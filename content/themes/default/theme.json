@@ -1,0 +1,18 @@
+{
+  "theme_id": "default",
+  "name": "Daiying Default",
+  "version": "1.0.0-alpha.1",
+  "author": "Daiying CMS",
+  "core": {
+    "min": "1.2.0-rc1",
+    "max": "1.x"
+  },
+  "content_types": ["article", "page"],
+  "recommended_plugins": [],
+  "settings_schema": {
+    "accent_color": {
+      "type": "string",
+      "default": "#1f6feb"
+    }
+  }
+}
