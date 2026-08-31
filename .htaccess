@@ -1,0 +1,15 @@
+Options -Indexes
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "^(\.env.*|composer\.(json|lock)|CMS_RELEASE_.*\.md|CMS_COMPLETION_STATUS_AUDIT.*\.md|.*\.(zip(\.sha256)?|manifest\.json|sql|sqlite|db|bak|backup|old|orig|pem|key|crt|csr))$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(config|storage|system|tests|scripts|content/plugins|content/themes)(/|$) - [F,L]
+    RewriteRule ^content/uploads/.*\.(php|phtml|phar|cgi|pl|py|rb|sh|js|html?|svg)$ - [F,L,NC]
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

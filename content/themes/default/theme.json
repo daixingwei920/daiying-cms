@@ -1,0 +1,304 @@
+{
+  "theme_id": "default",
+  "name": "Daiying Default",
+  "version": "1.0.0",
+  "author": "Daiying CMS",
+  "description": "Daiying CMS V1.2 正式默认主题，适合博客、内容站、企业官网和轻量数字内容站。",
+  "core": {
+    "min": "1.2.0-rc1",
+    "max": "1.x"
+  },
+  "content_types": ["article", "page"],
+  "recommended_plugins": [],
+  "settings_schema": {
+    "site_description": {
+      "type": "textarea",
+      "label": "网站描述",
+      "group": "常规",
+      "order": 1,
+      "default": "一个干净、可靠、适合中文内容的网站。"
+    },
+    "show_site_name": {
+      "type": "toggle",
+      "label": "显示网站名称",
+      "group": "常规",
+      "order": 2,
+      "default": true
+    },
+    "home_featured_title": {
+      "type": "text",
+      "label": "推荐内容标题",
+      "group": "Homepage",
+      "order": 10,
+      "default": "推荐内容"
+    },
+    "home_latest_title": {
+      "type": "text",
+      "label": "最新文章标题",
+      "group": "Homepage",
+      "order": 11,
+      "default": "最新文章"
+    },
+    "home_featured_count": {
+      "type": "number",
+      "label": "推荐内容数量",
+      "group": "Homepage",
+      "order": 12,
+      "default": 3,
+      "min": 1,
+      "max": 6
+    },
+    "home_latest_count": {
+      "type": "number",
+      "label": "最新文章数量",
+      "group": "Homepage",
+      "order": 13,
+      "default": 8,
+      "min": 3,
+      "max": 20
+    },
+    "logo_image": {
+      "type": "image",
+      "label": "Logo 图片",
+      "group": "Logo 与品牌",
+      "order": 20,
+      "default": "",
+      "placeholder": "/uploads/logo.png"
+    },
+    "logo_height": {
+      "type": "range",
+      "label": "Logo 高度",
+      "group": "Logo 与品牌",
+      "order": 21,
+      "default": 40,
+      "min": 28,
+      "max": 72,
+      "step": 2
+    },
+    "header_sticky": {
+      "type": "toggle",
+      "label": "固定顶部导航",
+      "group": "Header",
+      "order": 30,
+      "default": true
+    },
+    "header_height": {
+      "type": "range",
+      "label": "Header 高度",
+      "group": "Header",
+      "order": 31,
+      "default": 68,
+      "min": 56,
+      "max": 92,
+      "step": 2
+    },
+    "header_layout": {
+      "type": "select",
+      "label": "导航布局",
+      "group": "Navigation",
+      "order": 40,
+      "default": "balanced",
+      "options": {
+        "balanced": "品牌左侧，导航右侧",
+        "center": "导航居中",
+        "compact": "紧凑布局"
+      }
+    },
+    "show_search": {
+      "type": "toggle",
+      "label": "显示搜索入口",
+      "group": "Navigation",
+      "order": 41,
+      "default": true
+    },
+    "content_layout": {
+      "type": "select",
+      "label": "内容布局",
+      "group": "Layout",
+      "order": 50,
+      "default": "right_sidebar",
+      "options": {
+        "right_sidebar": "右侧栏",
+        "left_sidebar": "左侧栏",
+        "full_width": "全宽"
+      }
+    },
+    "site_width": {
+      "type": "select",
+      "label": "网站宽度",
+      "group": "Layout",
+      "order": 51,
+      "default": "standard",
+      "options": {
+        "narrow": "窄版",
+        "standard": "标准",
+        "wide": "宽版"
+      }
+    },
+    "article_list_layout": {
+      "type": "select",
+      "label": "文章列表样式",
+      "group": "Content",
+      "order": 60,
+      "default": "mixed",
+      "options": {
+        "list": "列表",
+        "grid": "网格",
+        "mixed": "混合"
+      }
+    },
+    "article_font_size": {
+      "type": "range",
+      "label": "正文字号",
+      "group": "Typography",
+      "order": 70,
+      "default": 17,
+      "min": 15,
+      "max": 20,
+      "step": 1
+    },
+    "article_line_height": {
+      "type": "range",
+      "label": "正文行高",
+      "group": "Typography",
+      "order": 71,
+      "default": 178,
+      "min": 155,
+      "max": 195,
+      "step": 1
+    },
+    "color_mode": {
+      "type": "select",
+      "label": "颜色模式",
+      "group": "Colors",
+      "order": 80,
+      "default": "light",
+      "options": {
+        "light": "浅色",
+        "dark": "深色",
+        "system": "跟随系统"
+      }
+    },
+    "primary_color": {
+      "type": "color",
+      "label": "Primary Color",
+      "group": "Colors",
+      "order": 81,
+      "default": "#1f6feb"
+    },
+    "accent_color": {
+      "type": "color",
+      "label": "Accent Color",
+      "group": "Colors",
+      "order": 82,
+      "default": "#0f766e"
+    },
+    "background_color": {
+      "type": "color",
+      "label": "Background",
+      "group": "Colors",
+      "order": 83,
+      "default": "#f7f8fb"
+    },
+    "surface_color": {
+      "type": "color",
+      "label": "Surface",
+      "group": "Colors",
+      "order": 84,
+      "default": "#ffffff"
+    },
+    "text_color": {
+      "type": "color",
+      "label": "Text",
+      "group": "Colors",
+      "order": 85,
+      "default": "#172033"
+    },
+    "muted_color": {
+      "type": "color",
+      "label": "Secondary Text",
+      "group": "Colors",
+      "order": 86,
+      "default": "#667085"
+    },
+    "border_color": {
+      "type": "color",
+      "label": "Border",
+      "group": "Colors",
+      "order": 87,
+      "default": "#d9e0ea"
+    },
+    "sidebar_enabled": {
+      "type": "toggle",
+      "label": "显示侧栏",
+      "group": "Sidebar",
+      "order": 90,
+      "default": true
+    },
+    "sidebar_title": {
+      "type": "text",
+      "label": "侧栏标题",
+      "group": "Sidebar",
+      "order": 91,
+      "default": "站点简介"
+    },
+    "footer_layout": {
+      "type": "select",
+      "label": "页脚栏数",
+      "group": "Footer",
+      "order": 100,
+      "default": "three",
+      "options": {
+        "one": "单栏",
+        "two": "双栏",
+        "three": "三栏",
+        "four": "四栏"
+      }
+    },
+    "footer_about": {
+      "type": "textarea",
+      "label": "页脚介绍",
+      "group": "Footer",
+      "order": 101,
+      "default": "使用 Daiying CMS 构建的现代内容网站。"
+    },
+    "footer_links": {
+      "type": "textarea",
+      "label": "页脚链接",
+      "group": "Footer",
+      "order": 102,
+      "default": "首页|/\n文章|/articles\n站点地图|/sitemap.xml",
+      "description": "每行一个链接，格式：名称|地址"
+    },
+    "social_links": {
+      "type": "textarea",
+      "label": "社交链接",
+      "group": "Footer",
+      "order": 103,
+      "default": "",
+      "description": "每行一个链接，格式：名称|地址"
+    },
+    "icp_text": {
+      "type": "text",
+      "label": "备案文本",
+      "group": "Footer",
+      "order": 104,
+      "default": ""
+    },
+    "footer_custom_text": {
+      "type": "textarea",
+      "label": "自定义页脚文本",
+      "group": "Footer",
+      "order": 105,
+      "default": ""
+    },
+    "custom_css": {
+      "type": "textarea",
+      "label": "自定义 CSS",
+      "group": "Advanced",
+      "order": 120,
+      "default": "",
+      "description": "仅建议填写少量覆盖样式。"
+    }
+  }
+}

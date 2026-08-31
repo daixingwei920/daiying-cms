@@ -1,0 +1,14 @@
+{
+  "plugin_id": "faq_block",
+  "name": "FAQ Block",
+  "version": "1.0.0",
+  "author": "CMS Core Team",
+  "core": {
+    "min": "1.2.0"
+  },
+  "php": "8.3",
+  "entry": "plugin.php",
+  "trust_level": "api",
+  "capabilities": ["blocks.register"],
+  "dependencies": []
+}

@@ -1,0 +1,24 @@
+{
+  "plugin_id": "official.friend-links",
+  "name": "Friend Links",
+  "version": "1.0.0-alpha.1",
+  "author": "CMS Core Team",
+  "package_type": "plugin",
+  "type": "system-plugin",
+  "bundled": true,
+  "core": { "min": "1.2.0-rc1" },
+  "php": "8.3.0",
+  "entry": "plugin.php",
+  "trust_level": "trusted_php",
+  "capability_namespaces": ["friend_links"],
+  "table_prefixes": ["friend_links_"],
+  "capabilities": [
+    "friend_links.view",
+    "friend_links.manage"
+  ],
+  "dependencies": [],
+  "data_policy": { "uninstall": "retain" },
+  "database_prefix": "friend_links_",
+  "data_schema_version": "1.0.0-alpha.1",
+  "migrations": ["migrations/001_friend_links.php"]
+}
