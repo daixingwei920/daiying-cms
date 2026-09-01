@@ -726,7 +726,7 @@ final class PaidContentService
 
     private function isSafeStripeCheckoutRedirectUrl(string $url): bool
     {
-        if ($url === '' || $url !== trim($url) || strlen($url) > 4096 || preg_match('/[\x00-\x1F\x7F]/', $url) === 1) {
+        if ($url === '' || $url !== trim($url) || strlen($url) > 262144 || preg_match('/[\x00-\x1F\x7F]/', $url) === 1) {
             return false;
         }
         $parts = parse_url($url);
@@ -738,24 +738,25 @@ final class PaidContentService
         ) {
             return false;
         }
+        if (!str_starts_with((string) ($parts['path'] ?? ''), '/c/pay/')) {
+            return false;
+        }
         if (preg_match('#cs_(?:test|live)_[A-Za-z0-9_=-]+#', $url) !== 1) {
             return false;
         }
-        $query = (string) ($parts['query'] ?? '');
-        $fragment = (string) ($parts['fragment'] ?? '');
-        if ($query !== '' && $this->providerRedirectUrlValueContainsSecret(rawurldecode($query))) {
-            return false;
-        }
-        if ($fragment !== '' && (
-            strlen($fragment) > 4096
-            || preg_match('/%(?![0-9A-Fa-f]{2})/', $fragment) === 1
-            || preg_match('/^[A-Za-z0-9._~!$&\'()*+,;=:@\/?%=-]+$/', $fragment) !== 1
-            || $this->providerRedirectUrlValueContainsSecret(rawurldecode($fragment))
-        )) {
+        if (!$this->isSafeStripeOwnedUrlPart((string) ($parts['query'] ?? ''), 65536)
+            || !$this->isSafeStripeOwnedUrlPart((string) ($parts['fragment'] ?? ''), 196608)
+        ) {
             return false;
         }
 
         return true;
+    }
+
+    private function isSafeStripeOwnedUrlPart(string $value, int $maxLength): bool
+    {
+        return strlen($value) <= $maxLength
+            && preg_match('/[\x00-\x1F\x7F]/', $value) !== 1;
     }
 
     private function isSafeProviderRedirectUrl(string $url): bool

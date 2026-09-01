@@ -58,7 +58,7 @@ final class MarketPackageInstaller
         $plan = $this->verifyAndPlan($zipPath, $authorization);
         $repo = new MarketInstallRepository($pdo);
         $marketReference = $authorization->marketId !== '' ? $authorization->marketId : $authorization->packageUrl;
-        (new ExtensionCompatibilityChecker((string) $this->configValue('app.version', '0.0.0')))->assertCompatible($manifest);
+        (new ExtensionCompatibilityChecker($this->currentCoreVersion()))->assertCompatible($manifest);
         (new ExtensionDependencyResolver($repo))->assertSatisfied($manifest);
 
         $repo->recordLog($marketReference, $manifest->extensionId, $manifest->type, 'Installing', $plan);
@@ -381,6 +381,27 @@ final class MarketPackageInstaller
         }
 
         return $value;
+    }
+
+    private function currentCoreVersion(): string
+    {
+        $configuredVersion = (string) $this->configValue('app.version', '0.0.0');
+        $pointer = $this->rootPath . '/storage/updates/current-release.json';
+        if (!is_file($pointer) || !is_readable($pointer)) {
+            return $configuredVersion;
+        }
+
+        $decoded = json_decode((string) file_get_contents($pointer), true);
+        if (!is_array($decoded)) {
+            return $configuredVersion;
+        }
+
+        $version = trim((string) ($decoded['version'] ?? ''));
+        if ($version === '' || preg_match('/^[0-9][A-Za-z0-9._-]*$/', $version) !== 1) {
+            return $configuredVersion;
+        }
+
+        return $version;
     }
 
     private function registerPluginRecord(PDO $pdo, string $target, MarketPackageManifest $marketManifest, string $marketReference): void

@@ -84,6 +84,87 @@ final class MediaLibrary
         }
     }
 
+    public function registerRemoteReference(MediaProviderItem $item, ?int $adminId = null): int
+    {
+        if ($item->provider === '' || $item->id === '' || $item->path === '' || $item->type === 'folder') {
+            throw new MediaException('Remote media reference is invalid.');
+        }
+        if (!in_array($item->type, ['image', 'audio', 'video', 'attachment'], true)) {
+            throw new MediaException('Remote media type is not supported.');
+        }
+
+        $storageKey = $item->provider . ':' . $item->id;
+        $metadata = [
+            'provider' => $item->provider,
+            'remote_id' => $item->id,
+            'remote_path' => $item->path,
+            'remote_name' => $item->name,
+            'checksum' => $item->checksum,
+            'remote_metadata' => $item->metadata,
+            'cached_metadata_at' => gmdate('c'),
+        ];
+        $now = gmdate('c');
+        $existing = $this->findByProviderKey($item->provider, $storageKey);
+        if ($existing !== null) {
+            $stmt = $this->pdo->prepare(
+                'UPDATE cms_media
+                 SET media_type = :media_type, mime_type = :mime_type, original_name = :original_name, relative_path = :relative_path,
+                     byte_size = :byte_size, metadata_json = :metadata_json, extension = :extension, width = :width, height = :height,
+                     duration_seconds = :duration_seconds, title = :title, status = :status, updated_at = :updated_at
+                 WHERE id = :id'
+            );
+            $stmt->execute([
+                ':id' => (int) $existing['id'],
+                ':media_type' => $item->type,
+                ':mime_type' => $item->mimeType !== '' ? $item->mimeType : 'application/octet-stream',
+                ':original_name' => $this->safeOriginalName($item->name),
+                ':relative_path' => $item->path,
+                ':byte_size' => max(0, $item->byteSize),
+                ':metadata_json' => $this->json($metadata),
+                ':extension' => strtolower(pathinfo($item->name, PATHINFO_EXTENSION)),
+                ':width' => $item->width,
+                ':height' => $item->height,
+                ':duration_seconds' => $item->durationSeconds,
+                ':title' => pathinfo($item->name, PATHINFO_FILENAME),
+                ':status' => 'Active',
+                ':updated_at' => $now,
+            ]);
+
+            return (int) $existing['id'];
+        }
+
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO cms_media
+                (storage_provider, media_type, mime_type, original_name, relative_path, storage_key, byte_size, sha256_hash, metadata_json, extension, width, height, duration_seconds, title, description, alt_text, uploaded_by, status, created_at, updated_at)
+             VALUES
+                (:storage_provider, :media_type, :mime_type, :original_name, :relative_path, :storage_key, :byte_size, :sha256_hash, :metadata_json, :extension, :width, :height, :duration_seconds, :title, :description, :alt_text, :uploaded_by, :status, :created_at, :updated_at)'
+        );
+        $stmt->execute([
+            ':storage_provider' => $item->provider,
+            ':media_type' => $item->type,
+            ':mime_type' => $item->mimeType !== '' ? $item->mimeType : 'application/octet-stream',
+            ':original_name' => $this->safeOriginalName($item->name),
+            ':relative_path' => $item->path,
+            ':storage_key' => $storageKey,
+            ':byte_size' => max(0, $item->byteSize),
+            ':sha256_hash' => hash('sha256', 'remote:' . $item->provider . ':' . $item->id . ':' . $item->path),
+            ':metadata_json' => $this->json($metadata),
+            ':extension' => strtolower(pathinfo($item->name, PATHINFO_EXTENSION)),
+            ':width' => $item->width,
+            ':height' => $item->height,
+            ':duration_seconds' => $item->durationSeconds,
+            ':title' => pathinfo($item->name, PATHINFO_FILENAME),
+            ':description' => '',
+            ':alt_text' => '',
+            ':uploaded_by' => $adminId,
+            ':status' => 'Active',
+            ':created_at' => $now,
+            ':updated_at' => $now,
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
     /** @return array<string, mixed>|null */
     public function find(int $id): ?array
     {
@@ -151,6 +232,10 @@ final class MediaLibrary
             return;
         }
         $this->pdo->prepare('DELETE FROM cms_media WHERE id = :id')->execute([':id' => $id]);
+
+        if ((string) ($media['storage_provider'] ?? $this->storage()->id()) !== $this->storage()->id()) {
+            return;
+        }
 
         if (!$this->isStorageKeyUsed((string) $media['storage_key'])) {
             $this->storage()->delete((string) $media['storage_key']);
@@ -222,7 +307,11 @@ final class MediaLibrary
             return ['id' => $id, 'available' => false, 'url' => '', 'media_type' => 'missing'];
         }
 
-        $exists = $this->storage()->exists((string) ($media['storage_key'] ?: $media['relative_path']));
+        $provider = (string) ($media['storage_provider'] ?? $this->storage()->id());
+        $remote = $provider !== $this->storage()->id();
+        $exists = $remote
+            ? RemoteMediaProviderRegistry::get($provider) !== null
+            : $this->storage()->exists((string) ($media['storage_key'] ?: $media['relative_path']));
 
         return [
             'id' => $id,
@@ -242,6 +331,10 @@ final class MediaLibrary
             'duration_seconds' => $media['duration_seconds'],
             'thumbnail_url' => isset($media['metadata']['derivatives']['thumbnail']) ? '/media/' . $id . '?variant=thumbnail' : '',
             'derivatives' => is_array($media['metadata']['derivatives'] ?? null) ? $media['metadata']['derivatives'] : [],
+            'provider' => $provider,
+            'remote' => $remote,
+            'remote_id' => (string) ($media['metadata']['remote_id'] ?? ''),
+            'remote_path' => (string) ($media['metadata']['remote_path'] ?? ''),
         ];
     }
 
@@ -378,6 +471,16 @@ final class MediaLibrary
     {
         $stmt = $this->pdo->prepare('SELECT * FROM cms_media WHERE sha256_hash = :hash LIMIT 1');
         $stmt->execute([':hash' => $hash]);
+        $row = $stmt->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
+    }
+
+    /** @return array<string,mixed>|null */
+    private function findByProviderKey(string $provider, string $storageKey): ?array
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM cms_media WHERE storage_provider = :provider AND storage_key = :storage_key LIMIT 1');
+        $stmt->execute([':provider' => $provider, ':storage_key' => $storageKey]);
         $row = $stmt->fetch();
 
         return is_array($row) ? $this->hydrate($row) : null;

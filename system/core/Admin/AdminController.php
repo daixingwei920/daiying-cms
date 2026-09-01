@@ -952,7 +952,6 @@ final class AdminController
         if ($guard instanceof Response) {
             return $guard;
         }
-
         try {
             $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
             $page = max(1, (int) ($request->query['page'] ?? 1));
@@ -1343,6 +1342,9 @@ final class AdminController
         if ($guard instanceof Response) {
             return $guard;
         }
+        if ((string) ($_GET['source'] ?? 'local') === 'cloudreve') {
+            return $this->remoteMediaIndex('cloudreve');
+        }
 
         try {
             $library = $this->mediaLibrary();
@@ -1377,6 +1379,7 @@ final class AdminController
         $rows = $rows !== '' ? $rows : '<tr><td colspan="7" class="muted">暂无媒体</td></tr>';
         $cards = $cards !== '' ? $cards : '<div class="admin-empty">暂无媒体文件</div>';
         $body = '<div class="admin-page-header"><div><h1>媒体库</h1><p class="muted">集中管理图片、音频、视频和附件。</p></div></div>' .
+            '<div class="admin-tabs" role="tablist"><span class="active">本地媒体</span><a href="/admin/media?source=cloudreve">Cloudreve</a></div>' .
             '<form class="admin-filter-bar" method="get" action="/admin/media"><label>类型<select name="type"><option value="">全部</option><option value="image">图片</option><option value="audio">音频</option><option value="video">视频</option><option value="attachment">附件</option></select></label><label>文件名<input name="filename" value="' . View::escape((string) ($_GET['filename'] ?? '')) . '"></label><label>状态<select name="status"><option value="">全部</option><option value="Active">可用</option><option value="Deleted">已删除</option></select></label><button type="submit">筛选</button></form>' .
             '<section class="admin-card"><form method="post" action="/admin/media/upload" enctype="multipart/form-data" id="media-upload">' . CsrfToken::field() .
             '<label>上传文件<input type="file" name="media_files[]" multiple></label><progress id="media-progress" max="100" value="0"></progress><p class="muted" id="media-error">支持图片、音频、视频、PDF、TXT、ZIP 和 Office 附件。</p><button type="submit">上传</button></form></section>' .
@@ -1385,6 +1388,47 @@ final class AdminController
             '<table><thead><tr><th>ID</th><th>类型</th><th>文件名</th><th>大小</th><th>状态</th><th>上传时间</th><th>URL</th></tr></thead><tbody>' . $rows . '</tbody></table>';
 
         return Response::html(View::page('媒体库', $body));
+    }
+
+    private function remoteMediaIndex(string $providerId): Response
+    {
+        $provider = \Cms\Core\Media\RemoteMediaProviderRegistry::get($providerId);
+        if ($provider === null) {
+            return Response::html(View::page('媒体库', '<div class="admin-page-header"><div><h1>媒体库</h1><p class="error">Cloudreve 媒体来源暂不可用，请确认插件已启用并完成授权。</p></div></div><p><a class="button" href="/admin/media">返回本地媒体</a></p>'), 503);
+        }
+
+        $path = (string) ($_GET['path'] ?? 'cloudreve://my/');
+        $query = trim((string) ($_GET['q'] ?? ''));
+        try {
+            $result = $query !== '' ? $provider->search($query, $path, ['page_size' => 50]) : $provider->list($path, ['page_size' => 50]);
+            $rows = '';
+            foreach ($result['items'] as $item) {
+                if (!$item instanceof \Cms\Core\Media\MediaProviderItem) {
+                    continue;
+                }
+                $action = $item->type === 'folder'
+                    ? '<a class="button admin-button-secondary" href="/admin/media?source=cloudreve&amp;path=' . View::escape(rawurlencode($item->path)) . '">打开</a>'
+                    : '<form method="post" action="/admin/media/provider/select" style="display:inline">' . CsrfToken::field() .
+                        '<input type="hidden" name="provider" value="' . View::escape($providerId) . '">' .
+                        '<input type="hidden" name="id" value="' . View::escape($item->id) . '">' .
+                        '<input type="hidden" name="path" value="' . View::escape($item->path) . '">' .
+                        '<input type="hidden" name="mode" value="reference">' .
+                        '<input type="hidden" name="return_to" value="/admin/media">' .
+                        '<button type="submit">引用到媒体库</button></form>';
+                $rows .= '<tr><td>' . View::escape($item->name) . '</td><td>' . View::escape($item->type) . '</td><td>' . View::escape($item->mimeType) . '</td><td>' . View::escape(number_format($item->byteSize / 1024, 1) . ' KB') . '</td><td><code>' . View::escape($item->path) . '</code></td><td>' . $action . '</td></tr>';
+            }
+            $rows = $rows !== '' ? $rows : '<tr><td colspan="6" class="muted">Cloudreve 当前目录没有媒体文件。</td></tr>';
+        } catch (Throwable $exception) {
+            $this->logger->error('Cloudreve media page failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('媒体库', '<div class="admin-page-header"><div><h1>媒体库</h1><p class="error">Cloudreve 暂不可用，请检查授权或网络连接。</p></div></div><p><a class="button" href="/admin/media">返回本地媒体</a></p>'), 503);
+        }
+
+        $body = '<div class="admin-page-header"><div><h1>媒体库</h1><p class="muted">浏览 Cloudreve 文件，按需引用到 CMS 媒体库。</p></div></div>' .
+            '<div class="admin-tabs" role="tablist"><a href="/admin/media">本地媒体</a><span class="active">Cloudreve</span></div>' .
+            '<form class="admin-filter-bar" method="get" action="/admin/media"><input type="hidden" name="source" value="cloudreve"><label>目录<input name="path" value="' . View::escape($path) . '"></label><label>搜索<input name="q" value="' . View::escape($query) . '"></label><button type="submit">读取</button></form>' .
+            '<table><thead><tr><th>名称</th><th>类型</th><th>MIME</th><th>大小</th><th>路径</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>';
+
+        return Response::html(View::page('媒体库 - Cloudreve', $body));
     }
 
     public function mediaUpload(): Response
@@ -1427,6 +1471,124 @@ final class AdminController
         }
 
         return Response::redirect('/admin/media');
+    }
+
+    public function mediaProviderList(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        $provider = \Cms\Core\Media\RemoteMediaProviderRegistry::get((string) $request->input('provider', ''));
+        if ($provider === null) {
+            return Response::json(['ok' => false, 'message' => '媒体来源暂不可用，请确认插件已启用。'], 404);
+        }
+
+        try {
+            $query = trim((string) $request->input('q', ''));
+            $path = (string) $request->input('path', '');
+            $options = [
+                'page' => max(0, (int) $request->input('page', 0)),
+                'page_size' => max(1, min(100, (int) $request->input('page_size', 50))),
+            ];
+            $result = $query !== '' ? $provider->search($query, $path, $options) : $provider->list($path, $options);
+            $items = array_map(static fn (\Cms\Core\Media\MediaProviderItem $item): array => $item->toArray(), $result['items']);
+
+            return Response::json([
+                'ok' => true,
+                'provider' => $provider->id(),
+                'label' => $provider->label(),
+                'items' => $items,
+                'pagination' => $result['pagination'] ?? [],
+                'parent' => $result['parent'] ?? null,
+            ]);
+        } catch (Throwable $exception) {
+            $this->logger->error('Remote media provider list failed', ['source' => 'Core', 'provider' => $provider->id(), 'error' => $exception->getMessage()]);
+            return Response::json(['ok' => false, 'message' => '远程媒体暂不可用，请检查授权或网络连接。'], 503);
+        }
+    }
+
+    public function mediaProviderSelect(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::json(['ok' => false, 'message' => '请求校验失败，请刷新页面后重试。'], 403);
+        }
+        $provider = \Cms\Core\Media\RemoteMediaProviderRegistry::get((string) $request->input('provider', ''));
+        if ($provider === null) {
+            return Response::json(['ok' => false, 'message' => '媒体来源暂不可用，请确认插件已启用。'], 404);
+        }
+
+        try {
+            $item = $provider->get((string) $request->input('id', ''), (string) $request->input('path', ''));
+            $mode = (string) $request->input('mode', 'reference');
+            if ($mode === 'import') {
+                $mediaId = $this->importRemoteMedia($provider, $item, (int) ($guard['id'] ?? 0));
+            } else {
+                $mediaId = $this->mediaLibrary()->registerRemoteReference($item, (int) ($guard['id'] ?? 0));
+            }
+            $media = $this->mediaLibrary()->find($mediaId);
+            if ($media === null) {
+                throw new MediaException('媒体登记失败。');
+            }
+            (new AuditLogger(ConnectionFactory::make($this->settings)))->record('admin', (int) ($guard['id'] ?? 0), 'media.remote_selected', [
+                'media_id' => $mediaId,
+                'provider' => $provider->id(),
+                'mode' => $mode === 'import' ? 'import' : 'reference',
+            ]);
+            $returnTo = $this->safeExtensionReturn((string) $request->input('return_to', ''), false);
+            if ($returnTo !== '') {
+                return Response::redirect($returnTo);
+            }
+
+            return Response::json(['ok' => true, 'media' => $this->mediaPickerItem($media), 'mode' => $mode === 'import' ? 'import' : 'reference']);
+        } catch (Throwable $exception) {
+            $this->logger->error('Remote media provider select failed', ['source' => 'Core', 'provider' => $provider->id(), 'error' => $exception->getMessage()]);
+            return Response::json(['ok' => false, 'message' => $exception->getMessage()], 400);
+        }
+    }
+
+    public function mediaProviderUpload(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::json(['ok' => false, 'message' => '请求校验失败，请刷新页面后重试。'], 403);
+        }
+        $provider = \Cms\Core\Media\RemoteMediaProviderRegistry::get((string) $request->input('provider', ''));
+        if ($provider === null) {
+            return Response::json(['ok' => false, 'message' => '媒体来源暂不可用，请确认插件已启用。'], 404);
+        }
+
+        try {
+            $files = $this->uploadedFiles($_FILES['media_files'] ?? []);
+            if ($files === []) {
+                throw new MediaException('No files selected.');
+            }
+            $file = $files[0];
+            if (($file['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
+                throw new MediaException('Upload failed.');
+            }
+            if ((int) ($file['size'] ?? 0) > $this->mediaLimit('max_file_bytes', 52428800)) {
+                throw new MediaException('Upload file exceeds size limit.');
+            }
+            $item = $provider->upload((string) $file['tmp_name'], (string) $file['name'], (string) $request->input('path', ''), (string) ($file['type'] ?? 'application/octet-stream'));
+            $mediaId = $this->mediaLibrary()->registerRemoteReference($item, (int) ($guard['id'] ?? 0));
+            $media = $this->mediaLibrary()->find($mediaId);
+            if ($media === null) {
+                throw new MediaException('媒体登记失败。');
+            }
+
+            return Response::json(['ok' => true, 'media' => $this->mediaPickerItem($media)]);
+        } catch (Throwable $exception) {
+            $this->logger->error('Remote media provider upload failed', ['source' => 'Core', 'provider' => $provider->id(), 'error' => $exception->getMessage()]);
+            return Response::json(['ok' => false, 'message' => $exception->getMessage()], 400);
+        }
     }
 
     public function mediaDetail(Request $request): Response
@@ -5763,7 +5925,7 @@ final class AdminController
         $items = $items !== '' ? '<ul>' . $items . '</ul>' : '<p class="muted">暂无更新记录</p>';
 
         $serverUrl = (string) $this->settings->get('updates.server_url', '');
-        $currentVersion = (string) $this->settings->get('app.version', '0.0.0');
+        $currentVersion = $this->currentCoreVersion();
         $siteId = (string) $this->settings->get('site.id', 'local-site');
         $preparedPath = trim((string) ($_GET['prepared_package'] ?? ''));
         if ($preparedPath !== '' && (!str_ends_with($preparedPath, '.zip') || str_contains($preparedPath, "\0"))) {
@@ -5806,7 +5968,7 @@ final class AdminController
 
         $serverUrl = trim((string) $request->input('server_url', $this->settings->get('updates.server_url', '')));
         $productId = trim((string) $request->input('product_id', 'daiying.cms'));
-        $currentVersion = (string) $this->settings->get('app.version', '0.0.0');
+        $currentVersion = $this->currentCoreVersion();
         $channel = trim((string) $request->input('channel', 'stable'));
         if (!in_array($channel, ['stable', 'rc', 'beta', 'dev'], true)) {
             $channel = 'stable';
@@ -5886,7 +6048,7 @@ final class AdminController
         if (!in_array($channel, ['stable', 'rc', 'beta', 'dev'], true)) {
             $channel = 'stable';
         }
-        $currentVersion = (string) $this->settings->get('app.version', '0.0.0');
+        $currentVersion = $this->currentCoreVersion();
 
         try {
             $client = new UpdateServerClient($serverUrl);
@@ -5962,7 +6124,7 @@ final class AdminController
             $root = $this->root();
             $service = new UpdateService(
                 $root,
-                (string) $this->settings->get('app.version', '0.0.0'),
+                $this->currentCoreVersion(),
                 new SignatureVerifier((string) $this->settings->get('updates.public_key', '')),
             );
             $plan = $service->dryRun((string) $request->input('package_path', ''));
@@ -6000,7 +6162,7 @@ final class AdminController
             $root = $this->root();
             $service = new UpdateService(
                 $root,
-                (string) $this->settings->get('app.version', '0.0.0'),
+                $this->currentCoreVersion(),
                 new SignatureVerifier((string) $this->settings->get('updates.public_key', '')),
             );
             $result = $service->execute((string) $request->input('package_path', ''), (int) ($guard['id'] ?? 0), (string) $request->input('confirmation', ''));
@@ -6274,7 +6436,7 @@ final class AdminController
             '<tr><th>最近获取插件数量</th><td>' . (int) ($diagnostics['last_item_count'] ?? 0) . '</td></tr>' .
             '<tr><th>当前市场渠道</th><td>' . View::escape($this->marketChannel()) . '</td></tr>' .
             '<tr><th>缓存状态</th><td>' . View::escape((string) ($diagnostics['cache_status'] ?? 'unknown')) . '</td></tr>' .
-            '<tr><th>CMS 版本</th><td>' . View::escape((string) $this->settings->get('app.version', '0.0.0')) . '</td></tr>' .
+            '<tr><th>CMS 版本</th><td>' . View::escape($this->currentCoreVersion()) . '</td></tr>' .
             '<tr><th>PHP 版本</th><td>' . View::escape(PHP_VERSION) . '</td></tr>' .
             '<tr><th>市场 API 版本</th><td>' . View::escape((string) ($diagnostics['api_version'] ?? 'unknown')) . '</td></tr>' .
             '</tbody></table>';
@@ -7082,7 +7244,7 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
             (string) $this->settings->get('market.site_token', ''),
             $this->root() . '/storage/cache/market-api',
             $this->marketChannel(),
-            (string) $this->settings->get('app.version', '0.0.0')
+            $this->currentCoreVersion()
         );
     }
 
@@ -7201,6 +7363,27 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
     private function root(): string
     {
         return $this->rootPath ?? dirname(__DIR__, 3);
+    }
+
+    private function currentCoreVersion(): string
+    {
+        $configuredVersion = (string) $this->settings->get('app.version', '0.0.0');
+        $pointer = $this->root() . '/storage/updates/current-release.json';
+        if (!is_file($pointer) || !is_readable($pointer)) {
+            return $configuredVersion;
+        }
+
+        $decoded = json_decode((string) file_get_contents($pointer), true);
+        if (!is_array($decoded)) {
+            return $configuredVersion;
+        }
+
+        $version = trim((string) ($decoded['version'] ?? ''));
+        if ($version === '' || preg_match('/^[0-9][A-Za-z0-9._-]*$/', $version) !== 1) {
+            return $configuredVersion;
+        }
+
+        return $version;
     }
 
     private function pathSegmentInt(string $path, int $index): int
@@ -7854,9 +8037,9 @@ JS . '</script>';
 
         return '<div id="media-picker-modal" hidden style="position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:1000;padding:4vh 4vw;overflow:auto">' .
             '<div style="background:#fff;max-width:980px;margin:0 auto;padding:20px;border-radius:8px;box-shadow:0 20px 60px rgba(15,23,42,.25)">' .
-            '<h2>媒体库选择</h2><div style="display:flex;gap:12px;flex-wrap:wrap"><label>搜索<input id="media-picker-search" placeholder="文件名"></label><label>类型<select id="media-picker-type"><option value="">全部</option><option value="image">图片</option><option value="audio">音频</option><option value="video">视频</option><option value="attachment">附件</option></select></label><button type="button" id="media-picker-close">关闭</button></div>' .
+            '<h2>媒体库选择</h2><div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px"><button type="button" data-media-source="local" class="button">本地媒体</button><button type="button" data-media-source="cloudreve" class="button editor-secondary">Cloudreve</button></div><div style="display:flex;gap:12px;flex-wrap:wrap"><label>搜索<input id="media-picker-search" placeholder="文件名"></label><label id="media-picker-path-wrap" hidden>Cloudreve 目录<input id="media-picker-path" value="cloudreve://my/"></label><label>类型<select id="media-picker-type"><option value="">全部</option><option value="image">图片</option><option value="audio">音频</option><option value="video">视频</option><option value="attachment">附件</option></select></label><label id="media-picker-mode-wrap" hidden>选择方式<select id="media-picker-mode"><option value="reference">引用 Cloudreve</option><option value="import">导入到 CMS</option></select></label><button type="button" id="media-picker-refresh" hidden>读取目录</button><button type="button" id="media-picker-close">关闭</button></div><p class="muted" id="media-picker-message"></p>' .
             '<div id="media-picker-results" style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px"></div></div></div>' .
-            '<script>window.CMS_MEDIA_PICKER_ITEMS=' . $json . ';' . $this->mediaPickerJavascript() . '</script>';
+            '<script>window.CMS_MEDIA_PICKER_ITEMS=' . $json . ';window.CMS_MEDIA_PICKER_CSRF=' . json_encode(CsrfToken::get(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) . ';' . $this->mediaPickerJavascript() . '</script>';
     }
 
     /** @return list<array<string, mixed>> */
@@ -7869,45 +8052,70 @@ JS . '</script>';
             return [];
         }
 
-        return array_map(static function (array $item): array {
-            $id = (int) ($item['id'] ?? 0);
-            $name = (string) ($item['original_name'] ?? ('media-' . $id));
-            $title = trim((string) ($item['title'] ?? ''));
-            $relativePath = trim((string) ($item['relative_path'] ?? ''));
-            $storageKey = trim((string) ($item['storage_key'] ?? ''));
-            $pathName = basename($relativePath !== '' ? $relativePath : $storageKey);
-            $displayName = $title !== '' && $title !== pathinfo($name, PATHINFO_FILENAME) ? $title . '（' . $name . '）' : $name;
-            $url = '/media/' . $id;
+        return array_map(fn (array $item): array => $this->mediaPickerItem($item), $items);
+    }
 
-            return [
-                'id' => $id,
-                'filename' => $name,
-                'display_name' => $displayName,
-                'title' => $title,
-                'path_name' => $pathName,
-                'relative_path' => $relativePath,
-                'search_text' => trim($id . ' ' . $displayName . ' ' . $name . ' ' . $title . ' ' . $pathName . ' ' . $relativePath),
-                'media_type' => (string) ($item['media_type'] ?? ''),
-                'mime_type' => (string) ($item['mime_type'] ?? ''),
-                'byte_size' => (int) ($item['byte_size'] ?? 0),
-                'created_at' => (string) ($item['created_at'] ?? ''),
-                'url' => $url,
-                'download_url' => $url . '?download=1',
-                'thumbnail_url' => (string) ($item['media_type'] ?? '') === 'image' ? $url : '',
-            ];
-        }, $items);
+    /** @param array<string,mixed> $item @return array<string,mixed> */
+    private function mediaPickerItem(array $item): array
+    {
+        $id = (int) ($item['id'] ?? 0);
+        $name = (string) ($item['original_name'] ?? ('media-' . $id));
+        $title = trim((string) ($item['title'] ?? ''));
+        $relativePath = trim((string) ($item['relative_path'] ?? ''));
+        $storageKey = trim((string) ($item['storage_key'] ?? ''));
+        $pathName = basename($relativePath !== '' ? $relativePath : $storageKey);
+        $displayName = $title !== '' && $title !== pathinfo($name, PATHINFO_FILENAME) ? $title . '（' . $name . '）' : $name;
+        $url = '/media/' . $id;
+
+        return [
+            'id' => $id,
+            'filename' => $name,
+            'display_name' => $displayName,
+            'title' => $title,
+            'path_name' => $pathName,
+            'relative_path' => $relativePath,
+            'search_text' => trim($id . ' ' . $displayName . ' ' . $name . ' ' . $title . ' ' . $pathName . ' ' . $relativePath),
+            'media_type' => (string) ($item['media_type'] ?? ''),
+            'mime_type' => (string) ($item['mime_type'] ?? ''),
+            'byte_size' => (int) ($item['byte_size'] ?? 0),
+            'created_at' => (string) ($item['created_at'] ?? ''),
+            'url' => $url,
+            'download_url' => $url . '?download=1',
+            'thumbnail_url' => (string) ($item['media_type'] ?? '') === 'image' ? $url : '',
+            'provider' => (string) ($item['storage_provider'] ?? 'local'),
+        ];
+    }
+
+    private function importRemoteMedia(\Cms\Core\Media\RemoteMediaProviderInterface $provider, \Cms\Core\Media\MediaProviderItem $item, int $adminId): int
+    {
+        $tmpDir = rtrim($this->root() . '/storage/tmp', DIRECTORY_SEPARATOR);
+        if (!is_dir($tmpDir)) {
+            mkdir($tmpDir, 0755, true);
+        }
+        $tmp = $tmpDir . '/remote-media-' . bin2hex(random_bytes(12)) . '.tmp';
+        try {
+            $provider->downloadTo($item->id, $item->path, $tmp, $this->mediaLimit('max_file_bytes', 52428800));
+            return $this->mediaLibrary()->uploadLocalFile($tmp, $item->name, $adminId);
+        } finally {
+            if (is_file($tmp)) {
+                unlink($tmp);
+            }
+        }
     }
 
     private function mediaPickerJavascript(): string
     {
         return <<<'JS'
 (function(){
-var modal=document.getElementById('media-picker-modal'),results=document.getElementById('media-picker-results'),search=document.getElementById('media-picker-search'),typeSelect=document.getElementById('media-picker-type');
-var activeInput=null,activeSummary=null,activeType='',activeMultiple=false;
+var modal=document.getElementById('media-picker-modal'),results=document.getElementById('media-picker-results'),search=document.getElementById('media-picker-search'),typeSelect=document.getElementById('media-picker-type'),pathInput=document.getElementById('media-picker-path'),pathWrap=document.getElementById('media-picker-path-wrap'),modeWrap=document.getElementById('media-picker-mode-wrap'),modeSelect=document.getElementById('media-picker-mode'),refreshBtn=document.getElementById('media-picker-refresh'),message=document.getElementById('media-picker-message');
+var activeInput=null,activeSummary=null,activeType='',activeMultiple=false,source='local',remoteItems=[];
 function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c];});}
 function ids(){return (activeInput&&activeInput.value?activeInput.value:'').split(/[,\s]+/).map(function(v){return parseInt(v,10)||0;}).filter(function(v){return v>0;});}
 function writeIds(list){if(activeInput){activeInput.value=list.join(', ');} renderSummary();}
-function humanSize(bytes){if(bytes>=1048576){return (bytes/1048576).toFixed(1)+' MB';} return (bytes/1024).toFixed(1)+' KB';}
+function humanSize(bytes){bytes=parseInt(bytes,10)||0;if(bytes>=1048576){return (bytes/1048576).toFixed(1)+' MB';} return (bytes/1024).toFixed(1)+' KB';}
+function shortPath(path){path=String(path||'');if(!path){return '';}try{path=decodeURIComponent(path);}catch(e){}var parts=path.split('/').filter(Boolean);return parts.length?parts[parts.length-1]:path;}
+function readJson(response){var type=response.headers.get('content-type')||'';if(type.indexOf('application/json')<0){return response.text().then(function(text){var msg=response.status===401||response.status===403?'登录状态或请求校验已失效，请刷新页面后重试。':'服务器返回了非 JSON 响应，请刷新页面或检查后台路由。';throw new Error(msg);});}return response.json();}
+function itemType(item){var mime=String((item&&item.mime_type)||'');if(item&&item.type==='folder'){return 'folder';}if(mime.indexOf('image/')===0){return 'image';}if(mime.indexOf('audio/')===0){return 'audio';}if(mime.indexOf('video/')===0){return 'video';}return item&&item.media_type?item.media_type:'attachment';}
 function mediaPreview(item){
  if(!item){return '';}
  if(item.media_type==='image'&&item.thumbnail_url){return '<img src="'+esc(item.thumbnail_url)+'" alt="" style="width:72px;height:54px;object-fit:cover;border:1px solid #d0d7de;border-radius:4px;margin-right:8px;vertical-align:middle">';}
@@ -7934,20 +8142,42 @@ function syncGalleryCaptions(){
  out.value=list.map(function(id){return id+' | '+(old[id]||'');}).join('\n');
 }
 function choose(id){var list=ids(); if(activeMultiple){if(list.indexOf(id)<0){list.push(id);}}else{list=[id];} writeIds(list); if(!activeMultiple){modal.hidden=true;}}
+function setSource(next){source=next==='cloudreve'?'cloudreve':'local'; pathWrap.hidden=source!=='cloudreve'; modeWrap.hidden=source!=='cloudreve'; refreshBtn.hidden=source!=='cloudreve'; [].slice.call(document.querySelectorAll('[data-media-source]')).forEach(function(btn){btn.classList.toggle('editor-secondary',btn.dataset.mediaSource!==source);}); if(source==='cloudreve'){loadRemote();}else{message.textContent='';render();}}
+function localRows(){var q=(search.value||'').toLowerCase(), filter=typeSelect.value||activeType;return (window.CMS_MEDIA_PICKER_ITEMS||[]).filter(function(item){return (!filter||item.media_type===filter)&&(!q||String(item.search_text||item.filename).toLowerCase().indexOf(q)>=0);});}
+function remoteRows(){var q=(search.value||'').toLowerCase(), filter=typeSelect.value||activeType;return remoteItems.filter(function(item){var mt=itemType(item);return mt==='folder'||((!filter||mt===filter)&&(!q||String((item.name||'')+' '+(item.path||'')).toLowerCase().indexOf(q)>=0));});}
 function render(){
- var q=(search.value||'').toLowerCase(), filter=typeSelect.value||activeType;
- var rows=(window.CMS_MEDIA_PICKER_ITEMS||[]).filter(function(item){return (!filter||item.media_type===filter)&&(!q||String(item.search_text||item.filename).toLowerCase().indexOf(q)>=0);});
- results.innerHTML=rows.length?rows.map(function(item){var thumb=item.thumbnail_url?'<img src="'+esc(item.thumbnail_url)+'" alt="" style="width:100%;height:92px;object-fit:cover;border:1px solid #d0d7de;border-radius:4px">':'<div style="height:92px;display:flex;align-items:center;justify-content:center;border:1px solid #d0d7de;border-radius:4px;background:#f6f8fa">'+esc(item.media_type)+'</div>';var path=item.relative_path?'<br><span class="muted" title="'+esc(item.relative_path)+'">存储：'+esc(item.path_name||item.relative_path)+'</span>':'';return '<article style="border:1px solid #d8dee4;border-radius:6px;padding:10px;min-width:0">'+thumb+'<strong style="display:block;margin-top:8px;word-break:break-word;overflow-wrap:anywhere">'+esc(item.display_name||item.filename)+'</strong><span class="muted">ID '+esc(item.id)+' · '+esc(item.media_type)+' · '+esc(humanSize(item.byte_size))+'</span>'+path+'<br><span class="muted">'+esc(item.created_at)+'</span><br><button type="button" data-media-choose="'+item.id+'">选择</button></article>';}).join(''):'<p class="muted">没有可选媒体。</p>';
+ if(source==='cloudreve'){
+  var remote=remoteRows();
+  results.innerHTML=remote.length?remote.map(function(item){var mt=itemType(item),folder=mt==='folder';var thumb='<div style="height:92px;display:flex;align-items:center;justify-content:center;border:1px solid #d0d7de;border-radius:4px;background:#f6f8fa">'+esc(folder?'目录':mt)+'</div>';return '<article style="border:1px solid #d8dee4;border-radius:6px;padding:10px;min-width:0;overflow:hidden">'+thumb+'<strong style="display:block;margin-top:8px;word-break:break-word;overflow-wrap:anywhere;line-height:1.25">'+esc(item.name)+'</strong><span class="muted">'+esc(mt)+' · '+esc(humanSize(item.byte_size))+'</span><br><span class="muted" title="'+esc(item.path)+'" style="display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">位置：'+esc(shortPath(item.path))+'</span><button type="button" '+(folder?'data-media-folder':'data-media-remote')+'="'+esc(item.id)+'" data-path="'+esc(item.path)+'">'+(folder?'打开':'选择')+'</button></article>';}).join(''):'<p class="muted">Cloudreve 中没有可选媒体。</p>';
+  return;
+ }
+ var rows=localRows();
+ results.innerHTML=rows.length?rows.map(function(item){var thumb=item.thumbnail_url?'<img src="'+esc(item.thumbnail_url)+'" alt="" style="width:100%;height:92px;object-fit:cover;border:1px solid #d0d7de;border-radius:4px">':'<div style="height:92px;display:flex;align-items:center;justify-content:center;border:1px solid #d0d7de;border-radius:4px;background:#f6f8fa">'+esc(item.media_type)+'</div>';var path=item.relative_path?'<br><span class="muted" title="'+esc(item.relative_path)+'">存储：'+esc(item.provider&&item.provider!=='local'?item.provider+' · ':'')+esc(item.path_name||item.relative_path)+'</span>':'';return '<article style="border:1px solid #d8dee4;border-radius:6px;padding:10px;min-width:0">'+thumb+'<strong style="display:block;margin-top:8px;word-break:break-word;overflow-wrap:anywhere">'+esc(item.display_name||item.filename)+'</strong><span class="muted">ID '+esc(item.id)+' · '+esc(item.media_type)+' · '+esc(humanSize(item.byte_size))+'</span>'+path+'<br><span class="muted">'+esc(item.created_at)+'</span><br><button type="button" data-media-choose="'+item.id+'">选择</button></article>';}).join(''):'<p class="muted">没有可选媒体。</p>';
+}
+function loadRemote(){
+ message.textContent='读取 Cloudreve 中...';
+ var params=new URLSearchParams({provider:'cloudreve',path:pathInput.value||'cloudreve://my/',q:search.value||'',page_size:'50'});
+ fetch('/admin/media/provider/list?'+params.toString(),{headers:{'Accept':'application/json'}}).then(readJson).then(function(data){if(!data.ok){throw new Error(data.message||'Cloudreve 暂不可用');}remoteItems=data.items||[];message.textContent='';render();}).catch(function(err){remoteItems=[];message.textContent=err.message;render();});
+}
+function chooseRemote(id,path){
+ message.textContent='正在加入媒体库...';
+ fetch('/admin/media/provider/select',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},body:new URLSearchParams({provider:'cloudreve',id:id,path:path,mode:modeSelect.value||'reference',_csrf:window.CMS_MEDIA_PICKER_CSRF||''})}).then(readJson).then(function(data){if(!data.ok){throw new Error(data.message||'选择失败');}var exists=(window.CMS_MEDIA_PICKER_ITEMS||[]).some(function(item){return item.id===data.media.id;});if(!exists){window.CMS_MEDIA_PICKER_ITEMS.unshift(data.media);}choose(data.media.id);message.textContent=data.mode==='import'?'已导入到 CMS 媒体库。':'已引用 Cloudreve 媒体。';}).catch(function(err){message.textContent=err.message;});
 }
 document.addEventListener('click',function(e){
- var open=e.target.closest('.media-picker-open'); if(open){var box=open.closest('.media-picker-field'); activeInput=box.querySelector('[data-media-picker-input="'+open.dataset.targetField+'"]'); activeSummary=box.querySelector('[data-media-picker-summary="'+open.dataset.targetField+'"]'); activeType=open.dataset.mediaType||''; activeMultiple=open.dataset.mediaMultiple==='1'; typeSelect.value=activeType; search.value=''; modal.hidden=false; render(); return;}
+ var open=e.target.closest('.media-picker-open'); if(open){var box=open.closest('.media-picker-field'); activeInput=box.querySelector('[data-media-picker-input="'+open.dataset.targetField+'"]'); activeSummary=box.querySelector('[data-media-picker-summary="'+open.dataset.targetField+'"]'); activeType=open.dataset.mediaType||''; activeMultiple=open.dataset.mediaMultiple==='1'; typeSelect.value=activeType; search.value=''; modal.hidden=false; setSource(source); return;}
+ var sourceBtn=e.target.closest('[data-media-source]'); if(sourceBtn){setSource(sourceBtn.dataset.mediaSource||'local'); return;}
+ var refresh=e.target.closest('#media-picker-refresh'); if(refresh){loadRemote(); return;}
+ var folder=e.target.closest('[data-media-folder]'); if(folder){pathInput.value=folder.dataset.path||'cloudreve://my/'; loadRemote(); return;}
+ var remote=e.target.closest('[data-media-remote]'); if(remote){chooseRemote(remote.getAttribute('data-media-remote')||'',remote.dataset.path||''); return;}
  var clear=e.target.closest('.media-picker-clear'); if(clear){var cbox=clear.closest('.media-picker-field'); activeInput=cbox.querySelector('[data-media-picker-input="'+clear.dataset.targetField+'"]'); activeSummary=cbox.querySelector('[data-media-picker-summary="'+clear.dataset.targetField+'"]'); writeIds([]); return;}
  var pick=e.target.closest('[data-media-choose]'); if(pick){choose(parseInt(pick.dataset.mediaChoose,10)||0); return;}
  var rem=e.target.closest('[data-media-remove]'); if(rem){activeSummary=e.target.closest('.media-picker-selection'); activeInput=activeSummary.parentElement.querySelector('[data-media-picker-input]'); writeIds(ids().filter(function(id){return id!==(parseInt(rem.dataset.mediaRemove,10)||0);})); return;}
  var move=e.target.closest('[data-media-move]'); if(move){activeSummary=e.target.closest('.media-picker-selection'); activeInput=activeSummary.parentElement.querySelector('[data-media-picker-input]'); var li=move.closest('li'), id=parseInt(li.dataset.mediaSelectedId,10)||0, list=ids(), pos=list.indexOf(id), dir=move.dataset.mediaMove; if(pos>=0&&dir==='up'&&pos>0){var t=list[pos-1];list[pos-1]=list[pos];list[pos]=t;} if(pos>=0&&dir==='down'&&pos<list.length-1){var n=list[pos+1];list[pos+1]=list[pos];list[pos]=n;} writeIds(list); return;}
  if(e.target&&e.target.id==='media-picker-close'){modal.hidden=true;}
 });
-search.addEventListener('input',render); typeSelect.addEventListener('change',render);
+search.addEventListener('input',function(){if(source==='cloudreve'){loadRemote();}else{render();}});
+typeSelect.addEventListener('change',render);
+pathInput.addEventListener('change',loadRemote);
 document.querySelectorAll('.media-picker-field').forEach(function(box){activeInput=box.querySelector('[data-media-picker-input]');activeSummary=box.querySelector('[data-media-picker-summary]');renderSummary();});
 activeInput=null;activeSummary=null;
 })();

@@ -32,6 +32,10 @@ final class MediaController
         }
         try {
             $library = new MediaLibrary(ConnectionFactory::make($this->settings), $this->rootPath . '/content/uploads');
+            $mediaRow = $library->find($id);
+            if (is_array($mediaRow) && $this->isRemoteMedia($mediaRow)) {
+                return $this->remoteMediaResponse($request, $library, $mediaRow);
+            }
             $result = $library->fileForResponse($id, $this->variant($request));
             $media = $result['media'];
             $path = $result['path'];
@@ -101,6 +105,58 @@ final class MediaController
         } catch (Throwable) {
             return $this->mediaNotFoundResponse();
         }
+    }
+
+    /** @param array<string,mixed> $media */
+    private function remoteMediaResponse(Request $request, MediaLibrary $library, array $media): Response
+    {
+        if ((string) ($media['status'] ?? '') !== 'Active') {
+            return $this->mediaNotFoundResponse();
+        }
+
+        $id = (int) ($media['id'] ?? 0);
+        $download = $this->downloadRequested($request) || (string) ($media['media_type'] ?? '') === 'attachment';
+        if ((string) ($media['media_type'] ?? '') === 'attachment') {
+            $service = new PaidDownloadService(ConnectionFactory::make($this->settings), $this->settings);
+            $protected = $service->requiresAuthorizationForMedia($id);
+            if ($protected && !$this->authorizedAttachment($request, $id, $service, $request->method !== 'HEAD')) {
+                return $this->paymentRequiredResponse();
+            }
+        }
+
+        $providerId = (string) ($media['storage_provider'] ?? '');
+        $provider = RemoteMediaProviderRegistry::get($providerId);
+        if ($provider === null) {
+            return Response::text('远程媒体 Provider 暂不可用，请确认相关插件已启用并完成授权。', 503)
+                ->withHeaders(['Cache-Control' => 'private, no-store']);
+        }
+
+        try {
+            $resolved = $provider->resolveUrl($media, [
+                'download' => $download,
+                'variant' => $this->variant($request),
+            ]);
+            $url = (string) ($resolved['url'] ?? '');
+            if ($url === '') {
+                throw new MediaException('Remote media URL is empty.');
+            }
+        } catch (Throwable) {
+            return Response::text('远程媒体暂不可用，请管理员检查 Cloudreve 授权状态。', 503)
+                ->withHeaders(['Cache-Control' => 'private, no-store']);
+        }
+
+        return Response::redirect($url, 302)->withHeaders([
+            'Cache-Control' => 'private, no-store',
+            'X-Daiying-Media-Provider' => $providerId,
+        ]);
+    }
+
+    /** @param array<string,mixed> $media */
+    private function isRemoteMedia(array $media): bool
+    {
+        $provider = (string) ($media['storage_provider'] ?? 'local');
+
+        return $provider !== '' && $provider !== 'local';
     }
 
     private function mediaNotFoundResponse(): Response

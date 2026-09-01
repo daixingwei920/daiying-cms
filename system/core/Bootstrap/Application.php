@@ -338,6 +338,9 @@ final class Application
         $router->post('/admin/content/delete/{id}', [$admin, 'contentDelete']);
         $router->get('/admin/media', [$admin, 'mediaIndex']);
         $router->post('/admin/media/upload', [$admin, 'mediaUpload']);
+        $router->get('/admin/media/provider/list', [$admin, 'mediaProviderList']);
+        $router->post('/admin/media/provider/select', [$admin, 'mediaProviderSelect']);
+        $router->post('/admin/media/provider/upload', [$admin, 'mediaProviderUpload']);
         $router->get('/admin/media/detail/{id}', [$admin, 'mediaDetail']);
         $router->post('/admin/media/detail/{id}', [$admin, 'mediaUpdate']);
         $router->get('/admin/ads', [$admin, 'adIndex']);
