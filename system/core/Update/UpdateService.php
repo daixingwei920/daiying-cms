@@ -54,7 +54,7 @@ final class UpdateService
             'build' => $manifest->build,
             'signature' => ['algorithm' => $manifest->signatureAlgorithm, 'key_id' => $this->mask($manifest->keyId)],
             'compatibility' => $checks,
-            'migration_count' => count($manifest->migrations),
+            'migration_count' => count($manifest->migrationsFor($this->currentVersion)),
             'space_required_bytes' => $this->manifestSize($manifest),
             'notes' => $manifest->notes,
             'features' => $manifest->features,
@@ -157,8 +157,12 @@ final class UpdateService
         if (!$this->isLegacyManifest($manifest) && version_compare($manifest->toVersion, $this->currentVersion, '<')) {
             throw new UpdateException('Core update cannot downgrade the current version.');
         }
-        if (!version_compare($this->currentVersion, $manifest->fromVersionMin, '>=') || !version_compare($this->currentVersion, $manifest->fromVersionMax, '<=')) {
-            throw new UpdateException('Current Core version is outside supported update range.');
+        if (!$manifest->supportsSourceVersion($this->currentVersion)) {
+            $floor = $manifest->hardFloor();
+            if ($floor !== '' && version_compare($this->currentVersion, $floor, '<')) {
+                throw new UpdateException('Current Core version is below the hard migration floor.');
+            }
+            throw new UpdateException('Current Core version is outside the supported migration range.');
         }
         if (!version_compare(PHP_VERSION, $manifest->phpMin, '>=')) {
             throw new UpdateException('PHP version is below update requirement.');
@@ -189,6 +193,10 @@ final class UpdateService
         if ($this->hasUnresolvedMigrationFailures($pdo)) {
             throw new UpdateException('Unresolved Core migration failure exists.');
         }
+        $migrationCheck = $this->migrationPathCheck($manifest);
+        if (($migrationCheck['complete'] ?? false) !== true) {
+            throw new UpdateException('Core update migration path is incomplete.');
+        }
         foreach (['storage/updates', 'storage/recovery'] as $dir) {
             $path = $this->rootPath . '/' . $dir;
             if (!is_dir($path)) {
@@ -216,6 +224,10 @@ final class UpdateService
             'database' => $driver,
             'disk_free_bytes' => disk_free_space($this->rootPath . '/storage'),
             'atomic_pointer_supported' => true,
+            'direct_upgrade_supported' => true,
+            'migration_path' => $migrationCheck,
+            'plugin_compatibility' => $this->extensionCompatibilitySnapshot('plugins'),
+            'theme_compatibility' => $this->extensionCompatibilitySnapshot('themes'),
         ];
     }
 
@@ -291,13 +303,14 @@ final class UpdateService
     /** @param array<string,mixed> $restorePoints */
     private function runCoreMigrations(PDO $pdo, string $operationId, UpdatePackageManifest $manifest, string $releaseDir, array $restorePoints): void
     {
-        foreach ($manifest->migrations as $migration) {
+        foreach ($manifest->migrationsFor($this->currentVersion) as $migration) {
             if (!is_array($migration)) {
                 throw new UpdateException('Core migration manifest entry is invalid.');
             }
             $id = (string) ($migration['migration_id'] ?? $migration['id'] ?? '');
             $path = (string) ($migration['path'] ?? '');
-            $version = (string) ($migration['version'] ?? $manifest->toVersion);
+            $sourceVersion = (string) ($migration['source_version'] ?? $this->currentVersion);
+            $version = (string) ($migration['target_version'] ?? $migration['version'] ?? $manifest->toVersion);
             $file = $releaseDir . '/' . str_replace('\\', '/', $path);
             if ($id === '' || $path === '' || !is_file($file) || !UpdatePackageManifest::isCorePath($path)) {
                 throw new UpdateException('Core migration file is invalid.');
@@ -313,7 +326,7 @@ final class UpdateService
                 }
                 continue;
             }
-            $recordId = $this->startCoreMigration($pdo, $operationId, $id, $version, $checksum, $migration['affected_objects'] ?? []);
+            $recordId = $this->startCoreMigration($pdo, $operationId, $id, $sourceVersion, $version, $checksum, $migration['affected_objects'] ?? []);
             try {
                 $definition = require $file;
                 $up = is_array($definition) ? ($definition['up'] ?? null) : (is_object($definition) && method_exists($definition, 'up') ? [$definition, 'up'] : null);
@@ -752,8 +765,9 @@ final class UpdateService
         $pdo->prepare('UPDATE cms_core_update_operations SET ' . implode(', ', $sets) . ', updated_at = :updated_at WHERE operation_id = :operation_id')->execute($params);
     }
 
-    private function startCoreMigration(PDO $pdo, string $operationId, string $id, string $version, string $checksum, mixed $affected): int
+    private function startCoreMigration(PDO $pdo, string $operationId, string $id, string $sourceVersion, string $version, string $checksum, mixed $affected): int
     {
+        $this->ensureMigrationHistoryTable($pdo);
         $now = gmdate('c');
         $stmt = $pdo->prepare("INSERT INTO cms_core_update_migrations (operation_id, migration_id, version, checksum, status, affected_objects_json, started_at, created_at, updated_at) VALUES (:operation_id, :migration_id, :version, :checksum, 'running', :affected, :started_at, :created_at, :updated_at)");
         $stmt->execute([
@@ -766,19 +780,52 @@ final class UpdateService
             ':created_at' => $now,
             ':updated_at' => $now,
         ]);
-        return (int) $pdo->lastInsertId();
+        $coreRecordId = (int) $pdo->lastInsertId();
+        $history = $pdo->prepare("INSERT INTO cms_migrations (migration_name, source_version, target_version, batch, checksum, started_at, status, created_at, updated_at) VALUES (:migration_name, :source_version, :target_version, :batch, :checksum, :started_at, 'running', :created_at, :updated_at)");
+        $history->execute([
+            ':migration_name' => $id,
+            ':source_version' => $sourceVersion,
+            ':target_version' => $version,
+            ':batch' => $operationId,
+            ':checksum' => $checksum,
+            ':started_at' => $now,
+            ':created_at' => $now,
+            ':updated_at' => $now,
+        ]);
+        return $coreRecordId;
     }
 
     private function finishCoreMigration(PDO $pdo, int $recordId, string $status): void
     {
+        $row = $this->coreUpdateMigrationByRecordId($pdo, $recordId);
         $pdo->prepare('UPDATE cms_core_update_migrations SET status = :status, completed_at = :completed_at, updated_at = :updated_at WHERE id = :id')
             ->execute([':id' => $recordId, ':status' => $status, ':completed_at' => gmdate('c'), ':updated_at' => gmdate('c')]);
+        if ($row !== null) {
+            $pdo->prepare('UPDATE cms_migrations SET status = :status, completed_at = :completed_at, updated_at = :updated_at WHERE migration_name = :migration_name AND batch = :batch')
+                ->execute([
+                    ':status' => 'applied',
+                    ':completed_at' => gmdate('c'),
+                    ':updated_at' => gmdate('c'),
+                    ':migration_name' => (string) $row['migration_id'],
+                    ':batch' => (string) $row['operation_id'],
+                ]);
+        }
     }
 
     private function failCoreMigration(PDO $pdo, int $recordId, string $error): void
     {
+        $row = $this->coreUpdateMigrationByRecordId($pdo, $recordId);
         $pdo->prepare("UPDATE cms_core_update_migrations SET status = 'failed', error_summary = :error, updated_at = :updated_at WHERE id = :id")
             ->execute([':id' => $recordId, ':error' => $error, ':updated_at' => gmdate('c')]);
+        if ($row !== null) {
+            $pdo->prepare("UPDATE cms_migrations SET status = 'failed', error_message = :error, updated_at = :updated_at WHERE migration_name = :migration_name AND batch = :batch")
+                ->execute([
+                    ':error' => $error,
+                    ':updated_at' => gmdate('c'),
+                    ':migration_name' => (string) $row['migration_id'],
+                    ':batch' => (string) $row['operation_id'],
+                ]);
+        }
     }
 
     private function coreMigrationRow(PDO $pdo, string $migrationId): ?array
@@ -791,6 +838,120 @@ final class UpdateService
         } catch (Throwable) {
             return null;
         }
+    }
+
+    private function coreUpdateMigrationByRecordId(PDO $pdo, int $recordId): ?array
+    {
+        try {
+            $stmt = $pdo->prepare('SELECT * FROM cms_core_update_migrations WHERE id = :id LIMIT 1');
+            $stmt->execute([':id' => $recordId]);
+            $row = $stmt->fetch();
+            return is_array($row) ? $row : null;
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    /** @return array{complete:bool,pending_count:int,declared_count:int,required_count:int,missing_required:list<string>} */
+    private function migrationPathCheck(UpdatePackageManifest $manifest): array
+    {
+        $pending = $manifest->migrationsFor($this->currentVersion);
+        $declaredIds = [];
+        foreach ($manifest->migrations as $migration) {
+            if (is_array($migration)) {
+                $id = (string) ($migration['migration_id'] ?? $migration['id'] ?? '');
+                if ($id !== '') {
+                    $declaredIds[$id] = true;
+                }
+            }
+        }
+        $missing = [];
+        foreach ($manifest->requiredMigrations as $required) {
+            if (!isset($declaredIds[$required])) {
+                $missing[] = $required;
+            }
+        }
+
+        return [
+            'complete' => $missing === [],
+            'pending_count' => count($pending),
+            'declared_count' => count($manifest->migrations),
+            'required_count' => count($manifest->requiredMigrations),
+            'missing_required' => $missing,
+        ];
+    }
+
+    /** @return array{safe_fallback_available:bool,active:list<string>,incompatible:list<string>} */
+    private function extensionCompatibilitySnapshot(string $type): array
+    {
+        $base = $type === 'themes' ? $this->rootPath . '/content/themes' : $this->rootPath . '/content/plugins';
+        $active = [];
+        if (is_dir($base)) {
+            foreach (glob($base . '/*') ?: [] as $entry) {
+                if (is_dir($entry)) {
+                    $active[] = basename($entry);
+                }
+            }
+        }
+
+        return [
+            'safe_fallback_available' => $type === 'themes'
+                ? (is_dir($this->rootPath . '/content/themes/safe') || is_dir($this->rootPath . '/content/themes/default'))
+                : true,
+            'active' => $active,
+            'incompatible' => [],
+        ];
+    }
+
+    private function ensureMigrationHistoryTable(PDO $pdo): void
+    {
+        $driver = (string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $idColumn = $driver === 'sqlite' ? 'INTEGER PRIMARY KEY AUTOINCREMENT' : 'INTEGER PRIMARY KEY AUTO_INCREMENT';
+        $longText = $driver === 'sqlite' ? 'TEXT' : 'LONGTEXT';
+        $pdo->exec(
+            'CREATE TABLE IF NOT EXISTS cms_migrations (
+                id ' . $idColumn . ',
+                migration_name VARCHAR(191) NOT NULL,
+                source_version VARCHAR(64) NOT NULL DEFAULT "",
+                target_version VARCHAR(64) NOT NULL DEFAULT "",
+                batch VARCHAR(64) NOT NULL DEFAULT "",
+                checksum VARCHAR(64) NOT NULL DEFAULT "",
+                started_at VARCHAR(64) NULL,
+                completed_at VARCHAR(64) NULL,
+                status VARCHAR(32) NOT NULL DEFAULT "pending",
+                error_message ' . $longText . ' NULL,
+                created_at VARCHAR(64) NOT NULL,
+                updated_at VARCHAR(64) NOT NULL
+            )'
+        );
+        $columns = $this->tableColumns($pdo, 'cms_migrations');
+        foreach ([
+            'migration_name' => 'VARCHAR(191) NOT NULL DEFAULT ""',
+            'source_version' => 'VARCHAR(64) NOT NULL DEFAULT ""',
+            'target_version' => 'VARCHAR(64) NOT NULL DEFAULT ""',
+            'batch' => 'VARCHAR(64) NOT NULL DEFAULT ""',
+            'checksum' => 'VARCHAR(64) NOT NULL DEFAULT ""',
+            'started_at' => 'VARCHAR(64) NULL',
+            'completed_at' => 'VARCHAR(64) NULL',
+            'status' => 'VARCHAR(32) NOT NULL DEFAULT "pending"',
+            'error_message' => $longText . ' NULL',
+            'created_at' => 'VARCHAR(64) NOT NULL DEFAULT ""',
+            'updated_at' => 'VARCHAR(64) NOT NULL DEFAULT ""',
+        ] as $column => $definition) {
+            if (!in_array($column, $columns, true)) {
+                $pdo->exec('ALTER TABLE cms_migrations ADD COLUMN ' . $column . ' ' . $definition);
+            }
+        }
+    }
+
+    /** @return list<string> */
+    private function tableColumns(PDO $pdo, string $table): array
+    {
+        if ((string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+            return array_map(static fn (array $row): string => (string) $row['name'], $pdo->query('PRAGMA table_info(' . $table . ')')->fetchAll());
+        }
+
+        return array_map(static fn (array $row): string => (string) ($row['Field'] ?? ''), $pdo->query('SHOW COLUMNS FROM ' . $table)->fetchAll());
     }
 
     /** @return array<string,mixed>|null */

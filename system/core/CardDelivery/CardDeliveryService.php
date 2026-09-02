@@ -158,7 +158,7 @@ final class CardDeliveryService
         $paymentRepo = new PaymentRepository($this->pdo);
         $payment = $paymentRepo->paymentByIdempotency($idempotencyKey);
         if (is_array($payment) && in_array((string) ($payment['status'] ?? ''), ['pending', 'authorized'], true)) {
-            $payment = (new PaymentService($this->pdo, $paymentRepo, $this->secret()))->syncProviderPaymentStatus((int) $payment['id']);
+            $payment = (new PaymentService($this->pdo, $paymentRepo, $this->secret()))->settleHostedCheckoutPayment((int) $payment['id'], $idempotencyKey);
         }
 
         $this->pdo->beginTransaction();

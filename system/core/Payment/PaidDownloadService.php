@@ -254,7 +254,7 @@ final class PaidDownloadService
         $repo = new PaymentRepository($this->pdo);
         $payment = $repo->paymentByIdempotency($idempotencyKey);
         if (is_array($payment) && in_array((string) ($payment['status'] ?? ''), ['pending', 'authorized'], true)) {
-            $payment = (new PaymentService($this->pdo, $repo, $this->secret()))->syncProviderPaymentStatus((int) $payment['id']);
+            $payment = (new PaymentService($this->pdo, $repo, $this->secret()))->settleHostedCheckoutPayment((int) $payment['id'], $idempotencyKey);
         }
 
         $this->pdo->beginTransaction();

@@ -11,6 +11,8 @@ final class UpdatePackageManifest
      * @param list<array<string,mixed>> $migrations
      * @param list<string> $requiredExtensions
      * @param list<string> $databaseTypes
+     * @param list<string> $requiredMigrations
+     * @param array<string,mixed> $rollbackMetadata
      * @param list<string> $features
      * @param list<string> $acceptanceGates
      */
@@ -25,12 +27,17 @@ final class UpdatePackageManifest
         public readonly string $build = '',
         public readonly string $fromVersionMin = '',
         public readonly string $fromVersionMax = '',
+        public readonly string $minUpgradeFrom = '',
+        public readonly string $hardMinVersion = '',
+        public readonly string $migrationFloor = '',
         public readonly string $phpMin = '8.0.0',
         public readonly string $phpMax = '',
         public readonly array $requiredExtensions = [],
         public readonly array $databaseTypes = [],
         public readonly string $coreSchemaVersion = '',
         public readonly array $migrations = [],
+        public readonly array $requiredMigrations = [],
+        public readonly array $rollbackMetadata = [],
         public readonly string $packageSha256 = '',
         public readonly string $signatureAlgorithm = 'rsa-sha256',
         public readonly string $keyId = '',
@@ -58,7 +65,10 @@ final class UpdatePackageManifest
         $fromVersion = (string) ($data['from_version'] ?? '');
         $sourceRange = is_array($data['source_versions'] ?? null) ? $data['source_versions'] : [];
         $fromMin = (string) ($sourceRange['min'] ?? $fromVersion);
-        $fromMax = (string) ($sourceRange['max'] ?? $fromVersion);
+        $fromMax = (string) ($sourceRange['max'] ?? ($data['to_version'] ?? $data['version'] ?? $fromVersion));
+        $minUpgradeFrom = (string) ($data['min_upgrade_from'] ?? $fromMin);
+        $hardMinVersion = (string) ($data['hard_min_version'] ?? $data['migration_floor'] ?? $minUpgradeFrom);
+        $migrationFloor = (string) ($data['migration_floor'] ?? $hardMinVersion);
         if ($releaseId === '' || $version === '') {
             throw new UpdateException('Update manifest must define release_id and version.');
         }
@@ -94,12 +104,17 @@ final class UpdatePackageManifest
             (string) ($data['build'] ?? ''),
             $fromMin,
             $fromMax,
+            $minUpgradeFrom,
+            $hardMinVersion,
+            $migrationFloor,
             (string) ($data['php']['min'] ?? $data['php_min'] ?? '8.0.0'),
             (string) ($data['php']['max'] ?? $data['php_max'] ?? ''),
             array_values(array_map('strval', is_array($data['required_extensions'] ?? null) ? $data['required_extensions'] : [])),
             array_values(array_map('strval', is_array($data['database_types'] ?? null) ? $data['database_types'] : [])),
             (string) ($data['core_schema_version'] ?? ''),
             array_values(is_array($data['migrations'] ?? null) ? $data['migrations'] : []),
+            self::stringList($data['required_migrations'] ?? []),
+            is_array($data['rollback'] ?? null) ? $data['rollback'] : [],
             (string) ($data['package_sha256'] ?? ''),
             (string) ($data['signature_algorithm'] ?? 'rsa-sha256'),
             (string) ($data['key_id'] ?? ''),
@@ -108,6 +123,45 @@ final class UpdatePackageManifest
             self::stringList($data['features'] ?? []),
             self::stringList($data['acceptance_gates'] ?? []),
         );
+    }
+
+    public function hardFloor(): string
+    {
+        return $this->hardMinVersion !== '' ? $this->hardMinVersion : ($this->migrationFloor !== '' ? $this->migrationFloor : $this->fromVersionMin);
+    }
+
+    public function supportsSourceVersion(string $currentVersion): bool
+    {
+        $floor = $this->hardFloor();
+        if ($floor !== '' && version_compare($currentVersion, $floor, '<')) {
+            return false;
+        }
+        if ($this->fromVersionMin !== '' && version_compare($currentVersion, $this->fromVersionMin, '<')) {
+            return false;
+        }
+        if ($this->fromVersionMax !== '' && version_compare($currentVersion, $this->fromVersionMax, '>')) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function migrationsFor(string $currentVersion): array
+    {
+        $pending = [];
+        foreach ($this->migrations as $migration) {
+            if (!is_array($migration)) {
+                $pending[] = $migration;
+                continue;
+            }
+            $target = (string) ($migration['target_version'] ?? $migration['version'] ?? $this->toVersion);
+            if ($target === '' || version_compare($target, $currentVersion, '>')) {
+                $pending[] = $migration;
+            }
+        }
+
+        return $pending;
     }
 
     /** @return list<string> */

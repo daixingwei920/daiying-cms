@@ -212,6 +212,7 @@ final class PaymentService
         $this->beginImmediate();
         try {
             $this->updatePaymentFromProviderResult($payment, $result, ['paid']);
+            $this->mergePaymentMetadata($payment, $result);
             $updated = $this->payments->payment($paymentId) ?? [];
             $this->recordAudit('payment.provider.captured', [
                 'payment_id' => $paymentId,
@@ -236,6 +237,27 @@ final class PaymentService
         }
 
         return $updated;
+    }
+
+    /** @return array<string,mixed> */
+    public function settleHostedCheckoutPayment(int $paymentId, string $completionKey = ''): array
+    {
+        $payment = $this->existingPayment($paymentId);
+        if (in_array($this->existingPaymentStatus($payment), ['pending', 'authorized'], true)) {
+            $payment = $this->syncProviderPaymentStatus($paymentId);
+        }
+        if (in_array($this->existingPaymentStatus($payment), ['pending', 'authorized'], true)) {
+            try {
+                $captureKey = 'hosted-return-' . substr(hash('sha256', $paymentId . '|' . $completionKey), 0, 48);
+                $payment = $this->captureProviderPayment($paymentId, $captureKey);
+            } catch (PaymentException $exception) {
+                if ($exception->getMessage() !== 'Payment provider does not support the requested action.') {
+                    throw $exception;
+                }
+            }
+        }
+
+        return $payment;
     }
 
     /** @return array<string,mixed> */
@@ -322,6 +344,7 @@ final class PaymentService
         $this->beginImmediate();
         try {
             $this->updatePaymentFromProviderResult($payment, $result);
+            $this->mergePaymentMetadata($payment, $result);
             $updated = $this->payments->payment($paymentId) ?? [];
             $this->recordAudit('payment.provider.status_synced', [
                 'payment_id' => $paymentId,
@@ -1132,6 +1155,21 @@ final class PaymentService
             $remoteId,
             $result->requestId,
         );
+    }
+
+    /** @param array<string,mixed> $payment */
+    private function mergePaymentMetadata(array $payment, PaymentResult $result): void
+    {
+        $paymentId = $this->storedPositiveInt($payment['id'] ?? null);
+        if ($paymentId === null) {
+            throw new PaymentException('Payment id is invalid.');
+        }
+        $metadata = array_merge(
+            $this->storedPaymentMetadata($payment),
+            $result->data,
+            ['provider_code' => $result->code],
+        );
+        $this->payments->updatePaymentMetadata($paymentId, $this->safeMetadata($metadata));
     }
 
     private function providerResultString(PaymentResult $result, string $key): ?string

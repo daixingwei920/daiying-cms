@@ -5981,7 +5981,7 @@ final class AdminController
                 $channel,
                 $currentVersion,
                 (string) $request->input('site_id', $this->settings->get('site.id', 'local-site')),
-                ['signed_update', 'restore_point', 'rollback', 'health_check']
+                ['signed_update', 'restore_point', 'rollback', 'health_check', 'migration_chain', 'direct_cross_version_update']
             );
             $compatible = (array) ($payload['compatibility'] ?? []);
             $messages = (array) ($compatible['messages'] ?? []);
@@ -5990,8 +5990,10 @@ final class AdminController
                 '<dt>检查结果</dt><dd>' . View::escape($status) . '</dd>' .
                 '<dt>产品 ID</dt><dd><code>' . View::escape((string) ($payload['product_id'] ?? $productId)) . '</code></dd>' .
                 '<dt>当前版本</dt><dd>' . View::escape($currentVersion) . '</dd>' .
-                '<dt>目标版本</dt><dd>' . View::escape((string) ($payload['version'] ?? '-')) . '</dd>' .
+                '<dt>目标版本</dt><dd>' . View::escape((string) ($payload['latest_version'] ?? $payload['version'] ?? '-')) . '</dd>' .
                 '<dt>发布通道</dt><dd>' . View::escape((string) ($payload['channel'] ?? $channel)) . '</dd>' .
+                '<dt>直接升级</dt><dd>' . View::escape(($payload['direct_upgrade_supported'] ?? true) ? '可直接升级到最新版' : '当前版本过旧，需要中间基线') . '</dd>' .
+                '<dt>预计迁移</dt><dd>' . (int) ($payload['migration_count'] ?? count((array) ($payload['required_migrations'] ?? []))) . ' 个</dd>' .
                 '<dt>包 SHA-256</dt><dd><code>' . View::escape((string) ($payload['package_sha256'] ?? '-')) . '</code></dd>' .
                 '<dt>包地址</dt><dd><code>' . View::escape((string) ($payload['package_url'] ?? '-')) . '</code></dd>' .
                 '<dt>兼容状态</dt><dd>' . View::escape(($compatible['compatible'] ?? true) ? '兼容' : '不兼容') . '</dd>' .
@@ -6058,7 +6060,7 @@ final class AdminController
                 $channel,
                 $currentVersion,
                 (string) $request->input('site_id', $this->settings->get('site.id', 'local-site')),
-                ['signed_update', 'restore_point', 'rollback', 'health_check']
+                ['signed_update', 'restore_point', 'rollback', 'health_check', 'migration_chain', 'direct_cross_version_update']
             );
             if (!($payload['update_available'] ?? false)) {
                 throw new \RuntimeException('当前没有可用更新。');
@@ -8257,7 +8259,9 @@ JS;
         return '<table><tbody>' .
             '<tr><th>更新包</th><td><code>' . View::escape((string) ($plan['release_id'] ?? $plan['package_id'] ?? '')) . '</code></td></tr>' .
             '<tr><th>版本</th><td>' . View::escape((string) ($plan['from_version'] ?? '')) . ' -> ' . View::escape((string) ($plan['to_version'] ?? $plan['target_version'] ?? '')) . '</td></tr>' .
+            '<tr><th>直接升级</th><td>' . View::escape(($plan['direct_upgrade_supported'] ?? true) ? '可直接升级到最新版' : '当前版本过旧，需要中间基线') . '</td></tr>' .
             '<tr><th>文件 / 迁移</th><td>' . (int) ($plan['file_count'] ?? 0) . ' 个文件，' . (int) ($plan['migration_count'] ?? 0) . ' 个迁移</td></tr>' .
+            '<tr><th>迁移边界</th><td>hard min: ' . View::escape((string) ($plan['hard_min_version'] ?? '')) . '；migration floor: ' . View::escape((string) ($plan['migration_floor'] ?? '')) . '</td></tr>' .
             '<tr><th>兼容性</th><td>' . View::escape((string) ($compatibility['current_integrity'] ?? '')) . ' / ' . View::escape((string) ($compatibility['database'] ?? '')) . ' / PHP ' . View::escape((string) ($compatibility['php'] ?? '')) . '</td></tr>' .
             '<tr><th>签名</th><td>' . View::escape((string) ($signature['algorithm'] ?? '')) . ' <code>' . View::escape((string) ($signature['key_id'] ?? '')) . '</code></td></tr>' .
             '<tr><th>包含能力</th><td>' . $features . '</td></tr>' .

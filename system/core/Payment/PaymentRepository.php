@@ -227,6 +227,21 @@ final class PaymentRepository
         }
     }
 
+    /** @param array<string,mixed> $metadata */
+    public function updatePaymentMetadata(int $paymentId, array $metadata): void
+    {
+        $paymentId = $this->positiveInt($paymentId, 'Payment id is invalid.');
+        if ($this->payment($paymentId) === null) {
+            throw new PaymentException('Payment was not found.');
+        }
+        $stmt = $this->pdo->prepare('UPDATE cms_payments SET metadata_json = :metadata_json, updated_at = :updated_at WHERE id = :id');
+        $stmt->execute([
+            ':id' => $paymentId,
+            ':metadata_json' => $this->metadataJson($this->safeMetadata($metadata)),
+            ':updated_at' => gmdate('c'),
+        ]);
+    }
+
     /** @return array<string,mixed>|null */
     public function refund(int $refundId): ?array
     {
