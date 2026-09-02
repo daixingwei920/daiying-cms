@@ -8742,7 +8742,7 @@ JS;
             'toggle' => '<label class="admin-toggle"><input type="checkbox" name="' . $inputName . '" value="1"' . ($this->truthy($value) ? ' checked' : '') . '><span></span><strong>' . $label . '</strong></label>',
             'color' => '<input id="' . View::escape($id) . '" type="color" name="' . $inputName . '" value="' . View::escape($valueString !== '' ? $valueString : '#1663f1') . '">',
             'image', 'icon' => $this->renderThemeMediaField($field, $valueString, $id, $inputName, $placeholderAttr),
-            'url' => '<input id="' . View::escape($id) . '" type="url" name="' . $inputName . '" value="' . View::escape($valueString) . '"' . $placeholderAttr . '>',
+            'url' => '<input id="' . View::escape($id) . '" type="text" inputmode="url" name="' . $inputName . '" value="' . View::escape($valueString) . '"' . $placeholderAttr . '>',
             'email' => '<input id="' . View::escape($id) . '" type="email" name="' . $inputName . '" value="' . View::escape($valueString) . '"' . $placeholderAttr . '>',
             'number', 'range' => '<input id="' . View::escape($id) . '" type="' . View::escape($type) . '" name="' . $inputName . '" value="' . View::escape($valueString) . '"' . $this->numberAttributes($field) . $placeholderAttr . '>',
             'text' => '<input id="' . View::escape($id) . '" type="text" name="' . $inputName . '" value="' . View::escape($valueString) . '"' . $placeholderAttr . '>',
@@ -8767,7 +8767,7 @@ JS;
         return '<div class="admin-theme-media-field">' .
             '<div class="admin-theme-media-preview">' . $preview . '</div>' .
             '<div class="admin-theme-media-controls">' .
-            '<input id="' . View::escape($id) . '" type="url" name="' . $inputName . '" value="' . View::escape($value) . '"' . $placeholderAttr . '>' .
+            '<input id="' . View::escape($id) . '" type="text" inputmode="url" name="' . $inputName . '" value="' . View::escape($value) . '"' . $placeholderAttr . '>' .
             '<div class="admin-theme-media-upload"><input type="file" name="theme_assets[' . View::escape($name) . ']" accept="image/*"><button type="submit" name="theme_asset_upload" value="' . View::escape($name) . '" class="admin-button-secondary">上传并保存</button></div>' .
             '<p class="admin-field-description">可以填写已有图片地址，也可以直接上传图片到媒体库并自动回填。</p>' .
             '</div></div>';
