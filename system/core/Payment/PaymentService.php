@@ -1155,6 +1155,10 @@ final class PaymentService
             $remoteId,
             $result->requestId,
         );
+        $this->payments->updatePaymentMetadata(
+            $paymentId,
+            $this->storedPaymentMetadata($payment) + $this->safeMetadata($result->data + ['provider_code' => $result->code]),
+        );
     }
 
     /** @param array<string,mixed> $payment */
