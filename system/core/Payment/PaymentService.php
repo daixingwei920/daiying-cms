@@ -202,9 +202,21 @@ final class PaymentService
                 'amount_minor' => $amountMinor,
                 'currency' => $currency,
                 'idempotency_key' => $idempotencyKey,
-            ]));
+        ]));
         $this->assertProviderResultEnvelope($result);
         if (!$result->success) {
+            $this->persistRejectedProviderResult($payment, $result, 'payment.provider.capture_rejected', [
+                'payment_id' => $paymentId,
+                'subject_type' => $subjectType,
+                'subject_id' => $subjectId,
+                'provider_id' => $providerId,
+                'remote_id' => $remoteId,
+                'status' => $this->existingPaymentStatus($payment),
+                'amount_minor' => $amountMinor,
+                'currency' => $currency,
+                'idempotency_key' => $idempotencyKey,
+                'provider_code' => $result->code,
+            ]);
             throw new PaymentException('Payment provider rejected the capture request.');
         }
 
@@ -1698,6 +1710,29 @@ final class PaymentService
     private function recordAudit(string $action, array $context): void
     {
         (new AuditLogger($this->pdo))->record('system', null, $action, $this->safeMetadata($context));
+    }
+
+    /** @param array<string,mixed> $payment @param array<string,mixed> $auditContext */
+    private function persistRejectedProviderResult(array $payment, PaymentResult $result, string $action, array $auditContext): void
+    {
+        $alreadyInTransaction = $this->pdo->inTransaction();
+        $this->beginImmediate();
+        try {
+            $this->updatePaymentFromProviderResult($payment, $result);
+            $this->mergePaymentMetadata($payment, $result);
+            $updated = $this->payments->payment((int) ($payment['id'] ?? 0)) ?? $payment;
+            $this->recordAudit($action, $auditContext + [
+                'persisted_status' => (string) ($updated['status'] ?? $payment['status'] ?? ''),
+            ]);
+            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
+                $this->pdo->commit();
+            }
+        } catch (Throwable $exception) {
+            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $exception;
+        }
     }
 
     private function recordProviderCreateFailure(
