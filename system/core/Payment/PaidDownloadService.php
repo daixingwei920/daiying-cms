@@ -255,6 +255,27 @@ final class PaidDownloadService
         $payment = $repo->paymentByIdempotency($idempotencyKey);
         if (is_array($payment) && in_array((string) ($payment['status'] ?? ''), ['pending', 'authorized'], true)) {
             $payment = (new PaymentService($this->pdo, $repo, $this->secret()))->settleHostedCheckoutPayment((int) $payment['id'], $idempotencyKey);
+            if (in_array((string) ($payment['status'] ?? ''), ['pending', 'authorized'], true)) {
+                $checkoutUrl = $this->providerCheckoutUrl($payment);
+                if ($checkoutUrl !== '') {
+                    return [
+                        'payment' => $payment,
+                        'authorization' => null,
+                        'download_url' => $checkoutUrl,
+                        'provider_redirect' => true,
+                        'pending_confirmation' => false,
+                    ];
+                }
+                return [
+                    'payment' => $payment,
+                    'authorization' => null,
+                    'download_url' => '/articles/' . $contentId,
+                    'completion_url' => '/paid-download/' . $contentId . '/' . $mediaId . '/complete?payment_key=' . rawurlencode($idempotencyKey) . '&claim=' . rawurlencode($claim),
+                    'provider_redirect' => false,
+                    'pending_confirmation' => true,
+                    'instructions' => $this->pendingInstructions($payment),
+                ];
+            }
         }
 
         $this->pdo->beginTransaction();
@@ -839,7 +860,10 @@ final class PaidDownloadService
         if (isset($parts['query'])) {
             parse_str((string) $parts['query'], $query);
             foreach ($query as $key => $value) {
-                if ((string) $key !== 'cms_signature' && preg_match('/token|secret|signature|authorization|auth|key|password|private/i', (string) $key) === 1) {
+                if ((string) $key !== 'cms_signature'
+                    && !$this->isAllowedGatewayTokenQuery($parts, (string) $key, $value)
+                    && preg_match('/token|secret|signature|authorization|auth|key|password|private/i', (string) $key) === 1
+                ) {
                     return false;
                 }
                 if (!is_scalar($value)) {
@@ -855,6 +879,20 @@ final class PaidDownloadService
         }
 
         return true;
+    }
+
+    /** @param array<string,mixed> $parts */
+    private function isAllowedGatewayTokenQuery(array $parts, string $key, mixed $value): bool
+    {
+        if ($key !== 'token' || !is_scalar($value)) {
+            return false;
+        }
+        $host = strtolower((string) ($parts['host'] ?? ''));
+        if (!in_array($host, ['www.paypal.com', 'www.sandbox.paypal.com', 'www.paypal.test'], true)) {
+            return false;
+        }
+
+        return is_string($value) && preg_match('/^[A-Za-z0-9._-]{1,191}$/', $value) === 1;
     }
 
     private function providerRedirectUrlValueContainsSecret(string $value): bool

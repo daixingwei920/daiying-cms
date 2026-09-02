@@ -159,6 +159,20 @@ final class CardDeliveryService
         $payment = $paymentRepo->paymentByIdempotency($idempotencyKey);
         if (is_array($payment) && in_array((string) ($payment['status'] ?? ''), ['pending', 'authorized'], true)) {
             $payment = (new PaymentService($this->pdo, $paymentRepo, $this->secret()))->settleHostedCheckoutPayment((int) $payment['id'], $idempotencyKey);
+            if (in_array((string) ($payment['status'] ?? ''), ['pending', 'authorized'], true)) {
+                $checkoutUrl = $this->providerCheckoutUrl($payment);
+                return [
+                    'order' => $order,
+                    'product' => $product,
+                    'payment' => $payment,
+                    'delivery' => null,
+                    'provider_redirect' => $checkoutUrl !== '',
+                    'checkout_url' => $checkoutUrl,
+                    'pending_confirmation' => $checkoutUrl === '',
+                    'completion_url' => '/card-delivery/orders/' . $orderId . '/complete?payment_key=' . rawurlencode($idempotencyKey) . '&claim=' . rawurlencode($claim),
+                    'instructions' => $this->pendingInstructions($payment),
+                ];
+            }
         }
 
         $this->pdo->beginTransaction();

@@ -217,6 +217,15 @@ final class PaymentService
                 'idempotency_key' => $idempotencyKey,
                 'provider_code' => $result->code,
             ]);
+            if ($this->providerResultRequiresBuyerAction($result)) {
+                $updated = $this->payments->payment($paymentId) ?? $payment;
+                $checkoutUrl = $this->providerCheckoutUrlFromResultData($providerId, $result->data);
+                if ($checkoutUrl !== '') {
+                    $updated['_provider_checkout_url'] = $checkoutUrl;
+                }
+
+                return $updated;
+            }
             throw new PaymentException('Payment provider rejected the capture request.');
         }
 
@@ -1848,6 +1857,19 @@ final class PaymentService
         }
 
         return '';
+    }
+
+    private function providerResultRequiresBuyerAction(PaymentResult $result): bool
+    {
+        if (($result->data['requires_buyer_action'] ?? false) === true) {
+            return true;
+        }
+        $issue = strtoupper((string) ($result->data['paypal_error_issue'] ?? ''));
+        if ($issue === 'ORDER_NOT_APPROVED') {
+            return true;
+        }
+        $status = strtoupper((string) ($result->data['paypal_order_status'] ?? ''));
+        return in_array($status, ['PAYER_ACTION_REQUIRED', 'CREATED'], true);
     }
 
     private function isSafeProviderRedirectUrlForProvider(string $providerId, string $url): bool

@@ -68,6 +68,10 @@ final class PaidContentController
                 $this->queryString($request, 'claim'),
             );
 
+            if (($result['pending_confirmation'] ?? false) === true) {
+                return $this->pendingResponse($result, '付费内容');
+            }
+
             return $this->accessRedirect((string) $result['content_url']);
         } catch (PaymentException $exception) {
             return $this->paymentErrorResponse($exception, '付费内容');

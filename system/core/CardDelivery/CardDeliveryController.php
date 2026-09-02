@@ -75,6 +75,13 @@ final class CardDeliveryController
                 $this->queryString($request, 'claim'),
             );
 
+            if (($result['provider_redirect'] ?? false) === true && is_string($result['checkout_url'] ?? null)) {
+                return Response::redirect((string) $result['checkout_url']);
+            }
+            if (($result['pending_confirmation'] ?? false) === true) {
+                return $this->pendingResponse($result);
+            }
+
             return $this->deliveryResponse($result);
         } catch (PaymentException|CardDeliveryException $exception) {
             return Response::html(View::page('自动发卡', '<h1>自动发卡</h1><p class="error">' . View::escape($this->publicErrorMessage($exception)) . '</p>'), 400)
