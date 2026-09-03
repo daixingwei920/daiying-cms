@@ -79,6 +79,7 @@ $report = [
     'created_terms' => 0,
     'created_media' => 0,
     'created_comments' => 0,
+    'created_url_mappings' => 0,
     'skipped' => 0,
     'warnings' => [],
 ];
@@ -155,6 +156,7 @@ try {
         $contentIdsBySource[$sourceId] = $contentId;
 
         replaceContentTerms($cms, $contentId, contentTerms($cms, $post, $categoryTermIds, $tagNames, $now, $report), $now);
+        recordUrlMappings($cms, $post, $type, $slug, $sourceId, $now, $report);
     }
 
     foreach ($uploads as $upload) {
@@ -346,6 +348,47 @@ function replaceContentTerms(PDO $pdo, int $contentId, array $termIds, string $n
         $stmt = $pdo->prepare('INSERT INTO cms_content_terms (content_id, term_id, created_at) VALUES (:content_id, :term_id, :created_at)');
         $stmt->execute([':content_id' => $contentId, ':term_id' => $termId, ':created_at' => $now]);
     }
+}
+
+function recordUrlMappings(PDO $pdo, array $post, string $type, string $slug, string $sourceId, string $now, array &$report): void
+{
+    if (!tableExists($pdo, 'cms_url_mappings')) {
+        return;
+    }
+    $target = $type === 'page' ? '/' . rawurlencode($slug) : '/articles/' . rawurlencode($slug);
+    $alias = trim((string) ($post['log_Alias'] ?? ''));
+    $sources = [
+        '/post/' . $sourceId . '.html',
+        '/?id=' . $sourceId,
+        '/?post=' . $sourceId,
+    ];
+    if ($alias !== '') {
+        $sources[] = '/post/' . rawurlencode($alias) . '.html';
+        $sources[] = '/' . rawurlencode($alias) . '.html';
+    }
+    foreach (array_values(array_unique($sources)) as $source) {
+        if (str_contains($source, '?')) {
+            continue;
+        }
+        if (urlMappingExists($pdo, $source, $target)) {
+            continue;
+        }
+        insertRow($pdo, 'cms_url_mappings', [
+            'source_url' => $source,
+            'target_url' => $target,
+            'status_code' => 301,
+            'source_platform' => 'zblogphp',
+            'created_at' => $now,
+        ]);
+        $report['created_url_mappings']++;
+    }
+}
+
+function urlMappingExists(PDO $pdo, string $source, string $target): bool
+{
+    $stmt = $pdo->prepare('SELECT COUNT(*) FROM cms_url_mappings WHERE source_url=:source_url AND target_url=:target_url');
+    $stmt->execute([':source_url' => $source, ':target_url' => $target]);
+    return (int) $stmt->fetchColumn() > 0;
 }
 
 function importUploadIndex(PDO $pdo, string $zblogRoot, array $upload, string $now, bool $copyUploads, array &$report): int

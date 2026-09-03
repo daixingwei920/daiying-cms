@@ -78,6 +78,15 @@ final class ContentFrontController
         return $content === null ? $this->notFound() : $this->content($content, false, $request);
     }
 
+    public function legacyRedirect(Request $request): Response
+    {
+        if (($mapped = $this->mapped($request->path)) !== null) {
+            return Response::redirect($mapped['target'], $mapped['status']);
+        }
+
+        return $this->notFound();
+    }
+
     public function search(Request $request): Response
     {
         try {

@@ -261,6 +261,7 @@ final class Application
         $front = new ContentFrontController($rootPath, $settings, $logger);
         $router->get('/articles', [$front, 'articles']);
         $router->get('/articles/{slug}', [$front, 'article']);
+        $router->get('/post/{slug}', [$front, 'legacyRedirect']);
         $router->get('/search', [$front, 'search']);
         $router->get('/login', [$front, 'loginForm']);
         $router->post('/login', [$front, 'login']);
