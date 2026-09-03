@@ -1,0 +1,46 @@
+{
+    "theme_id": "daiying_novel",
+    "name": "Daiying Novel",
+    "version": "1.0.0",
+    "author": "Daiying CMS",
+    "core": {"min": "1.2.0", "max": "1.x"},
+    "content_types": ["novel", "novel_author", "novel_chapter"],
+    "recommended_plugins": ["official.novel-collector"],
+    "required_plugins": ["official.novel-collector"],
+    "navigation_items": [
+        {"label": "小说", "url": "/novels", "type": "url", "location": "primary", "sort_order": 30}
+    ],
+    "menu_items": [
+        {"label": "小说", "url": "/novels", "type": "url", "location": "primary", "sort_order": 30}
+    ],
+    "package_type": "theme",
+    "local_dev": false,
+    "market_release": true,
+    "settings_schema": {
+        "brand_name": {"type": "string", "label": "站点名称", "default": "Daiying Novel"},
+        "brand_logo_text": {"type": "string", "label": "文字 Logo", "default": "D"},
+        "brand_logo_url": {"type": "string", "label": "图片 Logo URL", "default": ""},
+        "home_title": {"type": "string", "label": "首页标题", "default": "小说书库"},
+        "home_subtitle": {"type": "string", "label": "首页副标题", "default": "按推荐、更新、新书、完本和排行组织内容，适合连续阅读、追更和移动端浏览。"},
+        "home_eyebrow": {"type": "string", "label": "首页小标题", "default": "Daiying Novel Library"},
+        "accent_color": {"type": "string", "label": "主色", "default": "#b8324a"},
+        "nav_label_library": {"type": "string", "label": "导航：书库", "default": "书库"},
+        "nav_label_latest": {"type": "string", "label": "导航：更新", "default": "更新"},
+        "nav_label_completed": {"type": "string", "label": "导航：完本", "default": "完本"},
+        "nav_label_ranking": {"type": "string", "label": "导航：排行", "default": "排行"},
+        "search_placeholder": {"type": "string", "label": "搜索提示", "default": "搜索书名、作者"},
+        "show_search": {"type": "boolean", "label": "显示搜索框", "default": true},
+        "show_home_stats": {"type": "boolean", "label": "显示首页统计", "default": true},
+        "show_quick_links": {"type": "boolean", "label": "显示快速入口", "default": true},
+        "section_recommended_label": {"type": "string", "label": "分区：推荐", "default": "推荐"},
+        "section_latest_label": {"type": "string", "label": "分区：最新更新", "default": "最新更新"},
+        "section_new_label": {"type": "string", "label": "分区：新书", "default": "新书"},
+        "section_completed_label": {"type": "string", "label": "分区：完本", "default": "完本"},
+        "section_ranking_label": {"type": "string", "label": "分区：排行", "default": "排行"},
+        "empty_text": {"type": "string", "label": "空数据文案", "default": "这里还没有可显示的小说。采集完成并写入正式内容后，会自动出现在这个分区。"},
+        "reader_default_theme": {"type": "string", "label": "阅读器默认主题", "default": "paper", "enum": ["paper", "green", "night"]},
+        "reader_width": {"type": "integer", "label": "阅读宽度", "default": 800, "minimum": 640, "maximum": 980},
+        "reader_font_size": {"type": "integer", "label": "默认字号", "default": 18, "minimum": 14, "maximum": 28},
+        "enable_txt_download": {"type": "boolean", "label": "详情页显示 TXT 下载", "default": true}
+    }
+}

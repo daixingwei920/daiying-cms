@@ -1,7 +1,7 @@
 {
     "plugin_id": "official.video-collector",
     "name": "Daiying Video Collector",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "author": "Daiying CMS",
     "type": "plugin",
     "package_type": "plugin",
@@ -24,6 +24,7 @@
     "capability_namespaces": ["video", "video_collector"],
     "public_routes": [
         {"label": "影视", "path": "/videos", "method": "GET"},
+        {"label": "影视搜索", "path": "/videos/search", "method": "GET"},
         {"label": "影视详情", "path": "/videos/detail", "method": "GET"},
         {"label": "影视播放", "path": "/videos/watch", "method": "GET"}
     ],

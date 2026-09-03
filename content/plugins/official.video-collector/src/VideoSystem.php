@@ -694,10 +694,26 @@ final class VideoRepository
     }
 
     /** @return list<array<string,mixed>> */
-    public function publicVideos(int $limit = 24): array
+    public function publicVideos(int $limit = 24, string $type = '', string $query = ''): array
     {
-        $stmt = $this->pdo->prepare("SELECT id,type,title,slug,description,year,region,language,status,episode_count,latest_episode_at,category_name FROM videos WHERE visibility = 'public' ORDER BY latest_episode_at DESC, id DESC LIMIT ?");
-        $stmt->bindValue(1, $limit, \PDO::PARAM_INT);
+        $where = ["visibility = 'public'"];
+        $params = [];
+        if ($type !== '' && in_array($type, ['movie', 'tv', 'short_drama', 'anime', 'variety', 'documentary', 'uncategorized'], true)) {
+            $where[] = 'type = ?';
+            $params[] = $type;
+        }
+        if ($query !== '') {
+            $where[] = '(title LIKE ? OR original_title LIKE ? OR region LIKE ?)';
+            $like = '%' . $query . '%';
+            $params[] = $like;
+            $params[] = $like;
+            $params[] = $like;
+        }
+        $stmt = $this->pdo->prepare('SELECT id,type,title,slug,description,year,region,language,status,episode_count,latest_episode_at,category_name FROM videos WHERE ' . implode(' AND ', $where) . ' ORDER BY latest_episode_at DESC, id DESC LIMIT ?');
+        foreach ($params as $index => $value) {
+            $stmt->bindValue($index + 1, $value);
+        }
+        $stmt->bindValue(count($params) + 1, $limit, \PDO::PARAM_INT);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
     }

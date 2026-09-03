@@ -80,18 +80,35 @@ return static function (PluginContext $context): void {
     }
 
     if (method_exists($context, 'frontRoute')) {
-        $context->frontRoute('GET', '/videos', static function ($request) use ($repo, $pageShell, $html): Response {
+        $context->frontRoute('GET', '/videos', static function ($request) use ($repo, $pageShell, $html, $param): Response {
             if (!$repo instanceof VideoRepository) {
                 return Response::html($pageShell('影视', '<section class="panel"><h1>影视</h1><p>影视内容暂未启用。</p></section>'));
             }
+            $type = $param($request, 'type');
+            $query = trim($param($request, 'q'));
             $cards = '';
-            foreach ($repo->publicVideos(48) as $video) {
+            foreach ($repo->publicVideos(48, $type, $query) as $video) {
                 $cards .= '<a class="media-card" href="/videos/detail?id=' . (int) $video['id'] . '"><strong>' . $html((string) $video['title']) . '</strong><p class="muted">' . $html((string) ($video['category_name'] ?? $video['type'] ?? '未分类')) . ' · ' . $html((string) ($video['year'] ?? '')) . ' · ' . (int) ($video['episode_count'] ?? 0) . ' 集</p><p>' . $html(mb_substr((string) ($video['description'] ?? ''), 0, 80)) . '</p></a>';
             }
             if ($cards === '') {
                 $cards = '<section class="panel"><p>暂时还没有影视内容。</p></section>';
             }
-            return Response::html($pageShell('影视', '<h1>影视</h1><section class="media-grid">' . $cards . '</section>'));
+            $search = '<section class="panel"><form method="get" action="/videos/search"><label>搜索影视</label><input name="q" value="' . $html($query) . '" placeholder="片名、别名、地区"><button type="submit">搜索</button></form><p><a class="button light" href="/videos?type=movie">电影</a><a class="button light" href="/videos?type=tv">电视剧</a><a class="button light" href="/videos?type=short_drama">短剧</a><a class="button light" href="/videos?type=anime">动漫</a><a class="button light" href="/videos?type=variety">综艺</a></p></section>';
+            return Response::html($pageShell('影视', '<h1>影视</h1>' . $search . '<section class="media-grid">' . $cards . '</section>'));
+        });
+        $context->frontRoute('GET', '/videos/search', static function ($request) use ($repo, $pageShell, $html, $param): Response {
+            if (!$repo instanceof VideoRepository) {
+                return Response::html($pageShell('影视搜索', '<section class="panel"><h1>影视搜索</h1><p>影视内容暂未启用。</p></section>'));
+            }
+            $query = trim($param($request, 'q'));
+            $cards = '';
+            foreach ($repo->publicVideos(48, '', $query) as $video) {
+                $cards .= '<a class="media-card" href="/videos/detail?id=' . (int) $video['id'] . '"><strong>' . $html((string) $video['title']) . '</strong><p class="muted">' . $html((string) ($video['category_name'] ?? $video['type'] ?? '未分类')) . ' · ' . $html((string) ($video['year'] ?? '')) . ' · ' . (int) ($video['episode_count'] ?? 0) . ' 集</p></a>';
+            }
+            if ($cards === '') {
+                $cards = '<section class="panel"><p>没有找到匹配影片。</p></section>';
+            }
+            return Response::html($pageShell('影视搜索', '<h1>影视搜索</h1><section class="panel"><form method="get" action="/videos/search"><label>关键词</label><input name="q" value="' . $html($query) . '" placeholder="片名、别名、地区"><button type="submit">搜索</button><a class="button secondary" href="/videos">返回片库</a></form></section><section class="media-grid">' . $cards . '</section>'));
         });
         $context->frontRoute('GET', '/videos/detail', static function ($request) use ($repo, $pageShell, $html, $param): Response {
             if (!$repo instanceof VideoRepository) {
