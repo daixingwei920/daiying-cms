@@ -317,8 +317,16 @@ HTML);
         usort($chapters, static fn (array $a, array $b): int => (int) ($a['sort_order'] ?? 0) <=> (int) ($b['sort_order'] ?? 0));
         return $chapters;
     };
-    $loadNovelSummaries = static function () use ($storeAll, $normalizeStoredRow, $loadCollectedChapters, $loadCollectedChapterIndex): array {
+    $loadNovelSummaries = static function () use ($storeAll, $normalizeStoredRow, $loadCollectedChapters, $loadCollectedChapterIndex, $formalRepo): array {
         $novels = [];
+        if ($formalRepo instanceof NovelRepository) {
+            foreach ($formalRepo->publicNovels(200) as $formalNovel) {
+                $jobId = (string) ($formalNovel['job_id'] ?? '');
+                if ($jobId !== '') {
+                    $novels[$jobId] = $formalNovel;
+                }
+            }
+        }
         $jobTitles = [];
         foreach ($storeAll('novel_collector_jobs') as $rowKey => $row) {
             $job = $normalizeStoredRow($row);
@@ -380,7 +388,27 @@ HTML);
         uasort($novels, static fn (array $a, array $b): int => strcmp((string) ($b['updated_at'] ?? ''), (string) ($a['updated_at'] ?? '')));
         return $novels;
     };
-    $sendTxtDownload = static function (string $jobId) use ($txt, $storeGet, $storePut, $loadCollectedChapters, $fileStoreDir, $fileKey) {
+    $sendTxtDownload = static function (string $jobId) use ($txt, $storeGet, $storePut, $loadCollectedChapters, $fileStoreDir, $fileKey, $formalRepo) {
+        if (str_starts_with($jobId, 'formal_') && $formalRepo instanceof NovelRepository) {
+            $formalId = (int) substr($jobId, 7);
+            $formalNovel = $formalRepo->publicNovel($formalId);
+            if ($formalNovel !== null) {
+                $chapters = $formalRepo->publicChapters($formalId);
+                $body = $txt->exportTxt($formalNovel, $chapters);
+                $safeTitle = trim((string) ($formalNovel['title'] ?? 'novel'));
+                $safeTitle = preg_replace('/[^\p{L}\p{N}_-]+/u', '_', $safeTitle) ?: 'novel';
+                $filename = trim(mb_substr($safeTitle, 0, 80), '_-') . '.txt';
+                if (!headers_sent()) {
+                    header('Content-Type: text/plain; charset=UTF-8');
+                    header('Content-Disposition: attachment; filename="' . rawurlencode($filename) . '"; filename*=UTF-8\'\'' . rawurlencode($filename));
+                    header('X-Daiying-Export-Source: formal');
+                }
+                if (class_exists('\\Cms\\Core\\Http\\Response') && method_exists('\\Cms\\Core\\Http\\Response', 'text')) {
+                    return \Cms\Core\Http\Response::text($body);
+                }
+                return \Cms\Core\Http\Response::html('<pre>' . htmlspecialchars($body, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</pre>');
+            }
+        }
         $novel = $storeGet('novels_local', $jobId) ?? $storeGet('novel_collector_jobs', $jobId) ?? ['title' => 'novel', 'author' => ''];
         $chapters = $loadCollectedChapters($jobId);
         $novel['id'] = $novel['id'] ?? $jobId;
@@ -622,15 +650,25 @@ HTML);
 HTML;
             return \Cms\Core\Http\Response::html($pageShell('我的书架', $body));
         });
-        $context->frontRoute('GET', '/novels/book', static function ($request) use ($param, $html, $pageShell, $loadNovelSummaries, $loadCollectedChapters, $loadCollectedChapterIndex, $novelChapterUrl) {
+        $context->frontRoute('GET', '/novels/book', static function ($request) use ($param, $html, $pageShell, $loadNovelSummaries, $loadCollectedChapters, $loadCollectedChapterIndex, $novelChapterUrl, $formalRepo) {
             $jobId = $param($request, 'job_id');
             $novels = $loadNovelSummaries();
             $novel = $novels[$jobId] ?? null;
+            $formalId = str_starts_with($jobId, 'formal_') ? (int) substr($jobId, 7) : 0;
+            if ($novel === null && $formalId > 0 && $formalRepo instanceof NovelRepository) {
+                $novel = $formalRepo->publicNovel($formalId);
+            }
             if ($novel === null) {
                 return \Cms\Core\Http\Response::html($pageShell('小说不存在', '<h1>小说不存在</h1><section class="panel"><p class="muted">没有找到这个小说，可能还没有采集成功。</p><a class="button secondary" href="/novels">返回小说书库</a></section>'));
             }
-            $chapters = $loadCollectedChapterIndex($jobId);
+            $chapters = [];
+            if ($formalId > 0 && $formalRepo instanceof NovelRepository) {
+                $chapters = $formalRepo->publicChapters($formalId);
+            }
             if ($chapters === []) {
+                $chapters = $loadCollectedChapterIndex($jobId);
+            }
+            if ($chapters === [] && !str_starts_with($jobId, 'formal_')) {
                 $chapters = array_map(static fn (array $chapter): array => [
                     'title' => (string) ($chapter['title'] ?? ''),
                     'sort_order' => (int) ($chapter['sort_order'] ?? 0),
@@ -660,10 +698,17 @@ HTML;
         $context->frontRoute('GET', '/novels/export.txt', static function ($request) use ($param, $sendTxtDownload) {
             return $sendTxtDownload($param($request, 'job_id'));
         });
-        $context->frontRoute('GET', '/novels/chapter', static function ($request) use ($param, $html, $pageShell, $storeGet, $loadNovelSummaries, $loadCollectedChapters, $novelUrl, $novelChapterUrl) {
+        $context->frontRoute('GET', '/novels/chapter', static function ($request) use ($param, $html, $pageShell, $storeGet, $loadNovelSummaries, $loadCollectedChapters, $novelUrl, $novelChapterUrl, $formalRepo) {
             $jobId = $param($request, 'job_id');
             $sort = max(1, (int) $param($request, 'chapter', '1'));
-            $chapter = $storeGet('novel_chapters_local', $jobId . '_' . (string) $sort);
+            $formalId = str_starts_with($jobId, 'formal_') ? (int) substr($jobId, 7) : 0;
+            $chapter = null;
+            if ($formalId > 0 && $formalRepo instanceof NovelRepository) {
+                $chapter = $formalRepo->publicChapter($formalId, $sort);
+            }
+            if ($chapter === null) {
+                $chapter = $storeGet('novel_chapters_local', $jobId . '_' . (string) $sort);
+            }
             if ($chapter === null) {
                 foreach ($loadCollectedChapters($jobId) as $candidate) {
                     if ((int) ($candidate['sort_order'] ?? 0) === $sort) {
@@ -677,17 +722,33 @@ HTML;
             }
             $novels = $loadNovelSummaries();
             $novel = $novels[$jobId] ?? ['title' => $jobId];
-            $prevUrl = $sort > 1 ? $novelChapterUrl($jobId, $sort - 1) : '';
-            $nextUrl = $novelChapterUrl($jobId, $sort + 1);
+            if ($formalId > 0 && $formalRepo instanceof NovelRepository) {
+                $novel = $formalRepo->publicNovel($formalId) ?? $novel;
+            }
+            $chapterSorts = [];
+            if ($formalId > 0 && $formalRepo instanceof NovelRepository) {
+                $chapterSorts = array_map(static fn (array $row): int => (int) ($row['sort_order'] ?? 0), $formalRepo->publicChapters($formalId));
+            } else {
+                $chapterSorts = array_map(static fn (array $row): int => (int) ($row['sort_order'] ?? 0), $loadCollectedChapters($jobId));
+            }
+            $chapterSorts = array_values(array_unique(array_filter($chapterSorts, static fn (int $value): bool => $value > 0)));
+            sort($chapterSorts);
+            $currentIndex = array_search($sort, $chapterSorts, true);
+            $prevSort = $currentIndex !== false && isset($chapterSorts[$currentIndex - 1]) ? (int) $chapterSorts[$currentIndex - 1] : 0;
+            $nextSort = $currentIndex !== false && isset($chapterSorts[$currentIndex + 1]) ? (int) $chapterSorts[$currentIndex + 1] : 0;
+            $prevUrl = $prevSort > 0 ? $novelChapterUrl($jobId, $prevSort) : '';
+            $nextUrl = $nextSort > 0 ? $novelChapterUrl($jobId, $nextSort) : '';
             $prev = $prevUrl !== '' ? '<a class="button ghost" href="' . $html($prevUrl) . '">上一章</a>' : '';
-            $next = '<a class="button ghost" href="' . $html($nextUrl) . '">下一章</a>';
+            $next = $nextUrl !== '' ? '<a class="button ghost" href="' . $html($nextUrl) . '">下一章</a>' : '';
             $content = (string) ($chapter['content'] ?? '');
             if ($content === '') {
                 $content = implode('', array_map(static fn (string $p): string => '<p>' . htmlspecialchars($p, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</p>', preg_split('/\R+/u', (string) ($chapter['content_plaintext'] ?? '')) ?: []));
             }
             $title = (string) ($chapter['title'] ?? '未命名章节');
             $bookUrl = $novelUrl($jobId);
-            $body = '<h1>' . $html($title) . '</h1><section class="reader-controls" data-reader-controls><div class="topline"><span><strong>' . $html((string) ($novel['title'] ?? $jobId)) . '</strong> · #' . $html((string) $sort) . '</span><span data-reader-percent>0%</span></div><div class="progressbar"><span data-reader-progress></span></div><p><button type="button" data-theme="day">日间</button><button type="button" data-theme="eye">护眼</button><button type="button" data-theme="night">夜间</button><button type="button" data-font="-">字号 -</button><button type="button" data-font="+">字号 +</button><button type="button" data-width="-">窄一点</button><button type="button" data-width="+">宽一点</button><button type="button" data-fullscreen>全屏</button></p>' . $prev . $next . '<a class="button secondary" href="' . $html($bookUrl) . '">目录</a></section><section class="panel reader" data-reader data-job-id="' . $html($jobId) . '" data-chapter="' . $html((string) $sort) . '" data-chapter-title="' . $html($title) . '" data-book-title="' . $html((string) ($novel['title'] ?? $jobId)) . '" data-book-url="' . $html($bookUrl) . '">' . $content . '</section><p><a class="button" href="' . $html($nextUrl) . '">继续下一章</a></p><nav class="mobile-reader-bar">' . ($prevUrl !== '' ? '<a class="button ghost" href="' . $html($prevUrl) . '">上一章</a>' : '') . '<a class="button secondary" href="' . $html($bookUrl) . '">目录</a><a class="button ghost" href="' . $html($nextUrl) . '">下一章</a></nav><script>(function(){var reader=document.querySelector("[data-reader]"); if(!reader) return; var id=reader.dataset.jobId, chapter=reader.dataset.chapter, key="daiying_novel_reader_settings"; var settings=JSON.parse(localStorage.getItem(key)||"{\"theme\":\"day\",\"font\":18,\"line\":1.9,\"width\":820,\"autoNext\":false}"); function apply(){reader.dataset.theme=settings.theme||"day"; reader.style.fontSize=(settings.font||18)+"px"; reader.style.lineHeight=String(settings.line||1.9); reader.style.maxWidth=(settings.width||820)+"px"; localStorage.setItem(key,JSON.stringify(settings));} apply(); document.addEventListener("click",function(e){var t=e.target;if(!t) return; var theme=t.getAttribute("data-theme"); if(theme){settings.theme=theme; apply();} var font=t.getAttribute("data-font"); if(font){settings.font=Math.max(14,Math.min(28,(settings.font||18)+(font==="+"?1:-1))); apply();} var width=t.getAttribute("data-width"); if(width){settings.width=Math.max(620,Math.min(1040,(settings.width||820)+(width==="+"?60:-60))); apply();} if(t.hasAttribute("data-fullscreen")&&document.documentElement.requestFullscreen){document.documentElement.requestFullscreen();}}); function save(){var max=Math.max(1,document.documentElement.scrollHeight-window.innerHeight); var pos=Math.max(0,window.scrollY||document.documentElement.scrollTop||0); var percent=Math.min(100,Math.round(pos/max*100)); var bar=document.querySelector("[data-reader-progress]"), label=document.querySelector("[data-reader-percent]"); if(bar) bar.style.width=percent+"%"; if(label) label.textContent=percent+"%"; var progress=JSON.parse(localStorage.getItem("daiying_novel_reading_progress")||"{}"); progress[id]={chapter:chapter,chapterTitle:reader.dataset.chapterTitle,chapterUrl:location.pathname+location.search,bookTitle:reader.dataset.bookTitle,bookUrl:reader.dataset.bookUrl,scrollY:pos,percent:percent,updatedAt:(new Date()).toISOString()}; localStorage.setItem("daiying_novel_reading_progress",JSON.stringify(progress)); var shelf=JSON.parse(localStorage.getItem("daiying_novel_bookshelf")||"{}"); shelf[id]=shelf[id]||{title:reader.dataset.bookTitle,url:reader.dataset.bookUrl}; shelf[id].updatedAt=(new Date()).toISOString(); localStorage.setItem("daiying_novel_bookshelf",JSON.stringify(shelf));} var saved=JSON.parse(localStorage.getItem("daiying_novel_reading_progress")||"{}")[id]; if(saved&&String(saved.chapter)===String(chapter)&&saved.scrollY>0){setTimeout(function(){window.scrollTo(0,saved.scrollY);},80);} window.addEventListener("scroll",function(){window.requestAnimationFrame(save);},{passive:true}); window.addEventListener("beforeunload",save); save();})();</script>';
+            $continueAction = $nextUrl !== '' ? '<p><a class="button" href="' . $html($nextUrl) . '">继续下一章</a></p>' : '<p><a class="button" href="' . $html($bookUrl) . '">返回目录</a></p>';
+            $mobileNext = $nextUrl !== '' ? '<a class="button ghost" href="' . $html($nextUrl) . '">下一章</a>' : '';
+            $body = '<h1>' . $html($title) . '</h1><section class="reader-controls" data-reader-controls><div class="topline"><span><strong>' . $html((string) ($novel['title'] ?? $jobId)) . '</strong> · #' . $html((string) $sort) . '</span><span data-reader-percent>0%</span></div><div class="progressbar"><span data-reader-progress></span></div><p><button type="button" data-theme="day">日间</button><button type="button" data-theme="eye">护眼</button><button type="button" data-theme="night">夜间</button><button type="button" data-font="-">字号 -</button><button type="button" data-font="+">字号 +</button><button type="button" data-width="-">窄一点</button><button type="button" data-width="+">宽一点</button><button type="button" data-fullscreen>全屏</button></p>' . $prev . $next . '<a class="button secondary" href="' . $html($bookUrl) . '">目录</a></section><section class="panel reader" data-reader data-job-id="' . $html($jobId) . '" data-chapter="' . $html((string) $sort) . '" data-chapter-title="' . $html($title) . '" data-book-title="' . $html((string) ($novel['title'] ?? $jobId)) . '" data-book-url="' . $html($bookUrl) . '">' . $content . '</section>' . $continueAction . '<nav class="mobile-reader-bar">' . ($prevUrl !== '' ? '<a class="button ghost" href="' . $html($prevUrl) . '">上一章</a>' : '') . '<a class="button secondary" href="' . $html($bookUrl) . '">目录</a>' . $mobileNext . '</nav><script>(function(){var reader=document.querySelector("[data-reader]"); if(!reader) return; var id=reader.dataset.jobId, chapter=reader.dataset.chapter, key="daiying_novel_reader_settings"; var settings=JSON.parse(localStorage.getItem(key)||"{\"theme\":\"day\",\"font\":18,\"line\":1.9,\"width\":820,\"autoNext\":false}"); function apply(){reader.dataset.theme=settings.theme||"day"; reader.style.fontSize=(settings.font||18)+"px"; reader.style.lineHeight=String(settings.line||1.9); reader.style.maxWidth=(settings.width||820)+"px"; localStorage.setItem(key,JSON.stringify(settings));} apply(); document.addEventListener("click",function(e){var t=e.target;if(!t) return; var theme=t.getAttribute("data-theme"); if(theme){settings.theme=theme; apply();} var font=t.getAttribute("data-font"); if(font){settings.font=Math.max(14,Math.min(28,(settings.font||18)+(font==="+"?1:-1))); apply();} var width=t.getAttribute("data-width"); if(width){settings.width=Math.max(620,Math.min(1040,(settings.width||820)+(width==="+"?60:-60))); apply();} if(t.hasAttribute("data-fullscreen")&&document.documentElement.requestFullscreen){document.documentElement.requestFullscreen();}}); function save(){var max=Math.max(1,document.documentElement.scrollHeight-window.innerHeight); var pos=Math.max(0,window.scrollY||document.documentElement.scrollTop||0); var percent=Math.min(100,Math.round(pos/max*100)); var bar=document.querySelector("[data-reader-progress]"), label=document.querySelector("[data-reader-percent]"); if(bar) bar.style.width=percent+"%"; if(label) label.textContent=percent+"%"; var progress=JSON.parse(localStorage.getItem("daiying_novel_reading_progress")||"{}"); progress[id]={chapter:chapter,chapterTitle:reader.dataset.chapterTitle,chapterUrl:location.pathname+location.search,bookTitle:reader.dataset.bookTitle,bookUrl:reader.dataset.bookUrl,scrollY:pos,percent:percent,updatedAt:(new Date()).toISOString()}; localStorage.setItem("daiying_novel_reading_progress",JSON.stringify(progress)); var shelf=JSON.parse(localStorage.getItem("daiying_novel_bookshelf")||"{}"); shelf[id]=shelf[id]||{title:reader.dataset.bookTitle,url:reader.dataset.bookUrl}; shelf[id].updatedAt=(new Date()).toISOString(); localStorage.setItem("daiying_novel_bookshelf",JSON.stringify(shelf));} var saved=JSON.parse(localStorage.getItem("daiying_novel_reading_progress")||"{}")[id]; if(saved&&String(saved.chapter)===String(chapter)&&saved.scrollY>0){setTimeout(function(){window.scrollTo(0,saved.scrollY);},80);} window.addEventListener("scroll",function(){window.requestAnimationFrame(save);},{passive:true}); window.addEventListener("beforeunload",save); save();})();</script>';
             return \Cms\Core\Http\Response::html($pageShell((string) ($chapter['title'] ?? '小说阅读'), $body));
         });
     }

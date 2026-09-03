@@ -12,6 +12,71 @@ $novelBookshelfUrl = $urls['novel_bookshelf_url'];
 $site = $get('site_name', 'Daiying Novel');
 $sections = $get('novel_sections', []);
 $sections = is_array($sections) ? $sections : [];
+if ($sections === []) {
+    $sections = (static function (): array {
+        $root = dirname(__DIR__, 4);
+        $configFile = $root . '/config/app.php';
+        if (!is_file($configFile)) {
+            return [];
+        }
+        try {
+            $config = require $configFile;
+            $db = is_array($config) ? ($config['database'] ?? []) : [];
+            if (!is_array($db) || (string) ($db['dsn'] ?? '') === '') {
+                return [];
+            }
+            $pdo = new PDO((string) $db['dsn'], ($db['username'] ?? '') !== '' ? (string) $db['username'] : null, ($db['password'] ?? '') !== '' ? (string) $db['password'] : null, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]);
+            $driver = (string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+            if ($driver === 'sqlite') {
+                $stmt = $pdo->prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1");
+                $stmt->execute(['novels']);
+            } else {
+                $stmt = $pdo->prepare('SHOW TABLES LIKE ?');
+                $stmt->execute(['novels']);
+            }
+            if ($stmt->fetchColumn() === false) {
+                return [];
+            }
+            $rows = $pdo->query('SELECT n.id, n.title, n.description, n.status, n.word_count, n.chapter_count, n.latest_chapter_title, n.latest_chapter_at, n.updated_at, n.published_at, a.name AS author
+                FROM novels n
+                LEFT JOIN novel_authors a ON a.id = n.author_id
+                WHERE n.visibility = ' . $pdo->quote('public') . ' AND n.chapter_count > 0
+                ORDER BY COALESCE(n.latest_chapter_at, n.updated_at, n.published_at) DESC, n.id DESC
+                LIMIT 100')->fetchAll();
+            $items = [];
+            foreach ($rows ?: [] as $row) {
+                $id = (int) ($row['id'] ?? 0);
+                if ($id <= 0) {
+                    continue;
+                }
+                $row['id'] = $id;
+                $row['formal_novel_id'] = $id;
+                $row['job_id'] = 'formal_' . $id;
+                $row['author'] = (string) ($row['author'] ?? '佚名');
+                $row['category'] = '小说';
+                $row['url'] = '/novels/book?job_id=formal_' . rawurlencode((string) $id);
+                $items[] = $row;
+            }
+            $new = $items;
+            usort($new, static fn (array $a, array $b): int => strcmp((string) ($b['published_at'] ?? $b['updated_at'] ?? ''), (string) ($a['published_at'] ?? $a['updated_at'] ?? '')));
+            $ranking = $items;
+            usort($ranking, static fn (array $a, array $b): int => ((int) ($b['word_count'] ?? 0) <=> (int) ($a['word_count'] ?? 0)) ?: ((int) ($b['chapter_count'] ?? 0) <=> (int) ($a['chapter_count'] ?? 0)));
+            $completed = array_values(array_filter($items, static fn (array $row): bool => in_array((string) ($row['status'] ?? ''), ['completed', 'complete', 'finished', '完结', '完本'], true)));
+            return [
+                'recommended' => array_slice($ranking, 0, 18),
+                'latest' => array_slice($items, 0, 30),
+                'new' => array_slice($new, 0, 18),
+                'completed' => array_slice($completed, 0, 18),
+                'ranking' => array_slice($ranking, 0, 18),
+            ];
+        } catch (Throwable) {
+            return [];
+        }
+    })();
+}
 $assetBase = '/content/themes/daiying_novel/assets';
 $inlineCss = is_file(__DIR__ . '/../assets/style.css') ? (string) file_get_contents(__DIR__ . '/../assets/style.css') : '';
 $settings = $get('theme_settings', $get('settings', []));

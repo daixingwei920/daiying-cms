@@ -1,9 +1,9 @@
 {
     "theme_id": "daiying_novel",
     "name": "Daiying Novel",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "author": "Daiying CMS",
-    "core": {"min": "1.2.0", "max": "1.x"},
+    "core": {"min": "1.2.0", "max": "2.0.0"},
     "content_types": ["novel", "novel_author", "novel_chapter"],
     "recommended_plugins": ["official.novel-collector"],
     "required_plugins": ["official.novel-collector"],

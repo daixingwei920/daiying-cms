@@ -5,6 +5,7 @@ declare(strict_types=1);
 $root = dirname(__DIR__);
 $manifest = json_decode((string) file_get_contents($root . '/content/plugins/official.novel-collector/plugin.json'), true, 512, JSON_THROW_ON_ERROR);
 $plugin = (string) file_get_contents($root . '/content/plugins/official.novel-collector/plugin.php');
+$system = (string) file_get_contents($root . '/content/plugins/official.novel-collector/src/NovelSystem.php');
 
 $assert = static function (bool $condition, string $message): void {
     if (!$condition) {
@@ -13,8 +14,11 @@ $assert = static function (bool $condition, string $message): void {
 };
 
 $assert(($manifest['plugin_id'] ?? '') === 'official.novel-collector', 'Novel collector plugin ID must remain official.novel-collector.');
-$assert(($manifest['version'] ?? '') === '0.4.7', 'Novel collector version should be 0.4.7.');
+$assert(($manifest['version'] ?? '') === '0.4.10', 'Novel collector version should be 0.4.10.');
 $assert(($manifest['core']['max'] ?? '') === '2.0.0', 'Novel collector core max should be a concrete semver upper bound.');
+$manifestJson = json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+$assert(is_string($manifestJson) && str_contains($manifestJson, 'scheduled_tasks'), 'Novel collector manifest should declare scheduled tasks.');
+$assert(is_string($manifestJson) && str_contains($manifestJson, 'novel_collector_auto_tick'), 'Novel collector manifest should expose auto tick task.');
 
 $routes = [];
 foreach (($manifest['public_routes'] ?? []) as $route) {
@@ -48,13 +52,17 @@ foreach ([
     '/admin/novel-collector/auto/save',
     '/admin/novel-collector/auto/tick',
     'novel_collector_auto',
+    'formal_',
     '同域名、同端口',
 ] as $needle) {
     $assert(str_contains($plugin, $needle), 'Missing frontend contract token: ' . $needle);
 }
+foreach (['publicNovels', 'publicSections', 'publicChapters', 'publicChapter', "job_id'] = 'formal_'"] as $needle) {
+    $assert(str_contains($system, $needle), 'Missing novel repository token: ' . $needle);
+}
 
 $assert(!str_contains($plugin, 'local.novel-collector'), 'Plugin PHP must not reference local.novel-collector.');
 $assert(!str_contains($plugin, 'local.novel_collector.manage'), 'Plugin PHP must not reference local capability names.');
-$assert(!str_contains(json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), 'local.novel-collector'), 'Manifest must not reference local.novel-collector.');
+$assert(!str_contains($manifestJson, 'local.novel-collector'), 'Manifest must not reference local.novel-collector.');
 
 echo "novel_collector_frontend_contract: PASS\n";

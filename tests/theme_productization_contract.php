@@ -36,7 +36,8 @@ $videoManifest = $readJson($videoThemeDir . '/theme.json');
 $videoPluginManifest = $readJson($videoPluginDir . '/plugin.json');
 
 $assert(($novelManifest['theme_id'] ?? '') === 'daiying_novel', 'Novel theme ID must remain daiying_novel.');
-$assert(($novelManifest['version'] ?? '') === '1.0.0', 'Novel theme version must be 1.0.0.');
+$assert(($novelManifest['version'] ?? '') === '1.0.1', 'Novel theme version must be 1.0.1.');
+$assert(($novelManifest['core']['max'] ?? '') === '2.0.0', 'Novel theme core max should be a concrete semver upper bound.');
 $assert(($novelManifest['local_dev'] ?? true) === false, 'Novel theme must not be marked local_dev.');
 $assert(($novelManifest['market_release'] ?? false) === true, 'Novel theme must be marked market_release.');
 $assert(in_array('official.novel-collector', $novelManifest['recommended_plugins'] ?? [], true), 'Novel theme must recommend official.novel-collector.');
@@ -72,6 +73,9 @@ foreach ([
     'data-fullscreen',
     '最近 100 章',
     'update-table',
+    'formal_',
+    'novel_sections',
+    'chapter_count > 0',
 ] as $needle) {
     $assert(str_contains($novelTree, $needle), 'Novel theme missing product token: ' . $needle);
 }

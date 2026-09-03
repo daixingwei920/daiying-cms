@@ -711,6 +711,91 @@ final class NovelRepository
         $this->pdo->prepare('UPDATE novel_export_cache SET is_stale = 1 WHERE novel_id = ?')->execute([$novelId]);
     }
 
+    /** @return list<array<string,mixed>> */
+    public function publicNovels(int $limit = 100): array
+    {
+        if (!$this->hasTable('novels')) {
+            return [];
+        }
+        $limit = max(1, min(500, $limit));
+        $sql = 'SELECT n.id, n.title, n.slug, n.description, n.status, n.word_count, n.chapter_count, n.latest_chapter_title, n.latest_chapter_at, n.updated_at, n.published_at, a.name AS author
+            FROM novels n
+            LEFT JOIN novel_authors a ON a.id = n.author_id
+            WHERE n.visibility = ? AND n.chapter_count > 0
+            ORDER BY COALESCE(n.latest_chapter_at, n.updated_at, n.published_at) DESC, n.id DESC
+            LIMIT ' . $limit;
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['public']);
+        $rows = [];
+        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [] as $row) {
+            $rows[] = $this->publicNovelRow($row);
+        }
+        return $rows;
+    }
+
+    /** @return array<string,list<array<string,mixed>>> */
+    public function publicSections(int $limit = 30): array
+    {
+        $items = $this->publicNovels(max($limit, 100));
+        $latest = $items;
+        $new = $items;
+        usort($new, static fn (array $a, array $b): int => strcmp((string) ($b['published_at'] ?? $b['updated_at'] ?? ''), (string) ($a['published_at'] ?? $a['updated_at'] ?? '')));
+        $ranking = $items;
+        usort($ranking, static fn (array $a, array $b): int => ((int) ($b['word_count'] ?? 0) <=> (int) ($a['word_count'] ?? 0)) ?: ((int) ($b['chapter_count'] ?? 0) <=> (int) ($a['chapter_count'] ?? 0)));
+        $completed = array_values(array_filter($items, static fn (array $row): bool => in_array((string) ($row['status'] ?? ''), ['completed', 'complete', 'finished', '完结', '完本'], true)));
+
+        return [
+            'recommended' => array_slice($ranking, 0, $limit),
+            'latest' => array_slice($latest, 0, $limit),
+            'new' => array_slice($new, 0, $limit),
+            'completed' => array_slice($completed, 0, $limit),
+            'ranking' => array_slice($ranking, 0, $limit),
+        ];
+    }
+
+    public function publicNovel(int $id): ?array
+    {
+        if ($id <= 0 || !$this->hasTable('novels')) {
+            return null;
+        }
+        $stmt = $this->pdo->prepare('SELECT n.id, n.title, n.slug, n.description, n.status, n.word_count, n.chapter_count, n.latest_chapter_title, n.latest_chapter_at, n.updated_at, n.published_at, a.name AS author
+            FROM novels n
+            LEFT JOIN novel_authors a ON a.id = n.author_id
+            WHERE n.id = ? AND n.visibility = ?
+            LIMIT 1');
+        $stmt->execute([$id, 'public']);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return is_array($row) ? $this->publicNovelRow($row) : null;
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function publicChapters(int $novelId): array
+    {
+        if ($novelId <= 0 || !$this->hasTable('novel_chapters')) {
+            return [];
+        }
+        $stmt = $this->pdo->prepare('SELECT id, novel_id, title, slug, chapter_number, sort_order, source_url, content, content_plaintext, content_hash, word_count, published_at, collected_at, updated_at
+            FROM novel_chapters
+            WHERE novel_id = ?
+            ORDER BY sort_order ASC, id ASC');
+        $stmt->execute([$novelId]);
+        return array_values(array_map([$this, 'publicChapterRow'], $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: []));
+    }
+
+    public function publicChapter(int $novelId, int $sortOrder): ?array
+    {
+        if ($novelId <= 0 || !$this->hasTable('novel_chapters')) {
+            return null;
+        }
+        $stmt = $this->pdo->prepare('SELECT id, novel_id, title, slug, chapter_number, sort_order, source_url, content, content_plaintext, content_hash, word_count, published_at, collected_at, updated_at
+            FROM novel_chapters
+            WHERE novel_id = ? AND sort_order = ?
+            LIMIT 1');
+        $stmt->execute([$novelId, $sortOrder]);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return is_array($row) ? $this->publicChapterRow($row) : null;
+    }
+
     private function findNovelId(string $slug, ?string $sourceHash): int
     {
         if ($sourceHash !== null && $this->hasColumn('novels', 'source_url_hash')) {
@@ -757,6 +842,50 @@ final class NovelRepository
         } catch (\Throwable) {
             return false;
         }
+    }
+
+    private function hasTable(string $table): bool
+    {
+        try {
+            $driver = (string) $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+            if ($driver === 'sqlite') {
+                $stmt = $this->pdo->prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1");
+                $stmt->execute([$table]);
+                return $stmt->fetchColumn() !== false;
+            }
+            $stmt = $this->pdo->prepare('SHOW TABLES LIKE ?');
+            $stmt->execute([$table]);
+            return $stmt->fetchColumn() !== false;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    /** @param array<string,mixed> $row @return array<string,mixed> */
+    private function publicNovelRow(array $row): array
+    {
+        $id = (int) ($row['id'] ?? 0);
+        $row['id'] = $id;
+        $row['formal_novel_id'] = $id;
+        $row['job_id'] = 'formal_' . $id;
+        $row['author'] = (string) ($row['author'] ?? '佚名');
+        $row['url'] = '/novels/book?job_id=formal_' . rawurlencode((string) $id);
+        $row['category'] = '小说';
+        $row['cover'] = $row['cover'] ?? '';
+        return $row;
+    }
+
+    /** @param array<string,mixed> $row @return array<string,mixed> */
+    private function publicChapterRow(array $row): array
+    {
+        $novelId = (int) ($row['novel_id'] ?? 0);
+        $sort = max(1, (int) ($row['sort_order'] ?? $row['chapter_number'] ?? 1));
+        $row['novel_id'] = $novelId;
+        $row['job_id'] = 'formal_' . $novelId;
+        $row['novel_key'] = 'formal_' . $novelId;
+        $row['sort_order'] = $sort;
+        $row['url'] = '/novels/chapter?job_id=formal_' . rawurlencode((string) $novelId) . '&chapter=' . rawurlencode((string) $sort);
+        return $row;
     }
 
     private function slug(string $value): string
