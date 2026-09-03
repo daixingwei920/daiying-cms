@@ -2136,7 +2136,7 @@ final class AdminController
             (new AuditLogger($pdo))->record('admin', $guard['id'] ?? null, 'theme.settings_saved', ['theme_id' => $themeId]);
         } catch (Throwable $exception) {
             $this->logger->error('Theme settings save failed', ['source' => 'Core', 'theme_id' => $themeId, 'error' => $exception->getMessage()]);
-            $safeThemeId = preg_match('/^[a-z][a-z0-9_]{2,63}$/', $themeId) === 1 ? rawurlencode($themeId) : '';
+            $safeThemeId = preg_match('/^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$/', $themeId) === 1 && strlen($themeId) <= 64 ? rawurlencode($themeId) : '';
             $back = $safeThemeId !== '' ? '/admin/themes/' . $safeThemeId . '/settings' : '/admin/themes';
             return Response::html(View::page('主题设置保存失败', '<h1>主题设置保存失败</h1><p class="error">' . View::escape($exception->getMessage()) . '</p><p><a class="button" href="' . View::escape($back) . '">返回主题设置</a></p>'), 400);
         }
@@ -2191,7 +2191,7 @@ final class AdminController
         }
 
         $themeId = (string) $request->input('theme_id', '');
-        if (!preg_match('/^[a-z][a-z0-9_]{2,63}$/', $themeId) || in_array($themeId, ['default', 'safe'], true)) {
+        if (!preg_match('/^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$/', $themeId) || strlen($themeId) > 64 || in_array($themeId, ['default', 'safe'], true)) {
             return Response::html(View::page('删除主题', '<h1>删除主题</h1><p class="error">主题 ID 无效或系统主题不可删除。</p><p><a class="button" href="/admin/themes">返回主题管理</a></p>'), 400);
         }
 
@@ -8939,7 +8939,7 @@ JS;
         }
 
         $themeId = rawurldecode((string) $matches[1]);
-        if (!preg_match('/^[a-z][a-z0-9_]{2,63}$/', $themeId)) {
+        if (!preg_match('/^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$/', $themeId) || strlen($themeId) > 64) {
             throw new \RuntimeException('主题 ID 无效。');
         }
 

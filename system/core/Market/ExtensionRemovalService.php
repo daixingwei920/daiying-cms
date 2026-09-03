@@ -14,7 +14,7 @@ final class ExtensionRemovalService
 
     public function uninstall(string $extensionId, string $type, PDO $pdo): void
     {
-        if (!preg_match('/^[a-z][a-z0-9_]{2,63}$/', $extensionId)) {
+        if (!preg_match('/^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*(?:\.[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*){0,4}$/', $extensionId)) {
             throw new MarketException('Invalid extension id.');
         }
         if (!in_array($type, ['plugin', 'theme'], true)) {

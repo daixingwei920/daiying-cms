@@ -31,7 +31,7 @@ final class ThemeManifest
         }
 
         $id = (string) $data['theme_id'];
-        if (!preg_match('/^[a-z][a-z0-9_]{2,63}$/', $id)) {
+        if (!preg_match('/^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$/', $id) || strlen($id) > 64) {
             throw new ThemeException('Invalid theme id.');
         }
 
