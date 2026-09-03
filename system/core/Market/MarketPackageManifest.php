@@ -31,7 +31,7 @@ final class MarketPackageManifest
         $extensionId = (string) ($data['extension_id'] ?? '');
         $validId = in_array($type, ['plugin', 'payment_provider'], true)
             ? preg_match('/^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*(?:\.[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*){0,4}$/', $extensionId) === 1
-            : preg_match('/^[a-z][a-z0-9_]{2,63}$/', $extensionId) === 1;
+            : preg_match('/^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$/', $extensionId) === 1 && strlen($extensionId) <= 64;
         if (!$validId) {
             throw new MarketException('Invalid market package extension id.');
         }

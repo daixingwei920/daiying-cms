@@ -18,7 +18,7 @@ final class ExtensionDependency
     public static function fromArray(array $data): self
     {
         $extensionId = (string) ($data['extension_id'] ?? '');
-        if (!preg_match('/^[a-z][a-z0-9_]{2,63}$/', $extensionId)) {
+        if (!preg_match('/^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*(?:\.[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*){0,4}$/', $extensionId)) {
             throw new MarketException('Invalid dependency extension id.');
         }
 
