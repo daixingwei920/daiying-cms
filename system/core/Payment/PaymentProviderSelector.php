@@ -191,6 +191,9 @@ final class PaymentProviderSelector
         if ($public === null) {
             return false;
         }
+        if ($currency !== '' && !$this->configuredCurrencyMatches($public, $currency)) {
+            return false;
+        }
         $provider = PaymentProviderRegistry::get($providerId);
         if ($provider instanceof PaymentProviderConfigurationInterface) {
             try {
@@ -239,6 +242,24 @@ final class PaymentProviderSelector
         $supported = array_map(static fn (string $code): string => strtoupper($code), $provider->supportedCurrencies());
 
         return in_array($currency, $supported, true);
+    }
+
+    /** @param array<string,mixed> $public */
+    private function configuredCurrencyMatches(array $public, string $currency): bool
+    {
+        $configured = $public['currency'] ?? null;
+        if ($configured === null || $configured === '') {
+            return true;
+        }
+        if (!is_string($configured)) {
+            return false;
+        }
+
+        try {
+            return CurrencyRegistry::normalizeCode($configured) === $currency;
+        } catch (InvalidArgumentException) {
+            return false;
+        }
     }
 
     /** @return array<string,mixed>|null */

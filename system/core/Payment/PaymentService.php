@@ -808,6 +808,9 @@ final class PaymentService
         } catch (PaymentException) {
             return false;
         }
+        if ($currency !== '' && !$this->configuredCurrencyMatches($public, $currency)) {
+            return false;
+        }
         if ($provider instanceof PaymentProviderConfigurationInterface) {
             try {
                 $maskedSecrets = (new PaymentProviderSettingsRepository($this->pdo, $this->providerSettingsKey))->maskedSecrets($providerId);
@@ -882,6 +885,12 @@ final class PaymentService
                 }
                 $publicConfig = $this->validatedProviderPublicConfig($decoded);
             }
+        }
+        if (isset($data['currency'])
+            && is_string($data['currency'])
+            && !$this->configuredCurrencyMatches($publicConfig, $data['currency'])
+        ) {
+            throw new PaymentException('Payment provider checkout configuration is unavailable.');
         }
 
         $secretConfig = [];
@@ -1567,6 +1576,24 @@ final class PaymentService
         $supported = array_map(static fn (string $code): string => strtoupper($code), $provider->supportedCurrencies());
 
         return in_array($currency, $supported, true);
+    }
+
+    /** @param array<string,mixed> $public */
+    private function configuredCurrencyMatches(array $public, string $currency): bool
+    {
+        $configured = $public['currency'] ?? null;
+        if ($configured === null || $configured === '') {
+            return true;
+        }
+        if (!is_string($configured)) {
+            return false;
+        }
+
+        try {
+            return CurrencyRegistry::normalizeCode($configured) === $currency;
+        } catch (\InvalidArgumentException) {
+            return false;
+        }
     }
 
     private function normalizeIdempotencyKey(string $idempotencyKey): string
