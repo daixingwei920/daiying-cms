@@ -22,6 +22,11 @@ final class ThemeRuntime
             throw new ThemeException('Template not found: ' . $template);
         }
 
+        $data += [
+            'theme_settings' => $this->settings,
+            'settings' => $this->settings,
+        ];
+
         $context = new TemplateContext($this, $data);
         ob_start();
         try {
