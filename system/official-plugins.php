@@ -12,4 +12,22 @@ return [
         'capability_namespaces' => ['friend_links'],
         'table_prefixes' => ['friend_links_'],
     ],
+    'official.novel-collector' => [
+        'directory' => 'official.novel-collector',
+        'package_type' => 'plugin',
+        'type' => 'plugin',
+        'bundled' => true,
+        'trust_level' => 'trusted_php',
+        'capability_namespaces' => ['novel', 'novel_collector'],
+        'table_prefixes' => ['novel_', 'novel_collector_'],
+    ],
+    'official.video-collector' => [
+        'directory' => 'official.video-collector',
+        'package_type' => 'plugin',
+        'type' => 'plugin',
+        'bundled' => true,
+        'trust_level' => 'trusted_php',
+        'capability_namespaces' => ['video', 'video_collector'],
+        'table_prefixes' => ['video_', 'video_collector_'],
+    ],
 ];

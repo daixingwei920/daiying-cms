@@ -1,0 +1,49 @@
+{
+    "plugin_id": "official.novel-collector",
+    "name": "Daiying Novel Collector",
+    "version": "0.4.3",
+    "author": "Daiying CMS",
+    "type": "plugin",
+    "package_type": "plugin",
+    "entry": "plugin.php",
+    "core": {"min": "1.2.0", "max": "1.x"},
+    "php": "8.1.0",
+    "trust_level": "trusted_php",
+    "official": true,
+    "trusted_deployment": "builtin_or_registry_only",
+    "capabilities": [
+        "content.read",
+        "content.write",
+        "media.read",
+        "media.write",
+        "network.external",
+        "cron.register",
+        "settings.read",
+        "settings.write",
+        "storage.plugin",
+        "novel_collector.manage",
+        "novel_collector.export"
+    ],
+    "capability_namespaces": ["novel", "novel_collector"],
+    "public_routes": [
+        {"label": "小说", "path": "/novels", "method": "GET"},
+        {"label": "小说目录", "path": "/novels/book", "method": "GET"},
+        {"label": "小说阅读", "path": "/novels/chapter", "method": "GET"},
+        {"label": "小说 TXT 下载", "path": "/novels/export.txt", "method": "GET"}
+    ],
+    "navigation_items": [
+        {"label": "小说", "url": "/novels", "type": "plugin_route", "location": "primary", "sort_order": 30}
+    ],
+    "menu_items": [
+        {"label": "小说", "url": "/novels", "type": "url", "location": "primary", "sort_order": 30}
+    ],
+    "dependencies": [],
+    "required_plugins": [],
+    "migrations": ["migrations/001_novel_core_and_collector.php"],
+    "table_prefixes": ["novel_", "novel_collector_"],
+    "data_policy": {
+        "uninstall": "retain_formal_content",
+        "purge": "separate_confirmation_only"
+    },
+    "data_schema_version": "1.0.0-alpha.1"
+}

@@ -1,0 +1,18 @@
+{
+  "list": [
+    {
+      "vod_id": "v-1001",
+      "type_name": "微短剧",
+      "vod_name": "归来仍是少年",
+      "vod_year": "2026",
+      "vod_area": "中国大陆",
+      "vod_lang": "国语",
+      "vod_remarks": "更新至28集",
+      "vod_actor": "演员甲,演员乙",
+      "vod_director": "导演甲",
+      "vod_content": "<p>短剧测试资料。</p>",
+      "vod_play_from": "dbm3u8$$$ffm3u8",
+      "vod_play_url": "第1集$https://example.com/a/1.m3u8#第2集$https://example.com/a/2.m3u8$$$第1集$https://example.com/b/1.m3u8#第2集$https://example.com/b/2.mp4"
+    }
+  ]
+}

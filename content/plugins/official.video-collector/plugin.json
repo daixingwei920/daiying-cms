@@ -1,0 +1,40 @@
+{
+    "plugin_id": "official.video-collector",
+    "name": "Daiying Video Collector",
+    "version": "0.1.2",
+    "author": "Daiying CMS",
+    "type": "plugin",
+    "package_type": "plugin",
+    "entry": "plugin.php",
+    "core": {"min": "1.2.0", "max": "1.x"},
+    "php": "8.1.0",
+    "trust_level": "api",
+    "capabilities": [
+        "content.read",
+        "content.write",
+        "media.read",
+        "media.write",
+        "network.external",
+        "cron.register",
+        "settings.read",
+        "settings.write",
+        "storage.plugin",
+        "video_collector.manage"
+    ],
+    "capability_namespaces": ["video", "video_collector"],
+    "public_routes": [
+        {"label": "影视", "path": "/videos", "method": "GET"}
+    ],
+    "navigation_items": [
+        {"label": "影视", "url": "/videos", "type": "plugin_route", "location": "primary", "sort_order": 40}
+    ],
+    "dependencies": [],
+    "required_plugins": [],
+    "migrations": ["migrations/001_video_core_and_collector.php"],
+    "table_prefixes": ["video_", "video_collector_"],
+    "data_policy": {
+        "uninstall": "retain_formal_content",
+        "purge": "separate_confirmation_only"
+    },
+    "data_schema_version": "1.0.0-alpha.1"
+}
