@@ -1883,42 +1883,7 @@ final class PaymentService
 
     private function isSafeStripeCheckoutRedirectUrl(string $url): bool
     {
-        if ($url === '' || $url !== trim($url) || strlen($url) > 262144 || preg_match('/[\x00-\x1F\x7F]/', $url) === 1) {
-            return false;
-        }
-        $parts = parse_url($url);
-        if (!is_array($parts)
-            || strtolower((string) ($parts['scheme'] ?? '')) !== 'https'
-            || strtolower((string) ($parts['host'] ?? '')) !== 'checkout.stripe.com'
-            || isset($parts['user'])
-            || isset($parts['pass'])
-        ) {
-            return false;
-        }
-        if (!str_starts_with((string) ($parts['path'] ?? ''), '/c/pay/')) {
-            return false;
-        }
-        if (preg_match('#cs_(?:test|live)_[A-Za-z0-9_=-]+#', $url) !== 1) {
-            return false;
-        }
-        if (!$this->isSafeStripeOwnedUrlPart((string) ($parts['query'] ?? ''), 65536)
-            || !$this->isSafeStripeOwnedUrlPart((string) ($parts['fragment'] ?? ''), 196608)
-        ) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private function isSafeStripeOwnedUrlPart(string $value, int $maxLength): bool
-    {
-        return strlen($value) <= $maxLength
-            && preg_match('/[\x00-\x1F\x7F]/', $value) !== 1;
-    }
-
-    private function providerRedirectPartContainsSecret(string $value): bool
-    {
-        return preg_match('/(?:bearer\s+|sk_(test|live)?_|api[_-]?key=|access[_-]?key=|secret=|authorization=)/i', rawurldecode($value)) === 1;
+        return StripeCheckoutUrlValidator::isSafe($url);
     }
 
     private function isSafeProviderRedirectUrl(string $url): bool
