@@ -55,27 +55,34 @@ final class SafeHttpClient
             foreach ($extraHeaders as $name => $value) {
                 $headerLines[] = preg_replace('/[^A-Za-z0-9-]/', '', (string) $name) . ': ' . str_replace(["\r", "\n"], '', (string) $value);
             }
-            $context = stream_context_create([
-                'http' => [
-                    'method' => 'GET',
-                    'timeout' => $this->timeoutSeconds,
-                    'ignore_errors' => true,
-                    'follow_location' => 0,
-                    'header' => implode("\r\n", $headerLines) . "\r\n",
-                ],
-                'ssl' => ['verify_peer' => true, 'verify_peer_name' => true],
-            ]);
-            $stream = @fopen($current, 'rb', false, $context);
-            if (!is_resource($stream)) {
-                throw new \RuntimeException('HTTP request failed.');
+            $fallback = $this->curlGet($current, $headerLines);
+            if ($fallback !== null) {
+                $body = $fallback['body'];
+                $headers = $fallback['headers'];
+                $status = $fallback['status'];
+            } else {
+                $context = stream_context_create([
+                    'http' => [
+                        'method' => 'GET',
+                        'timeout' => $this->timeoutSeconds,
+                        'ignore_errors' => true,
+                        'follow_location' => 0,
+                        'header' => implode("\r\n", $headerLines) . "\r\n",
+                    ],
+                    'ssl' => ['verify_peer' => true, 'verify_peer_name' => true],
+                ]);
+                $stream = @fopen($current, 'rb', false, $context);
+                if (!is_resource($stream)) {
+                    throw new \RuntimeException('HTTP request failed.');
+                }
+                $body = stream_get_contents($stream, $this->maxBytes + 1);
+                fclose($stream);
+                $headers = $http_response_header ?? [];
+                $status = $this->statusCode($headers);
             }
-            $body = stream_get_contents($stream, $this->maxBytes + 1);
-            fclose($stream);
-            $headers = $http_response_header ?? [];
             if (strlen((string) $body) > $this->maxBytes) {
                 throw new SecurityException('Response size limit exceeded.');
             }
-            $status = $this->statusCode($headers);
             $location = $this->locationHeader($headers);
             if ($status >= 300 && $status < 400 && $location !== null) {
                 if ($redirect === $this->maxRedirects) {
@@ -87,6 +94,46 @@ final class SafeHttpClient
             return ['url' => $current, 'status' => $status, 'headers' => $headers, 'body' => (string) $body];
         }
         throw new SecurityException('Redirect limit exceeded.');
+    }
+
+    private function curlGet(string $url, array $headerLines): ?array
+    {
+        if (!function_exists('curl_init')) {
+            return null;
+        }
+        $handle = curl_init($url);
+        if (!is_resource($handle) && !$handle instanceof \CurlHandle) {
+            return null;
+        }
+        curl_setopt_array($handle, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HEADER => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_CONNECTTIMEOUT => $this->timeoutSeconds,
+            CURLOPT_TIMEOUT => $this->timeoutSeconds,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_HTTPHEADER => $headerLines,
+        ]);
+        if (defined('CURLOPT_PROTOCOLS') && defined('CURLPROTO_HTTP') && defined('CURLPROTO_HTTPS')) {
+            curl_setopt($handle, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+        }
+        $raw = curl_exec($handle);
+        if (!is_string($raw)) {
+            if (PHP_VERSION_ID < 80500) {
+                curl_close($handle);
+            }
+            return null;
+        }
+        $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
+        $headerSize = (int) curl_getinfo($handle, CURLINFO_HEADER_SIZE);
+        if (PHP_VERSION_ID < 80500) {
+            curl_close($handle);
+        }
+        $headerText = substr($raw, 0, $headerSize);
+        $body = substr($raw, $headerSize);
+        $headers = preg_split('/\r\n|\n|\r/', trim($headerText)) ?: [];
+        return ['status' => $status, 'headers' => $headers, 'body' => $body];
     }
 
     private function isBlockedIp(string $ip): bool
@@ -137,11 +184,44 @@ final class CatalogUrlDiscoverer
 {
     public static function discover(string $url, int $max, callable $fetch): array
     {
-        $res = $fetch($url);
-        $baseUrl = (string) ($res['url'] ?? $url);
+        $max = max(1, $max);
+        $queue = [$url];
+        $visited = [];
+        $found = [];
+        $pageLimit = min(20, max(3, (int) ceil($max / 15) + 2));
+
+        while ($queue !== [] && count($visited) < $pageLimit && count($found) < $max) {
+            $currentUrl = array_shift($queue);
+            if (!is_string($currentUrl) || $currentUrl === '' || isset($visited[$currentUrl])) {
+                continue;
+            }
+            $visited[$currentUrl] = true;
+            try {
+                $res = $fetch($currentUrl);
+            } catch (\Throwable) {
+                if (!BqgSpaAdapter::isPotentialSpaHost($currentUrl)) {
+                    continue;
+                }
+                $res = ['url' => $currentUrl, 'status' => 0, 'headers' => [], 'body' => ''];
+            }
+            $baseUrl = (string) ($res['url'] ?? $currentUrl);
+            $pageFound = self::discoverFromPage($baseUrl, (string) ($res['body'] ?? ''), $max - count($found), $fetch, $queue);
+            foreach ($pageFound as $item) {
+                $found[(string) $item['url']] = $item;
+                if (count($found) >= $max) {
+                    break 2;
+                }
+            }
+        }
+
+        return array_values($found);
+    }
+
+    private static function discoverFromPage(string $baseUrl, string $body, int $remaining, callable $fetch, array &$queue): array
+    {
         $baseParts = parse_url($baseUrl);
         if (!is_array($baseParts)) {
-            $baseParts = parse_url($url) ?: [];
+            $baseParts = [];
         }
         $baseScheme = strtolower((string) ($baseParts['scheme'] ?? 'https'));
         $baseHost = self::normalizeHost((string) ($baseParts['host'] ?? ''));
@@ -150,15 +230,19 @@ final class CatalogUrlDiscoverer
             return [];
         }
 
+        $found = self::discoverBqgSpa($baseUrl, $body, $remaining, $fetch);
+        if (count($found) >= $remaining) {
+            return $found;
+        }
+
         $previous = libxml_use_internal_errors(true);
         $dom = new \DOMDocument();
-        $body = mb_convert_encoding((string) ($res['body'] ?? ''), 'UTF-8', 'UTF-8,GB18030,GBK,BIG5,ISO-8859-1');
+        $body = mb_convert_encoding($body, 'UTF-8', 'UTF-8,GB18030,GBK,BIG5,ISO-8859-1');
         $dom->loadHTML('<?xml encoding="utf-8" ?>' . $body, LIBXML_NOERROR | LIBXML_NOWARNING);
         libxml_clear_errors();
         libxml_use_internal_errors($previous);
 
         $xpath = new \DOMXPath($dom);
-        $found = [];
         foreach ($xpath->query('//a[@href]') ?: [] as $node) {
             if (!$node instanceof \DOMElement) {
                 continue;
@@ -179,14 +263,21 @@ final class CatalogUrlDiscoverer
             if ($host !== $baseHost || $port !== $basePort) {
                 continue;
             }
-            if (!self::isLikelyCatalogPath($path)) {
+            if (self::isLikelyListingPath($path, $node->textContent)) {
+                $queue[] = $candidate;
+            }
+            if (!self::isLikelyCatalogPath($path, (string) ($parts['fragment'] ?? ''))) {
                 continue;
+            }
+            $title = trim(preg_replace('/\s+/u', ' ', $node->textContent) ?? '');
+            if ($title === '') {
+                $title = trim((string) $node->getAttribute('title'));
             }
             $found[$candidate] = [
                 'url' => $candidate,
-                'title' => trim(preg_replace('/\s+/u', ' ', $node->textContent) ?? ''),
+                'title' => $title,
             ];
-            if (count($found) >= $max) {
+            if (count($found) >= $remaining) {
                 break;
             }
         }
@@ -258,6 +349,9 @@ final class CatalogUrlDiscoverer
         if (isset($parts['query']) && $parts['query'] !== '') {
             $url .= '?' . (string) $parts['query'];
         }
+        if (isset($parts['fragment']) && $parts['fragment'] !== '') {
+            $url .= '#' . (string) $parts['fragment'];
+        }
         return $url;
     }
 
@@ -277,9 +371,191 @@ final class CatalogUrlDiscoverer
         return '/' . implode('/', $segments) . (str_ends_with($path, '/') && $segments !== [] ? '/' : '');
     }
 
-    private static function isLikelyCatalogPath(string $path): bool
+    private static function discoverBqgSpa(string $baseUrl, string $body, int $remaining, callable $fetch): array
     {
-        return preg_match('~(?:/n/[^/?#]+/list\.html|/(?:book|novel|xiaoshuo|xs|b)/[^/?#]+/?$|/(?:book|novel|xiaoshuo|xs|b)/\d+/?$|/read/\d+/?$)~i', $path) === 1;
+        if (!BqgSpaAdapter::looksLikeSite($baseUrl, $body) && !BqgSpaAdapter::isPotentialSpaHost($baseUrl)) {
+            return [];
+        }
+        $found = [];
+        $apiUrls = [
+            BqgSpaAdapter::centralApiUrl('index', ['sort' => 'index']),
+            BqgSpaAdapter::plainApiUrl($baseUrl, 'index', ['sort' => 'index']),
+        ];
+        foreach (['xuanhuan', 'wuxia', 'dushi', 'lishi', 'wangyou', 'kehuan', 'mm', 'finish', 'top'] as $sort) {
+            $apiUrls[] = BqgSpaAdapter::centralApiUrl('sort', ['sort' => $sort]);
+            $apiUrls[] = BqgSpaAdapter::plainApiUrl($baseUrl, 'sort', ['sort' => $sort]);
+        }
+        foreach ($apiUrls as $apiUrl) {
+            if (count($found) >= $remaining) {
+                break;
+            }
+            try {
+                $res = $fetch($apiUrl);
+            } catch (\Throwable) {
+                continue;
+            }
+            $json = json_decode((string) ($res['body'] ?? ''), true);
+            if (!is_array($json)) {
+                continue;
+            }
+            foreach (BqgSpaAdapter::bookRowsFromPayload($json) as $book) {
+                $id = (int) ($book['id'] ?? 0);
+                if ($id <= 0) {
+                    continue;
+                }
+                $catalogUrl = BqgSpaAdapter::publicCatalogUrl($baseUrl, $id);
+                $found[$catalogUrl] = [
+                    'url' => $catalogUrl,
+                    'title' => trim((string) ($book['title'] ?? '')),
+                    'author' => trim((string) ($book['author'] ?? '')),
+                    'cover_url' => BqgSpaAdapter::coverUrl($baseUrl, $id),
+                ];
+                if (count($found) >= $remaining) {
+                    break 2;
+                }
+            }
+        }
+        return array_values($found);
+    }
+
+    private static function isLikelyCatalogPath(string $path, string $fragment = ''): bool
+    {
+        return preg_match('~(?:/n/[^/?#]+/list\.html|/(?:book|novel|xiaoshuo|xs|b)/[^/?#]+/?$|/(?:book|novel|xiaoshuo|xs|b)/\d+/?$|/read/\d+/?$)~i', $path) === 1
+            || preg_match('~^/?book/\d+/?$~i', ltrim($fragment, '#/')) === 1;
+    }
+
+    private static function isLikelyListingPath(string $path, string $label): bool
+    {
+        $label = trim(html_entity_decode($label, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        if (preg_match('~(?:下一页|下页|尾页|更多|>|»|›)~iu', $label)) {
+            return true;
+        }
+        if (preg_match('~^/?(?:xuanhuan|wuxia|dushi|lishi|wangyou|kehuan|mm|finish|top|sort)(?:/|\b)~i', ltrim($path, '/'))) {
+            return true;
+        }
+        return preg_match('~/(?:\d+|index_\d+|list_\d+)\.html$~i', $path) === 1;
+    }
+}
+
+final class BqgSpaAdapter
+{
+    private const API_HOST = 'https://apibi.cc';
+    private const CATEGORIES = ['xuanhuan', 'wuxia', 'dushi', 'lishi', 'wangyou', 'kehuan', 'mm', 'finish', 'top'];
+
+    public static function looksLikeSite(string $url, string $body = ''): bool
+    {
+        $host = strtolower((string) (parse_url($url, PHP_URL_HOST) ?? ''));
+        return (str_contains($host, 'bqg') && (str_contains($body, '/#/book') || str_contains($body, '/api/index') || str_contains($body, '/js/common.js')))
+            || str_contains($body, 'function url_book(id)')
+            || str_contains($body, '/api/sort?sort=');
+    }
+
+    public static function isPotentialSpaHost(string $url): bool
+    {
+        $host = strtolower((string) (parse_url($url, PHP_URL_HOST) ?? ''));
+        $fragment = (string) (parse_url($url, PHP_URL_FRAGMENT) ?? '');
+        return (str_contains($host, 'bqg') && str_ends_with($host, '.xyz')) || preg_match('~(?:^|/)book/\d+(?:/|$)~i', $fragment) === 1;
+    }
+
+    public static function bookIdFromUrl(string $url): ?int
+    {
+        $path = (string) (parse_url($url, PHP_URL_PATH) ?? '');
+        $fragment = (string) (parse_url($url, PHP_URL_FRAGMENT) ?? '');
+        foreach ([$fragment, $path] as $value) {
+            if (preg_match('~(?:^|/)book/(\d+)(?:/|$)~i', $value, $m)) {
+                return max(1, (int) $m[1]);
+            }
+        }
+        return null;
+    }
+
+    public static function plainApiUrl(string $baseUrl, string $endpoint, array $query): string
+    {
+        $parts = parse_url($baseUrl);
+        $scheme = (string) ($parts['scheme'] ?? 'https');
+        $host = (string) ($parts['host'] ?? '');
+        return $scheme . '://' . $host . '/api/' . rawurlencode($endpoint) . '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+    }
+
+    public static function centralApiUrl(string $endpoint, array $query): string
+    {
+        return self::API_HOST . '/api/' . rawurlencode($endpoint) . '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+    }
+
+    public static function encryptedApiUrl(string $endpoint, array $payload): string
+    {
+        $code = md5('book@token.html');
+        $iv = substr($code, 0, 16);
+        $key = substr($code, 16);
+        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if (!is_string($json)) {
+            $json = '{}';
+        }
+        $cipher = openssl_encrypt($json, 'AES-128-CBC', $key, OPENSSL_RAW_DATA, $iv);
+        if (!is_string($cipher)) {
+            $cipher = '';
+        }
+        return self::API_HOST . '/api/' . rawurlencode($endpoint) . '?token=' . rawurlencode(base64_encode($cipher));
+    }
+
+    public static function publicCatalogUrl(string $baseUrl, int $bookId): string
+    {
+        $parts = parse_url($baseUrl);
+        $scheme = (string) ($parts['scheme'] ?? 'https');
+        $host = (string) ($parts['host'] ?? '');
+        return $scheme . '://' . $host . '/#/book/' . $bookId . '/';
+    }
+
+    public static function coverUrl(string $baseUrl, int $bookId): string
+    {
+        $parts = parse_url($baseUrl);
+        $scheme = (string) ($parts['scheme'] ?? 'https');
+        $host = (string) ($parts['host'] ?? '');
+        return $scheme . '://' . $host . '/bookimg/' . intdiv($bookId, 1000) . '/' . $bookId . '.jpg';
+    }
+
+    public static function bookRowsFromPayload(array $payload): array
+    {
+        $rows = [];
+        $walk = static function ($value) use (&$walk, &$rows): void {
+            if (!is_array($value)) {
+                return;
+            }
+            if (isset($value['id'], $value['title'])) {
+                $rows[] = $value;
+                return;
+            }
+            foreach ($value as $child) {
+                $walk($child);
+            }
+        };
+        $walk($payload);
+        return $rows;
+    }
+
+    public static function catalogFromApi(string $catalogUrl, array $book, array $bookList): array
+    {
+        $bookId = (int) ($book['dirid'] ?? $book['id'] ?? self::bookIdFromUrl($catalogUrl) ?? 0);
+        $chapters = [];
+        foreach (($bookList['list'] ?? []) as $index => $title) {
+            $chapterId = $index + 1;
+            $chapters[] = [
+                'title' => trim((string) $title),
+                'url' => self::encryptedApiUrl('chapter', ['id' => $bookId, 'chapterid' => $chapterId]),
+                'source_chapter_id' => $bookId . ':' . $chapterId,
+                'sort_order' => $chapterId,
+            ];
+        }
+        return [
+            'title' => trim((string) ($book['title'] ?? '')),
+            'author' => trim(preg_replace('/\s+/u', ' ', (string) ($book['author'] ?? '')) ?? ''),
+            'description' => trim((string) ($book['intro'] ?? '')),
+            'cover_url' => $bookId > 0 ? self::coverUrl($catalogUrl, $bookId) : '',
+            'status' => str_contains((string) ($book['full'] ?? ''), '完') ? 'completed' : 'serializing',
+            'chapters' => $chapters,
+            'confidence' => count($chapters) >= 3 ? 0.96 : 0.45,
+            'strategy' => 'adapter_bqg_spa_api',
+        ];
     }
 }
 
@@ -342,14 +618,14 @@ final class NovelAutoDetector
         }
         $title = $this->match($html, '/<h1[^>]*>(.*?)<\/h1>/isu') ?: $this->match($html, '/<title[^>]*>(.*?)<\/title>/isu');
         $author = $this->match($html, '/(?:作者|author)[\s:：<\/span>]*([^<\n]+)/iu') ?: '佚名';
-        preg_match_all('/<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)<\/a>/isu', $html, $matches, PREG_SET_ORDER);
+        preg_match_all('/<a\b[^>]*\bhref\s*=\s*(["\'])(.*?)\1[^>]*>(.*?)<\/a>/isu', $html, $matches, PREG_SET_ORDER);
         $chapters = [];
         foreach ($matches as $i => $m) {
-            $chapterTitle = trim(html_entity_decode(strip_tags($m[2]), ENT_QUOTES, 'UTF-8'));
+            $chapterTitle = trim(html_entity_decode(strip_tags($m[3]), ENT_QUOTES, 'UTF-8'));
             if (!preg_match('/(?:第\s*[一二三四五六七八九十百千万\d零〇两]+\s*章|Chapter\s*\d+|正文|序章|终章|完本感言)/iu', $chapterTitle)) {
                 continue;
             }
-            $chapters[] = ['title' => $chapterTitle, 'url' => $this->absoluteUrl($catalogUrl, html_entity_decode($m[1], ENT_QUOTES, 'UTF-8')), 'sort_order' => count($chapters) + 1];
+            $chapters[] = ['title' => $chapterTitle, 'url' => $this->absoluteUrl($catalogUrl, html_entity_decode($m[2], ENT_QUOTES, 'UTF-8')), 'sort_order' => count($chapters) + 1];
         }
         $confidence = 0.20;
         $confidence += $title ? 0.20 : 0;
@@ -503,6 +779,11 @@ final class NovelAutoDetector
 
     public function extractChapterBody(string $chapterUrl, string $html): string
     {
+        $json = json_decode($html, true);
+        if (is_array($json) && is_string($json['txt'] ?? null)) {
+            $lines = array_values(array_filter(array_map('trim', preg_split('/\R+/u', (string) $json['txt']) ?: [])));
+            return implode("\n", array_map(static fn (string $line): string => '<p>' . htmlspecialchars($line, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</p>', $lines));
+        }
         $host = strtolower((string) (parse_url($chapterUrl, PHP_URL_HOST) ?? ''));
         if (str_ends_with($host, 'quanben.io')) {
             $body = $this->extractByXpath($html, '//*[@id="content" or contains(concat(" ", normalize-space(@class), " "), " content ")]');

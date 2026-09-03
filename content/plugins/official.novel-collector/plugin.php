@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Cms\Core\Plugin\PluginContext;
+use Official\NovelCollector\BqgSpaAdapter;
 use Official\NovelCollector\CatalogUrlDiscoverer;
 use Official\NovelCollector\HtmlSanitizer;
 use Official\NovelCollector\NovelAutoDetector;
@@ -57,7 +58,38 @@ return static function (PluginContext $context): void {
     $novelChapterUrl = static fn (string $jobId, int $chapter): string => '/novels/chapter?job_id=' . rawurlencode($jobId) . '&chapter=' . rawurlencode((string) max(1, $chapter));
     $novelSearchUrl = static fn (string $query = ''): string => '/novels/search' . ($query !== '' ? '?q=' . rawurlencode($query) : '');
     $loadCatalog = static function (string $url) use ($http, $detector): array {
-        $res = $http->get($url);
+        $bqgBookId = BqgSpaAdapter::bookIdFromUrl($url);
+        try {
+            $res = $http->get($url);
+        } catch (\Throwable $e) {
+            if ($bqgBookId === null || !BqgSpaAdapter::isPotentialSpaHost($url)) {
+                throw $e;
+            }
+            $res = ['url' => $url, 'status' => 0, 'headers' => [], 'body' => ''];
+        }
+        if ($bqgBookId !== null && (BqgSpaAdapter::looksLikeSite($url, (string) ($res['body'] ?? '')) || BqgSpaAdapter::isPotentialSpaHost($url))) {
+            $loadJson = static function (string $endpoint, array $plainQuery, array $encryptedPayload) use ($http, $url): array {
+                foreach ([BqgSpaAdapter::centralApiUrl($endpoint, $plainQuery), BqgSpaAdapter::plainApiUrl($url, $endpoint, $plainQuery), BqgSpaAdapter::encryptedApiUrl($endpoint, $encryptedPayload)] as $apiUrl) {
+                    try {
+                        $apiRes = $http->get($apiUrl, ['Referer' => $url]);
+                    } catch (\Throwable) {
+                        continue;
+                    }
+                    $decoded = json_decode((string) ($apiRes['body'] ?? ''), true);
+                    if (is_array($decoded) && $decoded !== []) {
+                        return $decoded;
+                    }
+                }
+                return [];
+            };
+            $book = $loadJson('book', ['id' => $bqgBookId], ['id' => $bqgBookId]);
+            $bookList = $loadJson('booklist', ['id' => $bqgBookId], ['id' => $bqgBookId]);
+            if ($book !== [] && $bookList !== []) {
+                $detected = BqgSpaAdapter::catalogFromApi($url, $book, $bookList);
+                $detected['chapter_count'] = count($detected['chapters'] ?? []);
+                return $detected;
+            }
+        }
         $detected = $detector->detect($url, $res['body']);
         if (is_string($detected['full_list_url'] ?? null) && $detected['full_list_url'] !== '') {
             $full = $http->get((string) $detected['full_list_url'], ['Referer' => $url]);
@@ -821,7 +853,7 @@ HTML), 'novel_collector.manage', false);
             $settings = $loadAutoSettings();
             $job = $pickRunnableJob();
             $enabled = !empty($settings['enabled']);
-            $body = '<h1>自动采集</h1><section class="panel"><p><strong>状态：</strong><span class="tag">' . ($enabled ? 'enabled' : 'disabled') . '</span></p><p><strong>间隔：</strong>' . $html((string) ($settings['interval_seconds'] ?? 60)) . ' 秒</p><p><strong>每批：</strong>' . $html((string) ($settings['batch_size'] ?? 50)) . ' 章</p><p><strong>上次执行：</strong>' . $html((string) ($settings['last_tick_at'] ?? '')) . '</p><p><strong>待执行队列：</strong>' . $html((string) ($job['title'] ?? '无')) . '</p><form method="get" action="/admin/novel-collector/auto/save"><label>开启自动采集</label><select name="enabled"><option value="1"' . ($enabled ? ' selected' : '') . '>开启</option><option value="0"' . (!$enabled ? ' selected' : '') . '>关闭</option></select><label>间隔秒数</label><input name="interval_seconds" type="number" min="20" max="86400" value="' . $html((string) ($settings['interval_seconds'] ?? 60)) . '"><label>每批章节数</label><input name="batch_size" type="number" min="1" max="200" value="' . $html((string) ($settings['batch_size'] ?? 50)) . '"><button type="submit">保存设置</button><a class="button secondary" href="/admin/novel-collector/auto/tick?force=1">立即执行一批</a><a class="button secondary" href="/admin/novel-collector/site">全站发现</a><a class="button secondary" href="/admin/novel-collector/jobs">队列管理</a></form><p class="muted">一次采集数量受 PHP 请求超时、资源站响应和限流影响；建议自动采集用 30-120 秒间隔，每批 50-100 章，稳定后再提高。</p></section>';
+            $body = '<h1>自动采集</h1><section class="panel"><p><strong>状态：</strong><span class="tag">' . ($enabled ? 'enabled' : 'disabled') . '</span></p><p><strong>间隔：</strong>' . $html((string) ($settings['interval_seconds'] ?? 60)) . ' 秒</p><p><strong>每批：</strong>' . $html((string) ($settings['batch_size'] ?? 50)) . ' 章</p><p><strong>上次执行：</strong>' . $html((string) ($settings['last_tick_at'] ?? '')) . '</p><p><strong>待执行队列：</strong>' . $html((string) ($job['title'] ?? '无')) . '</p><form method="get" action="/admin/novel-collector/auto/save"><label>开启自动采集</label><select name="enabled"><option value="1"' . ($enabled ? ' selected' : '') . '>开启</option><option value="0"' . (!$enabled ? ' selected' : '') . '>关闭</option></select><label>间隔秒数</label><input name="interval_seconds" type="number" min="20" max="86400" value="' . $html((string) ($settings['interval_seconds'] ?? 60)) . '"><label>每批章节数</label><input name="batch_size" type="number" min="1" max="200" value="' . $html((string) ($settings['batch_size'] ?? 50)) . '"><button type="submit">保存设置</button><a class="button secondary" href="/admin/novel-collector/auto/tick?force=1">立即执行一批</a><a class="button secondary" href="/admin/novel-collector/auto/tick?force=1&loops=5">连续执行 5 批</a><a class="button secondary" href="/admin/novel-collector/site">全站发现</a><a class="button secondary" href="/admin/novel-collector/jobs">队列管理</a></form><p class="muted">一次采集数量受 PHP 请求超时、资源站响应和限流影响；建议自动采集用 30-120 秒间隔，每批 50-100 章，稳定后再提高。</p></section>';
             return \Cms\Core\Http\Response::html($pageShell('小说自动采集', $body));
         }, 'novel_collector.manage', false);
         $context->adminRoute('GET', '/admin/novel-collector/auto/save', static function ($request) use ($param, $storePut, $pageShell, $html) {
@@ -839,6 +871,7 @@ HTML), 'novel_collector.manage', false);
         $context->adminRoute('GET', '/admin/novel-collector/auto/tick', static function ($request) use ($param, $storePut, $pageShell, $html, $loadAutoSettings, $pickRunnableJob, $runAutoBatch) {
             $settings = $loadAutoSettings();
             $force = $param($request, 'force', '0') === '1';
+            $loops = max(1, min(10, (int) $param($request, 'loops', '1')));
             if (empty($settings['enabled']) && !$force) {
                 return \Cms\Core\Http\Response::html($pageShell('自动采集未开启', '<h1>自动采集未开启</h1><section class="panel"><p class="muted">自动采集当前关闭。</p><a class="button" href="/admin/novel-collector/auto">返回设置</a></section>'));
             }
@@ -849,19 +882,30 @@ HTML), 'novel_collector.manage', false);
                 return \Cms\Core\Http\Response::html($pageShell('自动采集等待中', '<h1>自动采集等待中</h1><section class="panel"><p>距离下次执行还需 ' . $html((string) $wait) . ' 秒。</p><a class="button secondary" href="/admin/novel-collector/auto">返回设置</a></section>'));
             }
             $job = $pickRunnableJob();
-            if ($job === null) {
+            $results = [];
+            for ($loop = 0; $loop < $loops; $loop++) {
+                if ($job === null) {
+                    break;
+                }
+                $result = $runAutoBatch($job, max(1, min(200, (int) ($settings['batch_size'] ?? 50))));
+                $results[] = $result;
+                $job = ((int) ($result['remaining'] ?? 0) > 0) ? $result['job'] : $pickRunnableJob();
+            }
+            if ($results === []) {
                 $settings['last_tick_at'] = gmdate('c');
                 $storePut('novel_collector_auto', 'settings', $settings);
                 return \Cms\Core\Http\Response::html($pageShell('没有可执行队列', '<h1>没有可执行队列</h1><section class="panel"><p class="muted">请先创建单本队列，或用全站发现批量创建队列。</p><a class="button" href="/admin/novel-collector/site">全站发现</a><a class="button secondary" href="/admin/novel-collector/auto">返回设置</a></section>'));
             }
-            $result = $runAutoBatch($job, max(1, min(200, (int) ($settings['batch_size'] ?? 50))));
+            $result = end($results);
+            $processedTotal = array_sum(array_map(static fn (array $item): int => count($item['processed'] ?? []), $results));
+            $errorTotal = array_sum(array_map(static fn (array $item): int => count($item['errors'] ?? []), $results));
             $settings['last_tick_at'] = gmdate('c');
             $settings['last_job_id'] = (string) ($result['job']['job_id'] ?? '');
             $storePut('novel_collector_auto', 'settings', $settings);
             if ($param($request, 'format') === 'json') {
-                return \Cms\Core\Http\Response::json(['settings' => $settings, 'result' => $result]);
+                return \Cms\Core\Http\Response::json(['settings' => $settings, 'loops' => count($results), 'processed_total' => $processedTotal, 'error_total' => $errorTotal, 'result' => $result]);
             }
-            $body = '<h1>自动采集执行</h1><section class="panel"><p><strong>书名：</strong>' . $html((string) ($result['job']['title'] ?? '')) . '</p><p><strong>本次采集：</strong>' . count($result['processed']) . ' 章</p><p><strong>失败：</strong>' . count($result['errors']) . ' 章</p><p><strong>剩余：</strong>' . $html((string) ($result['remaining'] ?? 0)) . ' 章</p><p><strong>状态：</strong><span class="tag">' . $html((string) ($result['job']['status'] ?? '')) . '</span></p>' . ($result['errors'] !== [] ? '<p class="fail">' . $html(implode('; ', $result['errors'])) . '</p>' : '') . '<a class="button" href="/admin/novel-collector/auto/tick?force=1">继续执行一批</a><a class="button secondary" href="/admin/novel-collector/auto">返回自动采集</a><a class="button secondary" href="/novels">前台小说</a></section>';
+            $body = '<h1>自动采集执行</h1><section class="panel"><p><strong>书名：</strong>' . $html((string) ($result['job']['title'] ?? '')) . '</p><p><strong>执行批次：</strong>' . count($results) . ' 批</p><p><strong>本次采集：</strong>' . $processedTotal . ' 章</p><p><strong>失败：</strong>' . $errorTotal . ' 章</p><p><strong>剩余：</strong>' . $html((string) ($result['remaining'] ?? 0)) . ' 章</p><p><strong>状态：</strong><span class="tag">' . $html((string) ($result['job']['status'] ?? '')) . '</span></p>' . ($result['errors'] !== [] ? '<p class="fail">' . $html(implode('; ', $result['errors'])) . '</p>' : '') . '<a class="button" href="/admin/novel-collector/auto/tick?force=1">继续执行一批</a><a class="button secondary" href="/admin/novel-collector/auto/tick?force=1&loops=5">连续执行 5 批</a><a class="button secondary" href="/admin/novel-collector/auto">返回自动采集</a><a class="button secondary" href="/novels">前台小说</a></section>';
             return \Cms\Core\Http\Response::html($pageShell('自动采集执行', $body));
         }, 'novel_collector.manage', false);
         $context->adminRoute('GET', '/admin/novel-collector/site', static function ($request) use ($pageShell) {
@@ -1049,7 +1093,7 @@ HTML));
                 return \Cms\Core\Http\Response::json(['stored' => $stored, 'verified' => $verified, 'job' => $job]);
             }
             $storageStatus = $verified ? '<span class="ok">已保存并验证</span>' : '<span class="fail">未验证到持久化，执行按钮将使用 URL 自动重建</span>';
-            $body = '<h1>采集队列</h1><section class="panel"><p><strong>队列 ID：</strong>' . $html($jobId) . '</p><p><strong>书名：</strong>' . $html($job['title']) . '</p><p><strong>作者：</strong>' . $html($job['author']) . '</p><p><strong>章节任务：</strong>' . $html((string) $job['chapter_count']) . '</p><p><strong>状态：</strong><span class="tag">pending</span></p><p><strong>队列存储：</strong>' . $storageStatus . '</p><p><strong>正式内容：</strong>' . $formalStatus . '</p><p class="muted">可信官方版会写入正式 Novel / Volume / Chapter / Author 表；本地 API 版仅写 PluginDataStore。</p><a class="button" href="/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . rawurlencode($url) . '&limit=10">开始采集 10 章</a><a class="button secondary" href="/admin/novel-collector/jobs/status?job_id=' . rawurlencode($jobId) . '&url=' . rawurlencode($url) . '">查看状态</a><a class="button secondary" href="/admin/novel-collector/jobs/create?format=json&url=' . rawurlencode($url) . '">查看队列 JSON</a><a class="button secondary" href="/admin/novel-collector">返回</a></section>';
+            $body = '<h1>采集队列</h1><section class="panel"><p><strong>队列 ID：</strong>' . $html($jobId) . '</p><p><strong>书名：</strong>' . $html($job['title']) . '</p><p><strong>作者：</strong>' . $html($job['author']) . '</p><p><strong>章节任务：</strong>' . $html((string) $job['chapter_count']) . '</p><p><strong>状态：</strong><span class="tag">pending</span></p><p><strong>队列存储：</strong>' . $storageStatus . '</p><p><strong>正式内容：</strong>' . $formalStatus . '</p><p class="muted">可信官方版会写入正式 Novel / Volume / Chapter / Author 表；本地 API 版仅写 PluginDataStore。</p><a class="button" href="/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . rawurlencode($url) . '&limit=50&auto=1">自动连续采集</a><a class="button secondary" href="/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . rawurlencode($url) . '&limit=10">开始采集 10 章</a><a class="button secondary" href="/admin/novel-collector/jobs/status?job_id=' . rawurlencode($jobId) . '&url=' . rawurlencode($url) . '">查看状态</a><a class="button secondary" href="/admin/novel-collector/jobs/create?format=json&url=' . rawurlencode($url) . '">查看队列 JSON</a><a class="button secondary" href="/admin/novel-collector">返回</a></section>';
             return \Cms\Core\Http\Response::html($pageShell('小说采集队列', $body));
         }, 'novel_collector.manage', false);
         $context->adminRoute('GET', '/admin/novel-collector/jobs', static function ($request) use ($html, $pageShell, $storeAll, $normalizeStoredRow) {
@@ -1065,7 +1109,7 @@ HTML));
                 }
                 $linkUrl = rawurlencode((string) ($job['catalog_url'] ?? ''));
                 $cursor = (string) ($job['resume_cursor'] ?? 0);
-                $rows .= '<tr><td>' . $html($jobId) . '</td><td>' . $html((string) ($job['title'] ?? '')) . '</td><td>' . $html((string) ($job['status'] ?? '')) . '</td><td>' . $html($cursor) . ' / ' . $html((string) ($job['chapter_count'] ?? 0)) . '</td><td><a class="button secondary" href="/admin/novel-collector/jobs/status?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($cursor) . '">状态</a><a class="button" href="/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($cursor) . '&limit=10">继续采集</a></td></tr>';
+                $rows .= '<tr><td>' . $html($jobId) . '</td><td>' . $html((string) ($job['title'] ?? '')) . '</td><td>' . $html((string) ($job['status'] ?? '')) . '</td><td>' . $html($cursor) . ' / ' . $html((string) ($job['chapter_count'] ?? 0)) . '</td><td><a class="button secondary" href="/admin/novel-collector/jobs/status?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($cursor) . '">状态</a><a class="button" href="/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($cursor) . '&limit=50&auto=1">自动连续</a><a class="button secondary" href="/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($cursor) . '&limit=10">继续采集</a></td></tr>';
             }
             if ($rows === '') {
                 $rows = '<tr><td colspan="5" class="muted">还没有队列。请先识别目录并创建采集队列。</td></tr>';
@@ -1092,13 +1136,14 @@ HTML));
             }
             $linkUrl = rawurlencode((string) ($job['catalog_url'] ?? $catalogUrl));
             $cursor = (string) ($job['resume_cursor'] ?? 0);
-            $body = '<h1>队列状态</h1><section class="panel"><p><strong>队列 ID：</strong>' . $html($jobId) . '</p><p><strong>书名：</strong>' . $html((string) ($job['title'] ?? '')) . '</p><p><strong>状态：</strong><span class="tag">' . $html((string) ($job['status'] ?? 'unknown')) . '</span></p><p><strong>进度：</strong>' . $html($cursor) . ' / ' . $html((string) ($job['chapter_count'] ?? 0)) . '</p><p><strong>已采：</strong>' . $html((string) ($job['collected_count'] ?? 0)) . '，失败：' . $html((string) ($job['failed_count'] ?? 0)) . '</p><p class="fail">' . $html((string) ($job['last_error'] ?? '')) . '</p><a class="button" href="/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($cursor) . '&limit=10">继续采集 10 章</a><a class="button secondary" href="/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($cursor) . '&limit=50">采集 50 章</a><a class="button secondary" href="/admin/novel-collector/export.txt?job_id=' . rawurlencode($jobId) . '">TXT 导出</a><a class="button secondary" href="/admin/novel-collector/jobs">返回队列</a></section><section class="panel"><h2>最近采集章节</h2><table><tr><th>#</th><th>标题</th><th>字数</th><th>Hash</th></tr>' . $rows . '</table></section>';
+            $body = '<h1>队列状态</h1><section class="panel"><p><strong>队列 ID：</strong>' . $html($jobId) . '</p><p><strong>书名：</strong>' . $html((string) ($job['title'] ?? '')) . '</p><p><strong>状态：</strong><span class="tag">' . $html((string) ($job['status'] ?? 'unknown')) . '</span></p><p><strong>进度：</strong>' . $html($cursor) . ' / ' . $html((string) ($job['chapter_count'] ?? 0)) . '</p><p><strong>已采：</strong>' . $html((string) ($job['collected_count'] ?? 0)) . '，失败：' . $html((string) ($job['failed_count'] ?? 0)) . '</p><p class="fail">' . $html((string) ($job['last_error'] ?? '')) . '</p><a class="button" href="/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($cursor) . '&limit=50&auto=1">自动连续采集</a><a class="button secondary" href="/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($cursor) . '&limit=10">继续采集 10 章</a><a class="button secondary" href="/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($cursor) . '&limit=50">采集 50 章</a><a class="button secondary" href="/admin/novel-collector/export.txt?job_id=' . rawurlencode($jobId) . '">TXT 导出</a><a class="button secondary" href="/admin/novel-collector/jobs">返回队列</a></section><section class="panel"><h2>最近采集章节</h2><table><tr><th>#</th><th>标题</th><th>字数</th><th>Hash</th></tr>' . $rows . '</table></section>';
             return \Cms\Core\Http\Response::html($pageShell('小说队列状态', $body));
         }, 'novel_collector.manage', false);
         $context->adminRoute('GET', '/admin/novel-collector/jobs/run', static function ($request) use ($param, $html, $pageShell, $storeGet, $storePut, $latestJob, $loadJobItems, $buildJob, $persistJob, $notFoundPage, $fetchChapterWithRetry, $formalRepo) {
             $jobId = $param($request, 'job_id');
             $catalogUrl = $param($request, 'url', $param($request, 'catalog_url'));
             $limit = max(1, min(50, (int) $param($request, 'limit', '10')));
+            $autoRun = $param($request, 'auto', '0') === '1';
             $job = $jobId !== '' ? $storeGet('novel_collector_jobs', $jobId) : $latestJob();
             $fallbackItems = [];
             if ($job === null && $catalogUrl !== '') {
@@ -1215,7 +1260,7 @@ HTML));
                 'updated_at' => gmdate('c'),
             ]);
             if ($param($request, 'format') === 'json') {
-                return \Cms\Core\Http\Response::json(['job' => $job, 'processed' => $processed, 'errors' => $errors]);
+                return \Cms\Core\Http\Response::json(['job' => $job, 'processed' => $processed, 'errors' => $errors, 'remaining' => max(0, count($items) - $cursor)]);
             }
             $rows = '';
             foreach ($processed as $chapter) {
@@ -1223,8 +1268,11 @@ HTML));
             }
             $linkUrl = rawurlencode((string) ($job['catalog_url'] ?? $catalogUrl));
             $nextCursor = (string) ($job['resume_cursor'] ?? $cursor);
+            $remaining = max(0, count($items) - $cursor);
+            $nextRunUrl = '/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($nextCursor) . '&limit=' . $limit . '&auto=1';
+            $autoContinue = $autoRun && $remaining > 0 ? '<p class="ok">自动连续采集中，下一批即将开始...</p><script>setTimeout(function(){location.href=' . json_encode($nextRunUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ';},900);</script>' : '';
             $formalLine = $formalRepo instanceof NovelRepository ? '<p><strong>正式 Novel ID：</strong>' . ($formalNovelId > 0 ? $html((string) $formalNovelId) : '<span class="fail">' . $html((string) ($job['formal_write_error'] ?? '未写入')) . '</span>') . '</p>' : '<p><strong>正式内容：</strong><span class="tag">当前运行环境未开放 PDO</span></p>';
-            $body = '<h1>队列执行</h1><section class="panel"><p><strong>本次采集：</strong>' . count($processed) . ' 章</p><p><strong>本次跳过失败：</strong>' . count($errors) . ' 章</p><p><strong>当前进度：</strong>' . $html($nextCursor) . ' / ' . $html((string) ($job['chapter_count'] ?? count($items))) . '</p><p><strong>状态：</strong><span class="tag">' . $html((string) $job['status']) . '</span></p>' . $formalLine . ($errors !== [] ? '<p class="fail">' . $html(implode('; ', $errors)) . '</p>' : '') . '<a class="button" href="/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($nextCursor) . '&limit=' . $limit . '">继续采集</a><a class="button secondary" href="/admin/novel-collector/jobs/status?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($nextCursor) . '">查看状态</a><a class="button secondary" href="/admin/novel-collector/novels">已采小说</a></section><section class="panel"><h2>本次章节</h2><table><tr><th>#</th><th>标题</th><th>字数</th></tr>' . $rows . '</table></section>';
+            $body = '<h1>队列执行</h1><section class="panel"><p><strong>本次采集：</strong>' . count($processed) . ' 章</p><p><strong>本次跳过失败：</strong>' . count($errors) . ' 章</p><p><strong>当前进度：</strong>' . $html($nextCursor) . ' / ' . $html((string) ($job['chapter_count'] ?? count($items))) . '</p><p><strong>剩余：</strong>' . $html((string) $remaining) . ' 章</p><p><strong>状态：</strong><span class="tag">' . $html((string) $job['status']) . '</span></p>' . $formalLine . $autoContinue . ($errors !== [] ? '<p class="fail">' . $html(implode('; ', $errors)) . '</p>' : '') . '<a class="button" href="' . $html($nextRunUrl) . '">自动连续采集</a><a class="button secondary" href="/admin/novel-collector/jobs/run?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($nextCursor) . '&limit=' . $limit . '">继续采集</a><a class="button secondary" href="/admin/novel-collector/jobs/status?job_id=' . rawurlencode($jobId) . '&url=' . $linkUrl . '&cursor=' . rawurlencode($nextCursor) . '">查看状态</a><a class="button secondary" href="/admin/novel-collector/novels">已采小说</a></section><section class="panel"><h2>本次章节</h2><table><tr><th>#</th><th>标题</th><th>字数</th></tr>' . $rows . '</table></section>';
             return \Cms\Core\Http\Response::html($pageShell('小说队列执行', $body));
         }, 'novel_collector.manage', false);
         $context->adminRoute('GET', '/admin/novel-collector/novels', static function ($request) use ($html, $pageShell, $loadNovelSummaries) {
