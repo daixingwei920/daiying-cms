@@ -1,5 +1,5 @@
 {
-    "Admin/AdminController.php": "225e755bfcf1df6368a28ac65ee3eb199eba1a52a2a13f3b42fa4fe3e3520636",
+    "Admin/AdminController.php": "15ae4c7303e9d285c163702362533f45c306d88dedc80d9e51750d197402df32",
     "Advertising/AdController.php": "4ab8107c99746c87b0a05d07dd2c7ac55071d8300fe81fa480f0af4849f4c862",
     "Advertising/AdRenderer.php": "990d4f9c05a8055acdb1c959afbbd38805e0df8682f06adb94815cf31475bc93",
     "Advertising/AdRepository.php": "332f8eb9a15c827d6ae5ac1a95d628e77d0e8bf696b46876f731539438260de9",

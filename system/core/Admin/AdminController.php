@@ -7009,8 +7009,8 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
     /** @param array<string,string> $data @param array<string,mixed> $file */
     private function validateDeveloperSubmission(array $data, array $file): void
     {
-        if (!in_array($data['package_type'] ?? '', ['plugin', 'theme'], true)) {
-            throw new \RuntimeException('产品类型必须是插件或主题。');
+        if (!in_array($data['package_type'] ?? '', ['plugin', 'payment_provider', 'theme'], true)) {
+            throw new \RuntimeException('产品类型必须是插件、支付插件或主题。');
         }
         if (($data['product_id'] ?? '') === '' || !preg_match('/^[a-z0-9][a-z0-9._-]{2,120}$/', (string) $data['product_id'])) {
             throw new \RuntimeException('产品 ID 只能使用小写字母、数字、点、下划线和短横线。');
@@ -7069,9 +7069,9 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
                 $data[$field] = (string) $hints[$field];
             }
         }
-        if (in_array((string) ($hints['package_type'] ?? ''), ['plugin', 'theme'], true)) {
+        if (in_array((string) ($hints['package_type'] ?? ''), ['plugin', 'payment_provider', 'theme'], true)) {
             $currentType = (string) ($data['package_type'] ?? '');
-            if ($currentType === '' || (($data['product_id'] ?? '') === (string) ($hints['product_id'] ?? '') && (string) ($hints['package_type'] ?? '') === 'theme')) {
+            if ($currentType === '' || (($data['product_id'] ?? '') === (string) ($hints['product_id'] ?? '') && $currentType !== (string) ($hints['package_type'] ?? ''))) {
                 $data['package_type'] = (string) $hints['package_type'];
             }
         }
@@ -7110,11 +7110,11 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
                 if ($priority >= $bestPriority) {
                     continue;
                 }
-                $packageType = $base === 'theme.json' ? 'theme' : (string) ($decoded['package_type'] ?? 'plugin');
-                if ($packageType === 'payment-provider' || $packageType === 'payment_provider') {
-                    $packageType = 'plugin';
+                $packageType = $base === 'theme.json' ? 'theme' : (string) ($decoded['package_type'] ?? ($decoded['type'] ?? 'plugin'));
+                if ($packageType === 'payment-provider') {
+                    $packageType = 'payment_provider';
                 }
-                if (!in_array($packageType, ['plugin', 'theme'], true)) {
+                if (!in_array($packageType, ['plugin', 'payment_provider', 'theme'], true)) {
                     $packageType = 'plugin';
                 }
                 $best = [
@@ -7168,9 +7168,9 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
     {
         $errorHtml = $error === '' ? '' : '<p class="error">' . View::escape($error) . '</p>';
         $type = (string) ($data['package_type'] ?? 'plugin');
-        $typeOptions = '<option value="plugin"' . ($type === 'plugin' ? ' selected' : '') . '>插件</option><option value="theme"' . ($type === 'theme' ? ' selected' : '') . '>主题</option>';
+        $typeOptions = '<option value="plugin"' . ($type === 'plugin' ? ' selected' : '') . '>插件</option><option value="payment_provider"' . ($type === 'payment_provider' ? ' selected' : '') . '>支付插件</option><option value="theme"' . ($type === 'theme' ? ' selected' : '') . '>主题</option>';
 
-        return '<h1>开发者提交</h1><p class="muted">提交插件或主题 ZIP 到 Daiying 官方更新服务器。CMS 只做基础预检，正式静态扫描、AI 审核和人工发布在官方 Update Server 完成。</p>' . $errorHtml .
+        return '<h1>开发者提交</h1><p class="muted">提交插件、支付插件或主题 ZIP 到 Daiying 官方更新服务器。CMS 只做基础预检，正式静态扫描、AI 审核和人工发布在官方 Update Server 完成。</p>' . $errorHtml .
             '<form method="post" action="/admin/market/developer-submit" enctype="multipart/form-data">' . CsrfToken::field() .
             '<label>产品类型<select name="package_type">' . $typeOptions . '</select></label>' .
             '<label>产品名称<input name="name" value="' . View::escape((string) ($data['name'] ?? '')) . '" required></label>' .
