@@ -20,7 +20,7 @@ use Throwable;
 
 final class InstallController
 {
-    private const OFFICIAL_UPDATE_SERVER_URL = 'https://updates.daiyinggame.com';
+    private const OFFICIAL_UPDATE_SERVER_URL = 'https://updates.daiyingcms.com';
 
     private const OFFICIAL_UPDATE_PUBLIC_KEY = 'h5vP/I/pAXWIz4GQ8h2LryHvyP+GW0Fc8AFEUHu0jms=';
 

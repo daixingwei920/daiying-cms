@@ -906,8 +906,8 @@ final class AdminController
             '<p class="muted">这里连接 Daiying 官方更新服务器。CMS 只负责查看市场、安装插件、激活授权和提交审核。</p>' .
             '<label class="checkbox-row"><input type="checkbox" name="market_enabled" value="1"' . ($marketEnabled ? ' checked' : '') . '> 启用插件市场和主题市场</label>' .
             '<label class="checkbox-row"><input type="checkbox" name="developer_mode" value="1"' . ($developerMode ? ' checked' : '') . '> 启用开发者中心</label>' .
-            '<label>官方市场地址<input name="market_server_url" value="' . View::escape($marketServerUrl) . '" placeholder="https://updates.daiyinggame.com"></label>' .
-            '<p class="muted">通常填写：https://updates.daiyinggame.com</p>' .
+            '<label>官方市场地址<input name="market_server_url" value="' . View::escape($marketServerUrl) . '" placeholder="https://updates.daiyingcms.com"></label>' .
+            '<p class="muted">通常填写：https://updates.daiyingcms.com</p>' .
             '<label>市场站点 Token（可选）<input name="market_site_token" type="password" autocomplete="off" placeholder="' . ($marketSiteTokenConfigured ? '已配置，留空则保留' : '无授权市场可留空') . '"></label>' .
             '<p class="muted">没有授权 Token 可以先留空；需要提交开发者项目或安装授权包时再填写。</p></section>' .
             '<button type="submit">保存站点设置</button></form>' .
@@ -6080,9 +6080,9 @@ final class AdminController
             ? '<p class="success">更新包已下载并准备完成，下面的本地路径已自动填入。</p>'
             : '';
         $body = '<h1>系统更新</h1><p class="muted">更新包会先验证签名、SHA-256、环境版本，并生成准备计划。执行更新会进入维护模式并创建恢复点。</p>' .
-            '<section class="admin-card"><h2>官方更新中心</h2><p class="muted">用于连接 updates.daiyinggame.com 检查 Daiying CMS Core 是否有新版本。发现更新后可一键下载并准备到服务器本地，不会自动执行安装。</p>' .
+            '<section class="admin-card"><h2>官方更新中心</h2><p class="muted">用于连接 updates.daiyingcms.com 检查 Daiying CMS Core 是否有新版本。发现更新后可一键下载并准备到服务器本地，不会自动执行安装。</p>' .
             '<form method="post" action="/admin/update/check">' . CsrfToken::field() .
-            '<label>更新服务器地址<input name="server_url" value="' . View::escape($serverUrl) . '" placeholder="https://updates.daiyinggame.com"></label>' .
+            '<label>更新服务器地址<input name="server_url" value="' . View::escape($serverUrl) . '" placeholder="https://updates.daiyingcms.com"></label>' .
             '<label>产品 ID<input name="product_id" value="daiying.cms" readonly></label>' .
             '<label>当前版本<input name="current_version" value="' . View::escape($currentVersion) . '" readonly></label>' .
             '<label>发布通道<select name="channel"><option value="stable">正式版 stable</option><option value="rc">候选版 rc</option><option value="beta">测试版 beta</option><option value="dev">开发版 dev</option></select></label>' .
@@ -7300,7 +7300,7 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
             $url = trim((string) $this->settings->get('updates.server_url', ''));
         }
         if ($url === '') {
-            $url = 'https://updates.daiyinggame.com';
+            $url = 'https://updates.daiyingcms.com';
         }
 
         return new ReviewSubmissionClient($url, trim((string) $this->settings->get('review.api_token', '')));
@@ -7383,7 +7383,7 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
             $url = trim((string) $this->settings->get('updates.server_url', ''));
         }
         if ($url === '') {
-            $url = 'https://updates.daiyinggame.com';
+            $url = 'https://updates.daiyingcms.com';
         }
 
         return new HttpMarketClient(

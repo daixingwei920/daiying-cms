@@ -126,7 +126,7 @@ development tests, local verification paths, coverage output, logs, or private s
 
 Download the latest stable installation package from the official GitHub Releases page, verify the published SHA-256 checksum, upload the ZIP to your server, extract it, and open the site URL to start the Web Installer.
 
-Official online updates for installed sites continue to use `https://updates.daiyinggame.com`.
+Official online updates for installed sites continue to use `https://updates.daiyingcms.com`.
 
 ## Recovery
 

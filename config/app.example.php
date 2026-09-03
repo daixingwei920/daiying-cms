@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
     'app' => [
         'name' => 'PHP CMS',
-        'version' => '1.2.15',
+        'version' => '1.2.16',
         'debug' => false,
         'mode' => 'NORMAL',
         'secure_cookies' => true,
@@ -33,7 +33,7 @@ return [
     ],
     'updates' => [
         'public_key' => 'h5vP/I/pAXWIz4GQ8h2LryHvyP+GW0Fc8AFEUHu0jms=',
-        'server_url' => 'https://updates.daiyinggame.com',
+        'server_url' => 'https://updates.daiyingcms.com',
     ],
     'payment' => [
         'fixture_provider_enabled' => false,
@@ -44,12 +44,12 @@ return [
     'market' => [
         'enabled' => true,
         'developer_mode' => false,
-        'server_url' => 'https://updates.daiyinggame.com',
+        'server_url' => 'https://updates.daiyingcms.com',
         'channel' => 'stable',
         'site_token' => '',
     ],
     'review' => [
-        'server_url' => 'https://updates.daiyinggame.com',
+        'server_url' => 'https://updates.daiyingcms.com',
         'max_zip_bytes' => 20971520,
     ],
     'comments' => [
