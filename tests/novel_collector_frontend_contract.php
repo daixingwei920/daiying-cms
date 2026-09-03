@@ -13,7 +13,8 @@ $assert = static function (bool $condition, string $message): void {
 };
 
 $assert(($manifest['plugin_id'] ?? '') === 'official.novel-collector', 'Novel collector plugin ID must remain official.novel-collector.');
-$assert(($manifest['version'] ?? '') === '0.4.4', 'Novel collector version should be 0.4.4.');
+$assert(($manifest['version'] ?? '') === '0.4.6', 'Novel collector version should be 0.4.6.');
+$assert(($manifest['core']['max'] ?? '') === '2.0.0', 'Novel collector core max should be a concrete semver upper bound.');
 
 $routes = [];
 foreach (($manifest['public_routes'] ?? []) as $route) {
@@ -36,11 +37,17 @@ foreach ([
     'data-continue-link',
     '最近 100 章',
     'data-reader-progress',
+    '$discoverCatalogUrls',
+    '/admin/novel-collector/site',
+    '/admin/novel-collector/site/discover',
+    '/admin/novel-collector/site/create',
+    '同域名、同端口',
 ] as $needle) {
     $assert(str_contains($plugin, $needle), 'Missing frontend contract token: ' . $needle);
 }
 
 $assert(!str_contains($plugin, 'local.novel-collector'), 'Plugin PHP must not reference local.novel-collector.');
+$assert(!str_contains($plugin, 'local.novel_collector.manage'), 'Plugin PHP must not reference local capability names.');
 $assert(!str_contains(json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), 'local.novel-collector'), 'Manifest must not reference local.novel-collector.');
 
 echo "novel_collector_frontend_contract: PASS\n";

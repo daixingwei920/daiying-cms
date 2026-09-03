@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Cms\Core\Plugin\PluginContext;
+use Official\NovelCollector\CatalogUrlDiscoverer;
 use Official\NovelCollector\HtmlSanitizer;
 use Official\NovelCollector\NovelAutoDetector;
 use Official\NovelCollector\NovelRepository;
@@ -64,6 +65,9 @@ return static function (PluginContext $context): void {
         }
         $detected['chapter_count'] = count($detected['chapters'] ?? []);
         return $detected;
+    };
+    $discoverCatalogUrls = static function (string $url, int $max = 20) use ($http): array {
+        return CatalogUrlDiscoverer::discover($url, $max, static fn (string $target): array => $http->get($target));
     };
     $pageShell = static function (string $title, string $body): string {
         return '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</title><style>body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#f6f7f9;color:#172033}.wrap{max-width:1100px;margin:0 auto;padding:28px 20px}.panel{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:20px;margin:0 0 18px}.topline{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}label{display:block;font-weight:650;margin:12px 0 6px}input,textarea,select{width:100%;box-sizing:border-box;border:1px solid #b8c0cc;border-radius:6px;padding:10px}button,.button{display:inline-block;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:10px 14px;text-decoration:none;margin:12px 8px 0 0}.button.secondary{background:#475467}.button.ghost{background:#eef2f7;color:#27364a}.muted{color:#667085}.tag{display:inline-block;background:#eef4ff;color:#1f4b99;border-radius:999px;padding:4px 9px;margin:3px}.ok{color:#027a48;font-weight:700}.fail{color:#b42318;font-weight:700}table{width:100%;border-collapse:collapse;margin-top:12px}td,th{border-bottom:1px solid #eaecf0;padding:10px;text-align:left;vertical-align:top}.chapter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:12px}.chapter-card{display:block;border:1px solid #e4e7ec;border-radius:6px;background:#fff;color:#172033;text-decoration:none;padding:10px;min-height:58px}.chapter-card small{display:block;color:#667085;margin-top:4px}.reader{font-size:18px;line-height:1.9;max-width:820px;margin-left:auto;margin-right:auto}.reader p{margin:0 0 1em}.reader-controls{position:sticky;top:0;z-index:5;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:10px;margin-bottom:12px}.reader[data-theme=eye]{background:#f5f4df;color:#1f2a20}.reader[data-theme=night]{background:#111827;color:#e5e7eb}.progressbar{height:6px;background:#e4e7ec;border-radius:999px;overflow:hidden}.progressbar span{display:block;height:100%;width:0;background:#1f6feb}pre{white-space:pre-wrap;background:#111827;color:#f9fafb;border-radius:8px;padding:14px;overflow:auto}@media(max-width:640px){.wrap{padding:18px 12px 84px}.reader{font-size:17px}.chapter-grid{grid-template-columns:1fr}.mobile-reader-bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #d8dee8;padding:8px 10px;display:flex;justify-content:space-around;z-index:8}.mobile-reader-bar .button{margin:0;padding:8px 10px}}</style><main class="wrap">' . $body . '</main>';
@@ -587,6 +591,7 @@ HTML;
     <p class="muted">采集优先级：Adapter → 自动识别 → 已保存站点规则 → CSS/XPath 手工规则。低置信度不会启动完整采集。</p>
     <a class="button secondary" href="/admin/novel-collector/jobs">队列管理</a>
     <a class="button secondary" href="/admin/novel-collector/novels">已采小说</a>
+    <a class="button secondary" href="/admin/novel-collector/site">全站发现</a>
   </section>
   <section class="panel">
     <h2>本地测试执行流</h2>
@@ -616,6 +621,108 @@ HTML));
   </section>
 </main>
 HTML), 'novel_collector.manage', false);
+        $context->adminRoute('GET', '/admin/novel-collector/site', static function ($request) use ($pageShell) {
+            return \Cms\Core\Http\Response::html($pageShell('全站发现', <<<'HTML'
+<h1>全站发现</h1>
+<section class="panel">
+  <form method="get" action="/admin/novel-collector/site/discover">
+    <label>站点首页或分类页 URL</label>
+    <input name="url" type="url" placeholder="https://example.com/category/" required>
+    <label>最多发现数量</label>
+    <input name="max" type="number" min="1" max="500" value="50">
+    <button type="submit">发现小说目录</button>
+  </form>
+  <p class="muted">只会收集同域名、同端口下疑似小说目录页的链接；每本入队前仍会执行识别和三章预检。</p>
+  <a class="button secondary" href="/admin/novel-collector">返回小说采集</a>
+</section>
+HTML));
+        }, 'novel_collector.manage', false);
+        $context->adminRoute('GET', '/admin/novel-collector/site/discover', static function ($request) use ($param, $html, $pageShell, $discoverCatalogUrls) {
+            $url = $param($request, 'url');
+            $max = max(1, min(500, (int) $param($request, 'max', '50')));
+            if ($url === '') {
+                return \Cms\Core\Http\Response::html('<p>Missing url.</p>');
+            }
+            $found = $discoverCatalogUrls($url, $max);
+            if ($param($request, 'format') === 'json') {
+                return \Cms\Core\Http\Response::json(['seed_url' => $url, 'found' => $found]);
+            }
+            $rows = '';
+            foreach ($found as $item) {
+                $rows .= '<tr><td>' . $html((string) ($item['title'] ?? '')) . '</td><td><code>' . $html((string) $item['url']) . '</code></td></tr>';
+            }
+            if ($rows === '') {
+                $rows = '<tr><td colspan="2" class="muted">没有发现符合规则的小说目录链接。</td></tr>';
+            }
+            $body = '<h1>全站发现结果</h1><section class="panel"><p><strong>发现：</strong>' . count($found) . ' 本</p><a class="button" href="/admin/novel-collector/site/create?url=' . rawurlencode($url) . '&max=' . rawurlencode((string) $max) . '">预检并批量建队列</a><a class="button secondary" href="/admin/novel-collector/site/discover?format=json&url=' . rawurlencode($url) . '&max=' . rawurlencode((string) $max) . '">查看 JSON</a><a class="button secondary" href="/admin/novel-collector/site">返回</a></section><section class="panel"><table><tr><th>标题</th><th>URL</th></tr>' . $rows . '</table></section>';
+            return \Cms\Core\Http\Response::html($pageShell('全站发现结果', $body));
+        }, 'novel_collector.manage', false);
+        $context->adminRoute('GET', '/admin/novel-collector/site/create', static function ($request) use ($param, $html, $pageShell, $discoverCatalogUrls, $loadCatalog, $http, $detector, $sanitizer, $buildJob, $persistJob, $storePut, $formalRepo) {
+            $url = $param($request, 'url');
+            $max = max(1, min(500, (int) $param($request, 'max', '50')));
+            if ($url === '') {
+                return \Cms\Core\Http\Response::html('<p>Missing url.</p>');
+            }
+            $created = [];
+            $skipped = [];
+            foreach ($discoverCatalogUrls($url, $max) as $item) {
+                $catalogUrl = (string) ($item['url'] ?? '');
+                try {
+                    $detected = $loadCatalog($catalogUrl);
+                    $preflight = $detector->preflight($detected['chapters'] ?? [], static function (string $chapterUrl) use ($http, $detector, $sanitizer): string {
+                        $res = $http->get($chapterUrl);
+                        $body = $detector->extractChapterBody($chapterUrl, $res['body']);
+                        return $sanitizer->clean($body)['plaintext'];
+                    });
+                    if (empty($preflight['pass'])) {
+                        $skipped[] = ['url' => $catalogUrl, 'reason' => implode('; ', $preflight['errors'] ?? ['preflight failed'])];
+                        continue;
+                    }
+                    [$job, $chapters] = $buildJob($catalogUrl);
+                    $jobId = (string) ($job['job_id'] ?? '');
+                    $job['site_seed_url'] = $url;
+                    $job['preflight_passed'] = true;
+                    if ($formalRepo instanceof NovelRepository) {
+                        try {
+                            $formalNovelId = $formalRepo->saveNovel($job + ['source_url' => $catalogUrl, 'catalog_url' => $catalogUrl]);
+                            $job['formal_novel_id'] = $formalNovelId;
+                        } catch (\Throwable $e) {
+                            $job['formal_write_error'] = $e->getMessage();
+                        }
+                    }
+                    $persistJob($job, $chapters);
+                    $storePut('novels_local', $jobId, [
+                        'job_id' => $jobId,
+                        'formal_novel_id' => (int) ($job['formal_novel_id'] ?? 0),
+                        'title' => (string) ($job['title'] ?? ''),
+                        'author' => (string) ($job['author'] ?? ''),
+                        'description' => '',
+                        'catalog_url' => $catalogUrl,
+                        'status' => (string) ($job['status'] ?? 'pending'),
+                        'chapter_count' => 0,
+                        'updated_at' => gmdate('c'),
+                    ]);
+                    $created[] = $job;
+                } catch (\Throwable $e) {
+                    $skipped[] = ['url' => $catalogUrl, 'reason' => $e->getMessage()];
+                }
+            }
+            if ($param($request, 'format') === 'json') {
+                return \Cms\Core\Http\Response::json(['seed_url' => $url, 'created' => $created, 'skipped' => $skipped]);
+            }
+            $rows = '';
+            foreach ($created as $job) {
+                $rows .= '<tr><td>' . $html((string) ($job['title'] ?? '')) . '</td><td>' . $html((string) ($job['chapter_count'] ?? 0)) . '</td><td>' . $html((string) ($job['job_id'] ?? '')) . '</td></tr>';
+            }
+            foreach ($skipped as $skip) {
+                $rows .= '<tr><td><code>' . $html((string) $skip['url']) . '</code></td><td colspan="2" class="fail">' . $html((string) $skip['reason']) . '</td></tr>';
+            }
+            if ($rows === '') {
+                $rows = '<tr><td colspan="3" class="muted">没有创建新的采集队列。</td></tr>';
+            }
+            $body = '<h1>批量建队列完成</h1><section class="panel"><p><strong>已入队：</strong>' . count($created) . ' 本</p><p><strong>跳过：</strong>' . count($skipped) . ' 本</p><a class="button secondary" href="/admin/novel-collector/jobs">队列管理</a><a class="button secondary" href="/admin/novel-collector/site/create?format=json&url=' . rawurlencode($url) . '&max=' . rawurlencode((string) $max) . '">查看 JSON</a><a class="button secondary" href="/admin/novel-collector/site">返回全站发现</a></section><section class="panel"><table><tr><th>书名/URL</th><th>章节/原因</th><th>队列 ID</th></tr>' . $rows . '</table></section>';
+            return \Cms\Core\Http\Response::html($pageShell('批量建队列完成', $body));
+        }, 'novel_collector.manage', false);
         $context->adminRoute('GET', '/admin/novel-collector/detect', static function ($request) use ($param, $html, $loadCatalog, $pageShell) {
             $url = $param($request, 'url');
             if ($url === '') {

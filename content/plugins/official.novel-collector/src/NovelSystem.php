@@ -133,6 +133,156 @@ final class SafeHttpClient
     }
 }
 
+final class CatalogUrlDiscoverer
+{
+    public static function discover(string $url, int $max, callable $fetch): array
+    {
+        $res = $fetch($url);
+        $baseUrl = (string) ($res['url'] ?? $url);
+        $baseParts = parse_url($baseUrl);
+        if (!is_array($baseParts)) {
+            $baseParts = parse_url($url) ?: [];
+        }
+        $baseScheme = strtolower((string) ($baseParts['scheme'] ?? 'https'));
+        $baseHost = self::normalizeHost((string) ($baseParts['host'] ?? ''));
+        $basePort = self::normalizePort($baseScheme, isset($baseParts['port']) ? (int) $baseParts['port'] : null);
+        if ($baseHost === '') {
+            return [];
+        }
+
+        $previous = libxml_use_internal_errors(true);
+        $dom = new \DOMDocument();
+        $body = mb_convert_encoding((string) ($res['body'] ?? ''), 'UTF-8', 'UTF-8,GB18030,GBK,BIG5,ISO-8859-1');
+        $dom->loadHTML('<?xml encoding="utf-8" ?>' . $body, LIBXML_NOERROR | LIBXML_NOWARNING);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        $xpath = new \DOMXPath($dom);
+        $found = [];
+        foreach ($xpath->query('//a[@href]') ?: [] as $node) {
+            if (!$node instanceof \DOMElement) {
+                continue;
+            }
+            $href = html_entity_decode((string) $node->getAttribute('href'), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $candidate = self::resolveUrl($href, $baseUrl);
+            if ($candidate === '') {
+                continue;
+            }
+            $parts = parse_url($candidate);
+            if (!is_array($parts)) {
+                continue;
+            }
+            $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+            $host = self::normalizeHost((string) ($parts['host'] ?? ''));
+            $port = self::normalizePort($scheme, isset($parts['port']) ? (int) $parts['port'] : null);
+            $path = (string) ($parts['path'] ?? '/');
+            if ($host !== $baseHost || $port !== $basePort) {
+                continue;
+            }
+            if (!self::isLikelyCatalogPath($path)) {
+                continue;
+            }
+            $found[$candidate] = [
+                'url' => $candidate,
+                'title' => trim(preg_replace('/\s+/u', ' ', $node->textContent) ?? ''),
+            ];
+            if (count($found) >= $max) {
+                break;
+            }
+        }
+        return array_values($found);
+    }
+
+    public static function normalizeHost(string $host): string
+    {
+        $host = strtolower(rtrim(trim($host), '.'));
+        if ($host !== '' && function_exists('idn_to_ascii')) {
+            $ascii = idn_to_ascii($host, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
+            if (is_string($ascii) && $ascii !== '') {
+                $host = strtolower(rtrim($ascii, '.'));
+            }
+        }
+        return $host;
+    }
+
+    public static function normalizePort(string $scheme, ?int $port): int
+    {
+        if ($port !== null) {
+            return $port;
+        }
+        return strtolower($scheme) === 'http' ? 80 : 443;
+    }
+
+    public static function resolveUrl(string $href, string $baseUrl): string
+    {
+        $href = trim($href);
+        if ($href === '' || str_starts_with($href, '#') || preg_match('~^(?:javascript|mailto|tel|data):~i', $href)) {
+            return '';
+        }
+        $baseParts = parse_url($baseUrl);
+        if (!is_array($baseParts)) {
+            return '';
+        }
+        $baseScheme = strtolower((string) ($baseParts['scheme'] ?? 'https'));
+        $baseHost = (string) ($baseParts['host'] ?? '');
+        if ($baseHost === '') {
+            return '';
+        }
+        if (str_starts_with($href, '//')) {
+            $href = $baseScheme . ':' . $href;
+        } elseif (!preg_match('~^[a-z][a-z0-9+.-]*://~i', $href)) {
+            $basePath = (string) ($baseParts['path'] ?? '/');
+            if (str_starts_with($href, '/')) {
+                $path = $href;
+            } else {
+                $path = rtrim(dirname($basePath), '/\\') . '/' . $href;
+            }
+            $href = $baseScheme . '://' . $baseHost . $path;
+        }
+
+        $parts = parse_url($href);
+        if (!is_array($parts)) {
+            return '';
+        }
+        $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+        if ($scheme !== 'http' && $scheme !== 'https') {
+            return '';
+        }
+        $host = (string) ($parts['host'] ?? '');
+        $path = self::normalizePath((string) ($parts['path'] ?? '/'));
+        $url = $scheme . '://' . $host;
+        if (isset($parts['port'])) {
+            $url .= ':' . (int) $parts['port'];
+        }
+        $url .= $path;
+        if (isset($parts['query']) && $parts['query'] !== '') {
+            $url .= '?' . (string) $parts['query'];
+        }
+        return $url;
+    }
+
+    private static function normalizePath(string $path): string
+    {
+        $segments = [];
+        foreach (explode('/', $path) as $segment) {
+            if ($segment === '' || $segment === '.') {
+                continue;
+            }
+            if ($segment === '..') {
+                array_pop($segments);
+                continue;
+            }
+            $segments[] = $segment;
+        }
+        return '/' . implode('/', $segments) . (str_ends_with($path, '/') && $segments !== [] ? '/' : '');
+    }
+
+    private static function isLikelyCatalogPath(string $path): bool
+    {
+        return preg_match('~(?:/n/[^/?#]+/list\.html|/(?:book|novel|xiaoshuo|xs|b)/[^/?#]+/?$|/(?:book|novel|xiaoshuo|xs|b)/\d+/?$|/read/\d+/?$)~i', $path) === 1;
+    }
+}
+
 final class HtmlSanitizer
 {
     public function clean(string $html, array $rules = []): array
