@@ -422,12 +422,11 @@ final class ContentRepository
 
         $now = gmdate('c');
         if ($id !== null && $id > 0) {
-            $current = $this->termById($id);
-            if ($current === null || $current['taxonomy'] !== $taxonomy) {
-                throw new ContentException('Category not found.');
-            }
             $stmt = $this->pdo->prepare('UPDATE cms_terms SET name = :name, slug = :slug, updated_at = :updated_at WHERE id = :id AND taxonomy = :taxonomy');
             $stmt->execute([':id' => $id, ':taxonomy' => $taxonomy, ':name' => $name, ':slug' => $slug, ':updated_at' => $now]);
+            if ($stmt->rowCount() < 1 && $this->termById($id) === null) {
+                throw new ContentException('Category not found.');
+            }
 
             return $id;
         }

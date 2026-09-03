@@ -8803,40 +8803,40 @@ JS;
 
     private function siteBrandUploadUrl(mixed $file, bool $favicon, int $adminId): string
     {
-        if (!is_array($file) || (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        if (!is_array($file) || !isset($file['name'], $file['tmp_name'])) {
             return '';
         }
-        $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+        $error = (int) ($file['error'] ?? UPLOAD_ERR_OK);
+        if ($error === UPLOAD_ERR_NO_FILE) {
+            return '';
+        }
         if ($error !== UPLOAD_ERR_OK) {
             throw new \InvalidArgumentException(($favicon ? 'Favicon' : 'Logo') . ' 上传失败，错误码：' . $error);
         }
-        $tmpName = (string) ($file['tmp_name'] ?? '');
-        if ($tmpName === '' || !is_uploaded_file($tmpName)) {
+        $tmpName = (string) $file['tmp_name'];
+        $originalName = (string) $file['name'];
+        $size = (int) ($file['size'] ?? 0);
+        if ($tmpName === '' || !is_uploaded_file($tmpName) || $size <= 0) {
             throw new \InvalidArgumentException(($favicon ? 'Favicon' : 'Logo') . ' 上传文件无效。');
         }
-        $size = (int) ($file['size'] ?? 0);
-        if ($size <= 0 || $size > 5 * 1024 * 1024) {
-            throw new \InvalidArgumentException(($favicon ? 'Favicon' : 'Logo') . ' 文件大小不能超过 5MB。');
+        if ($size > 5 * 1024 * 1024) {
+            throw new \InvalidArgumentException(($favicon ? 'Favicon' : 'Logo') . ' 图片不能超过 5MB。');
         }
-        $original = (string) ($file['name'] ?? '');
-        $extension = strtolower(pathinfo($original, PATHINFO_EXTENSION));
-        $allowed = $favicon ? ['avif', 'gif', 'ico', 'jpeg', 'jpg', 'png', 'webp'] : ['avif', 'gif', 'jpeg', 'jpg', 'png', 'webp'];
+        $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        $allowed = $favicon ? ['avif', 'gif', 'ico', 'jpg', 'jpeg', 'png', 'webp'] : ['avif', 'gif', 'jpg', 'jpeg', 'png', 'webp'];
         if (!in_array($extension, $allowed, true)) {
-            throw new \InvalidArgumentException(($favicon ? 'Favicon' : 'Logo') . ' 只允许上传图片文件。');
+            throw new \InvalidArgumentException(($favicon ? 'Favicon' : 'Logo') . ' 只支持常见图片格式。');
         }
 
-        $media = $this->mediaLibrary()->uploadLocalFile($tmpName, $this->siteBrandFileName($original, $favicon), $adminId);
-        return '/media/' . (int) $media['id'] . '/' . rawurlencode((string) $media['filename']);
+        $id = $this->mediaLibrary()->uploadLocalFile($tmpName, $originalName, $adminId);
+
+        return '/media/' . $id . '/' . rawurlencode($this->siteBrandFileName($originalName, $favicon ? 'favicon.' . $extension : 'logo.' . $extension));
     }
 
-    private function siteBrandFileName(string $original, bool $favicon): string
+    private function siteBrandFileName(string $name, string $fallback): string
     {
-        $extension = strtolower(pathinfo($original, PATHINFO_EXTENSION));
-        if ($extension === '') {
-            $extension = $favicon ? 'ico' : 'png';
-        }
-
-        return ($favicon ? 'site-favicon' : 'site-logo') . '-' . date('YmdHis') . '.' . $extension;
+        $name = trim(str_replace(["\0", '/', '\\'], '', $name));
+        return $name !== '' ? $name : $fallback;
     }
 
     private function mediaLimit(string $key, int $default): int
