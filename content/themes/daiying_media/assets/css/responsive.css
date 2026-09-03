@@ -1,0 +1,50 @@
+@media (max-width: 1024px) {
+  .site-main { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { display: none; }
+  .home-grid { grid-template-columns: 1fr; }
+  .mini-focus-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .post-list.grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  .container { width: min(100% - 30px, var(--dy-container)); }
+  .header-bar { min-height: 64px; }
+  .brand small, .cta-link, .main-nav { display: none; }
+  .header-actions { margin-left: auto; }
+  .mobile-menu-button { display: grid; }
+  .mobile-drawer { position: fixed; inset: 64px 0 auto 0; z-index: 70; background: var(--dy-surface); border-bottom: 1px solid var(--dy-border); box-shadow: var(--dy-shadow-sm); padding: .8rem 15px 1rem; }
+  .mobile-drawer.is-open { display: grid; gap: .25rem; }
+  .mobile-drawer a { padding: .8rem; border-radius: var(--dy-radius-sm); color: var(--dy-text); font-weight: 720; }
+  .mobile-drawer a:hover { background: var(--dy-surface-2); }
+  .hero { padding-top: 1rem; }
+  .focus-card { min-height: 300px; }
+  .mini-focus { min-height: 220px; }
+  .mini-focus .focus-body h2 { font-size: 1.34rem; }
+  .mini-focus-list, .post-list.cards, .post-list.grid, .related-grid, .post-nav, .adjacent-posts { grid-template-columns: 1fr; }
+  .post-card { grid-template-columns: 1fr; }
+  .entry-shell { width: 100%; padding: 1rem 0 2.4rem; }
+  .entry { border-left: 0; border-right: 0; border-radius: 0; }
+  .entry > * { width: min(100% - 30px, 820px); margin-left: auto; margin-right: auto; }
+  .entry-content { font-size: 1.02rem; line-height: 1.82; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .search-form { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 430px) {
+  .container { width: min(100% - 24px, var(--dy-container)); }
+  .brand-mark { width: 38px; height: 38px; }
+  .brand-logo { height: 38px; max-width: 132px; }
+  .brand strong { font-size: 1rem; }
+  .icon-button { width: 40px; height: 40px; }
+  .header-actions { gap: .35rem; }
+  .focus-card { min-height: 260px; }
+  .focus-body { padding: 1rem; }
+  .focus-body h1, .focus-body h2 { font-size: 1.55rem; }
+  .section-head { display: block; }
+  .post-card h2 { font-size: 1.12rem; }
+  .rank-item { grid-template-columns: 46px minmax(0, 1fr); }
+  .entry-header h1 { font-size: 1.82rem; }
+  .media-gallery { grid-template-columns: 1fr; }
+  .pagination { flex-wrap: wrap; }
+  .pagination span { order: -1; width: 100%; text-align: center; }
+}

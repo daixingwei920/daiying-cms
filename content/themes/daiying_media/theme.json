@@ -1,0 +1,601 @@
+{
+  "theme_id": "daiying_media",
+  "product_id": "daiying.media",
+  "name": "戴影·悦读",
+  "version": "1.0.4",
+  "author": "Daiying CMS Theme Studio",
+  "core": {
+    "min": "1.2.0",
+    "max": "1.999.999"
+  },
+  "content_types": ["article", "page"],
+  "recommended_plugins": [],
+  "required_plugins": [],
+  "settings_schema": {
+    "control_center": {
+      "type": "select",
+      "label": "主题控制中心",
+      "help": "当前 Core 以通用表单呈现主题设置；本主题已按控制中心分区命名设置项，并在缺口报告中记录了独立 SaaS 式设置 UI 需要的 Core API。",
+      "default": "dashboard",
+      "options": {
+        "dashboard": "总览"
+      }
+    },
+    "site_description": {
+      "type": "textarea",
+      "label": "总览｜站点一句话",
+      "help": "显示在首页、搜索区和页脚，建议使用面向读者的自然语言。",
+      "default": "让内容本身成为网站的主角。"
+    },
+    "accent_preset": {
+      "type": "select",
+      "label": "网站外观｜主题色",
+      "help": "选择一个色彩气质；选择“自定义”后会使用下方自定义色。",
+      "default": "daiying_blue",
+      "options": {
+        "daiying_blue": "Daiying Blue",
+        "ocean": "Ocean",
+        "emerald": "Emerald",
+        "violet": "Violet",
+        "orange": "Orange",
+        "rose": "Rose",
+        "monochrome": "Monochrome",
+        "custom": "自定义"
+      }
+    },
+    "accent_color": {
+      "type": "color",
+      "label": "网站外观｜自定义强调色",
+      "default": "#2563eb"
+    },
+    "logo_url": {
+      "type": "image",
+      "label": "网站外观｜Logo 图片地址",
+      "help": "可填媒体库图片地址、站内绝对路径或 https 图片地址，也可以直接上传；留空时显示站点名首字标识。",
+      "default": ""
+    },
+    "logo_alt": {
+      "type": "string",
+      "label": "网站外观｜Logo 替代文字",
+      "help": "留空时使用站点名称。",
+      "default": ""
+    },
+    "show_logo_tagline": {
+      "type": "boolean",
+      "label": "网站外观｜显示 Logo 旁副标题",
+      "default": true
+    },
+    "favicon_url": {
+      "type": "icon",
+      "label": "网站外观｜Favicon 地址",
+      "help": "可填 .ico、.png、.svg、.webp 等图标地址，也可以上传 PNG/WebP/JPG；留空时不输出自定义 favicon。",
+      "default": ""
+    },
+    "body_bg_url": {
+      "type": "image",
+      "label": "网站外观｜页面背景图地址",
+      "help": "建议使用轻量图片，留空使用纯色背景。",
+      "default": ""
+    },
+    "flashlights": {
+      "type": "boolean",
+      "label": "网站外观｜Logo 扫光特效",
+      "default": false
+    },
+    "color_mode": {
+      "type": "select",
+      "label": "网站外观｜默认明暗模式",
+      "default": "light",
+      "options": {
+        "light": "浅色",
+        "dark": "深色",
+        "system": "跟随系统"
+      }
+    },
+    "visitor_theme_toggle": {
+      "type": "boolean",
+      "label": "网站外观｜允许访客切换明暗",
+      "default": true
+    },
+    "radius_style": {
+      "type": "select",
+      "label": "网站外观｜圆角风格",
+      "default": "soft",
+      "options": {
+        "sharp": "锐利",
+        "soft": "柔和",
+        "round": "圆润"
+      }
+    },
+    "font_style": {
+      "type": "select",
+      "label": "网站外观｜字体气质",
+      "default": "reading",
+      "options": {
+        "system": "系统默认",
+        "sans": "现代无衬线",
+        "reading": "中文阅读",
+        "serif": "衬线阅读"
+      }
+    },
+    "home_title": {
+      "type": "string",
+      "label": "首页｜主标题",
+      "default": ""
+    },
+    "home_kicker": {
+      "type": "string",
+      "label": "首页｜眉标",
+      "default": "精选内容"
+    },
+    "hero_mode": {
+      "type": "select",
+      "label": "首页｜焦点区",
+      "default": "magazine",
+      "options": {
+        "focus": "大图焦点文章",
+        "magazine": "杂志型",
+        "off": "关闭"
+      }
+    },
+    "enable_slider": {
+      "type": "boolean",
+      "label": "首页｜开启轮播图兼容开关",
+      "help": "兼容原 InfoLee 轮播图设置；当前主题用焦点区承接轮播视觉。",
+      "ui": "developer",
+      "default": true
+    },
+    "home_tabs": {
+      "type": "textarea",
+      "label": "首页｜分类导航",
+      "help": "每行一个频道名称，显示为首页 Hero 下方的频道标签。",
+      "default": "最新\n科技\n游戏\n开发\n生活\n评测"
+    },
+    "home_modules": {
+      "type": "textarea",
+      "label": "首页｜模块顺序",
+      "help": "每行一个模块：Hero、分类导航、最新文章、编辑精选、分类专题、热门文章。当前 Core 不支持拖拽，主题按这里的顺序展示可用模块。",
+      "ui": "developer",
+      "default": "Hero\n分类导航\n最新文章\n编辑精选\n分类专题\n热门文章"
+    },
+    "featured_title": {
+      "type": "string",
+      "label": "首页｜精选导读模块名",
+      "default": "编辑精选"
+    },
+    "featured_description": {
+      "type": "textarea",
+      "label": "首页｜精选导读描述",
+      "default": "值得读完，也值得收藏。"
+    },
+    "featured_post_ids": {
+      "type": "string",
+      "label": "首页｜精选文章 ID",
+      "help": "兼容原 InfoLee 精选导读文章 ID；当前 Core 暂未提供按 ID 精准调取给主题，主题会优先使用最新文章生成精选区。",
+      "ui": "developer",
+      "default": ""
+    },
+    "home_category_slug": {
+      "type": "string",
+      "label": "首页｜CMS 模块分类 Slug",
+      "help": "兼容原 InfoLee 首页 CMS 模块分类；当前主题用于记录配置和后续 Core 能力对接。",
+      "ui": "developer",
+      "default": ""
+    },
+    "home_category_count": {
+      "type": "string",
+      "label": "首页｜CMS 模块调用数量",
+      "ui": "developer",
+      "default": "8"
+    },
+    "home_category_enabled": {
+      "type": "boolean",
+      "label": "首页｜启用 CMS 分类模块",
+      "ui": "developer",
+      "default": true
+    },
+    "home_tag_category_slugs": {
+      "type": "textarea",
+      "label": "首页｜TAG 模块分类 Slug",
+      "help": "每行一个分类 Slug，兼容原 InfoLee TAG 分类切换模块。",
+      "ui": "developer",
+      "default": ""
+    },
+    "home_tag_count": {
+      "type": "string",
+      "label": "首页｜TAG 模块数量",
+      "ui": "developer",
+      "default": "6"
+    },
+    "home_tag_enabled": {
+      "type": "boolean",
+      "label": "首页｜启用 TAG 分类切换",
+      "ui": "developer",
+      "default": true
+    },
+    "list_layout": {
+      "type": "select",
+      "label": "文章｜列表样式",
+      "default": "classic",
+      "options": {
+        "classic": "经典图文",
+        "cards": "杂志卡片",
+        "grid": "Magazine Grid",
+        "minimal": "极简列表"
+      }
+    },
+    "article_license": {
+      "type": "select",
+      "label": "文章｜版权声明",
+      "default": "original",
+      "options": {
+        "original": "原创",
+        "repost": "转载",
+        "source": "来源"
+      }
+    },
+    "post_time_format": {
+      "type": "select",
+      "label": "文章｜时间格式",
+      "ui": "developer",
+      "default": "date",
+      "options": {
+        "friendly": "友好时间",
+        "date": "普通时间",
+        "datetime": "详细时间"
+      }
+    },
+    "open_article_new_window": {
+      "type": "boolean",
+      "label": "文章｜文章链接新窗口打开",
+      "ui": "developer",
+      "default": false
+    },
+    "enable_article_excerpt": {
+      "type": "boolean",
+      "label": "文章｜显示文章摘要",
+      "ui": "developer",
+      "default": true
+    },
+    "excerpt_from_content": {
+      "type": "boolean",
+      "label": "文章｜摘要调用正文",
+      "ui": "developer",
+      "default": true
+    },
+    "enable_lightbox": {
+      "type": "boolean",
+      "label": "文章｜图片灯箱",
+      "ui": "developer",
+      "default": true
+    },
+    "enable_custom_thumbnail": {
+      "type": "boolean",
+      "label": "文章｜自定义缩略图兼容开关",
+      "help": "Daiying CMS 当前使用媒体库作为封面来源；此项用于兼容原 InfoLee 设置。",
+      "ui": "developer",
+      "default": true
+    },
+    "enable_article_copyright": {
+      "type": "boolean",
+      "label": "文章｜显示版权声明",
+      "default": true
+    },
+    "enable_scroll_animation": {
+      "type": "boolean",
+      "label": "文章｜滚动加载特效兼容开关",
+      "help": "兼容原 InfoLee 滚动加载特效；市场版默认使用轻量原生交互。",
+      "ui": "developer",
+      "default": false
+    },
+    "seo_title_mode": {
+      "type": "select",
+      "label": "SEO｜标题组合",
+      "default": "site",
+      "options": {
+        "category_site": "文章标题-分类名-网站标题",
+        "site": "文章标题-网站标题"
+      }
+    },
+    "seo_site_title": {
+      "type": "textarea",
+      "label": "SEO｜网站标题",
+      "default": ""
+    },
+    "seo_site_subtitle": {
+      "type": "textarea",
+      "label": "SEO｜网站副标题",
+      "default": ""
+    },
+    "seo_keywords": {
+      "type": "textarea",
+      "label": "SEO｜网站关键词",
+      "default": ""
+    },
+    "seo_description": {
+      "type": "textarea",
+      "label": "SEO｜网站描述",
+      "default": ""
+    },
+    "enable_custom_seo": {
+      "type": "boolean",
+      "label": "SEO｜启用自定义 SEO 设置",
+      "default": true
+    },
+    "show_sidebar": {
+      "type": "boolean",
+      "label": "侧栏｜启用侧栏",
+      "default": true
+    },
+    "sidebar_modules": {
+      "type": "textarea",
+      "label": "侧栏｜模块",
+      "help": "每行一个模块：搜索、最新文章、热门文章、分类、标签、作者卡片、Newsletter、推荐内容。",
+      "default": "搜索\n最新文章\n热门文章\n分类\n标签\n作者卡片\nNewsletter"
+    },
+    "sidebar_tag_count": {
+      "type": "string",
+      "label": "侧栏｜热门标签数量",
+      "ui": "developer",
+      "default": "12"
+    },
+    "sidebar_hot_days": {
+      "type": "string",
+      "label": "侧栏｜热门文章统计天数",
+      "ui": "developer",
+      "default": "30"
+    },
+    "sidebar_recommend_ids": {
+      "type": "string",
+      "label": "侧栏｜推荐文章 ID",
+      "help": "兼容原 InfoLee 推荐文章 ID；当前 Core 暂未提供按 ID 精准调取给主题。",
+      "ui": "developer",
+      "default": ""
+    },
+    "sidebar_notice": {
+      "type": "textarea",
+      "label": "侧栏｜赏析/公告内容",
+      "default": ""
+    },
+    "qq_number": {
+      "type": "string",
+      "label": "侧栏｜QQ 客服号",
+      "ui": "developer",
+      "default": ""
+    },
+    "wechat_qrcode_url": {
+      "type": "image",
+      "label": "侧栏｜微信二维码地址",
+      "default": ""
+    },
+    "enable_qq_service": {
+      "type": "boolean",
+      "label": "侧栏｜开启右侧客服 QQ",
+      "ui": "developer",
+      "default": false
+    },
+    "ad_home_top_enabled": {
+      "type": "boolean",
+      "label": "广告｜首页顶部广告",
+      "default": false
+    },
+    "ad_home_top_text": {
+      "type": "string",
+      "label": "广告｜首页顶部文案",
+      "default": "品牌合作位"
+    },
+    "ad_home_top_url": {
+      "type": "string",
+      "label": "广告｜首页顶部链接",
+      "default": ""
+    },
+    "ad_home_bottom_desktop": {
+      "type": "textarea",
+      "label": "广告｜首页幻灯片下方 PC 文案/代码",
+      "help": "为市场安全，主题默认按文本展示；需要脚本广告时建议以后由官方广告插件承接。",
+      "default": ""
+    },
+    "ad_home_bottom_mobile": {
+      "type": "textarea",
+      "label": "广告｜首页幻灯片下方移动端文案/代码",
+      "default": ""
+    },
+    "ad_list_top_desktop": {
+      "type": "textarea",
+      "label": "广告｜分类列表顶部 A1 PC",
+      "default": ""
+    },
+    "ad_list_top_mobile": {
+      "type": "textarea",
+      "label": "广告｜分类列表顶部 A1 移动端",
+      "default": ""
+    },
+    "ad_list_bottom_desktop": {
+      "type": "textarea",
+      "label": "广告｜分类列表底部 A2 PC",
+      "default": ""
+    },
+    "ad_list_bottom_mobile": {
+      "type": "textarea",
+      "label": "广告｜分类列表底部 A2 移动端",
+      "default": ""
+    },
+    "ad_list_between_desktop": {
+      "type": "textarea",
+      "label": "广告｜分类列表间 PC",
+      "default": ""
+    },
+    "ad_list_between_mobile": {
+      "type": "textarea",
+      "label": "广告｜分类列表间移动端",
+      "default": ""
+    },
+    "ad_article_top_desktop": {
+      "type": "textarea",
+      "label": "广告｜文章页顶部 C1 PC",
+      "default": ""
+    },
+    "ad_article_top_mobile": {
+      "type": "textarea",
+      "label": "广告｜文章页顶部 C1 移动端",
+      "default": ""
+    },
+    "ad_related_bottom_desktop": {
+      "type": "textarea",
+      "label": "广告｜相关推荐底部 C2 PC",
+      "default": ""
+    },
+    "ad_related_bottom_mobile": {
+      "type": "textarea",
+      "label": "广告｜相关推荐底部 C2 移动端",
+      "default": ""
+    },
+    "enable_safe_ad_slots": {
+      "type": "boolean",
+      "label": "广告｜启用安全广告位文本展示",
+      "default": false
+    },
+    "reward_wechat_url": {
+      "type": "image",
+      "label": "赞赏｜微信收款码地址",
+      "default": ""
+    },
+    "reward_alipay_url": {
+      "type": "image",
+      "label": "赞赏｜支付宝收款码地址",
+      "default": ""
+    },
+    "enable_reward": {
+      "type": "boolean",
+      "label": "赞赏｜开启文章赞赏",
+      "default": false
+    },
+    "footer_nav_text": {
+      "type": "textarea",
+      "label": "页脚｜导航/关于文本",
+      "default": ""
+    },
+    "icp_beian": {
+      "type": "string",
+      "label": "页脚｜工信部备案号",
+      "default": ""
+    },
+    "gab_beian": {
+      "type": "string",
+      "label": "页脚｜公安备案号",
+      "default": ""
+    },
+    "analytics_note": {
+      "type": "textarea",
+      "label": "页脚｜统计代码备注",
+      "help": "兼容原 InfoLee 统计代码入口。主题市场版不直接执行脚本代码，建议通过官方统计/广告插件接入。",
+      "ui": "developer",
+      "default": ""
+    },
+    "share_note": {
+      "type": "textarea",
+      "label": "互动｜网站分享代码备注",
+      "help": "兼容原 InfoLee 百度分享入口。当前主题前台使用浏览器原生分享和复制链接。",
+      "ui": "developer",
+      "default": ""
+    },
+    "comment_like_text": {
+      "type": "string",
+      "label": "评论｜喜欢文案",
+      "ui": "developer",
+      "default": "支持"
+    },
+    "comment_up_text": {
+      "type": "string",
+      "label": "评论｜顶文案",
+      "ui": "developer",
+      "default": "顶"
+    },
+    "comment_down_text": {
+      "type": "string",
+      "label": "评论｜踩文案",
+      "ui": "developer",
+      "default": "踩"
+    },
+    "comment_prompt_text": {
+      "type": "textarea",
+      "label": "评论｜提示文案",
+      "default": "评论区已准备好承接 Daiying CMS 后续评论 API。"
+    },
+    "head_code_note": {
+      "type": "textarea",
+      "label": "高级｜网页头部接口备注",
+      "help": "兼容原 InfoLee uncode。市场主题不直接执行自定义头部代码。",
+      "ui": "developer",
+      "default": ""
+    },
+    "footer_code_note": {
+      "type": "textarea",
+      "label": "高级｜底部代码接口备注",
+      "help": "兼容原 InfoLee funcode。市场主题不直接执行自定义底部代码。",
+      "ui": "developer",
+      "default": ""
+    },
+    "custom_css": {
+      "type": "textarea",
+      "label": "高级｜自定义 CSS",
+      "default": ""
+    },
+    "enable_custom_css": {
+      "type": "boolean",
+      "label": "高级｜启用自定义 CSS",
+      "default": false
+    },
+    "login_avatar_url": {
+      "type": "image",
+      "label": "登录｜默认登录头像地址",
+      "ui": "developer",
+      "default": ""
+    },
+    "register_url": {
+      "type": "string",
+      "label": "登录｜顶部注册链接",
+      "ui": "developer",
+      "default": "/admin/login"
+    },
+    "signin_url": {
+      "type": "string",
+      "label": "登录｜顶部会员登录",
+      "default": "/admin/login"
+    },
+    "dashboard_url": {
+      "type": "string",
+      "label": "登录｜后台管理地址",
+      "ui": "developer",
+      "default": "/admin"
+    },
+    "qq_login_url": {
+      "type": "string",
+      "label": "登录｜QQ 登录链接",
+      "ui": "developer",
+      "default": ""
+    },
+    "enable_top_login": {
+      "type": "boolean",
+      "label": "登录｜开启导航顶部登录",
+      "default": true
+    },
+    "enable_mobile_login": {
+      "type": "boolean",
+      "label": "登录｜移动端开启登录",
+      "ui": "developer",
+      "default": true
+    },
+    "enable_qq_login": {
+      "type": "boolean",
+      "label": "登录｜开启 QQ 登录",
+      "ui": "developer",
+      "default": false
+    },
+    "footer_text": {
+      "type": "string",
+      "label": "页脚｜补充文字",
+      "default": "Powered by Daiying CMS"
+    }
+  }
+}
