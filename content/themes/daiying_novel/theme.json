@@ -1,7 +1,7 @@
 {
     "theme_id": "daiying_novel",
     "name": "Daiying Novel",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "author": "Daiying CMS",
     "core": {"min": "1.2.0", "max": "2.0.0"},
     "content_types": ["novel", "novel_author", "novel_chapter"],

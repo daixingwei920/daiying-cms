@@ -29,6 +29,7 @@ $migration = static function (\PDO $pdo): void {
         author_id BIGINT NULL,
         description $text NULL,
         cover_media_id BIGINT NULL,
+        cover_url VARCHAR(1024) NULL,
         source_url VARCHAR(1024) NULL,
         source_url_hash VARCHAR(64) NULL,
         status VARCHAR(32) NOT NULL DEFAULT 'draft',
@@ -180,6 +181,9 @@ $migration = static function (\PDO $pdo): void {
     }
     if (!$hasColumn('novels', 'source_url_hash')) {
         $pdo->exec('ALTER TABLE novels ADD COLUMN source_url_hash VARCHAR(64) NULL');
+    }
+    if (!$hasColumn('novels', 'cover_url')) {
+        $pdo->exec('ALTER TABLE novels ADD COLUMN cover_url VARCHAR(1024) NULL');
     }
     $pdo->exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_novels_source_hash ON novels(source_url_hash)");
 };

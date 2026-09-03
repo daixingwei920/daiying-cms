@@ -14,7 +14,7 @@ $assert = static function (bool $condition, string $message): void {
 };
 
 $assert(($manifest['plugin_id'] ?? '') === 'official.novel-collector', 'Novel collector plugin ID must remain official.novel-collector.');
-$assert(($manifest['version'] ?? '') === '0.4.10', 'Novel collector version should be 0.4.10.');
+$assert(($manifest['version'] ?? '') === '0.4.12', 'Novel collector version should be 0.4.12.');
 $assert(($manifest['core']['max'] ?? '') === '2.0.0', 'Novel collector core max should be a concrete semver upper bound.');
 $manifestJson = json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 $assert(is_string($manifestJson) && str_contains($manifestJson, 'scheduled_tasks'), 'Novel collector manifest should declare scheduled tasks.');
@@ -60,6 +60,8 @@ foreach ([
 foreach (['publicNovels', 'publicSections', 'publicChapters', 'publicChapter', "job_id'] = 'formal_'"] as $needle) {
     $assert(str_contains($system, $needle), 'Missing novel repository token: ' . $needle);
 }
+$assert(str_contains($system, 'extractCoverUrl'), 'Novel detector should extract cover URLs.');
+$assert(str_contains($system, 'cover_url'), 'Novel repository should persist and expose cover_url.');
 
 $assert(!str_contains($plugin, 'local.novel-collector'), 'Plugin PHP must not reference local.novel-collector.');
 $assert(!str_contains($plugin, 'local.novel_collector.manage'), 'Plugin PHP must not reference local capability names.');

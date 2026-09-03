@@ -70,7 +70,7 @@ return static function (PluginContext $context): void {
         return CatalogUrlDiscoverer::discover($url, $max, static fn (string $target): array => $http->get($target));
     };
     $pageShell = static function (string $title, string $body): string {
-        return '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</title><style>body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#f6f7f9;color:#172033}.wrap{max-width:1100px;margin:0 auto;padding:28px 20px}.panel{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:20px;margin:0 0 18px}.topline{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}label{display:block;font-weight:650;margin:12px 0 6px}input,textarea,select{width:100%;box-sizing:border-box;border:1px solid #b8c0cc;border-radius:6px;padding:10px}button,.button{display:inline-block;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:10px 14px;text-decoration:none;margin:12px 8px 0 0}.button.secondary{background:#475467}.button.ghost{background:#eef2f7;color:#27364a}.muted{color:#667085}.tag{display:inline-block;background:#eef4ff;color:#1f4b99;border-radius:999px;padding:4px 9px;margin:3px}.ok{color:#027a48;font-weight:700}.fail{color:#b42318;font-weight:700}table{width:100%;border-collapse:collapse;margin-top:12px}td,th{border-bottom:1px solid #eaecf0;padding:10px;text-align:left;vertical-align:top}.chapter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:12px}.chapter-card{display:block;border:1px solid #e4e7ec;border-radius:6px;background:#fff;color:#172033;text-decoration:none;padding:10px;min-height:58px}.chapter-card small{display:block;color:#667085;margin-top:4px}.reader{font-size:18px;line-height:1.9;max-width:820px;margin-left:auto;margin-right:auto}.reader p{margin:0 0 1em}.reader-controls{position:sticky;top:0;z-index:5;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:10px;margin-bottom:12px}.reader[data-theme=eye]{background:#f5f4df;color:#1f2a20}.reader[data-theme=night]{background:#111827;color:#e5e7eb}.progressbar{height:6px;background:#e4e7ec;border-radius:999px;overflow:hidden}.progressbar span{display:block;height:100%;width:0;background:#1f6feb}pre{white-space:pre-wrap;background:#111827;color:#f9fafb;border-radius:8px;padding:14px;overflow:auto}@media(max-width:640px){.wrap{padding:18px 12px 84px}.reader{font-size:17px}.chapter-grid{grid-template-columns:1fr}.mobile-reader-bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #d8dee8;padding:8px 10px;display:flex;justify-content:space-around;z-index:8}.mobile-reader-bar .button{margin:0;padding:8px 10px}}</style><main class="wrap">' . $body . '</main>';
+        return '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . htmlspecialchars($title, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</title><style>body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#f6f7f9;color:#172033}.wrap{max-width:1100px;margin:0 auto;padding:28px 20px}.panel{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:20px;margin:0 0 18px}.topline{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}label{display:block;font-weight:650;margin:12px 0 6px}input,textarea,select{width:100%;box-sizing:border-box;border:1px solid #b8c0cc;border-radius:6px;padding:10px}button,.button{display:inline-block;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:10px 14px;text-decoration:none;margin:12px 8px 0 0}.button.secondary{background:#475467}.button.ghost{background:#eef2f7;color:#27364a}.muted{color:#667085}.tag{display:inline-block;background:#eef4ff;color:#1f4b99;border-radius:999px;padding:4px 9px;margin:3px}.ok{color:#027a48;font-weight:700}.fail{color:#b42318;font-weight:700}table{width:100%;border-collapse:collapse;margin-top:12px}td,th{border-bottom:1px solid #eaecf0;padding:10px;text-align:left;vertical-align:top}.cover-thumb{display:grid;width:54px;height:76px;place-items:center;object-fit:cover;border-radius:6px;background:linear-gradient(160deg,#263241,#bf3450);border:1px solid #d8dee8;color:#fff;font-weight:800;text-align:center}.book-head{display:flex;gap:18px;align-items:flex-start}.book-head img,.book-head .cover-thumb{width:128px;height:178px;object-fit:cover;border-radius:8px;background:linear-gradient(160deg,#263241,#bf3450);border:1px solid #d8dee8}.chapter-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:12px}.chapter-card{display:block;border:1px solid #e4e7ec;border-radius:6px;background:#fff;color:#172033;text-decoration:none;padding:10px;min-height:58px}.chapter-card small{display:block;color:#667085;margin-top:4px}.reader{font-size:18px;line-height:1.9;max-width:820px;margin-left:auto;margin-right:auto}.reader p{margin:0 0 1em}.reader-controls{position:sticky;top:0;z-index:5;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:10px;margin-bottom:12px}.reader[data-theme=eye]{background:#f5f4df;color:#1f2a20}.reader[data-theme=night]{background:#111827;color:#e5e7eb}.progressbar{height:6px;background:#e4e7ec;border-radius:999px;overflow:hidden}.progressbar span{display:block;height:100%;width:0;background:#1f6feb}pre{white-space:pre-wrap;background:#111827;color:#f9fafb;border-radius:8px;padding:14px;overflow:auto}@media(max-width:640px){.wrap{padding:18px 12px 84px}.reader{font-size:17px}.book-head{display:block}.book-head img,.book-head .cover-thumb{width:96px;height:136px;margin-bottom:12px}.chapter-grid{grid-template-columns:1fr}.mobile-reader-bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #d8dee8;padding:8px 10px;display:flex;justify-content:space-around;z-index:8}.mobile-reader-bar .button{margin:0;padding:8px 10px}}</style><main class="wrap">' . $body . '</main>';
     };
     $fileKey = static fn (string $value): string => preg_replace('/[^a-zA-Z0-9_.-]/', '_', $value) ?: 'item';
     $filePut = static function (string $bucket, string $key, array $value) use ($fileStoreDir, $fileKey): bool {
@@ -219,6 +219,9 @@ return static function (PluginContext $context): void {
             'catalog_url' => $url,
             'title' => (string) ($detected['title'] ?? ''),
             'author' => (string) ($detected['author'] ?? ''),
+            'description' => (string) ($detected['description'] ?? ''),
+            'cover_url' => (string) ($detected['cover_url'] ?? ''),
+            'cover' => (string) ($detected['cover_url'] ?? ''),
             'chapter_count' => count($chapters),
             'resume_cursor' => 0,
             'collected_count' => 0,
@@ -338,12 +341,16 @@ HTML);
                 'title' => (string) ($job['title'] ?? ''),
                 'author' => (string) ($job['author'] ?? ''),
                 'catalog_url' => (string) ($job['catalog_url'] ?? ''),
+                'cover' => (string) ($job['cover'] ?? $job['cover_url'] ?? ''),
+                'cover_url' => (string) ($job['cover_url'] ?? $job['cover'] ?? ''),
             ];
             $novels[$jobId] = [
                 'job_id' => $jobId,
                 'title' => (string) ($job['title'] ?? ''),
                 'author' => (string) ($job['author'] ?? ''),
                 'catalog_url' => (string) ($job['catalog_url'] ?? ''),
+                'cover' => (string) ($job['cover'] ?? $job['cover_url'] ?? ''),
+                'cover_url' => (string) ($job['cover_url'] ?? $job['cover'] ?? ''),
                 'chapter_count' => max(count($loadCollectedChapterIndex($jobId)), count($loadCollectedChapters($jobId)), (int) ($job['collected_count'] ?? 0)),
             ];
         }
@@ -358,6 +365,8 @@ HTML);
                 'title' => (string) ($novel['title'] ?? ($novels[$jobId]['title'] ?? '')),
                 'author' => (string) ($novel['author'] ?? ($novels[$jobId]['author'] ?? '')),
                 'catalog_url' => (string) ($novel['catalog_url'] ?? ($novels[$jobId]['catalog_url'] ?? '')),
+                'cover' => (string) ($novel['cover'] ?? $novel['cover_url'] ?? ($novels[$jobId]['cover'] ?? '')),
+                'cover_url' => (string) ($novel['cover_url'] ?? $novel['cover'] ?? ($novels[$jobId]['cover_url'] ?? '')),
                 'chapter_count' => max(count($loadCollectedChapterIndex($jobId)), count($loadCollectedChapters($jobId)), (int) ($novel['chapter_count'] ?? 0), (int) ($novels[$jobId]['chapter_count'] ?? 0)),
             ]);
         }
@@ -374,6 +383,8 @@ HTML);
                         'title' => $jobTitles[$jobId]['title'] ?? $jobId,
                         'author' => $jobTitles[$jobId]['author'] ?? '',
                         'catalog_url' => $jobTitles[$jobId]['catalog_url'] ?? '',
+                        'cover' => $jobTitles[$jobId]['cover'] ?? '',
+                        'cover_url' => $jobTitles[$jobId]['cover_url'] ?? '',
                         'chapter_count' => 0,
                     ];
                 }
@@ -576,7 +587,9 @@ HTML);
             'formal_novel_id' => $formalNovelId,
             'title' => (string) ($job['title'] ?? ''),
             'author' => (string) ($job['author'] ?? ''),
-            'description' => '',
+            'description' => (string) ($job['description'] ?? ''),
+            'cover' => (string) ($job['cover'] ?? $job['cover_url'] ?? ''),
+            'cover_url' => (string) ($job['cover_url'] ?? $job['cover'] ?? ''),
             'catalog_url' => $catalogUrl,
             'status' => (string) ($job['status'] ?? 'serializing'),
             'chapter_count' => (int) ($job['collected_count'] ?? 0),
@@ -594,12 +607,14 @@ HTML);
             $rows = '';
             foreach ($loadNovelSummaries() as $novel) {
                 $jobId = (string) ($novel['job_id'] ?? '');
-                $rows .= '<tr><td><a href="' . $html($novelUrl($jobId)) . '">' . $html((string) ($novel['title'] ?? '')) . '</a></td><td>' . $html((string) ($novel['author'] ?? '')) . '</td><td>' . $html((string) ($novel['chapter_count'] ?? 0)) . '</td></tr>';
+                $cover = (string) ($novel['cover'] ?? $novel['cover_url'] ?? '');
+                $coverCell = $cover !== '' ? '<img class="cover-thumb" src="' . $html($cover) . '" alt="">' : '<span class="cover-thumb" aria-hidden="true">' . $html(mb_substr((string) ($novel['title'] ?? '书'), 0, 2)) . '</span>';
+                $rows .= '<tr><td>' . $coverCell . '</td><td><a href="' . $html($novelUrl($jobId)) . '">' . $html((string) ($novel['title'] ?? '')) . '</a></td><td>' . $html((string) ($novel['author'] ?? '')) . '</td><td>' . $html((string) ($novel['chapter_count'] ?? 0)) . '</td></tr>';
             }
             if ($rows === '') {
-                $rows = '<tr><td colspan="3" class="muted">暂无已采小说。</td></tr>';
+                $rows = '<tr><td colspan="4" class="muted">暂无已采小说。</td></tr>';
             }
-            $body = '<div class="topline"><h1>小说书库</h1><a class="button secondary" href="/novels/bookshelf">我的书架</a></div><section class="panel"><form method="get" action="' . $html($novelSearchUrl()) . '"><label>搜索小说</label><input name="q" placeholder="书名或作者"><button type="submit">搜索</button></form></section><section class="panel"><p class="muted">这里显示采集后的小说，可直接作为前台导航菜单 URL 使用：/novels</p><table><tr><th>书名</th><th>作者</th><th>章节</th></tr>' . $rows . '</table></section>';
+            $body = '<div class="topline"><h1>小说书库</h1><a class="button secondary" href="/novels/bookshelf">我的书架</a></div><section class="panel"><form method="get" action="' . $html($novelSearchUrl()) . '"><label>搜索小说</label><input name="q" placeholder="书名或作者"><button type="submit">搜索</button></form></section><section class="panel"><p class="muted">这里显示采集后的小说，可直接作为前台导航菜单 URL 使用：/novels</p><table><tr><th>封面</th><th>书名</th><th>作者</th><th>章节</th></tr>' . $rows . '</table></section>';
             return \Cms\Core\Http\Response::html($pageShell('小说', $body));
         });
         $context->frontRoute('GET', '/novels/search', static function ($request) use ($param, $html, $pageShell, $loadNovelSummaries, $novelUrl): \Cms\Core\Http\Response {
@@ -611,12 +626,14 @@ HTML);
                     continue;
                 }
                 $jobId = (string) ($novel['job_id'] ?? '');
-                $rows .= '<tr><td><a href="' . $html($novelUrl($jobId)) . '">' . $html((string) ($novel['title'] ?? '')) . '</a></td><td>' . $html((string) ($novel['author'] ?? '')) . '</td><td>' . (int) ($novel['chapter_count'] ?? 0) . '</td></tr>';
+                $cover = (string) ($novel['cover'] ?? $novel['cover_url'] ?? '');
+                $coverCell = $cover !== '' ? '<img class="cover-thumb" src="' . $html($cover) . '" alt="">' : '<span class="cover-thumb" aria-hidden="true">' . $html(mb_substr((string) ($novel['title'] ?? '书'), 0, 2)) . '</span>';
+                $rows .= '<tr><td>' . $coverCell . '</td><td><a href="' . $html($novelUrl($jobId)) . '">' . $html((string) ($novel['title'] ?? '')) . '</a></td><td>' . $html((string) ($novel['author'] ?? '')) . '</td><td>' . (int) ($novel['chapter_count'] ?? 0) . '</td></tr>';
             }
             if ($rows === '') {
-                $rows = '<tr><td colspan="3" class="muted">没有找到匹配小说。</td></tr>';
+                $rows = '<tr><td colspan="4" class="muted">没有找到匹配小说。</td></tr>';
             }
-            $body = '<h1>小说搜索</h1><section class="panel"><form method="get" action="/novels/search"><label>关键词</label><input name="q" value="' . $html($query) . '" placeholder="书名或作者"><button type="submit">搜索</button><a class="button secondary" href="/novels">返回书库</a></form></section><section class="panel"><table><tr><th>书名</th><th>作者</th><th>章节</th></tr>' . $rows . '</table></section>';
+            $body = '<h1>小说搜索</h1><section class="panel"><form method="get" action="/novels/search"><label>关键词</label><input name="q" value="' . $html($query) . '" placeholder="书名或作者"><button type="submit">搜索</button><a class="button secondary" href="/novels">返回书库</a></form></section><section class="panel"><table><tr><th>封面</th><th>书名</th><th>作者</th><th>章节</th></tr>' . $rows . '</table></section>';
             return \Cms\Core\Http\Response::html($pageShell('小说搜索', $body));
         });
         $context->frontRoute('GET', '/novels/bookshelf', static function ($request) use ($pageShell): \Cms\Core\Http\Response {
@@ -692,7 +709,9 @@ HTML;
             $firstChapter = $chapters[0]['sort_order'] ?? 1;
             $latestChapter = $chapters !== [] ? (int) ($chapters[array_key_last($chapters)]['sort_order'] ?? $firstChapter) : 1;
             $pager = $latestOnly ? '<a class="button secondary" href="/novels/book?job_id=' . rawurlencode($jobId) . '">查看全部目录</a>' : '<a class="button secondary" href="/novels/book?job_id=' . rawurlencode($jobId) . '&page=' . max(1, $page - 1) . '">上一页</a><a class="button secondary" href="/novels/book?job_id=' . rawurlencode($jobId) . '&page=' . min($pageCount, $page + 1) . '">下一页</a><a class="button secondary" href="/novels/book?job_id=' . rawurlencode($jobId) . '&latest=1">最近 100 章</a><form method="get" action="/novels/book" style="display:inline-block"><input type="hidden" name="job_id" value="' . $html($jobId) . '"><input name="page" type="number" min="1" max="' . $pageCount . '" value="' . $page . '" style="width:88px"><button type="submit">跳转</button></form>';
-            $body = '<h1>' . $html((string) ($novel['title'] ?? $jobId)) . '</h1><section class="panel" data-novel-book data-job-id="' . $html($jobId) . '" data-title="' . $html((string) ($novel['title'] ?? $jobId)) . '" data-url="/novels/book?job_id=' . rawurlencode($jobId) . '"><p><strong>作者：</strong>' . $html((string) ($novel['author'] ?? '')) . '</p><p><strong>已采章节：</strong>' . $html((string) $totalChapters) . '</p><p data-continue-wrap hidden><a class="button" data-continue-link href="' . $html($novelChapterUrl($jobId, (int) $firstChapter)) . '">继续阅读</a></p><a class="button" href="' . $html($novelChapterUrl($jobId, (int) $firstChapter)) . '">开始阅读</a><button type="button" data-bookshelf-add>加入书架</button><a class="button secondary" href="/novels/export.txt?job_id=' . rawurlencode($jobId) . '">TXT 下载</a><a class="button secondary" href="/novels">返回书库</a></section><section class="panel"><h2>章节目录</h2><p class="muted">' . ($latestOnly ? '正在显示最近 100 章' : '第 ' . $page . ' / ' . $pageCount . ' 页') . '，最新章节 #' . $latestChapter . '</p>' . $pager . '<div class="chapter-grid">' . $cards . '</div></section><script>(function(){var box=document.querySelector("[data-novel-book]"); if(!box) return; var id=box.dataset.jobId,title=box.dataset.title,url=box.dataset.url; var shelf=JSON.parse(localStorage.getItem("daiying_novel_bookshelf")||"{}"); var progress=JSON.parse(localStorage.getItem("daiying_novel_reading_progress")||"{}"); var p=progress[id]; if(p&&p.chapterUrl){var wrap=document.querySelector("[data-continue-wrap]"),link=document.querySelector("[data-continue-link]"); if(wrap&&link){wrap.hidden=false; link.href=p.chapterUrl; link.textContent="继续阅读 " + (p.chapterTitle||"上次章节");}} var btn=document.querySelector("[data-bookshelf-add]"); if(btn){btn.textContent=shelf[id]?"已在书架":"加入书架"; btn.addEventListener("click",function(){shelf[id]={title:title,url:url,updatedAt:(new Date()).toISOString()}; localStorage.setItem("daiying_novel_bookshelf",JSON.stringify(shelf)); btn.textContent="已在书架";});}})();</script>';
+            $cover = (string) ($novel['cover'] ?? $novel['cover_url'] ?? '');
+            $coverHtml = $cover !== '' ? '<img src="' . $html($cover) . '" alt="">' : '<span class="cover-thumb" aria-hidden="true">' . $html(mb_substr((string) ($novel['title'] ?? '书'), 0, 4)) . '</span>';
+            $body = '<h1>' . $html((string) ($novel['title'] ?? $jobId)) . '</h1><section class="panel book-head" data-novel-book data-job-id="' . $html($jobId) . '" data-title="' . $html((string) ($novel['title'] ?? $jobId)) . '" data-url="/novels/book?job_id=' . rawurlencode($jobId) . '">' . $coverHtml . '<div><p><strong>作者：</strong>' . $html((string) ($novel['author'] ?? '')) . '</p><p><strong>已采章节：</strong>' . $html((string) $totalChapters) . '</p><p data-continue-wrap hidden><a class="button" data-continue-link href="' . $html($novelChapterUrl($jobId, (int) $firstChapter)) . '">继续阅读</a></p><a class="button" href="' . $html($novelChapterUrl($jobId, (int) $firstChapter)) . '">开始阅读</a><button type="button" data-bookshelf-add>加入书架</button><a class="button secondary" href="/novels/export.txt?job_id=' . rawurlencode($jobId) . '">TXT 下载</a><a class="button secondary" href="/novels">返回书库</a></div></section><section class="panel"><h2>章节目录</h2><p class="muted">' . ($latestOnly ? '正在显示最近 100 章' : '第 ' . $page . ' / ' . $pageCount . ' 页') . '，最新章节 #' . $latestChapter . '</p>' . $pager . '<div class="chapter-grid">' . $cards . '</div></section><script>(function(){var box=document.querySelector("[data-novel-book]"); if(!box) return; var id=box.dataset.jobId,title=box.dataset.title,url=box.dataset.url; var shelf=JSON.parse(localStorage.getItem("daiying_novel_bookshelf")||"{}"); var progress=JSON.parse(localStorage.getItem("daiying_novel_reading_progress")||"{}"); var p=progress[id]; if(p&&p.chapterUrl){var wrap=document.querySelector("[data-continue-wrap]"),link=document.querySelector("[data-continue-link]"); if(wrap&&link){wrap.hidden=false; link.href=p.chapterUrl; link.textContent="继续阅读 " + (p.chapterTitle||"上次章节");}} var btn=document.querySelector("[data-bookshelf-add]"); if(btn){btn.textContent=shelf[id]?"已在书架":"加入书架"; btn.addEventListener("click",function(){shelf[id]={title:title,url:url,updatedAt:(new Date()).toISOString()}; localStorage.setItem("daiying_novel_bookshelf",JSON.stringify(shelf)); btn.textContent="已在书架";});}})();</script>';
             return \Cms\Core\Http\Response::html($pageShell((string) ($novel['title'] ?? '小说目录'), $body));
         });
         $context->frontRoute('GET', '/novels/export.txt', static function ($request) use ($param, $sendTxtDownload) {
@@ -920,7 +939,9 @@ HTML));
                         'formal_novel_id' => (int) ($job['formal_novel_id'] ?? 0),
                         'title' => (string) ($job['title'] ?? ''),
                         'author' => (string) ($job['author'] ?? ''),
-                        'description' => '',
+                        'description' => (string) ($job['description'] ?? ''),
+                        'cover' => (string) ($job['cover'] ?? $job['cover_url'] ?? ''),
+                        'cover_url' => (string) ($job['cover_url'] ?? $job['cover'] ?? ''),
                         'catalog_url' => $catalogUrl,
                         'status' => (string) ($job['status'] ?? 'pending'),
                         'chapter_count' => 0,
@@ -1015,7 +1036,9 @@ HTML));
                 'formal_novel_id' => (int) ($job['formal_novel_id'] ?? 0),
                 'title' => (string) ($job['title'] ?? ''),
                 'author' => (string) ($job['author'] ?? ''),
-                'description' => '',
+                'description' => (string) ($job['description'] ?? ''),
+                'cover' => (string) ($job['cover'] ?? $job['cover_url'] ?? ''),
+                'cover_url' => (string) ($job['cover_url'] ?? $job['cover'] ?? ''),
                 'catalog_url' => $url,
                 'status' => (string) ($job['status'] ?? 'pending'),
                 'chapter_count' => 0,
@@ -1183,7 +1206,9 @@ HTML));
                 'formal_novel_id' => $formalNovelId,
                 'title' => (string) ($job['title'] ?? ''),
                 'author' => (string) ($job['author'] ?? ''),
-                'description' => '',
+                'description' => (string) ($job['description'] ?? ''),
+                'cover' => (string) ($job['cover'] ?? $job['cover_url'] ?? ''),
+                'cover_url' => (string) ($job['cover_url'] ?? $job['cover'] ?? ''),
                 'catalog_url' => (string) ($job['catalog_url'] ?? $catalogUrl),
                 'status' => (string) ($job['status'] ?? 'serializing'),
                 'chapter_count' => (int) ($job['collected_count'] ?? 0),

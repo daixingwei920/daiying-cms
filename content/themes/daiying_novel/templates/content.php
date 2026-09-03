@@ -28,6 +28,13 @@ $accent = preg_match('/^#[0-9a-fA-F]{6}$/', $accent) ? $accent : '#b8324a';
 $brandName = (string) $setting('brand_name', $get('site_name', 'Daiying Novel'));
 $logoText = mb_substr((string) $setting('brand_logo_text', 'D'), 0, 2);
 $logoUrl = (string) $setting('brand_logo_url', '');
+$coverMarkup = static function (array $novel) use ($e): string {
+    $cover = (string) ($novel['cover'] ?? $novel['cover_url'] ?? '');
+    if ($cover !== '') {
+        return '<img class="detail-cover" src="' . $e($cover) . '" alt="">';
+    }
+    return '<span class="detail-cover generated-cover"><strong>' . $e(mb_substr((string) ($novel['title'] ?? '小说'), 0, 10)) . '</strong><em>' . $e((string) ($novel['author'] ?? '佚名')) . '</em></span>';
+};
 $showSearch = $boolSetting('show_search', true);
 $enableTxtDownload = $boolSetting('enable_txt_download', true);
 $pageSize = 100;
@@ -76,7 +83,7 @@ $continueUrl = (string) ($progress['continue_url'] ?? $firstChapterUrl);
 </header>
 <main class="novel-detail">
     <section class="detail-head">
-        <img class="detail-cover" src="<?= $e($novel['cover'] ?? $assetBase . '/cover-placeholder.svg') ?>" alt="">
+        <?= $coverMarkup($novel) ?>
         <div class="detail-card">
             <h1><?= $e($novel['title'] ?? '') ?></h1>
             <p class="detail-meta"><?= $e($novel['author'] ?? '佚名') ?> · <?= $e($novel['status'] ?? '') ?> · <?= $e($novel['word_count'] ?? 0) ?> 字</p>

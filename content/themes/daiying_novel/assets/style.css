@@ -333,12 +333,37 @@ h1 {
 }
 
 .book img,
+.book .generated-cover,
 .detail-cover {
     width: 100%;
     aspect-ratio: 2 / 3;
     border-radius: 6px;
     background: #e7e1d7;
     object-fit: cover;
+}
+
+.generated-cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: 12px 9px;
+    background: linear-gradient(160deg, #263241 0%, #415268 55%, #bf3450 100%);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2);
+    color: #fff;
+}
+
+.generated-cover strong {
+    color: #fff;
+    font-size: 15px;
+    line-height: 1.25;
+    -webkit-line-clamp: 4;
+}
+
+.generated-cover em {
+    color: rgba(255, 255, 255, .78);
+    font-size: 12px;
+    line-height: 1.35;
 }
 
 .book-info {

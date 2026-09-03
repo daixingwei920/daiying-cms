@@ -40,7 +40,21 @@ if ($sections === []) {
             if ($stmt->fetchColumn() === false) {
                 return [];
             }
-            $rows = $pdo->query('SELECT n.id, n.title, n.description, n.status, n.word_count, n.chapter_count, n.latest_chapter_title, n.latest_chapter_at, n.updated_at, n.published_at, a.name AS author
+            $hasCoverUrl = false;
+            if ($driver === 'sqlite') {
+                foreach ($pdo->query('PRAGMA table_info(novels)') ?: [] as $column) {
+                    if ((string) ($column['name'] ?? '') === 'cover_url') {
+                        $hasCoverUrl = true;
+                        break;
+                    }
+                }
+            } else {
+                $coverStmt = $pdo->prepare('SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?');
+                $coverStmt->execute(['novels', 'cover_url']);
+                $hasCoverUrl = (int) $coverStmt->fetchColumn() > 0;
+            }
+            $coverSelect = $hasCoverUrl ? ', n.cover_url' : ', NULL AS cover_url';
+            $rows = $pdo->query('SELECT n.id, n.title, n.description, n.status, n.word_count, n.chapter_count, n.latest_chapter_title, n.latest_chapter_at, n.updated_at, n.published_at' . $coverSelect . ', a.name AS author
                 FROM novels n
                 LEFT JOIN novel_authors a ON a.id = n.author_id
                 WHERE n.visibility = ' . $pdo->quote('public') . ' AND n.chapter_count > 0
@@ -58,6 +72,7 @@ if ($sections === []) {
                 $row['author'] = (string) ($row['author'] ?? '佚名');
                 $row['category'] = '小说';
                 $row['url'] = '/novels/book?job_id=formal_' . rawurlencode((string) $id);
+                $row['cover'] = (string) ($row['cover_url'] ?? '');
                 $items[] = $row;
             }
             $new = $items;
@@ -88,6 +103,13 @@ $accent = preg_match('/^#[0-9a-fA-F]{6}$/', $accent) ? $accent : '#b8324a';
 $brandName = (string) $setting('brand_name', $site);
 $logoText = mb_substr((string) $setting('brand_logo_text', 'D'), 0, 2);
 $logoUrl = (string) $setting('brand_logo_url', '');
+$coverMarkup = static function (array $novel) use ($e): string {
+    $cover = (string) ($novel['cover'] ?? $novel['cover_url'] ?? '');
+    if ($cover !== '') {
+        return '<img src="' . $e($cover) . '" alt="">';
+    }
+    return '<span class="generated-cover"><strong>' . $e(mb_substr((string) ($novel['title'] ?? '小说'), 0, 8)) . '</strong><em>' . $e((string) ($novel['author'] ?? '佚名')) . '</em></span>';
+};
 $showSearch = $boolSetting('show_search', true);
 $showStats = $boolSetting('show_home_stats', true);
 $showQuickLinks = $boolSetting('show_quick_links', true);
@@ -194,7 +216,7 @@ $sectionLabels = [
                     <?php foreach ($items as $novel): ?>
                         <article class="book">
                             <a href="<?= $e($novelUrl($novel)) ?>">
-                                <img src="<?= $e($novel['cover'] ?? $assetBase . '/cover-placeholder.svg') ?>" alt="">
+                                <?= $coverMarkup($novel) ?>
                                 <span class="book-info">
                                     <strong><?= $e($novel['title'] ?? '') ?></strong>
                                     <span><?= $e($novel['author'] ?? '佚名') ?></span>

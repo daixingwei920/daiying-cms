@@ -360,6 +360,7 @@ final class NovelAutoDetector
             'title' => $this->cleanText((string) $title),
             'author' => $this->cleanText($author),
             'description' => $this->cleanText($this->match($html, '/<meta\s+name=["\']description["\']\s+content=["\']([^"\']+)/isu') ?: ''),
+            'cover_url' => $this->extractCoverUrl($catalogUrl, $html),
             'status' => str_contains($html, '完结') ? 'completed' : 'serializing',
             'chapters' => $chapters,
             'confidence' => min(0.99, round($confidence, 3)),
@@ -384,6 +385,7 @@ final class NovelAutoDetector
             'title' => $this->cleanText((string) $title),
             'author' => $this->cleanText($author),
             'description' => $this->cleanText($description),
+            'cover_url' => $this->extractCoverUrl($catalogUrl, $html),
             'status' => str_contains($statusText, '完结') ? 'completed' : 'serializing',
             'chapters' => $chapters,
             'confidence' => min(0.99, round($confidence, 3)),
@@ -534,6 +536,40 @@ final class NovelAutoDetector
         return preg_match($pattern, $html, $m) ? trim(html_entity_decode(strip_tags($m[1]), ENT_QUOTES, 'UTF-8')) : null;
     }
 
+    private function extractCoverUrl(string $catalogUrl, string $html): string
+    {
+        libxml_use_internal_errors(true);
+        $dom = new \DOMDocument();
+        $dom->loadHTML('<?xml encoding="utf-8" ?>' . mb_convert_encoding($html, 'UTF-8', 'UTF-8,GB18030,GBK,BIG5,ISO-8859-1'), LIBXML_NOERROR | LIBXML_NOWARNING);
+        $xpath = new \DOMXPath($dom);
+        $queries = [
+            '//meta[translate(@property,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="og:image"]/@content',
+            '//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="twitter:image"]/@content',
+            '//link[contains(translate(@rel,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"image_src")]/@href',
+            '//*[@itemprop="image"]/@content',
+            '//*[@itemprop="image"]/@src',
+            '//img[contains(translate(concat(" ", @class, " ", @id, " ", @alt, " "), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), " cover ")]/@src',
+            '//img[contains(translate(concat(" ", @class, " ", @id, " ", @alt, " "), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), " bookimg ")]/@src',
+            '//img[contains(translate(concat(" ", @class, " ", @id, " ", @alt, " "), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), " book-cover ")]/@src',
+            '//img[contains(translate(concat(" ", @class, " ", @id, " ", @alt, " "), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), " 封面 ")]/@src',
+        ];
+        foreach ($queries as $query) {
+            foreach ($xpath->query($query) ?: [] as $node) {
+                $candidate = trim(html_entity_decode((string) $node->nodeValue, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+                if ($candidate === '') {
+                    continue;
+                }
+                $url = $this->absoluteUrl($catalogUrl, $candidate);
+                $scheme = strtolower((string) (parse_url($url, PHP_URL_SCHEME) ?? ''));
+                $host = (string) (parse_url($url, PHP_URL_HOST) ?? '');
+                if (in_array($scheme, ['http', 'https'], true) && $host !== '') {
+                    return $url;
+                }
+            }
+        }
+        return '';
+    }
+
     private function cleanText(string $value): string
     {
         $value = html_entity_decode(strip_tags($value), ENT_QUOTES, 'UTF-8');
@@ -553,10 +589,14 @@ final class NovelAutoDetector
 
     private function absoluteUrl(string $base, string $href): string
     {
+        $href = trim(html_entity_decode($href, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
         if (parse_url($href, PHP_URL_SCHEME)) {
             return $href;
         }
         $parts = parse_url($base);
+        if (str_starts_with($href, '//')) {
+            return ($parts['scheme'] ?? 'https') . ':' . $href;
+        }
         return ($parts['scheme'] ?? 'https') . '://' . ($parts['host'] ?? '') . (str_starts_with($href, '/') ? $href : rtrim(dirname((string) ($parts['path'] ?? '/')), '/') . '/' . $href);
     }
 }
@@ -648,15 +688,31 @@ final class NovelRepository
         $slug = $this->slug((string) $data['title']);
         $sourceUrl = (string) ($data['catalog_url'] ?? $data['source_url'] ?? '');
         $sourceHash = $sourceUrl !== '' ? hash('sha256', $sourceUrl) : null;
+        $coverUrl = (string) ($data['cover_url'] ?? $data['cover'] ?? '');
+        $hasCoverUrl = $this->hasColumn('novels', 'cover_url');
         $novelId = $this->findNovelId($slug, $sourceHash);
         if ($novelId > 0) {
-            $stmt = $this->pdo->prepare('UPDATE novels SET title = ?, original_title = ?, author_id = ?, description = ?, status = ?, language = ?, visibility = ?, source_url = COALESCE(source_url, ?), source_url_hash = COALESCE(source_url_hash, ?), updated_at = ?, published_at = COALESCE(published_at, ?) WHERE id = ?');
-            $stmt->execute([(string) $data['title'], $data['original_title'] ?? null, $authorId, $data['description'] ?? '', $data['status'] ?? 'serializing', $data['language'] ?? 'zh-CN', 'public', $sourceUrl !== '' ? $sourceUrl : null, $sourceHash, $now, $now, $novelId]);
+            $coverSql = $hasCoverUrl ? ', cover_url = COALESCE(NULLIF(?, \'\'), cover_url)' : '';
+            $stmt = $this->pdo->prepare('UPDATE novels SET title = ?, original_title = ?, author_id = ?, description = ?, status = ?, language = ?, visibility = ?, source_url = COALESCE(source_url, ?), source_url_hash = COALESCE(source_url_hash, ?)' . $coverSql . ', updated_at = ?, published_at = COALESCE(published_at, ?) WHERE id = ?');
+            $params = [(string) $data['title'], $data['original_title'] ?? null, $authorId, $data['description'] ?? '', $data['status'] ?? 'serializing', $data['language'] ?? 'zh-CN', 'public', $sourceUrl !== '' ? $sourceUrl : null, $sourceHash];
+            if ($hasCoverUrl) {
+                $params[] = $coverUrl;
+            }
+            array_push($params, $now, $now, $novelId);
+            $stmt->execute($params);
             $this->ensureDefaultVolume($novelId);
             return $novelId;
         }
-        $stmt = $this->pdo->prepare('INSERT INTO novels (uuid,title,slug,original_title,author_id,description,source_url,source_url_hash,status,language,visibility,created_at,updated_at,published_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
-        $stmt->execute([$this->uuid(), (string) $data['title'], $slug, $data['original_title'] ?? null, $authorId, $data['description'] ?? '', $sourceUrl !== '' ? $sourceUrl : null, $sourceHash, $data['status'] ?? 'serializing', $data['language'] ?? 'zh-CN', 'public', $now, $now, $now]);
+        $columns = 'uuid,title,slug,original_title,author_id,description,source_url,source_url_hash,status,language,visibility,created_at,updated_at,published_at';
+        $placeholders = '?,?,?,?,?,?,?,?,?,?,?,?,?,?';
+        $params = [$this->uuid(), (string) $data['title'], $slug, $data['original_title'] ?? null, $authorId, $data['description'] ?? '', $sourceUrl !== '' ? $sourceUrl : null, $sourceHash, $data['status'] ?? 'serializing', $data['language'] ?? 'zh-CN', 'public', $now, $now, $now];
+        if ($hasCoverUrl) {
+            $columns .= ',cover_url';
+            $placeholders .= ',?';
+            $params[] = $coverUrl !== '' ? $coverUrl : null;
+        }
+        $stmt = $this->pdo->prepare('INSERT INTO novels (' . $columns . ') VALUES (' . $placeholders . ')');
+        $stmt->execute($params);
         $novelId = (int) $this->pdo->lastInsertId();
         $this->ensureDefaultVolume($novelId);
         return $novelId;
@@ -718,7 +774,8 @@ final class NovelRepository
             return [];
         }
         $limit = max(1, min(500, $limit));
-        $sql = 'SELECT n.id, n.title, n.slug, n.description, n.status, n.word_count, n.chapter_count, n.latest_chapter_title, n.latest_chapter_at, n.updated_at, n.published_at, a.name AS author
+        $coverSelect = $this->hasColumn('novels', 'cover_url') ? ', n.cover_url' : ', NULL AS cover_url';
+        $sql = 'SELECT n.id, n.title, n.slug, n.description, n.status, n.word_count, n.chapter_count, n.latest_chapter_title, n.latest_chapter_at, n.updated_at, n.published_at' . $coverSelect . ', a.name AS author
             FROM novels n
             LEFT JOIN novel_authors a ON a.id = n.author_id
             WHERE n.visibility = ? AND n.chapter_count > 0
@@ -758,7 +815,8 @@ final class NovelRepository
         if ($id <= 0 || !$this->hasTable('novels')) {
             return null;
         }
-        $stmt = $this->pdo->prepare('SELECT n.id, n.title, n.slug, n.description, n.status, n.word_count, n.chapter_count, n.latest_chapter_title, n.latest_chapter_at, n.updated_at, n.published_at, a.name AS author
+        $coverSelect = $this->hasColumn('novels', 'cover_url') ? ', n.cover_url' : ', NULL AS cover_url';
+        $stmt = $this->pdo->prepare('SELECT n.id, n.title, n.slug, n.description, n.status, n.word_count, n.chapter_count, n.latest_chapter_title, n.latest_chapter_at, n.updated_at, n.published_at' . $coverSelect . ', a.name AS author
             FROM novels n
             LEFT JOIN novel_authors a ON a.id = n.author_id
             WHERE n.id = ? AND n.visibility = ?
@@ -871,7 +929,7 @@ final class NovelRepository
         $row['author'] = (string) ($row['author'] ?? '佚名');
         $row['url'] = '/novels/book?job_id=formal_' . rawurlencode((string) $id);
         $row['category'] = '小说';
-        $row['cover'] = $row['cover'] ?? '';
+        $row['cover'] = (string) ($row['cover_url'] ?? $row['cover'] ?? '');
         return $row;
     }
 

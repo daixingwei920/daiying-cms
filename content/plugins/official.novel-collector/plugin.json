@@ -1,7 +1,7 @@
 {
     "plugin_id": "official.novel-collector",
     "name": "Daiying Novel Collector",
-    "version": "0.4.10",
+    "version": "0.4.12",
     "author": "Daiying CMS",
     "type": "plugin",
     "package_type": "plugin",
