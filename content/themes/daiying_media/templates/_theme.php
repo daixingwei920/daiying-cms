@@ -108,6 +108,27 @@ if (!function_exists('dm_setting')) {
         return $path === '' || preg_match('/\.(avif|gif|ico|jpe?g|png|svg|webp)$/', $path) ? $url : '';
     }
 
+    function dm_absolute_url(TemplateContext $context, string $url): string
+    {
+        $url = trim($url);
+        if ($url === '') {
+            return '';
+        }
+        if (preg_match('/^https?:\/\//i', $url)) {
+            return $url;
+        }
+        if (!str_starts_with($url, '/')) {
+            return $url;
+        }
+        $siteUrl = rtrim(dm_setting_any($context, ['site_url'], ''), '/');
+        if ($siteUrl !== '' && preg_match('/^https?:\/\//i', $siteUrl)) {
+            return $siteUrl . $url;
+        }
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = (string) ($_SERVER['HTTP_HOST'] ?? '');
+        return $host !== '' ? $scheme . '://' . $host . $url : $url;
+    }
+
     function dm_bool_any(TemplateContext $context, array $keys, bool $default): bool
     {
         foreach ($keys as $key) {
@@ -210,6 +231,90 @@ if (!function_exists('dm_setting')) {
         return '<div class="placeholder-cover ' . $class . '" role="img" aria-label="' . $context->e((string) ($item['title'] ?? '内容封面')) . '"><span>Daiying Media</span></div>';
     }
 
+    function dm_cover_url(array $item): string
+    {
+        $media = is_array($item['media'] ?? null) ? $item['media'] : [];
+        foreach ($media as $mediaItem) {
+            if (is_array($mediaItem) && ($mediaItem['available'] ?? false) && ($mediaItem['media_type'] ?? '') === 'image') {
+                $url = trim((string) ($mediaItem['url'] ?? ''));
+                if ($url !== '') {
+                    return $url;
+                }
+            }
+        }
+        return '';
+    }
+
+    /**
+     * @return array{
+     *   title:string,
+     *   description:string,
+     *   url:string,
+     *   image:string,
+     *   links:array<string,string>
+     * }
+     */
+    function dm_share_payload(TemplateContext $context, array $content = [], array $seo = [], string $fallbackTitle = ''): array
+    {
+        $title = trim((string) ($seo['title'] ?? $fallbackTitle));
+        if ($title === '') {
+            $title = trim((string) ($content['title'] ?? '')) ?: dm_site_name($context);
+        }
+        $description = trim((string) ($seo['description'] ?? ''));
+        if ($description === '' && $content !== []) {
+            $description = dm_excerpt($content, 150);
+        }
+        if ($description === '') {
+            $description = dm_setting_any($context, ['seo_description', 'Description', 'site_description'], $title);
+        }
+        $url = trim((string) ($seo['canonical'] ?? $context->get('canonical', ($_SERVER['REQUEST_URI'] ?? '/'))));
+        $url = dm_absolute_url($context, $url !== '' ? $url : '/');
+        $image = trim((string) ($seo['image'] ?? dm_cover_url(['media' => $context->get('media', [])])));
+        if ($image === '') {
+            $image = dm_logo_url($context);
+        }
+        $image = $image !== '' ? dm_absolute_url($context, $image) : '';
+        $encodedUrl = rawurlencode($url);
+        $encodedTitle = rawurlencode($title);
+        $encodedSummary = rawurlencode($description);
+        return [
+            'title' => $title,
+            'description' => $description,
+            'url' => $url,
+            'image' => $image,
+            'links' => [
+                'weibo' => 'https://service.weibo.com/share/share.php?url=' . $encodedUrl . '&title=' . $encodedTitle,
+                'qq' => 'https://connect.qq.com/widget/shareqq/index.html?url=' . $encodedUrl . '&title=' . $encodedTitle . '&summary=' . $encodedSummary,
+                'qzone' => 'https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=' . $encodedUrl . '&title=' . $encodedTitle . '&summary=' . $encodedSummary,
+                'wechat_qr' => 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' . $encodedUrl,
+            ],
+        ];
+    }
+
+    function dm_share_row(TemplateContext $context, array $share): void
+    {
+        $links = is_array($share['links'] ?? null) ? $share['links'] : [];
+        ?>
+<div class="share-row" data-share-row data-share-title="<?= $context->e((string) ($share['title'] ?? '')) ?>" data-share-text="<?= $context->e((string) ($share['description'] ?? '')) ?>" data-share-url="<?= $context->e((string) ($share['url'] ?? '')) ?>">
+    <span>分享</span>
+    <button type="button" data-open-search>搜索相似内容</button>
+    <button type="button" data-share-native>系统分享</button>
+    <button type="button" data-share-copy>复制链接</button>
+    <button type="button" data-share-qr>微信二维码</button>
+    <?php if (!empty($links['weibo'])): ?><a href="<?= $context->e((string) $links['weibo']) ?>" target="_blank" rel="noopener noreferrer">微博</a><?php endif; ?>
+    <?php if (!empty($links['qq'])): ?><a href="<?= $context->e((string) $links['qq']) ?>" target="_blank" rel="noopener noreferrer">QQ</a><?php endif; ?>
+    <?php if (!empty($links['qzone'])): ?><a href="<?= $context->e((string) $links['qzone']) ?>" target="_blank" rel="noopener noreferrer">QQ 空间</a><?php endif; ?>
+    <span class="share-status" data-share-status aria-live="polite"></span>
+    <?php if (!empty($links['wechat_qr'])): ?>
+        <span class="share-qr" data-share-qr-panel hidden>
+            <img src="<?= $context->e((string) $links['wechat_qr']) ?>" alt="微信扫码分享" loading="lazy">
+            <small>微信扫码打开后分享</small>
+        </span>
+    <?php endif; ?>
+</div>
+<?php
+    }
+
     /** @param list<array<string,mixed>> $items */
     function dm_card(TemplateContext $context, array $item, string $level = 'h2'): void
     {
@@ -297,7 +402,13 @@ if (!function_exists('dm_setting')) {
         }
         $keywords = dm_setting_any($context, ['seo_keywords', 'Keywords']);
         $canonical = trim((string) ($seo['canonical'] ?? $context->get('canonical', '')));
+        $canonical = $canonical !== '' ? dm_absolute_url($context, $canonical) : '';
         $favicon = dm_image_setting($context, ['favicon_url', 'favicon']);
+        $ogImage = trim((string) ($seo['image'] ?? dm_cover_url(['media' => $context->get('media', [])])));
+        if ($ogImage === '') {
+            $ogImage = dm_logo_url($context);
+        }
+        $ogImage = $ogImage !== '' ? dm_absolute_url($context, $ogImage) : '';
         ?>
 <head>
     <meta charset="utf-8">
@@ -312,6 +423,8 @@ if (!function_exists('dm_setting')) {
     <meta property="og:description" content="<?= $context->e($description) ?>">
     <meta property="og:type" content="<?= $context->e($seo['og_type'] ?? $type) ?>">
     <?php if ($canonical !== ''): ?><meta property="og:url" content="<?= $context->e($canonical) ?>"><?php endif; ?>
+    <?php if ($ogImage !== ''): ?><meta property="og:image" content="<?= $context->e($ogImage) ?>"><?php endif; ?>
+    <meta name="twitter:card" content="<?= $ogImage !== '' ? 'summary_large_image' : 'summary' ?>">
     <style><?= dm_css($context) ?></style>
 </head>
 <?php

@@ -21,13 +21,7 @@ $comments = is_array($context->get('comments', [])) ? $context->get('comments', 
 $commentItems = is_array($comments['items'] ?? null) ? $comments['items'] : [];
 $commentUser = is_array($comments['user'] ?? null) ? $comments['user'] : null;
 $commentPrompt = dm_setting($context, 'comment_prompt_text', '请遵守相关法律与法规，文明评论。O(∩_∩)O~~');
-$shareUrl = (string) ($seo['canonical'] ?? $context->get('canonical', ($_SERVER['REQUEST_URI'] ?? '/')));
-if (str_starts_with($shareUrl, '/')) {
-    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host = (string) ($_SERVER['HTTP_HOST'] ?? '');
-    $shareUrl = $host !== '' ? $scheme . '://' . $host . $shareUrl : $shareUrl;
-}
-$shareTitle = $title !== '' ? $title : dm_site_name($context);
+$share = dm_share_payload($context, $content, is_array($seo) ? $seo : [], $title);
 ?>
 <!doctype html>
 <html lang="zh-CN">
@@ -56,15 +50,7 @@ $shareTitle = $title !== '' ? $title : dm_site_name($context);
         <div class="entry-content"><?= $context->get('rendered_blocks', '') ?></div>
         <footer class="entry-footer">
             <?php dm_terms($context, is_array($tags) ? $tags : [], 'tag'); ?>
-            <div class="share-row" data-share-row data-share-title="<?= $context->e($shareTitle) ?>" data-share-url="<?= $context->e($shareUrl) ?>">
-                <span>分享</span>
-                <button type="button" data-open-search>搜索相似内容</button>
-                <button type="button" data-share-native>系统分享</button>
-                <button type="button" data-share-copy>复制链接</button>
-                <a href="https://service.weibo.com/share/share.php?url=<?= $context->e(rawurlencode($shareUrl)) ?>&title=<?= $context->e(rawurlencode($shareTitle)) ?>" target="_blank" rel="noopener noreferrer">微博</a>
-                <a href="https://connect.qq.com/widget/shareqq/index.html?url=<?= $context->e(rawurlencode($shareUrl)) ?>&title=<?= $context->e(rawurlencode($shareTitle)) ?>" target="_blank" rel="noopener noreferrer">QQ</a>
-                <span class="share-status" data-share-status aria-live="polite"></span>
-            </div>
+            <?php dm_share_row($context, $share); ?>
             <?php if (!$isPage && dm_bool($context, 'enable_reward', false)): ?>
                 <?php $wechat = dm_image_setting($context, ['reward_wechat_url', 'weipay']); $alipay = dm_image_setting($context, ['reward_alipay_url', 'alipay']); ?>
                 <?php if ($wechat !== '' || $alipay !== ''): ?><section class="reward-box"><h2>赞赏支持</h2><div><?php if ($wechat !== ''): ?><img src="<?= $context->e($wechat) ?>" alt="微信赞赏码" loading="lazy"><?php endif; ?><?php if ($alipay !== ''): ?><img src="<?= $context->e($alipay) ?>" alt="支付宝赞赏码" loading="lazy"><?php endif; ?></div></section><?php endif; ?>

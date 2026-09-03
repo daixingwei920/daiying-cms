@@ -26,6 +26,9 @@
 .share-row button, .share-row a { border: 1px solid var(--dy-border); background: var(--dy-surface); color: var(--dy-text); border-radius: var(--dy-radius-sm); padding: .34rem .68rem; line-height: 1.35; font: inherit; text-decoration: none; cursor: pointer; }
 .share-row button:hover, .share-row a:hover { border-color: var(--dy-primary); color: var(--dy-primary); }
 .share-status { min-height: 1.35em; color: var(--dy-primary); font-size: .9rem; }
+.share-qr { display: grid; gap: .35rem; align-items: center; justify-items: center; width: 148px; margin-left: .25rem; border: 1px solid var(--dy-border); border-radius: var(--dy-radius-md); background: var(--dy-surface-2); padding: .55rem; color: var(--dy-text-muted); font-size: .78rem; }
+.share-qr[hidden] { display: none; }
+.share-qr img { width: 112px; height: 112px; border-radius: var(--dy-radius-sm); background: #fff; padding: 4px; }
 .copyright-box { background: var(--dy-surface-2); border: 1px solid var(--dy-border); border-radius: var(--dy-radius-md); padding: .85rem; color: var(--dy-text-muted); }
 .post-nav, .adjacent-posts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .adjacent-card { background: var(--dy-surface-2); border: 1px solid var(--dy-border); border-radius: var(--dy-radius-md); padding: .9rem; color: var(--dy-text); }

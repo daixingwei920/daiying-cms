@@ -42,8 +42,10 @@
 
   document.querySelectorAll('[data-share-row]').forEach((row) => {
     const title = row.getAttribute('data-share-title') || document.title;
+    const text = row.getAttribute('data-share-text') || '';
     const url = row.getAttribute('data-share-url') || window.location.href;
     const status = row.querySelector('[data-share-status]');
+    const qrPanel = row.querySelector('[data-share-qr-panel]');
     const setStatus = (message) => {
       if (!status) return;
       status.textContent = message;
@@ -57,7 +59,7 @@
       button.addEventListener('click', async () => {
         try {
           if (navigator.share) {
-            await navigator.share({ title, url });
+            await navigator.share({ title, text, url });
             setStatus('已打开分享');
             return;
           }
@@ -77,6 +79,17 @@
         } catch (error) {
           setStatus('复制失败，请手动复制地址栏链接');
         }
+      });
+    });
+
+    row.querySelectorAll('[data-share-qr]').forEach((button) => {
+      button.addEventListener('click', () => {
+        if (!qrPanel) {
+          setStatus('二维码暂不可用');
+          return;
+        }
+        qrPanel.hidden = !qrPanel.hidden;
+        setStatus(qrPanel.hidden ? '已收起二维码' : '微信扫码后分享');
       });
     });
   });
