@@ -334,15 +334,121 @@ final class ContentRepository
         return (int) $stmt->fetchColumn();
     }
 
-    /** @return list<array{name:string,slug:string,taxonomy:string}> */
+    /** @return list<array{id:int,name:string,slug:string,taxonomy:string}> */
     public function termsForContent(int $id): array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT t.name, t.slug, t.taxonomy FROM cms_terms t INNER JOIN cms_content_terms ct ON ct.term_id = t.id WHERE ct.content_id = :id ORDER BY t.taxonomy, t.name'
+            'SELECT t.id, t.name, t.slug, t.taxonomy FROM cms_terms t INNER JOIN cms_content_terms ct ON ct.term_id = t.id WHERE ct.content_id = :id ORDER BY t.taxonomy, t.name'
         );
         $stmt->execute([':id' => $id]);
 
         return $stmt->fetchAll();
+    }
+
+    /** @return list<array{id:int,taxonomy:string,name:string,slug:string,content_count:int,created_at:string,updated_at:string}> */
+    public function terms(string $taxonomy): array
+    {
+        if (!$this->safeTaxonomy($taxonomy)) {
+            return [];
+        }
+        $stmt = $this->pdo->prepare(
+            'SELECT t.id, t.taxonomy, t.name, t.slug, t.created_at, t.updated_at, COUNT(ct.content_id) AS content_count
+             FROM cms_terms t
+             LEFT JOIN cms_content_terms ct ON ct.term_id = t.id
+             WHERE t.taxonomy = :taxonomy
+             GROUP BY t.id, t.taxonomy, t.name, t.slug, t.created_at, t.updated_at
+             ORDER BY t.name ASC'
+        );
+        $stmt->execute([':taxonomy' => $taxonomy]);
+
+        return array_map(static fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'taxonomy' => (string) $row['taxonomy'],
+            'name' => (string) $row['name'],
+            'slug' => (string) $row['slug'],
+            'content_count' => (int) ($row['content_count'] ?? 0),
+            'created_at' => (string) ($row['created_at'] ?? ''),
+            'updated_at' => (string) ($row['updated_at'] ?? ''),
+        ], $stmt->fetchAll());
+    }
+
+    /** @return array{id:int,taxonomy:string,name:string,slug:string,content_count:int,created_at:string,updated_at:string}|null */
+    public function termById(int $id): ?array
+    {
+        if ($id <= 0) {
+            return null;
+        }
+        $stmt = $this->pdo->prepare(
+            'SELECT t.id, t.taxonomy, t.name, t.slug, t.created_at, t.updated_at, COUNT(ct.content_id) AS content_count
+             FROM cms_terms t
+             LEFT JOIN cms_content_terms ct ON ct.term_id = t.id
+             WHERE t.id = :id
+             GROUP BY t.id, t.taxonomy, t.name, t.slug, t.created_at, t.updated_at
+             LIMIT 1'
+        );
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+        if (!is_array($row)) {
+            return null;
+        }
+
+        return [
+            'id' => (int) $row['id'],
+            'taxonomy' => (string) $row['taxonomy'],
+            'name' => (string) $row['name'],
+            'slug' => (string) $row['slug'],
+            'content_count' => (int) ($row['content_count'] ?? 0),
+            'created_at' => (string) ($row['created_at'] ?? ''),
+            'updated_at' => (string) ($row['updated_at'] ?? ''),
+        ];
+    }
+
+    public function saveTerm(string $taxonomy, string $name, string $slug, ?int $id = null): int
+    {
+        if (!$this->safeTaxonomy($taxonomy)) {
+            throw new ContentException('Unsupported taxonomy.');
+        }
+        $name = trim($name);
+        if ($name === '') {
+            throw new ContentException('Category name is required.');
+        }
+        $slug = Slugger::make($slug !== '' ? $slug : $name);
+        $existing = $this->pdo->prepare('SELECT id FROM cms_terms WHERE taxonomy = :taxonomy AND slug = :slug LIMIT 1');
+        $existing->execute([':taxonomy' => $taxonomy, ':slug' => $slug]);
+        $existingId = (int) $existing->fetchColumn();
+        if ($existingId > 0 && ($id === null || $existingId !== $id)) {
+            throw new ContentException('Category slug already exists.');
+        }
+
+        $now = gmdate('c');
+        if ($id !== null && $id > 0) {
+            $current = $this->termById($id);
+            if ($current === null || $current['taxonomy'] !== $taxonomy) {
+                throw new ContentException('Category not found.');
+            }
+            $stmt = $this->pdo->prepare('UPDATE cms_terms SET name = :name, slug = :slug, updated_at = :updated_at WHERE id = :id AND taxonomy = :taxonomy');
+            $stmt->execute([':id' => $id, ':taxonomy' => $taxonomy, ':name' => $name, ':slug' => $slug, ':updated_at' => $now]);
+
+            return $id;
+        }
+
+        $stmt = $this->pdo->prepare('INSERT INTO cms_terms (taxonomy, name, slug, created_at, updated_at) VALUES (:taxonomy, :name, :slug, :created_at, :updated_at)');
+        $stmt->execute([':taxonomy' => $taxonomy, ':name' => $name, ':slug' => $slug, ':created_at' => $now, ':updated_at' => $now]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    public function deleteTerm(int $id, string $taxonomy = 'category'): void
+    {
+        $term = $this->termById($id);
+        if ($term === null || $term['taxonomy'] !== $taxonomy) {
+            throw new ContentException('Category not found.');
+        }
+        if ((int) $term['content_count'] > 0) {
+            throw new ContentException('Category is in use.');
+        }
+        $stmt = $this->pdo->prepare('DELETE FROM cms_terms WHERE id = :id AND taxonomy = :taxonomy');
+        $stmt->execute([':id' => $id, ':taxonomy' => $taxonomy]);
     }
 
     /** @return array{target:string,status:int}|null */

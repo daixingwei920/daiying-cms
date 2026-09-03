@@ -993,7 +993,7 @@ final class AdminController
         $rows = $rows !== '' ? $rows : '<tr><td colspan="5" class="muted">暂无内容</td></tr>';
         $pager = $this->adminContentPager($page, $totalPages, $perPage, $total);
 
-        $body = '<div class="admin-page-header"><div><h1>内容管理</h1><p class="muted">文章、页面和区块内容统一在这里管理。</p></div><div class="admin-action-row"><a class="button" href="/admin/content/new">新建内容</a> <a class="button admin-button-secondary" href="/admin/navigation">设置前台导航</a></div></div>' .
+        $body = '<div class="admin-page-header"><div><h1>内容管理</h1><p class="muted">文章、页面和区块内容统一在这里管理。</p></div><div class="admin-action-row"><a class="button" href="/admin/content/new">新建内容</a> <a class="button admin-button-secondary" href="/admin/categories">分类管理</a> <a class="button admin-button-secondary" href="/admin/navigation">设置前台导航</a></div></div>' .
             $notice . '<div class="admin-list-toolbar"><span class="muted">共 ' . (int) $total . ' 条内容，第 ' . (int) $page . ' / ' . (int) $totalPages . ' 页，每页 ' . (int) $perPage . ' 条。</span></div>' .
             '<table><thead><tr><th>ID</th><th>类型</th><th>标题</th><th>状态</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>' . $pager;
 
@@ -1133,6 +1133,126 @@ final class AdminController
         }
 
         return Response::redirect('/admin/content?deleted=1');
+    }
+
+    public function categoryIndex(?Request $request = null): Response
+    {
+        $request ??= new Request('GET', '/admin/categories');
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+
+        try {
+            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $categories = $repo->terms('category');
+        } catch (Throwable $exception) {
+            $this->logger->error('Category index failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('分类管理', '<h1>分类管理</h1><p class="error">分类服务暂不可用。</p>'), 500);
+        }
+
+        $notice = match ((string) ($request->query['notice'] ?? '')) {
+            'created' => '<p class="muted">分类已创建。</p>',
+            'updated' => '<p class="muted">分类已保存。</p>',
+            'deleted' => '<p class="muted">分类已删除。</p>',
+            default => '',
+        };
+
+        return Response::html(View::page('分类管理', $this->categoryIndexHtml($categories, $notice)));
+    }
+
+    public function categoryStore(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('分类管理', $this->categoryIndexHtml($this->categoryRows(), '<p class="error">CSRF 校验失败，请刷新页面重试。</p>')), 403);
+        }
+
+        try {
+            $pdo = ConnectionFactory::make($this->settings);
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $id = $repo->saveTerm('category', (string) $request->input('name', ''), (string) $request->input('slug', ''));
+            (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'category.created', ['category_id' => $id]);
+        } catch (Throwable $exception) {
+            $this->logger->error('Category create failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('分类管理', $this->categoryIndexHtml($this->categoryRows(), '<p class="error">保存失败：' . View::escape($exception->getMessage()) . '</p>')), 422);
+        }
+
+        return Response::redirect('/admin/categories?notice=created');
+    }
+
+    public function categoryEdit(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        $id = $this->pathSegmentInt($request->path, 3);
+
+        try {
+            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $category = $repo->termById($id);
+            if ($category === null || $category['taxonomy'] !== 'category') {
+                return Response::html(View::page('编辑分类', '<h1>编辑分类</h1><p class="error">分类不存在。</p><p><a class="button" href="/admin/categories">返回分类管理</a></p>'), 404);
+            }
+        } catch (Throwable $exception) {
+            $this->logger->error('Category edit failed', ['source' => 'Core', 'category_id' => $id, 'error' => $exception->getMessage()]);
+            return Response::html(View::page('编辑分类', '<h1>编辑分类</h1><p class="error">分类服务暂不可用。</p>'), 500);
+        }
+
+        return Response::html(View::page('编辑分类', $this->categoryEditHtml($category)));
+    }
+
+    public function categoryUpdate(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('编辑分类', '<h1>编辑分类</h1><p class="error">CSRF 校验失败，请刷新页面重试。</p><p><a class="button" href="/admin/categories">返回分类管理</a></p>'), 403);
+        }
+        $id = $this->pathSegmentInt($request->path, 3);
+
+        try {
+            $pdo = ConnectionFactory::make($this->settings);
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $repo->saveTerm('category', (string) $request->input('name', ''), (string) $request->input('slug', ''), $id);
+            (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'category.updated', ['category_id' => $id]);
+        } catch (Throwable $exception) {
+            $this->logger->error('Category update failed', ['source' => 'Core', 'category_id' => $id, 'error' => $exception->getMessage()]);
+            $category = ['id' => $id, 'name' => (string) $request->input('name', ''), 'slug' => (string) $request->input('slug', ''), 'content_count' => 0];
+            return Response::html(View::page('编辑分类', $this->categoryEditHtml($category, '保存失败：' . $exception->getMessage())), 422);
+        }
+
+        return Response::redirect('/admin/categories?notice=updated');
+    }
+
+    public function categoryDelete(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('分类管理', '<h1>分类管理</h1><p class="error">CSRF 校验失败，请刷新页面重试。</p><p><a class="button" href="/admin/categories">返回分类管理</a></p>'), 403);
+        }
+        $id = $this->pathSegmentInt($request->path, 3);
+
+        try {
+            $pdo = ConnectionFactory::make($this->settings);
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $repo->deleteTerm($id, 'category');
+            (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'category.deleted', ['category_id' => $id]);
+        } catch (Throwable $exception) {
+            $this->logger->error('Category delete failed', ['source' => 'Core', 'category_id' => $id, 'error' => $exception->getMessage()]);
+            return Response::html(View::page('分类管理', $this->categoryIndexHtml($this->categoryRows(), '<p class="error">删除失败：' . View::escape($exception->getMessage()) . '</p>')), 422);
+        }
+
+        return Response::redirect('/admin/categories?notice=deleted');
     }
 
     public function cardDeliveryIndex(): Response
@@ -7534,6 +7654,7 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
         $paidEnabled = (bool) ($meta['paid_content_enabled'] ?? false);
         $contentType = (string) ($data['type'] ?? 'article');
         $blockCount = count(array_values(is_array($blocks) ? $blocks : []));
+        $categorySelector = $this->contentCategorySelector($data['categories'] ?? []);
 
         return '<div class="editor-header content-editor-page-header"><div><h1>' . $heading . '</h1><p class="muted">专注写正文，发布、分类、付费和 SEO 设置放在右侧。</p></div><div class="editor-actions">' . $actions . '</div></div>' . $errorHtml .
             '<form class="content-editor-form" method="post" action="' . View::escape($action) . '">' . CsrfToken::field() .
@@ -7549,7 +7670,8 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
             '<div class="editor-schedule-fields" data-editor-schedule-fields' . (!$isScheduled ? ' hidden' : '') . '><input type="hidden" name="scheduled_at" value="' . View::escape($scheduledAt) . '"><label>日期<input name="scheduled_date" type="date" value="' . View::escape($scheduledDate) . '"></label><label>时间<input name="scheduled_time" type="time" value="' . View::escape($scheduledTime) . '"></label></div>' .
             '<div class="editor-sidebar-actions"><button class="editor-secondary" type="submit" name="content_action" value="draft">保存草稿</button><button class="editor-primary" type="submit" name="content_action" value="publish">' . $publishLabel . '</button></div></div></details>' .
             '<details class="editor-settings-section" open><summary>内容</summary><div class="editor-settings-body"><label>内容类型<select name="content_type"><option value="article"' . ($contentType === 'article' ? ' selected' : '') . '>文章</option><option value="page"' . ($contentType === 'page' ? ' selected' : '') . '>页面</option></select></label></div></details>' .
-            '<details class="editor-settings-section"><summary>分类标签</summary><div class="editor-settings-body"><label>分类（逗号分隔）<input name="categories" value="' . View::escape(implode(', ', $data['categories'] ?? [])) . '"></label>' .
+            '<details class="editor-settings-section"><summary>分类标签</summary><div class="editor-settings-body">' . $categorySelector .
+            '<label>快速新增分类<input name="categories" value="' . View::escape(implode(', ', $this->manualCategoryNames($data['categories'] ?? []))) . '" placeholder="多个分类用逗号分隔"></label>' .
             '<label>标签（逗号分隔）<input name="tags" value="' . View::escape(implode(', ', $data['tags'] ?? [])) . '"></label></div></details>' .
             '<details class="editor-settings-section"><summary>付费内容</summary><div class="editor-settings-body">' .
             '<label><input type="checkbox" name="paid_content_enabled" value="1"' . ($paidEnabled ? ' checked' : '') . ' data-editor-paid-toggle> 启用 Core 付费解锁</label><div data-editor-paid-fields' . (!$paidEnabled ? ' hidden' : '') . '>' .
@@ -7606,7 +7728,10 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
             'slug' => trim((string) $request->input('slug', '')),
             'status' => $status,
             'blocks' => $blocks,
-            'categories' => $this->csvList((string) $request->input('categories', '')),
+            'categories' => array_values(array_unique(array_merge(
+                $this->categoryNamesFromIds($request->input('category_ids', [])),
+                $this->csvList((string) $request->input('categories', ''))
+            ))),
             'tags' => $this->csvList((string) $request->input('tags', '')),
             'meta' => [
                 'seo_title' => trim((string) $request->input('seo_title', '')),
@@ -8332,6 +8457,96 @@ JS;
     private function csvList(string $value): array
     {
         return array_values(array_filter(array_map('trim', explode(',', $value)), static fn (string $item): bool => $item !== ''));
+    }
+
+    /** @param list<array<string,mixed>> $categories */
+    private function categoryIndexHtml(array $categories, string $notice = ''): string
+    {
+        $rows = '';
+        foreach ($categories as $category) {
+            $count = (int) ($category['content_count'] ?? 0);
+            $delete = $count === 0
+                ? '<form method="post" action="/admin/categories/delete/' . (int) $category['id'] . '" style="display:inline" onsubmit="return confirm(\'确定要删除这个分类吗？\');">' . CsrfToken::field() . '<button class="admin-danger" type="submit">删除</button></form>'
+                : '<span class="muted">有内容时不可删除</span>';
+            $rows .= '<tr><td>' . (int) $category['id'] . '</td><td><strong>' . View::escape((string) $category['name']) . '</strong><br><code>' . View::escape((string) $category['slug']) . '</code></td><td>' . $count . '</td><td><a class="button" href="/category/' . rawurlencode((string) $category['slug']) . '" target="_blank" rel="noopener">前台</a> <a class="button admin-button-secondary" href="/admin/categories/edit/' . (int) $category['id'] . '">编辑</a> ' . $delete . '</td></tr>';
+        }
+        $rows = $rows !== '' ? $rows : '<tr><td colspan="4" class="muted">暂无分类，先在下方创建一个。</td></tr>';
+
+        return '<div class="admin-page-header"><div><h1>分类管理</h1><p class="muted">创建和维护文章分类，发布文章时可以直接选择。</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/content">返回内容管理</a><a class="button" href="/admin/content/new">新建内容</a></div></div>' .
+            $notice .
+            '<section class="editor-card"><h2>新建分类</h2><form method="post" action="/admin/categories">' . CsrfToken::field() .
+            '<div class="admin-grid two"><label>分类名称<input name="name" required placeholder="例如：生活日常"></label><label>URL Slug<input name="slug" placeholder="留空自动生成"></label></div>' .
+            '<p><button type="submit">创建分类</button></p></form></section>' .
+            '<section class="editor-card"><h2>已有分类</h2><table><thead><tr><th>ID</th><th>分类</th><th>内容数</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table></section>';
+    }
+
+    /** @param array<string,mixed> $category */
+    private function categoryEditHtml(array $category, string $error = ''): string
+    {
+        $errorHtml = $error === '' ? '' : '<p class="error">' . View::escape($error) . '</p>';
+
+        return '<div class="admin-page-header"><div><h1>编辑分类</h1><p class="muted">修改分类名称和前台 URL Slug。</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/categories">返回分类管理</a></div></div>' .
+            $errorHtml .
+            '<section class="editor-card"><form method="post" action="/admin/categories/edit/' . (int) $category['id'] . '">' . CsrfToken::field() .
+            '<label>分类名称<input name="name" value="' . View::escape((string) ($category['name'] ?? '')) . '" required></label>' .
+            '<label>URL Slug<input name="slug" value="' . View::escape((string) ($category['slug'] ?? '')) . '" required></label>' .
+            '<p class="muted">当前关联内容：' . (int) ($category['content_count'] ?? 0) . ' 篇。</p>' .
+            '<button type="submit">保存分类</button></form></section>';
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function categoryRows(): array
+    {
+        try {
+            return (new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults()))->terms('category');
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    /** @param mixed $selected */
+    private function contentCategorySelector(mixed $selected): string
+    {
+        $selectedNames = array_values(array_map('strval', is_array($selected) ? $selected : []));
+        $selectedLookup = array_fill_keys($selectedNames, true);
+        $categories = $this->categoryRows();
+        $options = '';
+        foreach ($categories as $category) {
+            $checked = isset($selectedLookup[(string) $category['name']]) ? ' checked' : '';
+            $options .= '<label><input type="checkbox" name="category_ids[]" value="' . (int) $category['id'] . '"' . $checked . '> ' . View::escape((string) $category['name']) . '</label>';
+        }
+        $options = $options !== '' ? $options : '<p class="muted">暂无已建分类，可以先快速新增，或进入分类管理创建。</p>';
+
+        return '<div class="editor-checkbox-list">' . $options . '</div><p><a class="button editor-secondary" href="/admin/categories" target="_blank" rel="noopener">管理分类</a></p>';
+    }
+
+    /** @param mixed $selected @return list<string> */
+    private function manualCategoryNames(mixed $selected): array
+    {
+        $selectedNames = array_values(array_map('strval', is_array($selected) ? $selected : []));
+        $known = [];
+        foreach ($this->categoryRows() as $category) {
+            $known[(string) $category['name']] = true;
+        }
+
+        return array_values(array_filter($selectedNames, static fn (string $name): bool => !isset($known[$name])));
+    }
+
+    /** @param mixed $input @return list<string> */
+    private function categoryNamesFromIds(mixed $input): array
+    {
+        $ids = is_array($input) ? array_values(array_filter(array_map('intval', $input), static fn (int $id): bool => $id > 0)) : [];
+        if ($ids === []) {
+            return [];
+        }
+        $names = [];
+        foreach ($this->categoryRows() as $category) {
+            if (in_array((int) $category['id'], $ids, true)) {
+                $names[] = (string) $category['name'];
+            }
+        }
+
+        return $names;
     }
 
     private function navigationForm(string $error = ''): string

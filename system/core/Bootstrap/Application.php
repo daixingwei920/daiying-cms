@@ -337,6 +337,11 @@ final class Application
         $router->get('/admin/content/edit/{id}', [$admin, 'contentEdit']);
         $router->post('/admin/content/edit/{id}', [$admin, 'contentUpdate']);
         $router->post('/admin/content/delete/{id}', [$admin, 'contentDelete']);
+        $router->get('/admin/categories', [$admin, 'categoryIndex']);
+        $router->post('/admin/categories', [$admin, 'categoryStore']);
+        $router->get('/admin/categories/edit/{id}', [$admin, 'categoryEdit']);
+        $router->post('/admin/categories/edit/{id}', [$admin, 'categoryUpdate']);
+        $router->post('/admin/categories/delete/{id}', [$admin, 'categoryDelete']);
         $router->get('/admin/media', [$admin, 'mediaIndex']);
         $router->post('/admin/media/upload', [$admin, 'mediaUpload']);
         $router->get('/admin/media/provider/list', [$admin, 'mediaProviderList']);
