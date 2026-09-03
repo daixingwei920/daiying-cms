@@ -55,6 +55,7 @@ final class Application
         private readonly Settings $settings,
         private readonly FileLogger $logger,
         private readonly Router $router,
+        private readonly bool $installed,
     ) {
     }
 
@@ -62,10 +63,11 @@ final class Application
     {
         $settings = Settings::load($rootPath);
         $logger = new FileLogger($rootPath . '/storage/logs/app.log');
+        $installed = is_file($rootPath . '/storage/installed.lock');
 
         ErrorHandler::register($logger, (bool) $settings->get('app.debug', false));
         if (!self::isStatelessHealthRequest()) {
-            SessionManager::start((bool) $settings->get('app.secure_cookies', false));
+            SessionManager::start($installed && (bool) $settings->get('app.secure_cookies', false));
         }
         CoreBoundary::assertWritablePaths($rootPath);
         $mode = RunMode::detect($rootPath, (string) $settings->get('app.mode', RunMode::NORMAL));
@@ -73,7 +75,7 @@ final class Application
             'source' => 'Core',
             'mode' => $mode,
             'version' => (string) $settings->get('app.version', '0.0.0'),
-            'installed' => is_file($rootPath . '/storage/installed.lock'),
+            'installed' => $installed,
             'maintenance' => is_file($rootPath . '/storage/maintenance.mode'),
         ]);
 
@@ -81,7 +83,7 @@ final class Application
         $blocks = new BlockRegistry();
         $pluginRuntime = new PluginRuntimeRegistry();
         self::registerCorePaymentProviders($settings);
-        if (RunMode::safeLoadsPlugins($mode)) {
+        if ($installed && RunMode::safeLoadsPlugins($mode)) {
             try {
                 $pdo = ConnectionFactory::make($settings);
                 $secrets = new PluginSecretStore($pdo, (string) $settings->get('security.encryption_key', ''));
@@ -101,7 +103,7 @@ final class Application
                 $logger->error('Plugin bootstrap skipped', ['source' => 'Core', 'error' => $exception->getMessage()]);
             }
         } else {
-            $logger->info('Plugin bootstrap skipped by run mode', ['source' => 'Core', 'mode' => $mode]);
+            $logger->info('Plugin bootstrap skipped', ['source' => 'Core', 'installed' => $installed, 'mode' => $mode]);
         }
 
         $router = new Router();
@@ -109,7 +111,7 @@ final class Application
         View::setFrontNavigation(NavigationBuilder::build($settings, null, $rootPath));
         self::registerCoreRoutes($router, $settings, $rootPath, $logger, $mode, $pluginRuntime);
 
-        return new self($rootPath, $settings, $logger, $router);
+        return new self($rootPath, $settings, $logger, $router, $installed);
     }
 
     public function handle(Request $request): Response
@@ -152,6 +154,10 @@ final class Application
 
     private function hstsEnabled(): bool
     {
+        if (!$this->installed) {
+            return false;
+        }
+
         $siteUrl = (string) $this->settings->get('site.url', '');
         $parts = parse_url($siteUrl);
 

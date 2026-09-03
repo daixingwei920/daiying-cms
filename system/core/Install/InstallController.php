@@ -347,7 +347,7 @@ final class InstallController
             'id' => $siteId,
             'secret' => $siteSecret,
         ];
-        $items['app']['secure_cookies'] = $this->secureCookiesForSiteUrl($siteUrl);
+        $items['app']['secure_cookies'] = $this->secureCookiesForSiteUrl($siteUrl, is_file($this->rootPath . '/config/app.php'));
         $items['database'] = [
             'dsn' => $database['dsn'],
             'username' => $database['username'],
@@ -425,9 +425,9 @@ final class InstallController
         @chmod($target, 0600);
     }
 
-    private function secureCookiesForSiteUrl(string $siteUrl): bool
+    private function secureCookiesForSiteUrl(string $siteUrl, bool $preserveExisting): bool
     {
-        $existing = (bool) $this->settings->get('app.secure_cookies', false);
+        $existing = $preserveExisting && (bool) $this->settings->get('app.secure_cookies', false);
         $scheme = strtolower((string) (parse_url($siteUrl, PHP_URL_SCHEME) ?: ''));
 
         return $existing || $scheme === 'https';

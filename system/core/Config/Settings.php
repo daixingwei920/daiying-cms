@@ -14,11 +14,12 @@ final class Settings
     public static function load(string $rootPath): self
     {
         $configFile = $rootPath . '/config/app.php';
+        $exampleFile = $rootPath . '/config/app.example.php';
         clearstatcache(true, $configFile);
         if (function_exists('opcache_invalidate')) {
             @opcache_invalidate($configFile, true);
         }
-        $items = is_file($configFile) ? require $configFile : [];
+        $items = is_file($configFile) ? require $configFile : (is_file($exampleFile) ? require $exampleFile : []);
 
         return new self(is_array($items) ? $items : []);
     }
