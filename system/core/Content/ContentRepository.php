@@ -787,8 +787,18 @@ final class ContentRepository
                     continue;
                 }
                 $slug = Slugger::make($name);
-                $termStmt = $this->pdo->prepare('SELECT id FROM cms_terms WHERE taxonomy = :taxonomy AND slug = :slug LIMIT 1');
-                $termStmt->execute([':taxonomy' => $taxonomy, ':slug' => $slug]);
+                $termStmt = $this->pdo->prepare(
+                    'SELECT id FROM cms_terms
+                     WHERE taxonomy = :taxonomy AND (name = :name OR slug = :slug)
+                     ORDER BY CASE WHEN name = :name_order THEN 0 ELSE 1 END, id ASC
+                     LIMIT 1'
+                );
+                $termStmt->execute([
+                    ':taxonomy' => $taxonomy,
+                    ':name' => $name,
+                    ':slug' => $slug,
+                    ':name_order' => $name,
+                ]);
                 $termId = (int) $termStmt->fetchColumn();
                 if ($termId <= 0) {
                     $now = gmdate('c');

@@ -363,6 +363,23 @@ final class ContentFrontController
         if (($paidContent['enabled'] ?? false) && !($paidContent['authorized'] ?? false)) {
             $renderedBlocks .= $this->paidContentWallHtml($paidContent);
         }
+        $pageCategory = null;
+        $pageCategoryItems = [];
+        $pageCategoryTotal = 0;
+        if ((string) $content['content_type'] === 'page') {
+            $pageSlug = trim((string) $content['slug'], '/');
+            if ($pageSlug !== '') {
+                $repo = $this->repo();
+                $pageCategory = $repo->termBySlug('category', $pageSlug);
+                if ($pageCategory !== null) {
+                    $pageCategoryItems = array_map(
+                        fn (array $item): array => $this->viewModel($item),
+                        $repo->publicByTerm('category', $pageSlug, 1, 24)
+                    );
+                    $pageCategoryTotal = $repo->publicCountByTerm('category', $pageSlug);
+                }
+            }
+        }
 
         return [
             'site_name' => (string) $this->settings->get('site.name', 'PHP CMS'),
@@ -378,6 +395,9 @@ final class ContentFrontController
             'updated_at' => $content['updated_at'] ?? null,
             'categories' => array_values(array_filter($terms, static fn (array $term): bool => $term['taxonomy'] === 'category')),
             'tags' => array_values(array_filter($terms, static fn (array $term): bool => $term['taxonomy'] === 'tag')),
+            'page_category' => $pageCategory,
+            'page_category_items' => $pageCategoryItems,
+            'page_category_total' => $pageCategoryTotal,
             'seo' => $seo,
             'canonical' => $seo['canonical'],
             'preview' => $preview,
