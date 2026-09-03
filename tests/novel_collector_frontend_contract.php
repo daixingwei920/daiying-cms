@@ -13,7 +13,7 @@ $assert = static function (bool $condition, string $message): void {
 };
 
 $assert(($manifest['plugin_id'] ?? '') === 'official.novel-collector', 'Novel collector plugin ID must remain official.novel-collector.');
-$assert(($manifest['version'] ?? '') === '0.4.6', 'Novel collector version should be 0.4.6.');
+$assert(($manifest['version'] ?? '') === '0.4.7', 'Novel collector version should be 0.4.7.');
 $assert(($manifest['core']['max'] ?? '') === '2.0.0', 'Novel collector core max should be a concrete semver upper bound.');
 
 $routes = [];
@@ -41,6 +41,13 @@ foreach ([
     '/admin/novel-collector/site',
     '/admin/novel-collector/site/discover',
     '/admin/novel-collector/site/create',
+    '$loadAutoSettings',
+    '$pickRunnableJob',
+    '$runAutoBatch',
+    '/admin/novel-collector/auto',
+    '/admin/novel-collector/auto/save',
+    '/admin/novel-collector/auto/tick',
+    'novel_collector_auto',
     '同域名、同端口',
 ] as $needle) {
     $assert(str_contains($plugin, $needle), 'Missing frontend contract token: ' . $needle);
