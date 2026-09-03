@@ -828,10 +828,19 @@ final class AdminController
 
         try {
             $input = $this->siteSettingsInput($request);
+            $brandUploads = $this->siteBrandUploads((int) ($guard['id'] ?? 0));
+            if ($brandUploads['site_logo_url'] !== '') {
+                $input['site_logo_url'] = $brandUploads['site_logo_url'];
+            }
+            if ($brandUploads['site_favicon_url'] !== '') {
+                $input['site_favicon_url'] = $brandUploads['site_favicon_url'];
+            }
             $this->writeConfig($this->root(), static function (array $config) use ($input): array {
                 $config['site'] = is_array($config['site'] ?? null) ? $config['site'] : [];
                 $config['site']['name'] = $input['site_name'];
                 $config['site']['url'] = $input['site_url'];
+                $config['site']['logo_url'] = $input['site_logo_url'];
+                $config['site']['favicon_url'] = $input['site_favicon_url'];
                 $config['payment'] = is_array($config['payment'] ?? null) ? $config['payment'] : [];
                 $config['payment']['default_currency'] = $input['default_currency'];
                 $config['seo'] = is_array($config['seo'] ?? null) ? $config['seo'] : [];
@@ -866,6 +875,8 @@ final class AdminController
     {
         $siteName = (string) $this->settings->get('site.name', 'PHP CMS');
         $siteUrl = (string) $this->settings->get('site.url', '');
+        $siteLogoUrl = (string) $this->settings->get('site.logo_url', '');
+        $siteFaviconUrl = (string) $this->settings->get('site.favicon_url', '');
         $robotsIndex = (bool) $this->settings->get('seo.robots_index', true);
         $marketEnabled = (bool) $this->settings->get('market.enabled', false);
         $developerMode = (bool) $this->settings->get('market.developer_mode', false) && $marketEnabled;
@@ -875,10 +886,19 @@ final class AdminController
 
         return '<h1>站点设置</h1>' . $message .
             '<p class="muted">这里保存 CMS Core 站点身份和基础 SEO 抓取策略。关闭索引后，前台页面会输出 noindex,nofollow，robots.txt 会禁止抓取，sitemap.xml 不列出公开内容。</p>' .
-            '<form method="post" action="/admin/settings">' . CsrfToken::field() .
+            '<form method="post" action="/admin/settings" enctype="multipart/form-data">' . CsrfToken::field() .
             '<label>站点名称<input name="site_name" maxlength="120" value="' . View::escape($siteName) . '" required></label>' .
             '<label>站点 URL<input name="site_url" value="' . View::escape($siteUrl) . '" placeholder="https://example.com"></label>' .
             '<p class="muted">站点 URL 用于 canonical、robots.txt 和 sitemap.xml。留空时前台会回退到本地基准地址。</p>' .
+            '<section class="card"><h2>站点品牌</h2>' .
+            '<p class="muted">Logo 和 Favicon 是 CMS 全局基础设置。主题可以留空并自动使用这里的地址，也可以在主题设置里单独覆盖。</p>' .
+            ($siteLogoUrl !== '' ? '<p><img src="' . View::escape($siteLogoUrl) . '" alt="" style="max-width:180px;max-height:72px;border:1px solid #d8dee4;border-radius:8px;background:#fff;padding:8px"></p>' : '') .
+            '<label>Logo 图片地址<input name="site_logo_url" value="' . View::escape($siteLogoUrl) . '" placeholder="/media/1/logo.png"></label>' .
+            '<label>上传 Logo<input type="file" name="site_logo_file" accept="image/avif,image/gif,image/jpeg,image/png,image/webp"></label>' .
+            ($siteFaviconUrl !== '' ? '<p><img src="' . View::escape($siteFaviconUrl) . '" alt="" style="width:48px;height:48px;object-fit:contain;border:1px solid #d8dee4;border-radius:8px;background:#fff;padding:6px"></p>' : '') .
+            '<label>Favicon 地址<input name="site_favicon_url" value="' . View::escape($siteFaviconUrl) . '" placeholder="/media/2/favicon.png"></label>' .
+            '<label>上传 Favicon<input type="file" name="site_favicon_file" accept="image/avif,image/gif,image/jpeg,image/png,image/x-icon,image/vnd.microsoft.icon,image/webp"></label>' .
+            '<p class="muted">上传后会进入媒体库并自动保存为可访问的 /media/ID/文件名 地址。</p></section>' .
             $this->currencySelect('default_currency', $defaultCurrency, '默认币种') .
             '<p class="muted">新建发卡商品、付费内容和扩展商品默认使用该币种，单个商品仍可单独修改。</p>' .
             '<label><input type="checkbox" name="robots_index" value="1"' . ($robotsIndex ? ' checked' : '') . '> 允许搜索引擎索引本站</label>' .
@@ -894,7 +914,7 @@ final class AdminController
             '<p><a class="button" href="/admin">返回后台首页</a></p>';
     }
 
-    /** @return array{site_name:string,site_url:string,default_currency:string,robots_index:bool,market_enabled:bool,developer_mode:bool,market_server_url:string,market_site_token:string} */
+    /** @return array{site_name:string,site_url:string,site_logo_url:string,site_favicon_url:string,default_currency:string,robots_index:bool,market_enabled:bool,developer_mode:bool,market_server_url:string,market_site_token:string} */
     private function siteSettingsInput(Request $request): array
     {
         $siteName = trim((string) $request->input('site_name', ''));
@@ -914,6 +934,9 @@ final class AdminController
                 throw new \InvalidArgumentException('站点 URL 只允许 http 或 https 完整地址。');
             }
         }
+
+        $siteLogoUrl = $this->siteBrandUrl((string) $request->input('site_logo_url', ''), false);
+        $siteFaviconUrl = $this->siteBrandUrl((string) $request->input('site_favicon_url', ''), true);
 
         $marketServerUrl = rtrim(trim((string) $request->input('market_server_url', (string) $this->settings->get('market.server_url', (string) $this->settings->get('updates.server_url', '')))), '/');
         if ($marketServerUrl !== '') {
@@ -936,6 +959,8 @@ final class AdminController
         return [
             'site_name' => $siteName,
             'site_url' => $siteUrl,
+            'site_logo_url' => $siteLogoUrl,
+            'site_favicon_url' => $siteFaviconUrl,
             'default_currency' => $this->normalizeAdminCurrency((string) $request->input('default_currency', 'USD')),
             'robots_index' => (string) $request->input('robots_index', '') === '1',
             'market_enabled' => (string) $request->input('market_enabled', '') === '1',
@@ -8736,6 +8761,82 @@ JS;
     private function mediaLibrary(): MediaLibrary
     {
         return new MediaLibrary(ConnectionFactory::make($this->settings), $this->root() . '/content/uploads', (array) $this->settings->get('media', []));
+    }
+
+    private function siteBrandUrl(string $url, bool $favicon): string
+    {
+        $url = trim($url);
+        if ($url === '') {
+            return '';
+        }
+        if (strlen($url) > 2048 || preg_match('/[\x00-\x1F\x7F]/', $url) === 1) {
+            throw new \InvalidArgumentException(($favicon ? 'Favicon' : 'Logo') . ' 地址格式无效。');
+        }
+        $parts = parse_url($url);
+        if (str_starts_with($url, '/')) {
+            $path = (string) (is_array($parts) ? ($parts['path'] ?? '') : $url);
+        } else {
+            $scheme = is_array($parts) ? strtolower((string) ($parts['scheme'] ?? '')) : '';
+            $host = is_array($parts) ? (string) ($parts['host'] ?? '') : '';
+            if (!in_array($scheme, ['http', 'https'], true) || $host === '') {
+                throw new \InvalidArgumentException(($favicon ? 'Favicon' : 'Logo') . ' 地址只允许站内绝对路径或 http/https 图片地址。');
+            }
+            $path = (string) ($parts['path'] ?? '');
+        }
+
+        $pattern = $favicon ? '/\.(avif|gif|ico|jpe?g|png|svg|webp)$/i' : '/\.(avif|gif|jpe?g|png|svg|webp)$/i';
+        if ($path !== '' && preg_match($pattern, $path) !== 1) {
+            throw new \InvalidArgumentException(($favicon ? 'Favicon' : 'Logo') . ' 地址必须指向图片文件。');
+        }
+
+        return $url;
+    }
+
+    /** @return array{site_logo_url:string,site_favicon_url:string} */
+    private function siteBrandUploads(int $adminId): array
+    {
+        return [
+            'site_logo_url' => $this->siteBrandUploadUrl($_FILES['site_logo_file'] ?? null, false, $adminId),
+            'site_favicon_url' => $this->siteBrandUploadUrl($_FILES['site_favicon_file'] ?? null, true, $adminId),
+        ];
+    }
+
+    private function siteBrandUploadUrl(mixed $file, bool $favicon, int $adminId): string
+    {
+        if (!is_array($file) || (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+            return '';
+        }
+        $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
+        if ($error !== UPLOAD_ERR_OK) {
+            throw new \InvalidArgumentException(($favicon ? 'Favicon' : 'Logo') . ' 上传失败，错误码：' . $error);
+        }
+        $tmpName = (string) ($file['tmp_name'] ?? '');
+        if ($tmpName === '' || !is_uploaded_file($tmpName)) {
+            throw new \InvalidArgumentException(($favicon ? 'Favicon' : 'Logo') . ' 上传文件无效。');
+        }
+        $size = (int) ($file['size'] ?? 0);
+        if ($size <= 0 || $size > 5 * 1024 * 1024) {
+            throw new \InvalidArgumentException(($favicon ? 'Favicon' : 'Logo') . ' 文件大小不能超过 5MB。');
+        }
+        $original = (string) ($file['name'] ?? '');
+        $extension = strtolower(pathinfo($original, PATHINFO_EXTENSION));
+        $allowed = $favicon ? ['avif', 'gif', 'ico', 'jpeg', 'jpg', 'png', 'webp'] : ['avif', 'gif', 'jpeg', 'jpg', 'png', 'webp'];
+        if (!in_array($extension, $allowed, true)) {
+            throw new \InvalidArgumentException(($favicon ? 'Favicon' : 'Logo') . ' 只允许上传图片文件。');
+        }
+
+        $media = $this->mediaLibrary()->uploadLocalFile($tmpName, $this->siteBrandFileName($original, $favicon), $adminId);
+        return '/media/' . (int) $media['id'] . '/' . rawurlencode((string) $media['filename']);
+    }
+
+    private function siteBrandFileName(string $original, bool $favicon): string
+    {
+        $extension = strtolower(pathinfo($original, PATHINFO_EXTENSION));
+        if ($extension === '') {
+            $extension = $favicon ? 'ico' : 'png';
+        }
+
+        return ($favicon ? 'site-favicon' : 'site-logo') . '-' . date('YmdHis') . '.' . $extension;
     }
 
     private function mediaLimit(string $key, int $default): int

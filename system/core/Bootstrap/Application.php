@@ -218,6 +218,8 @@ final class Application
             try {
                 return Response::html($theme->render('home', [
                     'site_name' => (string) $settings->get('site.name', 'PHP CMS'),
+                    'site_logo_url' => (string) $settings->get('site.logo_url', ''),
+                    'site_favicon_url' => (string) $settings->get('site.favicon_url', ''),
                     'contents' => $contents,
                     'navigation' => NavigationBuilder::build($settings, null, $rootPath),
                     'ad_slots' => self::adSlots($settings),
@@ -227,6 +229,8 @@ final class Application
                 $safe = $themes->load($themes->safeThemeId());
                 return Response::html($safe->render('home', [
                     'site_name' => (string) $settings->get('site.name', 'PHP CMS'),
+                    'site_logo_url' => (string) $settings->get('site.logo_url', ''),
+                    'site_favicon_url' => (string) $settings->get('site.favicon_url', ''),
                     'contents' => [],
                     'navigation' => NavigationBuilder::build($settings, null, $rootPath),
                     'ad_slots' => self::adSlots($settings),

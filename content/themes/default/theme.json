@@ -63,13 +63,23 @@
       "group": "Logo 与品牌",
       "order": 20,
       "default": "",
-      "placeholder": "/uploads/logo.png"
+      "placeholder": "/media/1/logo.png",
+      "help": "留空时自动使用站点设置中的全局 Logo。"
+    },
+    "favicon_image": {
+      "type": "image",
+      "label": "Favicon 图标",
+      "group": "Logo 与品牌",
+      "order": 21,
+      "default": "",
+      "placeholder": "/media/2/favicon.png",
+      "help": "留空时自动使用站点设置中的全局 Favicon。"
     },
     "logo_height": {
       "type": "range",
       "label": "Logo 高度",
       "group": "Logo 与品牌",
-      "order": 21,
+      "order": 22,
       "default": 40,
       "min": 28,
       "max": 72,

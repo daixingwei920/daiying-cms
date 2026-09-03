@@ -43,6 +43,8 @@ final class ContentFrontController
             $items = array_map(fn (array $item): array => $this->viewModel($item), $repo->publicList('article', $page, $perPage));
             return Response::html($this->theme()->render('list', [
                 'site_name' => (string) $this->settings->get('site.name', 'PHP CMS'),
+                'site_logo_url' => (string) $this->settings->get('site.logo_url', ''),
+                'site_favicon_url' => (string) $this->settings->get('site.favicon_url', ''),
                 'navigation' => NavigationBuilder::build($this->settings, null, $this->rootPath),
                 'title' => 'Articles',
                 'items' => $items,
@@ -102,6 +104,8 @@ final class ContentFrontController
 
             return Response::html($this->theme()->render('search', [
                 'site_name' => (string) $this->settings->get('site.name', 'PHP CMS'),
+                'site_logo_url' => (string) $this->settings->get('site.logo_url', ''),
+                'site_favicon_url' => (string) $this->settings->get('site.favicon_url', ''),
                 'navigation' => NavigationBuilder::build($this->settings, null, $this->rootPath),
                 'title' => $title,
                 'query' => $query,
@@ -263,6 +267,8 @@ final class ContentFrontController
 
         return Response::html($this->theme()->render('list', [
             'site_name' => (string) $this->settings->get('site.name', 'PHP CMS'),
+                'site_logo_url' => (string) $this->settings->get('site.logo_url', ''),
+                'site_favicon_url' => (string) $this->settings->get('site.favicon_url', ''),
             'navigation' => NavigationBuilder::build($this->settings, null, $this->rootPath),
             'title' => $title,
             'term' => $term,
@@ -360,6 +366,8 @@ final class ContentFrontController
 
         return [
             'site_name' => (string) $this->settings->get('site.name', 'PHP CMS'),
+                'site_logo_url' => (string) $this->settings->get('site.logo_url', ''),
+                'site_favicon_url' => (string) $this->settings->get('site.favicon_url', ''),
             'navigation' => NavigationBuilder::build($this->settings, null, $this->rootPath),
             'content' => $content,
             'title' => (string) $content['title'],
@@ -572,6 +580,8 @@ final class ContentFrontController
         try {
             return Response::html($this->theme()->render('error', [
                 'site_name' => (string) $this->settings->get('site.name', 'PHP CMS'),
+                'site_logo_url' => (string) $this->settings->get('site.logo_url', ''),
+                'site_favicon_url' => (string) $this->settings->get('site.favicon_url', ''),
                 'navigation' => NavigationBuilder::build($this->settings, null, $this->rootPath),
                 'title' => '页面未找到',
                 'message' => '你访问的页面不存在，或内容已经移动。',

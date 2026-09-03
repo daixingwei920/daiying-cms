@@ -71,6 +71,23 @@ if (!function_exists('dy_setting')) {
         return preg_match('/^https?:\/\/[^\s<>"\']+$/i', $url) === 1 ? $url : $fallback;
     }
 
+    function dy_image_url(TemplateContext $context, array $keys, bool $favicon = false): string
+    {
+        foreach ($keys as $key) {
+            $url = dy_safe_url(dy_text($context, (string) $key, ''), '');
+            if ($url === '') {
+                continue;
+            }
+            $path = strtolower((string) parse_url($url, PHP_URL_PATH));
+            $pattern = $favicon ? '/\.(avif|gif|ico|jpe?g|png|svg|webp)$/' : '/\.(avif|gif|jpe?g|png|svg|webp)$/';
+            if ($path === '' || preg_match($pattern, $path) === 1) {
+                return $url;
+            }
+        }
+
+        return '';
+    }
+
     function dy_date(mixed $value): string
     {
         $text = trim((string) $value);
@@ -144,12 +161,14 @@ if (!function_exists('dy_setting')) {
         $pageTitle = trim((string) ($seo['title'] ?? $title));
         $description = trim((string) ($seo['description'] ?? dy_text($context, 'site_description', '')));
         $canonical = trim((string) ($seo['canonical'] ?? $context->get('canonical', '')));
+        $favicon = dy_image_url($context, ['favicon_image', 'favicon_url', 'site_favicon_url'], true);
         ?>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title><?= $context->e($pageTitle !== '' ? $pageTitle : $siteName) ?></title>
     <meta name="description" content="<?= $context->e($description !== '' ? $description : $siteName) ?>">
+    <?php if ($favicon !== ''): ?><link rel="icon" href="<?= $context->e($favicon) ?>"><?php endif; ?>
     <?php if ($canonical !== ''): ?><link rel="canonical" href="<?= $context->e($canonical) ?>"><?php endif; ?>
     <meta name="robots" content="<?= $context->e($seo['robots'] ?? 'index,follow') ?>">
     <meta property="og:title" content="<?= $context->e($pageTitle !== '' ? $pageTitle : $siteName) ?>">
@@ -165,7 +184,7 @@ if (!function_exists('dy_setting')) {
     {
         $siteName = dy_site_name($context);
         $description = dy_text($context, 'site_description', '记录、发布与分享');
-        $logo = dy_safe_url(dy_text($context, 'logo_image', ''), '');
+        $logo = dy_image_url($context, ['logo_image', 'site_logo_url']);
         $initial = function_exists('mb_substr') ? mb_substr($siteName, 0, 1, 'UTF-8') : substr($siteName, 0, 1);
         $navigation = dy_navigation_items($context);
         $showSearch = dy_bool($context, 'show_search', true);
