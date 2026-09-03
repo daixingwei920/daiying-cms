@@ -1,7 +1,7 @@
 {
     "plugin_id": "official.novel-collector",
     "name": "Daiying Novel Collector",
-    "version": "0.4.3",
+    "version": "0.4.4",
     "author": "Daiying CMS",
     "type": "plugin",
     "package_type": "plugin",
@@ -27,6 +27,8 @@
     "capability_namespaces": ["novel", "novel_collector"],
     "public_routes": [
         {"label": "小说", "path": "/novels", "method": "GET"},
+        {"label": "小说搜索", "path": "/novels/search", "method": "GET"},
+        {"label": "我的书架", "path": "/novels/bookshelf", "method": "GET"},
         {"label": "小说目录", "path": "/novels/book", "method": "GET"},
         {"label": "小说阅读", "path": "/novels/chapter", "method": "GET"},
         {"label": "小说 TXT 下载", "path": "/novels/export.txt", "method": "GET"}
