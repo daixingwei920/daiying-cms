@@ -1108,6 +1108,31 @@ final class NovelRepository
     }
 
     /** @return list<array<string,mixed>> */
+    public function publicChapterIndex(int $novelId): array
+    {
+        if ($novelId <= 0 || !$this->hasTable('novel_chapters')) {
+            return [];
+        }
+        $stmt = $this->pdo->prepare('SELECT id, novel_id, title, slug, chapter_number, sort_order, source_url, content_hash, word_count, published_at, collected_at, updated_at
+            FROM novel_chapters
+            WHERE novel_id = ?
+            ORDER BY sort_order ASC, id ASC');
+        $stmt->execute([$novelId]);
+        return array_values(array_map([$this, 'publicChapterRow'], $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: []));
+    }
+
+    /** @return list<int> */
+    public function publicChapterSorts(int $novelId): array
+    {
+        if ($novelId <= 0 || !$this->hasTable('novel_chapters')) {
+            return [];
+        }
+        $stmt = $this->pdo->prepare('SELECT sort_order FROM novel_chapters WHERE novel_id = ? AND sort_order > 0 ORDER BY sort_order ASC, id ASC');
+        $stmt->execute([$novelId]);
+        return array_values(array_unique(array_map('intval', $stmt->fetchAll(\PDO::FETCH_COLUMN) ?: [])));
+    }
+
+    /** @return list<array<string,mixed>> */
     public function publicChapters(int $novelId): array
     {
         if ($novelId <= 0 || !$this->hasTable('novel_chapters')) {

@@ -352,7 +352,7 @@ HTML);
         usort($chapters, static fn (array $a, array $b): int => (int) ($a['sort_order'] ?? 0) <=> (int) ($b['sort_order'] ?? 0));
         return $chapters;
     };
-    $loadNovelSummaries = static function () use ($storeAll, $normalizeStoredRow, $loadCollectedChapters, $loadCollectedChapterIndex, $formalRepo): array {
+    $loadNovelSummaries = static function () use ($storeAll, $normalizeStoredRow, $formalRepo): array {
         $novels = [];
         if ($formalRepo instanceof NovelRepository) {
             foreach ($formalRepo->publicNovels(200) as $formalNovel) {
@@ -383,7 +383,7 @@ HTML);
                 'catalog_url' => (string) ($job['catalog_url'] ?? ''),
                 'cover' => (string) ($job['cover'] ?? $job['cover_url'] ?? ''),
                 'cover_url' => (string) ($job['cover_url'] ?? $job['cover'] ?? ''),
-                'chapter_count' => max(count($loadCollectedChapterIndex($jobId)), count($loadCollectedChapters($jobId)), (int) ($job['collected_count'] ?? 0)),
+                'chapter_count' => max((int) ($job['collected_count'] ?? 0), (int) ($job['chapter_count'] ?? 0)),
             ];
         }
         foreach ($storeAll('novels_local') as $rowKey => $row) {
@@ -399,34 +399,8 @@ HTML);
                 'catalog_url' => (string) ($novel['catalog_url'] ?? ($novels[$jobId]['catalog_url'] ?? '')),
                 'cover' => (string) ($novel['cover'] ?? $novel['cover_url'] ?? ($novels[$jobId]['cover'] ?? '')),
                 'cover_url' => (string) ($novel['cover_url'] ?? $novel['cover'] ?? ($novels[$jobId]['cover_url'] ?? '')),
-                'chapter_count' => max(count($loadCollectedChapterIndex($jobId)), count($loadCollectedChapters($jobId)), (int) ($novel['chapter_count'] ?? 0), (int) ($novels[$jobId]['chapter_count'] ?? 0)),
+                'chapter_count' => max((int) ($novel['chapter_count'] ?? 0), (int) ($novels[$jobId]['chapter_count'] ?? 0)),
             ]);
-        }
-        foreach (['novel_chapter_index_local', 'novel_chapters_local'] as $bucket) {
-            foreach ($storeAll($bucket) as $row) {
-                $chapter = $normalizeStoredRow($row);
-                $jobId = (string) ($chapter['job_id'] ?? $chapter['novel_key'] ?? '');
-                if ($jobId === '') {
-                    continue;
-                }
-                if (!isset($novels[$jobId])) {
-                    $novels[$jobId] = [
-                        'job_id' => $jobId,
-                        'title' => $jobTitles[$jobId]['title'] ?? $jobId,
-                        'author' => $jobTitles[$jobId]['author'] ?? '',
-                        'catalog_url' => $jobTitles[$jobId]['catalog_url'] ?? '',
-                        'cover' => $jobTitles[$jobId]['cover'] ?? '',
-                        'cover_url' => $jobTitles[$jobId]['cover_url'] ?? '',
-                        'chapter_count' => 0,
-                    ];
-                }
-                if ((string) ($novels[$jobId]['title'] ?? '') === $jobId && isset($jobTitles[$jobId])) {
-                    $novels[$jobId]['title'] = $jobTitles[$jobId]['title'];
-                    $novels[$jobId]['author'] = $jobTitles[$jobId]['author'];
-                    $novels[$jobId]['catalog_url'] = $jobTitles[$jobId]['catalog_url'];
-                }
-                $novels[$jobId]['chapter_count'] = max((int) ($novels[$jobId]['chapter_count'] ?? 0), count($loadCollectedChapterIndex($jobId)), count($loadCollectedChapters($jobId)));
-            }
         }
         uasort($novels, static fn (array $a, array $b): int => strcmp((string) ($b['updated_at'] ?? ''), (string) ($a['updated_at'] ?? '')));
         return $novels;
@@ -677,13 +651,45 @@ HTML);
             'results' => $results,
         ];
     };
+    $compactAutoTick = static function (array $tick): array {
+        $settings = (array) ($tick['settings'] ?? []);
+        unset($settings['cron_token']);
+        $compactResult = static function (?array $result): ?array {
+            if ($result === null) {
+                return null;
+            }
+            $job = (array) ($result['job'] ?? []);
+            return [
+                'job' => [
+                    'job_id' => (string) ($job['job_id'] ?? ''),
+                    'title' => (string) ($job['title'] ?? ''),
+                    'status' => (string) ($job['status'] ?? ''),
+                    'resume_cursor' => (int) ($job['resume_cursor'] ?? 0),
+                    'chapter_count' => (int) ($job['chapter_count'] ?? 0),
+                ],
+                'processed_count' => count($result['processed'] ?? []),
+                'error_count' => count($result['errors'] ?? []),
+                'errors' => array_slice(array_map('strval', (array) ($result['errors'] ?? [])), 0, 5),
+                'remaining' => (int) ($result['remaining'] ?? 0),
+            ];
+        };
+        return [
+            'status' => (string) ($tick['status'] ?? ''),
+            'wait_seconds' => (int) ($tick['wait_seconds'] ?? 0),
+            'settings' => $settings,
+            'loops' => (int) ($tick['loops'] ?? 0),
+            'processed_total' => (int) ($tick['processed_total'] ?? 0),
+            'error_total' => (int) ($tick['error_total'] ?? 0),
+            'result' => $compactResult(isset($tick['result']) && is_array($tick['result']) ? $tick['result'] : null),
+        ];
+    };
 
     if (method_exists($context, 'adminMenu')) {
         $context->adminMenu('小说采集', '/admin/novel-collector', 'novel_collector.manage');
     }
 
     if (method_exists($context, 'frontRoute')) {
-        $context->frontRoute('GET', '/novel-collector/cron', static function ($request) use ($param, $loadAutoSettings, $ensureAutoCronToken, $runAutoTick): \Cms\Core\Http\Response {
+        $context->frontRoute('GET', '/novel-collector/cron', static function ($request) use ($param, $loadAutoSettings, $ensureAutoCronToken, $runAutoTick, $compactAutoTick): \Cms\Core\Http\Response {
             $settings = $ensureAutoCronToken($loadAutoSettings());
             $expected = (string) ($settings['cron_token'] ?? '');
             $provided = $param($request, 'token');
@@ -691,7 +697,7 @@ HTML);
                 return \Cms\Core\Http\Response::json(['ok' => false, 'error' => 'invalid_token'], 403);
             }
             $result = $runAutoTick($settings, max(1, min(10, (int) $param($request, 'loops', '1'))), $param($request, 'force', '0') === '1');
-            return \Cms\Core\Http\Response::json(['ok' => in_array($result['status'], ['ran', 'idle', 'waiting'], true), 'cron' => true] + $result);
+            return \Cms\Core\Http\Response::json(['ok' => in_array($result['status'], ['ran', 'idle', 'waiting'], true), 'cron' => true] + $compactAutoTick($result));
         });
         $context->frontRoute('GET', '/novels', static function ($request) use ($html, $pageShell, $loadNovelSummaries, $novelUrl, $novelSearchUrl) {
             $rows = '';
@@ -759,18 +765,20 @@ HTML;
         });
         $context->frontRoute('GET', '/novels/book', static function ($request) use ($param, $html, $pageShell, $loadNovelSummaries, $loadCollectedChapters, $loadCollectedChapterIndex, $novelChapterUrl, $formalRepo) {
             $jobId = $param($request, 'job_id');
-            $novels = $loadNovelSummaries();
-            $novel = $novels[$jobId] ?? null;
             $formalId = str_starts_with($jobId, 'formal_') ? (int) substr($jobId, 7) : 0;
-            if ($novel === null && $formalId > 0 && $formalRepo instanceof NovelRepository) {
+            $novel = null;
+            if ($formalId > 0 && $formalRepo instanceof NovelRepository) {
                 $novel = $formalRepo->publicNovel($formalId);
+            } else {
+                $novels = $loadNovelSummaries();
+                $novel = $novels[$jobId] ?? null;
             }
             if ($novel === null) {
                 return \Cms\Core\Http\Response::html($pageShell('小说不存在', '<h1>小说不存在</h1><section class="panel"><p class="muted">没有找到这个小说，可能还没有采集成功。</p><a class="button secondary" href="/novels">返回小说书库</a></section>'));
             }
             $chapters = [];
             if ($formalId > 0 && $formalRepo instanceof NovelRepository) {
-                $chapters = $formalRepo->publicChapters($formalId);
+                $chapters = $formalRepo->publicChapterIndex($formalId);
             }
             if ($chapters === []) {
                 $chapters = $loadCollectedChapterIndex($jobId);
@@ -829,14 +837,16 @@ HTML;
             if ($chapter === null) {
                 return \Cms\Core\Http\Response::html($pageShell('章节不存在', '<h1>章节不存在</h1><section class="panel"><p class="muted">这个章节还没有采集到本地。</p><a class="button secondary" href="/novels/book?job_id=' . rawurlencode($jobId) . '">返回目录</a></section>'));
             }
-            $novels = $loadNovelSummaries();
-            $novel = $novels[$jobId] ?? ['title' => $jobId];
+            $novel = ['title' => $jobId];
             if ($formalId > 0 && $formalRepo instanceof NovelRepository) {
                 $novel = $formalRepo->publicNovel($formalId) ?? $novel;
+            } else {
+                $novels = $loadNovelSummaries();
+                $novel = $novels[$jobId] ?? $novel;
             }
             $chapterSorts = [];
             if ($formalId > 0 && $formalRepo instanceof NovelRepository) {
-                $chapterSorts = array_map(static fn (array $row): int => (int) ($row['sort_order'] ?? 0), $formalRepo->publicChapters($formalId));
+                $chapterSorts = $formalRepo->publicChapterSorts($formalId);
             } else {
                 $chapterSorts = array_map(static fn (array $row): int => (int) ($row['sort_order'] ?? 0), $loadCollectedChapters($jobId));
             }
@@ -931,7 +941,7 @@ HTML), 'novel_collector.manage', false);
             $storePut('novel_collector_auto', 'settings', $settings);
             return \Cms\Core\Http\Response::html($pageShell('自动采集已保存', '<h1>自动采集已保存</h1><section class="panel"><p><strong>状态：</strong>' . ($settings['enabled'] ? '开启' : '关闭') . '</p><p><strong>间隔：</strong>' . $html((string) $settings['interval_seconds']) . ' 秒</p><p><strong>每批：</strong>' . $html((string) $settings['batch_size']) . ' 章</p><a class="button" href="/admin/novel-collector/auto">返回自动采集</a></section>'));
         }, 'novel_collector.manage', false);
-        $context->adminRoute('GET', '/admin/novel-collector/auto/tick', static function ($request) use ($param, $pageShell, $html, $loadAutoSettings, $ensureAutoCronToken, $runAutoTick) {
+        $context->adminRoute('GET', '/admin/novel-collector/auto/tick', static function ($request) use ($param, $pageShell, $html, $loadAutoSettings, $ensureAutoCronToken, $runAutoTick, $compactAutoTick) {
             $settings = $ensureAutoCronToken($loadAutoSettings());
             $force = $param($request, 'force', '0') === '1';
             $loops = max(1, min(10, (int) $param($request, 'loops', '1')));
@@ -947,7 +957,7 @@ HTML), 'novel_collector.manage', false);
                 return \Cms\Core\Http\Response::html($pageShell('没有可执行队列', '<h1>没有可执行队列</h1><section class="panel"><p class="muted">请先创建单本队列，或用全站发现批量创建队列。</p><a class="button" href="/admin/novel-collector/site">全站发现</a><a class="button secondary" href="/admin/novel-collector/auto">返回设置</a></section>'));
             }
             if ($param($request, 'format') === 'json') {
-                return \Cms\Core\Http\Response::json($tick);
+                return \Cms\Core\Http\Response::json($compactAutoTick($tick));
             }
             $result = (array) ($tick['result'] ?? []);
             $errors = (array) ($result['errors'] ?? []);
