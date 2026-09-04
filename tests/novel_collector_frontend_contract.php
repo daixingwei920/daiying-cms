@@ -14,7 +14,7 @@ $assert = static function (bool $condition, string $message): void {
 };
 
 $assert(($manifest['plugin_id'] ?? '') === 'official.novel-collector', 'Novel collector plugin ID must remain official.novel-collector.');
-$assert(($manifest['version'] ?? '') === '0.4.13', 'Novel collector version should be 0.4.13.');
+$assert(($manifest['version'] ?? '') === '0.4.14', 'Novel collector version should be 0.4.14.');
 $assert(($manifest['core']['max'] ?? '') === '2.0.0', 'Novel collector core max should be a concrete semver upper bound.');
 $manifestJson = json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 $assert(is_string($manifestJson) && str_contains($manifestJson, 'scheduled_tasks'), 'Novel collector manifest should declare scheduled tasks.');
@@ -25,7 +25,7 @@ foreach (($manifest['public_routes'] ?? []) as $route) {
     $routes[] = ($route['method'] ?? 'GET') . ' ' . ($route['path'] ?? '');
 }
 
-foreach (['GET /novels', 'GET /novels/search', 'GET /novels/bookshelf', 'GET /novels/book', 'GET /novels/chapter', 'GET /novels/export.txt'] as $route) {
+foreach (['GET /novels', 'GET /novels/search', 'GET /novels/bookshelf', 'GET /novels/book', 'GET /novels/chapter', 'GET /novels/export.txt', 'GET /novel-collector/cron'] as $route) {
     $assert(in_array($route, $routes, true), 'Missing public route: ' . $route);
 }
 
@@ -48,9 +48,14 @@ foreach ([
     '$loadAutoSettings',
     '$pickRunnableJob',
     '$runAutoBatch',
+    '$runAutoTick',
+    '$ensureAutoCronToken',
     '/admin/novel-collector/auto',
     '/admin/novel-collector/auto/save',
     '/admin/novel-collector/auto/tick',
+    '/novel-collector/cron',
+    'cron_token',
+    'invalid_token',
     'novel_collector_auto',
     'formal_',
     '同域名、同端口',

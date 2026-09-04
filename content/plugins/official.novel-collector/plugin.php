@@ -512,6 +512,7 @@ HTML);
         }
         throw new \RuntimeException($lastError?->getMessage() ?: 'HTTP request failed.');
     };
+    $generateCronToken = static fn (): string => bin2hex(random_bytes(24));
     $loadAutoSettings = static function () use ($storeGet): array {
         return array_merge([
             'enabled' => false,
@@ -519,7 +520,16 @@ HTML);
             'batch_size' => 50,
             'last_tick_at' => '',
             'last_job_id' => '',
+            'cron_token' => '',
         ], $storeGet('novel_collector_auto', 'settings') ?? []);
+    };
+    $ensureAutoCronToken = static function (array $settings) use ($storePut, $generateCronToken): array {
+        if (strlen((string) ($settings['cron_token'] ?? '')) < 32) {
+            $settings['cron_token'] = $generateCronToken();
+            $settings['updated_at'] = gmdate('c');
+            $storePut('novel_collector_auto', 'settings', $settings);
+        }
+        return $settings;
     };
     $pickRunnableJob = static function () use ($storeAll, $normalizeStoredRow): ?array {
         $jobs = [];
@@ -629,12 +639,60 @@ HTML);
         ]);
         return ['job' => $job, 'processed' => $processed, 'errors' => $errors, 'remaining' => max(0, count($items) - $cursor)];
     };
+    $runAutoTick = static function (array $settings, int $loops = 1, bool $force = false) use ($storePut, $pickRunnableJob, $runAutoBatch): array {
+        $loops = max(1, min(10, $loops));
+        if (empty($settings['enabled']) && !$force) {
+            return ['status' => 'disabled', 'settings' => $settings, 'loops' => 0, 'processed_total' => 0, 'error_total' => 0, 'results' => []];
+        }
+        $last = strtotime((string) ($settings['last_tick_at'] ?? '')) ?: 0;
+        $interval = max(20, (int) ($settings['interval_seconds'] ?? 60));
+        if (!$force && $last > 0 && time() - $last < $interval) {
+            return ['status' => 'waiting', 'wait_seconds' => $interval - (time() - $last), 'settings' => $settings, 'loops' => 0, 'processed_total' => 0, 'error_total' => 0, 'results' => []];
+        }
+        $job = $pickRunnableJob();
+        $results = [];
+        for ($loop = 0; $loop < $loops; $loop++) {
+            if ($job === null) {
+                break;
+            }
+            $result = $runAutoBatch($job, max(1, min(200, (int) ($settings['batch_size'] ?? 50))));
+            $results[] = $result;
+            $job = ((int) ($result['remaining'] ?? 0) > 0) ? $result['job'] : $pickRunnableJob();
+        }
+        $settings['last_tick_at'] = gmdate('c');
+        if ($results !== []) {
+            $lastResult = end($results);
+            $settings['last_job_id'] = (string) ($lastResult['job']['job_id'] ?? '');
+        }
+        $storePut('novel_collector_auto', 'settings', $settings);
+        $processedTotal = array_sum(array_map(static fn (array $item): int => count($item['processed'] ?? []), $results));
+        $errorTotal = array_sum(array_map(static fn (array $item): int => count($item['errors'] ?? []), $results));
+        return [
+            'status' => $results === [] ? 'idle' : 'ran',
+            'settings' => $settings,
+            'loops' => count($results),
+            'processed_total' => $processedTotal,
+            'error_total' => $errorTotal,
+            'result' => $results !== [] ? end($results) : null,
+            'results' => $results,
+        ];
+    };
 
     if (method_exists($context, 'adminMenu')) {
         $context->adminMenu('小说采集', '/admin/novel-collector', 'novel_collector.manage');
     }
 
     if (method_exists($context, 'frontRoute')) {
+        $context->frontRoute('GET', '/novel-collector/cron', static function ($request) use ($param, $loadAutoSettings, $ensureAutoCronToken, $runAutoTick): \Cms\Core\Http\Response {
+            $settings = $ensureAutoCronToken($loadAutoSettings());
+            $expected = (string) ($settings['cron_token'] ?? '');
+            $provided = $param($request, 'token');
+            if ($expected === '' || !hash_equals($expected, $provided)) {
+                return \Cms\Core\Http\Response::json(['ok' => false, 'error' => 'invalid_token'], 403);
+            }
+            $result = $runAutoTick($settings, max(1, min(10, (int) $param($request, 'loops', '1'))), $param($request, 'force', '0') === '1');
+            return \Cms\Core\Http\Response::json(['ok' => in_array($result['status'], ['ran', 'idle', 'waiting'], true), 'cron' => true] + $result);
+        });
         $context->frontRoute('GET', '/novels', static function ($request) use ($html, $pageShell, $loadNovelSummaries, $novelUrl, $novelSearchUrl) {
             $rows = '';
             foreach ($loadNovelSummaries() as $novel) {
@@ -849,63 +907,51 @@ HTML));
   </section>
 </main>
 HTML), 'novel_collector.manage', false);
-        $context->adminRoute('GET', '/admin/novel-collector/auto', static function ($request) use ($html, $pageShell, $loadAutoSettings, $pickRunnableJob) {
-            $settings = $loadAutoSettings();
+        $context->adminRoute('GET', '/admin/novel-collector/auto', static function ($request) use ($html, $pageShell, $loadAutoSettings, $ensureAutoCronToken, $pickRunnableJob) {
+            $settings = $ensureAutoCronToken($loadAutoSettings());
             $job = $pickRunnableJob();
             $enabled = !empty($settings['enabled']);
-            $body = '<h1>自动采集</h1><section class="panel"><p><strong>状态：</strong><span class="tag">' . ($enabled ? 'enabled' : 'disabled') . '</span></p><p><strong>间隔：</strong>' . $html((string) ($settings['interval_seconds'] ?? 60)) . ' 秒</p><p><strong>每批：</strong>' . $html((string) ($settings['batch_size'] ?? 50)) . ' 章</p><p><strong>上次执行：</strong>' . $html((string) ($settings['last_tick_at'] ?? '')) . '</p><p><strong>待执行队列：</strong>' . $html((string) ($job['title'] ?? '无')) . '</p><form method="get" action="/admin/novel-collector/auto/save"><label>开启自动采集</label><select name="enabled"><option value="1"' . ($enabled ? ' selected' : '') . '>开启</option><option value="0"' . (!$enabled ? ' selected' : '') . '>关闭</option></select><label>间隔秒数</label><input name="interval_seconds" type="number" min="20" max="86400" value="' . $html((string) ($settings['interval_seconds'] ?? 60)) . '"><label>每批章节数</label><input name="batch_size" type="number" min="1" max="200" value="' . $html((string) ($settings['batch_size'] ?? 50)) . '"><button type="submit">保存设置</button><a class="button secondary" href="/admin/novel-collector/auto/tick?force=1">立即执行一批</a><a class="button secondary" href="/admin/novel-collector/auto/tick?force=1&loops=5">连续执行 5 批</a><a class="button secondary" href="/admin/novel-collector/site">全站发现</a><a class="button secondary" href="/admin/novel-collector/jobs">队列管理</a></form><p class="muted">一次采集数量受 PHP 请求超时、资源站响应和限流影响；建议自动采集用 30-120 秒间隔，每批 50-100 章，稳定后再提高。</p></section>';
+            $host = preg_replace('/[^A-Za-z0-9.:-]/', '', (string) ($request->server['HTTP_HOST'] ?? 'book.daixingwei.cn')) ?: 'book.daixingwei.cn';
+            $cronUrl = 'https://' . $host . '/novel-collector/cron?token=' . rawurlencode((string) ($settings['cron_token'] ?? ''));
+            $cronCommand = "curl -fsS '" . $cronUrl . "' >/dev/null";
+            $body = '<h1>自动采集</h1><section class="panel"><p><strong>状态：</strong><span class="tag">' . ($enabled ? 'enabled' : 'disabled') . '</span></p><p><strong>间隔：</strong>' . $html((string) ($settings['interval_seconds'] ?? 60)) . ' 秒</p><p><strong>每批：</strong>' . $html((string) ($settings['batch_size'] ?? 50)) . ' 章</p><p><strong>上次执行：</strong>' . $html((string) ($settings['last_tick_at'] ?? '')) . '</p><p><strong>待执行队列：</strong>' . $html((string) ($job['title'] ?? '无')) . '</p><form method="get" action="/admin/novel-collector/auto/save"><label>开启自动采集</label><select name="enabled"><option value="1"' . ($enabled ? ' selected' : '') . '>开启</option><option value="0"' . (!$enabled ? ' selected' : '') . '>关闭</option></select><label>间隔秒数</label><input name="interval_seconds" type="number" min="20" max="86400" value="' . $html((string) ($settings['interval_seconds'] ?? 60)) . '"><label>每批章节数</label><input name="batch_size" type="number" min="1" max="200" value="' . $html((string) ($settings['batch_size'] ?? 50)) . '"><button type="submit">保存设置</button><a class="button secondary" href="/admin/novel-collector/auto/tick?force=1">立即执行一批</a><a class="button secondary" href="/admin/novel-collector/auto/tick?force=1&loops=5">连续执行 5 批</a><a class="button secondary" href="/admin/novel-collector/site">全站发现</a><a class="button secondary" href="/admin/novel-collector/jobs">队列管理</a></form><p class="muted">后台按钮适合临时手动跑；真正无人值守请在宝塔计划任务里定时执行下面的 URL 或命令。</p><label>宝塔计划任务 URL</label><input readonly value="' . $html($cronUrl) . '"><label>Shell 命令</label><input readonly value="' . $html($cronCommand) . '"><p class="muted">建议宝塔任务每 1 分钟执行一次。插件会按“间隔秒数”判断是否真正采集，token 不要公开。</p></section>';
             return \Cms\Core\Http\Response::html($pageShell('小说自动采集', $body));
         }, 'novel_collector.manage', false);
-        $context->adminRoute('GET', '/admin/novel-collector/auto/save', static function ($request) use ($param, $storePut, $pageShell, $html) {
+        $context->adminRoute('GET', '/admin/novel-collector/auto/save', static function ($request) use ($param, $storePut, $pageShell, $html, $loadAutoSettings, $ensureAutoCronToken) {
+            $existing = $ensureAutoCronToken($loadAutoSettings());
             $settings = [
                 'enabled' => $param($request, 'enabled', '0') === '1',
                 'interval_seconds' => max(20, min(86400, (int) $param($request, 'interval_seconds', '60'))),
                 'batch_size' => max(1, min(200, (int) $param($request, 'batch_size', '50'))),
-                'last_tick_at' => '',
-                'last_job_id' => '',
+                'last_tick_at' => (string) ($existing['last_tick_at'] ?? ''),
+                'last_job_id' => (string) ($existing['last_job_id'] ?? ''),
+                'cron_token' => (string) ($existing['cron_token'] ?? ''),
                 'updated_at' => gmdate('c'),
             ];
             $storePut('novel_collector_auto', 'settings', $settings);
             return \Cms\Core\Http\Response::html($pageShell('自动采集已保存', '<h1>自动采集已保存</h1><section class="panel"><p><strong>状态：</strong>' . ($settings['enabled'] ? '开启' : '关闭') . '</p><p><strong>间隔：</strong>' . $html((string) $settings['interval_seconds']) . ' 秒</p><p><strong>每批：</strong>' . $html((string) $settings['batch_size']) . ' 章</p><a class="button" href="/admin/novel-collector/auto">返回自动采集</a></section>'));
         }, 'novel_collector.manage', false);
-        $context->adminRoute('GET', '/admin/novel-collector/auto/tick', static function ($request) use ($param, $storePut, $pageShell, $html, $loadAutoSettings, $pickRunnableJob, $runAutoBatch) {
-            $settings = $loadAutoSettings();
+        $context->adminRoute('GET', '/admin/novel-collector/auto/tick', static function ($request) use ($param, $pageShell, $html, $loadAutoSettings, $ensureAutoCronToken, $runAutoTick) {
+            $settings = $ensureAutoCronToken($loadAutoSettings());
             $force = $param($request, 'force', '0') === '1';
             $loops = max(1, min(10, (int) $param($request, 'loops', '1')));
-            if (empty($settings['enabled']) && !$force) {
+            $tick = $runAutoTick($settings, $loops, $force);
+            if ($tick['status'] === 'disabled') {
                 return \Cms\Core\Http\Response::html($pageShell('自动采集未开启', '<h1>自动采集未开启</h1><section class="panel"><p class="muted">自动采集当前关闭。</p><a class="button" href="/admin/novel-collector/auto">返回设置</a></section>'));
             }
-            $last = strtotime((string) ($settings['last_tick_at'] ?? '')) ?: 0;
-            $interval = max(20, (int) ($settings['interval_seconds'] ?? 60));
-            if (!$force && $last > 0 && time() - $last < $interval) {
-                $wait = $interval - (time() - $last);
+            if ($tick['status'] === 'waiting') {
+                $wait = (int) ($tick['wait_seconds'] ?? 0);
                 return \Cms\Core\Http\Response::html($pageShell('自动采集等待中', '<h1>自动采集等待中</h1><section class="panel"><p>距离下次执行还需 ' . $html((string) $wait) . ' 秒。</p><a class="button secondary" href="/admin/novel-collector/auto">返回设置</a></section>'));
             }
-            $job = $pickRunnableJob();
-            $results = [];
-            for ($loop = 0; $loop < $loops; $loop++) {
-                if ($job === null) {
-                    break;
-                }
-                $result = $runAutoBatch($job, max(1, min(200, (int) ($settings['batch_size'] ?? 50))));
-                $results[] = $result;
-                $job = ((int) ($result['remaining'] ?? 0) > 0) ? $result['job'] : $pickRunnableJob();
-            }
-            if ($results === []) {
-                $settings['last_tick_at'] = gmdate('c');
-                $storePut('novel_collector_auto', 'settings', $settings);
+            if ($tick['status'] === 'idle') {
                 return \Cms\Core\Http\Response::html($pageShell('没有可执行队列', '<h1>没有可执行队列</h1><section class="panel"><p class="muted">请先创建单本队列，或用全站发现批量创建队列。</p><a class="button" href="/admin/novel-collector/site">全站发现</a><a class="button secondary" href="/admin/novel-collector/auto">返回设置</a></section>'));
             }
-            $result = end($results);
-            $processedTotal = array_sum(array_map(static fn (array $item): int => count($item['processed'] ?? []), $results));
-            $errorTotal = array_sum(array_map(static fn (array $item): int => count($item['errors'] ?? []), $results));
-            $settings['last_tick_at'] = gmdate('c');
-            $settings['last_job_id'] = (string) ($result['job']['job_id'] ?? '');
-            $storePut('novel_collector_auto', 'settings', $settings);
             if ($param($request, 'format') === 'json') {
-                return \Cms\Core\Http\Response::json(['settings' => $settings, 'loops' => count($results), 'processed_total' => $processedTotal, 'error_total' => $errorTotal, 'result' => $result]);
+                return \Cms\Core\Http\Response::json($tick);
             }
-            $body = '<h1>自动采集执行</h1><section class="panel"><p><strong>书名：</strong>' . $html((string) ($result['job']['title'] ?? '')) . '</p><p><strong>执行批次：</strong>' . count($results) . ' 批</p><p><strong>本次采集：</strong>' . $processedTotal . ' 章</p><p><strong>失败：</strong>' . $errorTotal . ' 章</p><p><strong>剩余：</strong>' . $html((string) ($result['remaining'] ?? 0)) . ' 章</p><p><strong>状态：</strong><span class="tag">' . $html((string) ($result['job']['status'] ?? '')) . '</span></p>' . ($result['errors'] !== [] ? '<p class="fail">' . $html(implode('; ', $result['errors'])) . '</p>' : '') . '<a class="button" href="/admin/novel-collector/auto/tick?force=1">继续执行一批</a><a class="button secondary" href="/admin/novel-collector/auto/tick?force=1&loops=5">连续执行 5 批</a><a class="button secondary" href="/admin/novel-collector/auto">返回自动采集</a><a class="button secondary" href="/novels">前台小说</a></section>';
+            $result = (array) ($tick['result'] ?? []);
+            $errors = (array) ($result['errors'] ?? []);
+            $body = '<h1>自动采集执行</h1><section class="panel"><p><strong>书名：</strong>' . $html((string) ($result['job']['title'] ?? '')) . '</p><p><strong>执行批次：</strong>' . $html((string) ($tick['loops'] ?? 0)) . ' 批</p><p><strong>本次采集：</strong>' . $html((string) ($tick['processed_total'] ?? 0)) . ' 章</p><p><strong>失败：</strong>' . $html((string) ($tick['error_total'] ?? 0)) . ' 章</p><p><strong>剩余：</strong>' . $html((string) ($result['remaining'] ?? 0)) . ' 章</p><p><strong>状态：</strong><span class="tag">' . $html((string) ($result['job']['status'] ?? '')) . '</span></p>' . ($errors !== [] ? '<p class="fail">' . $html(implode('; ', $errors)) . '</p>' : '') . '<a class="button" href="/admin/novel-collector/auto/tick?force=1">继续执行一批</a><a class="button secondary" href="/admin/novel-collector/auto/tick?force=1&loops=5">连续执行 5 批</a><a class="button secondary" href="/admin/novel-collector/auto">返回自动采集</a><a class="button secondary" href="/novels">前台小说</a></section>';
             return \Cms\Core\Http\Response::html($pageShell('自动采集执行', $body));
         }, 'novel_collector.manage', false);
         $context->adminRoute('GET', '/admin/novel-collector/site', static function ($request) use ($pageShell) {
