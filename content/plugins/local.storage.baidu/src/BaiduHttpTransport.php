@@ -51,7 +51,6 @@ class BaiduHttpTransport
         $raw = curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         $error = curl_error($ch);
-        curl_close($ch);
 
         if (!is_string($raw)) {
             throw new \RuntimeException($error !== '' ? '百度网盘接口请求失败。' : '百度网盘接口没有返回内容。');
@@ -103,7 +102,6 @@ class BaiduHttpTransport
         $ok = curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         $error = curl_error($ch);
-        curl_close($ch);
         fclose($out);
 
         if ($tooLarge) {
