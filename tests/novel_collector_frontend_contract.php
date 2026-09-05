@@ -14,7 +14,7 @@ $assert = static function (bool $condition, string $message): void {
 };
 
 $assert(($manifest['plugin_id'] ?? '') === 'official.novel-collector', 'Novel collector plugin ID must remain official.novel-collector.');
-$assert(($manifest['version'] ?? '') === '0.4.17', 'Novel collector version should be 0.4.17.');
+$assert(($manifest['version'] ?? '') === '0.4.18', 'Novel collector version should be 0.4.18.');
 $assert(($manifest['core']['max'] ?? '') === '2.0.0', 'Novel collector core max should be a concrete semver upper bound.');
 $manifestJson = json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 $assert(is_string($manifestJson) && str_contains($manifestJson, 'scheduled_tasks'), 'Novel collector manifest should declare scheduled tasks.');
@@ -51,6 +51,15 @@ foreach ([
     '$runAutoTick',
     '$compactAutoTick',
     '$ensureAutoCronToken',
+    'payload_json',
+    'data_key',
+    'Chapter request title=',
+    '章节地址异常',
+    'suspected_duplicate_content',
+    'content_quality',
+    'requested_url',
+    'final_url',
+    'http_status',
     '/admin/novel-collector/auto',
     '/admin/novel-collector/auto/save',
     '/admin/novel-collector/auto/tick',
@@ -63,7 +72,7 @@ foreach ([
 ] as $needle) {
     $assert(str_contains($plugin, $needle), 'Missing frontend contract token: ' . $needle);
 }
-foreach (['publicNovels', 'publicSections', 'publicChapterIndex', 'publicChapterSorts', 'publicChapters', 'publicChapter', "job_id'] = 'formal_'"] as $needle) {
+foreach (['ContentQualityAnalyzer', 'hasDuplicateChapterContent', 'publicNovels', 'publicSections', 'publicChapterIndex', 'publicChapterSorts', 'publicChapters', 'publicChapter', "job_id'] = 'formal_'"] as $needle) {
     $assert(str_contains($system, $needle), 'Missing novel repository token: ' . $needle);
 }
 $assert(str_contains($system, 'extractCoverUrl'), 'Novel detector should extract cover URLs.');

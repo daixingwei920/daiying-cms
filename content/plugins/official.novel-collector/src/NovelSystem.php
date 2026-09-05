@@ -8,6 +8,10 @@ final class SecurityException extends \RuntimeException
 {
 }
 
+final class ContentQualityException extends \RuntimeException
+{
+}
+
 final class SafeHttpClient
 {
     private const BLOCKED_HOSTS = ['localhost', 'localhost.localdomain'];
@@ -45,6 +49,7 @@ final class SafeHttpClient
     public function get(string $url, array $extraHeaders = []): array
     {
         $this->assertSafeUrl($url);
+        $requested = $url;
         $current = $url;
         for ($redirect = 0; $redirect <= $this->maxRedirects; $redirect++) {
             $this->assertSafeUrl($current);
@@ -91,7 +96,18 @@ final class SafeHttpClient
                 $current = $this->resolveUrl($current, $location);
                 continue;
             }
-            return ['url' => $current, 'status' => $status, 'headers' => $headers, 'body' => (string) $body];
+            return [
+                'url' => $current,
+                'requested_url' => $requested,
+                'final_url' => $current,
+                'status' => $status,
+                'http_status' => $status,
+                'headers' => $headers,
+                'content_type' => $this->contentType($headers),
+                'response_length' => strlen((string) $body),
+                'redirect_count' => $redirect,
+                'body' => (string) $body,
+            ];
         }
         throw new SecurityException('Redirect limit exceeded.');
     }
@@ -162,6 +178,16 @@ final class SafeHttpClient
             }
         }
         return null;
+    }
+
+    private function contentType(array $headers): string
+    {
+        foreach ($headers as $header) {
+            if (stripos((string) $header, 'Content-Type:') === 0) {
+                return trim(substr((string) $header, 13));
+            }
+        }
+        return '';
     }
 
     private function resolveUrl(string $base, string $location): string
@@ -542,6 +568,7 @@ final class BqgSpaAdapter
             $chapters[] = [
                 'title' => trim((string) $title),
                 'url' => self::encryptedApiUrl('chapter', ['id' => $bookId, 'chapterid' => $chapterId]),
+                'source_book_id' => (string) $bookId,
                 'source_chapter_id' => $bookId . ':' . $chapterId,
                 'sort_order' => $chapterId,
             ];
@@ -608,6 +635,158 @@ final class HtmlSanitizer
     }
 }
 
+final class ContentQualityAnalyzer
+{
+    /** @return array<string,mixed> */
+    public function analyze(array $clean, array $response = [], array $chapter = []): array
+    {
+        $plain = trim((string) ($clean['plaintext'] ?? ''));
+        $html = (string) ($clean['html'] ?? '');
+        $normalized = self::normalizeText($plain);
+        $length = mb_strlen($plain);
+        $paragraphs = array_values(array_filter(array_map('trim', preg_split('/\R+/u', $plain) ?: [])));
+        $paragraphCount = count($paragraphs);
+        $urlLikeCount = preg_match_all('/(?:https?:\/\/|www\.|[a-z0-9][a-z0-9-]{1,24}\s*(?:[.。·点•⊕◎○◆◇♟♜♀¤Θ]|\\s)+\s*(?:com|cc|net|org|xyz|cn|de|vip))/iu', $plain);
+        $linkCount = preg_match_all('/<a\b|href\s*=/iu', $html);
+        $imageCount = preg_match_all('/<img\b/iu', $html);
+        $visibleLetters = preg_match_all('/[\p{L}\p{N}]/u', $plain);
+        $cjkLetters = preg_match_all('/\p{Han}/u', $plain);
+        $letterRatio = $length > 0 ? $visibleLetters / max(1, $length) : 0.0;
+        $cjkRatio = $length > 0 ? $cjkLetters / max(1, $length) : 0.0;
+        $noiseHits = preg_match_all('/验证码|访问(?:过于)?频繁|请登录|点击继续|最新网址|备用网址|广告|推广|扫码|APP下载|安全验证|人机验证|Cloudflare|Just a moment|cf-chl|成人|博彩|棋牌|AV在线|自拍偷拍|无码|加群|QQ|微信|联系(?:方式)?/iu', $plain);
+        $honeypotHits = preg_match_all('/大学阿拉伯语专业|全班一共\s*[０-９0-9]+\s*人|另\s*[０-９0-9]+\s*个男生|委琐不堪|典型东北大汉/iu', $plain);
+        $title = self::normalizeTitle((string) ($chapter['title'] ?? ''));
+        $titleRelated = $title === '' || str_contains($normalized, $title);
+        $score = 100;
+        $reasons = [];
+        if ($length < 100) {
+            $score -= 70;
+            $reasons[] = 'too_short';
+        } elseif ($length < 200) {
+            $score -= 35;
+            $reasons[] = 'short_text';
+        }
+        if ($paragraphCount < 2 && $length > 500) {
+            $score -= 20;
+            $reasons[] = 'low_paragraph_count';
+        }
+        if ($letterRatio < 0.35 && $length > 200) {
+            $score -= 35;
+            $reasons[] = 'low_text_ratio';
+        }
+        if ($urlLikeCount >= 4) {
+            $score -= min(45, $urlLikeCount * 6);
+            $reasons[] = 'high_domain_density';
+        }
+        if ($linkCount > 0 && $length > 0 && ($linkCount / max(1, $paragraphCount)) > 0.35) {
+            $score -= 30;
+            $reasons[] = 'high_link_density';
+        }
+        if ($imageCount >= 3 && $paragraphCount < 4) {
+            $score -= 25;
+            $reasons[] = 'image_heavy';
+        }
+        if ($noiseHits >= 3) {
+            $score -= min(45, $noiseHits * 8);
+            $reasons[] = 'error_or_promotion_terms';
+        }
+        if ($honeypotHits >= 2) {
+            $score -= 80;
+            $reasons[] = 'known_honeypot_promo_template';
+        }
+        if (!$titleRelated && $length < 800 && $cjkRatio > 0.2) {
+            $score -= 10;
+            $reasons[] = 'weak_title_relation';
+        }
+        $status = (int) ($response['http_status'] ?? $response['status'] ?? 0);
+        if ($status > 0 && ($status < 200 || $status >= 300)) {
+            $score -= 80;
+            $reasons[] = 'bad_http_status_' . $status;
+        }
+        $requested = (string) ($response['requested_url'] ?? '');
+        $final = (string) ($response['final_url'] ?? $response['url'] ?? '');
+        if ($requested !== '' && $final !== '' && self::looksLikeUnexpectedLanding($requested, $final)) {
+            $score -= 70;
+            $reasons[] = 'unexpected_final_url';
+        }
+        $quality = $score >= 70 ? 'ok' : ($score >= 45 ? 'suspicious' : 'failed');
+        return [
+            'quality' => $quality,
+            'score' => max(0, $score),
+            'reasons' => array_values(array_unique($reasons)),
+            'length' => $length,
+            'paragraph_count' => $paragraphCount,
+            'url_like_count' => $urlLikeCount,
+            'link_count' => $linkCount,
+            'image_count' => $imageCount,
+            'letter_ratio' => round($letterRatio, 3),
+            'cjk_ratio' => round($cjkRatio, 3),
+            'fingerprint' => self::fingerprint($plain),
+        ];
+    }
+
+    public function assertAcceptable(array $clean, array $response = [], array $chapter = []): array
+    {
+        $quality = $this->analyze($clean, $response, $chapter);
+        if (($quality['quality'] ?? '') !== 'ok') {
+            throw new ContentQualityException('content_quality_' . (string) $quality['quality'] . ': ' . implode(',', (array) ($quality['reasons'] ?? [])));
+        }
+        return $quality;
+    }
+
+    public static function fingerprint(string $text): string
+    {
+        return hash('sha256', self::normalizeText($text));
+    }
+
+    public static function similarity(string $a, string $b): float
+    {
+        $a = self::normalizeText($a);
+        $b = self::normalizeText($b);
+        if ($a === '' || $b === '') {
+            return 0.0;
+        }
+        $len = max(mb_strlen($a), mb_strlen($b));
+        $prefix = 0;
+        $limit = min(mb_strlen($a), mb_strlen($b), 2000);
+        for ($i = 0; $i < $limit; $i++) {
+            if (mb_substr($a, $i, 1) !== mb_substr($b, $i, 1)) {
+                break;
+            }
+            $prefix++;
+        }
+        return $prefix / max(1, min($len, 2000));
+    }
+
+    private static function normalizeText(string $text): string
+    {
+        $text = mb_strtolower(html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8'), 'UTF-8');
+        return preg_replace('/[\s\p{P}\p{S}]+/u', '', $text) ?? $text;
+    }
+
+    private static function normalizeTitle(string $title): string
+    {
+        $title = preg_replace('/^第\s*[\p{Han}\d零〇两百千万十]+\s*[章节回卷集部篇]\s*/u', '', $title) ?? $title;
+        $title = preg_replace('/[^\p{Han}\p{L}\p{N}]+/u', '', $title) ?? $title;
+        return mb_strtolower($title, 'UTF-8');
+    }
+
+    private static function looksLikeUnexpectedLanding(string $requested, string $final): bool
+    {
+        $req = parse_url($requested);
+        $fin = parse_url($final);
+        if (!is_array($req) || !is_array($fin)) {
+            return false;
+        }
+        $reqPath = trim((string) ($req['path'] ?? ''), '/');
+        $finPath = trim((string) ($fin['path'] ?? ''), '/');
+        if ($reqPath !== '' && $finPath === '') {
+            return true;
+        }
+        return strtolower((string) ($req['host'] ?? '')) !== strtolower((string) ($fin['host'] ?? '')) && $finPath === '';
+    }
+}
+
 final class NovelAutoDetector
 {
     public function detect(string $catalogUrl, string $html, array $manualRules = []): array
@@ -625,7 +804,13 @@ final class NovelAutoDetector
             if (!preg_match('/(?:第\s*[一二三四五六七八九十百千万\d零〇两]+\s*章|Chapter\s*\d+|正文|序章|终章|完本感言)/iu', $chapterTitle)) {
                 continue;
             }
-            $chapters[] = ['title' => $chapterTitle, 'url' => $this->absoluteUrl($catalogUrl, html_entity_decode($m[2], ENT_QUOTES, 'UTF-8')), 'sort_order' => count($chapters) + 1];
+            $href = html_entity_decode($m[2], ENT_QUOTES, 'UTF-8');
+            $chapters[] = [
+                'title' => $chapterTitle,
+                'url' => $this->absoluteUrl($catalogUrl, $href),
+                'source_chapter_id' => trim($href, '/'),
+                'sort_order' => count($chapters) + 1,
+            ];
         }
         $confidence = 0.20;
         $confidence += $title ? 0.20 : 0;
@@ -720,6 +905,7 @@ final class NovelAutoDetector
             $chapters[] = [
                 'title' => $chapterTitle,
                 'url' => $this->absoluteUrl($catalogUrl, $href),
+                'source_book_id' => (string) (parse_url($catalogUrl, PHP_URL_PATH) ?: ''),
                 'source_chapter_id' => trim($href, '/'),
                 'sort_order' => count($chapters) + 1,
             ];
@@ -753,21 +939,52 @@ final class NovelAutoDetector
         if (count($chapters) < 3) {
             return ['pass' => false, 'errors' => ['At least three chapters are required for preflight.']];
         }
+        $qualityAnalyzer = new ContentQualityAnalyzer();
         $positions = [0, intdiv(count($chapters), 2), count($chapters) - 1];
         $seen = [];
         $errors = [];
         $samples = [];
         foreach ($positions as $position) {
             $chapter = $chapters[$position];
-            $content = (string) $fetchChapter($chapter['url']);
+            $fetched = $fetchChapter($chapter['url']);
+            if (is_array($fetched)) {
+                $clean = is_array($fetched['clean'] ?? null) ? $fetched['clean'] : [];
+                $response = is_array($fetched['response'] ?? null) ? $fetched['response'] : [];
+                $content = (string) ($clean['plaintext'] ?? $fetched['plaintext'] ?? '');
+                if ($clean === []) {
+                    $clean = ['html' => '<p>' . htmlspecialchars($content, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</p>', 'plaintext' => $content, 'hash' => ContentQualityAnalyzer::fingerprint($content)];
+                }
+            } else {
+                $content = (string) $fetched;
+                $response = [];
+                $clean = ['html' => '<p>' . htmlspecialchars($content, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</p>', 'plaintext' => $content, 'hash' => ContentQualityAnalyzer::fingerprint($content)];
+            }
             $plain = trim(strip_tags($content));
-            $hash = hash('sha256', mb_substr($plain, 0, 2000));
-            $samples[] = ['title' => $chapter['title'], 'url' => $chapter['url'], 'length' => mb_strlen($plain), 'hash' => $hash];
+            $quality = $qualityAnalyzer->analyze($clean, $response, $chapter);
+            $hash = (string) ($quality['fingerprint'] ?? ContentQualityAnalyzer::fingerprint($plain));
+            $samples[] = [
+                'title' => $chapter['title'],
+                'url' => $chapter['url'],
+                'requested_url' => (string) ($response['requested_url'] ?? $chapter['url']),
+                'final_url' => (string) ($response['final_url'] ?? $response['url'] ?? ''),
+                'http_status' => (int) ($response['http_status'] ?? $response['status'] ?? 0),
+                'content_type' => (string) ($response['content_type'] ?? ''),
+                'response_length' => (int) ($response['response_length'] ?? 0),
+                'redirect_count' => (int) ($response['redirect_count'] ?? 0),
+                'length' => mb_strlen($plain),
+                'hash' => $hash,
+                'quality' => (string) ($quality['quality'] ?? 'unknown'),
+                'quality_score' => (int) ($quality['score'] ?? 0),
+                'quality_reasons' => $quality['reasons'] ?? [],
+            ];
             if (mb_strlen($plain) < 200) {
                 $errors[] = 'Chapter body is abnormally short: ' . $chapter['title'];
             }
             if (preg_match('/登录|验证码|404|not found|forbidden/i', $plain)) {
                 $errors[] = 'Chapter looks like an error or access-control page: ' . $chapter['title'];
+            }
+            if (($quality['quality'] ?? '') !== 'ok') {
+                $errors[] = 'Chapter content quality failed: ' . $chapter['title'] . ' (' . implode(',', (array) ($quality['reasons'] ?? [])) . ')';
             }
             if (isset($seen[$hash])) {
                 $errors[] = 'Duplicate chapter body detected.';
@@ -791,8 +1008,52 @@ final class NovelAutoDetector
                 return $body;
             }
         }
-        $body = $this->extractByXpath($html, '//article | //*[@itemprop="articleBody"] | //*[@id="chaptercontent" or @id="chapter-content" or @id="content"]');
+        $body = $this->extractBestChapterNode($html);
         return $body !== '' ? $body : $html;
+    }
+
+    private function extractBestChapterNode(string $html): string
+    {
+        libxml_use_internal_errors(true);
+        $dom = new \DOMDocument();
+        $dom->loadHTML('<?xml encoding="utf-8" ?>' . mb_convert_encoding($html, 'UTF-8', 'UTF-8,GB18030,GBK,BIG5,ISO-8859-1'), LIBXML_NOERROR | LIBXML_NOWARNING);
+        $xpath = new \DOMXPath($dom);
+        foreach (['script', 'style', 'iframe', 'object', 'embed', 'form', 'nav', 'header', 'footer', 'aside', 'noscript'] as $tag) {
+            foreach (iterator_to_array($dom->getElementsByTagName($tag)) as $node) {
+                $node->parentNode?->removeChild($node);
+            }
+        }
+        $query = '//article | //*[@itemprop="articleBody"] | //*[contains(translate(concat(" ", @id, " ", @class, " "), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "content") or contains(translate(concat(" ", @id, " ", @class, " "), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "chapter") or contains(translate(concat(" ", @id, " ", @class, " "), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "article") or contains(translate(concat(" ", @id, " ", @class, " "), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"), "read")]';
+        $best = null;
+        $bestScore = PHP_INT_MIN;
+        foreach ($xpath->query($query) ?: [] as $node) {
+            if (!$node instanceof \DOMElement) {
+                continue;
+            }
+            $text = trim(preg_replace('/\s+/u', ' ', $node->textContent) ?? '');
+            $length = mb_strlen($text);
+            if ($length < 80) {
+                continue;
+            }
+            $marker = strtolower((string) $node->getAttribute('id') . ' ' . (string) $node->getAttribute('class'));
+            $score = min(5000, $length);
+            $score += preg_match('/content|chapter|article|read|正文|章节/u', $marker) ? 1200 : 0;
+            $score += min(800, (preg_match_all('/<p\b|<br\b/iu', $dom->saveHTML($node) ?: '') ?: 0) * 80);
+            $score -= preg_match('/advert|ads|recommend|banner|footer|header|sidebar|popup|download|promotion|comment|nav/i', $marker) ? 3000 : 0;
+            $score -= (preg_match_all('/<a\b/iu', $dom->saveHTML($node) ?: '') ?: 0) * 120;
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $best = $node;
+            }
+        }
+        if (!$best instanceof \DOMNode) {
+            return '';
+        }
+        $out = '';
+        foreach ($best->childNodes as $child) {
+            $out .= $dom->saveHTML($child);
+        }
+        return $out;
     }
 
     private function extractByXpath(string $html, string $query): string
@@ -1039,6 +1300,23 @@ final class NovelRepository
         }
         $this->refreshNovelStats($novelId, $chapterId, $title, $now);
         return $chapterId;
+    }
+
+    public function hasDuplicateChapterContent(int $novelId, string $contentHash, int $sortOrder, string $sourceChapterId = ''): bool
+    {
+        if ($novelId <= 0 || $contentHash === '' || !$this->hasTable('novel_chapters')) {
+            return false;
+        }
+        $stmt = $this->pdo->prepare('SELECT id, sort_order, source_chapter_id FROM novel_chapters WHERE novel_id = ? AND content_hash = ? LIMIT 3');
+        $stmt->execute([$novelId, $contentHash]);
+        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [] as $row) {
+            $existingSort = (int) ($row['sort_order'] ?? 0);
+            $existingSource = (string) ($row['source_chapter_id'] ?? '');
+            if ($existingSort !== $sortOrder || ($sourceChapterId !== '' && $existingSource !== '' && $existingSource !== $sourceChapterId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function refreshNovelStats(int $novelId, int $latestChapterId, string $latestChapterTitle, string $now): void

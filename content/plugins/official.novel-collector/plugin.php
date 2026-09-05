@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Cms\Core\Plugin\PluginContext;
 use Official\NovelCollector\BqgSpaAdapter;
 use Official\NovelCollector\CatalogUrlDiscoverer;
+use Official\NovelCollector\ContentQualityAnalyzer;
 use Official\NovelCollector\HtmlSanitizer;
 use Official\NovelCollector\NovelAutoDetector;
 use Official\NovelCollector\NovelRepository;
@@ -18,6 +19,7 @@ return static function (PluginContext $context): void {
     $http = new SafeHttpClient();
     $detector = new NovelAutoDetector();
     $sanitizer = new HtmlSanitizer();
+    $qualityAnalyzer = new ContentQualityAnalyzer();
     $queue = new QueueManager();
     $txt = new TxtImportExport();
     $dataStore = method_exists($context, 'data') ? $context->data() : null;
@@ -135,12 +137,28 @@ return static function (PluginContext $context): void {
         if ($dataStore !== null && method_exists($dataStore, 'all')) {
             try {
                 $dataRows = $dataStore->all($bucket);
-                $rows = is_array($dataRows) ? $dataRows : [];
+                foreach (is_array($dataRows) ? $dataRows : [] as $index => $row) {
+                    if (!is_array($row)) {
+                        continue;
+                    }
+                    $key = (string) ($row['data_key'] ?? $row['key'] ?? $index);
+                    if ($key === '' || isset($rows[$key])) {
+                        continue;
+                    }
+                    $payload = $row['payload_json'] ?? $row['value'] ?? $row;
+                    if (is_string($payload)) {
+                        $decoded = json_decode($payload, true);
+                        $payload = is_array($decoded) ? $decoded : $payload;
+                    }
+                    if (is_array($payload)) {
+                        $rows[$key] = $payload;
+                    }
+                }
             } catch (\Throwable) {
                 $rows = [];
             }
         }
-        return array_replace($rows, $fileAll($bucket));
+        return array_replace($fileAll($bucket), $rows);
     };
     $storeGet = static function (string $bucket, string $key) use ($storeAll): ?array {
         $rows = $storeAll($bucket);
@@ -243,6 +261,27 @@ return static function (PluginContext $context): void {
     $buildJob = static function (string $url) use ($loadCatalog): array {
         $detected = $loadCatalog($url);
         $chapters = $detected['chapters'] ?? [];
+        $seenUrls = [];
+        $seenIds = [];
+        foreach ($chapters as $chapter) {
+            $chapterUrl = (string) ($chapter['url'] ?? '');
+            $chapterId = (string) ($chapter['source_chapter_id'] ?? '');
+            error_log('[NovelCollector] Book: ' . (string) ($detected['title'] ?? $url) . ' Chapter: ' . (string) ($chapter['title'] ?? '') . ' URL: ' . $chapterUrl . ' chapter_id=' . $chapterId . ' source_book_id=' . (string) ($chapter['source_book_id'] ?? ''));
+            if ($chapterUrl === '') {
+                throw new \RuntimeException('章节地址异常：章节 URL 为空。');
+            }
+            $urlKey = strtolower($chapterUrl);
+            if (isset($seenUrls[$urlKey])) {
+                throw new \RuntimeException('章节地址异常：多个章节解析到了相同地址。');
+            }
+            $seenUrls[$urlKey] = true;
+            if ($chapterId !== '') {
+                if (isset($seenIds[$chapterId])) {
+                    throw new \RuntimeException('章节地址异常：多个章节解析到了相同 chapter_id。');
+                }
+                $seenIds[$chapterId] = true;
+            }
+        }
         $jobId = 'novel_' . substr(hash('sha256', $url . '|' . (string) ($detected['chapter_count'] ?? 0)), 0, 16);
         return [[
             'job_id' => $jobId,
@@ -278,6 +317,7 @@ return static function (PluginContext $context): void {
                     'title' => (string) ($chapter['title'] ?? ''),
                     'url' => (string) ($chapter['url'] ?? ''),
                     'source_chapter_id' => (string) ($chapter['source_chapter_id'] ?? $chapter['url'] ?? ''),
+                    'source_book_id' => (string) ($chapter['source_book_id'] ?? ''),
                     'sort_order' => (int) ($chapter['sort_order'] ?? 0),
                     'status' => 'pending',
                 ], $chunk),
@@ -466,7 +506,7 @@ HTML);
         }
         return \Cms\Core\Http\Response::html('<pre>' . htmlspecialchars($body, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</pre>');
     };
-    $fetchChapterWithRetry = static function (array $item) use ($http, $detector, $sanitizer): array {
+    $fetchChapterWithRetry = static function (array $item) use ($http, $detector, $sanitizer, $qualityAnalyzer): array {
         $lastError = null;
         for ($attempt = 1; $attempt <= 3; $attempt++) {
             try {
@@ -474,11 +514,14 @@ HTML);
                     usleep(250000 * $attempt);
                 }
                 $res = $http->get((string) $item['url']);
+                error_log('[NovelCollector] Chapter request title=' . (string) ($item['title'] ?? '') . ' requested_url=' . (string) ($res['requested_url'] ?? $item['url']) . ' final_url=' . (string) ($res['final_url'] ?? $res['url'] ?? '') . ' http_status=' . (string) ($res['http_status'] ?? $res['status'] ?? '') . ' content_type=' . (string) ($res['content_type'] ?? '') . ' response_length=' . (string) ($res['response_length'] ?? strlen((string) ($res['body'] ?? ''))) . ' redirect_count=' . (string) ($res['redirect_count'] ?? 0));
                 $body = $detector->extractChapterBody((string) $item['url'], $res['body']);
                 $clean = $sanitizer->clean($body);
                 if (mb_strlen($clean['plaintext']) < 200) {
                     throw new \RuntimeException('Chapter body is abnormally short.');
                 }
+                $clean['quality'] = $qualityAnalyzer->assertAcceptable($clean, $res, $item);
+                $clean['hash'] = (string) ($clean['quality']['fingerprint'] ?? $clean['hash']);
                 return $clean;
             } catch (\Throwable $e) {
                 $lastError = $e;
@@ -528,6 +571,7 @@ HTML);
                 'title' => (string) ($chapter['title'] ?? ''),
                 'url' => (string) ($chapter['url'] ?? ''),
                 'source_chapter_id' => (string) ($chapter['source_chapter_id'] ?? $chapter['url'] ?? ''),
+                'source_book_id' => (string) ($chapter['source_book_id'] ?? ''),
                 'sort_order' => (int) ($chapter['sort_order'] ?? 0),
                 'status' => 'pending',
             ], $chapters);
@@ -544,12 +588,32 @@ HTML);
         $cursor = (int) ($job['resume_cursor'] ?? 0);
         $processed = [];
         $errors = [];
+        $batchHashes = [];
+        $lastPlaintext = '';
+        $similarStreak = 0;
         $job['status'] = 'running';
         for ($i = 0; $i < $limit && $cursor < count($items); $i++, $cursor++) {
             $item = $items[$cursor];
             try {
                 usleep(180000);
                 $clean = $fetchChapterWithRetry($item);
+                $hash = (string) ($clean['hash'] ?? '');
+                if ($hash !== '' && isset($batchHashes[$hash])) {
+                    throw new \RuntimeException('suspected_duplicate_content: current batch contains repeated chapter body.');
+                }
+                if ($formalRepo instanceof NovelRepository && $formalNovelId > 0 && $formalRepo->hasDuplicateChapterContent($formalNovelId, $hash, (int) ($item['sort_order'] ?? 0), (string) ($item['source_chapter_id'] ?? $item['url'] ?? ''))) {
+                    throw new \RuntimeException('suspected_duplicate_content: content hash already exists for a different chapter.');
+                }
+                if ($lastPlaintext !== '' && ContentQualityAnalyzer::similarity($lastPlaintext, (string) ($clean['plaintext'] ?? '')) > 0.95) {
+                    $similarStreak++;
+                    if ($similarStreak >= 2) {
+                        throw new \RuntimeException('suspected_duplicate_content: consecutive chapters are more than 95% similar.');
+                    }
+                } else {
+                    $similarStreak = 0;
+                }
+                $batchHashes[$hash] = true;
+                $lastPlaintext = (string) ($clean['plaintext'] ?? '');
                 $chapter = [
                     'job_id' => $jobId,
                     'novel_key' => $jobId,
@@ -560,6 +624,7 @@ HTML);
                     'content' => $clean['html'],
                     'content_plaintext' => $clean['plaintext'],
                     'content_hash' => $clean['hash'],
+                    'content_quality' => (string) ($clean['quality']['quality'] ?? 'ok'),
                     'word_count' => mb_strlen($clean['plaintext']),
                     'collected_at' => gmdate('c'),
                 ];
@@ -571,6 +636,7 @@ HTML);
                     'sort_order' => $chapter['sort_order'],
                     'source_url' => $chapter['source_url'],
                     'content_hash' => $chapter['content_hash'],
+                    'content_quality' => $chapter['content_quality'],
                     'word_count' => $chapter['word_count'],
                     'collected_at' => $chapter['collected_at'],
                 ]);
@@ -586,17 +652,26 @@ HTML);
                 $errors[] = $job['last_error'];
                 $storePut('novel_failed_chapters_local', $jobId . '_' . (string) ($cursor + 1), [
                     'job_id' => $jobId,
+                    'formal_novel_id' => $formalNovelId,
                     'title' => (string) ($item['title'] ?? ''),
                     'sort_order' => (int) ($item['sort_order'] ?? ($cursor + 1)),
                     'source_url' => (string) ($item['url'] ?? ''),
+                    'source_chapter_id' => (string) ($item['source_chapter_id'] ?? ''),
                     'error' => $e->getMessage(),
                     'failed_at' => gmdate('c'),
                 ]);
+                if (str_contains($e->getMessage(), 'suspected_duplicate_content')) {
+                    $job['status'] = 'paused';
+                    $job['last_error'] = $e->getMessage();
+                    break;
+                }
             }
         }
         $job['resume_cursor'] = $cursor;
         $job['updated_at'] = gmdate('c');
-        $job['status'] = $cursor >= count($items) ? 'completed' : 'running';
+        if (($job['status'] ?? '') !== 'paused') {
+            $job['status'] = $cursor >= count($items) ? 'completed' : 'running';
+        }
         $storePut('novel_collector_jobs', $jobId, $job);
         $storePut('novels_local', $jobId, [
             'job_id' => $jobId,
@@ -1012,10 +1087,10 @@ HTML));
                 $catalogUrl = (string) ($item['url'] ?? '');
                 try {
                     $detected = $loadCatalog($catalogUrl);
-                    $preflight = $detector->preflight($detected['chapters'] ?? [], static function (string $chapterUrl) use ($http, $detector, $sanitizer): string {
+                    $preflight = $detector->preflight($detected['chapters'] ?? [], static function (string $chapterUrl) use ($http, $detector, $sanitizer): array {
                         $res = $http->get($chapterUrl);
                         $body = $detector->extractChapterBody($chapterUrl, $res['body']);
-                        return $sanitizer->clean($body)['plaintext'];
+                        return ['response' => $res, 'clean' => $sanitizer->clean($body)];
                     });
                     if (empty($preflight['pass'])) {
                         $skipped[] = ['url' => $catalogUrl, 'reason' => implode('; ', $preflight['errors'] ?? ['preflight failed'])];
@@ -1091,17 +1166,17 @@ HTML));
                 return \Cms\Core\Http\Response::html('<p>Missing url.</p>');
             }
             $detected = $loadCatalog($url);
-            $preflight = $detector->preflight($detected['chapters'] ?? [], static function (string $chapterUrl) use ($http, $detector, $sanitizer): string {
+            $preflight = $detector->preflight($detected['chapters'] ?? [], static function (string $chapterUrl) use ($http, $detector, $sanitizer): array {
                 $res = $http->get($chapterUrl);
                 $body = $detector->extractChapterBody($chapterUrl, $res['body']);
-                return $sanitizer->clean($body)['plaintext'];
+                return ['response' => $res, 'clean' => $sanitizer->clean($body)];
             });
             if ($param($request, 'format') === 'json') {
                 return \Cms\Core\Http\Response::json(['book' => $detected, 'preflight' => $preflight]);
             }
             $rows = '';
             foreach (($preflight['samples'] ?? []) as $sample) {
-                $rows .= '<tr><td>' . $html((string) ($sample['title'] ?? '')) . '</td><td>' . $html((string) ($sample['length'] ?? 0)) . '</td><td>' . $html((string) ($sample['hash'] ?? '')) . '</td><td>' . $html((string) ($sample['url'] ?? '')) . '</td></tr>';
+                $rows .= '<tr><td>' . $html((string) ($sample['title'] ?? '')) . '</td><td>' . $html((string) ($sample['length'] ?? 0)) . '</td><td>' . $html((string) ($sample['quality'] ?? '')) . ' / ' . $html((string) ($sample['quality_score'] ?? 0)) . '</td><td>' . $html((string) ($sample['http_status'] ?? 0)) . '</td><td>' . $html((string) ($sample['final_url'] ?? '')) . '</td><td>' . $html((string) ($sample['hash'] ?? '')) . '</td><td>' . $html((string) ($sample['url'] ?? '')) . '</td></tr>';
             }
             $errors = '';
             foreach (($preflight['errors'] ?? []) as $error) {
@@ -1109,7 +1184,7 @@ HTML));
             }
             $status = ($preflight['pass'] ?? false) ? '<span class="ok">PRECHECK PASS</span>' : '<span class="fail">PRECHECK FAIL</span>';
             $createButton = ($preflight['pass'] ?? false) ? '<a class="button" href="/admin/novel-collector/jobs/create?url=' . rawurlencode($url) . '">创建采集队列</a>' : '';
-            $body = '<h1>三章预检</h1><section class="panel"><p><strong>书名：</strong>' . $html((string) ($detected['title'] ?? '')) . '</p><p><strong>章节数：</strong>' . $html((string) ($detected['chapter_count'] ?? 0)) . '</p><p><strong>结果：</strong>' . $status . '</p>' . ($errors !== '' ? '<ul>' . $errors . '</ul>' : '') . $createButton . '<a class="button secondary" href="/admin/novel-collector/detect?url=' . rawurlencode($url) . '">返回识别结果</a><a class="button secondary" href="/admin/novel-collector/preflight?format=json&url=' . rawurlencode($url) . '">查看 JSON</a></section><section class="panel"><h2>抽样章节</h2><table><tr><th>标题</th><th>正文长度</th><th>Hash</th><th>URL</th></tr>' . $rows . '</table></section>';
+            $body = '<h1>三章预检</h1><section class="panel"><p><strong>书名：</strong>' . $html((string) ($detected['title'] ?? '')) . '</p><p><strong>章节数：</strong>' . $html((string) ($detected['chapter_count'] ?? 0)) . '</p><p><strong>结果：</strong>' . $status . '</p>' . ($errors !== '' ? '<ul>' . $errors . '</ul>' : '') . $createButton . '<a class="button secondary" href="/admin/novel-collector/detect?url=' . rawurlencode($url) . '">返回识别结果</a><a class="button secondary" href="/admin/novel-collector/preflight?format=json&url=' . rawurlencode($url) . '">查看 JSON</a></section><section class="panel"><h2>抽样章节</h2><table><tr><th>标题</th><th>正文长度</th><th>质量</th><th>HTTP</th><th>最终 URL</th><th>Hash</th><th>URL</th></tr>' . $rows . '</table></section>';
             return \Cms\Core\Http\Response::html($pageShell('小说三章预检', $body));
         }, 'novel_collector.manage', false);
         $context->adminRoute('GET', '/admin/novel-collector/jobs/create', static function ($request) use ($param, $html, $buildJob, $persistJob, $pageShell, $storeGet, $storePut, $loadJobItems, $formalRepo) {
@@ -1209,6 +1284,7 @@ HTML));
                     'title' => (string) ($chapter['title'] ?? ''),
                     'url' => (string) ($chapter['url'] ?? ''),
                     'source_chapter_id' => (string) ($chapter['source_chapter_id'] ?? $chapter['url'] ?? ''),
+                    'source_book_id' => (string) ($chapter['source_book_id'] ?? ''),
                     'sort_order' => (int) ($chapter['sort_order'] ?? 0),
                     'status' => 'pending',
                 ], $chapters);
@@ -1228,6 +1304,7 @@ HTML));
                     'title' => (string) ($chapter['title'] ?? ''),
                     'url' => (string) ($chapter['url'] ?? ''),
                     'source_chapter_id' => (string) ($chapter['source_chapter_id'] ?? $chapter['url'] ?? ''),
+                    'source_book_id' => (string) ($chapter['source_book_id'] ?? ''),
                     'sort_order' => (int) ($chapter['sort_order'] ?? 0),
                     'status' => 'pending',
                 ], $chapters);
@@ -1247,12 +1324,32 @@ HTML));
             $cursor = max((int) ($job['resume_cursor'] ?? 0), (int) $param($request, 'cursor', '0'));
             $processed = [];
             $errors = [];
+            $batchHashes = [];
+            $lastPlaintext = '';
+            $similarStreak = 0;
             $job['status'] = 'running';
             for ($i = 0; $i < $limit && $cursor < count($items); $i++, $cursor++) {
                 $item = $items[$cursor];
                 try {
                     usleep(180000);
                     $clean = $fetchChapterWithRetry($item);
+                    $hash = (string) ($clean['hash'] ?? '');
+                    if ($hash !== '' && isset($batchHashes[$hash])) {
+                        throw new \RuntimeException('suspected_duplicate_content: current batch contains repeated chapter body.');
+                    }
+                    if ($formalRepo instanceof NovelRepository && $formalNovelId > 0 && $formalRepo->hasDuplicateChapterContent($formalNovelId, $hash, (int) ($item['sort_order'] ?? 0), (string) ($item['source_chapter_id'] ?? $item['url'] ?? ''))) {
+                        throw new \RuntimeException('suspected_duplicate_content: content hash already exists for a different chapter.');
+                    }
+                    if ($lastPlaintext !== '' && ContentQualityAnalyzer::similarity($lastPlaintext, (string) ($clean['plaintext'] ?? '')) > 0.95) {
+                        $similarStreak++;
+                        if ($similarStreak >= 2) {
+                            throw new \RuntimeException('suspected_duplicate_content: consecutive chapters are more than 95% similar.');
+                        }
+                    } else {
+                        $similarStreak = 0;
+                    }
+                    $batchHashes[$hash] = true;
+                    $lastPlaintext = (string) ($clean['plaintext'] ?? '');
                     $chapter = [
                         'job_id' => $jobId,
                         'novel_key' => $jobId,
@@ -1263,6 +1360,7 @@ HTML));
                         'content' => $clean['html'],
                         'content_plaintext' => $clean['plaintext'],
                         'content_hash' => $clean['hash'],
+                        'content_quality' => (string) ($clean['quality']['quality'] ?? 'ok'),
                         'word_count' => mb_strlen($clean['plaintext']),
                         'collected_at' => gmdate('c'),
                     ];
@@ -1274,6 +1372,7 @@ HTML));
                         'sort_order' => $chapter['sort_order'],
                         'source_url' => $chapter['source_url'],
                         'content_hash' => $chapter['content_hash'],
+                        'content_quality' => $chapter['content_quality'],
                         'word_count' => $chapter['word_count'],
                         'collected_at' => $chapter['collected_at'],
                     ]);
@@ -1289,18 +1388,26 @@ HTML));
                     $errors[] = $job['last_error'];
                     $storePut('novel_failed_chapters_local', $jobId . '_' . (string) ($cursor + 1), [
                         'job_id' => $jobId,
+                        'formal_novel_id' => $formalNovelId,
                         'title' => (string) ($item['title'] ?? ''),
                         'sort_order' => (int) ($item['sort_order'] ?? ($cursor + 1)),
                         'source_url' => (string) ($item['url'] ?? ''),
+                        'source_chapter_id' => (string) ($item['source_chapter_id'] ?? ''),
                         'error' => $e->getMessage(),
                         'failed_at' => gmdate('c'),
                     ]);
-                    continue;
+                    if (str_contains($e->getMessage(), 'suspected_duplicate_content')) {
+                        $job['status'] = 'paused';
+                        $job['last_error'] = $e->getMessage();
+                        break;
+                    }
                 }
             }
             $job['resume_cursor'] = $cursor;
             $job['updated_at'] = gmdate('c');
-            $job['status'] = $cursor >= count($items) ? 'completed' : 'running';
+            if (($job['status'] ?? '') !== 'paused') {
+                $job['status'] = $cursor >= count($items) ? 'completed' : 'running';
+            }
             $storePut('novel_collector_jobs', $jobId, $job);
             $storePut('novels_local', $jobId, [
                 'job_id' => $jobId,
