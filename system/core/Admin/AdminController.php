@@ -1487,8 +1487,9 @@ final class AdminController
         if ($guard instanceof Response) {
             return $guard;
         }
-        if ((string) ($_GET['source'] ?? 'local') === 'cloudreve') {
-            return $this->remoteMediaIndex('cloudreve');
+        $source = (string) ($_GET['source'] ?? 'local');
+        if ($source !== 'local') {
+            return $this->remoteMediaIndex($source);
         }
 
         try {
@@ -1524,7 +1525,7 @@ final class AdminController
         $rows = $rows !== '' ? $rows : '<tr><td colspan="7" class="muted">暂无媒体</td></tr>';
         $cards = $cards !== '' ? $cards : '<div class="admin-empty">暂无媒体文件</div>';
         $body = '<div class="admin-page-header"><div><h1>媒体库</h1><p class="muted">集中管理图片、音频、视频和附件。</p></div></div>' .
-            '<div class="admin-tabs" role="tablist"><span class="active">本地媒体</span><a href="/admin/media?source=cloudreve">Cloudreve</a></div>' .
+            '<div class="admin-tabs" role="tablist">' . $this->remoteMediaTabs('local') . '</div>' .
             '<form class="admin-filter-bar" method="get" action="/admin/media"><label>类型<select name="type"><option value="">全部</option><option value="image">图片</option><option value="audio">音频</option><option value="video">视频</option><option value="attachment">附件</option></select></label><label>文件名<input name="filename" value="' . View::escape((string) ($_GET['filename'] ?? '')) . '"></label><label>状态<select name="status"><option value="">全部</option><option value="Active">可用</option><option value="Deleted">已删除</option></select></label><button type="submit">筛选</button></form>' .
             '<section class="admin-card"><form method="post" action="/admin/media/upload" enctype="multipart/form-data" id="media-upload">' . CsrfToken::field() .
             '<label>上传文件<input type="file" name="media_files[]" multiple></label><progress id="media-progress" max="100" value="0"></progress><p class="muted" id="media-error">支持图片、音频、视频、PDF、TXT、ZIP 和 Office 附件。</p><button type="submit">上传</button></form></section>' .
@@ -1539,11 +1540,12 @@ final class AdminController
     {
         $provider = \Cms\Core\Media\RemoteMediaProviderRegistry::get($providerId);
         if ($provider === null) {
-            return Response::html(View::page('媒体库', '<div class="admin-page-header"><div><h1>媒体库</h1><p class="error">Cloudreve 媒体来源暂不可用，请确认插件已启用并完成授权。</p></div></div><p><a class="button" href="/admin/media">返回本地媒体</a></p>'), 503);
+            return Response::html(View::page('媒体库', '<div class="admin-page-header"><div><h1>媒体库</h1><p class="error">远程媒体来源暂不可用，请确认插件已启用并完成授权。</p></div></div><p><a class="button" href="/admin/media">返回本地媒体</a></p>'), 503);
         }
 
-        $path = (string) ($_GET['path'] ?? 'cloudreve://my/');
+        $path = (string) ($_GET['path'] ?? $this->remoteMediaDefaultPath($providerId));
         $query = trim((string) ($_GET['q'] ?? ''));
+        $label = $provider->label();
         try {
             $result = $query !== '' ? $provider->search($query, $path, ['page_size' => 50]) : $provider->list($path, ['page_size' => 50]);
             $rows = '';
@@ -1552,7 +1554,7 @@ final class AdminController
                     continue;
                 }
                 $action = $item->type === 'folder'
-                    ? '<a class="button admin-button-secondary" href="/admin/media?source=cloudreve&amp;path=' . View::escape(rawurlencode($item->path)) . '">打开</a>'
+                    ? '<a class="button admin-button-secondary" href="/admin/media?source=' . View::escape(rawurlencode($providerId)) . '&amp;path=' . View::escape(rawurlencode($item->path)) . '">打开</a>'
                     : '<form method="post" action="/admin/media/provider/select" style="display:inline">' . CsrfToken::field() .
                         '<input type="hidden" name="provider" value="' . View::escape($providerId) . '">' .
                         '<input type="hidden" name="id" value="' . View::escape($item->id) . '">' .
@@ -1562,18 +1564,54 @@ final class AdminController
                         '<button type="submit">引用到媒体库</button></form>';
                 $rows .= '<tr><td>' . View::escape($item->name) . '</td><td>' . View::escape($item->type) . '</td><td>' . View::escape($item->mimeType) . '</td><td>' . View::escape(number_format($item->byteSize / 1024, 1) . ' KB') . '</td><td><code>' . View::escape($item->path) . '</code></td><td>' . $action . '</td></tr>';
             }
-            $rows = $rows !== '' ? $rows : '<tr><td colspan="6" class="muted">Cloudreve 当前目录没有媒体文件。</td></tr>';
+            $rows = $rows !== '' ? $rows : '<tr><td colspan="6" class="muted">' . View::escape($label) . ' 当前目录没有媒体文件。</td></tr>';
         } catch (Throwable $exception) {
-            $this->logger->error('Cloudreve media page failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
-            return Response::html(View::page('媒体库', '<div class="admin-page-header"><div><h1>媒体库</h1><p class="error">Cloudreve 暂不可用，请检查授权或网络连接。</p></div></div><p><a class="button" href="/admin/media">返回本地媒体</a></p>'), 503);
+            $this->logger->error('Remote media page failed', ['source' => 'Core', 'provider' => $providerId, 'error' => $exception->getMessage()]);
+            return Response::html(View::page('媒体库', '<div class="admin-page-header"><div><h1>媒体库</h1><p class="error">' . View::escape($label) . ' 暂不可用，请检查授权或网络连接。</p></div></div><p><a class="button" href="/admin/media">返回本地媒体</a></p>'), 503);
         }
 
-        $body = '<div class="admin-page-header"><div><h1>媒体库</h1><p class="muted">浏览 Cloudreve 文件，按需引用到 CMS 媒体库。</p></div></div>' .
-            '<div class="admin-tabs" role="tablist"><a href="/admin/media">本地媒体</a><span class="active">Cloudreve</span></div>' .
-            '<form class="admin-filter-bar" method="get" action="/admin/media"><input type="hidden" name="source" value="cloudreve"><label>目录<input name="path" value="' . View::escape($path) . '"></label><label>搜索<input name="q" value="' . View::escape($query) . '"></label><button type="submit">读取</button></form>' .
+        $body = '<div class="admin-page-header"><div><h1>媒体库</h1><p class="muted">浏览 ' . View::escape($label) . ' 文件，按需引用到 CMS 媒体库。</p></div></div>' .
+            '<div class="admin-tabs" role="tablist">' . $this->remoteMediaTabs($providerId) . '</div>' .
+            '<form class="admin-filter-bar" method="get" action="/admin/media"><input type="hidden" name="source" value="' . View::escape($providerId) . '"><label>目录<input name="path" value="' . View::escape($path) . '"></label><label>搜索<input name="q" value="' . View::escape($query) . '"></label><button type="submit">读取</button></form>' .
             '<table><thead><tr><th>名称</th><th>类型</th><th>MIME</th><th>大小</th><th>路径</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>';
 
-        return Response::html(View::page('媒体库 - Cloudreve', $body));
+        return Response::html(View::page('媒体库 - ' . $label, $body));
+    }
+
+    private function remoteMediaTabs(string $active): string
+    {
+        $html = $active === 'local' ? '<span class="active">本地媒体</span>' : '<a href="/admin/media">本地媒体</a>';
+        foreach ($this->remoteMediaProviders() as $provider) {
+            $id = (string) $provider['id'];
+            $label = (string) $provider['label'];
+            $html .= $active === $id
+                ? '<span class="active">' . View::escape($label) . '</span>'
+                : '<a href="/admin/media?source=' . View::escape(rawurlencode($id)) . '">' . View::escape($label) . '</a>';
+        }
+        return $html;
+    }
+
+    /** @return list<array{id:string,label:string,default_path:string}> */
+    private function remoteMediaProviders(): array
+    {
+        $providers = [];
+        foreach (\Cms\Core\Media\RemoteMediaProviderRegistry::all() as $provider) {
+            $id = $provider->id();
+            $providers[] = [
+                'id' => $id,
+                'label' => $provider->label(),
+                'default_path' => method_exists($provider, 'defaultPath') ? (string) $provider->defaultPath() : $this->remoteMediaDefaultPath($id),
+            ];
+        }
+        return $providers;
+    }
+
+    private function remoteMediaDefaultPath(string $providerId): string
+    {
+        return match ($providerId) {
+            'cloudreve' => 'cloudreve://my/',
+            default => '',
+        };
     }
 
     public function mediaUpload(): Response
@@ -8186,12 +8224,21 @@ JS . '</script>';
         if (!is_string($json)) {
             $json = '[]';
         }
+        $remoteProviders = $this->remoteMediaProviders();
+        $remoteJson = json_encode($remoteProviders, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+        if (!is_string($remoteJson)) {
+            $remoteJson = '[]';
+        }
+        $remoteButtons = '';
+        foreach ($remoteProviders as $provider) {
+            $remoteButtons .= '<button type="button" data-media-source="' . View::escape((string) $provider['id']) . '" class="button editor-secondary">' . View::escape((string) $provider['label']) . '</button>';
+        }
 
         return '<div id="media-picker-modal" hidden style="position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:1000;padding:4vh 4vw;overflow:auto">' .
             '<div style="background:#fff;max-width:980px;margin:0 auto;padding:20px;border-radius:8px;box-shadow:0 20px 60px rgba(15,23,42,.25)">' .
-            '<h2>媒体库选择</h2><div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px"><button type="button" data-media-source="local" class="button">本地媒体</button><button type="button" data-media-source="cloudreve" class="button editor-secondary">Cloudreve</button></div><div style="display:flex;gap:12px;flex-wrap:wrap"><label>搜索<input id="media-picker-search" placeholder="文件名"></label><label id="media-picker-path-wrap" hidden>Cloudreve 目录<input id="media-picker-path" value="cloudreve://my/"></label><label>类型<select id="media-picker-type"><option value="">全部</option><option value="image">图片</option><option value="audio">音频</option><option value="video">视频</option><option value="attachment">附件</option></select></label><label id="media-picker-mode-wrap" hidden>选择方式<select id="media-picker-mode"><option value="reference">引用 Cloudreve</option><option value="import">导入到 CMS</option></select></label><button type="button" id="media-picker-refresh" hidden>读取目录</button><button type="button" id="media-picker-close">关闭</button></div><p class="muted" id="media-picker-message"></p>' .
+            '<h2>媒体库选择</h2><div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px"><button type="button" data-media-source="local" class="button">本地媒体</button>' . $remoteButtons . '</div><div style="display:flex;gap:12px;flex-wrap:wrap"><label>搜索<input id="media-picker-search" placeholder="文件名"></label><label id="media-picker-path-wrap" hidden>远程目录<input id="media-picker-path" value=""></label><label>类型<select id="media-picker-type"><option value="">全部</option><option value="image">图片</option><option value="audio">音频</option><option value="video">视频</option><option value="attachment">附件</option></select></label><label id="media-picker-mode-wrap" hidden>选择方式<select id="media-picker-mode"><option value="reference">引用远程媒体</option><option value="import">导入到 CMS</option></select></label><button type="button" id="media-picker-refresh" hidden>读取目录</button><button type="button" id="media-picker-close">关闭</button></div><p class="muted" id="media-picker-message"></p>' .
             '<div id="media-picker-results" style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px"></div></div></div>' .
-            '<script>window.CMS_MEDIA_PICKER_ITEMS=' . $json . ';window.CMS_MEDIA_PICKER_CSRF=' . json_encode(CsrfToken::get(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) . ';' . $this->mediaPickerJavascript() . '</script>';
+            '<script>window.CMS_MEDIA_PICKER_ITEMS=' . $json . ';window.CMS_REMOTE_MEDIA_PROVIDERS=' . $remoteJson . ';window.CMS_MEDIA_PICKER_CSRF=' . json_encode(CsrfToken::get(), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) . ';' . $this->mediaPickerJavascript() . '</script>';
     }
 
     /** @return list<array<string, mixed>> */
@@ -8261,7 +8308,11 @@ JS . '</script>';
 (function(){
 var modal=document.getElementById('media-picker-modal'),results=document.getElementById('media-picker-results'),search=document.getElementById('media-picker-search'),typeSelect=document.getElementById('media-picker-type'),pathInput=document.getElementById('media-picker-path'),pathWrap=document.getElementById('media-picker-path-wrap'),modeWrap=document.getElementById('media-picker-mode-wrap'),modeSelect=document.getElementById('media-picker-mode'),refreshBtn=document.getElementById('media-picker-refresh'),message=document.getElementById('media-picker-message');
 var activeInput=null,activeSummary=null,activeType='',activeMultiple=false,source='local',remoteItems=[];
+var remoteProviders=window.CMS_REMOTE_MEDIA_PROVIDERS||[];
 function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c];});}
+function remoteProvider(id){return remoteProviders.find(function(p){return p.id===id;})||null;}
+function isRemote(id){return !!remoteProvider(id);}
+function activeProvider(){return remoteProvider(source);}
 function ids(){return (activeInput&&activeInput.value?activeInput.value:'').split(/[,\s]+/).map(function(v){return parseInt(v,10)||0;}).filter(function(v){return v>0;});}
 function writeIds(list){if(activeInput){activeInput.value=list.join(', ');} renderSummary();}
 function humanSize(bytes){bytes=parseInt(bytes,10)||0;if(bytes>=1048576){return (bytes/1048576).toFixed(1)+' MB';} return (bytes/1024).toFixed(1)+' KB';}
@@ -8294,32 +8345,33 @@ function syncGalleryCaptions(){
  out.value=list.map(function(id){return id+' | '+(old[id]||'');}).join('\n');
 }
 function choose(id){var list=ids(); if(activeMultiple){if(list.indexOf(id)<0){list.push(id);}}else{list=[id];} writeIds(list); if(!activeMultiple){modal.hidden=true;}}
-function setSource(next){source=next==='cloudreve'?'cloudreve':'local'; pathWrap.hidden=source!=='cloudreve'; modeWrap.hidden=source!=='cloudreve'; refreshBtn.hidden=source!=='cloudreve'; [].slice.call(document.querySelectorAll('[data-media-source]')).forEach(function(btn){btn.classList.toggle('editor-secondary',btn.dataset.mediaSource!==source);}); if(source==='cloudreve'){loadRemote();}else{message.textContent='';render();}}
+function setSource(next){source=isRemote(next)?next:'local'; var remote=isRemote(source),p=activeProvider(); pathWrap.hidden=!remote; modeWrap.hidden=!remote; refreshBtn.hidden=!remote; if(remote&&p&&(!pathInput.value||pathInput.dataset.provider!==source)){pathInput.value=p.default_path||'';pathInput.dataset.provider=source;} [].slice.call(document.querySelectorAll('[data-media-source]')).forEach(function(btn){btn.classList.toggle('editor-secondary',btn.dataset.mediaSource!==source);}); if(remote){loadRemote();}else{message.textContent='';render();}}
 function localRows(){var q=(search.value||'').toLowerCase(), filter=typeSelect.value||activeType;return (window.CMS_MEDIA_PICKER_ITEMS||[]).filter(function(item){return (!filter||item.media_type===filter)&&(!q||String(item.search_text||item.filename).toLowerCase().indexOf(q)>=0);});}
 function remoteRows(){var q=(search.value||'').toLowerCase(), filter=typeSelect.value||activeType;return remoteItems.filter(function(item){var mt=itemType(item);return mt==='folder'||((!filter||mt===filter)&&(!q||String((item.name||'')+' '+(item.path||'')).toLowerCase().indexOf(q)>=0));});}
 function render(){
- if(source==='cloudreve'){
+ if(isRemote(source)){
   var remote=remoteRows();
-  results.innerHTML=remote.length?remote.map(function(item){var mt=itemType(item),folder=mt==='folder';var thumb='<div style="height:92px;display:flex;align-items:center;justify-content:center;border:1px solid #d0d7de;border-radius:4px;background:#f6f8fa">'+esc(folder?'目录':mt)+'</div>';return '<article style="border:1px solid #d8dee4;border-radius:6px;padding:10px;min-width:0;overflow:hidden">'+thumb+'<strong style="display:block;margin-top:8px;word-break:break-word;overflow-wrap:anywhere;line-height:1.25">'+esc(item.name)+'</strong><span class="muted">'+esc(mt)+' · '+esc(humanSize(item.byte_size))+'</span><br><span class="muted" title="'+esc(item.path)+'" style="display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">位置：'+esc(shortPath(item.path))+'</span><button type="button" '+(folder?'data-media-folder':'data-media-remote')+'="'+esc(item.id)+'" data-path="'+esc(item.path)+'">'+(folder?'打开':'选择')+'</button></article>';}).join(''):'<p class="muted">Cloudreve 中没有可选媒体。</p>';
+  var label=(activeProvider()&&activeProvider().label)||'远程媒体';
+  results.innerHTML=remote.length?remote.map(function(item){var mt=itemType(item),folder=mt==='folder';var thumb='<div style="height:92px;display:flex;align-items:center;justify-content:center;border:1px solid #d0d7de;border-radius:4px;background:#f6f8fa">'+esc(folder?'目录':mt)+'</div>';return '<article style="border:1px solid #d8dee4;border-radius:6px;padding:10px;min-width:0;overflow:hidden">'+thumb+'<strong style="display:block;margin-top:8px;word-break:break-word;overflow-wrap:anywhere;line-height:1.25">'+esc(item.name)+'</strong><span class="muted">'+esc(mt)+' · '+esc(humanSize(item.byte_size))+'</span><br><span class="muted" title="'+esc(item.path)+'" style="display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">位置：'+esc(shortPath(item.path))+'</span><button type="button" '+(folder?'data-media-folder':'data-media-remote')+'="'+esc(item.id)+'" data-path="'+esc(item.path)+'">'+(folder?'打开':'选择')+'</button></article>';}).join(''):'<p class="muted">'+esc(label)+' 中没有可选媒体。</p>';
   return;
  }
  var rows=localRows();
  results.innerHTML=rows.length?rows.map(function(item){var thumb=item.thumbnail_url?'<img src="'+esc(item.thumbnail_url)+'" alt="" style="width:100%;height:92px;object-fit:cover;border:1px solid #d0d7de;border-radius:4px">':'<div style="height:92px;display:flex;align-items:center;justify-content:center;border:1px solid #d0d7de;border-radius:4px;background:#f6f8fa">'+esc(item.media_type)+'</div>';var path=item.relative_path?'<br><span class="muted" title="'+esc(item.relative_path)+'">存储：'+esc(item.provider&&item.provider!=='local'?item.provider+' · ':'')+esc(item.path_name||item.relative_path)+'</span>':'';return '<article style="border:1px solid #d8dee4;border-radius:6px;padding:10px;min-width:0">'+thumb+'<strong style="display:block;margin-top:8px;word-break:break-word;overflow-wrap:anywhere">'+esc(item.display_name||item.filename)+'</strong><span class="muted">ID '+esc(item.id)+' · '+esc(item.media_type)+' · '+esc(humanSize(item.byte_size))+'</span>'+path+'<br><span class="muted">'+esc(item.created_at)+'</span><br><button type="button" data-media-choose="'+item.id+'">选择</button></article>';}).join(''):'<p class="muted">没有可选媒体。</p>';
 }
 function loadRemote(){
- message.textContent='读取 Cloudreve 中...';
- var params=new URLSearchParams({provider:'cloudreve',path:pathInput.value||'cloudreve://my/',q:search.value||'',page_size:'50'});
- fetch('/admin/media/provider/list?'+params.toString(),{headers:{'Accept':'application/json'}}).then(readJson).then(function(data){if(!data.ok){throw new Error(data.message||'Cloudreve 暂不可用');}remoteItems=data.items||[];message.textContent='';render();}).catch(function(err){remoteItems=[];message.textContent=err.message;render();});
+ var p=activeProvider(); if(!p){return;} message.textContent='读取 '+p.label+' 中...';
+ var params=new URLSearchParams({provider:p.id,path:pathInput.value||p.default_path||'',q:search.value||'',page_size:'50'});
+ fetch('/admin/media/provider/list?'+params.toString(),{headers:{'Accept':'application/json'}}).then(readJson).then(function(data){if(!data.ok){throw new Error(data.message||p.label+' 暂不可用');}remoteItems=data.items||[];message.textContent='';render();}).catch(function(err){remoteItems=[];message.textContent=err.message;render();});
 }
 function chooseRemote(id,path){
- message.textContent='正在加入媒体库...';
- fetch('/admin/media/provider/select',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},body:new URLSearchParams({provider:'cloudreve',id:id,path:path,mode:modeSelect.value||'reference',_csrf:window.CMS_MEDIA_PICKER_CSRF||''})}).then(readJson).then(function(data){if(!data.ok){throw new Error(data.message||'选择失败');}var exists=(window.CMS_MEDIA_PICKER_ITEMS||[]).some(function(item){return item.id===data.media.id;});if(!exists){window.CMS_MEDIA_PICKER_ITEMS.unshift(data.media);}choose(data.media.id);message.textContent=data.mode==='import'?'已导入到 CMS 媒体库。':'已引用 Cloudreve 媒体。';}).catch(function(err){message.textContent=err.message;});
+ var p=activeProvider(); if(!p){return;} message.textContent='正在加入媒体库...';
+ fetch('/admin/media/provider/select',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},body:new URLSearchParams({provider:p.id,id:id,path:path,mode:modeSelect.value||'reference',_csrf:window.CMS_MEDIA_PICKER_CSRF||''})}).then(readJson).then(function(data){if(!data.ok){throw new Error(data.message||'选择失败');}var exists=(window.CMS_MEDIA_PICKER_ITEMS||[]).some(function(item){return item.id===data.media.id;});if(!exists){window.CMS_MEDIA_PICKER_ITEMS.unshift(data.media);}choose(data.media.id);message.textContent=data.mode==='import'?'已导入到 CMS 媒体库。':'已引用 '+p.label+' 媒体。';}).catch(function(err){message.textContent=err.message;});
 }
 document.addEventListener('click',function(e){
  var open=e.target.closest('.media-picker-open'); if(open){var box=open.closest('.media-picker-field'); activeInput=box.querySelector('[data-media-picker-input="'+open.dataset.targetField+'"]'); activeSummary=box.querySelector('[data-media-picker-summary="'+open.dataset.targetField+'"]'); activeType=open.dataset.mediaType||''; activeMultiple=open.dataset.mediaMultiple==='1'; typeSelect.value=activeType; search.value=''; modal.hidden=false; setSource(source); return;}
  var sourceBtn=e.target.closest('[data-media-source]'); if(sourceBtn){setSource(sourceBtn.dataset.mediaSource||'local'); return;}
  var refresh=e.target.closest('#media-picker-refresh'); if(refresh){loadRemote(); return;}
- var folder=e.target.closest('[data-media-folder]'); if(folder){pathInput.value=folder.dataset.path||'cloudreve://my/'; loadRemote(); return;}
+ var folder=e.target.closest('[data-media-folder]'); if(folder){pathInput.value=folder.dataset.path||(activeProvider()&&activeProvider().default_path)||''; pathInput.dataset.provider=source; loadRemote(); return;}
  var remote=e.target.closest('[data-media-remote]'); if(remote){chooseRemote(remote.getAttribute('data-media-remote')||'',remote.dataset.path||''); return;}
  var clear=e.target.closest('.media-picker-clear'); if(clear){var cbox=clear.closest('.media-picker-field'); activeInput=cbox.querySelector('[data-media-picker-input="'+clear.dataset.targetField+'"]'); activeSummary=cbox.querySelector('[data-media-picker-summary="'+clear.dataset.targetField+'"]'); writeIds([]); return;}
  var pick=e.target.closest('[data-media-choose]'); if(pick){choose(parseInt(pick.dataset.mediaChoose,10)||0); return;}
@@ -8327,7 +8379,7 @@ document.addEventListener('click',function(e){
  var move=e.target.closest('[data-media-move]'); if(move){activeSummary=e.target.closest('.media-picker-selection'); activeInput=activeSummary.parentElement.querySelector('[data-media-picker-input]'); var li=move.closest('li'), id=parseInt(li.dataset.mediaSelectedId,10)||0, list=ids(), pos=list.indexOf(id), dir=move.dataset.mediaMove; if(pos>=0&&dir==='up'&&pos>0){var t=list[pos-1];list[pos-1]=list[pos];list[pos]=t;} if(pos>=0&&dir==='down'&&pos<list.length-1){var n=list[pos+1];list[pos+1]=list[pos];list[pos]=n;} writeIds(list); return;}
  if(e.target&&e.target.id==='media-picker-close'){modal.hidden=true;}
 });
-search.addEventListener('input',function(){if(source==='cloudreve'){loadRemote();}else{render();}});
+search.addEventListener('input',function(){if(isRemote(source)){loadRemote();}else{render();}});
 typeSelect.addEventListener('change',render);
 pathInput.addEventListener('change',loadRemote);
 document.querySelectorAll('.media-picker-field').forEach(function(box){activeInput=box.querySelector('[data-media-picker-input]');activeSummary=box.querySelector('[data-media-picker-summary]');renderSummary();});

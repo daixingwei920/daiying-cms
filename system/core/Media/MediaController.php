@@ -141,7 +141,7 @@ final class MediaController
                 throw new MediaException('Remote media URL is empty.');
             }
         } catch (Throwable) {
-            return Response::text('远程媒体暂不可用，请管理员检查 Cloudreve 授权状态。', 503)
+            return Response::text('远程媒体暂不可用，请管理员检查对应插件授权状态。', 503)
                 ->withHeaders(['Cache-Control' => 'private, no-store']);
         }
 

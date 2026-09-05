@@ -1,0 +1,36 @@
+{
+  "plugin_id": "official.storage.baidu",
+  "name": "百度网盘",
+  "version": "1.0.0-rc1",
+  "author": "Daiying CMS",
+  "type": "storage_provider",
+  "package_type": "plugin",
+  "entry": "plugin.php",
+  "core": { "min": "1.2.0", "max": "2.0.0" },
+  "php": "8.1.0",
+  "trust_level": "trusted_php",
+  "official": true,
+  "trusted_deployment": "builtin_or_registry_only",
+  "capabilities": [
+    "media.read",
+    "media.write",
+    "network.external",
+    "settings.read",
+    "settings.write",
+    "storage.plugin",
+    "baidu_storage.manage"
+  ],
+  "capability_namespaces": ["baidu_storage", "storage_baidu"],
+  "public_routes": [
+    { "label": "百度网盘 OAuth 回调", "path": "/oauth/baidu/callback", "method": "GET" }
+  ],
+  "dependencies": [],
+  "required_plugins": [],
+  "migrations": [],
+  "table_prefixes": ["baidu_storage_"],
+  "data_policy": {
+    "uninstall": "retain_config_and_media_references",
+    "purge": "separate_confirmation_only"
+  },
+  "data_schema_version": "1.0.0-rc1"
+}
