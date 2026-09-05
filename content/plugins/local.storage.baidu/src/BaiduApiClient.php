@@ -153,6 +153,12 @@ final class BaiduApiClient
         return $this->transport->downloadTo($this->resolveDownloadUrl($fsId), $targetPath, $maxBytes);
     }
 
+    /** @param array{0:int,1:int}|null $range @return array{status:int,headers:array<string,string>,body:string,final_url:string} */
+    public function downloadBytes(string $fsId, ?array $range, int $maxBytes): array
+    {
+        return $this->transport->downloadBytes($this->resolveDownloadUrl($fsId), $range, $maxBytes);
+    }
+
     public function accessToken(): string
     {
         $token = $this->tokens->token();

@@ -188,27 +188,44 @@ final class BaiduStoragePlugin
                 ->withHeaders(['Cache-Control' => 'private, no-store']);
         }
 
-        $tmp = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . '/baidu-storage-' . bin2hex(random_bytes(10)) . '.tmp';
         try {
-            $download = $this->provider->downloadTo($remoteId, '', $tmp, 52428800);
-            $body = file_get_contents($tmp);
-            if (!is_string($body)) {
-                throw new \RuntimeException('百度网盘媒体读取失败。');
-            }
-            $filename = $this->safeDownloadName((string) ($download['filename'] ?? 'baidu-media'));
-            return new Response($body, 200, [
-                'Content-Type' => (string) ($download['mime_type'] ?? 'application/octet-stream'),
-                'Content-Length' => (string) strlen($body),
+            $item = $this->provider->get($remoteId, '');
+            $rangeHeader = $this->rangeHeader($request);
+            $range = $rangeHeader === false ? false : $this->parseRange($rangeHeader, max(0, $item->byteSize));
+            $filename = $this->safeDownloadName($item->name);
+            $baseHeaders = [
+                'Content-Type' => $item->mimeType !== '' ? $item->mimeType : 'application/octet-stream',
+                'Accept-Ranges' => 'bytes',
                 'Content-Disposition' => 'inline; filename="' . $filename . '"; filename*=UTF-8\'\'' . rawurlencode($filename),
                 'Cache-Control' => 'private, no-store',
                 'X-Daiying-Media-Provider' => $this->provider->id(),
+            ];
+            if ($range === false) {
+                return new Response('', 416, $baseHeaders + [
+                    'Content-Range' => 'bytes */' . max(0, $item->byteSize),
+                    'Content-Length' => '0',
+                ]);
+            }
+
+            $maxBytes = $range !== null ? ($range[1] - $range[0] + 1) : 67108864;
+            $download = $this->provider->downloadBytes($remoteId, '', $range, $maxBytes);
+            $body = (string) ($download['body'] ?? '');
+            if ($body === '') {
+                throw new \RuntimeException('百度网盘媒体读取失败。');
+            }
+
+            if ($range !== null) {
+                return new Response($body, 206, $baseHeaders + [
+                    'Content-Range' => 'bytes ' . $range[0] . '-' . ($range[0] + strlen($body) - 1) . '/' . max(strlen($body), $item->byteSize),
+                    'Content-Length' => (string) strlen($body),
+                ]);
+            }
+
+            return new Response($body, 200, $baseHeaders + [
+                'Content-Length' => (string) strlen($body),
             ]);
         } catch (\Throwable) {
             return Response::text('百度网盘媒体暂不可用。', 503)->withHeaders(['Cache-Control' => 'private, no-store']);
-        } finally {
-            if (is_file($tmp)) {
-                @unlink($tmp);
-            }
         }
     }
 
@@ -216,6 +233,50 @@ final class BaiduStoragePlugin
     {
         $name = trim(str_replace(["\r", "\n", '"', '\\'], '', $name));
         return $name !== '' ? $name : 'baidu-media';
+    }
+
+    private function rangeHeader(Request $request): string|false
+    {
+        if (!array_key_exists('HTTP_RANGE', $request->server)) {
+            return '';
+        }
+        $value = $request->server['HTTP_RANGE'];
+
+        return is_string($value) ? $value : false;
+    }
+
+    /** @return array{0:int,1:int}|false|null */
+    private function parseRange(string $header, int $size): array|false|null
+    {
+        $header = trim($header);
+        if ($header === '') {
+            return null;
+        }
+        if ($size <= 0 || !preg_match('/^bytes=(\d*)-(\d*)$/', $header, $matches)) {
+            return false;
+        }
+
+        $startText = $matches[1];
+        $endText = $matches[2];
+        if ($startText === '' && $endText === '') {
+            return false;
+        }
+        if ($startText === '') {
+            $suffix = (int) $endText;
+            if ($suffix <= 0) {
+                return false;
+            }
+            $start = max(0, $size - $suffix);
+            $end = $size - 1;
+        } else {
+            $start = (int) $startText;
+            $end = $endText === '' ? $size - 1 : (int) $endText;
+        }
+        if ($start < 0 || $end < $start || $start >= $size) {
+            return false;
+        }
+
+        return [$start, min($end, $size - 1)];
     }
 
     private function downloadSecret(): string

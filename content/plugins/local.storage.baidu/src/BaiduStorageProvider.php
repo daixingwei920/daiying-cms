@@ -139,6 +139,22 @@ final class BaiduStorageProvider implements RemoteMediaProviderInterface
         return ['filename' => $item->name, 'mime_type' => $item->mimeType, 'byte_size' => $bytes];
     }
 
+    /** @param array{0:int,1:int}|null $range @return array{filename:string,mime_type:string,byte_size:int,status:int,headers:array<string,string>,body:string} */
+    public function downloadBytes(string $remoteId, string $path, ?array $range, int $maxBytes): array
+    {
+        $item = $this->get($remoteId, $path);
+        $download = $this->api->downloadBytes($remoteId, $range, $maxBytes);
+
+        return [
+            'filename' => $item->name,
+            'mime_type' => $item->mimeType,
+            'byte_size' => $item->byteSize,
+            'status' => (int) ($download['status'] ?? 200),
+            'headers' => is_array($download['headers'] ?? null) ? $download['headers'] : [],
+            'body' => (string) ($download['body'] ?? ''),
+        ];
+    }
+
     public function validateDownloadSignature(int $mediaId, string $remoteId, int $expires, string $sig): bool
     {
         if ($mediaId <= 0 || $remoteId === '' || $expires < time() || $sig === '') {

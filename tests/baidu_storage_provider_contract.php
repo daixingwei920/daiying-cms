@@ -38,6 +38,8 @@ final class FakeBaiduTransport extends BaiduHttpTransport
     public int $tokenRequests = 0;
     /** @var array<string,int> */
     public array $apiRequests = [];
+    /** @var array{0:int,1:int}|null */
+    public ?array $lastDownloadRange = null;
 
     /** @param array<string,string> $headers @return array{status:int,headers:array<string,string>,body:string,url:string} */
     public function request(string $method, string $url, array $headers = [], array|string|null $body = null, int $timeout = 20): array
@@ -83,6 +85,23 @@ final class FakeBaiduTransport extends BaiduHttpTransport
         $body = 'baidu-file';
         file_put_contents($targetPath, $body);
         return strlen($body);
+    }
+
+    /** @param array{0:int,1:int}|null $range @return array{status:int,headers:array<string,string>,body:string,final_url:string} */
+    public function downloadBytes(string $url, ?array $range, int $maxBytes, int $timeout = 60): array
+    {
+        $this->lastDownloadRange = $range;
+        $body = $range === null ? 'baidu-file' : substr('baidu-file-stream', $range[0], $range[1] - $range[0] + 1);
+
+        return [
+            'status' => $range === null ? 200 : 206,
+            'headers' => [
+                'content-type' => 'audio/mpeg',
+                'accept-ranges' => 'bytes',
+            ],
+            'body' => $body,
+            'final_url' => 'https://bjbgp01.baidupcs.com/file/test.mp3',
+        ];
     }
 }
 
@@ -258,6 +277,9 @@ if (is_string($tmpProxy)) {
 } else {
     $assert(false, 'Unable to create proxy download test temp file.');
 }
+$stream = $provider->downloadBytes('1001', '', [0, 9], 10);
+$assert($stream['status'] === 206 && $stream['body'] === 'baidu-file', 'Provider proxy route can request byte ranges for browser media playback.');
+$assert($transport->lastDownloadRange === [0, 9], 'Provider preserves browser byte range when downloading from Baidu.');
 
 $assert($api->isSafeDownloadUrl('https://d.pcs.baidu.com/file/test.jpg'), 'Baidu download host is allowed.');
 $assert($api->isSafeDownloadUrl('https://example.baidupcs.com/file/test.jpg'), 'Baidu PCS subdomain is allowed.');
