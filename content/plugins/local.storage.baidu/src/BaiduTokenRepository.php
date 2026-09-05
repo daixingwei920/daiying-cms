@@ -137,6 +137,37 @@ final class BaiduTokenRepository
         $this->data->put('baidu_storage_config', 'config', $config);
     }
 
+    /** @return array<string,mixed>|null */
+    public function cacheGet(string $key): ?array
+    {
+        foreach ($this->data->all('baidu_storage_cache') as $row) {
+            if ((string) ($row['data_key'] ?? '') !== $key) {
+                continue;
+            }
+            $payload = json_decode((string) ($row['payload_json'] ?? '{}'), true);
+            if (!is_array($payload)) {
+                return null;
+            }
+            if ((int) ($payload['expires_at'] ?? 0) < time()) {
+                return null;
+            }
+            $value = $payload['value'] ?? null;
+            return is_array($value) ? $value : null;
+        }
+
+        return null;
+    }
+
+    /** @param array<string,mixed> $payload */
+    public function cachePut(string $key, array $payload, int $ttlSeconds): void
+    {
+        $this->data->put('baidu_storage_cache', $key, [
+            'value' => $this->stripTransientLinks($payload),
+            'expires_at' => time() + max(10, min(600, $ttlSeconds)),
+            'created_at' => gmdate('c'),
+        ]);
+    }
+
     /** @return array<string,mixed> */
     private function latest(string $key): array
     {
@@ -148,5 +179,20 @@ final class BaiduTokenRepository
             return is_array($payload) ? $payload : [];
         }
         return [];
+    }
+
+    /** @param array<string,mixed> $payload @return array<string,mixed> */
+    private function stripTransientLinks(array $payload): array
+    {
+        foreach (['dlink', 'download_url', 'access_token'] as $key) {
+            unset($payload[$key]);
+        }
+        foreach ($payload as $key => $value) {
+            if (is_array($value)) {
+                $payload[$key] = $this->stripTransientLinks($value);
+            }
+        }
+
+        return $payload;
     }
 }

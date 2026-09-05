@@ -309,8 +309,9 @@ final class MediaLibrary
 
         $provider = (string) ($media['storage_provider'] ?? $this->storage()->id());
         $remote = $provider !== $this->storage()->id();
+        $remoteProvider = $remote ? RemoteMediaProviderRegistry::get($provider) : null;
         $exists = $remote
-            ? RemoteMediaProviderRegistry::get($provider) !== null
+            ? $this->remoteProviderAvailable($remoteProvider)
             : $this->storage()->exists((string) ($media['storage_key'] ?: $media['relative_path']));
 
         return [
@@ -618,6 +619,22 @@ final class MediaLibrary
     private function storage(): MediaStorageProviderInterface
     {
         return $this->storageProvider ?? new LocalMediaStorageProvider($this->uploadRoot);
+    }
+
+    private function remoteProviderAvailable(?RemoteMediaProviderInterface $provider): bool
+    {
+        if ($provider === null) {
+            return false;
+        }
+        if (!method_exists($provider, 'available')) {
+            return true;
+        }
+
+        try {
+            return (bool) $provider->available();
+        } catch (Throwable) {
+            return false;
+        }
     }
 
     private function isStorageKeyUsed(string $storageKey): bool

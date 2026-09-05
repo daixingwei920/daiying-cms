@@ -13,6 +13,7 @@ final class BaiduStorageProvider implements RemoteMediaProviderInterface
         private readonly BaiduApiClient $api,
         private readonly BaiduFileBrowser $browser,
         private readonly string $downloadSecret,
+        private readonly ?BaiduTokenRepository $tokens = null,
     ) {
     }
 
@@ -29,6 +30,20 @@ final class BaiduStorageProvider implements RemoteMediaProviderInterface
     public function defaultPath(): string
     {
         return 'baidu://root';
+    }
+
+    public function available(): bool
+    {
+        if ($this->tokens === null) {
+            return true;
+        }
+
+        $config = $this->tokens->config();
+        $token = $this->tokens->token();
+
+        return !empty($config['connected'])
+            && ((string) ($config['app_key'] ?? '') !== '')
+            && ($token['access_token'] !== '' || $token['refresh_token'] !== '');
     }
 
     /** @return array{items:list<MediaProviderItem>,pagination:array<string,mixed>,parent?:array<string,mixed>|null} */

@@ -13,6 +13,7 @@ require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduStorageProvi
 
 use Cms\Core\Http\Request;
 use Cms\Core\Media\MediaLibrary;
+use Cms\Core\Media\RemoteMediaProviderRegistry;
 use Cms\Core\Plugin\PluginDataStore;
 use Cms\Core\Plugin\PluginManifest;
 use Cms\Core\Plugin\PluginRiskBoundaryPolicy;
@@ -35,6 +36,8 @@ $assert = static function (bool $condition, string $message) use (&$failures): v
 final class FakeBaiduTransport extends BaiduHttpTransport
 {
     public int $tokenRequests = 0;
+    /** @var array<string,int> */
+    public array $apiRequests = [];
 
     /** @param array<string,string> $headers @return array{status:int,headers:array<string,string>,body:string,url:string} */
     public function request(string $method, string $url, array $headers = [], array|string|null $body = null, int $timeout = 20): array
@@ -52,11 +55,16 @@ final class FakeBaiduTransport extends BaiduHttpTransport
             return ['status' => 200, 'headers' => ['content-type' => 'application/json'], 'body' => json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}', 'url' => $url];
         }
 
-        $payload = match ((string) ($query['method'] ?? '')) {
+        $methodName = (string) ($query['method'] ?? '');
+        $this->apiRequests[$methodName] = ($this->apiRequests[$methodName] ?? 0) + 1;
+        $payload = match ($methodName) {
             'uinfo' => ['errno' => 0, 'baidu_name' => 'tester'],
             'list' => ['errno' => 0, 'list' => [
                 ['fs_id' => 1001, 'path' => '/图片/test.jpg', 'server_filename' => 'test.jpg', 'isdir' => 0, 'size' => 2048, 'server_mtime' => 1700000000],
                 ['fs_id' => 1002, 'path' => '/图片/子目录', 'server_filename' => '子目录', 'isdir' => 1, 'size' => 0],
+                ['fs_id' => 1004, 'path' => '/视频/movie.mkv', 'server_filename' => 'movie.mkv', 'isdir' => 0, 'size' => 8192],
+                ['fs_id' => 1005, 'path' => '/压缩/archive.7z', 'server_filename' => 'archive.7z', 'isdir' => 0, 'size' => 1024],
+                ['fs_id' => 1006, 'path' => '/文档/book.epub', 'server_filename' => 'book.epub', 'isdir' => 0, 'size' => 1024],
             ]],
             'search' => ['errno' => 0, 'list' => [
                 ['fs_id' => 1003, 'path' => '/音乐/a.mp3', 'server_filename' => 'a.mp3', 'isdir' => 0, 'size' => 4096],
@@ -205,13 +213,24 @@ $refreshed = $api->accessToken();
 $assert($refreshed === 'access-test-token-2', 'Expiring access token is refreshed automatically.');
 $assert($transport->tokenRequests === 2, 'Refresh endpoint was called exactly once after expiring token setup.');
 
-$provider = new BaiduStorageProvider($api, new BaiduFileBrowser(), 'download-secret');
+$provider = new BaiduStorageProvider($api, new BaiduFileBrowser(), 'download-secret', $repo);
+RemoteMediaProviderRegistry::clear();
+RemoteMediaProviderRegistry::register($provider);
+$assert($provider->available(), 'Connected Baidu provider reports as available without a network call.');
 $list = $provider->list('baidu://root');
-$assert(count($list['items']) === 2, 'Provider lists Baidu files.');
+$listAgain = $provider->list('baidu://root');
+$assert(count($list['items']) === 5, 'Provider lists Baidu files.');
 $assert($list['items'][0]->type === 'image', 'Provider maps jpg to image.');
 $assert($list['items'][1]->type === 'folder', 'Provider maps directories to folder.');
+$assert($list['items'][2]->type === 'video' && $list['items'][2]->mimeType === 'video/x-matroska', 'Provider maps mkv to video.');
+$assert($list['items'][3]->type === 'attachment' && $list['items'][3]->mimeType === 'application/x-7z-compressed', 'Provider maps 7z to attachment.');
+$assert($list['items'][4]->type === 'attachment' && $list['items'][4]->mimeType === 'application/epub+zip', 'Provider maps epub to attachment.');
+$assert(($transport->apiRequests['list'] ?? 0) === 1, 'Provider caches repeated directory listings briefly.');
+$assert(count($listAgain['items']) === 5, 'Cached directory listing returns the same file set.');
 $search = $provider->search('a', 'baidu://root');
+$provider->search('a', 'baidu://root');
 $assert($search['items'][0]->mimeType === 'audio/mpeg', 'Provider search maps mp3 MIME.');
+$assert(($transport->apiRequests['search'] ?? 0) === 1, 'Provider caches repeated searches briefly.');
 $resolved = $provider->resolveUrl(['id' => 9, 'metadata' => ['remote_id' => '1001']]);
 $assert(str_starts_with($resolved['url'], '/baidu-storage/media/9?'), 'Provider resolves to controlled signed CMS media route.');
 $assert(!str_contains($resolved['url'], 'access_token'), 'Resolved browser URL must not contain Baidu access token.');
@@ -226,6 +245,11 @@ $assert(is_array($media) && $media['storage_key'] === BaiduTokenRepository::PLUG
 $metadataJson = is_array($media) ? (string) ($media['metadata_json'] ?? '') : '';
 $assert(str_contains($metadataJson, '"remote_id":"1001"'), 'Remote media metadata stores Baidu remote id.');
 $assert(!str_contains($metadataJson, 'd.pcs.baidu.com') && !str_contains($metadataJson, 'access_token'), 'Remote media metadata does not store temporary download URL or token.');
+$view = $mediaLibrary->viewModel($mediaId);
+$assert($view['available'] === true && $view['remote'] === true && $view['provider'] === BaiduTokenRepository::PLUGIN_ID, 'Remote media view model works with registered Baidu provider.');
+$provider->get('1001');
+$provider->get('1001');
+$assert(($transport->apiRequests['filemetas'] ?? 0) === 1, 'Provider caches metadata lookup when no download link is requested.');
 $tmpProxy = tempnam(sys_get_temp_dir(), 'baidu-proxy-test-');
 if (is_string($tmpProxy)) {
     $proxy = $provider->downloadTo('1001', '', $tmpProxy, 1024);
@@ -275,6 +299,13 @@ try {
     $assert(str_contains($exception->getMessage(), '授权已失效'), 'Refresh token failure gets a reconnect message.');
     $assert($failedRefreshRepo->config()['connected'] === false, 'Refresh token failure marks Baidu connection disconnected.');
 }
+$disconnectedRepo = new BaiduTokenRepository(new PluginDataStore($pdo, 'baidu-disconnected-test'), $secretStore);
+$disconnectedProvider = new BaiduStorageProvider($api, new BaiduFileBrowser(), 'download-secret', $disconnectedRepo);
+$assert(!$disconnectedProvider->available(), 'Disconnected Baidu provider reports unavailable for front-end rendering.');
+
+$pluginRows = $pdo->query('SELECT payload_json FROM cms_plugin_data')->fetchAll(PDO::FETCH_COLUMN);
+$cachedRowsText = implode("\n", array_map('strval', $pluginRows));
+$assert(!str_contains($cachedRowsText, 'd.pcs.baidu.com') && !str_contains($cachedRowsText, 'access_token'), 'Baidu media cache does not store temporary download links or tokens.');
 
 $adminController = file_get_contents(__DIR__ . '/../system/core/Admin/AdminController.php') ?: '';
 $assert(str_contains($adminController, 'CMS_REMOTE_MEDIA_PROVIDERS'), 'Media picker exposes registered remote provider metadata.');

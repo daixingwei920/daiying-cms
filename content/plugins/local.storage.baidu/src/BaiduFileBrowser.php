@@ -47,20 +47,47 @@ final class BaiduFileBrowser
             'png' => 'image/png',
             'gif' => 'image/gif',
             'webp' => 'image/webp',
+            'avif' => 'image/avif',
+            'bmp' => 'image/bmp',
+            'heic' => 'image/heic',
+            'heif' => 'image/heif',
+            'tif', 'tiff' => 'image/tiff',
             'mp3' => 'audio/mpeg',
             'm4a' => 'audio/mp4',
             'aac' => 'audio/aac',
+            'flac' => 'audio/flac',
             'wav' => 'audio/wav',
             'ogg' => 'audio/ogg',
+            'opus' => 'audio/opus',
+            'wma' => 'audio/x-ms-wma',
+            'amr' => 'audio/amr',
             'mp4' => 'video/mp4',
             'webm' => 'video/webm',
             'mov' => 'video/quicktime',
+            'mkv' => 'video/x-matroska',
+            'm4v' => 'video/x-m4v',
+            'avi' => 'video/x-msvideo',
+            'wmv' => 'video/x-ms-wmv',
+            'flv' => 'video/x-flv',
+            'ts' => 'video/mp2t',
+            'm3u8' => 'application/vnd.apple.mpegurl',
             'pdf' => 'application/pdf',
             'txt' => 'text/plain',
+            'md' => 'text/markdown',
+            'csv' => 'text/csv',
+            'rtf' => 'application/rtf',
+            'epub' => 'application/epub+zip',
             'zip' => 'application/zip',
             'rar' => 'application/vnd.rar',
+            '7z' => 'application/x-7z-compressed',
+            'tar' => 'application/x-tar',
+            'gz' => 'application/gzip',
+            'bz2' => 'application/x-bzip2',
+            'doc' => 'application/msword',
             'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'xls' => 'application/vnd.ms-excel',
             'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'ppt' => 'application/vnd.ms-powerpoint',
             'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
             default => 'application/octet-stream',
         };
@@ -75,6 +102,9 @@ final class BaiduFileBrowser
             return 'audio';
         }
         if (str_starts_with($mime, 'video/')) {
+            return 'video';
+        }
+        if ($mime === 'application/vnd.apple.mpegurl') {
             return 'video';
         }
         return 'attachment';

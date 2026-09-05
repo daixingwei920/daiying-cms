@@ -23,7 +23,7 @@ final class BaiduStoragePlugin
         $this->tokens = new BaiduTokenRepository($context->data(), $context->secrets());
         $this->api = new BaiduApiClient($this->tokens, new BaiduHttpTransport());
         $this->oauth = new BaiduOAuthService($this->tokens, $this->api);
-        $this->provider = new BaiduStorageProvider($this->api, new BaiduFileBrowser(), $this->downloadSecret());
+        $this->provider = new BaiduStorageProvider($this->api, new BaiduFileBrowser(), $this->downloadSecret(), $this->tokens);
     }
 
     public function register(): void

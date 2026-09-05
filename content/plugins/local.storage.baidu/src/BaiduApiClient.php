@@ -89,7 +89,7 @@ final class BaiduApiClient
     /** @return array<string,mixed> */
     public function listFiles(string $path, int $page = 0, int $pageSize = 50): array
     {
-        return $this->getJson('https://pan.baidu.com/rest/2.0/xpan/file', [
+        $params = [
             'method' => 'list',
             'dir' => $this->normalizePath($path),
             'start' => max(0, $page) * max(1, min(100, $pageSize)),
@@ -98,30 +98,37 @@ final class BaiduApiClient
             'folder' => 0,
             'order' => 'name',
             'desc' => 0,
-        ]);
+        ];
+
+        return $this->cachedJson('list', $params, 60, fn (): array => $this->getJson('https://pan.baidu.com/rest/2.0/xpan/file', $params));
     }
 
     /** @return array<string,mixed> */
     public function searchFiles(string $query, string $path, int $page = 0, int $pageSize = 50): array
     {
-        return $this->getJson('https://pan.baidu.com/rest/2.0/xpan/file', [
+        $params = [
             'method' => 'search',
             'key' => $query,
             'dir' => $this->normalizePath($path),
             'recursion' => 1,
             'page' => max(1, $page + 1),
             'num' => max(1, min(100, $pageSize)),
-        ]);
+        ];
+
+        return $this->cachedJson('search', $params, 60, fn (): array => $this->getJson('https://pan.baidu.com/rest/2.0/xpan/file', $params));
     }
 
     /** @return array<string,mixed> */
     public function fileMeta(string $fsId, bool $withDownload = false): array
     {
-        $payload = $this->getJson('https://pan.baidu.com/rest/2.0/xpan/multimedia', [
+        $params = [
             'method' => 'filemetas',
             'fsids' => '[' . (string) (int) $fsId . ']',
             'dlink' => $withDownload ? 1 : 0,
-        ]);
+        ];
+        $payload = $withDownload
+            ? $this->getJson('https://pan.baidu.com/rest/2.0/xpan/multimedia', $params)
+            : $this->cachedJson('file-meta', $params, 300, fn (): array => $this->getJson('https://pan.baidu.com/rest/2.0/xpan/multimedia', $params));
         $list = $payload['list'] ?? [];
         if (!is_array($list) || !is_array($list[0] ?? null)) {
             throw new \RuntimeException('百度网盘文件不存在或已被移动。');
@@ -175,6 +182,21 @@ final class BaiduApiClient
             }
             throw $exception;
         }
+    }
+
+    /** @param array<string,mixed> $params @param callable():array<string,mixed> $loader @return array<string,mixed> */
+    private function cachedJson(string $scope, array $params, int $ttlSeconds, callable $loader): array
+    {
+        $key = 'api:' . $scope . ':' . hash('sha256', json_encode($params, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: serialize($params));
+        $cached = $this->tokens->cacheGet($key);
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $payload = $loader();
+        $this->tokens->cachePut($key, $payload, $ttlSeconds);
+
+        return $payload;
     }
 
     /** @param array{status:int,headers:array<string,string>,body:string,url:string} $response @return array<string,mixed> */
