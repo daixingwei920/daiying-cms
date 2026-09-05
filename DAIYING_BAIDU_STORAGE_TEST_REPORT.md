@@ -9,6 +9,7 @@ Command results:
 - `php -l content/plugins/official.storage.baidu/src/BaiduOAuthService.php` passed.
 - `php -l tests/baidu_storage_provider_contract.php` passed.
 - `php tests/baidu_storage_provider_contract.php` passed.
+- `php -l content/plugins/official.storage.baidu/src/BaiduStoragePlugin.php` passed after adding diagnostics UI.
 - `php tests/market_review_submission_payment_provider.php` passed.
 - `php tests/market_theme_hyphen_extension_id.php` passed.
 - `php tests/novel_collector_frontend_contract.php` passed.

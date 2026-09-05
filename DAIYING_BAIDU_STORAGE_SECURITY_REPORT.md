@@ -7,6 +7,7 @@ Date: 2026-09-05
 - App Secret, access token, refresh token, and OAuth state are stored through `Cms\Core\Plugin\PluginSecretStore`.
 - Secret Key is never echoed back into HTML; the admin field shows only a masked status.
 - Access tokens are not placed in JavaScript, media picker JSON, or permanent `cms_media` URLs.
+- Diagnostics show only status/configuration checks and intentionally hide Secret Key, Access Token, Refresh Token, and Authorization headers.
 
 ## OAuth
 

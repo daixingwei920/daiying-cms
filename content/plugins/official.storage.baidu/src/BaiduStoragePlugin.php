@@ -34,6 +34,7 @@ final class BaiduStoragePlugin
         $this->context->adminRoute('POST', '/admin/baidu-storage/disconnect', [$this, 'disconnect'], 'baidu_storage.manage', true);
         $this->context->adminRoute('GET', '/admin/baidu-storage/connect', [$this, 'connect'], 'baidu_storage.manage', false);
         $this->context->adminRoute('GET', '/admin/baidu-storage/test', [$this, 'testConnection'], 'baidu_storage.manage', false);
+        $this->context->adminRoute('GET', '/admin/baidu-storage/diagnostics', [$this, 'diagnostics'], 'baidu_storage.manage', false);
         $this->context->adminRoute('GET', '/admin/baidu-storage/browser', [$this, 'browser'], 'baidu_storage.manage', false);
         $this->context->frontRoute('GET', BaiduOAuthService::CALLBACK_PATH, [$this, 'callback']);
         $this->context->frontRoute('GET', '/baidu-storage/media/{id}', [$this, 'download']);
@@ -47,18 +48,22 @@ final class BaiduStoragePlugin
         $connected = !empty($config['connected']);
         $status = $this->statusLabel($config);
         $message = $this->notice($request);
+        $lastError = trim((string) ($config['last_error'] ?? ''));
         $secretText = $this->tokens->appSecretConfigured() ? '已配置（' . View::escape($this->tokens->maskedSecret()) . '）' : '未配置';
         $body = '<h1>百度网盘</h1>' . $message .
             '<p><strong>连接状态：</strong><span class="admin-tag">' . View::escape($status) . '</span></p>' .
+            ($lastError !== '' ? '<p class="error">最近错误：' . View::escape($lastError) . '</p>' : '') .
             '<form method="post" action="/admin/baidu-storage/save">' . CsrfToken::field() .
             '<label>App Key<input name="app_key" value="' . View::escape((string) ($config['app_key'] ?? '')) . '" autocomplete="off"></label>' .
             '<label>Secret Key<input name="app_secret" type="password" value="" autocomplete="new-password" placeholder="' . $secretText . '"></label>' .
             '<p class="muted">Secret Key 保存后不会回显。留空表示保持现有 Secret Key 不变。</p>' .
-            '<label>OAuth 回调地址<input readonly value="' . View::escape($callback) . '"></label>' .
+            '<label>OAuth 回调地址<input id="baidu-callback-url" readonly value="' . View::escape($callback) . '"></label>' .
+            '<button type="button" class="admin-button-secondary" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById(\'baidu-callback-url\').value)">复制回调地址</button>' .
             '<p class="muted">请将此地址填写到百度网盘开放平台的 OAuth 授权回调地址。当前插件不会写死任何站点域名。</p>' .
             '<button type="submit">保存配置</button> ' .
-            '<a class="button admin-button-secondary" href="/admin/baidu-storage/connect">连接百度网盘</a> ' .
+            '<a class="button admin-button-secondary" href="/admin/baidu-storage/connect">' . ($connected ? '重新授权' : '连接百度网盘') . '</a> ' .
             '<a class="button admin-button-secondary" href="/admin/baidu-storage/test">测试连接</a> ' .
+            '<a class="button admin-button-secondary" href="/admin/baidu-storage/diagnostics">查看诊断</a> ' .
             '<a class="button admin-button-secondary" href="/admin/baidu-storage/browser">浏览网盘</a></form>' .
             '<form method="post" action="/admin/baidu-storage/disconnect" onsubmit="return confirm(\'确定断开百度网盘授权吗？媒体引用记录会保留。\');">' . CsrfToken::field() . '<button class="admin-danger" type="submit">断开连接</button></form>' .
             ($connected ? '<p class="muted">Token 到期时间：' . View::escape((string) ($config['token_expires_at'] ?? '')) . '</p>' : '');
@@ -74,6 +79,32 @@ final class BaiduStoragePlugin
         } catch (\Throwable $exception) {
             return Response::html(View::page('百度网盘', '<h1>百度网盘</h1><p class="error">' . View::escape($this->friendly($exception)) . '</p><p><a class="button" href="/admin/baidu-storage">返回设置</a></p>'), 400);
         }
+    }
+
+    public function diagnostics(Request $request): Response
+    {
+        $config = $this->tokens->config();
+        $checks = [
+            '插件 ID' => $this->provider->id(),
+            '插件版本' => $this->context->manifest->version,
+            'OAuth 回调地址' => $this->oauth->callbackUrl($request),
+            'App Key' => (string) ($config['app_key'] ?? '') !== '' ? '已配置' : '未配置',
+            'Secret Key' => $this->tokens->appSecretConfigured() ? '已配置' : '未配置',
+            '连接状态' => $this->statusLabel($config),
+            'Token 到期时间' => (string) ($config['token_expires_at'] ?? '') !== '' ? (string) $config['token_expires_at'] : '-',
+            'PHP curl' => extension_loaded('curl') ? '可用' : '不可用',
+            'PHP openssl' => extension_loaded('openssl') ? '可用' : '不可用',
+        ];
+        $rows = '';
+        foreach ($checks as $name => $value) {
+            $rows .= '<tr><th>' . View::escape($name) . '</th><td>' . View::escape((string) $value) . '</td></tr>';
+        }
+        $lastError = trim((string) ($config['last_error'] ?? ''));
+        $body = '<h1>百度网盘诊断</h1><p><a class="button admin-button-secondary" href="/admin/baidu-storage">返回设置</a></p>' .
+            '<table><tbody>' . $rows . '</tbody></table>' .
+            ($lastError !== '' ? '<p class="error">最近错误：' . View::escape($lastError) . '</p>' : '') .
+            '<p class="muted">此页面不会显示 Secret Key、Access Token、Refresh Token 或 Authorization Header。</p>';
+        return Response::html(View::page('百度网盘诊断', $body));
     }
 
     public function connect(Request $request): Response

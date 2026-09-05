@@ -10,6 +10,7 @@ Implemented release-candidate plugin `official.storage.baidu` as an official tru
 
 - Added independent plugin under `content/plugins/official.storage.baidu`.
 - Added admin settings page for App Key, Secret Key, OAuth callback display, connect, disconnect, connection test, and browser.
+- Added callback URL copy action, reauthorization entry, recent-error display, and a safe diagnostics page.
 - Added OAuth flow with generated state, one-time state validation, callback handling, token exchange, token refresh support, and encrypted token storage.
 - Added Baidu API client for user info, directory list, search, file metadata, and download link resolution.
 - Added refresh-token lock to avoid concurrent access-token refresh races on one server.

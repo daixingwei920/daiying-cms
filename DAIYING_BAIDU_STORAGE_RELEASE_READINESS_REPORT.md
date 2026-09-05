@@ -12,6 +12,7 @@ Date: 2026-09-05
 
 - Plugin manifest and official registry entry exist.
 - Admin configuration and OAuth entry points exist.
+- Safe admin diagnostics and callback-copy UI exist.
 - Encrypted secret/token storage exists.
 - Access-token refresh lock exists.
 - Generic media provider UI integration exists.
