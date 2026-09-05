@@ -2,17 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Official\Storage\Baidu;
+namespace Local\Storage\Baidu;
 
 use Cms\Core\Media\MediaProviderItem;
-use Cms\Core\Media\RemoteMediaProviderInterface;
+use Cms\Core\Media\RemoteMediaProxyProviderInterface;
 
-final class BaiduStorageProvider implements RemoteMediaProviderInterface
+final class BaiduStorageProvider implements RemoteMediaProxyProviderInterface
 {
     public function __construct(
         private readonly BaiduApiClient $api,
         private readonly BaiduFileBrowser $browser,
-        private readonly string $downloadSecret,
     ) {
     }
 
@@ -83,11 +82,9 @@ final class BaiduStorageProvider implements RemoteMediaProviderInterface
         if ($mediaId <= 0 || $remoteId === '') {
             throw new \RuntimeException('百度网盘媒体引用无效。');
         }
-        $expires = time() + 300;
-        $sig = hash_hmac('sha256', $mediaId . ':' . $remoteId . ':' . $expires, $this->downloadSecret);
         return [
-            'url' => '/baidu-storage/media/' . $mediaId . '?expires=' . $expires . '&sig=' . $sig,
-            'expires' => gmdate('c', $expires),
+            'url' => '/media/' . $mediaId,
+            'expires' => null,
         ];
     }
 
@@ -120,13 +117,15 @@ final class BaiduStorageProvider implements RemoteMediaProviderInterface
         return ['filename' => $item->name, 'mime_type' => $item->mimeType, 'byte_size' => $bytes];
     }
 
-    public function validateDownloadSignature(int $mediaId, string $remoteId, int $expires, string $sig): bool
+    /** @param array<string,mixed> $media @return array{filename:string,mime_type:string,byte_size:int} */
+    public function proxyDownload(array $media, string $targetPath, int $maxBytes, array $options = []): array
     {
-        if ($mediaId <= 0 || $remoteId === '' || $expires < time() || $sig === '') {
-            return false;
+        $metadata = is_array($media['metadata'] ?? null) ? $media['metadata'] : [];
+        $remoteId = (string) ($metadata['remote_id'] ?? '');
+        if ($remoteId === '') {
+            throw new \RuntimeException('百度网盘媒体引用无效。');
         }
-        $expected = hash_hmac('sha256', $mediaId . ':' . $remoteId . ':' . $expires, $this->downloadSecret);
-        return hash_equals($expected, $sig);
+        return $this->downloadTo($remoteId, (string) ($metadata['remote_path'] ?? ''), $targetPath, $maxBytes);
     }
 
     /** @param mixed $rows @return list<MediaProviderItem> */

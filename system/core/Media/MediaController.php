@@ -132,6 +132,9 @@ final class MediaController
         }
 
         try {
+            if ($provider instanceof RemoteMediaProxyProviderInterface) {
+                return $this->remoteMediaProxyResponse($request, $provider, $media, $download);
+            }
             $resolved = $provider->resolveUrl($media, [
                 'download' => $download,
                 'variant' => $this->variant($request),
@@ -149,6 +152,52 @@ final class MediaController
             'Cache-Control' => 'private, no-store',
             'X-Daiying-Media-Provider' => $providerId,
         ]);
+    }
+
+    /** @param array<string,mixed> $media */
+    private function remoteMediaProxyResponse(Request $request, RemoteMediaProxyProviderInterface $provider, array $media, bool $download): Response
+    {
+        $filename = $this->safeDownloadName((string) ($media['original_name'] ?? 'remote-media'));
+        $headers = [
+            'Content-Type' => (string) ($media['mime_type'] ?? 'application/octet-stream'),
+            'Content-Disposition' => ($download ? 'attachment' : 'inline') . '; filename="' . $filename . '"; filename*=UTF-8\'\'' . rawurlencode($filename),
+            'Cache-Control' => 'private, no-store',
+            'X-Daiying-Media-Provider' => $provider->id(),
+            'X-Content-Type-Options' => 'nosniff',
+        ];
+
+        if ($request->method === 'HEAD') {
+            $size = max(0, (int) ($media['byte_size'] ?? 0));
+            return new Response('', 200, $headers + ($size > 0 ? ['Content-Length' => (string) $size] : []));
+        }
+
+        $tmp = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'remote-media-' . bin2hex(random_bytes(10)) . '.tmp';
+        try {
+            $downloaded = $provider->proxyDownload($media, $tmp, 52428800, [
+                'download' => $download,
+                'variant' => $this->variant($request),
+            ]);
+            $body = file_get_contents($tmp);
+            if (!is_string($body)) {
+                throw new MediaException('Remote media proxy file is unreadable.');
+            }
+            $proxyFilename = $this->safeDownloadName((string) ($downloaded['filename'] ?? $filename));
+            return new Response($body, 200, [
+                'Content-Type' => (string) ($downloaded['mime_type'] ?? $headers['Content-Type']),
+                'Content-Disposition' => ($download ? 'attachment' : 'inline') . '; filename="' . $proxyFilename . '"; filename*=UTF-8\'\'' . rawurlencode($proxyFilename),
+                'Content-Length' => (string) strlen($body),
+                'Cache-Control' => 'private, no-store',
+                'X-Daiying-Media-Provider' => $provider->id(),
+                'X-Content-Type-Options' => 'nosniff',
+            ]);
+        } catch (Throwable) {
+            return Response::text('远程媒体暂不可用，请管理员检查对应插件授权状态。', 503)
+                ->withHeaders(['Cache-Control' => 'private, no-store']);
+        } finally {
+            if (is_file($tmp)) {
+                @unlink($tmp);
+            }
+        }
     }
 
     /** @param array<string,mixed> $media */

@@ -12,7 +12,7 @@ This report intentionally does not claim a live Baidu OAuth pass. The current co
 
 ## Required Live Checklist
 
-1. Install/enable `official.storage.baidu`.
+1. Install/enable `local.storage.baidu`.
 2. Open `/admin/baidu-storage`.
 3. Enter the real Baidu App Key and Secret Key.
 4. Copy the displayed OAuth callback URL into Baidu Open Platform callback settings.

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Official\Storage\Baidu;
+namespace Local\Storage\Baidu;
 
 use Cms\Core\Http\Request;
 

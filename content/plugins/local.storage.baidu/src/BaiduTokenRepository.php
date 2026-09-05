@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Official\Storage\Baidu;
+namespace Local\Storage\Baidu;
 
 use Cms\Core\Plugin\PluginDataStore;
 use Cms\Core\Plugin\PluginSecretStore;
 
 final class BaiduTokenRepository
 {
-    public const PLUGIN_ID = 'official.storage.baidu';
+    public const PLUGIN_ID = 'local.storage.baidu';
 
     public function __construct(
         private readonly PluginDataStore $data,

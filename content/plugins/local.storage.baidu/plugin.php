@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Cms\Core\Plugin\PluginContext;
-use Official\Storage\Baidu\BaiduStoragePlugin;
+use Local\Storage\Baidu\BaiduStoragePlugin;
 
 require_once __DIR__ . '/src/BaiduStoragePlugin.php';
 require_once __DIR__ . '/src/BaiduTokenRepository.php';

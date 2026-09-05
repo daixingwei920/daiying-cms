@@ -8,6 +8,7 @@ Date: 2026-09-05
 - Secret Key is never echoed back into HTML; the admin field shows only a masked status.
 - Access tokens are not placed in JavaScript, media picker JSON, or permanent `cms_media` URLs.
 - Diagnostics show only status/configuration checks and intentionally hide Secret Key, Access Token, Refresh Token, and Authorization headers.
+- The local package does not claim `official.*`, `official: true`, or `trusted_php`.
 
 ## OAuth
 
@@ -31,8 +32,8 @@ Date: 2026-09-05
   - `pan.baidu.com`
   - a subdomain ending in `.baidupcs.com`
 - The plugin does not proxy arbitrary user-provided URLs.
-- Downloads are fetched only after looking up a CMS media record by id and matching `storage_provider = official.storage.baidu`.
-- The public media URL is HMAC signed and expires after 5 minutes.
+- Downloads are fetched only after Core looks up a CMS media record by id and matches `storage_provider = local.storage.baidu`.
+- The public media URL is the existing CMS `/media/{id}` route; Baidu access tokens stay server-side.
 
 ## Core Isolation
 

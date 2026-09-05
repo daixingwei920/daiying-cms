@@ -6,17 +6,19 @@ Date: 2026-09-05
 
 Command results:
 
-- `php -l content/plugins/official.storage.baidu/src/BaiduOAuthService.php` passed.
+- `php -l content/plugins/local.storage.baidu/src/BaiduOAuthService.php` passed.
 - `php -l tests/baidu_storage_provider_contract.php` passed.
 - `php tests/baidu_storage_provider_contract.php` passed.
-- `php -l content/plugins/official.storage.baidu/src/BaiduStoragePlugin.php` passed after adding diagnostics UI.
+- `php -l content/plugins/local.storage.baidu/src/BaiduStoragePlugin.php` passed after adding diagnostics UI.
 - `php tests/market_review_submission_payment_provider.php` passed.
 - `php tests/market_theme_hyphen_extension_id.php` passed.
 - `php tests/novel_collector_frontend_contract.php` passed.
+- Local ZIP manifest inspection passed for root `local.storage.baidu/`.
 
 ## Covered Behaviors
 
-- OAuth authorize URL uses official Baidu HTTPS host.
+- OAuth authorize URL uses Baidu official HTTPS host.
+- Plugin manifest uses `local.storage.baidu`, `trust_level = api`, and does not claim official status.
 - Authorization URL includes App Key but does not expose Secret Key.
 - OAuth state format and single-use behavior are enforced.
 - Callback URL derives from current host and preserves CMS subdirectory base path.
@@ -26,6 +28,7 @@ Command results:
 - Refresh-token failure returns a reconnect message and marks the connection disconnected.
 - Directory list and search map Baidu files/folders into CMS `MediaProviderItem`.
 - Remote media resolve URL returns a controlled CMS route and does not expose `access_token`.
+- Provider implements the Core remote media proxy interface and proxy-downloads through server-side transport.
 - Remote media library records store provider id, stable remote key, and remote id without temporary Baidu download URL or token.
 - Download URL validator allows expected Baidu hosts and rejects HTTP, loopback IP, foreign hosts, and non-443 ports.
 - API URL validator rejects HTTP, foreign hosts, and non-443 ports before cURL runs.

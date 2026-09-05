@@ -30,13 +30,4 @@ return [
         'capability_namespaces' => ['video', 'video_collector'],
         'table_prefixes' => ['video_', 'video_collector_'],
     ],
-    'official.storage.baidu' => [
-        'directory' => 'official.storage.baidu',
-        'package_type' => 'plugin',
-        'type' => 'storage_provider',
-        'bundled' => true,
-        'trust_level' => 'trusted_php',
-        'capability_namespaces' => ['baidu_storage', 'storage_baidu'],
-        'table_prefixes' => ['baidu_storage_'],
-    ],
 ];

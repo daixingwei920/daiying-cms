@@ -4,7 +4,7 @@ Date: 2026-09-05
 
 ## Scope
 
-This audit covers the first release-candidate phase of the official Baidu Netdisk storage plugin, `official.storage.baidu`. The goal is to confirm which Daiying CMS extension points were reused and which small generic Core changes were required for OAuth, token storage, directory browsing, and external media references.
+This audit covers the first release-candidate phase of the local Baidu Netdisk storage plugin, `local.storage.baidu`. The goal is to confirm which Daiying CMS extension points were reused and which small generic Core changes were required for OAuth, token storage, directory browsing, and external media references.
 
 ## Existing Core Capabilities
 
@@ -12,9 +12,9 @@ This audit covers the first release-candidate phase of the official Baidu Netdis
 
 - `Cms\Core\Plugin\PluginContext` already supports plugin-owned admin routes, front routes, admin menu entries, plugin data storage, raw PDO access for trusted official plugins, and `PluginSecretStore`.
 - `PluginRuntimeRegistry` handles route collision checks, admin route capability checks, and optional CSRF verification for plugin admin POST routes.
-- Official plugin trust is enforced through `system/official-plugins.php` and `OfficialPluginRegistry`.
+- Official plugin trust is enforced through `system/official-plugins.php` and `OfficialPluginRegistry`; this local RC must not claim that trust boundary.
 
-Decision: Baidu storage can be implemented as an independent official plugin. No Baidu-specific Core boot logic is required.
+Decision: Baidu storage can be implemented as an independent local plugin for this RC. No Baidu-specific Core boot logic is required.
 
 ### Secret Storage
 
@@ -27,11 +27,12 @@ Decision: App Secret, access token, refresh token, and OAuth one-time state secr
 ### Remote Media Provider
 
 - `Cms\Core\Media\RemoteMediaProviderInterface` already defines the required provider surface: `list`, `search`, `get`, `resolveUrl`, `upload`, `delete`, `move`, `metadata`, and `downloadTo`.
+- `Cms\Core\Media\RemoteMediaProxyProviderInterface` adds a generic proxy path for local/restricted providers that must keep provider tokens server-side.
 - `RemoteMediaProviderRegistry` allows enabled plugins to register providers at boot.
 - `MediaLibrary::registerRemoteReference()` persists remote media references in `cms_media` with `storage_provider`, `storage_key`, `relative_path`, and metadata including `remote_id`.
 - `MediaController` already detects non-local `storage_provider` rows and calls the registered remote provider to resolve a fresh URL at request time.
 
-Decision: Baidu media should save `storage_provider = official.storage.baidu` and `remote_id = fs_id`. The CMS should not persist short-lived Baidu download URLs as permanent media URLs.
+Decision: Baidu media should save `storage_provider = local.storage.baidu` and `remote_id = fs_id`. The CMS should not persist short-lived Baidu download URLs as permanent media URLs.
 
 ### Media Picker and Admin Media Pages
 
@@ -58,7 +59,7 @@ No Core storage schema changes are required for Phase 1.
 
 ### Plugin ID
 
-- `official.storage.baidu`
+- `local.storage.baidu`
 
 ### Main Components
 
@@ -67,7 +68,7 @@ No Core storage schema changes are required for Phase 1.
 - `BaiduOAuthService`: authorization URL generation, state creation/verification, callback token exchange.
 - `BaiduHttpTransport`: TLS-verified HTTP transport.
 - `BaiduApiClient`: Baidu OAuth/API requests, token refresh, error mapping, download URL validation.
-- `BaiduStorageProvider`: implements `RemoteMediaProviderInterface`.
+- `BaiduStorageProvider`: implements `RemoteMediaProxyProviderInterface`.
 - `BaiduFileBrowser`: maps Baidu file entries to `MediaProviderItem`.
 
 ### First Implementation Boundary

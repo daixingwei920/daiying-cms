@@ -3,24 +3,27 @@
 declare(strict_types=1);
 
 require __DIR__ . '/../system/core/Bootstrap/autoload.php';
-require __DIR__ . '/../content/plugins/official.storage.baidu/src/BaiduTokenRepository.php';
-require __DIR__ . '/../content/plugins/official.storage.baidu/src/BaiduTokenRefreshLock.php';
-require __DIR__ . '/../content/plugins/official.storage.baidu/src/BaiduHttpTransport.php';
-require __DIR__ . '/../content/plugins/official.storage.baidu/src/BaiduApiClient.php';
-require __DIR__ . '/../content/plugins/official.storage.baidu/src/BaiduOAuthService.php';
-require __DIR__ . '/../content/plugins/official.storage.baidu/src/BaiduFileBrowser.php';
-require __DIR__ . '/../content/plugins/official.storage.baidu/src/BaiduStorageProvider.php';
+require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduTokenRepository.php';
+require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduTokenRefreshLock.php';
+require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduHttpTransport.php';
+require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduApiClient.php';
+require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduOAuthService.php';
+require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduFileBrowser.php';
+require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduStorageProvider.php';
 
 use Cms\Core\Http\Request;
 use Cms\Core\Media\MediaLibrary;
+use Cms\Core\Media\RemoteMediaProxyProviderInterface;
 use Cms\Core\Plugin\PluginDataStore;
+use Cms\Core\Plugin\PluginManifest;
+use Cms\Core\Plugin\PluginRiskBoundaryPolicy;
 use Cms\Core\Plugin\PluginSecretStore;
-use Official\Storage\Baidu\BaiduApiClient;
-use Official\Storage\Baidu\BaiduFileBrowser;
-use Official\Storage\Baidu\BaiduHttpTransport;
-use Official\Storage\Baidu\BaiduOAuthService;
-use Official\Storage\Baidu\BaiduStorageProvider;
-use Official\Storage\Baidu\BaiduTokenRepository;
+use Local\Storage\Baidu\BaiduApiClient;
+use Local\Storage\Baidu\BaiduFileBrowser;
+use Local\Storage\Baidu\BaiduHttpTransport;
+use Local\Storage\Baidu\BaiduOAuthService;
+use Local\Storage\Baidu\BaiduStorageProvider;
+use Local\Storage\Baidu\BaiduTokenRepository;
 
 $failures = 0;
 $assert = static function (bool $condition, string $message) use (&$failures): void {
@@ -67,6 +70,13 @@ final class FakeBaiduTransport extends BaiduHttpTransport
 
         return ['status' => 200, 'headers' => ['content-type' => 'application/json'], 'body' => json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}', 'url' => $url];
     }
+
+    public function downloadTo(string $url, string $targetPath, int $maxBytes, int $timeout = 60): int
+    {
+        $body = 'baidu-file';
+        file_put_contents($targetPath, $body);
+        return strlen($body);
+    }
 }
 
 final class InvalidJsonBaiduTransport extends BaiduHttpTransport
@@ -86,6 +96,16 @@ final class FailedRefreshBaiduTransport extends BaiduHttpTransport
         $payload = ['error' => 'invalid_grant', 'error_description' => 'expired refresh token'];
         return ['status' => 400, 'headers' => ['content-type' => 'application/json'], 'body' => json_encode($payload) ?: '{}', 'url' => $url];
     }
+}
+
+$manifest = json_decode((string) file_get_contents(__DIR__ . '/../content/plugins/local.storage.baidu/plugin.json'), true);
+$assert(is_array($manifest), 'Local Baidu manifest is valid JSON.');
+if (is_array($manifest)) {
+    $parsedManifest = PluginManifest::fromArray($manifest);
+    PluginRiskBoundaryPolicy::assertLocalManifestAllowed($manifest);
+    $assert($parsedManifest->id === 'local.storage.baidu', 'Local Baidu plugin id uses local namespace.');
+    $assert($parsedManifest->trustLevel === 'api', 'Local Baidu plugin uses restricted API trust level.');
+    $assert(empty($manifest['official']), 'Local Baidu plugin does not claim official status.');
 }
 
 $pdo = new PDO('sqlite::memory:');
@@ -182,7 +202,8 @@ $refreshed = $api->accessToken();
 $assert($refreshed === 'access-test-token-2', 'Expiring access token is refreshed automatically.');
 $assert($transport->tokenRequests === 2, 'Refresh endpoint was called exactly once after expiring token setup.');
 
-$provider = new BaiduStorageProvider($api, new BaiduFileBrowser(), 'download-secret');
+$provider = new BaiduStorageProvider($api, new BaiduFileBrowser());
+$assert($provider instanceof RemoteMediaProxyProviderInterface, 'Local Baidu provider uses Core remote media proxy interface.');
 $list = $provider->list('baidu://root');
 $assert(count($list['items']) === 2, 'Provider lists Baidu files.');
 $assert($list['items'][0]->type === 'image', 'Provider maps jpg to image.');
@@ -190,7 +211,7 @@ $assert($list['items'][1]->type === 'folder', 'Provider maps directories to fold
 $search = $provider->search('a', 'baidu://root');
 $assert($search['items'][0]->mimeType === 'audio/mpeg', 'Provider search maps mp3 MIME.');
 $resolved = $provider->resolveUrl(['id' => 9, 'metadata' => ['remote_id' => '1001']]);
-$assert(str_starts_with($resolved['url'], '/baidu-storage/media/9?'), 'Provider resolves to controlled CMS media route.');
+$assert($resolved['url'] === '/media/9', 'Provider resolves to controlled CMS media route.');
 $assert(!str_contains($resolved['url'], 'access_token'), 'Resolved browser URL must not contain Baidu access token.');
 
 $mediaLibrary = new MediaLibrary($pdo, sys_get_temp_dir() . '/daiying-baidu-media-test');
@@ -201,8 +222,16 @@ $assert(is_array($media) && $media['storage_key'] === BaiduTokenRepository::PLUG
 $metadataJson = is_array($media) ? (string) ($media['metadata_json'] ?? '') : '';
 $assert(str_contains($metadataJson, '"remote_id":"1001"'), 'Remote media metadata stores Baidu remote id.');
 $assert(!str_contains($metadataJson, 'd.pcs.baidu.com') && !str_contains($metadataJson, 'access_token'), 'Remote media metadata does not store temporary download URL or token.');
+$tmpProxy = tempnam(sys_get_temp_dir(), 'baidu-proxy-test-');
+if (is_string($tmpProxy)) {
+    $proxy = $provider->proxyDownload($media, $tmpProxy, 1024);
+    $assert($proxy['byte_size'] === 10 && file_get_contents($tmpProxy) === 'baidu-file', 'Provider proxy download writes through server-side transport.');
+    @unlink($tmpProxy);
+} else {
+    $assert(false, 'Unable to create proxy download test temp file.');
+}
 
-$assert($api->isSafeDownloadUrl('https://d.pcs.baidu.com/file/test.jpg'), 'Baidu official download host is allowed.');
+$assert($api->isSafeDownloadUrl('https://d.pcs.baidu.com/file/test.jpg'), 'Baidu download host is allowed.');
 $assert($api->isSafeDownloadUrl('https://example.baidupcs.com/file/test.jpg'), 'Baidu PCS subdomain is allowed.');
 $assert(!$api->isSafeDownloadUrl('http://d.pcs.baidu.com/file/test.jpg'), 'HTTP download URL is rejected.');
 $assert(!$api->isSafeDownloadUrl('https://127.0.0.1/file'), 'Loopback IP download URL is rejected.');

@@ -4,13 +4,14 @@ Date: 2026-09-05
 
 ## Version
 
-- Plugin: `official.storage.baidu`
+- Plugin: `local.storage.baidu`
 - Version: `1.0.0-rc2`
 - Release status: RC, not final public release.
 
 ## Ready
 
-- Plugin manifest and official registry entry exist.
+- Plugin manifest uses local namespace and restricted API trust level.
+- Local ZIP root is `local.storage.baidu/`, suitable for local plugin upload.
 - Admin configuration and OAuth entry points exist.
 - Safe admin diagnostics and callback-copy UI exist.
 - Encrypted secret/token storage exists.

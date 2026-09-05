@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Official\Storage\Baidu;
+namespace Local\Storage\Baidu;
 
 use Cms\Core\Http\Request;
 use Cms\Core\Http\Response;
@@ -23,7 +23,7 @@ final class BaiduStoragePlugin
         $this->tokens = new BaiduTokenRepository($context->data(), $context->secrets());
         $this->api = new BaiduApiClient($this->tokens, new BaiduHttpTransport());
         $this->oauth = new BaiduOAuthService($this->tokens, $this->api);
-        $this->provider = new BaiduStorageProvider($this->api, new BaiduFileBrowser(), $this->downloadSecret());
+        $this->provider = new BaiduStorageProvider($this->api, new BaiduFileBrowser());
     }
 
     public function register(): void
@@ -37,7 +37,6 @@ final class BaiduStoragePlugin
         $this->context->adminRoute('GET', '/admin/baidu-storage/diagnostics', [$this, 'diagnostics'], 'baidu_storage.manage', false);
         $this->context->adminRoute('GET', '/admin/baidu-storage/browser', [$this, 'browser'], 'baidu_storage.manage', false);
         $this->context->frontRoute('GET', BaiduOAuthService::CALLBACK_PATH, [$this, 'callback']);
-        $this->context->frontRoute('GET', '/baidu-storage/media/{id}', [$this, 'download']);
         $this->context->adminMenu('百度网盘', '/admin/baidu-storage', 'baidu_storage.manage');
     }
 
@@ -177,61 +176,6 @@ final class BaiduStoragePlugin
         }
     }
 
-    public function download(Request $request): Response
-    {
-        $mediaId = (int) basename($request->path);
-        $expires = (int) ($request->query['expires'] ?? 0);
-        $sig = (string) ($request->query['sig'] ?? '');
-        try {
-            $pdo = $this->context->pdo();
-            $stmt = $pdo->prepare('SELECT * FROM cms_media WHERE id = :id AND storage_provider = :provider LIMIT 1');
-            $stmt->execute([':id' => $mediaId, ':provider' => $this->provider->id()]);
-            $media = $stmt->fetch();
-            if (!is_array($media)) {
-                throw new \RuntimeException('媒体文件不存在。');
-            }
-            $metadata = json_decode((string) ($media['metadata_json'] ?? '{}'), true);
-            $remoteId = (string) ($metadata['remote_id'] ?? '');
-            if (!$this->provider->validateDownloadSignature($mediaId, $remoteId, $expires, $sig)) {
-                throw new \RuntimeException('百度网盘媒体访问链接已过期，请刷新后重试。');
-            }
-            $tmp = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . '/baidu-storage-' . bin2hex(random_bytes(10)) . '.tmp';
-            try {
-                $download = $this->provider->downloadTo($remoteId, (string) ($metadata['remote_path'] ?? ''), $tmp, 52428800);
-                $body = file_get_contents($tmp);
-                if (!is_string($body)) {
-                    throw new \RuntimeException('百度网盘媒体读取失败。');
-                }
-                $filename = $this->safeDownloadName((string) ($download['filename'] ?? $media['original_name'] ?? 'baidu-media'));
-                return new Response($body, 200, [
-                    'Content-Type' => (string) ($download['mime_type'] ?? $media['mime_type'] ?? 'application/octet-stream'),
-                    'Content-Length' => (string) strlen($body),
-                    'Content-Disposition' => 'inline; filename="' . $filename . '"; filename*=UTF-8\'\'' . rawurlencode($filename),
-                    'Cache-Control' => 'private, no-store',
-                    'X-Daiying-Media-Provider' => $this->provider->id(),
-                ]);
-            } finally {
-                if (is_file($tmp)) {
-                    @unlink($tmp);
-                }
-            }
-        } catch (\Throwable) {
-            return Response::text('百度网盘媒体暂不可用。', 503)->withHeaders(['Cache-Control' => 'private, no-store']);
-        }
-    }
-
-    private function safeDownloadName(string $name): string
-    {
-        $name = trim(str_replace(["\r", "\n", '"', '\\'], '', $name));
-        return $name !== '' ? $name : 'baidu-media';
-    }
-
-    private function downloadSecret(): string
-    {
-        $secret = $this->tokens->appSecret();
-        return $secret !== '' ? hash('sha256', $secret . ':media-download') : hash('sha256', __DIR__);
-    }
-
     /** @param array<string,mixed> $config */
     private function statusLabel(array $config): string
     {
@@ -264,6 +208,9 @@ final class BaiduStoragePlugin
     private function friendly(\Throwable $exception): string
     {
         $message = $exception->getMessage();
+        if (str_contains($message, 'master key') || str_contains($message, 'encrypt plugin secret')) {
+            return '当前站点未配置安全密钥，无法保存百度 Secret Key。';
+        }
         return $message !== '' ? $message : '百度网盘暂不可用，请稍后重试。';
     }
 }
