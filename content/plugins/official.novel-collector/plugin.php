@@ -24,13 +24,16 @@ return static function (PluginContext $context): void {
     $txt = new TxtImportExport();
     $dataStore = method_exists($context, 'data') ? $context->data() : null;
     $formalRepo = null;
+    $contextPdo = null;
     if (method_exists($context, 'pdo')) {
         try {
             $pdo = $context->pdo();
             if ($pdo instanceof \PDO) {
+                $contextPdo = $pdo;
                 $formalRepo = new NovelRepository($pdo);
             }
         } catch (\Throwable) {
+            $contextPdo = null;
             $formalRepo = null;
         }
     }
@@ -160,7 +163,23 @@ return static function (PluginContext $context): void {
         }
         return array_replace($fileAll($bucket), $rows);
     };
-    $storeGet = static function (string $bucket, string $key) use ($storeAll): ?array {
+    $storeGet = static function (string $bucket, string $key) use ($storeAll, $contextPdo): ?array {
+        if ($contextPdo instanceof \PDO) {
+            try {
+                $stmt = $contextPdo->prepare('SELECT payload_json FROM cms_plugin_data WHERE plugin_id = ? AND data_type = ? AND data_key = ? ORDER BY id DESC LIMIT 1');
+                $stmt->execute(['official.novel-collector', $bucket, $key]);
+                $payload = $stmt->fetchColumn();
+                if (is_string($payload) && $payload !== '') {
+                    $decoded = json_decode($payload, true);
+                    if (is_array($decoded)) {
+                        return $decoded;
+                    }
+                }
+                return null;
+            } catch (\Throwable) {
+                return null;
+            }
+        }
         $rows = $storeAll($bucket);
         if (isset($rows[$key]) && is_array($rows[$key])) {
             if (isset($rows[$key]['value']) && is_array($rows[$key]['value'])) {
@@ -370,7 +389,31 @@ HTML);
         usort($items, static fn (array $a, array $b): int => (int) ($a['sort_order'] ?? 0) <=> (int) ($b['sort_order'] ?? 0));
         return $items;
     };
-    $loadCollectedChapters = static function (string $jobId) use ($storeAll, $normalizeStoredRow): array {
+    $loadCollectedChapters = static function (string $jobId) use ($storeAll, $normalizeStoredRow, $contextPdo): array {
+        if ($contextPdo instanceof \PDO) {
+            try {
+                $stmt = $contextPdo->prepare('SELECT payload_json FROM cms_plugin_data WHERE plugin_id = ? AND data_type = ? AND data_key LIKE ? ORDER BY data_key ASC, id DESC');
+                $stmt->execute(['official.novel-collector', 'novel_chapters_local', $jobId . '_%']);
+                $chapters = [];
+                $seen = [];
+                while (($payload = $stmt->fetchColumn()) !== false) {
+                    $row = json_decode((string) $payload, true);
+                    if (!is_array($row) || (string) ($row['job_id'] ?? '') !== $jobId) {
+                        continue;
+                    }
+                    $sort = (int) ($row['sort_order'] ?? 0);
+                    if ($sort <= 0 || isset($seen[$sort])) {
+                        continue;
+                    }
+                    $seen[$sort] = true;
+                    $chapters[] = $row;
+                }
+                usort($chapters, static fn (array $a, array $b): int => (int) ($a['sort_order'] ?? 0) <=> (int) ($b['sort_order'] ?? 0));
+                return $chapters;
+            } catch (\Throwable) {
+                return [];
+            }
+        }
         $chapters = [];
         foreach ($storeAll('novel_chapters_local') as $row) {
             $row = $normalizeStoredRow($row);
@@ -381,7 +424,31 @@ HTML);
         usort($chapters, static fn (array $a, array $b): int => (int) ($a['sort_order'] ?? 0) <=> (int) ($b['sort_order'] ?? 0));
         return $chapters;
     };
-    $loadCollectedChapterIndex = static function (string $jobId) use ($storeAll, $normalizeStoredRow): array {
+    $loadCollectedChapterIndex = static function (string $jobId) use ($storeAll, $normalizeStoredRow, $contextPdo): array {
+        if ($contextPdo instanceof \PDO) {
+            try {
+                $stmt = $contextPdo->prepare('SELECT payload_json FROM cms_plugin_data WHERE plugin_id = ? AND data_type = ? AND data_key LIKE ? ORDER BY data_key ASC, id DESC');
+                $stmt->execute(['official.novel-collector', 'novel_chapter_index_local', $jobId . '_%']);
+                $chapters = [];
+                $seen = [];
+                while (($payload = $stmt->fetchColumn()) !== false) {
+                    $row = json_decode((string) $payload, true);
+                    if (!is_array($row) || (string) ($row['job_id'] ?? '') !== $jobId) {
+                        continue;
+                    }
+                    $sort = (int) ($row['sort_order'] ?? 0);
+                    if ($sort <= 0 || isset($seen[$sort])) {
+                        continue;
+                    }
+                    $seen[$sort] = true;
+                    $chapters[] = $row;
+                }
+                usort($chapters, static fn (array $a, array $b): int => (int) ($a['sort_order'] ?? 0) <=> (int) ($b['sort_order'] ?? 0));
+                return $chapters;
+            } catch (\Throwable) {
+                return [];
+            }
+        }
         $chapters = [];
         foreach ($storeAll('novel_chapter_index_local') as $row) {
             $row = $normalizeStoredRow($row);
@@ -879,18 +946,22 @@ HTML;
             if ($cards === '') {
                 $cards = '<p class="muted">还没有可阅读章节，请先在后台采集一批章节。</p>';
             }
-            $firstChapter = $chapters[0]['sort_order'] ?? 1;
+            $firstChapter = $chapters[0]['sort_order'] ?? 0;
             $latestChapter = $chapters !== [] ? (int) ($chapters[array_key_last($chapters)]['sort_order'] ?? $firstChapter) : 1;
             $pager = $latestOnly ? '<a class="button secondary" href="/novels/book?job_id=' . rawurlencode($jobId) . '">查看全部目录</a>' : '<a class="button secondary" href="/novels/book?job_id=' . rawurlencode($jobId) . '&page=' . max(1, $page - 1) . '">上一页</a><a class="button secondary" href="/novels/book?job_id=' . rawurlencode($jobId) . '&page=' . min($pageCount, $page + 1) . '">下一页</a><a class="button secondary" href="/novels/book?job_id=' . rawurlencode($jobId) . '&latest=1">最近 100 章</a><form method="get" action="/novels/book" style="display:inline-block"><input type="hidden" name="job_id" value="' . $html($jobId) . '"><input name="page" type="number" min="1" max="' . $pageCount . '" value="' . $page . '" style="width:88px"><button type="submit">跳转</button></form>';
             $cover = (string) ($novel['cover'] ?? $novel['cover_url'] ?? '');
             $coverHtml = $cover !== '' ? '<img src="' . $html($cover) . '" alt="">' : '<span class="cover-thumb" aria-hidden="true">' . $html(mb_substr((string) ($novel['title'] ?? '书'), 0, 4)) . '</span>';
-            $body = '<h1>' . $html((string) ($novel['title'] ?? $jobId)) . '</h1><section class="panel book-head" data-novel-book data-job-id="' . $html($jobId) . '" data-title="' . $html((string) ($novel['title'] ?? $jobId)) . '" data-url="/novels/book?job_id=' . rawurlencode($jobId) . '">' . $coverHtml . '<div><p><strong>作者：</strong>' . $html((string) ($novel['author'] ?? '')) . '</p><p><strong>已采章节：</strong>' . $html((string) $totalChapters) . '</p><p data-continue-wrap hidden><a class="button" data-continue-link href="' . $html($novelChapterUrl($jobId, (int) $firstChapter)) . '">继续阅读</a></p><a class="button" href="' . $html($novelChapterUrl($jobId, (int) $firstChapter)) . '">开始阅读</a><button type="button" data-bookshelf-add>加入书架</button><a class="button secondary" href="/novels/export.txt?job_id=' . rawurlencode($jobId) . '">TXT 下载</a><a class="button secondary" href="/novels">返回书库</a></div></section><section class="panel"><h2>章节目录</h2><p class="muted">' . ($latestOnly ? '正在显示最近 100 章' : '第 ' . $page . ' / ' . $pageCount . ' 页') . '，最新章节 #' . $latestChapter . '</p>' . $pager . '<div class="chapter-grid">' . $cards . '</div></section><script>(function(){var box=document.querySelector("[data-novel-book]"); if(!box) return; var id=box.dataset.jobId,title=box.dataset.title,url=box.dataset.url; var shelf=JSON.parse(localStorage.getItem("daiying_novel_bookshelf")||"{}"); var progress=JSON.parse(localStorage.getItem("daiying_novel_reading_progress")||"{}"); var p=progress[id]; if(p&&p.chapterUrl){var wrap=document.querySelector("[data-continue-wrap]"),link=document.querySelector("[data-continue-link]"); if(wrap&&link){wrap.hidden=false; link.href=p.chapterUrl; link.textContent="继续阅读 " + (p.chapterTitle||"上次章节");}} var btn=document.querySelector("[data-bookshelf-add]"); if(btn){btn.textContent=shelf[id]?"已在书架":"加入书架"; btn.addEventListener("click",function(){shelf[id]={title:title,url:url,updatedAt:(new Date()).toISOString()}; localStorage.setItem("daiying_novel_bookshelf",JSON.stringify(shelf)); btn.textContent="已在书架";});}})();</script>';
+            $readActions = $firstChapter > 0
+                ? '<p data-continue-wrap hidden><a class="button" data-continue-link href="' . $html($novelChapterUrl($jobId, (int) $firstChapter)) . '">继续阅读</a></p><a class="button" href="' . $html($novelChapterUrl($jobId, (int) $firstChapter)) . '">开始阅读</a><a class="button secondary" href="/novels/export.txt?job_id=' . rawurlencode($jobId) . '">TXT 下载</a>'
+                : '<p class="muted">还没有可阅读正文，请先在后台完成章节采集。</p>';
+            $chapterMeta = $chapters !== [] ? '，最新章节 #' . $latestChapter : '';
+            $body = '<h1>' . $html((string) ($novel['title'] ?? $jobId)) . '</h1><section class="panel book-head" data-novel-book data-job-id="' . $html($jobId) . '" data-title="' . $html((string) ($novel['title'] ?? $jobId)) . '" data-url="/novels/book?job_id=' . rawurlencode($jobId) . '">' . $coverHtml . '<div><p><strong>作者：</strong>' . $html((string) ($novel['author'] ?? '')) . '</p><p><strong>已采章节：</strong>' . $html((string) $totalChapters) . '</p>' . $readActions . '<button type="button" data-bookshelf-add>加入书架</button><a class="button secondary" href="/novels">返回书库</a></div></section><section class="panel"><h2>章节目录</h2><p class="muted">' . ($latestOnly ? '正在显示最近 100 章' : '第 ' . $page . ' / ' . $pageCount . ' 页') . $chapterMeta . '</p>' . $pager . '<div class="chapter-grid">' . $cards . '</div></section><script>(function(){var box=document.querySelector("[data-novel-book]"); if(!box) return; var id=box.dataset.jobId,title=box.dataset.title,url=box.dataset.url; var shelf=JSON.parse(localStorage.getItem("daiying_novel_bookshelf")||"{}"); var progress=JSON.parse(localStorage.getItem("daiying_novel_reading_progress")||"{}"); var p=progress[id]; if(p&&p.chapterUrl){var wrap=document.querySelector("[data-continue-wrap]"),link=document.querySelector("[data-continue-link]"); if(wrap&&link){wrap.hidden=false; link.href=p.chapterUrl; link.textContent="继续阅读 " + (p.chapterTitle||"上次章节");}} var btn=document.querySelector("[data-bookshelf-add]"); if(btn){btn.textContent=shelf[id]?"已在书架":"加入书架"; btn.addEventListener("click",function(){shelf[id]={title:title,url:url,updatedAt:(new Date()).toISOString()}; localStorage.setItem("daiying_novel_bookshelf",JSON.stringify(shelf)); btn.textContent="已在书架";});}})();</script>';
             return \Cms\Core\Http\Response::html($pageShell((string) ($novel['title'] ?? '小说目录'), $body));
         });
         $context->frontRoute('GET', '/novels/export.txt', static function ($request) use ($param, $sendTxtDownload) {
             return $sendTxtDownload($param($request, 'job_id'));
         });
-        $context->frontRoute('GET', '/novels/chapter', static function ($request) use ($param, $html, $pageShell, $storeGet, $loadNovelSummaries, $loadCollectedChapters, $novelUrl, $novelChapterUrl, $formalRepo) {
+        $context->frontRoute('GET', '/novels/chapter', static function ($request) use ($param, $html, $pageShell, $storeGet, $loadNovelSummaries, $loadCollectedChapters, $novelUrl, $novelChapterUrl, $formalRepo, $qualityAnalyzer) {
             $jobId = $param($request, 'job_id');
             $sort = max(1, (int) $param($request, 'chapter', '1'));
             $formalId = str_starts_with($jobId, 'formal_') ? (int) substr($jobId, 7) : 0;
@@ -911,6 +982,21 @@ HTML;
             }
             if ($chapter === null) {
                 return \Cms\Core\Http\Response::html($pageShell('章节不存在', '<h1>章节不存在</h1><section class="panel"><p class="muted">这个章节还没有采集到本地。</p><a class="button secondary" href="/novels/book?job_id=' . rawurlencode($jobId) . '">返回目录</a></section>'));
+            }
+            $quality = $qualityAnalyzer->analyze([
+                'html' => (string) ($chapter['content'] ?? ''),
+                'plaintext' => (string) ($chapter['content_plaintext'] ?? strip_tags((string) ($chapter['content'] ?? ''))),
+                'hash' => (string) ($chapter['content_hash'] ?? ''),
+            ], [
+                'requested_url' => (string) ($chapter['source_url'] ?? ''),
+                'final_url' => (string) ($chapter['source_url'] ?? ''),
+                'http_status' => 200,
+            ], [
+                'title' => (string) ($chapter['title'] ?? ''),
+                'url' => (string) ($chapter['source_url'] ?? ''),
+            ]);
+            if (($quality['quality'] ?? '') === 'failed') {
+                return \Cms\Core\Http\Response::html($pageShell('章节已拦截', '<h1>章节已拦截</h1><section class="panel"><p class="muted">这个章节命中正文质量保护，疑似源站错误页、推广页或重复诱饵内容，已阻止前台展示。</p><p><strong>章节：</strong>' . $html((string) ($chapter['title'] ?? '')) . '</p><p><strong>原因：</strong>' . $html(implode(', ', (array) ($quality['reasons'] ?? []))) . '</p><a class="button secondary" href="/novels/book?job_id=' . rawurlencode($jobId) . '">返回目录</a></section>'));
             }
             $novel = ['title' => $jobId];
             if ($formalId > 0 && $formalRepo instanceof NovelRepository) {

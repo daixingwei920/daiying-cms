@@ -14,7 +14,7 @@ $assert = static function (bool $condition, string $message): void {
 };
 
 $assert(($manifest['plugin_id'] ?? '') === 'official.novel-collector', 'Novel collector plugin ID must remain official.novel-collector.');
-$assert(($manifest['version'] ?? '') === '0.4.18', 'Novel collector version should be 0.4.18.');
+$assert(($manifest['version'] ?? '') === '0.4.19', 'Novel collector version should be 0.4.19.');
 $assert(($manifest['core']['max'] ?? '') === '2.0.0', 'Novel collector core max should be a concrete semver upper bound.');
 $manifestJson = json_encode($manifest, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 $assert(is_string($manifestJson) && str_contains($manifestJson, 'scheduled_tasks'), 'Novel collector manifest should declare scheduled tasks.');
@@ -57,6 +57,7 @@ foreach ([
     '章节地址异常',
     'suspected_duplicate_content',
     'content_quality',
+    '章节已拦截',
     'requested_url',
     'final_url',
     'http_status',
