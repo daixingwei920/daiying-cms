@@ -28,7 +28,7 @@ Command results:
 - Refresh-token failure returns a reconnect message and marks the connection disconnected.
 - Directory list and search map Baidu files/folders into CMS `MediaProviderItem`.
 - Remote media resolve URL returns a controlled CMS route and does not expose `access_token`.
-- Provider implements the Core remote media proxy interface and proxy-downloads through server-side transport.
+- Provider returns a short-lived signed plugin proxy URL and downloads through server-side transport.
 - Remote media library records store provider id, stable remote key, and remote id without temporary Baidu download URL or token.
 - Download URL validator allows expected Baidu hosts and rejects HTTP, loopback IP, foreign hosts, and non-443 ports.
 - API URL validator rejects HTTP, foreign hosts, and non-443 ports before cURL runs.

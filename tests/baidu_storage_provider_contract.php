@@ -13,7 +13,6 @@ require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduStorageProvi
 
 use Cms\Core\Http\Request;
 use Cms\Core\Media\MediaLibrary;
-use Cms\Core\Media\RemoteMediaProxyProviderInterface;
 use Cms\Core\Plugin\PluginDataStore;
 use Cms\Core\Plugin\PluginManifest;
 use Cms\Core\Plugin\PluginRiskBoundaryPolicy;
@@ -202,8 +201,7 @@ $refreshed = $api->accessToken();
 $assert($refreshed === 'access-test-token-2', 'Expiring access token is refreshed automatically.');
 $assert($transport->tokenRequests === 2, 'Refresh endpoint was called exactly once after expiring token setup.');
 
-$provider = new BaiduStorageProvider($api, new BaiduFileBrowser());
-$assert($provider instanceof RemoteMediaProxyProviderInterface, 'Local Baidu provider uses Core remote media proxy interface.');
+$provider = new BaiduStorageProvider($api, new BaiduFileBrowser(), 'download-secret');
 $list = $provider->list('baidu://root');
 $assert(count($list['items']) === 2, 'Provider lists Baidu files.');
 $assert($list['items'][0]->type === 'image', 'Provider maps jpg to image.');
@@ -211,8 +209,10 @@ $assert($list['items'][1]->type === 'folder', 'Provider maps directories to fold
 $search = $provider->search('a', 'baidu://root');
 $assert($search['items'][0]->mimeType === 'audio/mpeg', 'Provider search maps mp3 MIME.');
 $resolved = $provider->resolveUrl(['id' => 9, 'metadata' => ['remote_id' => '1001']]);
-$assert($resolved['url'] === '/media/9', 'Provider resolves to controlled CMS media route.');
+$assert(str_starts_with($resolved['url'], '/baidu-storage/media/9?'), 'Provider resolves to controlled signed CMS media route.');
 $assert(!str_contains($resolved['url'], 'access_token'), 'Resolved browser URL must not contain Baidu access token.');
+parse_str((string) parse_url($resolved['url'], PHP_URL_QUERY), $resolvedQuery);
+$assert($provider->validateDownloadSignature(9, (string) ($resolvedQuery['remote_id'] ?? ''), (int) ($resolvedQuery['expires'] ?? 0), (string) ($resolvedQuery['sig'] ?? '')), 'Signed media proxy URL validates.');
 
 $mediaLibrary = new MediaLibrary($pdo, sys_get_temp_dir() . '/daiying-baidu-media-test');
 $mediaId = $mediaLibrary->registerRemoteReference($list['items'][0], 1);
@@ -224,8 +224,8 @@ $assert(str_contains($metadataJson, '"remote_id":"1001"'), 'Remote media metadat
 $assert(!str_contains($metadataJson, 'd.pcs.baidu.com') && !str_contains($metadataJson, 'access_token'), 'Remote media metadata does not store temporary download URL or token.');
 $tmpProxy = tempnam(sys_get_temp_dir(), 'baidu-proxy-test-');
 if (is_string($tmpProxy)) {
-    $proxy = $provider->proxyDownload($media, $tmpProxy, 1024);
-    $assert($proxy['byte_size'] === 10 && file_get_contents($tmpProxy) === 'baidu-file', 'Provider proxy download writes through server-side transport.');
+    $proxy = $provider->downloadTo('1001', '', $tmpProxy, 1024);
+    $assert($proxy['byte_size'] === 10 && file_get_contents($tmpProxy) === 'baidu-file', 'Provider proxy route can download through server-side transport.');
     @unlink($tmpProxy);
 } else {
     $assert(false, 'Unable to create proxy download test temp file.');

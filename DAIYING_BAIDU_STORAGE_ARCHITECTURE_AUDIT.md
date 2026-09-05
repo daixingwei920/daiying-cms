@@ -27,7 +27,6 @@ Decision: App Secret, access token, refresh token, and OAuth one-time state secr
 ### Remote Media Provider
 
 - `Cms\Core\Media\RemoteMediaProviderInterface` already defines the required provider surface: `list`, `search`, `get`, `resolveUrl`, `upload`, `delete`, `move`, `metadata`, and `downloadTo`.
-- `Cms\Core\Media\RemoteMediaProxyProviderInterface` adds a generic proxy path for local/restricted providers that must keep provider tokens server-side.
 - `RemoteMediaProviderRegistry` allows enabled plugins to register providers at boot.
 - `MediaLibrary::registerRemoteReference()` persists remote media references in `cms_media` with `storage_provider`, `storage_key`, `relative_path`, and metadata including `remote_id`.
 - `MediaController` already detects non-local `storage_provider` rows and calls the registered remote provider to resolve a fresh URL at request time.
@@ -68,7 +67,7 @@ No Core storage schema changes are required for Phase 1.
 - `BaiduOAuthService`: authorization URL generation, state creation/verification, callback token exchange.
 - `BaiduHttpTransport`: TLS-verified HTTP transport.
 - `BaiduApiClient`: Baidu OAuth/API requests, token refresh, error mapping, download URL validation.
-- `BaiduStorageProvider`: implements `RemoteMediaProxyProviderInterface`.
+- `BaiduStorageProvider`: implements `RemoteMediaProviderInterface`.
 - `BaiduFileBrowser`: maps Baidu file entries to `MediaProviderItem`.
 
 ### First Implementation Boundary
@@ -82,7 +81,7 @@ P0/P1:
 - Token refresh repository support.
 - Directory browse and search through Baidu API.
 - Remote media reference selection through existing CMS media endpoints.
-- Fresh URL resolution on `/media/{id}`.
+- Fresh URL resolution through a short-lived signed `/baidu-storage/media/{id}` proxy URL.
 - Upload/delete/move throw friendly “not supported in this version” errors.
 
 P1 upload will be implemented only after confirming Baidu's current official multipart upload protocol with real credentials.

@@ -23,7 +23,7 @@ final class BaiduStoragePlugin
         $this->tokens = new BaiduTokenRepository($context->data(), $context->secrets());
         $this->api = new BaiduApiClient($this->tokens, new BaiduHttpTransport());
         $this->oauth = new BaiduOAuthService($this->tokens, $this->api);
-        $this->provider = new BaiduStorageProvider($this->api, new BaiduFileBrowser());
+        $this->provider = new BaiduStorageProvider($this->api, new BaiduFileBrowser(), $this->downloadSecret());
     }
 
     public function register(): void
@@ -37,6 +37,7 @@ final class BaiduStoragePlugin
         $this->context->adminRoute('GET', '/admin/baidu-storage/diagnostics', [$this, 'diagnostics'], 'baidu_storage.manage', false);
         $this->context->adminRoute('GET', '/admin/baidu-storage/browser', [$this, 'browser'], 'baidu_storage.manage', false);
         $this->context->frontRoute('GET', BaiduOAuthService::CALLBACK_PATH, [$this, 'callback']);
+        $this->context->frontRoute('GET', '/baidu-storage/media/{id}', [$this, 'download']);
         $this->context->adminMenu('百度网盘', '/admin/baidu-storage', 'baidu_storage.manage');
     }
 
@@ -174,6 +175,53 @@ final class BaiduStoragePlugin
         } catch (\Throwable $exception) {
             return Response::html(View::page('百度网盘暂不可用', '<h1>百度网盘暂不可用</h1><p class="error">' . View::escape($this->friendly($exception)) . '</p><p><a class="button" href="/admin/baidu-storage">返回设置</a></p>'), 503);
         }
+    }
+
+    public function download(Request $request): Response
+    {
+        $mediaId = (int) basename($request->path);
+        $remoteId = trim((string) ($request->query['remote_id'] ?? ''));
+        $expires = (int) ($request->query['expires'] ?? 0);
+        $sig = (string) ($request->query['sig'] ?? '');
+        if (!$this->provider->validateDownloadSignature($mediaId, $remoteId, $expires, $sig)) {
+            return Response::text('百度网盘媒体访问链接已过期，请刷新后重试。', 403)
+                ->withHeaders(['Cache-Control' => 'private, no-store']);
+        }
+
+        $tmp = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . '/baidu-storage-' . bin2hex(random_bytes(10)) . '.tmp';
+        try {
+            $download = $this->provider->downloadTo($remoteId, '', $tmp, 52428800);
+            $body = file_get_contents($tmp);
+            if (!is_string($body)) {
+                throw new \RuntimeException('百度网盘媒体读取失败。');
+            }
+            $filename = $this->safeDownloadName((string) ($download['filename'] ?? 'baidu-media'));
+            return new Response($body, 200, [
+                'Content-Type' => (string) ($download['mime_type'] ?? 'application/octet-stream'),
+                'Content-Length' => (string) strlen($body),
+                'Content-Disposition' => 'inline; filename="' . $filename . '"; filename*=UTF-8\'\'' . rawurlencode($filename),
+                'Cache-Control' => 'private, no-store',
+                'X-Daiying-Media-Provider' => $this->provider->id(),
+            ]);
+        } catch (\Throwable) {
+            return Response::text('百度网盘媒体暂不可用。', 503)->withHeaders(['Cache-Control' => 'private, no-store']);
+        } finally {
+            if (is_file($tmp)) {
+                @unlink($tmp);
+            }
+        }
+    }
+
+    private function safeDownloadName(string $name): string
+    {
+        $name = trim(str_replace(["\r", "\n", '"', '\\'], '', $name));
+        return $name !== '' ? $name : 'baidu-media';
+    }
+
+    private function downloadSecret(): string
+    {
+        $secret = $this->tokens->appSecret();
+        return $secret !== '' ? hash('sha256', $secret . ':media-download') : hash('sha256', __DIR__);
     }
 
     /** @param array<string,mixed> $config */

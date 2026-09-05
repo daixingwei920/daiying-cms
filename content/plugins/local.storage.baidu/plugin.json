@@ -1,7 +1,7 @@
 {
   "plugin_id": "local.storage.baidu",
   "name": "百度网盘",
-  "version": "1.0.0-rc2",
+  "version": "1.0.0-rc3",
   "author": "Daiying CMS Local",
   "type": "storage_provider",
   "package_type": "plugin",
@@ -20,7 +20,8 @@
   ],
   "capability_namespaces": ["baidu_storage", "storage_baidu"],
   "public_routes": [
-    { "label": "百度网盘 OAuth 回调", "path": "/oauth/baidu/callback", "method": "GET" }
+    { "label": "百度网盘 OAuth 回调", "path": "/oauth/baidu/callback", "method": "GET" },
+    { "label": "百度网盘媒体代理", "path": "/baidu-storage/media/{id}", "method": "GET" }
   ],
   "dependencies": [],
   "required_plugins": [],
@@ -30,5 +31,5 @@
     "uninstall": "retain_config_and_media_references",
     "purge": "separate_confirmation_only"
   },
-  "data_schema_version": "1.0.0-rc2"
+  "data_schema_version": "1.0.0-rc3"
 }

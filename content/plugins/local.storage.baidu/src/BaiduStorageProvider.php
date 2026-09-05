@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Local\Storage\Baidu;
 
 use Cms\Core\Media\MediaProviderItem;
-use Cms\Core\Media\RemoteMediaProxyProviderInterface;
+use Cms\Core\Media\RemoteMediaProviderInterface;
 
-final class BaiduStorageProvider implements RemoteMediaProxyProviderInterface
+final class BaiduStorageProvider implements RemoteMediaProviderInterface
 {
     public function __construct(
         private readonly BaiduApiClient $api,
         private readonly BaiduFileBrowser $browser,
+        private readonly string $downloadSecret,
     ) {
     }
 
@@ -82,9 +83,15 @@ final class BaiduStorageProvider implements RemoteMediaProxyProviderInterface
         if ($mediaId <= 0 || $remoteId === '') {
             throw new \RuntimeException('百度网盘媒体引用无效。');
         }
+        $expires = time() + 300;
+        $sig = $this->downloadSignature($mediaId, $remoteId, $expires);
         return [
-            'url' => '/media/' . $mediaId,
-            'expires' => null,
+            'url' => '/baidu-storage/media/' . $mediaId . '?' . http_build_query([
+                'remote_id' => $remoteId,
+                'expires' => $expires,
+                'sig' => $sig,
+            ]),
+            'expires' => gmdate('c', $expires),
         ];
     }
 
@@ -117,15 +124,12 @@ final class BaiduStorageProvider implements RemoteMediaProxyProviderInterface
         return ['filename' => $item->name, 'mime_type' => $item->mimeType, 'byte_size' => $bytes];
     }
 
-    /** @param array<string,mixed> $media @return array{filename:string,mime_type:string,byte_size:int} */
-    public function proxyDownload(array $media, string $targetPath, int $maxBytes, array $options = []): array
+    public function validateDownloadSignature(int $mediaId, string $remoteId, int $expires, string $sig): bool
     {
-        $metadata = is_array($media['metadata'] ?? null) ? $media['metadata'] : [];
-        $remoteId = (string) ($metadata['remote_id'] ?? '');
-        if ($remoteId === '') {
-            throw new \RuntimeException('百度网盘媒体引用无效。');
+        if ($mediaId <= 0 || $remoteId === '' || $expires < time() || $sig === '') {
+            return false;
         }
-        return $this->downloadTo($remoteId, (string) ($metadata['remote_path'] ?? ''), $targetPath, $maxBytes);
+        return hash_equals($this->downloadSignature($mediaId, $remoteId, $expires), $sig);
     }
 
     /** @param mixed $rows @return list<MediaProviderItem> */
@@ -153,6 +157,11 @@ final class BaiduStorageProvider implements RemoteMediaProxyProviderInterface
             return '/' . ltrim(substr($path, strlen('baidu://')), '/');
         }
         return '/' . ltrim($path, '/');
+    }
+
+    private function downloadSignature(int $mediaId, string $remoteId, int $expires): string
+    {
+        return hash_hmac('sha256', $mediaId . ':' . $remoteId . ':' . $expires, $this->downloadSecret);
     }
 
     /** @return array<string,mixed>|null */

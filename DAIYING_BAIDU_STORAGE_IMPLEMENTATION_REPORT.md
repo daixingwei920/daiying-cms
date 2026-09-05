@@ -16,8 +16,8 @@ Implemented release-candidate plugin `local.storage.baidu` as a local restricted
 - Added refresh-token lock to avoid concurrent access-token refresh races on one server.
 - Added fixed Baidu host allowlists for API/download URLs.
 - Added remote media provider integration so Baidu files can be selected into the CMS media library as external references.
-- Added generic Core remote media proxy support through `/media/{id}` so browser-facing URLs never expose Baidu access tokens.
-- Converted the RC package from `official.storage.baidu` / `trusted_php` to local-installable `local.storage.baidu` / `api`.
+- Added signed plugin media proxy route `/baidu-storage/media/{id}` so browser-facing URLs never expose Baidu access tokens.
+- Converted the earlier RC package shape to local-installable `local.storage.baidu` / `api`.
 - Switched remote download ingestion from `fopen()` to cURL streaming into a temporary file with TLS verification and byte limit enforcement.
 - Genericized Core media admin/picker UI to enumerate all registered remote providers instead of only showing Cloudreve.
 - Prepared `local.storage.baidu` as a local ZIP plugin package. It is intentionally not registered as an official bundled plugin.
