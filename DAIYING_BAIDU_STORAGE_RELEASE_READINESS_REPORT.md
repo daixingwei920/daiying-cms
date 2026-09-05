@@ -5,7 +5,7 @@ Date: 2026-09-05
 ## Version
 
 - Plugin: `local.storage.baidu`
-- Version: `1.0.0-rc3`
+- Version: `1.0.0-rc4`
 - Release status: RC, not final public release.
 
 ## Ready

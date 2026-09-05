@@ -37,7 +37,8 @@ final class BaiduOAuthService
             'scope' => 'basic,netdisk',
             'state' => $state,
             'display' => 'page',
-            'force_login' => 1,
+            'qrcode' => 1,
+            'confirm_login' => 1,
         ]);
     }
 

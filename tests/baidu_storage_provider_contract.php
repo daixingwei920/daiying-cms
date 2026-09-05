@@ -155,6 +155,10 @@ parse_str((string) parse_url($authUrl, PHP_URL_QUERY), $authQuery);
 $state = (string) ($authQuery['state'] ?? '');
 $assert(preg_match('/^[a-f0-9]{64}$/', $state) === 1, 'OAuth state is high entropy hex.');
 $assert(($authQuery['redirect_uri'] ?? '') === 'https://example.test/oauth/baidu/callback', 'Callback URL is derived from current site.');
+$assert(($authQuery['display'] ?? '') === 'page', 'OAuth authorize URL keeps the standard web page display.');
+$assert(($authQuery['qrcode'] ?? '') === '1', 'OAuth authorize URL enables Baidu QR-code login entry.');
+$assert(($authQuery['confirm_login'] ?? '') === '1', 'OAuth authorize URL asks logged-in Baidu users to confirm account authorization.');
+$assert(!isset($authQuery['force_login']), 'OAuth authorize URL does not force the password-only login experience.');
 
 $subdirRequest = new Request('GET', '/cms/admin/baidu-storage', [], [], [
     'HTTPS' => 'on',
