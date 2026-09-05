@@ -40,6 +40,7 @@ final class FakeBaiduTransport extends BaiduHttpTransport
     public array $apiRequests = [];
     /** @var array{0:int,1:int}|null */
     public ?array $lastDownloadRange = null;
+    public string $lastDownloadUrl = '';
 
     /** @param array<string,string> $headers @return array{status:int,headers:array<string,string>,body:string,url:string} */
     public function request(string $method, string $url, array $headers = [], array|string|null $body = null, int $timeout = 20): array
@@ -82,6 +83,7 @@ final class FakeBaiduTransport extends BaiduHttpTransport
 
     public function downloadTo(string $url, string $targetPath, int $maxBytes, int $timeout = 60): int
     {
+        $this->lastDownloadUrl = $url;
         $body = 'baidu-file';
         file_put_contents($targetPath, $body);
         return strlen($body);
@@ -90,6 +92,7 @@ final class FakeBaiduTransport extends BaiduHttpTransport
     /** @param array{0:int,1:int}|null $range @return array{status:int,headers:array<string,string>,body:string,final_url:string} */
     public function downloadBytes(string $url, ?array $range, int $maxBytes, int $timeout = 60): array
     {
+        $this->lastDownloadUrl = $url;
         $this->lastDownloadRange = $range;
         $body = $range === null ? 'baidu-file' : substr('baidu-file-stream', $range[0], $range[1] - $range[0] + 1);
 
@@ -277,9 +280,13 @@ if (is_string($tmpProxy)) {
 } else {
     $assert(false, 'Unable to create proxy download test temp file.');
 }
+$assert(($transport->apiRequests['filemetas'] ?? 0) === 2, 'First proxy download resolves Baidu dlink once.');
 $stream = $provider->downloadBytes('1001', '', [0, 9], 10);
 $assert($stream['status'] === 206 && $stream['body'] === 'baidu-file', 'Provider proxy route can request byte ranges for browser media playback.');
 $assert($transport->lastDownloadRange === [0, 9], 'Provider preserves browser byte range when downloading from Baidu.');
+$stream = $provider->downloadBytes('1001', '', [10, 15], 6);
+$assert(($transport->apiRequests['filemetas'] ?? 0) === 2, 'Repeated proxy ranges reuse encrypted short-lived download URL cache.');
+$assert(str_contains($transport->lastDownloadUrl, 'baidupcs.com'), 'Repeated proxy ranges can skip the initial Baidu dlink redirect when a safe CDN URL is cached.');
 
 $assert($api->isSafeDownloadUrl('https://d.pcs.baidu.com/file/test.jpg'), 'Baidu download host is allowed.');
 $assert($api->isSafeDownloadUrl('https://example.baidupcs.com/file/test.jpg'), 'Baidu PCS subdomain is allowed.');

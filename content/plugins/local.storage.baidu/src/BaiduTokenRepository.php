@@ -168,6 +168,35 @@ final class BaiduTokenRepository
         ]);
     }
 
+    public function downloadUrlCacheGet(string $fsId): ?string
+    {
+        $raw = $this->secrets->get(self::PLUGIN_ID, $this->downloadUrlCacheKey($fsId));
+        if (!is_string($raw) || $raw === '') {
+            return null;
+        }
+        $payload = json_decode($raw, true);
+        if (!is_array($payload) || (int) ($payload['expires_at'] ?? 0) < time()) {
+            return null;
+        }
+        $url = (string) ($payload['url'] ?? '');
+
+        return $url !== '' ? $url : null;
+    }
+
+    public function downloadUrlCachePut(string $fsId, string $url, int $ttlSeconds): void
+    {
+        $this->secrets->set(self::PLUGIN_ID, $this->downloadUrlCacheKey($fsId), json_encode([
+            'url' => $url,
+            'expires_at' => time() + max(10, min(180, $ttlSeconds)),
+            'created_at' => gmdate('c'),
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}');
+    }
+
+    public function downloadUrlCacheForget(string $fsId): void
+    {
+        $this->secrets->set(self::PLUGIN_ID, $this->downloadUrlCacheKey($fsId), '');
+    }
+
     /** @return array<string,mixed> */
     private function latest(string $key): array
     {
@@ -194,5 +223,10 @@ final class BaiduTokenRepository
         }
 
         return $payload;
+    }
+
+    private function downloadUrlCacheKey(string $fsId): string
+    {
+        return 'download_url_' . hash('sha256', (string) (int) $fsId);
     }
 }

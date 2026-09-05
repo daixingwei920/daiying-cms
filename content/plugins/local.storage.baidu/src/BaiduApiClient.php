@@ -138,6 +138,16 @@ final class BaiduApiClient
 
     public function resolveDownloadUrl(string $fsId): string
     {
+        $cached = $this->tokens->downloadUrlCacheGet($fsId);
+        if (is_string($cached) && $this->isSafeDownloadUrl($cached)) {
+            return $cached;
+        }
+
+        return $this->freshDownloadUrl($fsId);
+    }
+
+    public function freshDownloadUrl(string $fsId): string
+    {
         $meta = $this->fileMeta($fsId, true);
         $dlink = (string) ($meta['dlink'] ?? '');
         if (!$this->isSafeDownloadUrl($dlink)) {
@@ -145,18 +155,38 @@ final class BaiduApiClient
         }
         $token = $this->accessToken();
         $join = str_contains($dlink, '?') ? '&' : '?';
-        return $dlink . $join . 'access_token=' . rawurlencode($token);
+        $url = $dlink . $join . 'access_token=' . rawurlencode($token);
+        $this->tokens->downloadUrlCachePut($fsId, $url, 90);
+
+        return $url;
     }
 
     public function downloadTo(string $fsId, string $targetPath, int $maxBytes): int
     {
-        return $this->transport->downloadTo($this->resolveDownloadUrl($fsId), $targetPath, $maxBytes);
+        try {
+            return $this->transport->downloadTo($this->resolveDownloadUrl($fsId), $targetPath, $maxBytes);
+        } catch (\Throwable $exception) {
+            $this->tokens->downloadUrlCacheForget($fsId);
+            return $this->transport->downloadTo($this->freshDownloadUrl($fsId), $targetPath, $maxBytes);
+        }
     }
 
     /** @param array{0:int,1:int}|null $range @return array{status:int,headers:array<string,string>,body:string,final_url:string} */
     public function downloadBytes(string $fsId, ?array $range, int $maxBytes): array
     {
-        return $this->transport->downloadBytes($this->resolveDownloadUrl($fsId), $range, $maxBytes);
+        try {
+            $download = $this->transport->downloadBytes($this->resolveDownloadUrl($fsId), $range, $maxBytes);
+        } catch (\Throwable $exception) {
+            $this->tokens->downloadUrlCacheForget($fsId);
+            $download = $this->transport->downloadBytes($this->freshDownloadUrl($fsId), $range, $maxBytes);
+        }
+
+        $finalUrl = (string) ($download['final_url'] ?? '');
+        if ($finalUrl !== '' && $this->isSafeDownloadUrl($finalUrl)) {
+            $this->tokens->downloadUrlCachePut($fsId, $finalUrl, 90);
+        }
+
+        return $download;
     }
 
     public function accessToken(): string
