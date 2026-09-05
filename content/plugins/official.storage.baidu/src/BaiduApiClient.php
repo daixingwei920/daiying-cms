@@ -21,6 +21,7 @@ final class BaiduApiClient
     public function __construct(
         private readonly BaiduTokenRepository $tokens,
         private readonly BaiduHttpTransport $transport,
+        private readonly ?BaiduTokenRefreshLock $refreshLock = null,
     ) {
     }
 
@@ -40,10 +41,25 @@ final class BaiduApiClient
     }
 
     /** @return array<string,mixed> */
-    public function refreshAccessToken(): array
+    public function refreshAccessToken(bool $force = true): array
+    {
+        $lock = $this->refreshLock ?? new BaiduTokenRefreshLock();
+        return $lock->run(fn (): array => $this->refreshAccessTokenUnlocked($force));
+    }
+
+    /** @return array<string,mixed> */
+    private function refreshAccessTokenUnlocked(bool $force): array
     {
         $config = $this->tokens->config();
         $token = $this->tokens->token();
+        $expires = strtotime($token['expires_at']) ?: 0;
+        if (!$force && $token['access_token'] !== '' && $expires > 0 && $expires - time() >= 300) {
+            return [
+                'access_token' => $token['access_token'],
+                'refresh_token' => $token['refresh_token'],
+                'expires_at' => $token['expires_at'],
+            ];
+        }
         if ($token['refresh_token'] === '') {
             throw new \RuntimeException('百度网盘授权已失效，请重新连接。');
         }
@@ -53,8 +69,13 @@ final class BaiduApiClient
             'client_id' => (string) ($config['app_key'] ?? ''),
             'client_secret' => $this->tokens->appSecret(),
         ]);
-        $payload = $this->json($this->transport->request('GET', $url), '百度 Token 刷新失败，请重新授权。');
-        $this->tokens->saveToken($payload);
+        try {
+            $payload = $this->json($this->transport->request('GET', $url), '百度 Token 刷新失败，请重新授权。');
+            $this->tokens->saveToken($payload);
+        } catch (\Throwable $exception) {
+            $this->tokens->markDisconnected('百度网盘授权已失效，请重新连接。');
+            throw $exception;
+        }
 
         return $payload;
     }
@@ -120,6 +141,11 @@ final class BaiduApiClient
         return $dlink . $join . 'access_token=' . rawurlencode($token);
     }
 
+    public function downloadTo(string $fsId, string $targetPath, int $maxBytes): int
+    {
+        return $this->transport->downloadTo($this->resolveDownloadUrl($fsId), $targetPath, $maxBytes);
+    }
+
     public function accessToken(): string
     {
         $token = $this->tokens->token();
@@ -128,7 +154,7 @@ final class BaiduApiClient
         }
         $expires = strtotime($token['expires_at']) ?: 0;
         if ($expires > 0 && $expires - time() < 300) {
-            $this->refreshAccessToken();
+            $this->refreshAccessToken(false);
             $token = $this->tokens->token();
         }
         return $token['access_token'];
@@ -143,7 +169,7 @@ final class BaiduApiClient
             return $this->json($this->transport->request('GET', $url), '百度网盘接口请求失败。');
         } catch (\RuntimeException $exception) {
             if (str_contains($exception->getMessage(), '授权') || str_contains($exception->getMessage(), 'Token')) {
-                $this->refreshAccessToken();
+                $this->refreshAccessToken(true);
                 $params['access_token'] = $this->accessToken();
                 return $this->json($this->transport->request('GET', $baseUrl . '?' . http_build_query($params)), '百度网盘接口请求失败。');
             }
@@ -197,6 +223,11 @@ final class BaiduApiClient
     }
 
     public function isSafeDownloadUrl(string $url): bool
+    {
+        return self::isSafeBaiduDownloadUrl($url);
+    }
+
+    public static function isSafeBaiduDownloadUrl(string $url): bool
     {
         $parts = parse_url($url);
         if (!is_array($parts) || strtolower((string) ($parts['scheme'] ?? '')) !== 'https') {

@@ -6,6 +6,8 @@ Date: 2026-09-05
 
 Not run.
 
+Plugin version under test: `1.0.0-rc2`.
+
 This report intentionally does not claim a live Baidu OAuth pass. The current coding pass used a fake transport only for automated contract tests.
 
 ## Required Live Checklist
@@ -24,4 +26,3 @@ This report intentionally does not claim a live Baidu OAuth pass. The current co
 ## Acceptance Rule
 
 Only after the above steps complete against the real Baidu API should this report be updated from “Not run” to “Passed”.
-

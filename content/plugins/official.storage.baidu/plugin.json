@@ -1,7 +1,7 @@
 {
   "plugin_id": "official.storage.baidu",
   "name": "百度网盘",
-  "version": "1.0.0-rc1",
+  "version": "1.0.0-rc2",
   "author": "Daiying CMS",
   "type": "storage_provider",
   "package_type": "plugin",
@@ -32,5 +32,5 @@
     "uninstall": "retain_config_and_media_references",
     "purge": "separate_confirmation_only"
   },
-  "data_schema_version": "1.0.0-rc1"
+  "data_schema_version": "1.0.0-rc2"
 }

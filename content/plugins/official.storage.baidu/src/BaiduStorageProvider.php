@@ -116,33 +116,7 @@ final class BaiduStorageProvider implements RemoteMediaProviderInterface
     public function downloadTo(string $remoteId, string $path, string $targetPath, int $maxBytes): array
     {
         $item = $this->get($remoteId, $path);
-        $url = $this->api->resolveDownloadUrl($remoteId);
-        $stream = fopen($url, 'rb');
-        if (!is_resource($stream)) {
-            throw new \RuntimeException('百度网盘文件下载失败。');
-        }
-        $out = fopen($targetPath, 'wb');
-        if (!is_resource($out)) {
-            fclose($stream);
-            throw new \RuntimeException('无法写入临时文件。');
-        }
-        $bytes = 0;
-        while (!feof($stream)) {
-            $chunk = fread($stream, 8192);
-            if (!is_string($chunk)) {
-                break;
-            }
-            $bytes += strlen($chunk);
-            if ($bytes > $maxBytes) {
-                fclose($stream);
-                fclose($out);
-                @unlink($targetPath);
-                throw new \RuntimeException('百度网盘文件超过 CMS 允许大小。');
-            }
-            fwrite($out, $chunk);
-        }
-        fclose($stream);
-        fclose($out);
+        $bytes = $this->api->downloadTo($remoteId, $targetPath, $maxBytes);
         return ['filename' => $item->name, 'mime_type' => $item->mimeType, 'byte_size' => $bytes];
     }
 

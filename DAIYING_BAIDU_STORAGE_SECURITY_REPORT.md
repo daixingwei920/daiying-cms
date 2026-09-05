@@ -15,6 +15,8 @@ Date: 2026-09-05
 - State expires after 10 minutes and is consumed once.
 - Token exchange reuses the same callback URL generated for authorization.
 - Callback URL is derived from the current request host/scheme and now preserves a CMS subdirectory base path when `SCRIPT_NAME`/`PHP_SELF` includes it.
+- Access-token refresh is guarded by a local file lock to reduce concurrent refresh races.
+- Refresh failure marks the connection invalid and keeps App Key/Secret available for reauthorization.
 
 ## Network Boundary
 
@@ -28,10 +30,11 @@ Date: 2026-09-05
   - `pan.baidu.com`
   - a subdomain ending in `.baidupcs.com`
 - The plugin does not proxy arbitrary user-provided URLs.
+- Downloads are fetched only after looking up a CMS media record by id and matching `storage_provider = official.storage.baidu`.
+- The public media URL is HMAC signed and expires after 5 minutes.
 
 ## Core Isolation
 
 - Core changes are generic remote media provider UI changes.
 - No Baidu-specific branch was added to Core media selection logic.
 - PayPal, Stripe, Cloudreve, and other providers keep their own URL and security policies.
-
