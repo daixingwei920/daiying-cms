@@ -10,6 +10,7 @@ require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduApiClient.ph
 require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduOAuthService.php';
 require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduFileBrowser.php';
 require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduStorageProvider.php';
+require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduStoragePlugin.php';
 
 use Cms\Core\Http\Request;
 use Cms\Core\Media\MediaLibrary;
@@ -287,6 +288,14 @@ $assert($transport->lastDownloadRange === [0, 9], 'Provider preserves browser by
 $stream = $provider->downloadBytes('1001', '', [10, 15], 6);
 $assert(($transport->apiRequests['filemetas'] ?? 0) === 2, 'Repeated proxy ranges reuse encrypted short-lived download URL cache.');
 $assert(str_contains($transport->lastDownloadUrl, 'baidupcs.com'), 'Repeated proxy ranges can skip the initial Baidu dlink redirect when a safe CDN URL is cached.');
+
+$pluginReflection = new ReflectionClass(\Local\Storage\Baidu\BaiduStoragePlugin::class);
+$pluginInstance = $pluginReflection->newInstanceWithoutConstructor();
+$boundedStreamRange = $pluginReflection->getMethod('boundedStreamRange');
+$assert($boundedStreamRange->invoke($pluginInstance, [0, 10754953], 'bytes=0-', 10754954, 'audio/mpeg') === [0, 65535], 'Open-ended stream range from start is capped to the first chunk.');
+$assert($boundedStreamRange->invoke($pluginInstance, [1048576, 10754953], 'bytes=1048576-', 10754954, 'audio/mpeg') === [1048576, 1114111], 'Open-ended stream seek range is capped to one chunk.');
+$assert($boundedStreamRange->invoke($pluginInstance, [0, 65535], 'bytes=0-65535', 10754954, 'audio/mpeg') === [0, 65535], 'Explicit stream range is preserved.');
+$assert($boundedStreamRange->invoke($pluginInstance, [0, 10754953], 'bytes=0-', 10754954, 'application/pdf') === [0, 10754953], 'Non-streamable open-ended range is not changed.');
 
 $assert($api->isSafeDownloadUrl('https://d.pcs.baidu.com/file/test.jpg'), 'Baidu download host is allowed.');
 $assert($api->isSafeDownloadUrl('https://example.baidupcs.com/file/test.jpg'), 'Baidu PCS subdomain is allowed.');

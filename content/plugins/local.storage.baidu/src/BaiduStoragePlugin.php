@@ -14,6 +14,8 @@ use Cms\Core\Support\View;
 
 final class BaiduStoragePlugin
 {
+    private const STREAM_RANGE_CHUNK_BYTES = 65536;
+
     private BaiduTokenRepository $tokens;
     private BaiduApiClient $api;
     private BaiduOAuthService $oauth;
@@ -195,6 +197,7 @@ final class BaiduStoragePlugin
             $item = $this->provider->get($remoteId, '');
             $rangeHeader = $this->rangeHeader($request);
             $range = $rangeHeader === false ? false : $this->parseRange($rangeHeader, max(0, $item->byteSize));
+            $range = $this->boundedStreamRange($range, $rangeHeader === false ? '' : $rangeHeader, max(0, $item->byteSize), $item->mimeType);
             $filename = $this->safeDownloadName($item->name);
             $baseHeaders = [
                 'Content-Type' => $item->mimeType !== '' ? $item->mimeType : 'application/octet-stream',
@@ -214,11 +217,6 @@ final class BaiduStoragePlugin
                 return new Response('', 200, $baseHeaders + [
                     'Content-Length' => (string) max(0, $item->byteSize),
                 ]);
-            }
-
-            if ($range === null && $this->isStreamableMime($item->mimeType)) {
-                $end = min(max(0, $item->byteSize - 1), 65535);
-                $range = [0, $end];
             }
 
             $maxBytes = $range !== null ? ($range[1] - $range[0] + 1) : 67108864;
@@ -255,6 +253,24 @@ final class BaiduStoragePlugin
         $mimeType = strtolower($mimeType);
 
         return str_starts_with($mimeType, 'audio/') || str_starts_with($mimeType, 'video/');
+    }
+
+    /** @param array{0:int,1:int}|false|null $range @return array{0:int,1:int}|false|null */
+    private function boundedStreamRange(array|false|null $range, string $rangeHeader, int $size, string $mimeType): array|false|null
+    {
+        if ($range === false || $size <= 0 || !$this->isStreamableMime($mimeType)) {
+            return $range;
+        }
+
+        if ($range === null) {
+            return [0, min($size - 1, self::STREAM_RANGE_CHUNK_BYTES - 1)];
+        }
+
+        if (preg_match('/^bytes=\d+-$/', trim($rangeHeader)) === 1) {
+            return [$range[0], min($size - 1, $range[0] + self::STREAM_RANGE_CHUNK_BYTES - 1)];
+        }
+
+        return $range;
     }
 
     private function logProxyFailure(int $mediaId, string $remoteId, \Throwable $exception): void
