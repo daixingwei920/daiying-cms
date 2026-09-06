@@ -207,6 +207,12 @@ final class BaiduStoragePlugin
                 ]);
             }
 
+            if ($request->method === 'HEAD') {
+                return new Response('', 200, $baseHeaders + [
+                    'Content-Length' => (string) max(0, $item->byteSize),
+                ]);
+            }
+
             $maxBytes = $range !== null ? ($range[1] - $range[0] + 1) : 67108864;
             $download = $this->provider->downloadBytes($remoteId, '', $range, $maxBytes);
             $body = (string) ($download['body'] ?? '');

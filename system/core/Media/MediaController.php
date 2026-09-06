@@ -131,6 +131,18 @@ final class MediaController
                 ->withHeaders(['Cache-Control' => 'private, no-store']);
         }
 
+        if ($request->method === 'HEAD') {
+            $filename = $this->safeDownloadName((string) ($media['original_name'] ?? 'remote-media'));
+            return new Response('', 200, [
+                'Content-Type' => (string) ($media['mime_type'] ?: 'application/octet-stream'),
+                'Accept-Ranges' => 'bytes',
+                'Content-Disposition' => ($download ? 'attachment' : 'inline') . '; filename="' . $filename . '"; filename*=UTF-8\'\'' . rawurlencode($filename),
+                'Content-Length' => (string) max(0, (int) ($media['byte_size'] ?? 0)),
+                'Cache-Control' => 'private, no-store',
+                'X-Daiying-Media-Provider' => $providerId,
+            ]);
+        }
+
         try {
             $resolved = $provider->resolveUrl($media, [
                 'download' => $download,
