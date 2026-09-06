@@ -94,6 +94,21 @@ $assert(is_array($product), 'Product can be created.');
 $assert((int) ($product['available_quantity'] ?? 0) === 5, 'New product starts with full available stock.');
 $assert(($product['specs']['颜色'] ?? '') === '黑色', 'Product specs are stored as structured facts.');
 
+$variantId = $repo->saveVariant([
+    'product_id' => $productId,
+    'title' => '黑色 128GB',
+    'sku' => 'TEST-001-BLK-128',
+    'stock_quantity' => 2,
+    'price_delta_minor' => 100,
+    'status' => 'active',
+]);
+$variantOrder = $repo->createPendingOrder($productId, $variantId, (int) $repo->activeActions($productId)[0]['id'], 1, 'fixture', 'commerce-test-variant', hash('sha256', 'variant'));
+$variantAfterReserve = $repo->variant($variantId);
+$assert((int) ($variantAfterReserve['reserved_quantity'] ?? 0) === 1, 'Variant checkout reserves variant inventory.');
+$repo->markOrderPaymentFailed((int) $variantOrder['id'], 'variant provider rejected');
+$variantAfterFailure = $repo->variant($variantId);
+$assert((int) ($variantAfterFailure['reserved_quantity'] ?? 0) === 0, 'Failed variant payment releases variant inventory.');
+
 $failed = $repo->createPendingOrder($productId, null, (int) $repo->activeActions($productId)[0]['id'], 2, 'fixture', 'commerce-test-failed', hash('sha256', 'failed'));
 $productAfterReserve = $repo->product($productId);
 $assert((int) ($productAfterReserve['reserved_quantity'] ?? 0) === 2, 'Checkout reserves product inventory.');

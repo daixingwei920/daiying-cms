@@ -240,6 +240,8 @@ final class CommerceController
         $this->repo->recordEvent((int) $product['id'], null, 'product_view');
         $media = (int) ($product['primary_media_id'] ?? 0);
         $image = $media > 0 ? '<img class="commerce-hero-img" src="/media/' . $media . '" alt="' . $this->e((string) $product['name']) . '">' : '<div class="commerce-hero-img placeholder">Daiying</div>';
+        $variants = $this->activeVariantOptions((int) $product['id'], (int) $product['price_minor'], (string) $product['currency']);
+        $variantField = $variants !== '' ? '<label>规格<select name="variant_id"><option value="">默认规格 · ' . $this->money((int) $product['price_minor'], (string) $product['currency']) . '</option>' . $variants . '</select></label>' : '';
         $actions = '';
         foreach ($this->repo->activeActions((int) $product['id']) as $action) {
             $type = (string) $action['action_type'];
@@ -254,6 +256,7 @@ final class CommerceController
             $actions .= '<form method="post" action="/commerce/checkout">' . CsrfToken::field() .
                 '<input type="hidden" name="product_id" value="' . (int) $product['id'] . '">' .
                 '<input type="hidden" name="action_id" value="' . (int) $action['id'] . '">' .
+                $variantField .
                 '<label>数量<input name="quantity" type="number" min="1" max="99" value="1"></label>' .
                 '<label>支付方式<select name="provider_id">' . $this->providerOptions((string) $product['currency']) . '</select></label>' .
                 '<button class="commerce-button" type="submit">' . $this->e((string) $action['label']) . '</button></form>';
@@ -392,6 +395,23 @@ final class CommerceController
         foreach ($providers as $provider) {
             $html .= '<option value="' . $this->e($provider['id']) . '">' . $this->e($provider['label']) . '</option>';
         }
+        return $html;
+    }
+
+    private function activeVariantOptions(int $productId, int $basePriceMinor, string $currency): string
+    {
+        $html = '';
+        foreach ($this->repo->variants($productId) as $variant) {
+            if ((string) ($variant['status'] ?? '') !== 'active') {
+                continue;
+            }
+            $available = max(0, (int) ($variant['stock_quantity'] ?? 0) - (int) ($variant['reserved_quantity'] ?? 0) - (int) ($variant['sold_quantity'] ?? 0));
+            $price = max(0, $basePriceMinor + (int) ($variant['price_delta_minor'] ?? 0));
+            $disabled = $available <= 0 ? ' disabled' : '';
+            $label = (string) ($variant['title'] ?? '规格') . ' · ' . strip_tags($this->money($price, $currency)) . ' · 库存 ' . $available;
+            $html .= '<option value="' . (int) $variant['id'] . '"' . $disabled . '>' . $this->e($label) . '</option>';
+        }
+
         return $html;
     }
 
