@@ -21,6 +21,13 @@ final class CommerceRepository
         'sku',
         'price_minor',
         'currency',
+        'region',
+        'transaction_region',
+        'shipping_fee_minor',
+        'tax_fee_minor',
+        'service_fee_minor',
+        'discount_minor',
+        'price_note',
         'brand',
         'model',
         'source_url',
@@ -32,6 +39,12 @@ final class CommerceRepository
     private const VERIFICATION_INVALIDATING_FIELDS = [
         'price_minor',
         'currency',
+        'region',
+        'transaction_region',
+        'shipping_fee_minor',
+        'tax_fee_minor',
+        'service_fee_minor',
+        'discount_minor',
         'brand',
         'model',
         'source_url',
@@ -114,6 +127,12 @@ final class CommerceRepository
             'price_minor' => $priceMinor,
             'currency' => $currency,
             'region' => strtoupper(substr($this->cleanCode((string) ($input['region'] ?? 'CN')), 0, 16)) ?: 'CN',
+            'transaction_region' => $this->status((string) ($input['transaction_region'] ?? 'cn_domestic'), ['cn_domestic', 'cross_border', 'international'], 'cn_domestic'),
+            'shipping_fee_minor' => max(0, (int) ($input['shipping_fee_minor'] ?? 0)),
+            'tax_fee_minor' => max(0, (int) ($input['tax_fee_minor'] ?? 0)),
+            'service_fee_minor' => max(0, (int) ($input['service_fee_minor'] ?? 0)),
+            'discount_minor' => max(0, (int) ($input['discount_minor'] ?? 0)),
+            'price_note' => $this->nullableText((string) ($input['price_note'] ?? ''), 500),
             'brand' => $this->nullableText((string) ($input['brand'] ?? ''), 191),
             'model' => $this->nullableText((string) ($input['model'] ?? ''), 191),
             'source_url' => $this->nullableUrl((string) ($input['source_url'] ?? '')),
@@ -145,9 +164,9 @@ final class CommerceRepository
 
         $stmt = $this->pdo->prepare(
             'INSERT INTO commerce_products
-                (uuid, sku, name, slug, status, summary, description_content_id, primary_media_id, gallery_media_ids_json, price_minor, currency, region, brand, model, source_url, specs_json, requires_shipping, auto_delivery_enabled, stock_quantity, reserved_quantity, sold_quantity, verification_status, key_fingerprint, published_at, created_at, updated_at)
+                (uuid, sku, name, slug, status, summary, description_content_id, primary_media_id, gallery_media_ids_json, price_minor, currency, region, transaction_region, shipping_fee_minor, tax_fee_minor, service_fee_minor, discount_minor, price_note, brand, model, source_url, specs_json, requires_shipping, auto_delivery_enabled, stock_quantity, reserved_quantity, sold_quantity, verification_status, key_fingerprint, published_at, created_at, updated_at)
              VALUES
-                (:uuid, :sku, :name, :slug, :status, :summary, :description_content_id, :primary_media_id, :gallery_media_ids_json, :price_minor, :currency, :region, :brand, :model, :source_url, :specs_json, :requires_shipping, :auto_delivery_enabled, :stock_quantity, 0, 0, :verification_status, :key_fingerprint, :published_at, :created_at, :updated_at)'
+                (:uuid, :sku, :name, :slug, :status, :summary, :description_content_id, :primary_media_id, :gallery_media_ids_json, :price_minor, :currency, :region, :transaction_region, :shipping_fee_minor, :tax_fee_minor, :service_fee_minor, :discount_minor, :price_note, :brand, :model, :source_url, :specs_json, :requires_shipping, :auto_delivery_enabled, :stock_quantity, 0, 0, :verification_status, :key_fingerprint, :published_at, :created_at, :updated_at)'
         );
         $insertParams = [];
         foreach ($payload as $key => $value) {
@@ -320,6 +339,7 @@ final class CommerceRepository
         if ($unit <= 0) {
             throw new RuntimeException('商品价格无效。');
         }
+        $pricing = $this->pricingSnapshot($product, $unit, $quantity);
         $snapshot = [
             'product' => $this->snapshotProduct($product),
             'variant' => $variant !== null ? $this->snapshotVariant($variant) : null,
@@ -329,6 +349,7 @@ final class CommerceRepository
                 'label' => (string) $action['label'],
                 'fulfillment_mode' => (string) $action['fulfillment_mode'],
             ],
+            'pricing' => $pricing,
         ];
         $now = gmdate('Y-m-d H:i:s');
         $this->pdo->beginTransaction();
@@ -350,7 +371,7 @@ final class CommerceRepository
                 ':status' => 'pending_payment',
                 ':fulfillment_status' => (int) $product['requires_shipping'] === 1 ? 'pending' : 'not_required',
                 ':shipping_required' => (int) $product['requires_shipping'],
-                ':amount_minor' => $unit * $quantity,
+                ':amount_minor' => (int) $pricing['total_minor'],
                 ':currency' => (string) $product['currency'],
                 ':provider_id' => $providerId,
                 ':idempotency_key' => $idempotencyKey,
@@ -825,11 +846,44 @@ final class CommerceRepository
             'slug' => (string) $product['slug'],
             'price_minor' => (int) $product['price_minor'],
             'currency' => (string) $product['currency'],
+            'region' => (string) ($product['region'] ?? 'CN'),
+            'transaction_region' => (string) ($product['transaction_region'] ?? 'cn_domestic'),
+            'shipping_fee_minor' => (int) ($product['shipping_fee_minor'] ?? 0),
+            'tax_fee_minor' => (int) ($product['tax_fee_minor'] ?? 0),
+            'service_fee_minor' => (int) ($product['service_fee_minor'] ?? 0),
+            'discount_minor' => (int) ($product['discount_minor'] ?? 0),
+            'price_note' => (string) ($product['price_note'] ?? ''),
             'brand' => (string) ($product['brand'] ?? ''),
             'model' => (string) ($product['model'] ?? ''),
             'source_url' => (string) ($product['source_url'] ?? ''),
             'primary_media_id' => isset($product['primary_media_id']) ? (int) $product['primary_media_id'] : null,
             'key_fingerprint' => (string) $product['key_fingerprint'],
+        ];
+    }
+
+    /** @param array<string,mixed> $product @return array<string,mixed> */
+    private function pricingSnapshot(array $product, int $unit, int $quantity): array
+    {
+        $subtotal = $unit * $quantity;
+        $shippingFee = (int) ($product['shipping_fee_minor'] ?? 0);
+        $taxFee = (int) ($product['tax_fee_minor'] ?? 0);
+        $serviceFee = (int) ($product['service_fee_minor'] ?? 0);
+        $discount = (int) ($product['discount_minor'] ?? 0);
+        $total = max(0, $subtotal + $shippingFee + $taxFee + $serviceFee - $discount);
+
+        return [
+            'unit_amount_minor' => $unit,
+            'quantity' => $quantity,
+            'subtotal_minor' => $subtotal,
+            'shipping_fee_minor' => $shippingFee,
+            'tax_fee_minor' => $taxFee,
+            'service_fee_minor' => $serviceFee,
+            'discount_minor' => $discount,
+            'total_minor' => $total,
+            'currency' => (string) $product['currency'],
+            'region' => (string) ($product['region'] ?? 'CN'),
+            'transaction_region' => (string) ($product['transaction_region'] ?? 'cn_domestic'),
+            'price_note' => (string) ($product['price_note'] ?? ''),
         ];
     }
 

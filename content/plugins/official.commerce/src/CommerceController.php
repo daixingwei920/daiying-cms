@@ -82,6 +82,12 @@ final class CommerceController
             '<label>价格（分）<input name="price_minor" type="number" min="1" required value="' . (int) ($product['price_minor'] ?? 0) . '"></label>' .
             '<label>币种<select name="currency">' . $this->currencyOptions((string) ($product['currency'] ?? 'CNY')) . '</select></label>' .
             '<label>交易区域<input name="region" value="' . $this->e((string) ($product['region'] ?? 'CN')) . '"></label>' .
+            '<label>交易类型<select name="transaction_region">' . $this->options(['cn_domestic' => '中国大陆交易', 'cross_border' => '跨境交易', 'international' => '海外/国际交易'], (string) ($product['transaction_region'] ?? 'cn_domestic')) . '</select></label>' .
+            '<label>运费（分）<input name="shipping_fee_minor" type="number" min="0" value="' . (int) ($product['shipping_fee_minor'] ?? 0) . '"></label>' .
+            '<label>税费（分）<input name="tax_fee_minor" type="number" min="0" value="' . (int) ($product['tax_fee_minor'] ?? 0) . '"></label>' .
+            '<label>服务费（分）<input name="service_fee_minor" type="number" min="0" value="' . (int) ($product['service_fee_minor'] ?? 0) . '"></label>' .
+            '<label>优惠抵扣（分）<input name="discount_minor" type="number" min="0" value="' . (int) ($product['discount_minor'] ?? 0) . '"></label>' .
+            '<label>价格说明<input name="price_note" value="' . $this->e((string) ($product['price_note'] ?? '')) . '" placeholder="如 含税 / 不含运费 / 海外仓发货"></label>' .
             '<label>库存数量<input name="stock_quantity" type="number" min="0" value="' . (int) ($product['stock_quantity'] ?? 0) . '"></label>' .
             '<label>摘要<textarea name="summary" rows="3">' . $this->e((string) ($product['summary'] ?? '')) . '</textarea></label>' .
             '<label>详情内容 ID<input name="description_content_id" type="number" min="0" value="' . (int) ($product['description_content_id'] ?? 0) . '"></label>' .
@@ -322,7 +328,7 @@ final class CommerceController
         $description = $this->descriptionHtml((int) ($product['description_content_id'] ?? 0));
         $verification = $this->verificationHtml((int) $product['id']);
         $body = '<article class="commerce-product"><div>' . $image . '</div><div><h1>' . $this->e((string) $product['name']) . '</h1><p class="commerce-price">' . $this->money((int) $product['price_minor'], (string) $product['currency']) . '</p><p>' . $this->e((string) ($product['summary'] ?? '')) . '</p><p><strong>库存：</strong>' . (int) $product['available_quantity'] . '</p><p><strong>来源核验：</strong>' . $this->verificationLabel((string) $product['verification_status']) . '</p>' . $actions . '</div></article>' .
-            '<section class="commerce-section"><h2>透明信息</h2>' . $source . '<p><strong>品牌/型号：</strong>' . $this->e(trim((string) ($product['brand'] ?? '') . ' ' . (string) ($product['model'] ?? '')) ?: '未提供') . '</p>' . $specs . '</section>' .
+            '<section class="commerce-section"><h2>透明信息</h2>' . $source . '<p><strong>交易区域：</strong>' . $this->e((string) ($product['region'] ?? 'CN')) . ' / ' . $this->e($this->transactionRegionLabel((string) ($product['transaction_region'] ?? 'cn_domestic'))) . '</p><p><strong>品牌/型号：</strong>' . $this->e(trim((string) ($product['brand'] ?? '') . ' ' . (string) ($product['model'] ?? '')) ?: '未提供') . '</p>' . $this->priceTransparencyHtml($product, 1) . $specs . '</section>' .
             $verification .
             $description;
 
@@ -404,7 +410,7 @@ final class CommerceController
             return Response::html($this->frontPage('订单待确认', '<h1>订单待确认</h1><p>支付状态暂未完成，请稍后刷新。</p><p class="commerce-muted">' . $this->e($exception->getMessage()) . '</p>'));
         }
         $paid = in_array((string) ($order['status'] ?? ''), ['paid', 'fulfilled'], true);
-        $body = '<h1>' . ($paid ? '支付成功' : '订单待支付') . '</h1><p>订单号：<strong>' . $this->e((string) $order['order_number']) . '</strong></p><p>金额：' . $this->money((int) $order['amount_minor'], (string) $order['currency']) . '</p><p>状态：' . $this->e((string) $order['status']) . '</p>' . $this->orderLogisticsHtml($order) . '<p><a href="/commerce">返回商品列表</a></p>';
+        $body = '<h1>' . ($paid ? '支付成功' : '订单待支付') . '</h1><p>订单号：<strong>' . $this->e((string) $order['order_number']) . '</strong></p><p>金额：' . $this->money((int) $order['amount_minor'], (string) $order['currency']) . '</p><p>状态：' . $this->e((string) $order['status']) . '</p>' . $this->orderPriceTransparencyHtml($order) . $this->orderLogisticsHtml($order) . '<p><a href="/commerce">返回商品列表</a></p>';
 
         return Response::html($this->frontPage('订单结果', $body));
     }
@@ -637,6 +643,57 @@ final class CommerceController
         return '<table class="commerce-specs">' . $rows . '</table>';
     }
 
+    /** @param array<string,mixed> $product */
+    private function priceTransparencyHtml(array $product, int $quantity): string
+    {
+        $currency = (string) ($product['currency'] ?? 'CNY');
+        $base = (int) ($product['price_minor'] ?? 0);
+        $subtotal = $base * max(1, $quantity);
+        $shipping = (int) ($product['shipping_fee_minor'] ?? 0);
+        $tax = (int) ($product['tax_fee_minor'] ?? 0);
+        $service = (int) ($product['service_fee_minor'] ?? 0);
+        $discount = (int) ($product['discount_minor'] ?? 0);
+        $total = max(0, $subtotal + $shipping + $tax + $service - $discount);
+        $note = trim((string) ($product['price_note'] ?? ''));
+        $rows = '<tr><th>商品小计</th><td>' . $this->money($subtotal, $currency) . '</td></tr>' .
+            '<tr><th>运费</th><td>' . $this->money($shipping, $currency) . '</td></tr>' .
+            '<tr><th>税费</th><td>' . $this->money($tax, $currency) . '</td></tr>' .
+            '<tr><th>服务费</th><td>' . $this->money($service, $currency) . '</td></tr>' .
+            '<tr><th>优惠抵扣</th><td>-' . $this->money($discount, $currency) . '</td></tr>' .
+            '<tr><th>预计合计</th><td><strong>' . $this->money($total, $currency) . '</strong></td></tr>';
+        if ($note !== '') {
+            $rows .= '<tr><th>价格说明</th><td>' . $this->e($note) . '</td></tr>';
+        }
+
+        return '<h3>价格透明</h3><table class="commerce-specs">' . $rows . '</table>';
+    }
+
+    /** @param array<string,mixed> $order */
+    private function orderPriceTransparencyHtml(array $order): string
+    {
+        $snapshot = is_array($order['snapshot'] ?? null) ? $order['snapshot'] : [];
+        $pricing = is_array($snapshot['pricing'] ?? null) ? $snapshot['pricing'] : [];
+        if ($pricing === []) {
+            return '';
+        }
+        $currency = (string) ($pricing['currency'] ?? ($order['currency'] ?? 'CNY'));
+        $rows = '<tr><th>单价</th><td>' . $this->money((int) ($pricing['unit_amount_minor'] ?? 0), $currency) . '</td></tr>' .
+            '<tr><th>数量</th><td>' . (int) ($pricing['quantity'] ?? $order['quantity'] ?? 1) . '</td></tr>' .
+            '<tr><th>商品小计</th><td>' . $this->money((int) ($pricing['subtotal_minor'] ?? 0), $currency) . '</td></tr>' .
+            '<tr><th>运费</th><td>' . $this->money((int) ($pricing['shipping_fee_minor'] ?? 0), $currency) . '</td></tr>' .
+            '<tr><th>税费</th><td>' . $this->money((int) ($pricing['tax_fee_minor'] ?? 0), $currency) . '</td></tr>' .
+            '<tr><th>服务费</th><td>' . $this->money((int) ($pricing['service_fee_minor'] ?? 0), $currency) . '</td></tr>' .
+            '<tr><th>优惠抵扣</th><td>-' . $this->money((int) ($pricing['discount_minor'] ?? 0), $currency) . '</td></tr>' .
+            '<tr><th>成交合计</th><td><strong>' . $this->money((int) ($pricing['total_minor'] ?? $order['amount_minor'] ?? 0), $currency) . '</strong></td></tr>' .
+            '<tr><th>交易区域</th><td>' . $this->e((string) ($pricing['region'] ?? '')) . ' / ' . $this->e($this->transactionRegionLabel((string) ($pricing['transaction_region'] ?? 'cn_domestic'))) . '</td></tr>';
+        $note = trim((string) ($pricing['price_note'] ?? ''));
+        if ($note !== '') {
+            $rows .= '<tr><th>价格说明</th><td>' . $this->e($note) . '</td></tr>';
+        }
+
+        return '<section class="commerce-section"><h2>成交价格明细</h2><table class="commerce-specs">' . $rows . '</table></section>';
+    }
+
     private function refreshClaim(int $orderId, string $claim): void
     {
         $stmt = $this->pdo->prepare('UPDATE commerce_orders SET completion_claim = :claim WHERE id = :id');
@@ -716,6 +773,15 @@ final class CommerceController
             'delivered' => '已送达',
             'exception' => '异常',
             default => '待发货',
+        };
+    }
+
+    private function transactionRegionLabel(string $region): string
+    {
+        return match ($region) {
+            'cross_border' => '跨境交易',
+            'international' => '海外/国际交易',
+            default => '中国大陆交易',
         };
     }
 

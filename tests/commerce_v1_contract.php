@@ -34,12 +34,15 @@ $coreMigration = require $root . '/content/plugins/official.commerce/migrations/
 $assert(in_array('table:commerce_orders', $coreMigration['affected_objects'] ?? [], true), 'Migration declares the commerce order table.');
 $logisticsMigration = require $root . '/content/plugins/official.commerce/migrations/002_logistics_events.php';
 $assert(in_array('table:commerce_logistics_events', $logisticsMigration['affected_objects'] ?? [], true), 'Logistics migration declares the logistics fact table.');
+$pricingMigration = require $root . '/content/plugins/official.commerce/migrations/003_price_transparency.php';
+$assert(in_array('table:commerce_products', $pricingMigration['affected_objects'] ?? [], true), 'Price transparency migration declares the commerce product table.');
 
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 ($coreMigration['up'])($pdo);
 ($logisticsMigration['up'])($pdo);
+($pricingMigration['up'])($pdo);
 $pdo->exec('CREATE TABLE cms_payments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_type VARCHAR(96) NOT NULL,
@@ -87,6 +90,12 @@ $productId = $repo->saveProduct([
     'price_minor' => 36000,
     'currency' => 'CNY',
     'stock_quantity' => 5,
+    'transaction_region' => 'cross_border',
+    'shipping_fee_minor' => 1200,
+    'tax_fee_minor' => 800,
+    'service_fee_minor' => 300,
+    'discount_minor' => 100,
+    'price_note' => '跨境订单费用以结算页快照为准',
     'source_url' => 'https://example.com/item/1',
     'brand' => 'Daiying',
     'model' => 'V1',
@@ -99,6 +108,7 @@ $assert(is_array($product), 'Product can be created.');
 $assert((int) ($product['available_quantity'] ?? 0) === 5, 'New product starts with full available stock.');
 $assert(($product['specs']['颜色'] ?? '') === '黑色', 'Product specs are stored as structured facts.');
 $assert(($product['verification_status'] ?? '') === 'pending', 'Product with a source URL starts as pending verification.');
+$assert(($product['transaction_region'] ?? '') === 'cross_border', 'Product keeps a transaction-region fact separate from currency.');
 
 $repo->appendVerificationRecord([
     'product_id' => $productId,
@@ -119,6 +129,12 @@ $repo->saveProduct([
     'price_minor' => 36000,
     'currency' => 'CNY',
     'stock_quantity' => 5,
+    'transaction_region' => 'cross_border',
+    'shipping_fee_minor' => 1200,
+    'tax_fee_minor' => 800,
+    'service_fee_minor' => 300,
+    'discount_minor' => 100,
+    'price_note' => '跨境订单费用以结算页快照为准',
     'source_url' => 'https://example.com/item/1',
     'brand' => 'Daiying Updated',
     'model' => 'V1',
@@ -165,9 +181,12 @@ $paidOrder = $repo->order((int) $paid['id']);
 $productAfterPaid = $repo->product($productId);
 
 $assert(($paidOrder['status'] ?? '') === 'paid', 'Paid order status is persisted.');
+$assert((int) ($paidOrder['amount_minor'] ?? 0) === 38200, 'Order total includes transparent shipping, tax, service, and discount components.');
 $assert((int) ($productAfterPaid['sold_quantity'] ?? 0) === 1, 'Paid order increments sold quantity.');
 $assert((int) ($productAfterPaid['available_quantity'] ?? 0) === 4, 'Paid order reduces available stock.');
 $assert(($paidOrder['snapshot']['product']['name'] ?? '') === '测试商品', 'Order keeps product snapshot.');
+$assert((int) ($paidOrder['snapshot']['pricing']['shipping_fee_minor'] ?? 0) === 1200, 'Order snapshot freezes shipping fee at checkout time.');
+$assert(($paidOrder['snapshot']['pricing']['transaction_region'] ?? '') === 'cross_border', 'Order snapshot freezes transaction-region at checkout time.');
 $repo->markOrderFulfilled((int) $paid['id']);
 $fulfilledOrder = $repo->order((int) $paid['id']);
 $assert(($fulfilledOrder['status'] ?? '') === 'fulfilled', 'Paid order can be marked fulfilled.');
@@ -249,6 +268,12 @@ $repo->saveProduct([
     'price_minor' => 36100,
     'currency' => 'CNY',
     'stock_quantity' => 5,
+    'transaction_region' => 'cross_border',
+    'shipping_fee_minor' => 1200,
+    'tax_fee_minor' => 800,
+    'service_fee_minor' => 300,
+    'discount_minor' => 100,
+    'price_note' => '跨境订单费用以结算页快照为准',
 ]);
 $changes = $repo->productChanges($productId);
 $fields = array_values(array_map(static fn (array $row): string => (string) $row['field_name'], $changes));
