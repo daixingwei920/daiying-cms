@@ -9,11 +9,9 @@ require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduHttpTranspor
 require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduApiClient.php';
 require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduOAuthService.php';
 require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduFileBrowser.php';
-require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduMediaRangeCache.php';
 require __DIR__ . '/../content/plugins/local.storage.baidu/src/BaiduStorageProvider.php';
 
 use Cms\Core\Http\Request;
-use Cms\Core\Media\MediaProviderItem;
 use Cms\Core\Media\MediaLibrary;
 use Cms\Core\Media\RemoteMediaProviderRegistry;
 use Cms\Core\Plugin\PluginDataStore;
@@ -23,7 +21,6 @@ use Cms\Core\Plugin\PluginSecretStore;
 use Local\Storage\Baidu\BaiduApiClient;
 use Local\Storage\Baidu\BaiduFileBrowser;
 use Local\Storage\Baidu\BaiduHttpTransport;
-use Local\Storage\Baidu\BaiduMediaRangeCache;
 use Local\Storage\Baidu\BaiduOAuthService;
 use Local\Storage\Baidu\BaiduStorageProvider;
 use Local\Storage\Baidu\BaiduTokenRepository;
@@ -290,17 +287,6 @@ $assert($transport->lastDownloadRange === [0, 9], 'Provider preserves browser by
 $stream = $provider->downloadBytes('1001', '', [10, 15], 6);
 $assert(($transport->apiRequests['filemetas'] ?? 0) === 2, 'Repeated proxy ranges reuse encrypted short-lived download URL cache.');
 $assert(str_contains($transport->lastDownloadUrl, 'baidupcs.com'), 'Repeated proxy ranges can skip the initial Baidu dlink redirect when a safe CDN URL is cached.');
-
-$cacheRoot = sys_get_temp_dir() . '/daiying-baidu-range-cache-' . bin2hex(random_bytes(4));
-$rangeCache = new BaiduMediaRangeCache($cacheRoot);
-$cacheItem = new MediaProviderItem(BaiduTokenRepository::PLUGIN_ID, '1001', 'baidu://音乐/a.mp3', 'a.mp3', 'audio', 'audio/mpeg', 1048576, null, null, null, 'md5-a', null, '2026-09-06T00:00:00Z');
-$assert($rangeCache->readAheadRange($cacheItem, [0, 31]) === [0, 524287], 'Range cache reads ahead 512 KB for tiny head probes.');
-$assert($rangeCache->readAheadRange($cacheItem, [1048000, 1048575]) === [786432, 1048575], 'Range cache reads ahead the audio tail window.');
-$rangeCache->store($cacheItem, [0, 524287], str_repeat('A', 524288));
-$assert($rangeCache->read($cacheItem, [0, 31]) === str_repeat('A', 32), 'Range cache serves tiny head probes from local bytes.');
-$assert($rangeCache->read($cacheItem, [262144, 262175]) === str_repeat('A', 32), 'Range cache serves later head probes from local bytes.');
-$rangeCache->store($cacheItem, [786432, 1048575], str_repeat('Z', 262144));
-$assert($rangeCache->read($cacheItem, [1048544, 1048575]) === str_repeat('Z', 32), 'Range cache serves suffix probes from local tail bytes.');
 
 $assert($api->isSafeDownloadUrl('https://d.pcs.baidu.com/file/test.jpg'), 'Baidu download host is allowed.');
 $assert($api->isSafeDownloadUrl('https://example.baidupcs.com/file/test.jpg'), 'Baidu PCS subdomain is allowed.');

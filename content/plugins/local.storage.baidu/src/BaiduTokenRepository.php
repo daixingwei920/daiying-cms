@@ -187,7 +187,7 @@ final class BaiduTokenRepository
     {
         $this->secrets->set(self::PLUGIN_ID, $this->downloadUrlCacheKey($fsId), json_encode([
             'url' => $url,
-            'expires_at' => time() + max(10, min(600, $ttlSeconds)),
+            'expires_at' => time() + max(10, min(180, $ttlSeconds)),
             'created_at' => gmdate('c'),
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}');
     }

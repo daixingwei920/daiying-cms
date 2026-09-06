@@ -156,7 +156,7 @@ final class BaiduApiClient
         $token = $this->accessToken();
         $join = str_contains($dlink, '?') ? '&' : '?';
         $url = $dlink . $join . 'access_token=' . rawurlencode($token);
-        $this->tokens->downloadUrlCachePut($fsId, $url, 300);
+        $this->tokens->downloadUrlCachePut($fsId, $url, 90);
 
         return $url;
     }
@@ -183,7 +183,7 @@ final class BaiduApiClient
 
         $finalUrl = (string) ($download['final_url'] ?? '');
         if ($finalUrl !== '' && $this->isSafeDownloadUrl($finalUrl)) {
-            $this->tokens->downloadUrlCachePut($fsId, $finalUrl, 300);
+            $this->tokens->downloadUrlCachePut($fsId, $finalUrl, 90);
         }
 
         return $download;
