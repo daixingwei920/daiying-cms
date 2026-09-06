@@ -9,6 +9,7 @@ use Cms\Core\Database\ConnectionFactory;
 use Cms\Core\Http\Request;
 use Cms\Core\Http\Response;
 use Cms\Core\Payment\PaidDownloadService;
+use Cms\Core\Security\SessionManager;
 use Throwable;
 
 final class MediaController
@@ -69,10 +70,12 @@ final class MediaController
             }
 
             if ($request->method === 'HEAD') {
+                SessionManager::close();
                 return new Response('', 200, $headers + ['Content-Length' => (string) $size]);
             }
 
             if ($range === false) {
+                SessionManager::close();
                 return new Response('', 416, $headers + [
                     'Content-Range' => 'bytes */' . $size,
                     'Content-Length' => '0',
@@ -84,6 +87,7 @@ final class MediaController
                     return $this->paymentRequiredResponse();
                 }
             }
+            SessionManager::close();
 
             if ($range !== null) {
                 [$start, $end] = $range;
@@ -131,13 +135,29 @@ final class MediaController
                 ->withHeaders(['Cache-Control' => 'private, no-store']);
         }
 
+        SessionManager::close();
+
         if (
             $request->method === 'GET'
             && !$download
             && $this->isBrowserDocumentRequest($request)
             && $this->isInlinePlayableRemoteMedia($media)
         ) {
-            return Response::html($this->remoteMediaPlayerPage($media));
+            try {
+                $resolved = $provider->resolveUrl($media, [
+                    'download' => false,
+                    'variant' => $this->variant($request),
+                ]);
+                $url = (string) ($resolved['url'] ?? '');
+                if ($url === '') {
+                    throw new MediaException('Remote media URL is empty.');
+                }
+            } catch (Throwable) {
+                return Response::text('远程媒体暂不可用，请管理员检查对应插件授权状态。', 503)
+                    ->withHeaders(['Cache-Control' => 'private, no-store']);
+            }
+
+            return Response::html($this->remoteMediaPlayerPage($media, $url));
         }
 
         if ($request->method === 'HEAD') {
@@ -217,15 +237,15 @@ final class MediaController
     }
 
     /** @param array<string,mixed> $media */
-    private function remoteMediaPlayerPage(array $media): string
+    private function remoteMediaPlayerPage(array $media, string $src): string
     {
         $id = max(0, (int) ($media['id'] ?? 0));
         $type = (string) ($media['media_type'] ?? 'audio');
         $title = htmlspecialchars((string) ($media['title'] ?: $media['original_name'] ?? '远程媒体'), ENT_QUOTES, 'UTF-8');
-        $src = '/media/' . $id . '?stream=1';
+        $src = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
         $tag = $type === 'video'
             ? '<video controls preload="metadata" src="' . $src . '" style="width:min(960px,90vw);max-height:70vh;background:#000"></video>'
-            : '<audio controls preload="metadata" src="' . $src . '" style="width:min(720px,90vw)"></audio>';
+            : '<audio controls preload="auto" src="' . $src . '" style="width:min(720px,90vw)"></audio>';
 
         return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $title . '</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f172a;color:#e5e7eb;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.player{display:grid;gap:18px;justify-items:center;padding:24px}h1{font-size:18px;font-weight:600;margin:0;text-align:center;max-width:90vw;word-break:break-word}.link{color:#93c5fd;text-decoration:none}</style></head><body><main class="player"><h1>' . $title . '</h1>' . $tag . '<a class="link" href="/admin/media/detail/' . $id . '">返回媒体详情</a></main></body></html>';
     }

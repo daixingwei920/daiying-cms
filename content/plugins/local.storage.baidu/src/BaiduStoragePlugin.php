@@ -9,6 +9,7 @@ use Cms\Core\Http\Response;
 use Cms\Core\Media\RemoteMediaProviderRegistry;
 use Cms\Core\Plugin\PluginContext;
 use Cms\Core\Security\CsrfToken;
+use Cms\Core\Security\SessionManager;
 use Cms\Core\Support\View;
 
 final class BaiduStoragePlugin
@@ -188,6 +189,8 @@ final class BaiduStoragePlugin
                 ->withHeaders(['Cache-Control' => 'private, no-store']);
         }
 
+        SessionManager::close();
+
         try {
             $item = $this->provider->get($remoteId, '');
             $rangeHeader = $this->rangeHeader($request);
@@ -219,7 +222,7 @@ final class BaiduStoragePlugin
             }
 
             $maxBytes = $range !== null ? ($range[1] - $range[0] + 1) : 67108864;
-            $download = $this->provider->downloadBytes($remoteId, '', $range, $maxBytes);
+            $download = $this->api->downloadBytes($remoteId, $range, $maxBytes);
             $body = (string) ($download['body'] ?? '');
             if ($body === '') {
                 throw new \RuntimeException('百度网盘媒体读取失败。');

@@ -139,11 +139,18 @@ class BaiduHttpTransport
             },
             CURLOPT_WRITEFUNCTION => static function ($curl, string $chunk) use (&$body, &$bytes, &$tooLarge, $maxBytes): int {
                 $length = strlen($chunk);
-                $bytes += $length;
-                if ($bytes > $maxBytes) {
+                $remaining = $maxBytes - $bytes;
+                if ($remaining <= 0) {
                     $tooLarge = true;
                     return 0;
                 }
+                if ($length > $remaining) {
+                    $body .= substr($chunk, 0, $remaining);
+                    $bytes += $remaining;
+                    $tooLarge = true;
+                    return 0;
+                }
+                $bytes += $length;
                 $body .= $chunk;
                 return $length;
             },
@@ -157,6 +164,9 @@ class BaiduHttpTransport
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         $error = curl_error($ch);
 
+        if ($tooLarge && $range !== null && $body !== '') {
+            return ['status' => $status > 0 ? $status : 206, 'headers' => $responseHeaders, 'body' => $body, 'final_url' => $url];
+        }
         if ($tooLarge) {
             throw new \RuntimeException('百度网盘文件超过 CMS 允许大小。');
         }
