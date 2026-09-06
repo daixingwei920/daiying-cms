@@ -131,6 +131,15 @@ final class MediaController
                 ->withHeaders(['Cache-Control' => 'private, no-store']);
         }
 
+        if (
+            $request->method === 'GET'
+            && !$download
+            && $this->isBrowserDocumentRequest($request)
+            && $this->isInlinePlayableRemoteMedia($media)
+        ) {
+            return Response::html($this->remoteMediaPlayerPage($media));
+        }
+
         if ($request->method === 'HEAD') {
             $filename = $this->safeDownloadName((string) ($media['original_name'] ?? 'remote-media'));
             return new Response('', 200, [
@@ -189,6 +198,36 @@ final class MediaController
         $value = $request->query['download'] ?? '';
 
         return is_string($value) && $value === '1';
+    }
+
+    private function isBrowserDocumentRequest(Request $request): bool
+    {
+        if (isset($request->query['stream'])) {
+            return false;
+        }
+        $accept = strtolower((string) ($request->server['HTTP_ACCEPT'] ?? ''));
+
+        return $accept === '' || str_contains($accept, 'text/html');
+    }
+
+    /** @param array<string,mixed> $media */
+    private function isInlinePlayableRemoteMedia(array $media): bool
+    {
+        return in_array((string) ($media['media_type'] ?? ''), ['audio', 'video'], true);
+    }
+
+    /** @param array<string,mixed> $media */
+    private function remoteMediaPlayerPage(array $media): string
+    {
+        $id = max(0, (int) ($media['id'] ?? 0));
+        $type = (string) ($media['media_type'] ?? 'audio');
+        $title = htmlspecialchars((string) ($media['title'] ?: $media['original_name'] ?? '远程媒体'), ENT_QUOTES, 'UTF-8');
+        $src = '/media/' . $id . '?stream=1';
+        $tag = $type === 'video'
+            ? '<video controls preload="metadata" src="' . $src . '" style="width:min(960px,90vw);max-height:70vh;background:#000"></video>'
+            : '<audio controls preload="metadata" src="' . $src . '" style="width:min(720px,90vw)"></audio>';
+
+        return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $title . '</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f172a;color:#e5e7eb;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.player{display:grid;gap:18px;justify-items:center;padding:24px}h1{font-size:18px;font-weight:600;margin:0;text-align:center;max-width:90vw;word-break:break-word}.link{color:#93c5fd;text-decoration:none}</style></head><body><main class="player"><h1>' . $title . '</h1>' . $tag . '<a class="link" href="/admin/media/detail/' . $id . '">返回媒体详情</a></main></body></html>';
     }
 
     private function variant(Request $request): string

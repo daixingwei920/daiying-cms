@@ -213,6 +213,11 @@ final class BaiduStoragePlugin
                 ]);
             }
 
+            if ($range === null && $this->isStreamableMime($item->mimeType)) {
+                $end = min(max(0, $item->byteSize - 1), 65535);
+                $range = [0, $end];
+            }
+
             $maxBytes = $range !== null ? ($range[1] - $range[0] + 1) : 67108864;
             $download = $this->provider->downloadBytes($remoteId, '', $range, $maxBytes);
             $body = (string) ($download['body'] ?? '');
@@ -230,7 +235,8 @@ final class BaiduStoragePlugin
             return new Response($body, 200, $baseHeaders + [
                 'Content-Length' => (string) strlen($body),
             ]);
-        } catch (\Throwable) {
+        } catch (\Throwable $exception) {
+            $this->logProxyFailure($mediaId, $remoteId, $exception);
             return Response::text('百度网盘媒体暂不可用。', 503)->withHeaders(['Cache-Control' => 'private, no-store']);
         }
     }
@@ -239,6 +245,37 @@ final class BaiduStoragePlugin
     {
         $name = trim(str_replace(["\r", "\n", '"', '\\'], '', $name));
         return $name !== '' ? $name : 'baidu-media';
+    }
+
+    private function isStreamableMime(string $mimeType): bool
+    {
+        $mimeType = strtolower($mimeType);
+
+        return str_starts_with($mimeType, 'audio/') || str_starts_with($mimeType, 'video/');
+    }
+
+    private function logProxyFailure(int $mediaId, string $remoteId, \Throwable $exception): void
+    {
+        if (!defined('CMS_ROOT')) {
+            return;
+        }
+        $log = rtrim((string) CMS_ROOT, DIRECTORY_SEPARATOR) . '/storage/logs/app.log';
+        $dir = dirname($log);
+        if (!is_dir($dir)) {
+            return;
+        }
+        $record = [
+            'time' => gmdate('c'),
+            'level' => 'ERROR',
+            'message' => 'Baidu media proxy failed',
+            'context' => [
+                'source' => 'local.storage.baidu',
+                'media_id' => $mediaId,
+                'remote_hash' => hash('sha256', $remoteId),
+                'error' => $exception->getMessage(),
+            ],
+        ];
+        @file_put_contents($log, json_encode($record, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . PHP_EOL, FILE_APPEND | LOCK_EX);
     }
 
     private function rangeHeader(Request $request): string|false
