@@ -206,14 +206,44 @@ final class CommerceController
             return Response::html(View::page('订单不存在', '<h1>订单不存在</h1><p><a class="button" href="/admin/commerce/orders">返回订单</a></p>'), 404);
         }
         $snapshot = is_array($order['snapshot'] ?? null) ? $order['snapshot'] : [];
+        $actions = '';
+        if ((string) ($order['status'] ?? '') === 'pending_payment') {
+            $actions .= '<form method="post" action="/admin/commerce/orders/cancel" style="display:inline">' . CsrfToken::field() . '<input type="hidden" name="id" value="' . (int) $order['id'] . '"><button class="admin-button-danger" type="submit">取消订单</button></form> ';
+        }
+        if ((string) ($order['status'] ?? '') === 'paid') {
+            $actions .= '<form method="post" action="/admin/commerce/orders/fulfill" style="display:inline">' . CsrfToken::field() . '<input type="hidden" name="id" value="' . (int) $order['id'] . '"><button type="submit">标记履约</button></form> ';
+        }
         $body = '<h1>订单 ' . $this->e((string) $order['order_number']) . '</h1>' .
             '<p><strong>状态：</strong>' . $this->e((string) $order['status']) . ' / ' . $this->e((string) $order['fulfillment_status']) . '</p>' .
             '<p><strong>金额：</strong>' . $this->money((int) $order['amount_minor'], (string) $order['currency']) . '</p>' .
             '<p><strong>支付：</strong>' . $this->e((string) ($order['provider_id'] ?? '')) . ' #' . $this->e((string) ($order['payment_id'] ?? '')) . '</p>' .
+            ($actions !== '' ? '<p>' . $actions . '</p>' : '') .
             '<h2>订单快照</h2><pre style="white-space:pre-wrap;background:#f8fafc;border:1px solid #d8dee8;border-radius:6px;padding:12px">' . $this->e(json_encode($snapshot, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}') . '</pre>' .
             '<p><a class="button admin-button-secondary" href="/admin/commerce/orders">返回订单</a></p>';
 
         return Response::html(View::page('订单详情', $body));
+    }
+
+    public function adminCancelOrder(Request $request): Response
+    {
+        $id = (int) ($request->body['id'] ?? 0);
+        try {
+            $this->repo->cancelPendingOrder($id, 'cancelled by admin');
+            return Response::redirect('/admin/commerce/orders/show?id=' . $id . '&cancelled=1');
+        } catch (Throwable $exception) {
+            return $this->error('取消订单失败', $exception, '/admin/commerce/orders/show?id=' . $id);
+        }
+    }
+
+    public function adminFulfillOrder(Request $request): Response
+    {
+        $id = (int) ($request->body['id'] ?? 0);
+        try {
+            $this->repo->markOrderFulfilled($id);
+            return Response::redirect('/admin/commerce/orders/show?id=' . $id . '&fulfilled=1');
+        } catch (Throwable $exception) {
+            return $this->error('订单履约失败', $exception, '/admin/commerce/orders/show?id=' . $id);
+        }
     }
 
     public function storefront(Request $request): Response

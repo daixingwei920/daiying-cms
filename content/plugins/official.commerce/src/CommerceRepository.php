@@ -430,6 +430,47 @@ final class CommerceRepository
         }
     }
 
+    public function cancelPendingOrder(int $orderId, string $note = ''): void
+    {
+        $order = $this->order($orderId);
+        if ($order === null) {
+            throw new RuntimeException('订单不存在。');
+        }
+        if ((string) ($order['status'] ?? '') !== 'pending_payment') {
+            throw new RuntimeException('只有待支付订单可以取消。');
+        }
+        $now = gmdate('Y-m-d H:i:s');
+        $this->pdo->beginTransaction();
+        try {
+            $this->releaseReservedInventory((int) $order['product_id'], isset($order['variant_id']) ? (int) $order['variant_id'] : null, $orderId, (int) $order['quantity'], $note !== '' ? $note : 'cancelled by admin');
+            $this->pdo->prepare("UPDATE commerce_orders SET status = 'cancelled', fulfillment_status = 'not_required', updated_at = :updated_at WHERE id = :id")
+                ->execute([':id' => $orderId, ':updated_at' => $now]);
+            $this->pdo->commit();
+        } catch (\Throwable $exception) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $exception;
+        }
+    }
+
+    public function markOrderFulfilled(int $orderId): void
+    {
+        $order = $this->order($orderId);
+        if ($order === null) {
+            throw new RuntimeException('订单不存在。');
+        }
+        if ((string) ($order['status'] ?? '') === 'fulfilled') {
+            return;
+        }
+        if ((string) ($order['status'] ?? '') !== 'paid') {
+            throw new RuntimeException('只有已支付订单可以标记履约。');
+        }
+        $now = gmdate('Y-m-d H:i:s');
+        $this->pdo->prepare("UPDATE commerce_orders SET status = 'fulfilled', fulfillment_status = 'fulfilled', fulfilled_at = :fulfilled_at, updated_at = :updated_at WHERE id = :id")
+            ->execute([':id' => $orderId, ':fulfilled_at' => $now, ':updated_at' => $now]);
+    }
+
     /** @return list<array<string,mixed>> */
     public function orders(int $limit = 100): array
     {

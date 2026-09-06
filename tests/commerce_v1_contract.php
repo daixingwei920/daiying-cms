@@ -116,6 +116,13 @@ $repo->markOrderPaymentFailed((int) $failed['id'], 'provider rejected');
 $productAfterFailure = $repo->product($productId);
 $assert((int) ($productAfterFailure['reserved_quantity'] ?? 0) === 0, 'Failed payment releases reserved inventory.');
 
+$cancelled = $repo->createPendingOrder($productId, null, (int) $repo->activeActions($productId)[0]['id'], 1, 'fixture', 'commerce-test-cancelled', hash('sha256', 'cancelled'));
+$repo->cancelPendingOrder((int) $cancelled['id'], 'admin cancelled');
+$cancelledOrder = $repo->order((int) $cancelled['id']);
+$productAfterCancel = $repo->product($productId);
+$assert(($cancelledOrder['status'] ?? '') === 'cancelled', 'Pending order can be cancelled by admin.');
+$assert((int) ($productAfterCancel['reserved_quantity'] ?? 0) === 0, 'Cancelled pending order releases reserved inventory.');
+
 $paid = $repo->createPendingOrder($productId, null, (int) $repo->activeActions($productId)[0]['id'], 1, 'fixture', 'commerce-test-paid', hash('sha256', 'paid'));
 $repo->attachPayment((int) $paid['id'], 123);
 $repo->markOrderPaid((int) $paid['id']);
@@ -126,6 +133,10 @@ $assert(($paidOrder['status'] ?? '') === 'paid', 'Paid order status is persisted
 $assert((int) ($productAfterPaid['sold_quantity'] ?? 0) === 1, 'Paid order increments sold quantity.');
 $assert((int) ($productAfterPaid['available_quantity'] ?? 0) === 4, 'Paid order reduces available stock.');
 $assert(($paidOrder['snapshot']['product']['name'] ?? '') === '测试商品', 'Order keeps product snapshot.');
+$repo->markOrderFulfilled((int) $paid['id']);
+$fulfilledOrder = $repo->order((int) $paid['id']);
+$assert(($fulfilledOrder['status'] ?? '') === 'fulfilled', 'Paid order can be marked fulfilled.');
+$assert(($fulfilledOrder['fulfillment_status'] ?? '') === 'fulfilled', 'Fulfilled order updates fulfillment status.');
 
 $synced = $repo->createPendingOrder($productId, null, (int) $repo->activeActions($productId)[0]['id'], 1, 'fixture', 'commerce-test-sync', hash('sha256', 'sync'));
 $paymentRepo = new PaymentRepository($pdo);

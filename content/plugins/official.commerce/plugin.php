@@ -28,6 +28,8 @@ return static function (PluginContext $context): void {
     $context->adminRoute('GET', '/admin/commerce/orders', [$controller, 'adminOrders'], 'commerce.orders', false);
     $context->adminRoute('GET', '/admin/commerce/orders/show', [$controller, 'adminOrderShow'], 'commerce.orders', false);
     $context->adminRoute('POST', '/admin/commerce/orders/sync', [$controller, 'adminSyncOrders'], 'commerce.orders', true);
+    $context->adminRoute('POST', '/admin/commerce/orders/cancel', [$controller, 'adminCancelOrder'], 'commerce.orders', true);
+    $context->adminRoute('POST', '/admin/commerce/orders/fulfill', [$controller, 'adminFulfillOrder'], 'commerce.orders', true);
 
     $context->frontRoute('GET', '/commerce', [$controller, 'storefront'], null, false);
     $context->frontRoute('GET', '/commerce/product', [$controller, 'productPage'], null, false);
