@@ -254,11 +254,23 @@ $search = $provider->search('a', 'baidu://root');
 $provider->search('a', 'baidu://root');
 $assert($search['items'][0]->mimeType === 'audio/mpeg', 'Provider search maps mp3 MIME.');
 $assert(($transport->apiRequests['search'] ?? 0) === 1, 'Provider caches repeated searches briefly.');
-$resolved = $provider->resolveUrl(['id' => 9, 'metadata' => ['remote_id' => '1001']]);
+$resolved = $provider->resolveUrl([
+    'id' => 9,
+    'original_name' => 'a.mp3',
+    'mime_type' => 'audio/mpeg',
+    'byte_size' => 4096,
+    'metadata' => ['remote_id' => '1001'],
+]);
 $assert(str_starts_with($resolved['url'], '/baidu-storage/media/9?'), 'Provider resolves to controlled signed CMS media route.');
 $assert(!str_contains($resolved['url'], 'access_token'), 'Resolved browser URL must not contain Baidu access token.');
 parse_str((string) parse_url($resolved['url'], PHP_URL_QUERY), $resolvedQuery);
 $assert($provider->validateDownloadSignature(9, (string) ($resolvedQuery['remote_id'] ?? ''), (int) ($resolvedQuery['expires'] ?? 0), (string) ($resolvedQuery['sig'] ?? '')), 'Signed media proxy URL validates.');
+$assert(isset($resolvedQuery['meta'], $resolvedQuery['meta_sig']), 'Signed media proxy URL carries signed playback metadata.');
+$encodedMeta = strtr((string) $resolvedQuery['meta'], '-_', '+/');
+$decodedMeta = json_decode((string) base64_decode(str_pad($encodedMeta, strlen($encodedMeta) + (4 - strlen($encodedMeta) % 4) % 4, '='), true), true);
+$assert(is_array($decodedMeta) && ($decodedMeta['name'] ?? '') === 'a.mp3', 'Signed playback metadata carries the imported filename.');
+$assert(is_array($decodedMeta) && ($decodedMeta['mime'] ?? '') === 'audio/mpeg', 'Signed playback metadata carries the imported MIME type.');
+$assert(is_array($decodedMeta) && ($decodedMeta['size'] ?? 0) === 4096, 'Signed playback metadata carries the imported byte size.');
 
 $mediaLibrary = new MediaLibrary($pdo, sys_get_temp_dir() . '/daiying-baidu-media-test');
 $mediaId = $mediaLibrary->registerRemoteReference($list['items'][0], 1);

@@ -6,6 +6,7 @@ namespace Local\Storage\Baidu;
 
 use Cms\Core\Http\Request;
 use Cms\Core\Http\Response;
+use Cms\Core\Media\MediaProviderItem;
 use Cms\Core\Media\RemoteMediaProviderRegistry;
 use Cms\Core\Plugin\PluginContext;
 use Cms\Core\Security\CsrfToken;
@@ -194,7 +195,7 @@ final class BaiduStoragePlugin
         SessionManager::close();
 
         try {
-            $item = $this->provider->get($remoteId, '');
+            $item = $this->signedPlaybackItem($request, $mediaId, $remoteId, $expires) ?? $this->provider->get($remoteId, '');
             $rangeHeader = $this->rangeHeader($request);
             $range = $rangeHeader === false ? false : $this->parseRange($rangeHeader, max(0, $item->byteSize));
             $range = $this->boundedStreamRange($range, $rangeHeader === false ? '' : $rangeHeader, max(0, $item->byteSize), $item->mimeType);
@@ -253,6 +254,65 @@ final class BaiduStoragePlugin
         $mimeType = strtolower($mimeType);
 
         return str_starts_with($mimeType, 'audio/') || str_starts_with($mimeType, 'video/');
+    }
+
+    private function signedPlaybackItem(Request $request, int $mediaId, string $remoteId, int $expires): ?MediaProviderItem
+    {
+        $metadata = (string) ($request->query['meta'] ?? '');
+        $signature = (string) ($request->query['meta_sig'] ?? '');
+        if ($metadata === '' || $signature === '') {
+            return null;
+        }
+        if (!hash_equals($this->metadataSignature($mediaId, $remoteId, $expires, $metadata), $signature)) {
+            return null;
+        }
+        $encoded = strtr($metadata, '-_', '+/');
+        $json = base64_decode(str_pad($encoded, strlen($encoded) + (4 - strlen($encoded) % 4) % 4, '='), true);
+        if (!is_string($json) || $json === '') {
+            return null;
+        }
+        $payload = json_decode($json, true);
+        if (!is_array($payload)) {
+            return null;
+        }
+
+        $name = trim((string) ($payload['name'] ?? ''));
+        $mimeType = trim((string) ($payload['mime'] ?? ''));
+        $byteSize = max(0, (int) ($payload['size'] ?? 0));
+        if ($name === '' || $mimeType === '' || $byteSize <= 0) {
+            return null;
+        }
+
+        return new MediaProviderItem(
+            $this->provider->id(),
+            $remoteId,
+            'baidu://' . $remoteId,
+            $name,
+            $this->mediaTypeFromMime($mimeType),
+            $mimeType,
+            $byteSize,
+        );
+    }
+
+    private function metadataSignature(int $mediaId, string $remoteId, int $expires, string $metadata): string
+    {
+        return hash_hmac('sha256', $mediaId . ':' . $remoteId . ':' . $expires . ':' . $metadata, $this->downloadSecret());
+    }
+
+    private function mediaTypeFromMime(string $mimeType): string
+    {
+        $mimeType = strtolower($mimeType);
+        if (str_starts_with($mimeType, 'image/')) {
+            return 'image';
+        }
+        if (str_starts_with($mimeType, 'audio/')) {
+            return 'audio';
+        }
+        if (str_starts_with($mimeType, 'video/')) {
+            return 'video';
+        }
+
+        return 'attachment';
     }
 
     /** @param array{0:int,1:int}|false|null $range @return array{0:int,1:int}|false|null */

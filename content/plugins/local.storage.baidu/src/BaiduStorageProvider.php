@@ -99,11 +99,14 @@ final class BaiduStorageProvider implements RemoteMediaProviderInterface
             throw new \RuntimeException('百度网盘媒体引用无效。');
         }
         $expires = time() + 300;
+        $metadata = $this->signedPlaybackMetadata($media);
         $sig = $this->downloadSignature($mediaId, $remoteId, $expires);
         return [
             'url' => '/baidu-storage/media/' . $mediaId . '?' . http_build_query([
                 'remote_id' => $remoteId,
                 'expires' => $expires,
+                'meta' => $metadata,
+                'meta_sig' => $this->metadataSignature($mediaId, $remoteId, $expires, $metadata),
                 'sig' => $sig,
             ]),
             'expires' => gmdate('c', $expires),
@@ -193,6 +196,24 @@ final class BaiduStorageProvider implements RemoteMediaProviderInterface
     private function downloadSignature(int $mediaId, string $remoteId, int $expires): string
     {
         return hash_hmac('sha256', $mediaId . ':' . $remoteId . ':' . $expires, $this->downloadSecret);
+    }
+
+    /** @param array<string,mixed> $media */
+    private function signedPlaybackMetadata(array $media): string
+    {
+        $payload = [
+            'name' => (string) ($media['original_name'] ?? ''),
+            'mime' => (string) ($media['mime_type'] ?? ''),
+            'size' => max(0, (int) ($media['byte_size'] ?? 0)),
+        ];
+        $json = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}';
+
+        return rtrim(strtr(base64_encode($json), '+/', '-_'), '=');
+    }
+
+    private function metadataSignature(int $mediaId, string $remoteId, int $expires, string $metadata): string
+    {
+        return hash_hmac('sha256', $mediaId . ':' . $remoteId . ':' . $expires . ':' . $metadata, $this->downloadSecret);
     }
 
     /** @return array<string,mixed>|null */
