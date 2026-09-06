@@ -157,6 +157,17 @@ final class CommerceController
         }
     }
 
+    public function adminSaveLogistics(Request $request): Response
+    {
+        $orderId = (int) ($request->body['order_id'] ?? 0);
+        try {
+            $this->repo->appendLogisticsEvent($request->body);
+            return Response::redirect('/admin/commerce/orders/show?id=' . $orderId . '&logistics_saved=1');
+        } catch (Throwable $exception) {
+            return $this->error('物流记录保存失败', $exception, '/admin/commerce/orders/show?id=' . $orderId);
+        }
+    }
+
     public function adminOrders(Request $request): Response
     {
         $autoSync = $this->repo->markTrustedPaidOrders(new PaymentRepository($this->pdo), 50);
@@ -229,6 +240,7 @@ final class CommerceController
             '<p><strong>金额：</strong>' . $this->money((int) $order['amount_minor'], (string) $order['currency']) . '</p>' .
             '<p><strong>支付：</strong>' . $this->e((string) ($order['provider_id'] ?? '')) . ' #' . $this->e((string) ($order['payment_id'] ?? '')) . '</p>' .
             ($actions !== '' ? '<p>' . $actions . '</p>' : '') .
+            $this->adminLogisticsPanel($order) .
             '<h2>订单快照</h2><pre style="white-space:pre-wrap;background:#f8fafc;border:1px solid #d8dee8;border-radius:6px;padding:12px">' . $this->e(json_encode($snapshot, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}') . '</pre>' .
             '<p><a class="button admin-button-secondary" href="/admin/commerce/orders">返回订单</a></p>';
 
@@ -392,9 +404,44 @@ final class CommerceController
             return Response::html($this->frontPage('订单待确认', '<h1>订单待确认</h1><p>支付状态暂未完成，请稍后刷新。</p><p class="commerce-muted">' . $this->e($exception->getMessage()) . '</p>'));
         }
         $paid = in_array((string) ($order['status'] ?? ''), ['paid', 'fulfilled'], true);
-        $body = '<h1>' . ($paid ? '支付成功' : '订单待支付') . '</h1><p>订单号：<strong>' . $this->e((string) $order['order_number']) . '</strong></p><p>金额：' . $this->money((int) $order['amount_minor'], (string) $order['currency']) . '</p><p>状态：' . $this->e((string) $order['status']) . '</p><p><a href="/commerce">返回商品列表</a></p>';
+        $body = '<h1>' . ($paid ? '支付成功' : '订单待支付') . '</h1><p>订单号：<strong>' . $this->e((string) $order['order_number']) . '</strong></p><p>金额：' . $this->money((int) $order['amount_minor'], (string) $order['currency']) . '</p><p>状态：' . $this->e((string) $order['status']) . '</p>' . $this->orderLogisticsHtml($order) . '<p><a href="/commerce">返回商品列表</a></p>';
 
         return Response::html($this->frontPage('订单结果', $body));
+    }
+
+    /** @param array<string,mixed> $order */
+    private function adminLogisticsPanel(array $order): string
+    {
+        if ((int) ($order['shipping_required'] ?? 0) !== 1) {
+            return '';
+        }
+        $orderId = (int) ($order['id'] ?? 0);
+        $rows = '';
+        foreach ($this->repo->logisticsEvents($orderId) as $event) {
+            $rows .= '<tr><td>' . $this->e((string) $event['occurred_at']) . '</td><td>' . $this->e($this->logisticsLabel((string) $event['status'])) . '</td><td>' . $this->e((string) ($event['carrier'] ?? '')) . '</td><td><code>' . $this->e((string) ($event['tracking_number'] ?? '')) . '</code></td><td>' . $this->e((string) ($event['provider'] ?? 'manual')) . '</td><td>' . $this->e((string) ($event['message'] ?? '')) . '</td></tr>';
+        }
+        if ($rows === '') {
+            $rows = '<tr><td colspan="6" class="muted">暂无物流记录。</td></tr>';
+        }
+
+        return '<h2>物流</h2><table><tr><th>时间</th><th>状态</th><th>快递公司</th><th>运单号</th><th>Provider</th><th>说明</th></tr>' . $rows . '</table>' .
+            '<form method="post" action="/admin/commerce/logistics/save">' . CsrfToken::field() .
+            '<input type="hidden" name="order_id" value="' . $orderId . '">' .
+            '<label>物流状态<select name="status">' . $this->options([
+                'pending_shipment' => '待发货',
+                'picked_up' => '已揽收',
+                'in_transit' => '运输中',
+                'out_for_delivery' => '派送中',
+                'delivered' => '已送达',
+                'exception' => '异常',
+            ], 'pending_shipment') . '</select></label>' .
+            '<label>快递公司<input name="carrier" placeholder="如 SF Express / UPS"></label>' .
+            '<label>运单号<input name="tracking_number"></label>' .
+            '<label>原始状态<input name="raw_status" placeholder="Provider 原始状态"></label>' .
+            '<label>发生时间<input name="occurred_at" placeholder="留空使用当前时间"></label>' .
+            '<label>说明<input name="message" placeholder="例如已交由快递揽收"></label>' .
+            '<label>原始数据（每行 名称: 值）<textarea name="raw_payload" rows="3"></textarea></label>' .
+            '<button type="submit">追加物流记录</button></form>';
     }
 
     private function adminProductChildren(int $productId): string
@@ -526,6 +573,25 @@ final class CommerceController
         return '<section class="commerce-section"><h2>来源与真实性</h2><p><strong>' . $this->e($this->verificationLabel((string) $latest['status'])) . '</strong></p>' . $sourceLink . '<table class="commerce-specs"><tr><th>时间</th><th>结果</th><th>说明</th></tr>' . $rows . '</table></section>';
     }
 
+    /** @param array<string,mixed> $order */
+    private function orderLogisticsHtml(array $order): string
+    {
+        if ((int) ($order['shipping_required'] ?? 0) !== 1) {
+            return '';
+        }
+        $events = $this->repo->logisticsEvents((int) ($order['id'] ?? 0), 5);
+        if ($events === []) {
+            return '<section class="commerce-section"><h2>物流</h2><p class="commerce-muted">商家暂未填写物流信息。</p></section>';
+        }
+        $latest = $events[0];
+        $rows = '';
+        foreach ($events as $event) {
+            $rows .= '<tr><td>' . $this->e((string) $event['occurred_at']) . '</td><td>' . $this->e($this->logisticsLabel((string) $event['status'])) . '</td><td>' . $this->e((string) ($event['message'] ?? '')) . '</td></tr>';
+        }
+
+        return '<section class="commerce-section"><h2>物流</h2><p><strong>' . $this->e($this->logisticsLabel((string) $latest['status'])) . '</strong></p><p>' . $this->e(trim((string) ($latest['carrier'] ?? '') . ' ' . (string) ($latest['tracking_number'] ?? '')) ?: '暂无运单号') . '</p><table class="commerce-specs"><tr><th>时间</th><th>状态</th><th>说明</th></tr>' . $rows . '</table></section>';
+    }
+
     /** @param list<array<string,mixed>> $blocks @return array<int,array<string,mixed>> */
     private function mediaViewModels(array $blocks): array
     {
@@ -638,6 +704,18 @@ final class CommerceController
             'failed' => '来源暂无法核验',
             'pending' => '等待核验',
             default => '未提供来源核验',
+        };
+    }
+
+    private function logisticsLabel(string $status): string
+    {
+        return match ($status) {
+            'picked_up' => '已揽收',
+            'in_transit' => '运输中',
+            'out_for_delivery' => '派送中',
+            'delivered' => '已送达',
+            'exception' => '异常',
+            default => '待发货',
         };
     }
 

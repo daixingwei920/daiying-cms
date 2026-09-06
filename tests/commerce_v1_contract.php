@@ -28,14 +28,18 @@ $assert(($official['official.commerce']['table_prefixes'] ?? []) === ['commerce_
 $assert(!in_array('payment.create', $parsed->capabilities, true), 'Commerce uses Core PaymentService without claiming a foreign payment capability namespace.');
 $assert(!in_array('network.external', $parsed->capabilities, true), 'Commerce core does not need external network access in V1 phase 1.');
 $assert(in_array('commerce.verify.write', $parsed->capabilities, true), 'Commerce declares a dedicated verification write capability for future permission splits.');
+$assert(in_array('commerce.logistics.write', $parsed->capabilities, true), 'Commerce declares a dedicated logistics write capability for future provider integrations.');
 
-$migration = require $root . '/content/plugins/official.commerce/migrations/001_commerce_core.php';
-$assert(in_array('table:commerce_orders', $migration['affected_objects'] ?? [], true), 'Migration declares the commerce order table.');
+$coreMigration = require $root . '/content/plugins/official.commerce/migrations/001_commerce_core.php';
+$assert(in_array('table:commerce_orders', $coreMigration['affected_objects'] ?? [], true), 'Migration declares the commerce order table.');
+$logisticsMigration = require $root . '/content/plugins/official.commerce/migrations/002_logistics_events.php';
+$assert(in_array('table:commerce_logistics_events', $logisticsMigration['affected_objects'] ?? [], true), 'Logistics migration declares the logistics fact table.');
 
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-($migration['up'])($pdo);
+($coreMigration['up'])($pdo);
+($logisticsMigration['up'])($pdo);
 $pdo->exec('CREATE TABLE cms_payments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_type VARCHAR(96) NOT NULL,
@@ -168,6 +172,53 @@ $repo->markOrderFulfilled((int) $paid['id']);
 $fulfilledOrder = $repo->order((int) $paid['id']);
 $assert(($fulfilledOrder['status'] ?? '') === 'fulfilled', 'Paid order can be marked fulfilled.');
 $assert(($fulfilledOrder['fulfillment_status'] ?? '') === 'fulfilled', 'Fulfilled order updates fulfillment status.');
+
+$shippingProductId = $repo->saveProduct([
+    'name' => '实体商品',
+    'sku' => 'SHIP-001',
+    'status' => 'active',
+    'price_minor' => 9900,
+    'currency' => 'CNY',
+    'stock_quantity' => 3,
+    'requires_shipping' => '1',
+]);
+$repo->saveAction(['product_id' => $shippingProductId, 'action_type' => 'site_checkout', 'label' => '购买实体商品', 'fulfillment_mode' => 'shipping']);
+$shippingOrder = $repo->createPendingOrder($shippingProductId, null, (int) $repo->activeActions($shippingProductId)[0]['id'], 1, 'fixture', 'commerce-test-shipping', hash('sha256', 'shipping'));
+$repo->markOrderPaid((int) $shippingOrder['id']);
+$repo->appendLogisticsEvent([
+    'order_id' => (int) $shippingOrder['id'],
+    'status' => 'in_transit',
+    'carrier' => 'SF Express',
+    'tracking_number' => 'SF123456',
+    'provider' => 'manual',
+    'raw_status' => 'transit',
+    'raw_payload' => "node: Shanghai\nsource: operator",
+    'message' => '包裹运输中',
+    'occurred_at' => '2026-09-06 12:00:00',
+]);
+$logisticsEvents = $repo->logisticsEvents((int) $shippingOrder['id']);
+$shippingInTransit = $repo->order((int) $shippingOrder['id']);
+$assert(($shippingInTransit['fulfillment_status'] ?? '') === 'in_transit', 'Shipping order records the latest logistics status.');
+$assert(($logisticsEvents[0]['raw_payload']['node'] ?? '') === 'Shanghai', 'Logistics raw provider facts are stored as structured append-only data.');
+$repo->appendLogisticsEvent([
+    'order_id' => (int) $shippingOrder['id'],
+    'status' => 'delivered',
+    'carrier' => 'SF Express',
+    'tracking_number' => 'SF123456',
+    'message' => '已签收',
+    'occurred_at' => '2026-09-07 09:30:00',
+]);
+$shippingDelivered = $repo->order((int) $shippingOrder['id']);
+$assert(($shippingDelivered['status'] ?? '') === 'fulfilled', 'Delivered logistics status fulfills the shipping order.');
+$assert(($shippingDelivered['fulfillment_status'] ?? '') === 'delivered', 'Delivered logistics status is kept as an explicit fulfillment fact.');
+
+$blockedNonShipping = false;
+try {
+    $repo->appendLogisticsEvent(['order_id' => (int) $paid['id'], 'status' => 'picked_up']);
+} catch (RuntimeException) {
+    $blockedNonShipping = true;
+}
+$assert($blockedNonShipping, 'Non-shipping orders reject logistics facts.');
 
 $synced = $repo->createPendingOrder($productId, null, (int) $repo->activeActions($productId)[0]['id'], 1, 'fixture', 'commerce-test-sync', hash('sha256', 'sync'));
 $paymentRepo = new PaymentRepository($pdo);

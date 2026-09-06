@@ -15,6 +15,7 @@ final class CommerceRepository
     private const PRODUCT_STATUSES = ['draft', 'active', 'archived'];
     private const ACTION_TYPES = ['site_checkout', 'external_url', 'contact', 'digital_delivery'];
     private const ORDER_STATUSES = ['pending_payment', 'paid', 'fulfilled', 'cancelled', 'payment_failed'];
+    private const LOGISTICS_STATUSES = ['pending_shipment', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'exception'];
     private const CHANGE_FIELDS = [
         'name',
         'sku',
@@ -594,6 +595,72 @@ final class CommerceRepository
         return array_map(fn (array $row): array => $this->hydrateJsonFields($row, ['checked_facts_json', 'raw_evidence_json']), $stmt->fetchAll());
     }
 
+    /** @param array<string,mixed> $input */
+    public function appendLogisticsEvent(array $input): int
+    {
+        $orderId = (int) ($input['order_id'] ?? 0);
+        $order = $this->order($orderId);
+        if ($order === null) {
+            throw new RuntimeException('订单不存在。');
+        }
+        if ((int) ($order['shipping_required'] ?? 0) !== 1) {
+            throw new RuntimeException('这个订单不需要物流。');
+        }
+        if (!in_array((string) ($order['status'] ?? ''), ['paid', 'fulfilled'], true)) {
+            throw new RuntimeException('只有已支付订单可以记录物流。');
+        }
+        $status = $this->status((string) ($input['status'] ?? 'pending_shipment'), self::LOGISTICS_STATUSES, 'pending_shipment');
+        $carrier = $this->nullableText((string) ($input['carrier'] ?? ''), 96);
+        $tracking = $this->nullableText((string) ($input['tracking_number'] ?? ''), 128);
+        $provider = $this->cleanCode((string) ($input['provider'] ?? 'manual')) ?: 'manual';
+        $rawStatus = $this->nullableText((string) ($input['raw_status'] ?? ''), 191);
+        $message = $this->nullableText((string) ($input['message'] ?? ''), 500);
+        $rawPayload = $this->keyValueLines((string) ($input['raw_payload'] ?? ''));
+        $occurredAt = $this->normalizeDateTime((string) ($input['occurred_at'] ?? ''));
+        $now = gmdate('Y-m-d H:i:s');
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO commerce_logistics_events (order_id, status, carrier, tracking_number, provider, raw_status, raw_payload_json, message, occurred_at, created_at)
+             VALUES (:order_id, :status, :carrier, :tracking_number, :provider, :raw_status, :raw_payload_json, :message, :occurred_at, :created_at)'
+        );
+        $stmt->execute([
+            ':order_id' => $orderId,
+            ':status' => $status,
+            ':carrier' => $carrier,
+            ':tracking_number' => $tracking,
+            ':provider' => $provider,
+            ':raw_status' => $rawStatus,
+            ':raw_payload_json' => $this->json($rawPayload),
+            ':message' => $message,
+            ':occurred_at' => $occurredAt,
+            ':created_at' => $now,
+        ]);
+        $updates = [
+            ':id' => $orderId,
+            ':fulfillment_status' => $status,
+            ':updated_at' => $now,
+        ];
+        $sql = 'UPDATE commerce_orders SET fulfillment_status = :fulfillment_status, updated_at = :updated_at';
+        if ($status === 'delivered' && (string) ($order['status'] ?? '') === 'paid') {
+            $sql .= ", status = 'fulfilled', fulfilled_at = :fulfilled_at";
+            $updates[':fulfilled_at'] = $occurredAt;
+        }
+        $sql .= ' WHERE id = :id';
+        $this->pdo->prepare($sql)->execute($updates);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function logisticsEvents(int $orderId, int $limit = 20): array
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM commerce_logistics_events WHERE order_id = :order_id ORDER BY occurred_at DESC, id DESC LIMIT :limit');
+        $stmt->bindValue(':order_id', $orderId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', max(1, min($limit, 100)), PDO::PARAM_INT);
+        $stmt->execute();
+
+        return array_map(fn (array $row): array => $this->hydrateJsonFields($row, ['raw_payload_json']), $stmt->fetchAll());
+    }
+
     public function recordEvent(?int $productId, ?int $orderId, string $eventType, array $metadata = []): void
     {
         $stmt = $this->pdo->prepare('INSERT INTO commerce_conversion_events (product_id, order_id, event_type, provider, metadata_json, created_at) VALUES (:product_id, :order_id, :event_type, :provider, :metadata_json, :created_at)');
@@ -847,6 +914,20 @@ final class CommerceRepository
             throw new InvalidArgumentException('URL 必须是 http/https 地址。');
         }
         return substr($value, 0, 1024);
+    }
+
+    private function normalizeDateTime(string $value): string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return gmdate('Y-m-d H:i:s');
+        }
+        $timestamp = strtotime($value);
+        if ($timestamp === false) {
+            throw new InvalidArgumentException('时间格式无效。');
+        }
+
+        return gmdate('Y-m-d H:i:s', $timestamp);
     }
 
     private function nullableInt(mixed $value): ?int

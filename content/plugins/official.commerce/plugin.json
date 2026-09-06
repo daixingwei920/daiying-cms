@@ -1,7 +1,7 @@
 {
   "plugin_id": "official.commerce",
   "name": "Daiying Commerce",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "author": "Daiying CMS",
   "type": "plugin",
   "package_type": "plugin",
@@ -19,7 +19,9 @@
     "commerce.sell",
     "commerce.orders",
     "commerce.verify.read",
-    "commerce.verify.write"
+    "commerce.verify.write",
+    "commerce.logistics.read",
+    "commerce.logistics.write"
   ],
   "capability_namespaces": ["commerce"],
   "public_routes": [
@@ -33,11 +35,11 @@
   ],
   "dependencies": [],
   "required_plugins": [],
-  "migrations": ["migrations/001_commerce_core.php"],
+  "migrations": ["migrations/001_commerce_core.php", "migrations/002_logistics_events.php"],
   "table_prefixes": ["commerce_"],
   "data_policy": {
     "uninstall": "retain_orders_and_facts",
     "purge": "separate_confirmation_only"
   },
-  "data_schema_version": "0.1.0-alpha.1"
+  "data_schema_version": "0.1.0-alpha.2"
 }

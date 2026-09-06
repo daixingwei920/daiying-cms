@@ -2,11 +2,22 @@
 
 declare(strict_types=1);
 
-$migration = static function (PDO $pdo): void {
+$up = static function (PDO $pdo): void {
     $driver = (string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
     $id = $driver === 'sqlite' ? 'INTEGER PRIMARY KEY AUTOINCREMENT' : 'BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY';
     $text = $driver === 'sqlite' ? 'TEXT' : 'LONGTEXT';
     $json = $driver === 'sqlite' ? 'TEXT' : 'JSON';
+    $createIndex = static function (PDO $pdo, string $table, string $index, string $columns) use ($driver): void {
+        if ($driver === 'sqlite') {
+            $pdo->exec('CREATE INDEX IF NOT EXISTS ' . $index . ' ON ' . $table . $columns);
+            return;
+        }
+        $stmt = $pdo->query('SHOW INDEX FROM ' . $table . ' WHERE Key_name = ' . $pdo->quote($index));
+        if ($stmt !== false && $stmt->fetch() !== false) {
+            return;
+        }
+        $pdo->exec('CREATE INDEX ' . $index . ' ON ' . $table . $columns);
+    };
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS commerce_products (
         id $id,
@@ -37,8 +48,8 @@ $migration = static function (PDO $pdo): void {
         created_at DATETIME NOT NULL,
         updated_at DATETIME NOT NULL
     )");
-    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_commerce_products_status ON commerce_products(status, updated_at)');
-    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_commerce_products_currency ON commerce_products(currency, price_minor)');
+    $createIndex($pdo, 'commerce_products', 'idx_commerce_products_status', '(status, updated_at)');
+    $createIndex($pdo, 'commerce_products', 'idx_commerce_products_currency', '(currency, price_minor)');
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS commerce_variants (
         id $id,
@@ -56,7 +67,7 @@ $migration = static function (PDO $pdo): void {
         updated_at DATETIME NOT NULL,
         UNIQUE(product_id, sku)
     )");
-    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_commerce_variants_product ON commerce_variants(product_id, status, sort_order)');
+    $createIndex($pdo, 'commerce_variants', 'idx_commerce_variants_product', '(product_id, status, sort_order)');
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS commerce_actions (
         id $id,
@@ -72,7 +83,7 @@ $migration = static function (PDO $pdo): void {
         created_at DATETIME NOT NULL,
         updated_at DATETIME NOT NULL
     )");
-    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_commerce_actions_product ON commerce_actions(product_id, status, sort_order)');
+    $createIndex($pdo, 'commerce_actions', 'idx_commerce_actions_product', '(product_id, status, sort_order)');
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS commerce_orders (
         id $id,
@@ -101,8 +112,8 @@ $migration = static function (PDO $pdo): void {
         fulfilled_at DATETIME NULL,
         cancelled_at DATETIME NULL
     )");
-    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_commerce_orders_status ON commerce_orders(status, updated_at)');
-    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_commerce_orders_product ON commerce_orders(product_id, created_at)');
+    $createIndex($pdo, 'commerce_orders', 'idx_commerce_orders_status', '(status, updated_at)');
+    $createIndex($pdo, 'commerce_orders', 'idx_commerce_orders_product', '(product_id, created_at)');
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS commerce_order_items (
         id $id,
@@ -118,7 +129,7 @@ $migration = static function (PDO $pdo): void {
         snapshot_json $json NOT NULL,
         created_at DATETIME NOT NULL
     )");
-    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_commerce_order_items_order ON commerce_order_items(order_id)');
+    $createIndex($pdo, 'commerce_order_items', 'idx_commerce_order_items_order', '(order_id)');
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS commerce_inventory_movements (
         id $id,
@@ -132,7 +143,7 @@ $migration = static function (PDO $pdo): void {
         note VARCHAR(500) NULL,
         created_at DATETIME NOT NULL
     )");
-    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_commerce_inventory_product ON commerce_inventory_movements(product_id, created_at)');
+    $createIndex($pdo, 'commerce_inventory_movements', 'idx_commerce_inventory_product', '(product_id, created_at)');
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS commerce_product_changes (
         id $id,
@@ -144,7 +155,7 @@ $migration = static function (PDO $pdo): void {
         reason VARCHAR(191) NULL,
         created_at DATETIME NOT NULL
     )");
-    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_commerce_changes_product ON commerce_product_changes(product_id, created_at)');
+    $createIndex($pdo, 'commerce_product_changes', 'idx_commerce_changes_product', '(product_id, created_at)');
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS commerce_verification_records (
         id $id,
@@ -157,7 +168,7 @@ $migration = static function (PDO $pdo): void {
         provider VARCHAR(64) NOT NULL DEFAULT 'manual',
         created_at DATETIME NOT NULL
     )");
-    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_commerce_verification_product ON commerce_verification_records(product_id, created_at)');
+    $createIndex($pdo, 'commerce_verification_records', 'idx_commerce_verification_product', '(product_id, created_at)');
 
     $pdo->exec("CREATE TABLE IF NOT EXISTS commerce_conversion_events (
         id $id,
@@ -170,7 +181,7 @@ $migration = static function (PDO $pdo): void {
         user_agent_hash VARCHAR(64) NULL,
         created_at DATETIME NOT NULL
     )");
-    $pdo->exec('CREATE INDEX IF NOT EXISTS idx_commerce_events_product ON commerce_conversion_events(product_id, event_type, created_at)');
+    $createIndex($pdo, 'commerce_conversion_events', 'idx_commerce_events_product', '(product_id, event_type, created_at)');
 };
 
 $rollback = static function (PDO $pdo): void {
@@ -202,6 +213,6 @@ return [
         'table:commerce_verification_records',
         'table:commerce_conversion_events',
     ],
-    'up' => $migration,
+    'up' => $up,
     'down' => $rollback,
 ];
