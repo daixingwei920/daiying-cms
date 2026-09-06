@@ -69,6 +69,18 @@ interface CommerceLogisticsProviderInterface
     public function pullEvents(array $orderSnapshot, array $context = []): array;
 }
 
+interface CommerceVerificationProviderInterface
+{
+    public function providerId(): string;
+
+    /**
+     * @param array<string,mixed> $product
+     * @param array<string,mixed> $context
+     * @return array{status:string,source_url?:string,checked_facts?:array<string,mixed>,raw_evidence?:array<string,mixed>,failure_reason?:string,provider?:string,record_type?:string}
+     */
+    public function verifySource(array $product, array $context = []): array;
+}
+
 final class CommerceProviderIsolation
 {
     /**

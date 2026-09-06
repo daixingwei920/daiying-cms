@@ -164,6 +164,46 @@ final class CommerceController
         }
     }
 
+    public function adminRunUrlVerification(Request $request): Response
+    {
+        $productId = (int) ($request->body['product_id'] ?? 0);
+        try {
+            $product = $this->repo->product($productId);
+            if ($product === null) {
+                throw new \RuntimeException('商品不存在。');
+            }
+            $provider = new GenericUrlVerificationProvider();
+            $captured = CommerceProviderIsolation::capture($provider->providerId(), 'verify_source', fn (): array => $provider->verifySource($product));
+            $record = ($captured['ok'] ?? false) === true && is_array($captured['result'] ?? null)
+                ? $captured['result']
+                : [
+                    'product_id' => $productId,
+                    'status' => 'failed',
+                    'source_url' => (string) ($product['source_url'] ?? ''),
+                    'checked_facts' => [
+                        'URL可访问性' => '核验失败',
+                        '品牌' => '未核验',
+                        '型号' => '未核验',
+                        '价格' => '未核验',
+                        '来源' => (string) ($product['source_url'] ?? ''),
+                    ],
+                    'raw_evidence' => [
+                        'error_class' => (string) ($captured['error_class'] ?? ''),
+                        'operation' => (string) ($captured['operation'] ?? 'verify_source'),
+                    ],
+                    'failure_reason' => 'URL 核验 Provider 暂不可用：' . (string) ($captured['error'] ?? 'unknown error'),
+                    'provider' => $provider->providerId(),
+                    'record_type' => 'provider_result',
+                ];
+            $record['product_id'] = $productId;
+            $this->repo->appendVerificationRecord($record, $this->adminId($request));
+
+            return Response::redirect('/admin/commerce/products/edit?id=' . $productId . '&url_verified=1');
+        } catch (Throwable $exception) {
+            return $this->error('URL 基础核验失败', $exception, '/admin/commerce/products/edit?id=' . $productId);
+        }
+    }
+
     public function adminSaveLogistics(Request $request): Response
     {
         $orderId = (int) ($request->body['order_id'] ?? 0);
@@ -497,6 +537,10 @@ final class CommerceController
         }
 
         return '<hr><h2>来源核验</h2><table><tr><th>时间</th><th>类型</th><th>状态</th><th>Provider</th><th>来源</th><th>事实/请求</th><th>说明</th></tr>' . $rows . '</table>' .
+            '<form method="post" action="/admin/commerce/verification/run-url">' . CsrfToken::field() .
+            '<input type="hidden" name="product_id" value="' . $productId . '">' .
+            '<p class="muted">通用 URL Provider 只核验来源页面可访问性和可可靠读取的页面事实，不判断正品。</p>' .
+            '<button type="submit">执行 URL 基础核验</button></form>' .
             '<form method="post" action="/admin/commerce/verification/save">' . CsrfToken::field() .
             '<input type="hidden" name="product_id" value="' . $productId . '">' .
             '<p class="muted">卖家只能请求重新核验；核验结果由系统或受信 Provider 追加，主题和普通插件只读展示。</p>' .

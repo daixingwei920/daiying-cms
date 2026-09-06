@@ -601,11 +601,15 @@ final class CommerceRepository
         if ($recordType === 'provider_result' && in_array($provider, ['manual', 'seller', 'system'], true)) {
             throw new RuntimeException('卖家只能请求重新核验，不能直接修改核验结果。');
         }
-        $checkedFacts = $this->keyValueLines((string) ($input['checked_facts'] ?? ''));
+        $checkedFacts = is_array($input['checked_facts'] ?? null)
+            ? $this->cleanFactMap($input['checked_facts'])
+            : $this->keyValueLines((string) ($input['checked_facts'] ?? ''));
         if ($actorId !== null) {
             $checkedFacts['_actor_id'] = (string) $actorId;
         }
-        $rawEvidence = $this->keyValueLines((string) ($input['raw_evidence'] ?? ''));
+        $rawEvidence = is_array($input['raw_evidence'] ?? null)
+            ? $this->cleanFactMap($input['raw_evidence'])
+            : $this->keyValueLines((string) ($input['raw_evidence'] ?? ''));
         $failureReason = $this->nullableText((string) ($input['failure_reason'] ?? ''), 500);
         $id = $this->insertVerificationRecord($product, [
             'status' => $status,
@@ -1138,6 +1142,32 @@ final class CommerceRepository
                 $items[$key] = $this->cleanText((string) $val, 191);
             }
         }
+        return $items;
+    }
+
+    /** @param array<mixed> $facts @return array<string,mixed> */
+    private function cleanFactMap(array $facts): array
+    {
+        $items = [];
+        foreach ($facts as $key => $value) {
+            if (!is_string($key) && !is_int($key)) {
+                continue;
+            }
+            $name = $this->cleanText((string) $key, 96);
+            if ($name === '') {
+                continue;
+            }
+            if (is_array($value)) {
+                $items[$name] = $this->cleanFactMap($value);
+                continue;
+            }
+            if ($value === null || is_bool($value) || is_int($value) || is_float($value)) {
+                $items[$name] = $value;
+                continue;
+            }
+            $items[$name] = $this->cleanText((string) $value, 1000);
+        }
+
         return $items;
     }
 

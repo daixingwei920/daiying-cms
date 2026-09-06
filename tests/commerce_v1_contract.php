@@ -5,6 +5,7 @@ declare(strict_types=1);
 require __DIR__ . '/../system/core/Bootstrap/autoload.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceContracts.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceRepository.php';
+require __DIR__ . '/../content/plugins/official.commerce/src/GenericUrlVerificationProvider.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceController.php';
 
 use Cms\Core\Config\Settings;
@@ -14,9 +15,11 @@ use Cms\Core\Payment\PaymentRepository;
 use Daiying\Commerce\CommerceController;
 use Daiying\Commerce\CommerceAiModuleInterface;
 use Daiying\Commerce\CommerceDistributionInterface;
+use Daiying\Commerce\CommerceVerificationProviderInterface;
 use Daiying\Commerce\CommerceLogisticsProviderInterface;
 use Daiying\Commerce\CommerceProviderIsolation;
 use Daiying\Commerce\CommerceRepository;
+use Daiying\Commerce\GenericUrlVerificationProvider;
 
 $failures = 0;
 $assert = static function (bool $condition, string $message) use (&$failures): void {
@@ -35,12 +38,13 @@ $assert($parsed->id === 'official.commerce', 'Commerce uses the official.commerc
 $assert($parsed->trustLevel === 'trusted_php', 'Commerce is a trusted official plugin because it owns order tables.');
 $assert(($official['official.commerce']['table_prefixes'] ?? []) === ['commerce_'], 'Official registry grants only the commerce_ table prefix.');
 $assert(!in_array('payment.create', $parsed->capabilities, true), 'Commerce uses Core PaymentService without claiming a foreign payment capability namespace.');
-$assert(!in_array('network.external', $parsed->capabilities, true), 'Commerce core does not need external network access in V1 phase 1.');
+$assert(in_array('network.external', $parsed->capabilities, true), 'Commerce declares external network access for the generic URL verification provider.');
 $assert(in_array('commerce.verify.write', $parsed->capabilities, true), 'Commerce declares a dedicated verification write capability for future permission splits.');
 $assert(in_array('commerce.logistics.write', $parsed->capabilities, true), 'Commerce declares a dedicated logistics write capability for future provider integrations.');
 $assert(interface_exists(CommerceAiModuleInterface::class), 'Commerce exposes an optional AI module interface without making AI a hard dependency.');
 $assert(interface_exists(CommerceDistributionInterface::class), 'Commerce exposes a distribution provider interface for future channels.');
 $assert(interface_exists(CommerceLogisticsProviderInterface::class), 'Commerce exposes a logistics provider interface for future carrier plugins.');
+$assert(interface_exists(CommerceVerificationProviderInterface::class), 'Commerce exposes a source verification provider interface.');
 $isolated = CommerceProviderIsolation::capture('fixture', 'explode', static function (): void {
     throw new RuntimeException('provider unavailable');
 });
@@ -132,6 +136,45 @@ $assert(($product['transaction_region'] ?? '') === 'cross_border', 'Product keep
 $sourceRecords = $repo->verificationRecords($productId);
 $assert(($sourceRecords[0]['record_type'] ?? '') === 'source_declaration', 'Saving a product source creates an append-only source declaration record.');
 $assert(($sourceRecords[0]['checked_facts']['source_claim'] ?? '') === '官方授权渠道采购', 'Source declarations keep seller-provided source claims as facts.');
+
+$urlProvider = new GenericUrlVerificationProvider(static function (string $url): array {
+    return [
+        'requested_url' => $url,
+        'final_url' => 'https://store.example/items/1',
+        'http_status' => 200,
+        'content_type' => 'text/html; charset=utf-8',
+        'redirect_count' => 1,
+        'body' => '<!doctype html><html><head><title>测试商品 - 店铺</title><script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"测试商品","brand":{"@type":"Brand","name":"Daiying"},"model":"V1","offers":{"@type":"Offer","price":"360.00","priceCurrency":"CNY"},"additionalProperty":[{"@type":"PropertyValue","name":"颜色","value":"黑色"}]}</script></head><body>商品页面</body></html>',
+    ];
+});
+$urlResult = $urlProvider->verifySource($product);
+$assert(($urlResult['status'] ?? '') === 'pending', 'Generic URL verification records accessible page facts without claiming authenticity.');
+$assert(($urlResult['checked_facts']['URL可访问性'] ?? '') === '可访问', 'Generic URL provider records URL accessibility.');
+$assert(($urlResult['checked_facts']['最终跳转域名'] ?? '') === 'store.example', 'Generic URL provider records the final redirected host.');
+$assert(($urlResult['checked_facts']['品牌'] ?? '') === 'Daiying', 'Generic URL provider extracts reliable JSON-LD brand facts.');
+$assert(($urlResult['checked_facts']['型号'] ?? '') === 'V1', 'Generic URL provider extracts reliable JSON-LD model facts.');
+$assert(($urlResult['checked_facts']['价格'] ?? '') === '360.00', 'Generic URL provider extracts reliable JSON-LD price facts.');
+$urlRecordId = $repo->appendVerificationRecord($urlResult + ['product_id' => $productId], 99);
+$urlRecords = $repo->verificationRecords($productId);
+$assert($urlRecordId > 0 && ($urlRecords[0]['provider'] ?? '') === 'official.commerce.verifier.url', 'Generic URL provider appends immutable verification records.');
+$assert(($repo->product($productId)['verification_status'] ?? '') === 'pending', 'Generic URL provider does not turn URL existence into verified authenticity.');
+
+$missingFactsProvider = new GenericUrlVerificationProvider(static fn (string $url): array => [
+    'requested_url' => $url,
+    'final_url' => $url,
+    'http_status' => 200,
+    'content_type' => 'text/html',
+    'redirect_count' => 0,
+    'body' => '<html><head><title>只有标题</title></head><body>没有结构化商品事实</body></html>',
+]);
+$missingFacts = $missingFactsProvider->verifySource($product);
+$assert(($missingFacts['checked_facts']['品牌'] ?? '') === '未核验', 'Missing source facts remain explicitly unverified.');
+$assert(($missingFacts['checked_facts']['型号'] ?? '') === '未核验', 'Generic URL provider does not guess unavailable model facts.');
+
+$unsafeProvider = new GenericUrlVerificationProvider(static fn (string $url): array => ['final_url' => $url, 'http_status' => 200, 'body' => '']);
+$unsafeResult = $unsafeProvider->verifySource($product + ['source_url' => 'http://127.0.0.1/admin']);
+$assert(($unsafeResult['status'] ?? '') === 'failed', 'Generic URL provider blocks private-address source URLs.');
+$assert(($unsafeResult['checked_facts']['品牌'] ?? '') === '未核验', 'Blocked URLs do not produce guessed brand facts.');
 
 $sellerCannotVerify = false;
 try {
