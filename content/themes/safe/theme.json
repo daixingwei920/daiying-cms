@@ -1,0 +1,13 @@
+{
+  "theme_id": "safe",
+  "name": "Safe Recovery Theme",
+  "version": "1.0.0",
+  "author": "CMS Core Team",
+  "core": {
+    "min": "1.2.0-rc1",
+    "max": "1.x"
+  },
+  "content_types": ["article", "page"],
+  "recommended_plugins": [],
+  "settings_schema": {}
+}

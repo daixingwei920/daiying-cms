@@ -1,0 +1,1 @@
+<?php http_response_code(404); ?><!doctype html><meta charset="utf-8"><title>未找到</title><link rel="stylesheet" href="/content/themes/daiying-video/assets/style.css"><main class="band"><h1>未找到</h1></main>

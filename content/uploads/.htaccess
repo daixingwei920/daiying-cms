@@ -1,0 +1,6 @@
+Options -ExecCGI
+RemoveHandler .php .phtml .phar .cgi .pl .py .rb .sh .js .html .htm
+RemoveType .php .phtml .phar .cgi .pl .py .rb .sh .js .html .htm
+<FilesMatch "\.(php|phtml|phar|cgi|pl|py|rb|sh|js|html|htm)$">
+    Require all denied
+</FilesMatch>

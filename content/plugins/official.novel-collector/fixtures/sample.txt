@@ -1,0 +1,12 @@
+星河旧梦
+
+第一卷 星港
+
+第一章 启程
+这是第一章正文。为了让导入器可以稳定拆章，这里放入足够清晰的章节标题。
+
+第002章 风暴
+这是第二章正文。队列恢复和增量测试会使用这一章作为本地已有章节。
+
+Chapter 3 Arrival
+This is the third chapter body for UTF-8 export verification.
