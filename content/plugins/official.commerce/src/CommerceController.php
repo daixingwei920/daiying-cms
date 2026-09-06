@@ -324,13 +324,9 @@ final class CommerceController
         if ($actions === '') {
             $actions = '<p class="commerce-muted">当前商品暂无可用购买方式。</p>';
         }
-        $source = !empty($product['source_url']) ? '<p><strong>来源：</strong><a href="' . $this->e((string) $product['source_url']) . '" target="_blank" rel="noopener nofollow">查看原始来源</a></p>' : '<p><strong>来源：</strong>商家未提供来源链接。</p>';
-        $specs = $this->specsHtml(is_array($product['specs'] ?? null) ? $product['specs'] : []);
         $description = $this->descriptionHtml((int) ($product['description_content_id'] ?? 0));
-        $verification = $this->verificationHtml((int) $product['id']);
         $body = '<article class="commerce-product"><div>' . $image . '</div><div><h1>' . $this->e((string) $product['name']) . '</h1><p class="commerce-price">' . $this->money((int) $product['price_minor'], (string) $product['currency']) . '</p><p>' . $this->e((string) ($product['summary'] ?? '')) . '</p><p><strong>库存：</strong>' . (int) $product['available_quantity'] . '</p><p><strong>来源核验：</strong>' . $this->verificationLabel((string) $product['verification_status']) . '</p>' . $actions . '</div></article>' .
-            '<section class="commerce-section"><h2>透明信息</h2>' . $source . '<p><strong>交易区域：</strong>' . $this->e((string) ($product['region'] ?? 'CN')) . ' / ' . $this->e($this->transactionRegionLabel((string) ($product['transaction_region'] ?? 'cn_domestic'))) . '</p><p><strong>品牌/型号：</strong>' . $this->e(trim((string) ($product['brand'] ?? '') . ' ' . (string) ($product['model'] ?? '')) ?: '未提供') . '</p>' . $this->priceTransparencyHtml($product, 1) . $specs . '</section>' .
-            $verification .
+            $this->transparencyProfileHtml($product) .
             $description;
 
         return Response::html($this->frontPage((string) $product['name'], $body));
@@ -562,6 +558,45 @@ final class CommerceController
         }
     }
 
+    /** @param array<string,mixed> $product */
+    private function transparencyProfileHtml(array $product): string
+    {
+        $productId = (int) ($product['id'] ?? 0);
+        $records = $this->repo->verificationRecords($productId, 5);
+        $changes = $this->repo->productChanges($productId);
+        $latestResult = $this->latestProviderVerification($records);
+        $latest = $latestResult ?? ($records[0] ?? []);
+        $sourceUrl = (string) ($product['source_url'] ?? ($latest['source_url'] ?? ''));
+        $sourceClaim = trim((string) ($product['source_claim_text'] ?? ''));
+        $sourceLink = $sourceUrl !== '' ? '<a href="' . $this->e($sourceUrl) . '" target="_blank" rel="noopener nofollow">查看来源页面</a>' : '<span class="commerce-muted">未提供来源页面</span>';
+        $verifiedAt = is_array($latestResult) ? (string) ($latestResult['created_at'] ?? '') : '';
+        $provider = is_array($latestResult) ? (string) ($latestResult['provider'] ?? '') : '';
+        $summaryCards = '<div class="commerce-fact-grid">' .
+            $this->factCard('当前核验', $this->verificationLabel((string) ($product['verification_status'] ?? 'not_provided')), $verifiedAt !== '' ? '最近核验 ' . $verifiedAt : '等待系统或 Provider 核验') .
+            $this->factCard('来源声明', $sourceClaim !== '' ? $sourceClaim : '商家未填写来源声明', $sourceUrl !== '' ? $sourceUrl : '无来源链接') .
+            $this->factCard('交易信息', (string) ($product['region'] ?? 'CN') . ' / ' . $this->transactionRegionLabel((string) ($product['transaction_region'] ?? 'cn_domestic')), '支付处理方：' . $this->providerSummary((string) ($product['currency'] ?? 'CNY'))) .
+            '</div>';
+        $facts = is_array($latestResult['checked_facts'] ?? null) ? $latestResult['checked_facts'] : [];
+        unset($facts['_actor_id']);
+        $factRows = $this->verificationFactRows($facts, $product);
+        $changeRows = $this->publicChangeRows($changes);
+        $historyRows = $this->verificationHistoryRows($records);
+        $specs = $this->specsHtml(is_array($product['specs'] ?? null) ? $product['specs'] : []);
+
+        if ($records === []) {
+            $historyRows = '<tr><td colspan="4" class="commerce-muted">暂无核验历史。</td></tr>';
+        }
+
+        return '<section class="commerce-section commerce-profile"><h2>商品透明档案</h2>' . $summaryCards .
+            '<h3>来源</h3><p>' . $sourceLink . '</p><p><strong>商家声明：</strong>' . $this->e($sourceClaim !== '' ? $sourceClaim : '未提供') . '</p>' .
+            '<h3>核验结论</h3><p><strong>' . $this->e($this->verificationLabel((string) ($product['verification_status'] ?? 'not_provided'))) . '</strong>' . ($provider !== '' ? ' <span class="commerce-muted">由 ' . $this->e($provider) . ' 处理</span>' : '') . '</p><table class="commerce-specs"><tr><th>项目</th><th>商品信息</th><th>核验信息</th><th>状态</th></tr>' . $factRows . '</table>' .
+            $this->priceTransparencyHtml($product, 1) .
+            '<h3>商品关键修改历史</h3><table class="commerce-specs"><tr><th>时间</th><th>项目</th><th>变化</th></tr>' . $changeRows . '</table>' .
+            '<h3>核验历史</h3><table class="commerce-specs"><tr><th>时间</th><th>类型</th><th>结果</th><th>说明</th></tr>' . $historyRows . '</table>' .
+            ($specs !== '' ? '<h3>商品规格</h3>' . $specs : '') .
+            '</section>';
+    }
+
     private function verificationHtml(int $productId): string
     {
         $records = $this->repo->verificationRecords($productId, 5);
@@ -577,6 +612,132 @@ final class CommerceController
         $sourceLink = $source !== '' ? '<p><a href="' . $this->e($source) . '" target="_blank" rel="noopener nofollow">查看原始来源</a></p>' : '';
 
         return '<section class="commerce-section"><h2>来源与真实性</h2><p><strong>' . $this->e($this->verificationLabel((string) $latest['status'])) . '</strong></p>' . $sourceLink . '<table class="commerce-specs"><tr><th>时间</th><th>类型</th><th>结果</th><th>说明</th></tr>' . $rows . '</table></section>';
+    }
+
+    /** @param list<array<string,mixed>> $records @return array<string,mixed>|null */
+    private function latestProviderVerification(array $records): ?array
+    {
+        foreach ($records as $record) {
+            if ((string) ($record['record_type'] ?? 'provider_result') === 'provider_result') {
+                return $record;
+            }
+        }
+
+        return null;
+    }
+
+    /** @param array<string,mixed> $facts @param array<string,mixed> $product */
+    private function verificationFactRows(array $facts, array $product): string
+    {
+        $labels = [
+            '品牌' => 'brand',
+            '型号' => 'model',
+            '价格' => 'price_minor',
+            '来源' => 'source_url',
+        ];
+        $rows = '';
+        foreach ($labels as $label => $field) {
+            $productValue = $field === 'price_minor'
+                ? strip_tags($this->money((int) ($product[$field] ?? 0), (string) ($product['currency'] ?? 'CNY')))
+                : (string) ($product[$field] ?? '');
+            $verifiedValue = (string) ($facts[$label] ?? $facts[$field] ?? '');
+            $state = $verifiedValue === '' ? '未核验' : ($this->normalizedComparable($productValue) === $this->normalizedComparable($verifiedValue) ? '一致' : '存在差异');
+            $rows .= '<tr><td>' . $this->e($label) . '</td><td>' . $this->e($productValue !== '' ? $productValue : '未提供') . '</td><td>' . $this->e($verifiedValue !== '' ? $verifiedValue : '未提供') . '</td><td>' . $this->e($state) . '</td></tr>';
+        }
+
+        return $rows !== '' ? $rows : '<tr><td colspan="4" class="commerce-muted">暂无核验事实。</td></tr>';
+    }
+
+    /** @param list<array<string,mixed>> $changes */
+    private function publicChangeRows(array $changes): string
+    {
+        $allowed = ['name', 'price_minor', 'currency', 'brand', 'model', 'source_url', 'source_claim_text', 'specs_json', 'primary_media_id'];
+        $rows = '';
+        foreach ($changes as $change) {
+            $field = (string) ($change['field_name'] ?? '');
+            if (!in_array($field, $allowed, true)) {
+                continue;
+            }
+            $old = $this->publicChangeValue($field, $change['old_value'] ?? null);
+            $new = $this->publicChangeValue($field, $change['new_value'] ?? null);
+            $rows .= '<tr><td>' . $this->e((string) ($change['created_at'] ?? '')) . '</td><td>' . $this->e($this->changeFieldLabel($field)) . '</td><td>' . $this->e($old . ' -> ' . $new) . '</td></tr>';
+            if (substr_count($rows, '<tr>') >= 6) {
+                break;
+            }
+        }
+
+        return $rows !== '' ? $rows : '<tr><td colspan="3" class="commerce-muted">暂无公开关键修改记录。</td></tr>';
+    }
+
+    /** @param list<array<string,mixed>> $records */
+    private function verificationHistoryRows(array $records): string
+    {
+        $rows = '';
+        foreach ($records as $record) {
+            $rows .= '<tr><td>' . $this->e((string) ($record['created_at'] ?? '')) . '</td><td>' . $this->e($this->verificationRecordTypeLabel((string) ($record['record_type'] ?? 'provider_result'))) . '</td><td>' . $this->e($this->verificationLabel((string) ($record['status'] ?? 'pending'))) . '</td><td>' . $this->e((string) ($record['failure_reason'] ?? '')) . '</td></tr>';
+        }
+
+        return $rows;
+    }
+
+    private function factCard(string $label, string $value, string $hint): string
+    {
+        return '<div class="commerce-fact"><span>' . $this->e($label) . '</span><strong>' . $this->e($value) . '</strong><small>' . $this->e($hint) . '</small></div>';
+    }
+
+    private function providerSummary(string $currency): string
+    {
+        try {
+            $providers = (new PaymentService($this->pdo, new PaymentRepository($this->pdo), $this->paymentSecret()))->enabledProviders($currency);
+        } catch (Throwable) {
+            return '暂无可用支付方式';
+        }
+        if ($providers === []) {
+            return '暂无可用支付方式';
+        }
+        $labels = [];
+        foreach ($providers as $provider) {
+            $labels[] = (string) ($provider['label'] ?? $provider['id'] ?? '');
+        }
+
+        return implode(' / ', array_filter($labels));
+    }
+
+    private function normalizedComparable(string $value): string
+    {
+        return strtolower(trim(preg_replace('/\s+/u', '', $value) ?? ''));
+    }
+
+    private function publicChangeValue(string $field, mixed $value): string
+    {
+        if ($value === null || $value === '') {
+            return '未提供';
+        }
+        if (is_array($value)) {
+            return $value === [] ? '空' : '已更新';
+        }
+        if (in_array($field, ['price_minor'], true)) {
+            return (string) $value . ' 分';
+        }
+        $text = (string) $value;
+
+        return mb_strlen($text) > 80 ? mb_substr($text, 0, 77) . '...' : $text;
+    }
+
+    private function changeFieldLabel(string $field): string
+    {
+        return match ($field) {
+            'name' => '商品名称',
+            'price_minor' => '价格',
+            'currency' => '币种',
+            'brand' => '品牌',
+            'model' => '型号',
+            'source_url' => '来源链接',
+            'source_claim_text' => '来源声明',
+            'specs_json' => '规格事实',
+            'primary_media_id' => '主图',
+            default => $field,
+        };
     }
 
     /** @param array<string,mixed> $order */
@@ -817,7 +978,7 @@ final class CommerceController
     private function frontPage(string $title, string $body): string
     {
         return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $this->e($title) . '</title><style>' .
-            'body{margin:0;background:#f8fafc;color:#172033;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}a{color:#1f6feb;text-decoration:none}.wrap{width:min(1120px,100% - 32px);margin:0 auto;padding:28px 0}.top{background:#fff;border-bottom:1px solid #e4e7ec}.top .wrap{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:14px 0}.brand{font-weight:800;color:#172033}.commerce-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.commerce-card{display:block;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:14px;color:#172033}.commerce-card img,.commerce-card .placeholder{width:100%;aspect-ratio:4/3;object-fit:cover;background:#edf2f7;border-radius:6px;display:grid;place-items:center;color:#667085;font-weight:800}.commerce-card strong{display:block;margin-top:10px}.commerce-card span,.commerce-price{font-size:24px;font-weight:800;color:#b42318}.commerce-card p,.commerce-muted{color:#667085}.commerce-product{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;align-items:start}.commerce-hero-img{width:100%;max-height:560px;object-fit:cover;background:#edf2f7;border-radius:8px}.commerce-button,button.commerce-button{display:inline-block;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:12px 16px;font-weight:750;cursor:pointer;margin-top:12px}.commerce-section,.commerce-empty{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:18px;margin-top:18px}.commerce-specs{width:100%;border-collapse:collapse;margin-top:14px}.commerce-specs th,.commerce-specs td{border-top:1px solid #e4e7ec;text-align:left;padding:10px}.commerce-description img,.commerce-description video,.commerce-description audio{max-width:100%}.media-gallery{display:grid;grid-template-columns:repeat(var(--columns),1fr);gap:12px}.media-gallery img{width:100%;border-radius:6px}.commerce-error{background:#fff1f0;border:1px solid #ffccc7;color:#8c1d18;border-radius:6px;padding:12px}label{display:block;font-weight:700;margin-top:12px}input,select{width:100%;box-sizing:border-box;border:1px solid #b8c0cc;border-radius:6px;padding:10px;margin-top:6px}@media(max-width:760px){.commerce-product{grid-template-columns:1fr}.wrap{width:min(100% - 24px,1120px)}.media-gallery{grid-template-columns:1fr}}' .
+            'body{margin:0;background:#f8fafc;color:#172033;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}a{color:#1f6feb;text-decoration:none}.wrap{width:min(1120px,100% - 32px);margin:0 auto;padding:28px 0}.top{background:#fff;border-bottom:1px solid #e4e7ec}.top .wrap{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:14px 0}.brand{font-weight:800;color:#172033}.commerce-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.commerce-card{display:block;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:14px;color:#172033}.commerce-card img,.commerce-card .placeholder{width:100%;aspect-ratio:4/3;object-fit:cover;background:#edf2f7;border-radius:6px;display:grid;place-items:center;color:#667085;font-weight:800}.commerce-card strong{display:block;margin-top:10px}.commerce-card span,.commerce-price{font-size:24px;font-weight:800;color:#b42318}.commerce-card p,.commerce-muted{color:#667085}.commerce-product{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;align-items:start}.commerce-hero-img{width:100%;max-height:560px;object-fit:cover;background:#edf2f7;border-radius:8px}.commerce-button,button.commerce-button{display:inline-block;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:12px 16px;font-weight:750;cursor:pointer;margin-top:12px}.commerce-section,.commerce-empty{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:18px;margin-top:18px}.commerce-profile h3{margin:22px 0 8px}.commerce-fact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.commerce-fact{background:#f8fafc;border:1px solid #e4e7ec;border-radius:8px;padding:12px}.commerce-fact span,.commerce-fact small{display:block;color:#667085}.commerce-fact strong{display:block;font-size:18px;margin:4px 0;color:#172033;overflow-wrap:anywhere}.commerce-specs{display:block;width:100%;border-collapse:collapse;margin-top:14px;overflow-x:auto}.commerce-specs th,.commerce-specs td{border-top:1px solid #e4e7ec;text-align:left;padding:10px}.commerce-description img,.commerce-description video,.commerce-description audio{max-width:100%}.media-gallery{display:grid;grid-template-columns:repeat(var(--columns),1fr);gap:12px}.media-gallery img{width:100%;border-radius:6px}.commerce-error{background:#fff1f0;border:1px solid #ffccc7;color:#8c1d18;border-radius:6px;padding:12px}label{display:block;font-weight:700;margin-top:12px}input,select{width:100%;box-sizing:border-box;border:1px solid #b8c0cc;border-radius:6px;padding:10px;margin-top:6px}@media(max-width:760px){.commerce-product{grid-template-columns:1fr}.wrap{width:min(100% - 24px,1120px)}.media-gallery{grid-template-columns:1fr}.commerce-fact-grid{grid-template-columns:1fr}.commerce-specs th,.commerce-specs td{white-space:nowrap}}' .
             '</style></head><body><header class="top"><div class="wrap"><a class="brand" href="/commerce">Daiying Commerce</a><a href="/">返回首页</a></div></header><main class="wrap">' . $body . '</main></body></html>';
     }
 

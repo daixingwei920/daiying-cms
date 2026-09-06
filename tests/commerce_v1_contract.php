@@ -5,9 +5,13 @@ declare(strict_types=1);
 require __DIR__ . '/../system/core/Bootstrap/autoload.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceContracts.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceRepository.php';
+require __DIR__ . '/../content/plugins/official.commerce/src/CommerceController.php';
 
+use Cms\Core\Config\Settings;
+use Cms\Core\Http\Request;
 use Cms\Core\Plugin\PluginManifest;
 use Cms\Core\Payment\PaymentRepository;
+use Daiying\Commerce\CommerceController;
 use Daiying\Commerce\CommerceAiModuleInterface;
 use Daiying\Commerce\CommerceDistributionInterface;
 use Daiying\Commerce\CommerceLogisticsProviderInterface;
@@ -192,6 +196,18 @@ $assert(($pendingProduct['verification_status'] ?? '') === 'pending', 'Changing 
 $assert(($verificationAfterChange[0]['provider'] ?? '') === 'system', 'Verification invalidation is recorded by the system as a separate fact.');
 $assert(($verificationAfterChange[0]['record_type'] ?? '') === 'system_invalidation', 'System invalidation is distinguishable from seller requests and provider results.');
 
+$controller = new CommerceController($repo, $pdo, Settings::fromArray(['security' => ['encryption_key' => 'commerce-test-secret']]));
+$productPage = $controller->productPage(new Request('GET', '/commerce/product', ['id' => $productId]))->body();
+$assert(str_contains($productPage, '商品透明档案'), 'Public product page exposes a consumer transparency profile.');
+$assert(str_contains($productPage, '来源声明'), 'Consumer transparency profile includes the seller source declaration.');
+$assert(str_contains($productPage, '最近核验'), 'Consumer transparency profile includes the latest provider verification time.');
+$assert(str_contains($productPage, '存在差异'), 'Consumer transparency profile shows mismatches after key product changes.');
+$assert(str_contains($productPage, '商品关键修改历史'), 'Consumer transparency profile includes public key change history.');
+$assert(str_contains($productPage, '价格透明'), 'Consumer transparency profile includes transparent price and fee facts.');
+$assert(str_contains($productPage, '支付处理方'), 'Consumer transparency profile includes payment processor context.');
+$assert(str_contains($productPage, '核验历史'), 'Consumer transparency profile includes verification history.');
+$assert(!str_contains($productPage, '正品认证'), 'Consumer transparency wording avoids unsupported authenticity claims.');
+
 $variantId = $repo->saveVariant([
     'product_id' => $productId,
     'title' => '黑色 128GB',
@@ -321,6 +337,7 @@ $repo->saveProduct([
     'service_fee_minor' => 300,
     'discount_minor' => 100,
     'price_note' => '跨境订单费用以结算页快照为准',
+    'source_url' => 'https://example.com/item/1',
     'source_claim_text' => '官方授权渠道采购',
 ]);
 $changes = $repo->productChanges($productId);
