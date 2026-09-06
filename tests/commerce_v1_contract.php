@@ -6,6 +6,7 @@ require __DIR__ . '/../system/core/Bootstrap/autoload.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceRepository.php';
 
 use Cms\Core\Plugin\PluginManifest;
+use Cms\Core\Payment\PaymentRepository;
 use Daiying\Commerce\CommerceRepository;
 
 $failures = 0;
@@ -34,6 +35,44 @@ $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 ($migration['up'])($pdo);
+$pdo->exec('CREATE TABLE cms_payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subject_type VARCHAR(96) NOT NULL,
+    subject_id VARCHAR(191) NOT NULL,
+    provider_id VARCHAR(96) NOT NULL,
+    remote_id VARCHAR(191) NOT NULL,
+    reference VARCHAR(191) NOT NULL,
+    status VARCHAR(32) NOT NULL,
+    amount_minor INTEGER NOT NULL,
+    currency VARCHAR(3) NOT NULL,
+    idempotency_key VARCHAR(191) NOT NULL,
+    request_hash VARCHAR(64) NOT NULL,
+    metadata_json TEXT NOT NULL,
+    authorized_at VARCHAR(64),
+    paid_at VARCHAR(64),
+    failed_at VARCHAR(64),
+    cancelled_at VARCHAR(64),
+    created_at VARCHAR(64) NOT NULL,
+    updated_at VARCHAR(64) NOT NULL
+)');
+$pdo->exec('CREATE TABLE cms_payment_refunds (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    payment_id INTEGER NOT NULL,
+    provider_id VARCHAR(96) NOT NULL,
+    remote_id VARCHAR(191) NOT NULL,
+    status VARCHAR(32) NOT NULL,
+    amount_minor INTEGER NOT NULL,
+    currency VARCHAR(3) NOT NULL,
+    reason VARCHAR(64) NOT NULL,
+    idempotency_key VARCHAR(191) NOT NULL,
+    request_hash VARCHAR(64) NOT NULL,
+    metadata_json TEXT NOT NULL,
+    completed_at VARCHAR(64),
+    failed_at VARCHAR(64),
+    cancelled_at VARCHAR(64),
+    created_at VARCHAR(64) NOT NULL,
+    updated_at VARCHAR(64) NOT NULL
+)');
 
 $repo = new CommerceRepository($pdo);
 $productId = $repo->saveProduct([
@@ -72,6 +111,27 @@ $assert(($paidOrder['status'] ?? '') === 'paid', 'Paid order status is persisted
 $assert((int) ($productAfterPaid['sold_quantity'] ?? 0) === 1, 'Paid order increments sold quantity.');
 $assert((int) ($productAfterPaid['available_quantity'] ?? 0) === 4, 'Paid order reduces available stock.');
 $assert(($paidOrder['snapshot']['product']['name'] ?? '') === '测试商品', 'Order keeps product snapshot.');
+
+$synced = $repo->createPendingOrder($productId, null, (int) $repo->activeActions($productId)[0]['id'], 1, 'fixture', 'commerce-test-sync', hash('sha256', 'sync'));
+$paymentRepo = new PaymentRepository($pdo);
+$paymentId = $paymentRepo->insertPayment([
+    'subject_type' => 'commerce_order',
+    'subject_id' => 'order:' . (int) $synced['id'],
+    'provider_id' => 'fixture',
+    'remote_id' => 'remote-sync',
+    'reference' => 'reference-sync',
+    'status' => 'paid',
+    'amount_minor' => (int) $synced['amount_minor'],
+    'currency' => (string) $synced['currency'],
+    'idempotency_key' => 'payment-sync',
+    'request_hash' => hash('sha256', 'payment-sync'),
+    'metadata' => [],
+]);
+$repo->attachPayment((int) $synced['id'], $paymentId);
+$syncResult = $repo->markTrustedPaidOrders($paymentRepo);
+$syncedOrder = $repo->order((int) $synced['id']);
+$assert((int) ($syncResult['marked'] ?? 0) === 1, 'Trusted paid CMS payment can sync a pending commerce order.');
+$assert(($syncedOrder['status'] ?? '') === 'paid', 'Synced commerce order is marked paid.');
 
 $repo->saveProduct([
     'id' => $productId,

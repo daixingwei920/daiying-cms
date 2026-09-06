@@ -27,6 +27,7 @@ return static function (PluginContext $context): void {
     $context->adminRoute('POST', '/admin/commerce/actions/save', [$controller, 'adminSaveAction'], 'commerce.manage', true);
     $context->adminRoute('GET', '/admin/commerce/orders', [$controller, 'adminOrders'], 'commerce.orders', false);
     $context->adminRoute('GET', '/admin/commerce/orders/show', [$controller, 'adminOrderShow'], 'commerce.orders', false);
+    $context->adminRoute('POST', '/admin/commerce/orders/sync', [$controller, 'adminSyncOrders'], 'commerce.orders', true);
 
     $context->frontRoute('GET', '/commerce', [$controller, 'storefront'], null, false);
     $context->frontRoute('GET', '/commerce/product', [$controller, 'productPage'], null, false);

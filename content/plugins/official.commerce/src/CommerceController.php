@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Daiying\Commerce;
 
 use Cms\Core\Config\Settings;
+use Cms\Core\Content\BlockRenderer;
+use Cms\Core\Content\ContentRepository;
+use Cms\Core\Content\ContentTypeRegistry;
 use Cms\Core\Http\Request;
 use Cms\Core\Http\Response;
+use Cms\Core\Media\MediaLibrary;
 use Cms\Core\Payment\PaymentRepository;
 use Cms\Core\Payment\PaymentService;
 use Cms\Core\Security\CsrfToken;
@@ -144,6 +148,16 @@ final class CommerceController
 
     public function adminOrders(Request $request): Response
     {
+        $autoSync = $this->repo->markTrustedPaidOrders(new PaymentRepository($this->pdo), 50);
+        $notice = '';
+        $manualMarked = (int) ($request->query['marked'] ?? 0);
+        $manualChecked = (int) ($request->query['checked'] ?? 0);
+        $manualErrors = (int) ($request->query['sync_errors'] ?? 0);
+        if ($manualChecked > 0 || $manualErrors > 0) {
+            $notice = '<p class="success">已检查 ' . $manualChecked . ' 个待支付订单，标记已支付 ' . $manualMarked . ' 个，异常 ' . $manualErrors . ' 个。</p>';
+        } elseif ((int) ($autoSync['marked'] ?? 0) > 0) {
+            $notice = '<p class="success">已自动同步 ' . (int) $autoSync['marked'] . ' 个已支付订单。</p>';
+        }
         $rows = '';
         foreach ($this->repo->orders() as $order) {
             $snapshot = is_array($order['snapshot'] ?? null) ? $order['snapshot'] : [];
@@ -157,7 +171,32 @@ final class CommerceController
             $rows = '<tr><td colspan="5" class="muted">还没有订单。</td></tr>';
         }
 
-        return Response::html(View::page('Commerce 订单', '<h1>订单管理</h1><p><a class="button admin-button-secondary" href="/admin/commerce">返回总览</a></p><table><tr><th>订单</th><th>金额</th><th>状态</th><th>时间</th><th>操作</th></tr>' . $rows . '</table>'));
+        $syncForm = '<form method="post" action="/admin/commerce/orders/sync" style="display:inline">' . CsrfToken::field() . '<button type="submit">同步支付状态</button></form>';
+
+        return Response::html(View::page('Commerce 订单', '<h1>订单管理</h1>' . $notice . '<p><a class="button admin-button-secondary" href="/admin/commerce">返回总览</a> ' . $syncForm . '</p><table><tr><th>订单</th><th>金额</th><th>状态</th><th>时间</th><th>操作</th></tr>' . $rows . '</table>'));
+    }
+
+    public function adminSyncOrders(Request $request): Response
+    {
+        $paymentRepo = new PaymentRepository($this->pdo);
+        $paymentService = new PaymentService($this->pdo, $paymentRepo, $this->paymentSecret());
+        $checked = 0;
+        $errors = 0;
+        foreach ($this->repo->pendingPaymentOrders(50) as $order) {
+            $checked++;
+            $paymentId = (int) ($order['payment_id'] ?? 0);
+            if ($paymentId <= 0) {
+                continue;
+            }
+            try {
+                $paymentService->settleHostedCheckoutPayment($paymentId, (string) ($order['idempotency_key'] ?? ''));
+            } catch (Throwable) {
+                $errors++;
+            }
+        }
+        $result = $this->repo->markTrustedPaidOrders($paymentRepo, 50);
+
+        return Response::redirect('/admin/commerce/orders?checked=' . max($checked, (int) $result['checked']) . '&marked=' . (int) $result['marked'] . '&sync_errors=' . ($errors + (int) $result['errors']));
     }
 
     public function adminOrderShow(Request $request): Response
@@ -223,8 +262,11 @@ final class CommerceController
             $actions = '<p class="commerce-muted">当前商品暂无可用购买方式。</p>';
         }
         $source = !empty($product['source_url']) ? '<p><strong>来源：</strong><a href="' . $this->e((string) $product['source_url']) . '" target="_blank" rel="noopener nofollow">查看原始来源</a></p>' : '<p><strong>来源：</strong>商家未提供来源链接。</p>';
+        $specs = $this->specsHtml(is_array($product['specs'] ?? null) ? $product['specs'] : []);
+        $description = $this->descriptionHtml((int) ($product['description_content_id'] ?? 0));
         $body = '<article class="commerce-product"><div>' . $image . '</div><div><h1>' . $this->e((string) $product['name']) . '</h1><p class="commerce-price">' . $this->money((int) $product['price_minor'], (string) $product['currency']) . '</p><p>' . $this->e((string) ($product['summary'] ?? '')) . '</p><p><strong>库存：</strong>' . (int) $product['available_quantity'] . '</p><p><strong>来源核验：</strong>' . $this->verificationLabel((string) $product['verification_status']) . '</p>' . $actions . '</div></article>' .
-            '<section class="commerce-section"><h2>透明信息</h2>' . $source . '<p><strong>品牌/型号：</strong>' . $this->e(trim((string) ($product['brand'] ?? '') . ' ' . (string) ($product['model'] ?? '')) ?: '未提供') . '</p></section>';
+            '<section class="commerce-section"><h2>透明信息</h2>' . $source . '<p><strong>品牌/型号：</strong>' . $this->e(trim((string) ($product['brand'] ?? '') . ' ' . (string) ($product['model'] ?? '')) ?: '未提供') . '</p>' . $specs . '</section>' .
+            $description;
 
         return Response::html($this->frontPage((string) $product['name'], $body));
     }
@@ -353,6 +395,74 @@ final class CommerceController
         return $html;
     }
 
+    private function descriptionHtml(int $contentId): string
+    {
+        if ($contentId <= 0) {
+            return '';
+        }
+        try {
+            $content = (new ContentRepository($this->pdo, ContentTypeRegistry::defaults()))->find($contentId);
+            if ($content === null || (string) ($content['status'] ?? '') === 'archived') {
+                return '<section class="commerce-section"><h2>商品详情</h2><p class="commerce-muted">详情内容暂不可用。</p></section>';
+            }
+            $blocks = is_array($content['blocks'] ?? null) ? $content['blocks'] : [];
+            $media = $this->mediaViewModels($blocks);
+            $html = (new BlockRenderer($media))->render($blocks);
+            if (trim(strip_tags($html)) === '' && !str_contains($html, '<img') && !str_contains($html, '<audio') && !str_contains($html, '<video')) {
+                return '';
+            }
+
+            return '<section class="commerce-section commerce-description"><h2>商品详情</h2>' . $html . '</section>';
+        } catch (Throwable) {
+            return '<section class="commerce-section"><h2>商品详情</h2><p class="commerce-muted">详情内容暂不可用。</p></section>';
+        }
+    }
+
+    /** @param list<array<string,mixed>> $blocks @return array<int,array<string,mixed>> */
+    private function mediaViewModels(array $blocks): array
+    {
+        $ids = [];
+        foreach ($blocks as $block) {
+            $data = is_array($block['data'] ?? null) ? $block['data'] : [];
+            foreach (['media_id', 'poster_media_id'] as $key) {
+                $id = (int) ($data[$key] ?? 0);
+                if ($id > 0) {
+                    $ids[] = $id;
+                }
+            }
+            $mediaIds = is_array($data['media_ids'] ?? null) ? $data['media_ids'] : [];
+            foreach ($mediaIds as $id) {
+                if ((int) $id > 0) {
+                    $ids[] = (int) $id;
+                }
+            }
+        }
+        if ($ids === []) {
+            return [];
+        }
+        $library = new MediaLibrary($this->pdo, $this->rootPath() . '/content/uploads', (array) $this->settings->get('media', []));
+        $viewModels = [];
+        foreach (array_unique($ids) as $id) {
+            $viewModels[$id] = $library->viewModel((int) $id);
+        }
+
+        return $viewModels;
+    }
+
+    /** @param array<string,string> $specs */
+    private function specsHtml(array $specs): string
+    {
+        if ($specs === []) {
+            return '';
+        }
+        $rows = '';
+        foreach ($specs as $key => $value) {
+            $rows .= '<tr><th>' . $this->e((string) $key) . '</th><td>' . $this->e((string) $value) . '</td></tr>';
+        }
+
+        return '<table class="commerce-specs">' . $rows . '</table>';
+    }
+
     private function refreshClaim(int $orderId, string $claim): void
     {
         $stmt = $this->pdo->prepare('UPDATE commerce_orders SET completion_claim = :claim WHERE id = :id');
@@ -368,6 +478,11 @@ final class CommerceController
     {
         $secret = (string) $this->settings->get('security.encryption_key', '');
         return $secret !== '' ? $secret : hash('sha256', __DIR__);
+    }
+
+    private function rootPath(): string
+    {
+        return dirname(__DIR__, 4);
     }
 
     private function adminId(Request $request): ?int
@@ -440,7 +555,7 @@ final class CommerceController
     private function frontPage(string $title, string $body): string
     {
         return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $this->e($title) . '</title><style>' .
-            'body{margin:0;background:#f8fafc;color:#172033;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}a{color:#1f6feb;text-decoration:none}.wrap{width:min(1120px,100% - 32px);margin:0 auto;padding:28px 0}.top{background:#fff;border-bottom:1px solid #e4e7ec}.top .wrap{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:14px 0}.brand{font-weight:800;color:#172033}.commerce-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.commerce-card{display:block;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:14px;color:#172033}.commerce-card img,.commerce-card .placeholder{width:100%;aspect-ratio:4/3;object-fit:cover;background:#edf2f7;border-radius:6px;display:grid;place-items:center;color:#667085;font-weight:800}.commerce-card strong{display:block;margin-top:10px}.commerce-card span,.commerce-price{font-size:24px;font-weight:800;color:#b42318}.commerce-card p,.commerce-muted{color:#667085}.commerce-product{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;align-items:start}.commerce-hero-img{width:100%;max-height:560px;object-fit:cover;background:#edf2f7;border-radius:8px}.commerce-button,button.commerce-button{display:inline-block;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:12px 16px;font-weight:750;cursor:pointer;margin-top:12px}.commerce-section,.commerce-empty{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:18px;margin-top:18px}.commerce-error{background:#fff1f0;border:1px solid #ffccc7;color:#8c1d18;border-radius:6px;padding:12px}label{display:block;font-weight:700;margin-top:12px}input,select{width:100%;box-sizing:border-box;border:1px solid #b8c0cc;border-radius:6px;padding:10px;margin-top:6px}@media(max-width:760px){.commerce-product{grid-template-columns:1fr}.wrap{width:min(100% - 24px,1120px)}}' .
+            'body{margin:0;background:#f8fafc;color:#172033;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}a{color:#1f6feb;text-decoration:none}.wrap{width:min(1120px,100% - 32px);margin:0 auto;padding:28px 0}.top{background:#fff;border-bottom:1px solid #e4e7ec}.top .wrap{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:14px 0}.brand{font-weight:800;color:#172033}.commerce-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.commerce-card{display:block;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:14px;color:#172033}.commerce-card img,.commerce-card .placeholder{width:100%;aspect-ratio:4/3;object-fit:cover;background:#edf2f7;border-radius:6px;display:grid;place-items:center;color:#667085;font-weight:800}.commerce-card strong{display:block;margin-top:10px}.commerce-card span,.commerce-price{font-size:24px;font-weight:800;color:#b42318}.commerce-card p,.commerce-muted{color:#667085}.commerce-product{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;align-items:start}.commerce-hero-img{width:100%;max-height:560px;object-fit:cover;background:#edf2f7;border-radius:8px}.commerce-button,button.commerce-button{display:inline-block;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:12px 16px;font-weight:750;cursor:pointer;margin-top:12px}.commerce-section,.commerce-empty{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:18px;margin-top:18px}.commerce-specs{width:100%;border-collapse:collapse;margin-top:14px}.commerce-specs th,.commerce-specs td{border-top:1px solid #e4e7ec;text-align:left;padding:10px}.commerce-description img,.commerce-description video,.commerce-description audio{max-width:100%}.media-gallery{display:grid;grid-template-columns:repeat(var(--columns),1fr);gap:12px}.media-gallery img{width:100%;border-radius:6px}.commerce-error{background:#fff1f0;border:1px solid #ffccc7;color:#8c1d18;border-radius:6px;padding:12px}label{display:block;font-weight:700;margin-top:12px}input,select{width:100%;box-sizing:border-box;border:1px solid #b8c0cc;border-radius:6px;padding:10px;margin-top:6px}@media(max-width:760px){.commerce-product{grid-template-columns:1fr}.wrap{width:min(100% - 24px,1120px)}.media-gallery{grid-template-columns:1fr}}' .
             '</style></head><body><header class="top"><div class="wrap"><a class="brand" href="/commerce">Daiying Commerce</a><a href="/">返回首页</a></div></header><main class="wrap">' . $body . '</main></body></html>';
     }
 

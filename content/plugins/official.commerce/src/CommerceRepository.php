@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Daiying\Commerce;
 
+use Cms\Core\Payment\PaymentRepository;
 use Cms\Core\Support\CurrencyRegistry;
 use InvalidArgumentException;
 use PDO;
@@ -436,6 +437,38 @@ final class CommerceRepository
         $stmt->bindValue(':limit', max(1, min($limit, 200)), PDO::PARAM_INT);
         $stmt->execute();
         return array_map(fn (array $row): array => $this->hydrateJsonFields($row, ['snapshot_json']), $stmt->fetchAll());
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function pendingPaymentOrders(int $limit = 100): array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM commerce_orders WHERE status = 'pending_payment' AND payment_id IS NOT NULL ORDER BY id ASC LIMIT :limit");
+        $stmt->bindValue(':limit', max(1, min($limit, 200)), PDO::PARAM_INT);
+        $stmt->execute();
+
+        return array_map(fn (array $row): array => $this->hydrateJsonFields($row, ['snapshot_json']), $stmt->fetchAll());
+    }
+
+    /** @return array{checked:int,marked:int,unpaid:int,errors:int} */
+    public function markTrustedPaidOrders(PaymentRepository $payments, int $limit = 100): array
+    {
+        $result = ['checked' => 0, 'marked' => 0, 'unpaid' => 0, 'errors' => 0];
+        foreach ($this->pendingPaymentOrders($limit) as $order) {
+            $result['checked']++;
+            try {
+                $trusted = $payments->trustedStatus('commerce_order', 'order:' . (int) $order['id'], (string) ($order['currency'] ?? ''));
+                if ((string) ($trusted['status'] ?? '') !== 'paid' || (int) ($trusted['net_paid_minor'] ?? 0) < (int) ($order['amount_minor'] ?? 0)) {
+                    $result['unpaid']++;
+                    continue;
+                }
+                $this->markOrderPaid((int) $order['id']);
+                $result['marked']++;
+            } catch (\Throwable) {
+                $result['errors']++;
+            }
+        }
+
+        return $result;
     }
 
     /** @return array<string,mixed>|null */
