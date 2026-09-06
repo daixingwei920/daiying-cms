@@ -31,6 +31,7 @@ final class CommerceRepository
         'brand',
         'model',
         'source_url',
+        'source_claim_text',
         'primary_media_id',
         'specs_json',
         'requires_shipping',
@@ -48,6 +49,7 @@ final class CommerceRepository
         'brand',
         'model',
         'source_url',
+        'source_claim_text',
         'primary_media_id',
         'specs_json',
     ];
@@ -136,6 +138,7 @@ final class CommerceRepository
             'brand' => $this->nullableText((string) ($input['brand'] ?? ''), 191),
             'model' => $this->nullableText((string) ($input['model'] ?? ''), 191),
             'source_url' => $this->nullableUrl((string) ($input['source_url'] ?? '')),
+            'source_claim_text' => $this->nullableText((string) ($input['source_claim_text'] ?? ''), 500),
             'specs_json' => $this->json($this->keyValueLines((string) ($input['specs'] ?? ''))),
             'requires_shipping' => !empty($input['requires_shipping']) ? 1 : 0,
             'auto_delivery_enabled' => !empty($input['auto_delivery_enabled']) ? 1 : 0,
@@ -154,19 +157,28 @@ final class CommerceRepository
                 $set[] = $key . ' = :' . $key;
                 $params[':' . $key] = $value;
             }
-            $sql = 'UPDATE commerce_products SET ' . implode(', ', $set) . ', published_at = :published_at, updated_at = :updated_at WHERE id = :id';
+            if (($existing['source_url'] ?? null) != $payload['source_url'] || ($existing['source_claim_text'] ?? null) != $payload['source_claim_text']) {
+                $params[':source_declared_at'] = $payload['source_url'] !== null || $payload['source_claim_text'] !== null ? $now : null;
+                $sql = 'UPDATE commerce_products SET ' . implode(', ', $set) . ', source_declared_at = :source_declared_at, published_at = :published_at, updated_at = :updated_at WHERE id = :id';
+            } else {
+                $sql = 'UPDATE commerce_products SET ' . implode(', ', $set) . ', published_at = :published_at, updated_at = :updated_at WHERE id = :id';
+            }
+            $sourceChanged = ($existing['source_url'] ?? null) != $payload['source_url'] || ($existing['source_claim_text'] ?? null) != $payload['source_claim_text'];
             $this->pdo->prepare($sql)->execute($params);
             $updated = $this->product($id) ?? [];
             $this->recordProductChanges($id, $existing, $updated, $actorId);
             $this->refreshVerificationAfterProductChange($id, $existing, $updated);
+            if ($sourceChanged) {
+                $this->recordSourceDeclaration($id, $updated, $actorId);
+            }
             return $id;
         }
 
         $stmt = $this->pdo->prepare(
             'INSERT INTO commerce_products
-                (uuid, sku, name, slug, status, summary, description_content_id, primary_media_id, gallery_media_ids_json, price_minor, currency, region, transaction_region, shipping_fee_minor, tax_fee_minor, service_fee_minor, discount_minor, price_note, brand, model, source_url, specs_json, requires_shipping, auto_delivery_enabled, stock_quantity, reserved_quantity, sold_quantity, verification_status, key_fingerprint, published_at, created_at, updated_at)
+                (uuid, sku, name, slug, status, summary, description_content_id, primary_media_id, gallery_media_ids_json, price_minor, currency, region, transaction_region, shipping_fee_minor, tax_fee_minor, service_fee_minor, discount_minor, price_note, brand, model, source_url, source_claim_text, source_declared_at, specs_json, requires_shipping, auto_delivery_enabled, stock_quantity, reserved_quantity, sold_quantity, verification_status, key_fingerprint, published_at, created_at, updated_at)
              VALUES
-                (:uuid, :sku, :name, :slug, :status, :summary, :description_content_id, :primary_media_id, :gallery_media_ids_json, :price_minor, :currency, :region, :transaction_region, :shipping_fee_minor, :tax_fee_minor, :service_fee_minor, :discount_minor, :price_note, :brand, :model, :source_url, :specs_json, :requires_shipping, :auto_delivery_enabled, :stock_quantity, 0, 0, :verification_status, :key_fingerprint, :published_at, :created_at, :updated_at)'
+                (:uuid, :sku, :name, :slug, :status, :summary, :description_content_id, :primary_media_id, :gallery_media_ids_json, :price_minor, :currency, :region, :transaction_region, :shipping_fee_minor, :tax_fee_minor, :service_fee_minor, :discount_minor, :price_note, :brand, :model, :source_url, :source_claim_text, :source_declared_at, :specs_json, :requires_shipping, :auto_delivery_enabled, :stock_quantity, 0, 0, :verification_status, :key_fingerprint, :published_at, :created_at, :updated_at)'
         );
         $insertParams = [];
         foreach ($payload as $key => $value) {
@@ -174,13 +186,20 @@ final class CommerceRepository
         }
         $stmt->execute($insertParams + [
             ':uuid' => $this->uuid(),
+            ':source_declared_at' => $payload['source_url'] !== null || $payload['source_claim_text'] !== null ? $now : null,
             ':verification_status' => $payload['source_url'] !== null ? 'pending' : 'not_provided',
             ':published_at' => $status === 'active' ? $now : null,
             ':created_at' => $now,
             ':updated_at' => $now,
         ]);
 
-        return (int) $this->pdo->lastInsertId();
+        $newId = (int) $this->pdo->lastInsertId();
+        $created = $this->product($newId);
+        if (is_array($created) && ((string) ($created['source_url'] ?? '') !== '' || (string) ($created['source_claim_text'] ?? '') !== '')) {
+            $this->recordSourceDeclaration($newId, $created, $actorId);
+        }
+
+        return $newId;
     }
 
     public function setProductStatus(int $productId, string $status, ?int $actorId = null): void
@@ -577,32 +596,61 @@ final class CommerceRepository
         if ($status !== 'not_provided' && $sourceUrl === null) {
             throw new InvalidArgumentException('来源 URL 不能为空。');
         }
+        $provider = $this->cleanCode((string) ($input['provider'] ?? 'manual')) ?: 'manual';
+        $recordType = $this->status((string) ($input['record_type'] ?? 'provider_result'), ['provider_result', 'system_invalidation'], 'provider_result');
+        if ($recordType === 'provider_result' && in_array($provider, ['manual', 'seller', 'system'], true)) {
+            throw new RuntimeException('卖家只能请求重新核验，不能直接修改核验结果。');
+        }
         $checkedFacts = $this->keyValueLines((string) ($input['checked_facts'] ?? ''));
         if ($actorId !== null) {
             $checkedFacts['_actor_id'] = (string) $actorId;
         }
         $rawEvidence = $this->keyValueLines((string) ($input['raw_evidence'] ?? ''));
         $failureReason = $this->nullableText((string) ($input['failure_reason'] ?? ''), 500);
-        $provider = $this->cleanCode((string) ($input['provider'] ?? 'manual')) ?: 'manual';
-        $now = gmdate('Y-m-d H:i:s');
-        $stmt = $this->pdo->prepare(
-            'INSERT INTO commerce_verification_records (product_id, status, source_url, checked_facts_json, raw_evidence_json, failure_reason, provider, created_at)
-             VALUES (:product_id, :status, :source_url, :checked_facts_json, :raw_evidence_json, :failure_reason, :provider, :created_at)'
-        );
-        $stmt->execute([
-            ':product_id' => $productId,
-            ':status' => $status,
-            ':source_url' => $sourceUrl,
-            ':checked_facts_json' => $this->json($checkedFacts),
-            ':raw_evidence_json' => $this->json($rawEvidence),
-            ':failure_reason' => $failureReason,
-            ':provider' => $provider,
-            ':created_at' => $now,
+        $id = $this->insertVerificationRecord($product, [
+            'status' => $status,
+            'source_url' => $sourceUrl,
+            'checked_facts' => $checkedFacts,
+            'raw_evidence' => $rawEvidence,
+            'failure_reason' => $failureReason,
+            'provider' => $provider,
+            'record_type' => $recordType,
+            'effective_status' => $status,
+            'requester_id' => $actorId,
         ]);
+        $now = gmdate('Y-m-d H:i:s');
         $this->pdo->prepare('UPDATE commerce_products SET verification_status = :status, updated_at = :updated_at WHERE id = :id')
             ->execute([':id' => $productId, ':status' => $status, ':updated_at' => $now]);
 
-        return (int) $this->pdo->lastInsertId();
+        return $id;
+    }
+
+    public function requestVerificationReview(int $productId, string $note = '', ?int $actorId = null): int
+    {
+        $product = $this->product($productId);
+        if ($product === null) {
+            throw new RuntimeException('商品不存在。');
+        }
+        $sourceUrl = $this->nullableUrl((string) ($product['source_url'] ?? ''));
+        if ($sourceUrl === null) {
+            throw new InvalidArgumentException('请先填写商品来源 URL。');
+        }
+        $id = $this->insertVerificationRecord($product, [
+            'status' => 'pending',
+            'source_url' => $sourceUrl,
+            'checked_facts' => ['request_note' => $this->cleanText($note, 500)],
+            'raw_evidence' => [],
+            'failure_reason' => $note !== '' ? $this->nullableText($note, 500) : '卖家请求重新核验。',
+            'provider' => 'seller',
+            'record_type' => 'seller_request',
+            'requested_status' => 'pending',
+            'effective_status' => null,
+            'requester_id' => $actorId,
+        ]);
+        $this->pdo->prepare("UPDATE commerce_products SET verification_status = 'pending', updated_at = :updated_at WHERE id = :id")
+            ->execute([':id' => $productId, ':updated_at' => gmdate('Y-m-d H:i:s')]);
+
+        return $id;
     }
 
     /** @return list<array<string,mixed>> */
@@ -613,7 +661,7 @@ final class CommerceRepository
         $stmt->bindValue(':limit', max(1, min($limit, 100)), PDO::PARAM_INT);
         $stmt->execute();
 
-        return array_map(fn (array $row): array => $this->hydrateJsonFields($row, ['checked_facts_json', 'raw_evidence_json']), $stmt->fetchAll());
+        return array_map(fn (array $row): array => $this->hydrateJsonFields($row, ['checked_facts_json', 'raw_evidence_json', 'related_change_ids_json']), $stmt->fetchAll());
     }
 
     /** @param array<string,mixed> $input */
@@ -805,17 +853,71 @@ final class CommerceRepository
         $now = gmdate('Y-m-d H:i:s');
         $this->pdo->prepare("UPDATE commerce_products SET verification_status = 'pending', updated_at = :updated_at WHERE id = :id")
             ->execute([':id' => $productId, ':updated_at' => $now]);
-        $this->pdo->prepare(
-            "INSERT INTO commerce_verification_records (product_id, status, source_url, checked_facts_json, raw_evidence_json, failure_reason, provider, created_at)
-             VALUES (:product_id, 'pending', :source_url, :checked_facts_json, :raw_evidence_json, :failure_reason, 'system', :created_at)"
-        )->execute([
-            ':product_id' => $productId,
-            ':source_url' => $newSource,
-            ':checked_facts_json' => $this->json(['reason' => 'product_key_facts_changed']),
-            ':raw_evidence_json' => $this->json([]),
-            ':failure_reason' => '关键商品信息已变更，等待重新核验。',
+        $this->insertVerificationRecord($new, [
+            'status' => 'pending',
+            'source_url' => $newSource,
+            'checked_facts' => ['reason' => 'product_key_facts_changed'],
+            'raw_evidence' => [],
+            'failure_reason' => '关键商品信息已变更，等待重新核验。',
+            'provider' => 'system',
+            'record_type' => 'system_invalidation',
+            'requested_status' => null,
+            'effective_status' => 'pending',
+            'requester_id' => null,
+        ]);
+    }
+
+    /** @param array<string,mixed> $product */
+    private function recordSourceDeclaration(int $productId, array $product, ?int $actorId): void
+    {
+        $sourceUrl = $this->nullableUrl((string) ($product['source_url'] ?? ''));
+        $claim = (string) ($product['source_claim_text'] ?? '');
+        if ($sourceUrl === null && $claim === '') {
+            return;
+        }
+        $this->insertVerificationRecord($product + ['id' => $productId], [
+            'status' => $sourceUrl !== null ? 'pending' : 'not_provided',
+            'source_url' => $sourceUrl,
+            'checked_facts' => ['source_claim' => $claim],
+            'raw_evidence' => [],
+            'failure_reason' => $claim !== '' ? $claim : '卖家声明商品来源。',
+            'provider' => 'seller',
+            'record_type' => 'source_declaration',
+            'requested_status' => 'pending',
+            'effective_status' => null,
+            'requester_id' => $actorId,
+        ]);
+    }
+
+    /** @param array<string,mixed> $product @param array<string,mixed> $record */
+    private function insertVerificationRecord(array $product, array $record): int
+    {
+        $now = gmdate('Y-m-d H:i:s');
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO commerce_verification_records
+                (product_id, status, source_url, checked_facts_json, raw_evidence_json, failure_reason, provider, record_type, requested_status, effective_status, requester_id, source_fingerprint, product_fingerprint, related_change_ids_json, created_at)
+             VALUES
+                (:product_id, :status, :source_url, :checked_facts_json, :raw_evidence_json, :failure_reason, :provider, :record_type, :requested_status, :effective_status, :requester_id, :source_fingerprint, :product_fingerprint, :related_change_ids_json, :created_at)'
+        );
+        $stmt->execute([
+            ':product_id' => (int) ($product['id'] ?? $record['product_id'] ?? 0),
+            ':status' => (string) $record['status'],
+            ':source_url' => $record['source_url'] ?? null,
+            ':checked_facts_json' => $this->json($record['checked_facts'] ?? []),
+            ':raw_evidence_json' => $this->json($record['raw_evidence'] ?? []),
+            ':failure_reason' => $record['failure_reason'] ?? null,
+            ':provider' => (string) ($record['provider'] ?? 'system'),
+            ':record_type' => (string) ($record['record_type'] ?? 'provider_result'),
+            ':requested_status' => $record['requested_status'] ?? null,
+            ':effective_status' => $record['effective_status'] ?? null,
+            ':requester_id' => $record['requester_id'] ?? null,
+            ':source_fingerprint' => $this->sourceFingerprint($product),
+            ':product_fingerprint' => (string) ($product['key_fingerprint'] ?? ''),
+            ':related_change_ids_json' => $this->json($record['related_change_ids'] ?? []),
             ':created_at' => $now,
         ]);
+
+        return (int) $this->pdo->lastInsertId();
     }
 
     /** @param array<string,mixed> $row */
@@ -856,6 +958,7 @@ final class CommerceRepository
             'brand' => (string) ($product['brand'] ?? ''),
             'model' => (string) ($product['model'] ?? ''),
             'source_url' => (string) ($product['source_url'] ?? ''),
+            'source_claim_text' => (string) ($product['source_claim_text'] ?? ''),
             'primary_media_id' => isset($product['primary_media_id']) ? (int) $product['primary_media_id'] : null,
             'key_fingerprint' => (string) $product['key_fingerprint'],
         ];
@@ -908,6 +1011,17 @@ final class CommerceRepository
         }
 
         return hash('sha256', $this->json($facts));
+    }
+
+    /** @param array<string,mixed> $product */
+    private function sourceFingerprint(array $product): string
+    {
+        return hash('sha256', $this->json([
+            'source_url' => $product['source_url'] ?? null,
+            'source_claim_text' => $product['source_claim_text'] ?? null,
+            'brand' => $product['brand'] ?? null,
+            'model' => $product['model'] ?? null,
+        ]));
     }
 
     private function slug(string $slug, string $fallback, int $ignoreId = 0): string

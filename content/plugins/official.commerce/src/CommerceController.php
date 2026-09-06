@@ -95,7 +95,8 @@ final class CommerceController
             '<label>图库媒体 ID（逗号分隔）<input name="gallery_media_ids" value="' . $this->e($gallery) . '"></label>' .
             '<label>品牌<input name="brand" value="' . $this->e((string) ($product['brand'] ?? '')) . '"></label>' .
             '<label>型号<input name="model" value="' . $this->e((string) ($product['model'] ?? '')) . '"></label>' .
-            '<label>来源 URL<input name="source_url" type="url" value="' . $this->e((string) ($product['source_url'] ?? '')) . '"></label>' .
+            '<label>商品来源 URL<input name="source_url" type="url" value="' . $this->e((string) ($product['source_url'] ?? '')) . '"></label>' .
+            '<label>商品来源声明<input name="source_claim_text" value="' . $this->e((string) ($product['source_claim_text'] ?? '')) . '" placeholder="例如 官方店购买 / 自有库存 / 供应商发货"></label>' .
             '<label>规格事实（每行一个：名称: 值）<textarea name="specs" rows="5">' . $this->e($specs) . '</textarea></label>' .
             '<label><input type="checkbox" name="requires_shipping" value="1" ' . ((int) ($product['requires_shipping'] ?? 0) === 1 ? 'checked' : '') . '> 需要物流配送</label>' .
             '<label><input type="checkbox" name="auto_delivery_enabled" value="1" ' . ((int) ($product['auto_delivery_enabled'] ?? 0) === 1 ? 'checked' : '') . '> 数字商品可自动交付</label>' .
@@ -156,10 +157,10 @@ final class CommerceController
     {
         $productId = (int) ($request->body['product_id'] ?? 0);
         try {
-            $this->repo->appendVerificationRecord($request->body, $this->adminId($request));
-            return Response::redirect('/admin/commerce/products/edit?id=' . $productId . '&verification_saved=1');
+            $this->repo->requestVerificationReview($productId, (string) ($request->body['request_note'] ?? ''), $this->adminId($request));
+            return Response::redirect('/admin/commerce/products/edit?id=' . $productId . '&verification_requested=1');
         } catch (Throwable $exception) {
-            return $this->error('来源核验保存失败', $exception, '/admin/commerce/products/edit?id=' . $productId);
+            return $this->error('重新核验请求失败', $exception, '/admin/commerce/products/edit?id=' . $productId);
         }
     }
 
@@ -490,23 +491,22 @@ final class CommerceController
         foreach ($this->repo->verificationRecords($productId) as $record) {
             $facts = is_array($record['checked_facts'] ?? null) ? $record['checked_facts'] : [];
             unset($facts['_actor_id']);
+            $type = $this->verificationRecordTypeLabel((string) ($record['record_type'] ?? 'provider_result'));
             $source = (string) ($record['source_url'] ?? '');
             $sourceCell = $source !== '' ? '<a href="' . $this->e($source) . '" target="_blank" rel="noopener nofollow">来源</a>' : '<span class="muted">无</span>';
-            $rows .= '<tr><td>' . $this->e((string) $record['created_at']) . '</td><td>' . $this->e($this->verificationLabel((string) $record['status'])) . '</td><td>' . $this->e((string) ($record['provider'] ?? 'manual')) . '</td><td>' . $sourceCell . '</td><td><code>' . $this->e(json_encode($facts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}') . '</code></td><td>' . $this->e((string) ($record['failure_reason'] ?? '')) . '</td></tr>';
+            $rows .= '<tr><td>' . $this->e((string) $record['created_at']) . '</td><td>' . $this->e($type) . '</td><td>' . $this->e($this->verificationLabel((string) $record['status'])) . '</td><td>' . $this->e((string) ($record['provider'] ?? 'manual')) . '</td><td>' . $sourceCell . '</td><td><code>' . $this->e(json_encode($facts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}') . '</code></td><td>' . $this->e((string) ($record['failure_reason'] ?? '')) . '</td></tr>';
         }
         if ($rows === '') {
-            $rows = '<tr><td colspan="6" class="muted">暂无核验记录。</td></tr>';
+            $rows = '<tr><td colspan="7" class="muted">暂无核验记录。</td></tr>';
         }
 
-        return '<hr><h2>来源核验</h2><table><tr><th>时间</th><th>状态</th><th>Provider</th><th>来源</th><th>核验事实</th><th>说明</th></tr>' . $rows . '</table>' .
+        return '<hr><h2>来源核验</h2><table><tr><th>时间</th><th>类型</th><th>状态</th><th>Provider</th><th>来源</th><th>事实/请求</th><th>说明</th></tr>' . $rows . '</table>' .
             '<form method="post" action="/admin/commerce/verification/save">' . CsrfToken::field() .
             '<input type="hidden" name="product_id" value="' . $productId . '">' .
-            '<label>核验状态<select name="status">' . $this->options(['pending' => '等待核验', 'verified' => '来源信息已核验', 'failed' => '当前无法核验', 'not_provided' => '未提供来源'], 'pending') . '</select></label>' .
-            '<label>来源 URL<input name="source_url" type="url" value="' . $this->e($defaultSource) . '" placeholder="https://example.com/product"></label>' .
-            '<label>核验事实（每行 名称: 值）<textarea name="checked_facts" rows="4" placeholder="品牌: Daiying&#10;型号: V1&#10;价格: 360 CNY"></textarea></label>' .
-            '<label>原始证据（每行 名称: 值）<textarea name="raw_evidence" rows="3" placeholder="页面标题: ...&#10;抓取时间: ..."></textarea></label>' .
-            '<label>失败/补充说明<input name="failure_reason" placeholder="来源页面失效 / 信息不一致 / 等待人工复核"></label>' .
-            '<button type="submit">追加核验记录</button></form>';
+            '<p class="muted">卖家只能请求重新核验；核验结果由系统或受信 Provider 追加，主题和普通插件只读展示。</p>' .
+            '<p><strong>当前来源：</strong>' . ($defaultSource !== '' ? '<a href="' . $this->e($defaultSource) . '" target="_blank" rel="noopener nofollow">' . $this->e($defaultSource) . '</a>' : '<span class="muted">未填写</span>') . '</p>' .
+            '<label>请求说明<input name="request_note" placeholder="例如 来源页面已更新，请重新核验。"></label>' .
+            '<button type="submit">请求重新核验</button></form>';
     }
 
     private function providerOptions(string $currency): string
@@ -571,12 +571,12 @@ final class CommerceController
         $latest = $records[0];
         $rows = '';
         foreach ($records as $record) {
-            $rows .= '<tr><td>' . $this->e((string) $record['created_at']) . '</td><td>' . $this->e($this->verificationLabel((string) $record['status'])) . '</td><td>' . $this->e((string) ($record['failure_reason'] ?? '')) . '</td></tr>';
+            $rows .= '<tr><td>' . $this->e((string) $record['created_at']) . '</td><td>' . $this->e($this->verificationRecordTypeLabel((string) ($record['record_type'] ?? 'provider_result'))) . '</td><td>' . $this->e($this->verificationLabel((string) $record['status'])) . '</td><td>' . $this->e((string) ($record['failure_reason'] ?? '')) . '</td></tr>';
         }
         $source = (string) ($latest['source_url'] ?? '');
         $sourceLink = $source !== '' ? '<p><a href="' . $this->e($source) . '" target="_blank" rel="noopener nofollow">查看原始来源</a></p>' : '';
 
-        return '<section class="commerce-section"><h2>来源与真实性</h2><p><strong>' . $this->e($this->verificationLabel((string) $latest['status'])) . '</strong></p>' . $sourceLink . '<table class="commerce-specs"><tr><th>时间</th><th>结果</th><th>说明</th></tr>' . $rows . '</table></section>';
+        return '<section class="commerce-section"><h2>来源与真实性</h2><p><strong>' . $this->e($this->verificationLabel((string) $latest['status'])) . '</strong></p>' . $sourceLink . '<table class="commerce-specs"><tr><th>时间</th><th>类型</th><th>结果</th><th>说明</th></tr>' . $rows . '</table></section>';
     }
 
     /** @param array<string,mixed> $order */
@@ -761,6 +761,16 @@ final class CommerceController
             'failed' => '来源暂无法核验',
             'pending' => '等待核验',
             default => '未提供来源核验',
+        };
+    }
+
+    private function verificationRecordTypeLabel(string $type): string
+    {
+        return match ($type) {
+            'source_declaration' => '来源声明',
+            'seller_request' => '重新核验请求',
+            'system_invalidation' => '系统失效',
+            default => '核验结果',
         };
     }
 

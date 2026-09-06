@@ -48,6 +48,8 @@ $logisticsMigration = require $root . '/content/plugins/official.commerce/migrat
 $assert(in_array('table:commerce_logistics_events', $logisticsMigration['affected_objects'] ?? [], true), 'Logistics migration declares the logistics fact table.');
 $pricingMigration = require $root . '/content/plugins/official.commerce/migrations/003_price_transparency.php';
 $assert(in_array('table:commerce_products', $pricingMigration['affected_objects'] ?? [], true), 'Price transparency migration declares the commerce product table.');
+$governanceMigration = require $root . '/content/plugins/official.commerce/migrations/004_source_verification_governance.php';
+$assert(in_array('table:commerce_verification_records', $governanceMigration['affected_objects'] ?? [], true), 'Source verification governance migration declares verification records.');
 
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -55,6 +57,7 @@ $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 ($coreMigration['up'])($pdo);
 ($logisticsMigration['up'])($pdo);
 ($pricingMigration['up'])($pdo);
+($governanceMigration['up'])($pdo);
 $pdo->exec('CREATE TABLE cms_payments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_type VARCHAR(96) NOT NULL,
@@ -109,6 +112,7 @@ $productId = $repo->saveProduct([
     'discount_minor' => 100,
     'price_note' => '跨境订单费用以结算页快照为准',
     'source_url' => 'https://example.com/item/1',
+    'source_claim_text' => '官方授权渠道采购',
     'brand' => 'Daiying',
     'model' => 'V1',
     'specs' => "颜色: 黑色\n容量: 128GB",
@@ -121,10 +125,26 @@ $assert((int) ($product['available_quantity'] ?? 0) === 5, 'New product starts w
 $assert(($product['specs']['颜色'] ?? '') === '黑色', 'Product specs are stored as structured facts.');
 $assert(($product['verification_status'] ?? '') === 'pending', 'Product with a source URL starts as pending verification.');
 $assert(($product['transaction_region'] ?? '') === 'cross_border', 'Product keeps a transaction-region fact separate from currency.');
+$sourceRecords = $repo->verificationRecords($productId);
+$assert(($sourceRecords[0]['record_type'] ?? '') === 'source_declaration', 'Saving a product source creates an append-only source declaration record.');
+$assert(($sourceRecords[0]['checked_facts']['source_claim'] ?? '') === '官方授权渠道采购', 'Source declarations keep seller-provided source claims as facts.');
+
+$sellerCannotVerify = false;
+try {
+    $repo->appendVerificationRecord([
+        'product_id' => $productId,
+        'status' => 'verified',
+        'source_url' => 'https://example.com/item/1',
+    ]);
+} catch (RuntimeException) {
+    $sellerCannotVerify = true;
+}
+$assert($sellerCannotVerify, 'Seller/manual flows cannot directly mark a source as verified.');
 
 $repo->appendVerificationRecord([
     'product_id' => $productId,
     'status' => 'verified',
+    'provider' => 'official.verifier.fixture',
     'source_url' => 'https://example.com/item/1',
     'checked_facts' => "品牌: Daiying\n型号: V1",
     'raw_evidence' => "页面标题: 测试商品\n抓取方式: manual",
@@ -132,7 +152,20 @@ $repo->appendVerificationRecord([
 $verifiedProduct = $repo->product($productId);
 $verifiedRecords = $repo->verificationRecords($productId);
 $assert(($verifiedProduct['verification_status'] ?? '') === 'verified', 'Appending a verified record updates the product verification status.');
+$assert(($verifiedRecords[0]['record_type'] ?? '') === 'provider_result', 'Trusted provider verification is recorded as a provider result.');
 $assert(($verifiedRecords[0]['checked_facts']['品牌'] ?? '') === 'Daiying', 'Verification facts are stored as append-only structured records.');
+$requestId = $repo->requestVerificationReview($productId, '来源页面已更新，请重新核验。', 99);
+$requestedRecords = $repo->verificationRecords($productId);
+$assert($requestId > 0 && ($requestedRecords[0]['record_type'] ?? '') === 'seller_request', 'Seller can request re-verification without editing the result.');
+$assert(($repo->product($productId)['verification_status'] ?? '') === 'pending', 'Seller re-verification requests move the product back to pending.');
+$repo->appendVerificationRecord([
+    'product_id' => $productId,
+    'status' => 'verified',
+    'provider' => 'official.verifier.fixture',
+    'source_url' => 'https://example.com/item/1',
+    'checked_facts' => "品牌: Daiying\n型号: V1",
+    'raw_evidence' => "页面标题: 测试商品\n抓取方式: fixture",
+]);
 $repo->saveProduct([
     'id' => $productId,
     'name' => '测试商品',
@@ -148,6 +181,7 @@ $repo->saveProduct([
     'discount_minor' => 100,
     'price_note' => '跨境订单费用以结算页快照为准',
     'source_url' => 'https://example.com/item/1',
+    'source_claim_text' => '官方授权渠道采购',
     'brand' => 'Daiying Updated',
     'model' => 'V1',
     'specs' => "颜色: 黑色\n容量: 128GB",
@@ -156,6 +190,7 @@ $pendingProduct = $repo->product($productId);
 $verificationAfterChange = $repo->verificationRecords($productId);
 $assert(($pendingProduct['verification_status'] ?? '') === 'pending', 'Changing key product facts invalidates verified source status.');
 $assert(($verificationAfterChange[0]['provider'] ?? '') === 'system', 'Verification invalidation is recorded by the system as a separate fact.');
+$assert(($verificationAfterChange[0]['record_type'] ?? '') === 'system_invalidation', 'System invalidation is distinguishable from seller requests and provider results.');
 
 $variantId = $repo->saveVariant([
     'product_id' => $productId,
@@ -286,6 +321,7 @@ $repo->saveProduct([
     'service_fee_minor' => 300,
     'discount_minor' => 100,
     'price_note' => '跨境订单费用以结算页快照为准',
+    'source_claim_text' => '官方授权渠道采购',
 ]);
 $changes = $repo->productChanges($productId);
 $fields = array_values(array_map(static fn (array $row): string => (string) $row['field_name'], $changes));
