@@ -247,6 +247,49 @@ final class CommerceController
         }
     }
 
+    public function adminRunTaobaoVerification(Request $request): Response
+    {
+        $productId = (int) ($request->body['product_id'] ?? 0);
+        try {
+            $product = $this->repo->product($productId);
+            if ($product === null) {
+                throw new \RuntimeException('商品不存在。');
+            }
+            $provider = new TaobaoVerificationProvider();
+            $captured = CommerceProviderIsolation::capture($provider->providerId(), 'verify_source', fn (): array => $provider->verifySource($product));
+            $record = ($captured['ok'] ?? false) === true && is_array($captured['result'] ?? null)
+                ? $captured['result']
+                : [
+                    'product_id' => $productId,
+                    'status' => 'failed',
+                    'source_url' => (string) ($product['source_url'] ?? ''),
+                    'checked_facts' => [
+                        '淘宝域名是否合法' => '未核验',
+                        '商品ID' => '未核验',
+                        '当前页面状态' => '核验失败',
+                        '商品标题' => '未核验',
+                        '品牌' => '未核验',
+                        '型号' => '未核验',
+                        '价格' => '未核验',
+                        '图片信息' => '未核验',
+                    ],
+                    'raw_evidence' => [
+                        'error_class' => (string) ($captured['error_class'] ?? ''),
+                        'operation' => (string) ($captured['operation'] ?? 'verify_source'),
+                    ],
+                    'failure_reason' => 'Taobao Provider 暂不可用：' . (string) ($captured['error'] ?? 'unknown error'),
+                    'provider' => $provider->providerId(),
+                    'record_type' => 'provider_result',
+                ];
+            $record['product_id'] = $productId;
+            $this->repo->appendVerificationRecord($record, $this->adminId($request));
+
+            return Response::redirect('/admin/commerce/products/edit?id=' . $productId . '&taobao_verified=1');
+        } catch (Throwable $exception) {
+            return $this->error('淘宝/天猫来源核验失败', $exception, '/admin/commerce/products/edit?id=' . $productId);
+        }
+    }
+
     public function adminSaveLogistics(Request $request): Response
     {
         $orderId = (int) ($request->body['order_id'] ?? 0);
@@ -588,6 +631,10 @@ final class CommerceController
             '<input type="hidden" name="product_id" value="' . $productId . '">' .
             '<p class="muted">Amazon Provider 只读取 Amazon 官方域名、ASIN 和页面可可靠取得的商品事实；登录、验证码、地区页均记为未核验。</p>' .
             '<button type="submit">执行 Amazon 来源核验</button></form>' .
+            '<form method="post" action="/admin/commerce/verification/run-taobao">' . CsrfToken::field() .
+            '<input type="hidden" name="product_id" value="' . $productId . '">' .
+            '<p class="muted">淘宝 Provider 只读取淘宝/天猫官方域名、商品 ID 和页面可可靠取得的商品事实；登录、验证码、风控页均记为未核验。</p>' .
+            '<button type="submit">执行淘宝来源核验</button></form>' .
             '<form method="post" action="/admin/commerce/verification/save">' . CsrfToken::field() .
             '<input type="hidden" name="product_id" value="' . $productId . '">' .
             '<p class="muted">卖家只能请求重新核验；核验结果由系统或受信 Provider 追加，主题和普通插件只读展示。</p>' .

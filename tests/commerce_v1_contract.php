@@ -7,6 +7,7 @@ require __DIR__ . '/../content/plugins/official.commerce/src/CommerceContracts.p
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceRepository.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/GenericUrlVerificationProvider.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/AmazonVerificationProvider.php';
+require __DIR__ . '/../content/plugins/official.commerce/src/TaobaoVerificationProvider.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceController.php';
 
 use Cms\Core\Config\Settings;
@@ -22,6 +23,7 @@ use Daiying\Commerce\CommerceProviderIsolation;
 use Daiying\Commerce\CommerceRepository;
 use Daiying\Commerce\AmazonVerificationProvider;
 use Daiying\Commerce\GenericUrlVerificationProvider;
+use Daiying\Commerce\TaobaoVerificationProvider;
 
 $failures = 0;
 $assert = static function (bool $condition, string $message) use (&$failures): void {
@@ -254,6 +256,82 @@ $fakeAmazonProvider = new AmazonVerificationProvider(static fn (string $url): ar
 $fakeAmazon = $fakeAmazonProvider->verifySource(array_replace($product, ['source_url' => 'https://amazon.com.evil.example/dp/B0TEST1234']));
 $assert(($fakeAmazon['status'] ?? '') === 'failed', 'Amazon provider rejects lookalike Amazon domains.');
 $assert(($fakeAmazon['checked_facts']['Amazon域名是否合法'] ?? '') === '不合法或未核验', 'Rejected Amazon domains are not recorded as valid platform facts.');
+
+$taobaoProduct = array_replace($product, ['source_url' => 'https://item.taobao.com/item.htm?id=812345678901']);
+$taobaoProvider = new TaobaoVerificationProvider(static function (string $url): array {
+    return [
+        'requested_url' => $url,
+        'final_url' => 'https://detail.tmall.com/item.htm?id=812345678901&skuId=1',
+        'http_status' => 200,
+        'content_type' => 'text/html; charset=utf-8',
+        'redirect_count' => 1,
+        'body' => '<!doctype html><html><head><title>黛影夹克-天猫</title><meta property="og:title" content="Daiying Jacket"><meta property="og:image" content="//img.alicdn.com/example.jpg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Daiying Jacket","brand":{"@type":"Brand","name":"Daiying"},"model":"V2","offers":{"@type":"Offer","price":"360.00","priceCurrency":"CNY"},"additionalProperty":[{"@type":"PropertyValue","name":"颜色","value":"黑色"}]}</script></head><body><ul><li>品牌: Daiying</li><li>型号: V2</li></ul></body></html>',
+    ];
+});
+$taobaoResult = $taobaoProvider->verifySource($taobaoProduct);
+$assert(($taobaoResult['status'] ?? '') === 'pending', 'Taobao provider records source facts without claiming authenticity.');
+$assert(($taobaoResult['checked_facts']['淘宝域名是否合法'] ?? '') === '合法', 'Taobao provider allowlists official Taobao/Tmall hosts.');
+$assert(($taobaoResult['checked_facts']['商品ID'] ?? '') === '812345678901', 'Taobao provider extracts item id from source or final URL.');
+$assert(($taobaoResult['checked_facts']['最终跳转域名'] ?? '') === 'detail.tmall.com', 'Taobao provider records final Taobao/Tmall host.');
+$assert(($taobaoResult['checked_facts']['当前页面状态'] ?? '') === '正常商品页面', 'Taobao provider records the current page state.');
+$assert(($taobaoResult['checked_facts']['商品标题'] ?? '') === 'Daiying Jacket', 'Taobao provider extracts product title.');
+$assert(($taobaoResult['checked_facts']['品牌'] ?? '') === 'Daiying', 'Taobao provider extracts reliable brand facts.');
+$assert(($taobaoResult['checked_facts']['型号'] ?? '') === 'V2', 'Taobao provider extracts reliable model facts.');
+$assert(($taobaoResult['checked_facts']['价格'] ?? '') === '360.00', 'Taobao provider records reliable price facts.');
+$assert(($taobaoResult['checked_facts']['币种'] ?? '') === 'CNY', 'Taobao provider records currency when reliable.');
+$assert(($taobaoResult['checked_facts']['图片信息'] ?? '') === 'https://img.alicdn.com/example.jpg', 'Taobao provider records reliable image metadata.');
+$assert(($taobaoResult['checked_facts']['商品标题对比'] ?? '') === '存在差异', 'Taobao provider compares source title with Daiying product name.');
+$assert(($taobaoResult['checked_facts']['品牌对比'] ?? '') === '一致', 'Taobao provider compares source brand with Daiying product brand.');
+$assert(($taobaoResult['checked_facts']['型号对比'] ?? '') === '存在差异', 'Taobao provider compares source model with Daiying product model.');
+$assert(($taobaoResult['checked_facts']['价格对比'] ?? '') === '一致', 'Taobao provider compares source price with Daiying product price.');
+$taobaoRecordId = $repo->appendVerificationRecord($taobaoResult + ['product_id' => $productId], 99);
+$taobaoRecords = $repo->verificationRecords($productId);
+$assert($taobaoRecordId > 0 && ($taobaoRecords[0]['provider'] ?? '') === 'official.commerce.verifier.taobao', 'Taobao provider appends immutable verification facts.');
+$assert(($repo->product($productId)['verification_status'] ?? '') === 'pending', 'Taobao provider keeps product pending until a stronger trusted provider verifies authenticity.');
+$taobaoProductPage = (new CommerceController($repo, $pdo, Settings::fromArray(['security' => ['encryption_key' => 'commerce-test-secret']])))->productPage(new Request('GET', '/commerce/product', ['id' => $productId]))->body();
+$assert(str_contains($taobaoProductPage, 'Daiying Jacket'), 'Consumer transparency profile can display Taobao product facts.');
+$assert(str_contains($taobaoProductPage, '商品标题') && str_contains($taobaoProductPage, '存在差异'), 'Consumer transparency profile can display Taobao comparison results.');
+
+$taobaoLoginProvider = new TaobaoVerificationProvider(static fn (string $url): array => [
+    'requested_url' => $url,
+    'final_url' => 'https://login.taobao.com/member/login.jhtml',
+    'http_status' => 200,
+    'content_type' => 'text/html',
+    'redirect_count' => 1,
+    'body' => '<html><head><title>亲，请登录</title></head><body>亲，请登录</body></html>',
+]);
+$taobaoLogin = $taobaoLoginProvider->verifySource($taobaoProduct);
+$assert(($taobaoLogin['checked_facts']['当前页面状态'] ?? '') === '登录页', 'Taobao provider marks login pages instead of bypassing them.');
+$assert(($taobaoLogin['checked_facts']['品牌'] ?? '') === '未核验', 'Taobao login pages do not produce guessed brand facts.');
+
+$taobaoRiskProvider = new TaobaoVerificationProvider(static fn (string $url): array => [
+    'requested_url' => $url,
+    'final_url' => 'https://sec.taobao.com/query.htm',
+    'http_status' => 200,
+    'content_type' => 'text/html',
+    'redirect_count' => 1,
+    'body' => '<html><head><title>安全验证</title></head><body>验证码 滑块 风控</body></html>',
+]);
+$taobaoRisk = $taobaoRiskProvider->verifySource($taobaoProduct);
+$assert(($taobaoRisk['checked_facts']['当前页面状态'] ?? '') === '验证码/风控页面', 'Taobao provider marks risk-control pages as unverified.');
+$assert(($taobaoRisk['checked_facts']['商品标题'] ?? '') === '未核验', 'Taobao risk pages do not produce product facts.');
+
+$taobaoInvalidProvider = new TaobaoVerificationProvider(static fn (string $url): array => [
+    'requested_url' => $url,
+    'final_url' => $url,
+    'http_status' => 404,
+    'content_type' => 'text/html',
+    'redirect_count' => 0,
+    'body' => '<html><head><title>页面不存在</title></head><body>商品不存在</body></html>',
+]);
+$taobaoInvalid = $taobaoInvalidProvider->verifySource($taobaoProduct);
+$assert(($taobaoInvalid['status'] ?? '') === 'failed', 'Taobao provider marks invalid or unavailable product pages as failed.');
+$assert(($taobaoInvalid['checked_facts']['商品标题'] ?? '') === '未核验', 'Invalid Taobao pages do not produce guessed product titles.');
+
+$fakeTaobaoProvider = new TaobaoVerificationProvider(static fn (string $url): array => ['requested_url' => $url, 'final_url' => $url, 'http_status' => 200, 'body' => '']);
+$fakeTaobao = $fakeTaobaoProvider->verifySource(array_replace($product, ['source_url' => 'https://taobao.com.evil.example/item.htm?id=812345678901']));
+$assert(($fakeTaobao['status'] ?? '') === 'failed', 'Taobao provider rejects lookalike Taobao domains.');
+$assert(($fakeTaobao['checked_facts']['淘宝域名是否合法'] ?? '') === '不合法或未核验', 'Rejected Taobao domains are not recorded as valid platform facts.');
 
 $sellerCannotVerify = false;
 try {
