@@ -6,6 +6,7 @@ require __DIR__ . '/../system/core/Bootstrap/autoload.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceContracts.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceRepository.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/GenericUrlVerificationProvider.php';
+require __DIR__ . '/../content/plugins/official.commerce/src/AmazonVerificationProvider.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceController.php';
 
 use Cms\Core\Config\Settings;
@@ -19,6 +20,7 @@ use Daiying\Commerce\CommerceVerificationProviderInterface;
 use Daiying\Commerce\CommerceLogisticsProviderInterface;
 use Daiying\Commerce\CommerceProviderIsolation;
 use Daiying\Commerce\CommerceRepository;
+use Daiying\Commerce\AmazonVerificationProvider;
 use Daiying\Commerce\GenericUrlVerificationProvider;
 
 $failures = 0;
@@ -172,9 +174,59 @@ $assert(($missingFacts['checked_facts']['品牌'] ?? '') === '未核验', 'Missi
 $assert(($missingFacts['checked_facts']['型号'] ?? '') === '未核验', 'Generic URL provider does not guess unavailable model facts.');
 
 $unsafeProvider = new GenericUrlVerificationProvider(static fn (string $url): array => ['final_url' => $url, 'http_status' => 200, 'body' => '']);
-$unsafeResult = $unsafeProvider->verifySource($product + ['source_url' => 'http://127.0.0.1/admin']);
+$unsafeResult = $unsafeProvider->verifySource(array_replace($product, ['source_url' => 'http://127.0.0.1/admin']));
 $assert(($unsafeResult['status'] ?? '') === 'failed', 'Generic URL provider blocks private-address source URLs.');
 $assert(($unsafeResult['checked_facts']['品牌'] ?? '') === '未核验', 'Blocked URLs do not produce guessed brand facts.');
+
+$amazonProduct = array_replace($product, ['source_url' => 'https://www.amazon.com/dp/B0TEST1234']);
+$amazonProvider = new AmazonVerificationProvider(static function (string $url): array {
+    return [
+        'requested_url' => $url,
+        'final_url' => 'https://www.amazon.com/Daiying-Widget/dp/B0TEST1234/ref=fixture',
+        'http_status' => 200,
+        'content_type' => 'text/html; charset=utf-8',
+        'redirect_count' => 1,
+        'body' => '<!doctype html><html><head><title>Amazon.com: Daiying Widget</title><meta property="og:image" content="https://m.media-amazon.com/images/I/test.jpg"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Daiying Widget","brand":{"@type":"Brand","name":"Daiying"},"model":"V1-Pro","offers":{"@type":"Offer","price":"59.99","priceCurrency":"USD"},"additionalProperty":[{"@type":"PropertyValue","name":"Color","value":"Black"}]}</script></head><body><span id="productTitle">Daiying Widget</span><span class="a-offscreen">$59.99</span></body></html>',
+    ];
+});
+$amazonResult = $amazonProvider->verifySource($amazonProduct);
+$assert(($amazonResult['status'] ?? '') === 'pending', 'Amazon provider records source facts without claiming authenticity.');
+$assert(($amazonResult['checked_facts']['Amazon域名是否合法'] ?? '') === '合法', 'Amazon provider allowlists official Amazon hosts.');
+$assert(($amazonResult['checked_facts']['ASIN'] ?? '') === 'B0TEST1234', 'Amazon provider extracts ASIN from the source or final URL.');
+$assert(($amazonResult['checked_facts']['最终跳转域名'] ?? '') === 'www.amazon.com', 'Amazon provider records final Amazon host.');
+$assert(($amazonResult['checked_facts']['当前页面状态'] ?? '') === '正常商品页面', 'Amazon provider records the current page state.');
+$assert(($amazonResult['checked_facts']['商品标题'] ?? '') === 'Daiying Widget', 'Amazon provider extracts product title.');
+$assert(($amazonResult['checked_facts']['品牌'] ?? '') === 'Daiying', 'Amazon provider extracts reliable brand facts.');
+$assert(($amazonResult['checked_facts']['型号'] ?? '') === 'V1-Pro', 'Amazon provider extracts reliable model facts.');
+$assert(($amazonResult['checked_facts']['价格'] ?? '') === '$59.99', 'Amazon provider records the visible Amazon price when reliable.');
+$assert(($amazonResult['checked_facts']['币种'] ?? '') === 'USD', 'Amazon provider records currency when reliable.');
+$assert(($amazonResult['checked_facts']['图片信息'] ?? '') === 'https://m.media-amazon.com/images/I/test.jpg', 'Amazon provider records reliable image metadata.');
+$assert(($amazonResult['checked_facts']['商品标题对比'] ?? '') === '存在差异', 'Amazon provider compares source title with Daiying product name.');
+$assert(($amazonResult['checked_facts']['品牌对比'] ?? '') === '一致', 'Amazon provider compares source brand with Daiying product brand.');
+$assert(($amazonResult['checked_facts']['型号对比'] ?? '') === '存在差异', 'Amazon provider compares source model with Daiying product model.');
+$assert(($amazonResult['checked_facts']['价格对比'] ?? '') === '存在差异', 'Amazon provider compares source price with Daiying product price and currency.');
+$assert(($amazonResult['checked_facts']['图片对比'] ?? '') === '未核验', 'Amazon provider leaves image comparison unverified without a reliable local image URL.');
+$amazonRecordId = $repo->appendVerificationRecord($amazonResult + ['product_id' => $productId], 99);
+$amazonRecords = $repo->verificationRecords($productId);
+$assert($amazonRecordId > 0 && ($amazonRecords[0]['provider'] ?? '') === 'official.commerce.verifier.amazon', 'Amazon provider appends immutable verification facts.');
+$assert(($repo->product($productId)['verification_status'] ?? '') === 'pending', 'Amazon provider keeps product pending until a stronger trusted provider verifies authenticity.');
+
+$amazonCaptchaProvider = new AmazonVerificationProvider(static fn (string $url): array => [
+    'requested_url' => $url,
+    'final_url' => $url,
+    'http_status' => 200,
+    'content_type' => 'text/html',
+    'redirect_count' => 0,
+    'body' => '<html><head><title>Robot Check</title></head><body>Enter the characters you see below</body></html>',
+]);
+$amazonCaptcha = $amazonCaptchaProvider->verifySource($amazonProduct);
+$assert(($amazonCaptcha['checked_facts']['当前页面状态'] ?? '') === '验证码/反爬页面', 'Amazon provider marks robot checks instead of fighting them.');
+$assert(($amazonCaptcha['checked_facts']['品牌'] ?? '') === '未核验', 'Amazon provider leaves facts unverified behind robot checks.');
+
+$fakeAmazonProvider = new AmazonVerificationProvider(static fn (string $url): array => ['requested_url' => $url, 'final_url' => $url, 'http_status' => 200, 'body' => '']);
+$fakeAmazon = $fakeAmazonProvider->verifySource(array_replace($product, ['source_url' => 'https://amazon.com.evil.example/dp/B0TEST1234']));
+$assert(($fakeAmazon['status'] ?? '') === 'failed', 'Amazon provider rejects lookalike Amazon domains.');
+$assert(($fakeAmazon['checked_facts']['Amazon域名是否合法'] ?? '') === '不合法或未核验', 'Rejected Amazon domains are not recorded as valid platform facts.');
 
 $sellerCannotVerify = false;
 try {

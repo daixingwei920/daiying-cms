@@ -10,6 +10,7 @@ use Daiying\Commerce\CommerceRepository;
 require_once __DIR__ . '/src/CommerceRepository.php';
 require_once __DIR__ . '/src/CommerceContracts.php';
 require_once __DIR__ . '/src/GenericUrlVerificationProvider.php';
+require_once __DIR__ . '/src/AmazonVerificationProvider.php';
 require_once __DIR__ . '/src/CommerceController.php';
 
 return static function (PluginContext $context): void {
@@ -29,6 +30,7 @@ return static function (PluginContext $context): void {
     $context->adminRoute('POST', '/admin/commerce/actions/save', [$controller, 'adminSaveAction'], 'commerce.manage', true);
     $context->adminRoute('POST', '/admin/commerce/verification/save', [$controller, 'adminSaveVerification'], 'commerce.manage', true);
     $context->adminRoute('POST', '/admin/commerce/verification/run-url', [$controller, 'adminRunUrlVerification'], 'commerce.verify.write', true);
+    $context->adminRoute('POST', '/admin/commerce/verification/run-amazon', [$controller, 'adminRunAmazonVerification'], 'commerce.verify.write', true);
     $context->adminRoute('POST', '/admin/commerce/logistics/save', [$controller, 'adminSaveLogistics'], 'commerce.orders', true);
     $context->adminRoute('GET', '/admin/commerce/orders', [$controller, 'adminOrders'], 'commerce.orders', false);
     $context->adminRoute('GET', '/admin/commerce/orders/show', [$controller, 'adminOrderShow'], 'commerce.orders', false);

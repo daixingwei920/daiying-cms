@@ -204,6 +204,49 @@ final class CommerceController
         }
     }
 
+    public function adminRunAmazonVerification(Request $request): Response
+    {
+        $productId = (int) ($request->body['product_id'] ?? 0);
+        try {
+            $product = $this->repo->product($productId);
+            if ($product === null) {
+                throw new \RuntimeException('商品不存在。');
+            }
+            $provider = new AmazonVerificationProvider();
+            $captured = CommerceProviderIsolation::capture($provider->providerId(), 'verify_source', fn (): array => $provider->verifySource($product));
+            $record = ($captured['ok'] ?? false) === true && is_array($captured['result'] ?? null)
+                ? $captured['result']
+                : [
+                    'product_id' => $productId,
+                    'status' => 'failed',
+                    'source_url' => (string) ($product['source_url'] ?? ''),
+                    'checked_facts' => [
+                        'Amazon域名是否合法' => '未核验',
+                        'ASIN' => '未核验',
+                        '当前页面状态' => '核验失败',
+                        '商品标题' => '未核验',
+                        '品牌' => '未核验',
+                        '型号' => '未核验',
+                        '价格' => '未核验',
+                        '图片信息' => '未核验',
+                    ],
+                    'raw_evidence' => [
+                        'error_class' => (string) ($captured['error_class'] ?? ''),
+                        'operation' => (string) ($captured['operation'] ?? 'verify_source'),
+                    ],
+                    'failure_reason' => 'Amazon Provider 暂不可用：' . (string) ($captured['error'] ?? 'unknown error'),
+                    'provider' => $provider->providerId(),
+                    'record_type' => 'provider_result',
+                ];
+            $record['product_id'] = $productId;
+            $this->repo->appendVerificationRecord($record, $this->adminId($request));
+
+            return Response::redirect('/admin/commerce/products/edit?id=' . $productId . '&amazon_verified=1');
+        } catch (Throwable $exception) {
+            return $this->error('Amazon 来源核验失败', $exception, '/admin/commerce/products/edit?id=' . $productId);
+        }
+    }
+
     public function adminSaveLogistics(Request $request): Response
     {
         $orderId = (int) ($request->body['order_id'] ?? 0);
@@ -541,6 +584,10 @@ final class CommerceController
             '<input type="hidden" name="product_id" value="' . $productId . '">' .
             '<p class="muted">通用 URL Provider 只核验来源页面可访问性和可可靠读取的页面事实，不判断正品。</p>' .
             '<button type="submit">执行 URL 基础核验</button></form>' .
+            '<form method="post" action="/admin/commerce/verification/run-amazon">' . CsrfToken::field() .
+            '<input type="hidden" name="product_id" value="' . $productId . '">' .
+            '<p class="muted">Amazon Provider 只读取 Amazon 官方域名、ASIN 和页面可可靠取得的商品事实；登录、验证码、地区页均记为未核验。</p>' .
+            '<button type="submit">执行 Amazon 来源核验</button></form>' .
             '<form method="post" action="/admin/commerce/verification/save">' . CsrfToken::field() .
             '<input type="hidden" name="product_id" value="' . $productId . '">' .
             '<p class="muted">卖家只能请求重新核验；核验结果由系统或受信 Provider 追加，主题和普通插件只读展示。</p>' .
@@ -674,6 +721,7 @@ final class CommerceController
     private function verificationFactRows(array $facts, array $product): string
     {
         $labels = [
+            '商品标题' => 'name',
             '品牌' => 'brand',
             '型号' => 'model',
             '价格' => 'price_minor',
@@ -685,7 +733,10 @@ final class CommerceController
                 ? strip_tags($this->money((int) ($product[$field] ?? 0), (string) ($product['currency'] ?? 'CNY')))
                 : (string) ($product[$field] ?? '');
             $verifiedValue = (string) ($facts[$label] ?? $facts[$field] ?? '');
-            $state = $verifiedValue === '' ? '未核验' : ($this->normalizedComparable($productValue) === $this->normalizedComparable($verifiedValue) ? '一致' : '存在差异');
+            $state = (string) ($facts[$label . '对比'] ?? '');
+            if ($state === '') {
+                $state = $verifiedValue === '' ? '未核验' : ($this->normalizedComparable($productValue) === $this->normalizedComparable($verifiedValue) ? '一致' : '存在差异');
+            }
             $rows .= '<tr><td>' . $this->e($label) . '</td><td>' . $this->e($productValue !== '' ? $productValue : '未提供') . '</td><td>' . $this->e($verifiedValue !== '' ? $verifiedValue : '未提供') . '</td><td>' . $this->e($state) . '</td></tr>';
         }
 
