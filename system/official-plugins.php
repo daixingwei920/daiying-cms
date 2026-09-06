@@ -30,4 +30,13 @@ return [
         'capability_namespaces' => ['video', 'video_collector'],
         'table_prefixes' => ['video_', 'video_collector_'],
     ],
+    'official.commerce' => [
+        'directory' => 'official.commerce',
+        'package_type' => 'plugin',
+        'type' => 'plugin',
+        'bundled' => true,
+        'trust_level' => 'trusted_php',
+        'capability_namespaces' => ['commerce'],
+        'table_prefixes' => ['commerce_'],
+    ],
 ];

@@ -1,0 +1,42 @@
+{
+  "plugin_id": "official.commerce",
+  "name": "Daiying Commerce",
+  "version": "0.1.0-alpha.1",
+  "author": "Daiying CMS",
+  "type": "plugin",
+  "package_type": "plugin",
+  "entry": "plugin.php",
+  "core": { "min": "1.2.0", "max": "2.0.0" },
+  "php": "8.1.0",
+  "trust_level": "trusted_php",
+  "official": true,
+  "trusted_deployment": "builtin_or_registry_only",
+  "capabilities": [
+    "content.read",
+    "media.read",
+    "settings.read",
+    "commerce.manage",
+    "commerce.sell",
+    "commerce.orders",
+    "commerce.verify.read"
+  ],
+  "capability_namespaces": ["commerce"],
+  "public_routes": [
+    { "label": "商品列表", "path": "/commerce", "method": "GET" },
+    { "label": "商品详情", "path": "/commerce/product", "method": "GET" },
+    { "label": "立即购买", "path": "/commerce/checkout", "method": "POST" },
+    { "label": "订单完成", "path": "/commerce/orders/complete", "method": "GET" }
+  ],
+  "navigation_items": [
+    { "label": "商品", "url": "/commerce", "type": "plugin_route", "location": "primary", "sort_order": 50 }
+  ],
+  "dependencies": [],
+  "required_plugins": [],
+  "migrations": ["migrations/001_commerce_core.php"],
+  "table_prefixes": ["commerce_"],
+  "data_policy": {
+    "uninstall": "retain_orders_and_facts",
+    "purge": "separate_confirmation_only"
+  },
+  "data_schema_version": "0.1.0-alpha.1"
+}
