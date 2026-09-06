@@ -244,10 +244,11 @@ final class MediaController
         $title = htmlspecialchars((string) ($media['title'] ?: $media['original_name'] ?? '远程媒体'), ENT_QUOTES, 'UTF-8');
         $src = htmlspecialchars($src, ENT_QUOTES, 'UTF-8');
         $tag = $type === 'video'
-            ? '<video controls preload="metadata" src="' . $src . '" style="width:min(960px,90vw);max-height:70vh;background:#000"></video>'
-            : '<audio controls preload="auto" src="' . $src . '" style="width:min(720px,90vw)"></audio>';
+            ? '<video id="media-player" controls preload="metadata" src="' . $src . '" style="width:min(960px,90vw);max-height:70vh;background:#000"></video>'
+            : '<audio id="media-player" controls preload="auto" src="' . $src . '" style="width:min(720px,90vw)"></audio>';
+        $script = '<script>(function(){var p=document.getElementById("media-player");var s=document.getElementById("media-status");if(!p||!s)return;var ready=function(){s.textContent="已准备播放";s.className="status ready";setTimeout(function(){s.style.display="none";},1200)};p.addEventListener("loadedmetadata",ready,{once:true});p.addEventListener("canplay",ready,{once:true});p.addEventListener("playing",ready,{once:true});p.addEventListener("error",function(){s.textContent="媒体暂时无法播放，请刷新后重试";s.className="status error";});})();</script>';
 
-        return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $title . '</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f172a;color:#e5e7eb;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.player{display:grid;gap:18px;justify-items:center;padding:24px}h1{font-size:18px;font-weight:600;margin:0;text-align:center;max-width:90vw;word-break:break-word}.link{color:#93c5fd;text-decoration:none}</style></head><body><main class="player"><h1>' . $title . '</h1>' . $tag . '<a class="link" href="/admin/media/detail/' . $id . '">返回媒体详情</a></main></body></html>';
+        return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $title . '</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f172a;color:#e5e7eb;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.player{display:grid;gap:16px;justify-items:center;padding:24px}h1{font-size:18px;font-weight:600;margin:0;text-align:center;max-width:90vw;word-break:break-word}.status{font-size:14px;color:#cbd5e1}.status.ready{color:#bbf7d0}.status.error{color:#fecaca}.link{color:#93c5fd;text-decoration:none}</style></head><body><main class="player"><h1>' . $title . '</h1><div id="media-status" class="status">正在准备播放...</div>' . $tag . '<a class="link" href="/admin/media/detail/' . $id . '">返回媒体详情</a></main>' . $script . '</body></html>';
     }
 
     private function variant(Request $request): string

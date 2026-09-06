@@ -18,6 +18,7 @@ final class BaiduStoragePlugin
     private BaiduApiClient $api;
     private BaiduOAuthService $oauth;
     private BaiduStorageProvider $provider;
+    private BaiduMediaRangeCache $rangeCache;
 
     public function __construct(private readonly PluginContext $context)
     {
@@ -25,6 +26,7 @@ final class BaiduStoragePlugin
         $this->api = new BaiduApiClient($this->tokens, new BaiduHttpTransport());
         $this->oauth = new BaiduOAuthService($this->tokens, $this->api);
         $this->provider = new BaiduStorageProvider($this->api, new BaiduFileBrowser(), $this->downloadSecret(), $this->tokens);
+        $this->rangeCache = BaiduMediaRangeCache::default();
     }
 
     public function register(): void
@@ -221,6 +223,27 @@ final class BaiduStoragePlugin
                 $range = [0, $end];
             }
 
+            if ($range !== null && $this->isStreamableMime($item->mimeType)) {
+                $cached = $this->rangeCache->read($item, $range);
+                if ($cached !== null) {
+                    return $this->partialResponse($cached, $range, $item->byteSize, $baseHeaders);
+                }
+
+                $fetchRange = $this->rangeCache->readAheadRange($item, $range);
+                $download = $this->api->downloadBytes($remoteId, $fetchRange, $fetchRange[1] - $fetchRange[0] + 1);
+                $downloadBody = (string) ($download['body'] ?? '');
+                if ($downloadBody === '' || !$this->downloadCoversRange($download, $fetchRange)) {
+                    throw new \RuntimeException('百度网盘媒体 Range 响应不可用。');
+                }
+                $this->rangeCache->store($item, $fetchRange, $downloadBody);
+                $body = $this->sliceDownloadedRange($downloadBody, $fetchRange, $range);
+                if ($body === '') {
+                    throw new \RuntimeException('百度网盘媒体读取失败。');
+                }
+
+                return $this->partialResponse($body, $range, $item->byteSize, $baseHeaders);
+            }
+
             $maxBytes = $range !== null ? ($range[1] - $range[0] + 1) : 67108864;
             $download = $this->api->downloadBytes($remoteId, $range, $maxBytes);
             $body = (string) ($download['body'] ?? '');
@@ -229,10 +252,7 @@ final class BaiduStoragePlugin
             }
 
             if ($range !== null) {
-                return new Response($body, 206, $baseHeaders + [
-                    'Content-Range' => 'bytes ' . $range[0] . '-' . ($range[0] + strlen($body) - 1) . '/' . max(strlen($body), $item->byteSize),
-                    'Content-Length' => (string) strlen($body),
-                ]);
+                return $this->partialResponse($body, $range, $item->byteSize, $baseHeaders);
             }
 
             return new Response($body, 200, $baseHeaders + [
@@ -255,6 +275,45 @@ final class BaiduStoragePlugin
         $mimeType = strtolower($mimeType);
 
         return str_starts_with($mimeType, 'audio/') || str_starts_with($mimeType, 'video/');
+    }
+
+    /** @param array{0:int,1:int} $range @param array<string,string> $baseHeaders */
+    private function partialResponse(string $body, array $range, int $totalSize, array $baseHeaders): Response
+    {
+        return new Response($body, 206, $baseHeaders + [
+            'Content-Range' => 'bytes ' . $range[0] . '-' . ($range[0] + strlen($body) - 1) . '/' . max(strlen($body), $totalSize),
+            'Content-Length' => (string) strlen($body),
+            'X-Daiying-Media-Cache' => 'range',
+        ]);
+    }
+
+    /** @param array{status:int,headers:array<string,string>,body:string,final_url:string} $download @param array{0:int,1:int} $range */
+    private function downloadCoversRange(array $download, array $range): bool
+    {
+        if ($range[0] === 0) {
+            return true;
+        }
+        if ((int) ($download['status'] ?? 0) !== 206) {
+            return false;
+        }
+        $contentRange = (string) (($download['headers']['content-range'] ?? '') ?: ($download['headers']['Content-Range'] ?? ''));
+        if ($contentRange === '' || preg_match('/bytes\s+(\d+)-(\d+)\/(\d+|\*)/i', $contentRange, $matches) !== 1) {
+            return false;
+        }
+
+        return (int) $matches[1] === $range[0];
+    }
+
+    /** @param array{0:int,1:int} $fetchRange @param array{0:int,1:int} $range */
+    private function sliceDownloadedRange(string $body, array $fetchRange, array $range): string
+    {
+        $offset = $range[0] - $fetchRange[0];
+        $length = $range[1] - $range[0] + 1;
+        if ($offset < 0 || $offset + $length > strlen($body)) {
+            return '';
+        }
+
+        return substr($body, $offset, $length);
     }
 
     private function logProxyFailure(int $mediaId, string $remoteId, \Throwable $exception): void
