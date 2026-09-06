@@ -3,10 +3,15 @@
 declare(strict_types=1);
 
 require __DIR__ . '/../system/core/Bootstrap/autoload.php';
+require __DIR__ . '/../content/plugins/official.commerce/src/CommerceContracts.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceRepository.php';
 
 use Cms\Core\Plugin\PluginManifest;
 use Cms\Core\Payment\PaymentRepository;
+use Daiying\Commerce\CommerceAiModuleInterface;
+use Daiying\Commerce\CommerceDistributionInterface;
+use Daiying\Commerce\CommerceLogisticsProviderInterface;
+use Daiying\Commerce\CommerceProviderIsolation;
 use Daiying\Commerce\CommerceRepository;
 
 $failures = 0;
@@ -29,6 +34,13 @@ $assert(!in_array('payment.create', $parsed->capabilities, true), 'Commerce uses
 $assert(!in_array('network.external', $parsed->capabilities, true), 'Commerce core does not need external network access in V1 phase 1.');
 $assert(in_array('commerce.verify.write', $parsed->capabilities, true), 'Commerce declares a dedicated verification write capability for future permission splits.');
 $assert(in_array('commerce.logistics.write', $parsed->capabilities, true), 'Commerce declares a dedicated logistics write capability for future provider integrations.');
+$assert(interface_exists(CommerceAiModuleInterface::class), 'Commerce exposes an optional AI module interface without making AI a hard dependency.');
+$assert(interface_exists(CommerceDistributionInterface::class), 'Commerce exposes a distribution provider interface for future channels.');
+$assert(interface_exists(CommerceLogisticsProviderInterface::class), 'Commerce exposes a logistics provider interface for future carrier plugins.');
+$isolated = CommerceProviderIsolation::capture('fixture', 'explode', static function (): void {
+    throw new RuntimeException('provider unavailable');
+});
+$assert(($isolated['ok'] ?? true) === false && ($isolated['provider'] ?? '') === 'fixture', 'Provider failures are captured instead of escaping into the commerce flow.');
 
 $coreMigration = require $root . '/content/plugins/official.commerce/migrations/001_commerce_core.php';
 $assert(in_array('table:commerce_orders', $coreMigration['affected_objects'] ?? [], true), 'Migration declares the commerce order table.');

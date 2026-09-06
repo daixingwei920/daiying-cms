@@ -8,6 +8,7 @@ use Daiying\Commerce\CommerceController;
 use Daiying\Commerce\CommerceRepository;
 
 require_once __DIR__ . '/src/CommerceRepository.php';
+require_once __DIR__ . '/src/CommerceContracts.php';
 require_once __DIR__ . '/src/CommerceController.php';
 
 return static function (PluginContext $context): void {
