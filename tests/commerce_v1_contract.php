@@ -210,6 +210,9 @@ $amazonRecordId = $repo->appendVerificationRecord($amazonResult + ['product_id' 
 $amazonRecords = $repo->verificationRecords($productId);
 $assert($amazonRecordId > 0 && ($amazonRecords[0]['provider'] ?? '') === 'official.commerce.verifier.amazon', 'Amazon provider appends immutable verification facts.');
 $assert(($repo->product($productId)['verification_status'] ?? '') === 'pending', 'Amazon provider keeps product pending until a stronger trusted provider verifies authenticity.');
+$amazonProductPage = (new CommerceController($repo, $pdo, Settings::fromArray(['security' => ['encryption_key' => 'commerce-test-secret']])))->productPage(new Request('GET', '/commerce/product', ['id' => $productId]))->body();
+$assert(str_contains($amazonProductPage, 'Daiying Widget'), 'Consumer transparency profile can display Amazon product facts.');
+$assert(str_contains($amazonProductPage, '商品标题') && str_contains($amazonProductPage, '存在差异'), 'Consumer transparency profile can display Amazon comparison results.');
 
 $amazonCaptchaProvider = new AmazonVerificationProvider(static fn (string $url): array => [
     'requested_url' => $url,
@@ -222,6 +225,30 @@ $amazonCaptchaProvider = new AmazonVerificationProvider(static fn (string $url):
 $amazonCaptcha = $amazonCaptchaProvider->verifySource($amazonProduct);
 $assert(($amazonCaptcha['checked_facts']['当前页面状态'] ?? '') === '验证码/反爬页面', 'Amazon provider marks robot checks instead of fighting them.');
 $assert(($amazonCaptcha['checked_facts']['品牌'] ?? '') === '未核验', 'Amazon provider leaves facts unverified behind robot checks.');
+
+$amazonContinueProvider = new AmazonVerificationProvider(static fn (string $url): array => [
+    'requested_url' => $url,
+    'final_url' => $url,
+    'http_status' => 200,
+    'content_type' => 'text/html',
+    'redirect_count' => 0,
+    'body' => '<html><head><title>Amazon.com</title></head><body>Click the button below to continue shopping</body></html>',
+]);
+$amazonContinue = $amazonContinueProvider->verifySource($amazonProduct);
+$assert(($amazonContinue['checked_facts']['当前页面状态'] ?? '') === '验证码/反爬页面', 'Amazon provider marks continue-shopping interstitials as access limits.');
+$assert(($amazonContinue['checked_facts']['商品标题'] ?? '') === '未核验', 'Amazon interstitial pages do not produce product facts.');
+
+$amazonInvalidProvider = new AmazonVerificationProvider(static fn (string $url): array => [
+    'requested_url' => $url,
+    'final_url' => $url,
+    'http_status' => 404,
+    'content_type' => 'text/html',
+    'redirect_count' => 0,
+    'body' => '<html><head><title>Page Not Found</title></head><body>Page Not Found</body></html>',
+]);
+$amazonInvalid = $amazonInvalidProvider->verifySource($amazonProduct);
+$assert(($amazonInvalid['status'] ?? '') === 'failed', 'Amazon provider marks invalid or unavailable product pages as failed.');
+$assert(($amazonInvalid['checked_facts']['商品标题'] ?? '') === '未核验', 'Invalid Amazon pages do not produce guessed product titles.');
 
 $fakeAmazonProvider = new AmazonVerificationProvider(static fn (string $url): array => ['requested_url' => $url, 'final_url' => $url, 'http_status' => 200, 'body' => '']);
 $fakeAmazon = $fakeAmazonProvider->verifySource(array_replace($product, ['source_url' => 'https://amazon.com.evil.example/dp/B0TEST1234']));

@@ -154,6 +154,7 @@ final class AmazonVerificationProvider implements CommerceVerificationProviderIn
                 CURLOPT_USERAGENT => 'DaiyingCommerceAmazonVerifier/1.0',
                 CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
                 CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_ENCODING => '',
                 CURLOPT_HEADER => true,
                 CURLOPT_NOBODY => false,
                 CURLOPT_RANGE => '0-1048575',
@@ -163,7 +164,6 @@ final class AmazonVerificationProvider implements CommerceVerificationProviderIn
             $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
             $headerSize = (int) curl_getinfo($ch, CURLINFO_HEADER_SIZE);
             $contentType = (string) curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-            curl_close($ch);
             if (!is_string($raw)) {
                 throw new RuntimeException($error !== '' ? $error : 'HTTP 请求失败。');
             }
@@ -241,7 +241,7 @@ final class AmazonVerificationProvider implements CommerceVerificationProviderIn
     private function pageState(string $body): string
     {
         $text = strtolower($this->clean(strip_tags($body), 3000));
-        foreach (['captcha', 'robot check', 'enter the characters you see', 'automated access'] as $needle) {
+        foreach (['captcha', 'robot check', 'enter the characters you see', 'automated access', 'click the button below to continue shopping', 'continue shopping'] as $needle) {
             if (str_contains($text, $needle)) {
                 return '验证码/反爬页面';
             }

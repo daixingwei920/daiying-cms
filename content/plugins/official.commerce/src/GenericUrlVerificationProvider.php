@@ -101,6 +101,7 @@ final class GenericUrlVerificationProvider implements CommerceVerificationProvid
                 CURLOPT_USERAGENT => 'DaiyingCommerceUrlVerifier/1.0',
                 CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
                 CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_ENCODING => '',
                 CURLOPT_HEADER => true,
                 CURLOPT_NOBODY => false,
                 CURLOPT_RANGE => '0-1048575',
@@ -110,7 +111,6 @@ final class GenericUrlVerificationProvider implements CommerceVerificationProvid
             $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
             $headerSize = (int) curl_getinfo($ch, CURLINFO_HEADER_SIZE);
             $contentType = (string) curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-            curl_close($ch);
             if (!is_string($raw)) {
                 throw new RuntimeException($error !== '' ? $error : 'HTTP 请求失败。');
             }
