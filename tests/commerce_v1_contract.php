@@ -27,6 +27,7 @@ $assert($parsed->trustLevel === 'trusted_php', 'Commerce is a trusted official p
 $assert(($official['official.commerce']['table_prefixes'] ?? []) === ['commerce_'], 'Official registry grants only the commerce_ table prefix.');
 $assert(!in_array('payment.create', $parsed->capabilities, true), 'Commerce uses Core PaymentService without claiming a foreign payment capability namespace.');
 $assert(!in_array('network.external', $parsed->capabilities, true), 'Commerce core does not need external network access in V1 phase 1.');
+$assert(in_array('commerce.verify.write', $parsed->capabilities, true), 'Commerce declares a dedicated verification write capability for future permission splits.');
 
 $migration = require $root . '/content/plugins/official.commerce/migrations/001_commerce_core.php';
 $assert(in_array('table:commerce_orders', $migration['affected_objects'] ?? [], true), 'Migration declares the commerce order table.');
@@ -93,6 +94,36 @@ $product = $repo->product($productId);
 $assert(is_array($product), 'Product can be created.');
 $assert((int) ($product['available_quantity'] ?? 0) === 5, 'New product starts with full available stock.');
 $assert(($product['specs']['颜色'] ?? '') === '黑色', 'Product specs are stored as structured facts.');
+$assert(($product['verification_status'] ?? '') === 'pending', 'Product with a source URL starts as pending verification.');
+
+$repo->appendVerificationRecord([
+    'product_id' => $productId,
+    'status' => 'verified',
+    'source_url' => 'https://example.com/item/1',
+    'checked_facts' => "品牌: Daiying\n型号: V1",
+    'raw_evidence' => "页面标题: 测试商品\n抓取方式: manual",
+]);
+$verifiedProduct = $repo->product($productId);
+$verifiedRecords = $repo->verificationRecords($productId);
+$assert(($verifiedProduct['verification_status'] ?? '') === 'verified', 'Appending a verified record updates the product verification status.');
+$assert(($verifiedRecords[0]['checked_facts']['品牌'] ?? '') === 'Daiying', 'Verification facts are stored as append-only structured records.');
+$repo->saveProduct([
+    'id' => $productId,
+    'name' => '测试商品',
+    'sku' => 'TEST-001',
+    'status' => 'active',
+    'price_minor' => 36000,
+    'currency' => 'CNY',
+    'stock_quantity' => 5,
+    'source_url' => 'https://example.com/item/1',
+    'brand' => 'Daiying Updated',
+    'model' => 'V1',
+    'specs' => "颜色: 黑色\n容量: 128GB",
+]);
+$pendingProduct = $repo->product($productId);
+$verificationAfterChange = $repo->verificationRecords($productId);
+$assert(($pendingProduct['verification_status'] ?? '') === 'pending', 'Changing key product facts invalidates verified source status.');
+$assert(($verificationAfterChange[0]['provider'] ?? '') === 'system', 'Verification invalidation is recorded by the system as a separate fact.');
 
 $variantId = $repo->saveVariant([
     'product_id' => $productId,

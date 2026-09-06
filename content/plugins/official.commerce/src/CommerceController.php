@@ -146,6 +146,17 @@ final class CommerceController
         }
     }
 
+    public function adminSaveVerification(Request $request): Response
+    {
+        $productId = (int) ($request->body['product_id'] ?? 0);
+        try {
+            $this->repo->appendVerificationRecord($request->body, $this->adminId($request));
+            return Response::redirect('/admin/commerce/products/edit?id=' . $productId . '&verification_saved=1');
+        } catch (Throwable $exception) {
+            return $this->error('来源核验保存失败', $exception, '/admin/commerce/products/edit?id=' . $productId);
+        }
+    }
+
     public function adminOrders(Request $request): Response
     {
         $autoSync = $this->repo->markTrustedPaidOrders(new PaymentRepository($this->pdo), 50);
@@ -297,8 +308,10 @@ final class CommerceController
         $source = !empty($product['source_url']) ? '<p><strong>来源：</strong><a href="' . $this->e((string) $product['source_url']) . '" target="_blank" rel="noopener nofollow">查看原始来源</a></p>' : '<p><strong>来源：</strong>商家未提供来源链接。</p>';
         $specs = $this->specsHtml(is_array($product['specs'] ?? null) ? $product['specs'] : []);
         $description = $this->descriptionHtml((int) ($product['description_content_id'] ?? 0));
+        $verification = $this->verificationHtml((int) $product['id']);
         $body = '<article class="commerce-product"><div>' . $image . '</div><div><h1>' . $this->e((string) $product['name']) . '</h1><p class="commerce-price">' . $this->money((int) $product['price_minor'], (string) $product['currency']) . '</p><p>' . $this->e((string) ($product['summary'] ?? '')) . '</p><p><strong>库存：</strong>' . (int) $product['available_quantity'] . '</p><p><strong>来源核验：</strong>' . $this->verificationLabel((string) $product['verification_status']) . '</p>' . $actions . '</div></article>' .
             '<section class="commerce-section"><h2>透明信息</h2>' . $source . '<p><strong>品牌/型号：</strong>' . $this->e(trim((string) ($product['brand'] ?? '') . ' ' . (string) ($product['model'] ?? '')) ?: '未提供') . '</p>' . $specs . '</section>' .
+            $verification .
             $description;
 
         return Response::html($this->frontPage((string) $product['name'], $body));
@@ -412,7 +425,35 @@ final class CommerceController
             '<form method="post" action="/admin/commerce/variants/save">' . CsrfToken::field() . '<input type="hidden" name="product_id" value="' . $productId . '"><label>规格名称<input name="title" placeholder="如 红色 / XL / 256GB"></label><label>规格 SKU<input name="sku"></label><label>库存<input name="stock_quantity" type="number" min="0" value="0"></label><label>价格增量（分）<input name="price_delta_minor" type="number" value="0"></label><label>选项（每行 名称:值）<textarea name="options" rows="3"></textarea></label><button type="submit">添加规格</button></form>' .
             '<hr><h2>购买动作</h2><table><tr><th>按钮</th><th>类型</th><th>履约</th><th>状态</th></tr>' . $actions . '</table>' .
             '<form method="post" action="/admin/commerce/actions/save">' . CsrfToken::field() . '<input type="hidden" name="product_id" value="' . $productId . '"><label>按钮文案<input name="label" placeholder="立即购买"></label><label>动作类型<select name="action_type">' . $this->options(['site_checkout' => '本站购买', 'external_url' => '外部购买', 'contact' => '联系购买', 'digital_delivery' => '数字自动交付'], 'site_checkout') . '</select></label><label>外部链接<input name="external_url" type="url"></label><label>联系说明<input name="contact_text"></label><label>履约模式<select name="fulfillment_mode">' . $this->options(['none' => '无需履约', 'shipping' => '物流配送', 'digital_card' => '自动发卡'], 'none') . '</select></label><button type="submit">添加购买动作</button></form>' .
+            $this->adminVerificationPanel($productId) .
             '<hr><h2>关键变更历史</h2><table><tr><th>时间</th><th>字段</th><th>旧值</th><th>新值</th></tr>' . $changes . '</table>';
+    }
+
+    private function adminVerificationPanel(int $productId): string
+    {
+        $product = $this->repo->product($productId) ?? [];
+        $defaultSource = (string) ($product['source_url'] ?? '');
+        $rows = '';
+        foreach ($this->repo->verificationRecords($productId) as $record) {
+            $facts = is_array($record['checked_facts'] ?? null) ? $record['checked_facts'] : [];
+            unset($facts['_actor_id']);
+            $source = (string) ($record['source_url'] ?? '');
+            $sourceCell = $source !== '' ? '<a href="' . $this->e($source) . '" target="_blank" rel="noopener nofollow">来源</a>' : '<span class="muted">无</span>';
+            $rows .= '<tr><td>' . $this->e((string) $record['created_at']) . '</td><td>' . $this->e($this->verificationLabel((string) $record['status'])) . '</td><td>' . $this->e((string) ($record['provider'] ?? 'manual')) . '</td><td>' . $sourceCell . '</td><td><code>' . $this->e(json_encode($facts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{}') . '</code></td><td>' . $this->e((string) ($record['failure_reason'] ?? '')) . '</td></tr>';
+        }
+        if ($rows === '') {
+            $rows = '<tr><td colspan="6" class="muted">暂无核验记录。</td></tr>';
+        }
+
+        return '<hr><h2>来源核验</h2><table><tr><th>时间</th><th>状态</th><th>Provider</th><th>来源</th><th>核验事实</th><th>说明</th></tr>' . $rows . '</table>' .
+            '<form method="post" action="/admin/commerce/verification/save">' . CsrfToken::field() .
+            '<input type="hidden" name="product_id" value="' . $productId . '">' .
+            '<label>核验状态<select name="status">' . $this->options(['pending' => '等待核验', 'verified' => '来源信息已核验', 'failed' => '当前无法核验', 'not_provided' => '未提供来源'], 'pending') . '</select></label>' .
+            '<label>来源 URL<input name="source_url" type="url" value="' . $this->e($defaultSource) . '" placeholder="https://example.com/product"></label>' .
+            '<label>核验事实（每行 名称: 值）<textarea name="checked_facts" rows="4" placeholder="品牌: Daiying&#10;型号: V1&#10;价格: 360 CNY"></textarea></label>' .
+            '<label>原始证据（每行 名称: 值）<textarea name="raw_evidence" rows="3" placeholder="页面标题: ...&#10;抓取时间: ..."></textarea></label>' .
+            '<label>失败/补充说明<input name="failure_reason" placeholder="来源页面失效 / 信息不一致 / 等待人工复核"></label>' .
+            '<button type="submit">追加核验记录</button></form>';
     }
 
     private function providerOptions(string $currency): string
@@ -466,6 +507,23 @@ final class CommerceController
         } catch (Throwable) {
             return '<section class="commerce-section"><h2>商品详情</h2><p class="commerce-muted">详情内容暂不可用。</p></section>';
         }
+    }
+
+    private function verificationHtml(int $productId): string
+    {
+        $records = $this->repo->verificationRecords($productId, 5);
+        if ($records === []) {
+            return '<section class="commerce-section"><h2>来源与真实性</h2><p class="commerce-muted">暂未提供来源核验记录。</p></section>';
+        }
+        $latest = $records[0];
+        $rows = '';
+        foreach ($records as $record) {
+            $rows .= '<tr><td>' . $this->e((string) $record['created_at']) . '</td><td>' . $this->e($this->verificationLabel((string) $record['status'])) . '</td><td>' . $this->e((string) ($record['failure_reason'] ?? '')) . '</td></tr>';
+        }
+        $source = (string) ($latest['source_url'] ?? '');
+        $sourceLink = $source !== '' ? '<p><a href="' . $this->e($source) . '" target="_blank" rel="noopener nofollow">查看原始来源</a></p>' : '';
+
+        return '<section class="commerce-section"><h2>来源与真实性</h2><p><strong>' . $this->e($this->verificationLabel((string) $latest['status'])) . '</strong></p>' . $sourceLink . '<table class="commerce-specs"><tr><th>时间</th><th>结果</th><th>说明</th></tr>' . $rows . '</table></section>';
     }
 
     /** @param list<array<string,mixed>> $blocks @return array<int,array<string,mixed>> */

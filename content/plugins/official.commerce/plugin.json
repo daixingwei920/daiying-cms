@@ -18,7 +18,8 @@
     "commerce.manage",
     "commerce.sell",
     "commerce.orders",
-    "commerce.verify.read"
+    "commerce.verify.read",
+    "commerce.verify.write"
   ],
   "capability_namespaces": ["commerce"],
   "public_routes": [

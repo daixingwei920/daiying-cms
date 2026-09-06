@@ -25,6 +25,7 @@ return static function (PluginContext $context): void {
     $context->adminRoute('POST', '/admin/commerce/products/status', [$controller, 'adminSetProductStatus'], 'commerce.manage', true);
     $context->adminRoute('POST', '/admin/commerce/variants/save', [$controller, 'adminSaveVariant'], 'commerce.manage', true);
     $context->adminRoute('POST', '/admin/commerce/actions/save', [$controller, 'adminSaveAction'], 'commerce.manage', true);
+    $context->adminRoute('POST', '/admin/commerce/verification/save', [$controller, 'adminSaveVerification'], 'commerce.manage', true);
     $context->adminRoute('GET', '/admin/commerce/orders', [$controller, 'adminOrders'], 'commerce.orders', false);
     $context->adminRoute('GET', '/admin/commerce/orders/show', [$controller, 'adminOrderShow'], 'commerce.orders', false);
     $context->adminRoute('POST', '/admin/commerce/orders/sync', [$controller, 'adminSyncOrders'], 'commerce.orders', true);

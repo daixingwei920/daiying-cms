@@ -24,8 +24,18 @@ final class CommerceRepository
         'model',
         'source_url',
         'primary_media_id',
+        'specs_json',
         'requires_shipping',
         'auto_delivery_enabled',
+    ];
+    private const VERIFICATION_INVALIDATING_FIELDS = [
+        'price_minor',
+        'currency',
+        'brand',
+        'model',
+        'source_url',
+        'primary_media_id',
+        'specs_json',
     ];
 
     public function __construct(private readonly PDO $pdo)
@@ -126,7 +136,9 @@ final class CommerceRepository
             }
             $sql = 'UPDATE commerce_products SET ' . implode(', ', $set) . ', published_at = :published_at, updated_at = :updated_at WHERE id = :id';
             $this->pdo->prepare($sql)->execute($params);
-            $this->recordProductChanges($id, $existing, $this->product($id) ?? [], $actorId);
+            $updated = $this->product($id) ?? [];
+            $this->recordProductChanges($id, $existing, $updated, $actorId);
+            $this->refreshVerificationAfterProductChange($id, $existing, $updated);
             return $id;
         }
 
@@ -142,7 +154,7 @@ final class CommerceRepository
         }
         $stmt->execute($insertParams + [
             ':uuid' => $this->uuid(),
-            ':verification_status' => 'not_provided',
+            ':verification_status' => $payload['source_url'] !== null ? 'pending' : 'not_provided',
             ':published_at' => $status === 'active' ? $now : null,
             ':created_at' => $now,
             ':updated_at' => $now,
@@ -443,8 +455,8 @@ final class CommerceRepository
         $this->pdo->beginTransaction();
         try {
             $this->releaseReservedInventory((int) $order['product_id'], isset($order['variant_id']) ? (int) $order['variant_id'] : null, $orderId, (int) $order['quantity'], $note !== '' ? $note : 'cancelled by admin');
-            $this->pdo->prepare("UPDATE commerce_orders SET status = 'cancelled', fulfillment_status = 'not_required', updated_at = :updated_at WHERE id = :id")
-                ->execute([':id' => $orderId, ':updated_at' => $now]);
+            $this->pdo->prepare("UPDATE commerce_orders SET status = 'cancelled', fulfillment_status = 'not_required', cancelled_at = :cancelled_at, updated_at = :updated_at WHERE id = :id")
+                ->execute([':id' => $orderId, ':cancelled_at' => $now, ':updated_at' => $now]);
             $this->pdo->commit();
         } catch (\Throwable $exception) {
             if ($this->pdo->inTransaction()) {
@@ -527,6 +539,59 @@ final class CommerceRepository
         $stmt = $this->pdo->prepare('SELECT * FROM commerce_product_changes WHERE product_id = :product_id ORDER BY id DESC LIMIT 50');
         $stmt->execute([':product_id' => $productId]);
         return array_map(fn (array $row): array => $this->hydrateJsonFields($row, ['old_value_json', 'new_value_json']), $stmt->fetchAll());
+    }
+
+    /** @param array<string,mixed> $input */
+    public function appendVerificationRecord(array $input, ?int $actorId = null): int
+    {
+        $productId = (int) ($input['product_id'] ?? 0);
+        $product = $this->product($productId);
+        if ($product === null) {
+            throw new RuntimeException('商品不存在。');
+        }
+        $status = $this->status((string) ($input['status'] ?? 'pending'), ['not_provided', 'pending', 'verified', 'failed'], 'pending');
+        $sourceInput = trim((string) ($input['source_url'] ?? ''));
+        $sourceUrl = $this->nullableUrl($sourceInput !== '' ? $sourceInput : (string) ($product['source_url'] ?? ''));
+        if ($status !== 'not_provided' && $sourceUrl === null) {
+            throw new InvalidArgumentException('来源 URL 不能为空。');
+        }
+        $checkedFacts = $this->keyValueLines((string) ($input['checked_facts'] ?? ''));
+        if ($actorId !== null) {
+            $checkedFacts['_actor_id'] = (string) $actorId;
+        }
+        $rawEvidence = $this->keyValueLines((string) ($input['raw_evidence'] ?? ''));
+        $failureReason = $this->nullableText((string) ($input['failure_reason'] ?? ''), 500);
+        $provider = $this->cleanCode((string) ($input['provider'] ?? 'manual')) ?: 'manual';
+        $now = gmdate('Y-m-d H:i:s');
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO commerce_verification_records (product_id, status, source_url, checked_facts_json, raw_evidence_json, failure_reason, provider, created_at)
+             VALUES (:product_id, :status, :source_url, :checked_facts_json, :raw_evidence_json, :failure_reason, :provider, :created_at)'
+        );
+        $stmt->execute([
+            ':product_id' => $productId,
+            ':status' => $status,
+            ':source_url' => $sourceUrl,
+            ':checked_facts_json' => $this->json($checkedFacts),
+            ':raw_evidence_json' => $this->json($rawEvidence),
+            ':failure_reason' => $failureReason,
+            ':provider' => $provider,
+            ':created_at' => $now,
+        ]);
+        $this->pdo->prepare('UPDATE commerce_products SET verification_status = :status, updated_at = :updated_at WHERE id = :id')
+            ->execute([':id' => $productId, ':status' => $status, ':updated_at' => $now]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function verificationRecords(int $productId, int $limit = 20): array
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM commerce_verification_records WHERE product_id = :product_id ORDER BY id DESC LIMIT :limit');
+        $stmt->bindValue(':product_id', $productId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', max(1, min($limit, 100)), PDO::PARAM_INT);
+        $stmt->execute();
+
+        return array_map(fn (array $row): array => $this->hydrateJsonFields($row, ['checked_facts_json', 'raw_evidence_json']), $stmt->fetchAll());
     }
 
     public function recordEvent(?int $productId, ?int $orderId, string $eventType, array $metadata = []): void
@@ -617,6 +682,52 @@ final class CommerceRepository
                 ':created_at' => gmdate('Y-m-d H:i:s'),
             ]);
         }
+    }
+
+    /** @param array<string,mixed> $old @param array<string,mixed> $new */
+    private function refreshVerificationAfterProductChange(int $productId, array $old, array $new): void
+    {
+        $newSource = $this->nullableUrl((string) ($new['source_url'] ?? ''));
+        $currentStatus = (string) ($old['verification_status'] ?? 'not_provided');
+        $changed = false;
+        foreach (self::VERIFICATION_INVALIDATING_FIELDS as $field) {
+            if (($old[$field] ?? null) != ($new[$field] ?? null)) {
+                $changed = true;
+                break;
+            }
+        }
+        if ($newSource === null) {
+            if ((string) ($new['verification_status'] ?? '') !== 'not_provided') {
+                $this->pdo->prepare("UPDATE commerce_products SET verification_status = 'not_provided', updated_at = :updated_at WHERE id = :id")
+                    ->execute([':id' => $productId, ':updated_at' => gmdate('Y-m-d H:i:s')]);
+            }
+            return;
+        }
+        if (!$changed) {
+            return;
+        }
+        if ($currentStatus === 'not_provided' && $this->nullableUrl((string) ($old['source_url'] ?? '')) === null) {
+            $this->pdo->prepare("UPDATE commerce_products SET verification_status = 'pending', updated_at = :updated_at WHERE id = :id")
+                ->execute([':id' => $productId, ':updated_at' => gmdate('Y-m-d H:i:s')]);
+            return;
+        }
+        if (!in_array($currentStatus, ['verified', 'failed'], true)) {
+            return;
+        }
+        $now = gmdate('Y-m-d H:i:s');
+        $this->pdo->prepare("UPDATE commerce_products SET verification_status = 'pending', updated_at = :updated_at WHERE id = :id")
+            ->execute([':id' => $productId, ':updated_at' => $now]);
+        $this->pdo->prepare(
+            "INSERT INTO commerce_verification_records (product_id, status, source_url, checked_facts_json, raw_evidence_json, failure_reason, provider, created_at)
+             VALUES (:product_id, 'pending', :source_url, :checked_facts_json, :raw_evidence_json, :failure_reason, 'system', :created_at)"
+        )->execute([
+            ':product_id' => $productId,
+            ':source_url' => $newSource,
+            ':checked_facts_json' => $this->json(['reason' => 'product_key_facts_changed']),
+            ':raw_evidence_json' => $this->json([]),
+            ':failure_reason' => '关键商品信息已变更，等待重新核验。',
+            ':created_at' => $now,
+        ]);
     }
 
     /** @param array<string,mixed> $row */
