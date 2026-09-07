@@ -163,6 +163,24 @@ $assert(is_array($product), 'Product can be created.');
 $assert((int) ($product['available_quantity'] ?? 0) === 5, 'New product starts with full available stock.');
 $assert(($product['specs']['颜色'] ?? '') === '黑色', 'Product specs are stored as structured facts.');
 $assert(($product['verification_status'] ?? '') === 'pending', 'Product with a source URL starts as pending verification.');
+
+$decimalProductId = $repo->saveProduct([
+    'name' => '正常金额商品',
+    'sku' => 'DECIMAL-001',
+    'status' => 'draft',
+    'price' => '29.99',
+    'currency' => 'CNY',
+    'stock_quantity' => 1,
+    'shipping_fee' => '1.20',
+    'tax_fee' => '0.30',
+    'service_fee' => '0',
+    'discount' => '0.01',
+]);
+$decimalProduct = $repo->product($decimalProductId);
+$assert((int) ($decimalProduct['price_minor'] ?? 0) === 2999, 'Seller-facing decimal product prices are converted to minor units internally.');
+$assert((int) ($decimalProduct['shipping_fee_minor'] ?? 0) === 120, 'Seller-facing decimal shipping fees are converted to minor units internally.');
+$assert((int) ($decimalProduct['tax_fee_minor'] ?? 0) === 30, 'Seller-facing decimal tax fees are converted to minor units internally.');
+$assert((int) ($decimalProduct['discount_minor'] ?? 0) === 1, 'Seller-facing decimal discounts are converted to minor units internally.');
 $assert(($product['transaction_region'] ?? '') === 'cross_border', 'Product keeps a transaction-region fact separate from currency.');
 $sourceRecords = $repo->verificationRecords($productId);
 $assert(($sourceRecords[0]['record_type'] ?? '') === 'source_declaration', 'Saving a product source creates an append-only source declaration record.');
@@ -565,7 +583,11 @@ $assert(!str_contains($productPage, '正品认证'), 'Consumer transparency word
 $adminEditPage = $controllerWithAi->adminProductForm(new Request('GET', '/admin/commerce/products/edit', ['id' => $productId]))->body();
 $assert(str_contains($adminEditPage, 'AI 优化描述'), 'Product edit UI exposes the AI description optimization action.');
 $assert(str_contains($adminEditPage, '允许使用收费 AI'), 'Product AI UI requires explicit opt-in before paid modules can be used.');
-$assert(str_contains($adminEditPage, '/admin/media') && str_contains($adminEditPage, '/admin/content/new'), 'Seller product form points to the existing CMS media library and content module instead of reconfiguring them.');
+$assert(str_contains($adminEditPage, 'data-commerce-media-picker') && str_contains($adminEditPage, '选择图片') && str_contains($adminEditPage, '/admin/media'), 'Seller product form opens a visual CMS media picker instead of asking for media IDs.');
+$assert(str_contains($adminEditPage, 'data-commerce-content-picker') && str_contains($adminEditPage, '选择商品介绍') && str_contains($adminEditPage, '/admin/content/new'), 'Seller product form opens a visual content picker and links to the existing content module editor.');
+$assert(!str_contains($adminEditPage, '详情内容 ID') && !str_contains($adminEditPage, '主图媒体 ID') && !str_contains($adminEditPage, '图库媒体 ID'), 'Seller product form does not expose raw content/media ID fields as visible inputs.');
+$assert(str_contains($adminEditPage, 'name="price"') && str_contains($adminEditPage, 'value="360.00"'), 'Seller product form displays product price as a normal decimal amount.');
+$assert(!str_contains($adminEditPage, '最小货币单位') && !str_contains($adminEditPage, '运费（分）') && !str_contains($adminEditPage, '税费（分）'), 'Seller product form no longer asks sellers to enter minor currency units.');
 
 $repo->saveAiModule([
     'id' => $freeOkId,
@@ -869,6 +891,9 @@ $changes = $repo->productChanges($productId);
 $fields = array_values(array_map(static fn (array $row): string => (string) $row['field_name'], $changes));
 $assert(in_array('name', $fields, true), 'Key product name changes are appended to immutable change history.');
 $assert(in_array('price_minor', $fields, true), 'Key product price changes are appended to immutable change history.');
+$changedProductPage = $controller->productPage(new Request('GET', '/commerce/product', ['id' => $productId]))->body();
+$assert(str_contains($changedProductPage, '¥360.00 CNY') && str_contains($changedProductPage, '¥361.00 CNY'), 'Consumer-facing product change history displays price changes as normal money.');
+$assert(!str_contains($changedProductPage, '36100 分'), 'Consumer-facing product change history does not expose minor currency units.');
 
 if ($failures > 0) {
     exit(1);

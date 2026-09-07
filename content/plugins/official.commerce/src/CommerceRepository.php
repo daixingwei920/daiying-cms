@@ -7,6 +7,7 @@ namespace Daiying\Commerce;
 use Cms\Core\CardDelivery\CardDeliveryService;
 use Cms\Core\Payment\PaymentRepository;
 use Cms\Core\Support\CurrencyRegistry;
+use Cms\Core\Support\Money;
 use InvalidArgumentException;
 use PDO;
 use RuntimeException;
@@ -120,7 +121,7 @@ final class CommerceRepository
         $slug = $this->slug((string) ($input['slug'] ?? ''), $name, $id);
         $status = $this->status((string) ($input['status'] ?? 'draft'), self::PRODUCT_STATUSES, 'draft');
         $currency = CurrencyRegistry::normalizeCode((string) ($input['currency'] ?? 'CNY'));
-        $priceMinor = max(0, (int) ($input['price_minor'] ?? 0));
+        $priceMinor = $this->moneyInputToMinor($input, 'price', $currency, 'price_minor');
         if ($priceMinor <= 0) {
             throw new InvalidArgumentException('商品价格必须大于 0。');
         }
@@ -139,10 +140,10 @@ final class CommerceRepository
             'currency' => $currency,
             'region' => strtoupper(substr($this->cleanCode((string) ($input['region'] ?? 'CN')), 0, 16)) ?: 'CN',
             'transaction_region' => $this->status((string) ($input['transaction_region'] ?? 'cn_domestic'), ['cn_domestic', 'cross_border', 'international'], 'cn_domestic'),
-            'shipping_fee_minor' => max(0, (int) ($input['shipping_fee_minor'] ?? 0)),
-            'tax_fee_minor' => max(0, (int) ($input['tax_fee_minor'] ?? 0)),
-            'service_fee_minor' => max(0, (int) ($input['service_fee_minor'] ?? 0)),
-            'discount_minor' => max(0, (int) ($input['discount_minor'] ?? 0)),
+            'shipping_fee_minor' => $this->moneyInputToMinor($input, 'shipping_fee', $currency, 'shipping_fee_minor'),
+            'tax_fee_minor' => $this->moneyInputToMinor($input, 'tax_fee', $currency, 'tax_fee_minor'),
+            'service_fee_minor' => $this->moneyInputToMinor($input, 'service_fee', $currency, 'service_fee_minor'),
+            'discount_minor' => $this->moneyInputToMinor($input, 'discount', $currency, 'discount_minor'),
             'price_note' => $this->nullableText((string) ($input['price_note'] ?? ''), 500),
             'brand' => $this->nullableText((string) ($input['brand'] ?? ''), 191),
             'model' => $this->nullableText((string) ($input['model'] ?? ''), 191),
@@ -1510,6 +1511,17 @@ final class CommerceRepository
     {
         $int = (int) $value;
         return $int > 0 ? $int : null;
+    }
+
+    /** @param array<string,mixed> $input */
+    private function moneyInputToMinor(array $input, string $amountName, string $currency, string $legacyMinorName): int
+    {
+        $raw = $input[$amountName] ?? null;
+        if ($raw !== null && trim((string) $raw) !== '') {
+            return max(0, Money::toMinor((string) $raw, $currency));
+        }
+
+        return max(0, (int) ($input[$legacyMinorName] ?? 0));
     }
 
     /** @return list<int> */

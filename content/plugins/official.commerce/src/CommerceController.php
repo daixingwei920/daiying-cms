@@ -73,6 +73,7 @@ final class CommerceController
         $gallery = is_array($product['gallery_media_ids'] ?? null) ? implode(',', $product['gallery_media_ids']) : '';
         $specs = $this->keyValueText(is_array($product['specs'] ?? null) ? $product['specs'] : []);
         $status = (string) ($product['status'] ?? 'draft');
+        $currency = (string) ($product['currency'] ?? 'CNY');
         $savedNotice = !$isNew && !empty($request->query['saved'])
             ? '<p class="notice">商品已保存。可继续完善图片/内容，发布后到“分发与分享”生成分享链接和文案。</p>'
             : '';
@@ -84,20 +85,20 @@ final class CommerceController
             '<label>SKU / 商品编号<input name="sku" value="' . $this->e((string) ($product['sku'] ?? '')) . '" placeholder="留空自动生成"></label>' .
             '<label>固定链接<input name="slug" value="' . $this->e((string) ($product['slug'] ?? '')) . '" placeholder="留空自动生成"></label>' .
             '<label>状态<select name="status">' . $this->options(['draft' => '草稿', 'active' => '可销售', 'archived' => '归档'], $status) . '</select></label>' .
-            '<label>价格（最小货币单位，例如 360 元填写 36000）<input name="price_minor" type="number" min="1" required value="' . (int) ($product['price_minor'] ?? 0) . '"></label>' .
-            '<label>币种<select name="currency">' . $this->currencyOptions((string) ($product['currency'] ?? 'CNY')) . '</select></label>' .
+            '<label>价格<input name="price" inputmode="decimal" required value="' . $this->e($this->moneyInputValue($product['price_minor'] ?? 0, $currency, $isNew)) . '" placeholder="29.99"></label>' .
+            '<label>币种<select name="currency">' . $this->currencyOptions($currency) . '</select></label>' .
             '<label>交易区域<input name="region" value="' . $this->e((string) ($product['region'] ?? 'CN')) . '"></label>' .
             '<label>交易类型<select name="transaction_region">' . $this->options(['cn_domestic' => '中国大陆交易', 'cross_border' => '跨境交易', 'international' => '海外/国际交易'], (string) ($product['transaction_region'] ?? 'cn_domestic')) . '</select></label>' .
-            '<label>运费（分）<input name="shipping_fee_minor" type="number" min="0" value="' . (int) ($product['shipping_fee_minor'] ?? 0) . '"></label>' .
-            '<label>税费（分）<input name="tax_fee_minor" type="number" min="0" value="' . (int) ($product['tax_fee_minor'] ?? 0) . '"></label>' .
-            '<label>服务费（分）<input name="service_fee_minor" type="number" min="0" value="' . (int) ($product['service_fee_minor'] ?? 0) . '"></label>' .
-            '<label>优惠抵扣（分）<input name="discount_minor" type="number" min="0" value="' . (int) ($product['discount_minor'] ?? 0) . '"></label>' .
+            '<label>运费<input name="shipping_fee" inputmode="decimal" value="' . $this->e($this->moneyInputValue($product['shipping_fee_minor'] ?? 0, $currency, false)) . '" placeholder="0.00"></label>' .
+            '<label>税费<input name="tax_fee" inputmode="decimal" value="' . $this->e($this->moneyInputValue($product['tax_fee_minor'] ?? 0, $currency, false)) . '" placeholder="0.00"></label>' .
+            '<label>服务费<input name="service_fee" inputmode="decimal" value="' . $this->e($this->moneyInputValue($product['service_fee_minor'] ?? 0, $currency, false)) . '" placeholder="0.00"></label>' .
+            '<label>优惠抵扣<input name="discount" inputmode="decimal" value="' . $this->e($this->moneyInputValue($product['discount_minor'] ?? 0, $currency, false)) . '" placeholder="0.00"></label>' .
             '<label>价格说明<input name="price_note" value="' . $this->e((string) ($product['price_note'] ?? '')) . '" placeholder="如 含税 / 不含运费 / 海外仓发货"></label>' .
             '<label>库存数量<input name="stock_quantity" type="number" min="0" value="' . (int) ($product['stock_quantity'] ?? 0) . '"></label>' .
             '<label>摘要<textarea name="summary" rows="3">' . $this->e((string) ($product['summary'] ?? '')) . '</textarea></label>' .
-            '<label>详情内容 ID<input name="description_content_id" type="number" min="0" value="' . (int) ($product['description_content_id'] ?? 0) . '"></label><p class="muted">商品介绍复用 CMS 内容模块：先在内容管理编辑文章/页面，再填写对应 ID。<a href="/admin/content/new">新建内容</a></p>' .
-            '<label>主图媒体 ID<input name="primary_media_id" type="number" min="0" value="' . (int) ($product['primary_media_id'] ?? 0) . '"></label>' .
-            '<label>图库媒体 ID（逗号分隔）<input name="gallery_media_ids" value="' . $this->e($gallery) . '"></label><p class="muted">图片、音频、视频和附件复用 CMS 媒体库。<a href="/admin/media">打开媒体库</a></p>' .
+            $this->contentPickerField((int) ($product['description_content_id'] ?? 0)) .
+            $this->mediaPickerField('primary_media_id', '商品主图', 'image', false, (string) (int) ($product['primary_media_id'] ?? 0)) .
+            $this->mediaPickerField('gallery_media_ids', '商品图库', 'image', true, $gallery) .
             '<label>品牌<input name="brand" value="' . $this->e((string) ($product['brand'] ?? '')) . '"></label>' .
             '<label>型号<input name="model" value="' . $this->e((string) ($product['model'] ?? '')) . '"></label>' .
             '<label>商品来源 URL<input name="source_url" type="url" value="' . $this->e((string) ($product['source_url'] ?? '')) . '"></label>' .
@@ -105,7 +106,8 @@ final class CommerceController
             '<label>规格事实（每行一个：名称: 值）<textarea name="specs" rows="5">' . $this->e($specs) . '</textarea></label>' .
             '<label><input type="checkbox" name="requires_shipping" value="1" ' . ((int) ($product['requires_shipping'] ?? 0) === 1 ? 'checked' : '') . '> 需要物流配送</label>' .
             '<label><input type="checkbox" name="auto_delivery_enabled" value="1" ' . ((int) ($product['auto_delivery_enabled'] ?? 0) === 1 ? 'checked' : '') . '> 数字商品可自动交付</label><p class="muted">数字交付复用后台“发卡管理”，请在发卡商品里关联当前 Commerce 商品 ID 并导入库存。</p>' .
-            '<button type="submit">保存商品</button> <a class="button admin-button-secondary" href="/admin/commerce/products">返回列表</a></form>';
+            '<button type="submit">保存商品</button> <a class="button admin-button-secondary" href="/admin/commerce/products">返回列表</a></form>' .
+            $this->commercePickerAssets();
 
         if (!$isNew) {
             $body .= $this->adminProductChildren((int) $product['id']);
@@ -953,6 +955,135 @@ final class CommerceController
         return $html;
     }
 
+    private function contentPickerField(int $selectedId): string
+    {
+        $summary = $this->contentPickerSummary($selectedId);
+        $edit = $selectedId > 0 ? ' <a class="button admin-button-secondary" href="/admin/content/edit/' . $selectedId . '">编辑商品介绍</a>' : '';
+
+        return '<div class="commerce-picker" data-commerce-content-picker><strong>商品介绍</strong>' .
+            '<input type="hidden" name="description_content_id" value="' . $selectedId . '" data-commerce-content-input>' .
+            '<p class="commerce-picker-summary" data-commerce-content-summary>' . $summary . '</p>' .
+            '<button type="button" class="button" data-commerce-content-open>选择商品介绍</button> ' .
+            '<a class="button admin-button-secondary" href="/admin/content/new">新建商品介绍</a>' . $edit . ' ' .
+            '<button type="button" class="button admin-button-secondary" data-commerce-content-clear>清除</button>' .
+            '</div>';
+    }
+
+    private function mediaPickerField(string $field, string $label, string $type, bool $multiple, string $value): string
+    {
+        return '<div class="commerce-picker" data-commerce-media-picker data-commerce-media-field="' . $this->e($field) . '" data-commerce-media-type="' . $this->e($type) . '" data-commerce-media-multiple="' . ($multiple ? '1' : '0') . '">' .
+            '<strong>' . $this->e($label) . '</strong>' .
+            '<input type="hidden" name="' . $this->e($field) . '" value="' . $this->e($value) . '" data-commerce-media-input>' .
+            '<p class="commerce-picker-summary" data-commerce-media-summary>' . $this->mediaPickerSummary($value) . '</p>' .
+            '<button type="button" class="button" data-commerce-media-open>选择图片</button> ' .
+            '<a class="button admin-button-secondary" href="/admin/media">上传/管理媒体</a> ' .
+            '<button type="button" class="button admin-button-secondary" data-commerce-media-clear>清除</button>' .
+            '</div>';
+    }
+
+    private function commercePickerAssets(): string
+    {
+        $mediaJson = json_encode($this->commerceMediaItems(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '[]';
+        $contentJson = json_encode($this->commerceContentItems(), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '[]';
+
+        return '<div class="commerce-picker-modal" id="commerce-media-modal" hidden><div class="commerce-picker-panel"><button type="button" class="commerce-picker-close" data-commerce-picker-close>×</button><h2>选择媒体</h2><input data-commerce-media-search placeholder="搜索文件名"><div class="commerce-picker-grid" data-commerce-media-results></div></div></div>' .
+            '<div class="commerce-picker-modal" id="commerce-content-modal" hidden><div class="commerce-picker-panel"><button type="button" class="commerce-picker-close" data-commerce-picker-close>×</button><h2>选择商品介绍</h2><input data-commerce-content-search placeholder="搜索标题"><div class="commerce-picker-list" data-commerce-content-results></div></div></div>' .
+            '<style>.commerce-picker{border:1px solid #d8dee8;border-radius:8px;padding:14px;margin:14px 0;background:#fff}.commerce-picker-summary{color:#667085;margin:8px 0}.commerce-picker-modal{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:9999;display:grid;place-items:center;padding:20px}.commerce-picker-modal[hidden]{display:none}.commerce-picker-panel{width:min(960px,100%);max-height:86vh;overflow:auto;background:#fff;border-radius:8px;padding:18px;box-shadow:0 20px 80px rgba(15,23,42,.25);position:relative}.commerce-picker-close{position:absolute;right:12px;top:10px;border:0;background:transparent;font-size:28px;line-height:1;cursor:pointer}.commerce-picker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px}.commerce-picker-card,.commerce-picker-row{text-align:left;border:1px solid #d8dee8;background:#fff;border-radius:8px;padding:10px;cursor:pointer;color:#172033}.commerce-picker-card img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#edf2f7;border-radius:6px;margin-bottom:8px}.commerce-picker-card span,.commerce-picker-row span{display:block;color:#667085;font-size:13px}.commerce-picker-list{display:grid;gap:10px;margin-top:14px}@media(max-width:760px){.commerce-picker-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.commerce-picker-panel{max-height:92vh}}</style>' .
+            '<script>window.COMMERCE_MEDIA_ITEMS=' . $mediaJson . ';window.COMMERCE_CONTENT_ITEMS=' . $contentJson . ';(function(){function esc(v){return String(v==null?"":v).replace(/[&<>"\']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","\'":"&#039;"}[c];});}function byId(id){return (window.COMMERCE_MEDIA_ITEMS||[]).find(function(item){return String(item.id)===String(id);});}function mediaSummary(value){var ids=String(value||"").split(",").map(function(v){return v.trim();}).filter(Boolean);if(!ids.length){return "未选择媒体。";}return ids.map(function(id){var item=byId(id);return item?esc(item.name)+" · "+esc(item.type):"媒体 #"+esc(id);}).join("<br>");}function renderMedia(picker,query){var type=picker.getAttribute("data-commerce-media-type")||"";var q=String(query||"").toLowerCase();var box=document.querySelector("[data-commerce-media-results]");box.innerHTML="";(window.COMMERCE_MEDIA_ITEMS||[]).filter(function(item){return (!type||item.type===type)&&(!q||String(item.name).toLowerCase().indexOf(q)>=0);}).forEach(function(item){var button=document.createElement("button");button.type="button";button.className="commerce-picker-card";button.setAttribute("data-commerce-media-choice",item.id);button.innerHTML=(item.thumbnail?\'<img src="\'+esc(item.thumbnail)+\'" alt="">\':\'<div style="aspect-ratio:4/3;display:grid;place-items:center;background:#edf2f7;border-radius:6px;margin-bottom:8px">\'+esc(item.type)+\'</div>\')+"<strong>"+esc(item.name)+"</strong><span>"+esc(item.type)+"</span>";box.appendChild(button);});if(box.innerHTML===""){box.innerHTML="<p class=\\"muted\\">没有找到可选媒体。请先到媒体库上传或引入。</p>";}}function renderContent(query){var q=String(query||"").toLowerCase();var box=document.querySelector("[data-commerce-content-results]");box.innerHTML="";(window.COMMERCE_CONTENT_ITEMS||[]).filter(function(item){return !q||String(item.title).toLowerCase().indexOf(q)>=0;}).forEach(function(item){var button=document.createElement("button");button.type="button";button.className="commerce-picker-row";button.setAttribute("data-commerce-content-choice",item.id);button.innerHTML="<strong>"+esc(item.title)+"</strong><span>"+esc(item.type)+" · "+esc(item.status)+"</span>";box.appendChild(button);});if(box.innerHTML===""){box.innerHTML="<p class=\\"muted\\">没有找到可选内容。可以先新建商品介绍。</p>";}}var currentMediaPicker=null;document.addEventListener("click",function(event){var mediaOpen=event.target.closest("[data-commerce-media-open]");if(mediaOpen){currentMediaPicker=mediaOpen.closest("[data-commerce-media-picker]");document.getElementById("commerce-media-modal").hidden=false;renderMedia(currentMediaPicker,"");return;}var mediaChoice=event.target.closest("[data-commerce-media-choice]");if(mediaChoice&&currentMediaPicker){var input=currentMediaPicker.querySelector("[data-commerce-media-input]");var id=mediaChoice.getAttribute("data-commerce-media-choice");if(currentMediaPicker.getAttribute("data-commerce-media-multiple")==="1"){var ids=String(input.value||"").split(",").map(function(v){return v.trim();}).filter(Boolean);if(ids.indexOf(id)<0){ids.push(id);}input.value=ids.join(",");}else{input.value=id;}currentMediaPicker.querySelector("[data-commerce-media-summary]").innerHTML=mediaSummary(input.value);document.getElementById("commerce-media-modal").hidden=true;return;}var mediaClear=event.target.closest("[data-commerce-media-clear]");if(mediaClear){var picker=mediaClear.closest("[data-commerce-media-picker]");picker.querySelector("[data-commerce-media-input]").value="";picker.querySelector("[data-commerce-media-summary]").textContent="未选择媒体。";return;}var contentOpen=event.target.closest("[data-commerce-content-open]");if(contentOpen){document.getElementById("commerce-content-modal").hidden=false;renderContent("");return;}var contentChoice=event.target.closest("[data-commerce-content-choice]");if(contentChoice){var item=(window.COMMERCE_CONTENT_ITEMS||[]).find(function(row){return String(row.id)===String(contentChoice.getAttribute("data-commerce-content-choice"));});var picker2=document.querySelector("[data-commerce-content-picker]");picker2.querySelector("[data-commerce-content-input]").value=contentChoice.getAttribute("data-commerce-content-choice");picker2.querySelector("[data-commerce-content-summary]").textContent=item?item.title+" · "+item.type+" · "+item.status:"已选择商品介绍";document.getElementById("commerce-content-modal").hidden=true;return;}var contentClear=event.target.closest("[data-commerce-content-clear]");if(contentClear){var picker3=contentClear.closest("[data-commerce-content-picker]");picker3.querySelector("[data-commerce-content-input]").value="";picker3.querySelector("[data-commerce-content-summary]").textContent="未选择商品介绍。";return;}if(event.target.closest("[data-commerce-picker-close]")||event.target.classList.contains("commerce-picker-modal")){document.getElementById("commerce-media-modal").hidden=true;document.getElementById("commerce-content-modal").hidden=true;}});document.addEventListener("input",function(event){if(event.target.matches("[data-commerce-media-search]")&&currentMediaPicker){renderMedia(currentMediaPicker,event.target.value);}if(event.target.matches("[data-commerce-content-search]")){renderContent(event.target.value);}});})();</script>';
+    }
+
+    private function contentPickerSummary(int $contentId): string
+    {
+        if ($contentId <= 0) {
+            return '未选择商品介绍。';
+        }
+        try {
+            $content = (new ContentRepository($this->pdo, ContentTypeRegistry::defaults()))->find($contentId);
+            if ($content !== null) {
+                return $this->e((string) $content['title']) . ' · ' . $this->e((string) $content['content_type']) . ' · ' . $this->e((string) $content['status']);
+            }
+        } catch (Throwable) {
+        }
+
+        return '已选择商品介绍。';
+    }
+
+    private function mediaPickerSummary(string $value): string
+    {
+        $ids = array_filter(array_map('intval', preg_split('/[,\s]+/', $value) ?: []));
+        if ($ids === []) {
+            return '未选择媒体。';
+        }
+        $names = [];
+        try {
+            $library = $this->mediaLibrary();
+            foreach ($ids as $id) {
+                $media = $library->find((int) $id);
+                $names[] = $media !== null ? $this->e((string) $media['original_name']) . ' · ' . $this->e((string) $media['media_type']) : '媒体 #' . (int) $id;
+            }
+        } catch (Throwable) {
+            foreach ($ids as $id) {
+                $names[] = '媒体 #' . (int) $id;
+            }
+        }
+
+        return implode('<br>', $names);
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function commerceMediaItems(): array
+    {
+        try {
+            $library = $this->mediaLibrary();
+            return array_map(function (array $media): array {
+                $id = (int) ($media['id'] ?? 0);
+                $type = (string) ($media['media_type'] ?? 'attachment');
+                return [
+                    'id' => $id,
+                    'name' => (string) ($media['original_name'] ?? ('media-' . $id)),
+                    'type' => $type,
+                    'thumbnail' => $type === 'image' ? '/media/' . $id : '',
+                ];
+            }, $library->list(['status' => 'Active'], 120));
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function commerceContentItems(): array
+    {
+        try {
+            $items = (new ContentRepository($this->pdo, ContentTypeRegistry::defaults()))->latest(80);
+            return array_map(fn (array $content): array => [
+                'id' => (int) ($content['id'] ?? 0),
+                'title' => (string) ($content['title'] ?? ('content-' . (int) ($content['id'] ?? 0))),
+                'type' => (string) ($content['content_type'] ?? ''),
+                'status' => (string) ($content['status'] ?? ''),
+            ], $items);
+        } catch (Throwable) {
+            return [];
+        }
+    }
+
+    private function moneyInputValue(mixed $amountMinor, string $currency, bool $blankZero = false): string
+    {
+        $minor = (int) $amountMinor;
+        if ($blankZero && $minor === 0) {
+            return '';
+        }
+        try {
+            return Money::fromMinor($minor, $currency);
+        } catch (Throwable) {
+            return (string) $minor;
+        }
+    }
+
+    private function mediaLibrary(): MediaLibrary
+    {
+        return new MediaLibrary($this->pdo, $this->rootPath() . '/content/uploads', (array) $this->settings->get('media', []));
+    }
+
     private function descriptionHtml(int $contentId): string
     {
         if ($contentId <= 0) {
@@ -997,7 +1128,7 @@ final class CommerceController
         $facts = is_array($latestResult['checked_facts'] ?? null) ? $latestResult['checked_facts'] : [];
         unset($facts['_actor_id']);
         $factRows = $this->verificationFactRows($facts, $product);
-        $changeRows = $this->publicChangeRows($changes);
+        $changeRows = $this->publicChangeRows($changes, (string) ($product['currency'] ?? 'CNY'));
         $historyRows = $this->verificationHistoryRows($records);
         $specs = $this->specsHtml(is_array($product['specs'] ?? null) ? $product['specs'] : []);
 
@@ -1071,7 +1202,7 @@ final class CommerceController
     }
 
     /** @param list<array<string,mixed>> $changes */
-    private function publicChangeRows(array $changes): string
+    private function publicChangeRows(array $changes, string $currency): string
     {
         $allowed = ['name', 'price_minor', 'currency', 'brand', 'model', 'source_url', 'source_claim_text', 'specs_json', 'primary_media_id'];
         $rows = '';
@@ -1080,10 +1211,10 @@ final class CommerceController
             if (!in_array($field, $allowed, true)) {
                 continue;
             }
-            $old = $this->publicChangeValue($field, $change['old_value'] ?? null);
-            $new = $this->publicChangeValue($field, $change['new_value'] ?? null);
+            $old = $this->publicChangeValue($field, $change['old_value'] ?? null, $currency);
+            $new = $this->publicChangeValue($field, $change['new_value'] ?? null, $currency);
             $rows .= '<tr><td>' . $this->e((string) ($change['created_at'] ?? '')) . '</td><td>' . $this->e($this->changeFieldLabel($field)) . '</td><td>' . $this->e($old . ' -> ' . $new) . '</td></tr>';
-            if (substr_count($rows, '<tr>') >= 6) {
+            if (substr_count($rows, '<tr>') >= 12) {
                 break;
             }
         }
@@ -1130,7 +1261,7 @@ final class CommerceController
         return strtolower(trim(preg_replace('/\s+/u', '', $value) ?? ''));
     }
 
-    private function publicChangeValue(string $field, mixed $value): string
+    private function publicChangeValue(string $field, mixed $value, string $currency): string
     {
         if ($value === null || $value === '') {
             return '未提供';
@@ -1139,7 +1270,7 @@ final class CommerceController
             return $value === [] ? '空' : '已更新';
         }
         if (in_array($field, ['price_minor'], true)) {
-            return (string) $value . ' 分';
+            return strip_tags($this->money((int) $value, $currency));
         }
         $text = (string) $value;
 
@@ -1248,7 +1379,7 @@ final class CommerceController
         if ($ids === []) {
             return [];
         }
-        $library = new MediaLibrary($this->pdo, $this->rootPath() . '/content/uploads', (array) $this->settings->get('media', []));
+        $library = $this->mediaLibrary();
         $viewModels = [];
         foreach (array_unique($ids) as $id) {
             $viewModels[$id] = $library->viewModel((int) $id);
