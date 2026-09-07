@@ -9,6 +9,7 @@ use Daiying\Commerce\CommerceRepository;
 
 require_once __DIR__ . '/src/CommerceRepository.php';
 require_once __DIR__ . '/src/CommerceContracts.php';
+require_once __DIR__ . '/src/CommerceAiModuleManager.php';
 require_once __DIR__ . '/src/GenericUrlVerificationProvider.php';
 require_once __DIR__ . '/src/AmazonVerificationProvider.php';
 require_once __DIR__ . '/src/TaobaoVerificationProvider.php';
@@ -39,6 +40,10 @@ return static function (PluginContext $context): void {
     $context->adminRoute('POST', '/admin/commerce/orders/sync', [$controller, 'adminSyncOrders'], 'commerce.orders', true);
     $context->adminRoute('POST', '/admin/commerce/orders/cancel', [$controller, 'adminCancelOrder'], 'commerce.orders', true);
     $context->adminRoute('POST', '/admin/commerce/orders/fulfill', [$controller, 'adminFulfillOrder'], 'commerce.orders', true);
+    $context->adminRoute('GET', '/admin/commerce/ai', [$controller, 'adminAiModules'], 'commerce.ai.manage', false);
+    $context->adminRoute('POST', '/admin/commerce/ai/save', [$controller, 'adminSaveAiModule'], 'commerce.ai.manage', true);
+    $context->adminRoute('POST', '/admin/commerce/ai/test', [$controller, 'adminTestAiModule'], 'commerce.ai.manage', true);
+    $context->adminRoute('POST', '/admin/commerce/ai/run-product', [$controller, 'adminRunProductAi'], 'commerce.ai.manage', true);
 
     $context->frontRoute('GET', '/commerce', [$controller, 'storefront'], null, false);
     $context->frontRoute('GET', '/commerce/product', [$controller, 'productPage'], null, false);

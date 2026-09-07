@@ -5,6 +5,7 @@ declare(strict_types=1);
 require __DIR__ . '/../system/core/Bootstrap/autoload.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceContracts.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceRepository.php';
+require __DIR__ . '/../content/plugins/official.commerce/src/CommerceAiModuleManager.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/GenericUrlVerificationProvider.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/AmazonVerificationProvider.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/TaobaoVerificationProvider.php';
@@ -15,6 +16,7 @@ use Cms\Core\Http\Request;
 use Cms\Core\Plugin\PluginManifest;
 use Cms\Core\Payment\PaymentRepository;
 use Daiying\Commerce\CommerceController;
+use Daiying\Commerce\CommerceAiModuleManager;
 use Daiying\Commerce\CommerceAiModuleInterface;
 use Daiying\Commerce\CommerceDistributionInterface;
 use Daiying\Commerce\CommerceVerificationProviderInterface;
@@ -45,6 +47,7 @@ $assert(!in_array('payment.create', $parsed->capabilities, true), 'Commerce uses
 $assert(in_array('network.external', $parsed->capabilities, true), 'Commerce declares external network access for the generic URL verification provider.');
 $assert(in_array('commerce.verify.write', $parsed->capabilities, true), 'Commerce declares a dedicated verification write capability for future permission splits.');
 $assert(in_array('commerce.logistics.write', $parsed->capabilities, true), 'Commerce declares a dedicated logistics write capability for future provider integrations.');
+$assert(in_array('commerce.ai.manage', $parsed->capabilities, true), 'Commerce declares a dedicated AI module management capability.');
 $assert(interface_exists(CommerceAiModuleInterface::class), 'Commerce exposes an optional AI module interface without making AI a hard dependency.');
 $assert(interface_exists(CommerceDistributionInterface::class), 'Commerce exposes a distribution provider interface for future channels.');
 $assert(interface_exists(CommerceLogisticsProviderInterface::class), 'Commerce exposes a logistics provider interface for future carrier plugins.');
@@ -62,6 +65,9 @@ $pricingMigration = require $root . '/content/plugins/official.commerce/migratio
 $assert(in_array('table:commerce_products', $pricingMigration['affected_objects'] ?? [], true), 'Price transparency migration declares the commerce product table.');
 $governanceMigration = require $root . '/content/plugins/official.commerce/migrations/004_source_verification_governance.php';
 $assert(in_array('table:commerce_verification_records', $governanceMigration['affected_objects'] ?? [], true), 'Source verification governance migration declares verification records.');
+$aiMigration = require $root . '/content/plugins/official.commerce/migrations/005_ai_modules.php';
+$assert(in_array('table:commerce_ai_modules', $aiMigration['affected_objects'] ?? [], true), 'AI module migration declares the Commerce AI module table.');
+$assert(in_array('table:commerce_ai_invocations', $aiMigration['affected_objects'] ?? [], true), 'AI module migration declares the Commerce AI invocation log table.');
 
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -70,6 +76,7 @@ $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 ($logisticsMigration['up'])($pdo);
 ($pricingMigration['up'])($pdo);
 ($governanceMigration['up'])($pdo);
+($aiMigration['up'])($pdo);
 $pdo->exec('CREATE TABLE cms_payments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_type VARCHAR(96) NOT NULL,
@@ -140,6 +147,89 @@ $assert(($product['transaction_region'] ?? '') === 'cross_border', 'Product keep
 $sourceRecords = $repo->verificationRecords($productId);
 $assert(($sourceRecords[0]['record_type'] ?? '') === 'source_declaration', 'Saving a product source creates an append-only source declaration record.');
 $assert(($sourceRecords[0]['checked_facts']['source_claim'] ?? '') === '官方授权渠道采购', 'Source declarations keep seller-provided source claims as facts.');
+
+$aiKey = 'commerce-test-secret-key';
+$freeFailId = $repo->saveAiModule([
+    'name' => 'Free Broken AI',
+    'provider_type' => 'domestic',
+    'protocol' => 'openai_compatible',
+    'endpoint' => 'https://ai-free-broken.example/v1',
+    'model' => 'free-broken',
+    'api_key' => 'free-broken-key',
+    'status' => 'enabled',
+    'billing_type' => 'free',
+    'sort_order' => 10,
+    'capabilities' => ['product_copy', 'verification_explanation'],
+], $aiKey);
+$freeOkId = $repo->saveAiModule([
+    'name' => 'Free Working AI',
+    'provider_type' => 'local',
+    'protocol' => 'openai_compatible',
+    'endpoint' => 'http://127.0.0.1:11434/v1',
+    'model' => 'local-free',
+    'api_key' => 'free-working-key',
+    'status' => 'enabled',
+    'billing_type' => 'free',
+    'sort_order' => 20,
+    'capabilities' => ['product_copy', 'share_copy', 'content_match', 'sales_insight', 'verification_explanation'],
+], $aiKey);
+$paidId = $repo->saveAiModule([
+    'name' => 'Paid Overseas AI',
+    'provider_type' => 'overseas',
+    'protocol' => 'openai_compatible',
+    'endpoint' => 'https://ai-paid.example/v1',
+    'model' => 'paid-model',
+    'api_key' => 'paid-secret-key',
+    'status' => 'enabled',
+    'billing_type' => 'paid',
+    'sort_order' => 30,
+    'capabilities' => ['product_copy'],
+], $aiKey);
+$aiModules = $repo->aiModules();
+$assert(count($aiModules) === 3, 'Commerce can manage multiple AI modules.');
+$assert(($aiModules[0]['credential_masked'] ?? '') === '********', 'AI credentials are masked when listed for the admin UI.');
+$assert(!array_key_exists('credential', $aiModules[0]), 'AI credentials are not exposed in module list data.');
+$assert($repo->aiModuleCredential($freeOkId, $aiKey) === 'free-working-key', 'AI credentials can be decrypted only on the server with the configured encryption key.');
+$controllerWithAi = new CommerceController($repo, $pdo, Settings::fromArray(['security' => ['encryption_key' => $aiKey]]));
+$aiPage = $controllerWithAi->adminAiModules(new Request('GET', '/admin/commerce/ai'))->body();
+$assert(str_contains($aiPage, 'Commerce AI 模块'), 'Admin exposes a unified Commerce AI module management entry.');
+$assert(str_contains($aiPage, 'Free Working AI'), 'Admin AI module page lists configured modules.');
+$assert(!str_contains($aiPage, 'free-working-key') && !str_contains($aiPage, 'paid-secret-key'), 'Admin AI page never renders API keys.');
+
+$manager = new CommerceAiModuleManager($repo, $aiKey, static function (array $module, string $prompt): array {
+    if ((string) $module['name'] === 'Free Broken AI') {
+        throw new RuntimeException('free quota exhausted: api_key=SHOULD_NOT_LEAK');
+    }
+    return ['text' => (string) $module['name'] . ' handled ' . (str_contains($prompt, '正品认证') ? 'guarded' : 'copy')];
+});
+$testResult = $manager->testModule($freeOkId);
+$assert(($testResult['ok'] ?? false) === true, 'AI modules support explicit connection testing.');
+$testedModule = $repo->aiModule($freeOkId);
+$assert(($testedModule['last_test_status'] ?? '') === 'success', 'AI connection test status and time are recorded.');
+$aiResult = $manager->runProductTask('product_copy', $product);
+$assert(($aiResult['ok'] ?? false) === true && ($aiResult['module_id'] ?? 0) === $freeOkId, 'Free AI failures fall back to the next free module by sort order.');
+$assert(($aiResult['billing_type'] ?? '') === 'free', 'Free AI fallback remains free by default.');
+$invocations = $repo->aiInvocations(10);
+$assert(($invocations[0]['status'] ?? '') === 'success', 'AI invocations are logged without blocking Commerce.');
+$assert(!str_contains(json_encode($invocations, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '', 'SHOULD_NOT_LEAK'), 'AI invocation logs redact secret-looking error text.');
+
+$repo->saveAiModule([
+    'id' => $freeOkId,
+    'name' => 'Free Working AI',
+    'provider_type' => 'local',
+    'protocol' => 'openai_compatible',
+    'endpoint' => 'http://127.0.0.1:11434/v1',
+    'model' => 'local-free',
+    'status' => 'disabled',
+    'billing_type' => 'free',
+    'sort_order' => 20,
+    'capabilities' => ['product_copy'],
+], $aiKey);
+$paidBlocked = $manager->runProductTask('product_copy', $product);
+$assert(($paidBlocked['ok'] ?? true) === false, 'Paid AI is not used when the caller has not explicitly allowed paid modules.');
+$paidAllowed = $manager->runProductTask('product_copy', $product, ['allow_paid' => true]);
+$assert(($paidAllowed['ok'] ?? false) === true && ($paidAllowed['module_id'] ?? 0) === $paidId && ($paidAllowed['billing_type'] ?? '') === 'paid', 'Paid AI is used only after explicit allow_paid consent.');
+$assert(($repo->product($productId)['verification_status'] ?? '') === 'pending', 'AI calls do not modify Verification source facts or product verification status.');
 
 $urlProvider = new GenericUrlVerificationProvider(static function (string $url): array {
     return [

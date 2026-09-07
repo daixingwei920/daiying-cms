@@ -39,7 +39,7 @@ final class CommerceController
             $this->stat('订单', (string) $stats['orders']) .
             $this->stat('已支付', (string) $stats['paid_orders']) .
             '</div>' .
-            '<p><a class="button" href="/admin/commerce/products/new">新建商品</a> <a class="button admin-button-secondary" href="/admin/commerce/products">商品管理</a> <a class="button admin-button-secondary" href="/admin/commerce/orders">订单管理</a></p>';
+            '<p><a class="button" href="/admin/commerce/products/new">新建商品</a> <a class="button admin-button-secondary" href="/admin/commerce/products">商品管理</a> <a class="button admin-button-secondary" href="/admin/commerce/orders">订单管理</a> <a class="button admin-button-secondary" href="/admin/commerce/ai">AI 模块</a></p>';
 
         return Response::html(View::page('Commerce', $body));
     }
@@ -402,6 +402,126 @@ final class CommerceController
         }
     }
 
+    public function adminAiModules(Request $request): Response
+    {
+        $editingId = (int) ($request->query['edit'] ?? 0);
+        $editing = $editingId > 0 ? $this->repo->aiModule($editingId) : null;
+        $notice = !empty($request->query['saved']) ? '<p class="notice">AI 模块已保存。</p>' : '';
+        $notice .= !empty($request->query['tested']) ? '<p class="notice">AI 模块连接测试已完成。</p>' : '';
+        $rows = '';
+        foreach ($this->repo->aiModules() as $module) {
+            $test = trim((string) ($module['last_test_status'] ?? '')) !== ''
+                ? $this->e((string) $module['last_test_status']) . '<br><span class="muted">' . $this->e((string) ($module['last_tested_at'] ?? '')) . '</span>'
+                : '<span class="muted">未测试</span>';
+            $credential = !empty($module['credential_configured']) ? $this->e((string) $module['credential_masked']) : '<span class="muted">未配置</span>';
+            $rows .= '<tr><td><strong>' . $this->e((string) $module['name']) . '</strong><br><code>' . (int) $module['id'] . '</code></td>' .
+                '<td>' . $this->e((string) $module['provider_type']) . '<br><span class="muted">' . $this->e((string) $module['protocol']) . '</span></td>' .
+                '<td>' . $this->e((string) ($module['model'] ?? '')) . '<br><span class="muted">' . $this->e((string) ($module['endpoint'] ?? '')) . '</span></td>' .
+                '<td>' . $this->e((string) $module['billing_type']) . '<br>' . $this->e((string) $module['status']) . '</td>' .
+                '<td>' . (int) $module['sort_order'] . '</td><td>' . $credential . '</td><td>' . $test . '</td>' .
+                '<td><a class="button" href="/admin/commerce/ai?edit=' . (int) $module['id'] . '">编辑</a> ' .
+                '<form method="post" action="/admin/commerce/ai/test" style="display:inline">' . CsrfToken::field() . '<input type="hidden" name="id" value="' . (int) $module['id'] . '"><button type="submit">测试连接</button></form></td></tr>';
+        }
+        if ($rows === '') {
+            $rows = '<tr><td colspan="8" class="muted">还没有 AI 模块。</td></tr>';
+        }
+        $capabilities = is_array($editing['capabilities'] ?? null) ? $editing['capabilities'] : array_keys(CommerceAiModuleManager::taskLabels());
+        $publicConfig = is_array($editing['public_config'] ?? null) ? $editing['public_config'] : [];
+        $form = '<h2>' . ($editing !== null ? '编辑 AI 模块' : '添加 AI 模块') . '</h2>' .
+            '<form method="post" action="/admin/commerce/ai/save">' . CsrfToken::field() .
+            '<input type="hidden" name="id" value="' . (int) ($editing['id'] ?? 0) . '">' .
+            '<label>模块名称<input name="name" required value="' . $this->e((string) ($editing['name'] ?? '')) . '" placeholder="如 DeepSeek 免费额度 / Local LLM"></label>' .
+            '<label>Provider 类型<select name="provider_type">' . $this->options(['domestic' => '国内 AI', 'overseas' => '海外 AI', 'local' => '本地 AI', 'custom' => '自定义 AI'], (string) ($editing['provider_type'] ?? 'custom')) . '</select></label>' .
+            '<label>协议<select name="protocol">' . $this->options(['openai_compatible' => 'OpenAI-Compatible', 'provider_adapter' => '特殊 Provider Adapter'], (string) ($editing['protocol'] ?? 'openai_compatible')) . '</select></label>' .
+            '<label>Endpoint<input name="endpoint" value="' . $this->e((string) ($editing['endpoint'] ?? '')) . '" placeholder="https://api.example.com/v1"></label>' .
+            '<label>Model<input name="model" value="' . $this->e((string) ($editing['model'] ?? '')) . '" placeholder="model-name"></label>' .
+            '<label>API Key / 凭据<input name="api_key" type="password" autocomplete="new-password" placeholder="' . (!empty($editing['credential_configured']) ? '留空则保留已有凭据' : '服务端加密保存') . '"></label>' .
+            '<label>启停<select name="status">' . $this->options(['enabled' => '启用', 'disabled' => '停用'], (string) ($editing['status'] ?? 'disabled')) . '</select></label>' .
+            '<label>费用<select name="billing_type">' . $this->options(['free' => '免费', 'paid' => '收费'], (string) ($editing['billing_type'] ?? 'free')) . '</select></label>' .
+            '<label>调用顺序<input name="sort_order" type="number" value="' . (int) ($editing['sort_order'] ?? 0) . '"></label>' .
+            '<label>温度<input name="temperature" type="number" min="0" max="2" step="0.1" value="' . $this->e((string) ($publicConfig['temperature'] ?? '0.2')) . '"></label>' .
+            '<label>超时秒数<input name="timeout_seconds" type="number" min="3" max="60" value="' . (int) ($publicConfig['timeout_seconds'] ?? 12) . '"></label>' .
+            '<fieldset><legend>允许用途</legend>' . $this->aiCapabilityCheckboxes($capabilities) . '</fieldset>' .
+            '<p class="muted">免费模块按顺序失败后会尝试下一个免费模块；收费模块只有在调用方明确允许时才会使用。AI 结果只作辅助文本，不修改核验事实和交易状态。</p>' .
+            '<button type="submit">保存 AI 模块</button> <a class="button admin-button-secondary" href="/admin/commerce">返回总览</a></form>';
+        $history = '';
+        foreach ($this->repo->aiInvocations(20) as $entry) {
+            $history .= '<tr><td>' . $this->e((string) $entry['created_at']) . '</td><td>' . $this->e($this->aiTaskLabel((string) $entry['task'])) . '</td><td>' . $this->e((string) ($entry['module_name'] ?? '')) . '</td><td>' . $this->e((string) $entry['billing_type']) . '</td><td>' . $this->e((string) $entry['status']) . '</td><td>' . $this->e((string) ($entry['error_message'] ?? $entry['response_summary'] ?? '')) . '</td></tr>';
+        }
+        if ($history === '') {
+            $history = '<tr><td colspan="6" class="muted">暂无 AI 调用记录。</td></tr>';
+        }
+
+        return Response::html(View::page('Commerce AI 模块', '<h1>Commerce AI 模块</h1>' . $notice . '<table><tr><th>模块</th><th>Provider</th><th>模型</th><th>费用/状态</th><th>顺序</th><th>凭据</th><th>测试</th><th>操作</th></tr>' . $rows . '</table>' . $form . '<h2>最近调用</h2><table><tr><th>时间</th><th>任务</th><th>模块</th><th>费用</th><th>状态</th><th>摘要</th></tr>' . $history . '</table>'));
+    }
+
+    public function adminSaveAiModule(Request $request): Response
+    {
+        try {
+            $id = $this->repo->saveAiModule($request->body, $this->paymentSecret());
+            return Response::redirect('/admin/commerce/ai?edit=' . $id . '&saved=1');
+        } catch (Throwable $exception) {
+            return $this->error('AI 模块保存失败', $exception, '/admin/commerce/ai');
+        }
+    }
+
+    public function adminTestAiModule(Request $request): Response
+    {
+        try {
+            $id = (int) ($request->body['id'] ?? 0);
+            $captured = CommerceProviderIsolation::capture('official.commerce.ai', 'test_module', fn (): array => (new CommerceAiModuleManager($this->repo, $this->paymentSecret()))->testModule($id));
+            if (($captured['ok'] ?? false) !== true) {
+                throw new \RuntimeException((string) ($captured['error'] ?? 'AI 模块连接测试失败。'));
+            }
+            return Response::redirect('/admin/commerce/ai?edit=' . $id . '&tested=1');
+        } catch (Throwable $exception) {
+            return $this->error('AI 模块连接测试失败', $exception, '/admin/commerce/ai');
+        }
+    }
+
+    public function adminRunProductAi(Request $request): Response
+    {
+        $productId = (int) ($request->body['product_id'] ?? 0);
+        try {
+            $product = $this->repo->product($productId);
+            if ($product === null) {
+                throw new \RuntimeException('商品不存在。');
+            }
+            $task = (string) ($request->body['task'] ?? 'product_copy');
+            $records = $this->repo->verificationRecords($productId, 5);
+            $latest = $this->latestProviderVerification($records);
+            $manager = new CommerceAiModuleManager($this->repo, $this->paymentSecret());
+            $captured = CommerceProviderIsolation::capture('official.commerce.ai', 'run_product_task', fn (): array => $manager->runProductTask($task, $product, [
+                'allow_paid' => !empty($request->body['allow_paid']),
+                'verification_facts' => is_array($latest['checked_facts'] ?? null) ? $latest['checked_facts'] : [],
+            ]));
+            $result = ($captured['ok'] ?? false) === true && is_array($captured['result'] ?? null)
+                ? $captured['result']
+                : ['ok' => false, 'message' => (string) ($captured['error'] ?? 'AI 模块暂不可用。'), 'attempts' => []];
+            $attemptRows = '';
+            foreach ((array) ($result['attempts'] ?? []) as $attempt) {
+                if (!is_array($attempt)) {
+                    continue;
+                }
+                $attemptRows .= '<tr><td>' . $this->e((string) ($attempt['module_name'] ?? '')) . '</td><td>' . $this->e((string) ($attempt['billing_type'] ?? '')) . '</td><td>' . $this->e((string) ($attempt['error'] ?? '')) . '</td></tr>';
+            }
+            if ($attemptRows === '') {
+                $attemptRows = '<tr><td colspan="3" class="muted">无失败尝试。</td></tr>';
+            }
+            $body = '<h1>AI 辅助结果</h1><p><strong>商品：</strong>' . $this->e((string) $product['name']) . '</p>' .
+                '<p><strong>任务：</strong>' . $this->e($this->aiTaskLabel($task)) . '</p>' .
+                '<p><strong>模块：</strong>' . $this->e((string) ($result['module_name'] ?? '无可用模块')) . ' ' . $this->e((string) ($result['billing_type'] ?? '')) . '</p>' .
+                '<pre>' . $this->e((string) ($result['result'] ?? $result['message'] ?? '')) . '</pre>' .
+                '<h2>失败尝试</h2><table><tr><th>模块</th><th>费用</th><th>错误</th></tr>' . $attemptRows . '</table>' .
+                '<p class="muted">AI 辅助结果不会自动写回商品、订单或 Verification 原始事实。</p>' .
+                '<p><a class="button" href="/admin/commerce/products/edit?id=' . $productId . '">返回商品</a></p>';
+
+            return Response::html(View::page('AI 辅助结果', $body));
+        } catch (Throwable $exception) {
+            return $this->error('AI 辅助失败', $exception, '/admin/commerce/products/edit?id=' . $productId);
+        }
+    }
+
     public function storefront(Request $request): Response
     {
         $cards = '';
@@ -601,6 +721,7 @@ final class CommerceController
             '<form method="post" action="/admin/commerce/variants/save">' . CsrfToken::field() . '<input type="hidden" name="product_id" value="' . $productId . '"><label>规格名称<input name="title" placeholder="如 红色 / XL / 256GB"></label><label>规格 SKU<input name="sku"></label><label>库存<input name="stock_quantity" type="number" min="0" value="0"></label><label>价格增量（分）<input name="price_delta_minor" type="number" value="0"></label><label>选项（每行 名称:值）<textarea name="options" rows="3"></textarea></label><button type="submit">添加规格</button></form>' .
             '<hr><h2>购买动作</h2><table><tr><th>按钮</th><th>类型</th><th>履约</th><th>状态</th></tr>' . $actions . '</table>' .
             '<form method="post" action="/admin/commerce/actions/save">' . CsrfToken::field() . '<input type="hidden" name="product_id" value="' . $productId . '"><label>按钮文案<input name="label" placeholder="立即购买"></label><label>动作类型<select name="action_type">' . $this->options(['site_checkout' => '本站购买', 'external_url' => '外部购买', 'contact' => '联系购买', 'digital_delivery' => '数字自动交付'], 'site_checkout') . '</select></label><label>外部链接<input name="external_url" type="url"></label><label>联系说明<input name="contact_text"></label><label>履约模式<select name="fulfillment_mode">' . $this->options(['none' => '无需履约', 'shipping' => '物流配送', 'digital_card' => '自动发卡'], 'none') . '</select></label><button type="submit">添加购买动作</button></form>' .
+            '<hr><h2>AI 辅助</h2><form method="post" action="/admin/commerce/ai/run-product">' . CsrfToken::field() . '<input type="hidden" name="product_id" value="' . $productId . '"><label>AI 任务<select name="task">' . $this->options(CommerceAiModuleManager::taskLabels(), 'product_copy') . '</select></label><label><input type="checkbox" name="allow_paid" value="1"> 允许使用收费 AI</label><p class="muted">默认只调用启用的免费 AI 模块。结果只用于人工参考，不自动写回商品或核验结论。</p><button type="submit">运行 AI 辅助</button> <a class="button admin-button-secondary" href="/admin/commerce/ai">管理 AI 模块</a></form>' .
             $this->adminVerificationPanel($productId) .
             '<hr><h2>关键变更历史</h2><table><tr><th>时间</th><th>字段</th><th>旧值</th><th>新值</th></tr>' . $changes . '</table>';
     }
@@ -1096,6 +1217,25 @@ final class CommerceController
             'international' => '海外/国际交易',
             default => '中国大陆交易',
         };
+    }
+
+    /** @param list<string> $selected */
+    private function aiCapabilityCheckboxes(array $selected): string
+    {
+        $html = '';
+        foreach (CommerceAiModuleManager::taskLabels() as $value => $label) {
+            $checked = in_array($value, $selected, true) ? ' checked' : '';
+            $html .= '<label><input type="checkbox" name="capabilities[]" value="' . $this->e($value) . '"' . $checked . '> ' . $this->e($label) . '</label>';
+        }
+
+        return $html;
+    }
+
+    private function aiTaskLabel(string $task): string
+    {
+        $labels = CommerceAiModuleManager::taskLabels();
+
+        return $labels[$task] ?? $task;
     }
 
     private function stat(string $label, string $value): string

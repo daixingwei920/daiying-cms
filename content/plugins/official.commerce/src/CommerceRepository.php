@@ -16,6 +16,11 @@ final class CommerceRepository
     private const ACTION_TYPES = ['site_checkout', 'external_url', 'contact', 'digital_delivery'];
     private const ORDER_STATUSES = ['pending_payment', 'paid', 'fulfilled', 'cancelled', 'payment_failed'];
     private const LOGISTICS_STATUSES = ['pending_shipment', 'picked_up', 'in_transit', 'out_for_delivery', 'delivered', 'exception'];
+    private const AI_PROVIDER_TYPES = ['domestic', 'overseas', 'local', 'custom'];
+    private const AI_PROTOCOLS = ['openai_compatible', 'provider_adapter'];
+    private const AI_STATUSES = ['enabled', 'disabled'];
+    private const AI_BILLING_TYPES = ['free', 'paid'];
+    private const AI_CAPABILITIES = ['product_copy', 'share_copy', 'content_match', 'sales_insight', 'verification_explanation'];
     private const CHANGE_FIELDS = [
         'name',
         'sku',
@@ -734,6 +739,150 @@ final class CommerceRepository
         return array_map(fn (array $row): array => $this->hydrateJsonFields($row, ['raw_payload_json']), $stmt->fetchAll());
     }
 
+    /** @return list<array<string,mixed>> */
+    public function aiModules(bool $enabledOnly = false): array
+    {
+        $sql = 'SELECT * FROM commerce_ai_modules';
+        if ($enabledOnly) {
+            $sql .= " WHERE status = 'enabled'";
+        }
+        $sql .= ' ORDER BY sort_order ASC, id ASC';
+        $stmt = $this->pdo->query($sql);
+        if ($stmt === false) {
+            return [];
+        }
+
+        return array_map(fn (array $row): array => $this->hydrateAiModule($row), $stmt->fetchAll());
+    }
+
+    /** @return array<string,mixed>|null */
+    public function aiModule(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM commerce_ai_modules WHERE id = :id LIMIT 1');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+
+        return is_array($row) ? $this->hydrateAiModule($row) : null;
+    }
+
+    public function aiModuleCredential(int $id, string $encryptionKey): string
+    {
+        $stmt = $this->pdo->prepare('SELECT credential_ciphertext FROM commerce_ai_modules WHERE id = :id LIMIT 1');
+        $stmt->execute([':id' => $id]);
+        $ciphertext = (string) ($stmt->fetchColumn() ?: '');
+
+        return $ciphertext !== '' ? $this->decryptAiCredential($ciphertext, $encryptionKey) : '';
+    }
+
+    /** @param array<string,mixed> $input */
+    public function saveAiModule(array $input, string $encryptionKey): int
+    {
+        $id = max(0, (int) ($input['id'] ?? 0));
+        $name = $this->cleanText((string) ($input['name'] ?? ''), 191);
+        if ($name === '') {
+            throw new InvalidArgumentException('AI 模块名称不能为空。');
+        }
+        $providerType = $this->status((string) ($input['provider_type'] ?? 'custom'), self::AI_PROVIDER_TYPES, 'custom');
+        $protocol = $this->status((string) ($input['protocol'] ?? 'openai_compatible'), self::AI_PROTOCOLS, 'openai_compatible');
+        $endpoint = $protocol === 'openai_compatible' ? $this->nullableUrl((string) ($input['endpoint'] ?? '')) : $this->nullableText((string) ($input['endpoint'] ?? ''), 1024);
+        if ($protocol === 'openai_compatible' && $endpoint === null) {
+            throw new InvalidArgumentException('OpenAI-Compatible 模块必须填写 Endpoint。');
+        }
+        $model = $this->nullableText((string) ($input['model'] ?? ''), 191);
+        if ($protocol === 'openai_compatible' && $model === null) {
+            throw new InvalidArgumentException('OpenAI-Compatible 模块必须填写 Model。');
+        }
+        $credential = trim((string) ($input['api_key'] ?? $input['credential'] ?? ''));
+        if ($credential !== '' && (strlen($credential) > 4096 || preg_match('/[\x00-\x1F\x7F]/', $credential) === 1)) {
+            throw new InvalidArgumentException('AI 凭据无效。');
+        }
+        $now = gmdate('Y-m-d H:i:s');
+        $params = [
+            ':name' => $name,
+            ':provider_type' => $providerType,
+            ':protocol' => $protocol,
+            ':endpoint' => $endpoint,
+            ':model' => $model,
+            ':status' => $this->status((string) ($input['status'] ?? 'disabled'), self::AI_STATUSES, 'disabled'),
+            ':billing_type' => $this->status((string) ($input['billing_type'] ?? 'free'), self::AI_BILLING_TYPES, 'free'),
+            ':sort_order' => (int) ($input['sort_order'] ?? 0),
+            ':capabilities_json' => $this->json($this->aiCapabilities($input['capabilities'] ?? self::AI_CAPABILITIES)),
+            ':public_config_json' => $this->json([
+                'temperature' => max(0, min(2, (float) ($input['temperature'] ?? 0.2))),
+                'timeout_seconds' => max(3, min(60, (int) ($input['timeout_seconds'] ?? 12))),
+            ]),
+            ':updated_at' => $now,
+        ];
+
+        if ($id > 0) {
+            if ($this->aiModule($id) === null) {
+                throw new RuntimeException('AI 模块不存在。');
+            }
+            $sql = 'UPDATE commerce_ai_modules SET name = :name, provider_type = :provider_type, protocol = :protocol, endpoint = :endpoint, model = :model, status = :status, billing_type = :billing_type, sort_order = :sort_order, capabilities_json = :capabilities_json, public_config_json = :public_config_json, updated_at = :updated_at';
+            if ($credential !== '') {
+                $sql .= ', credential_ciphertext = :credential_ciphertext';
+                $params[':credential_ciphertext'] = $this->encryptAiCredential($credential, $encryptionKey);
+            }
+            $this->pdo->prepare($sql . ' WHERE id = :id')->execute($params + [':id' => $id]);
+
+            return $id;
+        }
+
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO commerce_ai_modules
+                (uuid, name, provider_type, protocol, endpoint, model, status, billing_type, sort_order, capabilities_json, public_config_json, credential_ciphertext, created_at, updated_at)
+             VALUES
+                (:uuid, :name, :provider_type, :protocol, :endpoint, :model, :status, :billing_type, :sort_order, :capabilities_json, :public_config_json, :credential_ciphertext, :created_at, :updated_at)'
+        );
+        $stmt->execute($params + [
+            ':uuid' => $this->uuid(),
+            ':credential_ciphertext' => $credential !== '' ? $this->encryptAiCredential($credential, $encryptionKey) : '',
+            ':created_at' => $now,
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    public function updateAiModuleTest(int $id, string $status, string $message): void
+    {
+        $status = $this->status($status, ['success', 'failed', 'not_tested'], 'failed');
+        $now = gmdate('Y-m-d H:i:s');
+        $this->pdo->prepare('UPDATE commerce_ai_modules SET last_test_status = :status, last_test_message = :message, last_tested_at = :tested_at, updated_at = :updated_at WHERE id = :id')
+            ->execute([
+                ':id' => $id,
+                ':status' => $status,
+                ':message' => $this->nullableText($message, 500),
+                ':tested_at' => $now,
+                ':updated_at' => $now,
+            ]);
+    }
+
+    public function recordAiInvocation(?int $moduleId, string $moduleName, string $task, string $status, string $billingType, string $prompt, string $message = '', string $summary = ''): void
+    {
+        $this->pdo->prepare('INSERT INTO commerce_ai_invocations (module_id, module_name, task, status, billing_type, error_message, prompt_hash, response_summary, created_at) VALUES (:module_id, :module_name, :task, :status, :billing_type, :error_message, :prompt_hash, :response_summary, :created_at)')
+            ->execute([
+                ':module_id' => $moduleId,
+                ':module_name' => $this->nullableText($moduleName, 191),
+                ':task' => $this->status($task, self::AI_CAPABILITIES, 'product_copy'),
+                ':status' => $this->status($status, ['success', 'failed', 'skipped'], 'failed'),
+                ':billing_type' => $this->status($billingType, self::AI_BILLING_TYPES, 'free'),
+                ':error_message' => $this->nullableText($this->redactSecretText($message), 500),
+                ':prompt_hash' => hash('sha256', $prompt),
+                ':response_summary' => $this->nullableText($this->redactSecretText($summary), 500),
+                ':created_at' => gmdate('Y-m-d H:i:s'),
+            ]);
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function aiInvocations(int $limit = 50): array
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM commerce_ai_invocations ORDER BY id DESC LIMIT :limit');
+        $stmt->bindValue(':limit', max(1, min($limit, 200)), PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
     public function recordEvent(?int $productId, ?int $orderId, string $eventType, array $metadata = []): void
     {
         $stmt = $this->pdo->prepare('INSERT INTO commerce_conversion_events (product_id, order_id, event_type, provider, metadata_json, created_at) VALUES (:product_id, :order_id, :event_type, :provider, :metadata_json, :created_at)');
@@ -942,6 +1091,18 @@ final class CommerceRepository
         return $row;
     }
 
+    /** @param array<string,mixed> $row */
+    private function hydrateAiModule(array $row): array
+    {
+        $row = $this->hydrateJsonFields($row, ['capabilities_json', 'public_config_json']);
+        $ciphertext = (string) ($row['credential_ciphertext'] ?? '');
+        $row['credential_configured'] = $ciphertext !== '';
+        $row['credential_masked'] = $ciphertext !== '' ? '********' : '';
+        unset($row['credential_ciphertext']);
+
+        return $row;
+    }
+
     /** @param array<string,mixed> $product @return array<string,mixed> */
     private function snapshotProduct(array $product): array
     {
@@ -1075,6 +1236,32 @@ final class CommerceRepository
         return substr(preg_replace('/[^A-Za-z0-9_.:-]+/', '', trim($value)) ?? '', 0, 128);
     }
 
+    private function redactSecretText(string $value): string
+    {
+        return preg_replace('/(?:bearer\s+|sk-[A-Za-z0-9_-]+|api[_-]?key=|access[_-]?key=|secret=|authorization=)[^\s"\']*/i', '[redacted]', $value) ?: $value;
+    }
+
+    /** @param mixed $value @return list<string> */
+    private function aiCapabilities(mixed $value): array
+    {
+        if (is_string($value)) {
+            $value = preg_split('/[,\s]+/', $value) ?: [];
+        }
+        if (!is_array($value)) {
+            return self::AI_CAPABILITIES;
+        }
+        $items = [];
+        foreach ($value as $item) {
+            $capability = $this->cleanCode((string) $item);
+            if (in_array($capability, self::AI_CAPABILITIES, true)) {
+                $items[] = $capability;
+            }
+        }
+        $items = array_values(array_unique($items));
+
+        return $items !== [] ? $items : self::AI_CAPABILITIES;
+    }
+
     private function nullableUrl(string $value): ?string
     {
         $value = trim($value);
@@ -1174,6 +1361,52 @@ final class CommerceRepository
     private function json(mixed $value): string
     {
         return json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+    }
+
+    private function encryptAiCredential(string $credential, string $encryptionKey): string
+    {
+        if (!function_exists('openssl_encrypt')) {
+            throw new RuntimeException('PHP openssl 不可用，无法安全保存 AI 凭据。');
+        }
+        $nonce = random_bytes(12);
+        $tag = '';
+        $cipher = openssl_encrypt($credential, 'aes-256-gcm', $this->aiKeyBytes($encryptionKey), OPENSSL_RAW_DATA, $nonce, $tag);
+        if (!is_string($cipher) || $tag === '') {
+            throw new RuntimeException('AI 凭据加密失败。');
+        }
+
+        return 'v1:' . base64_encode($nonce . $tag . $cipher);
+    }
+
+    private function decryptAiCredential(string $payload, string $encryptionKey): string
+    {
+        if ($payload === '' || !str_starts_with($payload, 'v1:') || !function_exists('openssl_decrypt')) {
+            return '';
+        }
+        $raw = base64_decode(substr($payload, 3), true);
+        if (!is_string($raw) || strlen($raw) < 29) {
+            return '';
+        }
+        $plain = openssl_decrypt(
+            substr($raw, 28),
+            'aes-256-gcm',
+            $this->aiKeyBytes($encryptionKey),
+            OPENSSL_RAW_DATA,
+            substr($raw, 0, 12),
+            substr($raw, 12, 16)
+        );
+
+        return is_string($plain) ? $plain : '';
+    }
+
+    private function aiKeyBytes(string $encryptionKey): string
+    {
+        $key = trim($encryptionKey);
+        if ($key === '' || strlen($key) < 16 || preg_match('/[\x00-\x1F\x7F]/', $key) === 1) {
+            throw new RuntimeException('security.encryption_key 未配置或无效，无法安全保存 AI 凭据。');
+        }
+
+        return hash('sha256', $key, true);
     }
 
     private function uuid(): string
