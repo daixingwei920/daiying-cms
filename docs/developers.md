@@ -26,7 +26,7 @@ This page collects developer entry points for Daiying CMS.
 - `php scripts/validate_production_readiness.php`
 - `php scripts/diagnose_payment_providers.php --json`
 - `php scripts/publish_scheduled_content.php`
-- `php scripts/build_full_install_package.php --version=1.2.24`
+- `php scripts/build_full_install_package.php --version=1.2.25`
 - `php scripts/verify_release_artifacts.php`
 
 ## Compatibility

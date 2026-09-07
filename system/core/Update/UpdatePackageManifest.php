@@ -209,6 +209,7 @@ final class UpdatePackageManifest
         return [
             'README.md',
             'CMS_RELEASE_ENVIRONMENT_DEPLOYMENT_CHECKLIST.md',
+            'system/official-plugins.php',
             'scripts/diagnose_payment_providers.php',
             'scripts/publish_scheduled_content.php',
             'scripts/validate_production_readiness.php',

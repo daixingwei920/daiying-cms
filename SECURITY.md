@@ -2,7 +2,7 @@
 
 ## Supported Version
 
-The current public stable line is Daiying CMS `1.2.x`. The latest checked public release is `1.2.24`.
+The current public stable line is Daiying CMS `1.2.x`. The latest checked public release is `1.2.25`.
 
 ## Reporting A Vulnerability
 
