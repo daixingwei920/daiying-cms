@@ -19,7 +19,7 @@ This page collects developer entry points for Daiying CMS.
 - [Plugin Development](plugins.md)
 - [Theme Development](themes.md)
 - [Commerce Extension](commerce.md)
-- [Distribution Preview](distribution.md)
+- [Distribution In Development](distribution.md)
 
 ## Scripts
 

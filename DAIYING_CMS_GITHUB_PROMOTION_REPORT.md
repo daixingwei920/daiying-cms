@@ -2,6 +2,71 @@
 
 Date: 2026-09-06
 
+## Distribution Definition Correction
+
+The initial GitHub promotion pass incorrectly described Distribution as commercial extension packaging, license-based delivery, update workflows, deployable site capabilities, and related marketplace/update foundations.
+
+That was wrong. Daiying CMS Distribution is not the plugin marketplace, commercial plugin licensing, authorization-code delivery, the CMS update system, Capability Pack, Site Vault, Shadow Upgrade, or a mechanism for packaging and deploying plugins to a site.
+
+The corrected definition is:
+
+```text
+Distribution is the Daiying CMS layer being developed for sending prepared content and commerce data to supported external channels.
+```
+
+The intended product flow is:
+
+```text
+Content / product creation
+-> media resources
+-> Distribution
+-> external channel selection or matching
+-> AI / rule adaptation
+-> Provider / Connector
+-> external delivery
+-> success, failure, channel error, or AI error status
+```
+
+Current public repository status:
+
+- No dedicated stable `system/core/Distribution` directory was found in this branch.
+- No final Distribution Provider/Connector specification was found in this branch.
+- No stable channel list or final Distribution user workflow was found in this branch.
+- Historical `distribution-server` directories were found outside this repository under older Codex output paths, but they are not current Daiying CMS Core source in this public Git repository and were not used as README truth.
+
+Confirmed current capabilities in this public branch:
+
+- Content and media foundations exist in Core.
+- Commerce foundations exist for payment providers, paid access, card-code delivery, and commercial license storage.
+- Marketplace, update, Capability Pack, Site Vault, and Shadow Upgrade foundations exist as separate architecture areas.
+- Distribution-specific external-channel implementation details are not confirmed in this branch.
+
+Capabilities still owned by the other active Distribution development thread:
+
+- Supported external channels.
+- Provider/Connector interface.
+- AI/rule adaptation behavior.
+- Channel error and AI error workflow.
+- Admin UI and screenshots.
+- Final stable documentation.
+
+README now uses the conservative wording:
+
+```text
+A distribution layer being developed for sending Daiying CMS content and commerce data to supported external channels.
+```
+
+Files corrected in this pass:
+
+- `README.md`
+- `README.zh-CN.md`
+- `docs/distribution.md`
+- `docs/README.md`
+- `docs/developers.md`
+- `examples/README.md`
+- `GITHUB_REPOSITORY_SETTINGS.md`
+- `DAIYING_CMS_GITHUB_PROMOTION_REPORT.md`
+
 ## 1. Initial Repository State
 
 - Worktree was clean before changes.
@@ -20,7 +85,7 @@ Date: 2026-09-06
 - Product model.
 - Quick Start.
 - Major capabilities.
-- Distribution preview section.
+- Distribution in-development section.
 - Commerce section.
 - Plugin and theme summaries.
 - Documentation links.
@@ -31,9 +96,11 @@ Date: 2026-09-06
 
 ## 3. Distribution Presentation
 
-Distribution is shown as **Development / Preview**, not Stable.
+Distribution is shown as **In Development**, not Stable.
 
-The README explains Distribution as the planned layer for commercial extension packaging, license-based delivery, update workflows, and deployable site capabilities. It also records the current confirmed foundations in the public repository: Market infrastructure, commercial license schema, card delivery, payment provider foundation, signed updates, capability packs, site vault, and shadow upgrade schema.
+The README now defines Distribution as the in-development external-channel distribution layer for Daiying CMS content and commerce data. It explicitly separates Distribution from Marketplace, commercial plugin licensing, authorization-code delivery, Core updates, Capability Pack, Site Vault, and Shadow Upgrade.
+
+The current public repository branch does not contain a stable Distribution module or final Provider/Connector specification, so the README states that detailed supported channels and workflows will be documented after the current implementation is merged.
 
 ## 4. Commerce Presentation
 
@@ -204,10 +271,10 @@ README.md | 279 ++++++++++++++++++++++++++++++--------------------------------
 1 file changed, 136 insertions(+), 143 deletions(-)
 ```
 
-New files are currently untracked until staged for commit.
+The original promotion commit already exists as `1784b8a docs: improve GitHub project presentation`. The Distribution definition correction is tracked separately so it can be reviewed apart from the original GitHub presentation pass.
 
 ## 17. Test Results
 
-- `git diff --check`: PASS.
+- `git diff --check`: PASS after Distribution definition correction.
 - GitHub release metadata checked with `gh release view`.
 - No PHP business tests were run because this task modified documentation and GitHub metadata files only.

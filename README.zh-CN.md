@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-Daiying CMS 是一套模块化 PHP CMS，用于构建内容网站、媒体流程、商业插件和面向分发的站点运营能力。
+Daiying CMS 是一套模块化 PHP CMS，用于构建内容网站、媒体流程、交易基础能力，以及正在开发中的外部渠道分发能力。
 
 当前公开稳定版本：**1.2.24 stable**。
 
@@ -21,9 +21,9 @@ Daiying CMS 不是单一功能脚本，而是按产品层级组织：
 
 1. **Daiying CMS Core**：安装器、后台、路由、内容、媒体、主题、插件生命周期、恢复诊断、签名更新。
 2. **Content / Media**：文章、页面、结构化区块、分类、媒体库、上传、外部媒体与存储接入。
-3. **Commerce**：支付 Provider 基础、付费内容/下载、自动发卡、商业产品和授权存储。
-4. **Distribution**：**开发中 / 预览**。用于围绕商业扩展、授权、交付、更新和站点能力包建立统一分发流程。当前仓库已有市场任务、商业授权、插件安装、更新检查、发卡和支付基础，但稳定的 Distribution Provider 规范还没有在公开仓库中定稿。
-5. **Plugins / Themes**：插件和主题包生态。
+3. **Commerce**：商品、价格、订单、支付、付费访问、自动发卡、商业产品和授权存储。
+4. **Distribution**：**开发中**。正在开发的外部渠道分发层，用于将 Daiying CMS 的内容数据和 Commerce 数据分发到已支持的外部渠道。
+5. **Plugins / Themes**：官方和第三方插件、主题扩展生态。
 6. **Update System**：签名 Core 更新、恢复点、完整性检查、健康检查和回滚路径。
 
 ## 快速开始
@@ -62,20 +62,26 @@ Daiying CMS 不是单一功能脚本，而是按产品层级组织：
 
 ### Distribution
 
-**状态：开发中 / 预览**
+**状态：开发中**
 
-Distribution 是 Daiying CMS 当前正在建设的差异化方向，目标是让 CMS 不只管理内容，也能围绕插件、主题、授权、交付和更新形成可运营的分发体系。
+Distribution 是 Daiying CMS 当前正在建设的差异化方向，但它不是插件商城、商业授权、授权码交付、Core 更新、Capability Pack、Site Vault 或 Shadow Upgrade。
 
-当前公开仓库已经能看到的基础能力包括：
+Distribution 的目标是让站长或卖家只在 Daiying CMS 内完成一次内容或商品资料填写，然后由系统根据已接入的外部渠道进行处理、适配和分发。
 
-- 市场包安装与更新任务。
-- 商业产品与授权表。
-- 站点授权激活存储。
-- 自动发卡交付。
-- 支付 Provider 基础。
-- 签名 Core 更新基础设施。
+概念流程：
 
-稳定的 Distribution Provider API 和最终用户流程，需要等相关开发线程完成后再进入 Stable 文档。
+```text
+内容 / 商品资料
+-> 图片 / 视频 / 音频等媒体资源
+-> Distribution
+-> 选择或匹配外部渠道
+-> AI 或规则进行渠道适配
+-> Provider / Connector
+-> 分发
+-> 返回成功、失败、渠道异常或 AI 异常状态
+```
+
+当前这个公开仓库分支里还没有独立稳定的 `system/core/Distribution` 模块，也没有最终版 Distribution Provider / Connector 规范。详细支持渠道和工作流会在当前实现合并后再补充文档。
 
 ### Commerce
 

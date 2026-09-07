@@ -9,6 +9,6 @@ Future examples should be small, reproducible, and safe to publish. Recommended 
 - Plugin manifest example.
 - Media storage provider example.
 - Commerce card-code product example.
-- Distribution provider example after the specification becomes stable.
+- Distribution external-channel connector example after the specification becomes stable.
 
 Do not include production databases, secrets, OAuth credentials, payment keys, server credentials, logs, or private URLs in examples.

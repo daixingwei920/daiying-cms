@@ -2,9 +2,9 @@
 
 [简体中文](README.zh-CN.md)
 
-A modular PHP CMS for building content websites, media workflows, commercial plugins, and distribution-oriented site operations.
+A modular PHP CMS for building content websites, media workflows, commerce foundations, and in-development external distribution workflows.
 
-Daiying CMS Core is a self-hosted PHP CMS with themes, plugins, media management, card-code commerce, signed online updates, and recovery tooling. The current public release is **1.2.24 stable**.
+Daiying CMS Core is a self-hosted PHP CMS with themes, plugins, media management, commerce foundations, signed online updates, and recovery tooling. The current public release is **1.2.24 stable**.
 
 ## Project Links
 
@@ -21,9 +21,9 @@ Daiying CMS is organized as a Core platform with optional product layers:
 
 1. **Daiying CMS Core**: installer, admin backend, routing, content, media, themes, plugin lifecycle, recovery, and signed updates.
 2. **Content / Media**: articles, pages, structured blocks, taxonomy, uploads, media rendering, and external media/storage integrations.
-3. **Commerce**: manual and hosted-redirect payment provider foundations, card-code products, paid content/download access, and commercial license storage.
-4. **Distribution**: **Development / Preview**. Distribution is the planned layer for packaging, licensing, delivery, and update workflows around commercial CMS extensions and deployable site capabilities. The current repository contains foundations such as market jobs, commercial products/licenses, extension installation, update checks, and card delivery, but a stable Distribution Provider specification is not yet present in this public tree.
-5. **Plugins / Themes**: packaged extension points for official and third-party capabilities.
+3. **Commerce**: products, pricing, orders, payments, paid access, card-code delivery, and commercial license storage.
+4. **Distribution**: **In Development**. A distribution layer being developed for sending Daiying CMS content and commerce data to supported external channels.
+5. **Plugins / Themes**: packaged extension points and marketplace ecosystem for official and third-party capabilities.
 6. **Update System**: signed Core update flow with restore points, integrity checks, health checks, and rollback paths.
 
 ## Quick Start
@@ -62,18 +62,26 @@ See [Installation](docs/installation.md) for the full checklist.
 
 ### Distribution
 
-**Status: Development / Preview**
+**Status: In Development**
 
-Distribution is the direction for turning Daiying CMS into a packaged delivery platform for commercial extensions, licensed capabilities, and deployable site products. In the current public repository, the stable pieces around this direction are:
+Distribution is a layer being developed for sending Daiying CMS content and commerce data to supported external channels.
 
-- Market package installation and update jobs.
-- Commercial product and license tables.
-- Site license activation storage.
-- Card-code product delivery.
-- Payment Provider foundation.
-- Signed Core update infrastructure.
+The intended workflow is:
 
-The final Distribution Provider API and user-facing distribution workflows should be treated as preview until the related development thread promotes them to stable documentation.
+```text
+Content / product data
+-> media assets
+-> Distribution
+-> choose or match external channels
+-> AI or rule-based channel adaptation
+-> Provider / Connector
+-> delivery
+-> success, failure, channel error, or AI error status
+```
+
+Distribution is separate from the plugin marketplace, commercial plugin licensing, authorization-code delivery, Core updates, Capability Packs, Site Vault, and Shadow Upgrade.
+
+This repository branch does not currently contain a dedicated stable `system/core/Distribution` module or final Distribution Provider/Connector specification. Detailed supported channels and workflows will be documented after the current implementation is merged.
 
 ### Commerce
 

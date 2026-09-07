@@ -1,48 +1,81 @@
 # Distribution
 
-Distribution is a key Daiying CMS direction, but the public repository currently shows it as an evolving product layer rather than a stable API.
+Distribution is the Daiying CMS layer for sending prepared content and commerce data to supported external channels.
 
 ## Status
 
-**Development / Preview**
+**In Development**
 
-No stable `DistributionProvider` interface or final Distribution user guide is currently present in the public repository. Documentation should avoid calling Distribution stable until those files exist and the related development thread promotes the feature.
+No dedicated stable `system/core/Distribution` module, final Provider/Connector interface, channel list, or user workflow is currently present in this public repository branch. Documentation should stay conservative until the current implementation is merged.
 
 ## Intended Problem Space
 
 Distribution is meant to support workflows such as:
 
-- Packaging CMS capabilities for delivery.
-- Distributing official and third-party extensions.
-- Connecting commercial licensing to downloads and updates.
-- Supporting one-site or multi-site authorization models.
-- Preparing deployable site capability bundles.
+- Taking content or product information created once inside Daiying CMS.
+- Collecting related images, video, audio, files, and metadata.
+- Selecting or matching supported external channels.
+- Adapting fields, titles, descriptions, formats, and media requirements for each channel.
+- Calling the channel Provider or Connector.
+- Returning clear success, failure, channel error, or AI error status.
 
-## Confirmed Foundations In The Current Repository
+## Conceptual Flow
 
-The repository already contains several foundations that can support Distribution:
+```text
+Content / product creation
+-> media resources
+-> Distribution
+-> external channel selection or matching
+-> AI / rule adaptation
+-> Provider / Connector
+-> external delivery
+-> status feedback
+```
 
-- Market package client and installer classes under `system/core/Market`.
-- Extension dependency, conflict, update, rollback, and job infrastructure.
-- Commercial product, license, license-site, download-token, and audit-event schema.
-- Card-code delivery.
-- Payment Provider foundation.
-- Signed Core update flow.
-- Capability pack and site vault schema.
-- Shadow upgrade schema.
+## What Distribution Is Not
+
+Distribution is not:
+
+- The Daiying CMS plugin marketplace.
+- Commercial plugin licensing.
+- Authorization-code delivery.
+- The CMS update system.
+- Capability Pack.
+- Site Vault.
+- Shadow Upgrade.
+- A mechanism for packaging and deploying plugins to a site.
+
+Those capabilities may exist elsewhere in Daiying CMS, but they should be documented under Commerce, Marketplace, Update System, or Architecture rather than being used as the Distribution product definition.
 
 ## Relationship To Commerce
 
-Commerce handles payment, purchase, entitlement, license, and delivery records. Distribution should build on that layer when a purchased or authorized package needs to be delivered, updated, or validated for a site.
+Commerce handles products, pricing, orders, payment, and transactions.
+
+Distribution handles sending already prepared content or product data to external channels. For example, Commerce may provide product and transaction capabilities, while Distribution sends appropriate product data to a supported external channel.
+
+The final boundary should follow the merged implementation once it is available.
+
+## AI Role
+
+If AI support is implemented, it should be treated as an adapter aid, not as a separate fallback system. AI may help with:
+
+- Title and description adaptation.
+- Field conversion.
+- Content cleanup and formatting.
+- Platform-specific format adaptation.
+- Basic data suitability checks.
+
+If an AI service, Provider, or channel fails, the user-facing workflow should report the current error state clearly. It should not invent alternate distribution behavior that is not implemented.
 
 ## Documentation Gap
 
 The following stable docs are still needed before Distribution can be advertised as production-ready:
 
 - Distribution user workflow.
-- Distribution Provider interface.
-- Package schema.
-- Authorization and license validation rules.
-- Release/update flow for distributed extensions.
+- External channel Provider/Connector interface.
+- Supported channel list.
+- Channel data schema and mapping rules.
+- AI/rule adaptation behavior.
+- Error and retry behavior.
 - Admin UI screenshots.
 - Security model and threat checklist.

@@ -29,7 +29,7 @@ This index collects the public-facing documentation currently available in the G
 
 - [Distribution](distribution.md)
 
-Distribution is currently documented as Development / Preview because the public repository does not yet contain a stable Distribution Provider specification.
+Distribution is currently documented as In Development because this public branch does not yet contain a stable external-channel Provider/Connector specification or final user workflow.
 
 ## Deployment
 
