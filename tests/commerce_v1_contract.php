@@ -7,6 +7,7 @@ require __DIR__ . '/../content/plugins/official.commerce/src/CommerceContracts.p
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceRepository.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceOpenAiCompatibleProvider.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceAiModuleManager.php';
+require __DIR__ . '/../content/plugins/official.commerce/src/CommerceDistributionManager.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/GenericUrlVerificationProvider.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/AmazonVerificationProvider.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/TaobaoVerificationProvider.php';
@@ -19,6 +20,7 @@ use Cms\Core\Payment\PaymentRepository;
 use Daiying\Commerce\CommerceController;
 use Daiying\Commerce\CommerceOpenAiCompatibleProvider;
 use Daiying\Commerce\CommerceAiModuleManager;
+use Daiying\Commerce\CommerceDistributionManager;
 use Daiying\Commerce\CommerceAiModuleInterface;
 use Daiying\Commerce\CommerceDistributionInterface;
 use Daiying\Commerce\CommerceVerificationProviderInterface;
@@ -50,8 +52,10 @@ $assert(in_array('network.external', $parsed->capabilities, true), 'Commerce dec
 $assert(in_array('commerce.verify.write', $parsed->capabilities, true), 'Commerce declares a dedicated verification write capability for future permission splits.');
 $assert(in_array('commerce.logistics.write', $parsed->capabilities, true), 'Commerce declares a dedicated logistics write capability for future provider integrations.');
 $assert(in_array('commerce.ai.manage', $parsed->capabilities, true), 'Commerce declares a dedicated AI module management capability.');
+$assert(in_array('commerce.distribution.manage', $parsed->capabilities, true), 'Commerce declares a dedicated distribution management capability.');
 $assert(interface_exists(CommerceAiModuleInterface::class), 'Commerce exposes an optional AI module interface without making AI a hard dependency.');
 $assert(class_exists(CommerceOpenAiCompatibleProvider::class), 'Commerce provides a reusable OpenAI-Compatible AI provider.');
+$assert(class_exists(CommerceDistributionManager::class), 'Commerce provides a distribution manager for feed and share-card generation.');
 $assert(interface_exists(CommerceDistributionInterface::class), 'Commerce exposes a distribution provider interface for future channels.');
 $assert(interface_exists(CommerceLogisticsProviderInterface::class), 'Commerce exposes a logistics provider interface for future carrier plugins.');
 $assert(interface_exists(CommerceVerificationProviderInterface::class), 'Commerce exposes a source verification provider interface.');
@@ -71,6 +75,9 @@ $assert(in_array('table:commerce_verification_records', $governanceMigration['af
 $aiMigration = require $root . '/content/plugins/official.commerce/migrations/005_ai_modules.php';
 $assert(in_array('table:commerce_ai_modules', $aiMigration['affected_objects'] ?? [], true), 'AI module migration declares the Commerce AI module table.');
 $assert(in_array('table:commerce_ai_invocations', $aiMigration['affected_objects'] ?? [], true), 'AI module migration declares the Commerce AI invocation log table.');
+$distributionMigration = require $root . '/content/plugins/official.commerce/migrations/006_distribution_modules.php';
+$assert(in_array('table:commerce_distribution_channels', $distributionMigration['affected_objects'] ?? [], true), 'Distribution migration declares the channel table.');
+$assert(in_array('table:commerce_distribution_events', $distributionMigration['affected_objects'] ?? [], true), 'Distribution migration declares the event table.');
 
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -80,6 +87,7 @@ $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 ($pricingMigration['up'])($pdo);
 ($governanceMigration['up'])($pdo);
 ($aiMigration['up'])($pdo);
+($distributionMigration['up'])($pdo);
 $pdo->exec('CREATE TABLE cms_payments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_type VARCHAR(96) NOT NULL,
@@ -521,6 +529,64 @@ $assert(!str_contains($productPage, '正品认证'), 'Consumer transparency word
 $adminEditPage = $controllerWithAi->adminProductForm(new Request('GET', '/admin/commerce/products/edit', ['id' => $productId]))->body();
 $assert(str_contains($adminEditPage, 'AI 优化描述'), 'Product edit UI exposes the AI description optimization action.');
 $assert(str_contains($adminEditPage, '允许使用收费 AI'), 'Product AI UI requires explicit opt-in before paid modules can be used.');
+
+$repo->saveAiModule([
+    'id' => $freeOkId,
+    'name' => 'Free Working AI',
+    'provider_type' => 'local',
+    'protocol' => 'openai_compatible',
+    'endpoint' => 'http://127.0.0.1:11434/v1',
+    'model' => 'local-free',
+    'status' => 'enabled',
+    'billing_type' => 'free',
+    'sort_order' => 20,
+    'capabilities' => ['product_copy', 'share_copy'],
+], $aiKey);
+$distributionManager = new CommerceDistributionManager($repo, $manager);
+$feedItem = $distributionManager->productFeedItem($repo->product($productId) ?? [], 'https://www.daiyingcms.com');
+$assert(($feedItem['url'] ?? '') === 'https://www.daiyingcms.com/commerce/product?id=' . $productId, 'Distribution V1 creates canonical product share URLs from site.url.');
+$assert(($feedItem['availability'] ?? '') === 'in_stock', 'Distribution V1 feed exposes product availability.');
+$assert(($feedItem['pricing']['shipping_fee_minor'] ?? -1) === 1200, 'Distribution V1 feed keeps transparent pricing facts.');
+$shareCard = $distributionManager->shareCard($repo->product($productId) ?? [], 'https://www.daiyingcms.com');
+$assert(($shareCard['ai']['used'] ?? false) === true && ($shareCard['ai']['module_name'] ?? '') === 'Free Working AI' && ($shareCard['ai']['billing_type'] ?? '') === 'free', 'Distribution V1 can use enabled free AI modules to generate share copy.');
+$manualChannelId = $repo->saveDistributionChannel([
+    'name' => '私域一键分享',
+    'provider_type' => 'manual_share',
+    'mode' => 'manual',
+    'status' => 'enabled',
+    'sort_order' => 10,
+    'target' => '微信群',
+]);
+$automaticChannelId = $repo->saveDistributionChannel([
+    'name' => '未来自动同步',
+    'provider_type' => 'provider_adapter',
+    'mode' => 'automatic',
+    'status' => 'enabled',
+    'sort_order' => 20,
+]);
+$assert(count($repo->enabledDistributionChannels()) === 2, 'Commerce can manage multiple enabled distribution channels.');
+$distributionPage = $controllerWithAi->adminDistributionChannels(new Request('GET', '/admin/commerce/distribution'))->body();
+$assert(str_contains($distributionPage, '添加分发渠道') && str_contains($distributionPage, '标准商品 Feed'), 'Admin exposes Distribution module management and product feed access.');
+$shareResponse = $controllerWithAi->adminProductDistribution(new Request('POST', '/admin/commerce/distribution/product', [], [
+    'product_id' => $productId,
+    'channel_id' => $manualChannelId,
+]))->body();
+$assert(str_contains($shareResponse, '分享链接') && str_contains($shareResponse, '分享文案'), 'Product distribution flow renders share link and share copy for copying.');
+$assert(str_contains($shareResponse, '复制链接') && str_contains($shareResponse, '复制文案'), 'Product distribution flow exposes copy actions for sellers.');
+$failedSyncResponse = $controllerWithAi->adminProductDistribution(new Request('POST', '/admin/commerce/distribution/product', [], [
+    'product_id' => $productId,
+    'channel_id' => $automaticChannelId,
+]))->body();
+$assert(str_contains($failedSyncResponse, '商品销售不受影响'), 'Distribution provider failures are isolated from product sales.');
+$distributionEvents = $repo->distributionEvents($productId, 10);
+$assert(count($distributionEvents) >= 2, 'Distribution events record share and sync attempts.');
+$assert(($distributionEvents[0]['status'] ?? '') === 'failed', 'Unavailable automatic provider records a failed sync fact.');
+$feedResponse = $controllerWithAi->productFeed(new Request('GET', '/commerce/feed/products.json', [], [], ['HTTP_HOST' => 'www.daiyingcms.com', 'HTTPS' => 'on']));
+$feedPayload = json_decode($feedResponse->body(), true);
+$assert(($feedPayload['version'] ?? '') === 'commerce.feed.v1', 'Public product feed uses the Commerce Feed V1 schema.');
+$assert(($feedPayload['items'][0]['share_url'] ?? '') === 'https://www.daiyingcms.com/commerce/product?id=' . $productId, 'Public product feed includes absolute share links.');
+$adminEditPageWithDistribution = $controllerWithAi->adminProductForm(new Request('GET', '/admin/commerce/products/edit', ['id' => $productId]))->body();
+$assert(str_contains($adminEditPageWithDistribution, '分发与分享') && str_contains($adminEditPageWithDistribution, '生成分享内容'), 'Product edit UI exposes the Distribution V1 share loop.');
 
 $variantId = $repo->saveVariant([
     'product_id' => $productId,

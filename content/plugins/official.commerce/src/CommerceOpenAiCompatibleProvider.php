@@ -47,7 +47,6 @@ final class CommerceOpenAiCompatibleProvider
         $body = curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         $error = curl_error($ch);
-        curl_close($ch);
         if (!is_string($body) || $body === '') {
             throw new RuntimeException($error !== '' ? $error : 'AI Provider 无响应。');
         }

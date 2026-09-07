@@ -11,6 +11,7 @@ require_once __DIR__ . '/src/CommerceRepository.php';
 require_once __DIR__ . '/src/CommerceContracts.php';
 require_once __DIR__ . '/src/CommerceOpenAiCompatibleProvider.php';
 require_once __DIR__ . '/src/CommerceAiModuleManager.php';
+require_once __DIR__ . '/src/CommerceDistributionManager.php';
 require_once __DIR__ . '/src/GenericUrlVerificationProvider.php';
 require_once __DIR__ . '/src/AmazonVerificationProvider.php';
 require_once __DIR__ . '/src/TaobaoVerificationProvider.php';
@@ -45,9 +46,13 @@ return static function (PluginContext $context): void {
     $context->adminRoute('POST', '/admin/commerce/ai/save', [$controller, 'adminSaveAiModule'], 'commerce.ai.manage', true);
     $context->adminRoute('POST', '/admin/commerce/ai/test', [$controller, 'adminTestAiModule'], 'commerce.ai.manage', true);
     $context->adminRoute('POST', '/admin/commerce/ai/run-product', [$controller, 'adminRunProductAi'], 'commerce.ai.manage', true);
+    $context->adminRoute('GET', '/admin/commerce/distribution', [$controller, 'adminDistributionChannels'], 'commerce.distribution.manage', false);
+    $context->adminRoute('POST', '/admin/commerce/distribution/save', [$controller, 'adminSaveDistributionChannel'], 'commerce.distribution.manage', true);
+    $context->adminRoute('POST', '/admin/commerce/distribution/product', [$controller, 'adminProductDistribution'], 'commerce.distribution.manage', true);
 
     $context->frontRoute('GET', '/commerce', [$controller, 'storefront'], null, false);
     $context->frontRoute('GET', '/commerce/product', [$controller, 'productPage'], null, false);
+    $context->frontRoute('GET', '/commerce/feed/products.json', [$controller, 'productFeed'], null, false);
     $context->frontRoute('POST', '/commerce/checkout', [$controller, 'checkout'], null, true);
     $context->frontRoute('GET', '/commerce/orders/complete', [$controller, 'completeOrder'], null, false);
 

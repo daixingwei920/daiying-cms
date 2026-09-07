@@ -1,7 +1,7 @@
 {
   "plugin_id": "official.commerce",
   "name": "Daiying Commerce",
-  "version": "0.1.0-alpha.12",
+  "version": "0.1.0-alpha.13",
   "author": "Daiying CMS",
   "type": "plugin",
   "package_type": "plugin",
@@ -23,12 +23,14 @@
     "commerce.verify.write",
     "commerce.logistics.read",
     "commerce.logistics.write",
-    "commerce.ai.manage"
+    "commerce.ai.manage",
+    "commerce.distribution.manage"
   ],
   "capability_namespaces": ["commerce"],
   "public_routes": [
     { "label": "商品列表", "path": "/commerce", "method": "GET" },
     { "label": "商品详情", "path": "/commerce/product", "method": "GET" },
+    { "label": "商品 Feed", "path": "/commerce/feed/products.json", "method": "GET" },
     { "label": "立即购买", "path": "/commerce/checkout", "method": "POST" },
     { "label": "订单完成", "path": "/commerce/orders/complete", "method": "GET" }
   ],
@@ -37,7 +39,7 @@
   ],
   "dependencies": [],
   "required_plugins": [],
-  "migrations": ["migrations/001_commerce_core.php", "migrations/002_logistics_events.php", "migrations/003_price_transparency.php", "migrations/004_source_verification_governance.php", "migrations/005_ai_modules.php"],
+  "migrations": ["migrations/001_commerce_core.php", "migrations/002_logistics_events.php", "migrations/003_price_transparency.php", "migrations/004_source_verification_governance.php", "migrations/005_ai_modules.php", "migrations/006_distribution_modules.php"],
   "table_prefixes": ["commerce_"],
   "data_policy": {
     "uninstall": "retain_orders_and_facts",

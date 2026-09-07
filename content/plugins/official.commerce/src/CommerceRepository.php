@@ -21,6 +21,9 @@ final class CommerceRepository
     private const AI_STATUSES = ['enabled', 'disabled'];
     private const AI_BILLING_TYPES = ['free', 'paid'];
     private const AI_CAPABILITIES = ['product_copy', 'share_copy', 'content_match', 'sales_insight', 'verification_explanation'];
+    private const DISTRIBUTION_PROVIDER_TYPES = ['manual_share', 'standard_feed', 'provider_adapter'];
+    private const DISTRIBUTION_MODES = ['manual', 'automatic'];
+    private const DISTRIBUTION_STATUSES = ['enabled', 'disabled'];
     private const CHANGE_FIELDS = [
         'name',
         'sku',
@@ -881,6 +884,139 @@ final class CommerceRepository
         $stmt->execute();
 
         return $stmt->fetchAll();
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function distributionChannels(): array
+    {
+        $stmt = $this->pdo->query('SELECT * FROM commerce_distribution_channels ORDER BY sort_order ASC, id ASC');
+
+        return array_map(fn (array $row): array => $this->hydrateJsonFields($row, ['config_json']), $stmt !== false ? $stmt->fetchAll() : []);
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function enabledDistributionChannels(): array
+    {
+        $stmt = $this->pdo->query("SELECT * FROM commerce_distribution_channels WHERE status = 'enabled' ORDER BY sort_order ASC, id ASC");
+
+        return array_map(fn (array $row): array => $this->hydrateJsonFields($row, ['config_json']), $stmt !== false ? $stmt->fetchAll() : []);
+    }
+
+    /** @return array<string,mixed>|null */
+    public function distributionChannel(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM commerce_distribution_channels WHERE id = :id LIMIT 1');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+
+        return is_array($row) ? $this->hydrateJsonFields($row, ['config_json']) : null;
+    }
+
+    /** @param array<string,mixed> $input */
+    public function saveDistributionChannel(array $input): int
+    {
+        $id = max(0, (int) ($input['id'] ?? 0));
+        $name = $this->cleanText((string) ($input['name'] ?? ''), 191);
+        if ($name === '') {
+            throw new InvalidArgumentException('分发渠道名称不能为空。');
+        }
+        $providerType = $this->status((string) ($input['provider_type'] ?? 'manual_share'), self::DISTRIBUTION_PROVIDER_TYPES, 'manual_share');
+        $mode = $this->status((string) ($input['mode'] ?? 'manual'), self::DISTRIBUTION_MODES, 'manual');
+        $status = $this->status((string) ($input['status'] ?? 'disabled'), self::DISTRIBUTION_STATUSES, 'disabled');
+        $config = [
+            'target' => $this->nullableText((string) ($input['target'] ?? ''), 191),
+            'notes' => $this->nullableText((string) ($input['notes'] ?? ''), 500),
+        ];
+        $now = gmdate('Y-m-d H:i:s');
+        if ($id > 0) {
+            if ($this->distributionChannel($id) === null) {
+                throw new RuntimeException('分发渠道不存在。');
+            }
+            $this->pdo->prepare('UPDATE commerce_distribution_channels SET name = :name, provider_type = :provider_type, mode = :mode, status = :status, sort_order = :sort_order, config_json = :config_json, updated_at = :updated_at WHERE id = :id')
+                ->execute([
+                    ':id' => $id,
+                    ':name' => $name,
+                    ':provider_type' => $providerType,
+                    ':mode' => $mode,
+                    ':status' => $status,
+                    ':sort_order' => (int) ($input['sort_order'] ?? 0),
+                    ':config_json' => $this->json($config),
+                    ':updated_at' => $now,
+                ]);
+
+            return $id;
+        }
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO commerce_distribution_channels (uuid, name, provider_type, mode, status, sort_order, config_json, created_at, updated_at)
+             VALUES (:uuid, :name, :provider_type, :mode, :status, :sort_order, :config_json, :created_at, :updated_at)'
+        );
+        $stmt->execute([
+            ':uuid' => $this->uuid(),
+            ':name' => $name,
+            ':provider_type' => $providerType,
+            ':mode' => $mode,
+            ':status' => $status,
+            ':sort_order' => (int) ($input['sort_order'] ?? 0),
+            ':config_json' => $this->json($config),
+            ':created_at' => $now,
+            ':updated_at' => $now,
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /** @param array<string,mixed> $input */
+    public function recordDistributionEvent(array $input): int
+    {
+        $productId = (int) ($input['product_id'] ?? 0);
+        if ($this->product($productId) === null) {
+            throw new RuntimeException('商品不存在。');
+        }
+        $status = $this->status((string) ($input['status'] ?? 'ready'), ['ready', 'synced', 'failed'], 'ready');
+        $now = gmdate('Y-m-d H:i:s');
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO commerce_distribution_events (channel_id, product_id, event_type, status, external_listing_id, message, payload_json, created_at)
+             VALUES (:channel_id, :product_id, :event_type, :status, :external_listing_id, :message, :payload_json, :created_at)'
+        );
+        $stmt->execute([
+            ':channel_id' => isset($input['channel_id']) && (int) $input['channel_id'] > 0 ? (int) $input['channel_id'] : null,
+            ':product_id' => $productId,
+            ':event_type' => $this->cleanCode((string) ($input['event_type'] ?? 'manual_share')),
+            ':status' => $status,
+            ':external_listing_id' => $this->nullableText((string) ($input['external_listing_id'] ?? ''), 191),
+            ':message' => $this->nullableText((string) ($input['message'] ?? ''), 500),
+            ':payload_json' => $this->json($input['payload'] ?? []),
+            ':created_at' => $now,
+        ]);
+        $eventId = (int) $this->pdo->lastInsertId();
+        $channelId = isset($input['channel_id']) ? (int) $input['channel_id'] : 0;
+        if ($channelId > 0) {
+            $this->pdo->prepare('UPDATE commerce_distribution_channels SET last_sync_status = :status, last_sync_message = :message, last_synced_at = :last_synced_at, updated_at = :updated_at WHERE id = :id')
+                ->execute([
+                    ':id' => $channelId,
+                    ':status' => $status,
+                    ':message' => $this->nullableText((string) ($input['message'] ?? ''), 500),
+                    ':last_synced_at' => $now,
+                    ':updated_at' => $now,
+                ]);
+        }
+
+        return $eventId;
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function distributionEvents(?int $productId = null, int $limit = 20): array
+    {
+        if ($productId !== null) {
+            $stmt = $this->pdo->prepare('SELECT e.*, c.name AS channel_name FROM commerce_distribution_events e LEFT JOIN commerce_distribution_channels c ON c.id = e.channel_id WHERE e.product_id = :product_id ORDER BY e.created_at DESC, e.id DESC LIMIT :limit');
+            $stmt->bindValue(':product_id', $productId, PDO::PARAM_INT);
+        } else {
+            $stmt = $this->pdo->prepare('SELECT e.*, c.name AS channel_name FROM commerce_distribution_events e LEFT JOIN commerce_distribution_channels c ON c.id = e.channel_id ORDER BY e.created_at DESC, e.id DESC LIMIT :limit');
+        }
+        $stmt->bindValue(':limit', max(1, min($limit, 100)), PDO::PARAM_INT);
+        $stmt->execute();
+
+        return array_map(fn (array $row): array => $this->hydrateJsonFields($row, ['payload_json']), $stmt->fetchAll());
     }
 
     public function recordEvent(?int $productId, ?int $orderId, string $eventType, array $metadata = []): void

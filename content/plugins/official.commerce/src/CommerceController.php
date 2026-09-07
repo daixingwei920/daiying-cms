@@ -39,7 +39,7 @@ final class CommerceController
             $this->stat('订单', (string) $stats['orders']) .
             $this->stat('已支付', (string) $stats['paid_orders']) .
             '</div>' .
-            '<p><a class="button" href="/admin/commerce/products/new">新建商品</a> <a class="button admin-button-secondary" href="/admin/commerce/products">商品管理</a> <a class="button admin-button-secondary" href="/admin/commerce/orders">订单管理</a> <a class="button admin-button-secondary" href="/admin/commerce/ai">AI 模块</a></p>';
+            '<p><a class="button" href="/admin/commerce/products/new">新建商品</a> <a class="button admin-button-secondary" href="/admin/commerce/products">商品管理</a> <a class="button admin-button-secondary" href="/admin/commerce/orders">订单管理</a> <a class="button admin-button-secondary" href="/admin/commerce/distribution">分发渠道</a> <a class="button admin-button-secondary" href="/admin/commerce/ai">AI 模块</a></p>';
 
         return Response::html(View::page('Commerce', $body));
     }
@@ -528,6 +528,119 @@ final class CommerceController
         }
     }
 
+    public function adminDistributionChannels(Request $request): Response
+    {
+        $editingId = (int) ($request->query['edit'] ?? 0);
+        $editing = $editingId > 0 ? $this->repo->distributionChannel($editingId) : null;
+        $notice = !empty($request->query['saved']) ? '<p class="notice">分发渠道已保存。</p>' : '';
+        $rows = '';
+        foreach ($this->repo->distributionChannels() as $channel) {
+            $config = is_array($channel['config'] ?? null) ? $channel['config'] : [];
+            $rows .= '<tr><td><strong>' . $this->e((string) $channel['name']) . '</strong><br><code>' . (int) $channel['id'] . '</code></td>' .
+                '<td>' . $this->e((string) $channel['provider_type']) . '<br><span class="muted">' . $this->e((string) ($config['target'] ?? '')) . '</span></td>' .
+                '<td>' . $this->e((string) $channel['mode']) . '<br>' . $this->e((string) $channel['status']) . '</td>' .
+                '<td>' . (int) $channel['sort_order'] . '</td>' .
+                '<td>' . $this->e((string) ($channel['last_sync_status'] ?? '未同步')) . '<br><span class="muted">' . $this->e((string) ($channel['last_sync_message'] ?? '')) . '</span></td>' .
+                '<td><a class="button" href="/admin/commerce/distribution?edit=' . (int) $channel['id'] . '">编辑</a></td></tr>';
+        }
+        if ($rows === '') {
+            $rows = '<tr><td colspan="6" class="muted">还没有分发渠道。可以先添加“手动分享”或“标准 Feed”。</td></tr>';
+        }
+        $formChannel = $editing ?? [];
+        $config = is_array($formChannel['config'] ?? null) ? $formChannel['config'] : [];
+        $form = '<h2>' . ($editing !== null ? '编辑分发渠道' : '添加分发渠道') . '</h2>' .
+            '<form method="post" action="/admin/commerce/distribution/save">' . CsrfToken::field() .
+            '<input type="hidden" name="id" value="' . (int) ($formChannel['id'] ?? 0) . '">' .
+            '<label>渠道名称<input name="name" required value="' . $this->e((string) ($formChannel['name'] ?? '')) . '" placeholder="如 微信群分享 / 标准商品 Feed"></label>' .
+            '<label>Provider 类型<select name="provider_type">' . $this->options(['manual_share' => '一键分享', 'standard_feed' => '标准商品 Feed', 'provider_adapter' => '平台 Provider Adapter'], (string) ($formChannel['provider_type'] ?? 'manual_share')) . '</select></label>' .
+            '<label>分发方式<select name="mode">' . $this->options(['manual' => '一键分享', 'automatic' => '自动同步'], (string) ($formChannel['mode'] ?? 'manual')) . '</select></label>' .
+            '<label>启停<select name="status">' . $this->options(['enabled' => '启用', 'disabled' => '停用'], (string) ($formChannel['status'] ?? 'disabled')) . '</select></label>' .
+            '<label>调用顺序<input name="sort_order" type="number" value="' . (int) ($formChannel['sort_order'] ?? 0) . '"></label>' .
+            '<label>目标 / 备注名<input name="target" value="' . $this->e((string) ($config['target'] ?? '')) . '" placeholder="如 私域社群 / Google Merchant"></label>' .
+            '<label>说明<input name="notes" value="' . $this->e((string) ($config['notes'] ?? '')) . '"></label>' .
+            '<p class="muted">平台官方允许自动同步时才使用自动模式；平台不允许或 Provider 不可用时，商品继续正常销售，并记录同步失败。</p>' .
+            '<button type="submit">保存分发渠道</button> <a class="button admin-button-secondary" href="/admin/commerce">返回总览</a></form>';
+        $events = '';
+        foreach ($this->repo->distributionEvents(null, 20) as $event) {
+            $events .= '<tr><td>' . $this->e((string) $event['created_at']) . '</td><td>' . $this->e((string) ($event['channel_name'] ?? '标准能力')) . '</td><td>' . (int) $event['product_id'] . '</td><td>' . $this->e((string) $event['event_type']) . '</td><td>' . $this->e((string) $event['status']) . '</td><td>' . $this->e((string) ($event['message'] ?? '')) . '</td></tr>';
+        }
+        if ($events === '') {
+            $events = '<tr><td colspan="6" class="muted">暂无分发记录。</td></tr>';
+        }
+
+        return Response::html(View::page('Commerce 分发渠道', '<h1>Commerce 分发渠道</h1>' . $notice . '<p><a class="button admin-button-secondary" href="/commerce/feed/products.json" target="_blank" rel="noopener">查看标准商品 Feed</a></p><table><tr><th>渠道</th><th>Provider</th><th>方式/状态</th><th>顺序</th><th>最近同步</th><th>操作</th></tr>' . $rows . '</table>' . $form . '<h2>最近分发</h2><table><tr><th>时间</th><th>渠道</th><th>商品</th><th>事件</th><th>状态</th><th>说明</th></tr>' . $events . '</table>'));
+    }
+
+    public function adminSaveDistributionChannel(Request $request): Response
+    {
+        try {
+            $id = $this->repo->saveDistributionChannel($request->body);
+            return Response::redirect('/admin/commerce/distribution?edit=' . $id . '&saved=1');
+        } catch (Throwable $exception) {
+            return $this->error('分发渠道保存失败', $exception, '/admin/commerce/distribution');
+        }
+    }
+
+    public function adminProductDistribution(Request $request): Response
+    {
+        $productId = (int) ($request->body['product_id'] ?? 0);
+        try {
+            $product = $this->repo->product($productId);
+            if ($product === null) {
+                throw new \RuntimeException('商品不存在。');
+            }
+            if ((string) ($product['status'] ?? '') !== 'active') {
+                throw new \RuntimeException('商品发布后才能生成分发内容。');
+            }
+            $channelId = (int) ($request->body['channel_id'] ?? 0);
+            $channel = $channelId > 0 ? $this->repo->distributionChannel($channelId) : null;
+            $allowPaidAi = !empty($request->body['allow_paid_ai']);
+            $manager = new CommerceDistributionManager($this->repo, new CommerceAiModuleManager($this->repo, $this->paymentSecret()));
+            $card = $manager->shareCard($product, $this->siteBaseUrl($request), $allowPaidAi);
+            $eventStatus = 'ready';
+            $message = '已生成分享链接和文案。';
+            if (is_array($channel) && (string) ($channel['mode'] ?? '') === 'automatic' && (string) ($channel['provider_type'] ?? '') === 'provider_adapter') {
+                $eventStatus = 'failed';
+                $message = '该平台 Provider 尚未接入或暂不可用，商品销售不受影响。';
+            }
+            $eventId = $this->repo->recordDistributionEvent([
+                'channel_id' => $channelId > 0 ? $channelId : null,
+                'product_id' => $productId,
+                'event_type' => $eventStatus === 'failed' ? 'provider_sync' : 'manual_share',
+                'status' => $eventStatus,
+                'message' => $message,
+                'payload' => $card,
+            ]);
+            $body = '<h1>商品分发</h1><p><strong>商品：</strong>' . $this->e((string) $product['name']) . '</p>' .
+                '<p><strong>分享链接：</strong><input id="commerce-share-url" readonly value="' . $this->e((string) $card['url']) . '"></p>' .
+                '<p><button type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById(\'commerce-share-url\').value)">复制链接</button></p>' .
+                '<p><strong>分享文案：</strong></p><textarea id="commerce-share-copy" rows="8" readonly>' . $this->e((string) $card['copy']) . '</textarea>' .
+                '<p><button type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById(\'commerce-share-copy\').value)">复制文案</button></p>' .
+                '<h2>分享卡片数据</h2><table><tr><th>标题</th><td>' . $this->e((string) $card['title']) . '</td></tr><tr><th>价格</th><td>' . $this->e((string) $card['price_display']) . '</td></tr><tr><th>图片</th><td>' . $this->e((string) $card['image_url']) . '</td></tr><tr><th>AI 文案</th><td>' . (!empty($card['ai']['used']) ? '已生成' : '未使用') . '</td></tr><tr><th>分发状态</th><td>' . $this->e($message) . '</td></tr></table>' .
+                '<p class="muted">记录 ID：' . $eventId . '。分发故障不会改变商品销售、订单或支付状态。</p>' .
+                '<p><a class="button" href="' . $this->e((string) $card['url']) . '" target="_blank" rel="noopener">打开商品</a> <a class="button admin-button-secondary" href="/admin/commerce/products/edit?id=' . $productId . '">返回商品</a></p>';
+
+            return Response::html(View::page('商品分发', $body));
+        } catch (Throwable $exception) {
+            return $this->error('商品分发失败', $exception, '/admin/commerce/products/edit?id=' . $productId);
+        }
+    }
+
+    public function productFeed(Request $request): Response
+    {
+        $manager = new CommerceDistributionManager($this->repo);
+        $items = [];
+        foreach ($this->repo->publicProducts(200) as $product) {
+            $items[] = $manager->productFeedItem($product, $this->siteBaseUrl($request));
+        }
+
+        return Response::json([
+            'version' => 'commerce.feed.v1',
+            'generated_at' => gmdate('Y-m-d H:i:s'),
+            'items' => $items,
+        ]);
+    }
+
     public function storefront(Request $request): Response
     {
         $cards = '';
@@ -727,9 +840,33 @@ final class CommerceController
             '<form method="post" action="/admin/commerce/variants/save">' . CsrfToken::field() . '<input type="hidden" name="product_id" value="' . $productId . '"><label>规格名称<input name="title" placeholder="如 红色 / XL / 256GB"></label><label>规格 SKU<input name="sku"></label><label>库存<input name="stock_quantity" type="number" min="0" value="0"></label><label>价格增量（分）<input name="price_delta_minor" type="number" value="0"></label><label>选项（每行 名称:值）<textarea name="options" rows="3"></textarea></label><button type="submit">添加规格</button></form>' .
             '<hr><h2>购买动作</h2><table><tr><th>按钮</th><th>类型</th><th>履约</th><th>状态</th></tr>' . $actions . '</table>' .
             '<form method="post" action="/admin/commerce/actions/save">' . CsrfToken::field() . '<input type="hidden" name="product_id" value="' . $productId . '"><label>按钮文案<input name="label" placeholder="立即购买"></label><label>动作类型<select name="action_type">' . $this->options(['site_checkout' => '本站购买', 'external_url' => '外部购买', 'contact' => '联系购买', 'digital_delivery' => '数字自动交付'], 'site_checkout') . '</select></label><label>外部链接<input name="external_url" type="url"></label><label>联系说明<input name="contact_text"></label><label>履约模式<select name="fulfillment_mode">' . $this->options(['none' => '无需履约', 'shipping' => '物流配送', 'digital_card' => '自动发卡'], 'none') . '</select></label><button type="submit">添加购买动作</button></form>' .
+            $this->adminDistributionPanel($productId) .
             '<hr><h2>AI 辅助</h2><form method="post" action="/admin/commerce/ai/run-product">' . CsrfToken::field() . '<input type="hidden" name="product_id" value="' . $productId . '"><label>AI 任务<select name="task">' . $this->options(CommerceAiModuleManager::taskLabels(), 'product_copy') . '</select></label><label><input type="checkbox" name="allow_paid" value="1"> 允许使用收费 AI</label><p class="muted">默认只调用启用的免费 AI 模块。结果只用于人工参考，不自动写回商品或核验结论。</p><button type="submit">AI 优化描述</button> <a class="button admin-button-secondary" href="/admin/commerce/ai">管理 AI 模块</a></form>' .
             $this->adminVerificationPanel($productId) .
             '<hr><h2>关键变更历史</h2><table><tr><th>时间</th><th>字段</th><th>旧值</th><th>新值</th></tr>' . $changes . '</table>';
+    }
+
+    private function adminDistributionPanel(int $productId): string
+    {
+        $channelOptions = '<option value="0">标准分享能力</option>';
+        foreach ($this->repo->enabledDistributionChannels() as $channel) {
+            $channelOptions .= '<option value="' . (int) $channel['id'] . '">' . $this->e((string) $channel['name']) . ' · ' . $this->e((string) $channel['mode']) . '</option>';
+        }
+        $events = '';
+        foreach ($this->repo->distributionEvents($productId, 6) as $event) {
+            $events .= '<tr><td>' . $this->e((string) $event['created_at']) . '</td><td>' . $this->e((string) ($event['channel_name'] ?? '标准能力')) . '</td><td>' . $this->e((string) $event['event_type']) . '</td><td>' . $this->e((string) $event['status']) . '</td><td>' . $this->e((string) ($event['message'] ?? '')) . '</td></tr>';
+        }
+        if ($events === '') {
+            $events = '<tr><td colspan="5" class="muted">暂无分发记录。</td></tr>';
+        }
+
+        return '<hr><h2>分发与分享</h2><form method="post" action="/admin/commerce/distribution/product">' . CsrfToken::field() .
+            '<input type="hidden" name="product_id" value="' . $productId . '">' .
+            '<label>分发渠道<select name="channel_id">' . $channelOptions . '</select></label>' .
+            '<label><input type="checkbox" name="allow_paid_ai" value="1"> 允许使用收费 AI 生成分享文案</label>' .
+            '<p class="muted">商品发布后可生成标准商品 Feed、分享链接、分享卡片数据和分享文案。平台 Provider 故障只记录失败，不影响销售。</p>' .
+            '<button type="submit">生成分享内容</button> <a class="button admin-button-secondary" href="/admin/commerce/distribution">管理分发渠道</a> <a class="button admin-button-secondary" href="/commerce/feed/products.json" target="_blank" rel="noopener">商品 Feed</a></form>' .
+            '<h3>分发历史</h3><table><tr><th>时间</th><th>渠道</th><th>事件</th><th>状态</th><th>说明</th></tr>' . $events . '</table>';
     }
 
     private function adminVerificationPanel(int $productId): string
@@ -1266,8 +1403,22 @@ final class CommerceController
     private function frontPage(string $title, string $body): string
     {
         return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $this->e($title) . '</title><style>' .
-            'body{margin:0;background:#f8fafc;color:#172033;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}a{color:#1f6feb;text-decoration:none}.wrap{width:min(1120px,100% - 32px);margin:0 auto;padding:28px 0}.top{background:#fff;border-bottom:1px solid #e4e7ec}.top .wrap{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:14px 0}.brand{font-weight:800;color:#172033}.commerce-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.commerce-card{display:block;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:14px;color:#172033}.commerce-card img,.commerce-card .placeholder{width:100%;aspect-ratio:4/3;object-fit:cover;background:#edf2f7;border-radius:6px;display:grid;place-items:center;color:#667085;font-weight:800}.commerce-card strong{display:block;margin-top:10px}.commerce-card span,.commerce-price{font-size:24px;font-weight:800;color:#b42318}.commerce-card p,.commerce-muted{color:#667085}.commerce-product{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;align-items:start}.commerce-hero-img{width:100%;max-height:560px;object-fit:cover;background:#edf2f7;border-radius:8px}.commerce-button,button.commerce-button{display:inline-block;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:12px 16px;font-weight:750;cursor:pointer;margin-top:12px}.commerce-section,.commerce-empty{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:18px;margin-top:18px}.commerce-profile h3{margin:22px 0 8px}.commerce-fact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.commerce-fact{background:#f8fafc;border:1px solid #e4e7ec;border-radius:8px;padding:12px}.commerce-fact span,.commerce-fact small{display:block;color:#667085}.commerce-fact strong{display:block;font-size:18px;margin:4px 0;color:#172033;overflow-wrap:anywhere}.commerce-specs{display:block;width:100%;border-collapse:collapse;margin-top:14px;overflow-x:auto}.commerce-specs th,.commerce-specs td{border-top:1px solid #e4e7ec;text-align:left;padding:10px}.commerce-description img,.commerce-description video,.commerce-description audio{max-width:100%}.media-gallery{display:grid;grid-template-columns:repeat(var(--columns),1fr);gap:12px}.media-gallery img{width:100%;border-radius:6px}.commerce-error{background:#fff1f0;border:1px solid #ffccc7;color:#8c1d18;border-radius:6px;padding:12px}label{display:block;font-weight:700;margin-top:12px}input,select{width:100%;box-sizing:border-box;border:1px solid #b8c0cc;border-radius:6px;padding:10px;margin-top:6px}@media(max-width:760px){.commerce-product{grid-template-columns:1fr}.wrap{width:min(100% - 24px,1120px)}.media-gallery{grid-template-columns:1fr}.commerce-fact-grid{grid-template-columns:1fr}.commerce-specs th,.commerce-specs td{white-space:nowrap}}' .
+            'body{margin:0;background:#f8fafc;color:#172033;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}a{color:#1f6feb;text-decoration:none}.wrap{width:min(1120px,100% - 32px);margin:0 auto;padding:28px 0}.top{background:#fff;border-bottom:1px solid #e4e7ec}.top .wrap{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:14px 0}.brand{font-weight:800;color:#172033}.commerce-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.commerce-card{display:block;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:14px;color:#172033}.commerce-card img,.commerce-card .placeholder{width:100%;aspect-ratio:4/3;object-fit:cover;background:#edf2f7;border-radius:6px;display:grid;place-items:center;color:#667085;font-weight:800}.commerce-card strong{display:block;margin-top:10px}.commerce-card span,.commerce-price{font-size:24px;font-weight:800;color:#b42318}.commerce-card p,.commerce-muted{color:#667085}.commerce-product{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;align-items:start}.commerce-hero-img{width:100%;max-height:560px;object-fit:cover;background:#edf2f7;border-radius:8px}.commerce-button,button.commerce-button{display:inline-block;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:12px 16px;font-weight:750;cursor:pointer;margin-top:12px}.commerce-section,.commerce-empty{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:18px;margin-top:18px}.commerce-profile h3{margin:22px 0 8px}.commerce-fact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.commerce-fact{background:#f8fafc;border:1px solid #e4e7ec;border-radius:8px;padding:12px}.commerce-fact span,.commerce-fact small{display:block;color:#667085}.commerce-fact strong{display:block;font-size:18px;margin:4px 0;color:#172033;overflow-wrap:anywhere}.commerce-specs{display:block;width:100%;border-collapse:collapse;margin-top:14px;overflow-x:auto}.commerce-specs th,.commerce-specs td{border-top:1px solid #e4e7ec;text-align:left;padding:10px}.commerce-description img,.commerce-description video,.commerce-description audio{max-width:100%}.media-gallery{display:grid;grid-template-columns:repeat(var(--columns),1fr);gap:12px}.media-gallery img{width:100%;border-radius:6px}.commerce-error{background:#fff1f0;border:1px solid #ffccc7;color:#8c1d18;border-radius:6px;padding:12px}label{display:block;font-weight:700;margin-top:12px}input,select,textarea{width:100%;box-sizing:border-box;border:1px solid #b8c0cc;border-radius:6px;padding:10px;margin-top:6px}@media(max-width:760px){.commerce-product{grid-template-columns:1fr}.wrap{width:min(100% - 24px,1120px)}.media-gallery{grid-template-columns:1fr}.commerce-fact-grid{grid-template-columns:1fr}.commerce-specs th,.commerce-specs td{white-space:nowrap}}' .
             '</style></head><body><header class="top"><div class="wrap"><a class="brand" href="/commerce">Daiying Commerce</a><a href="/">返回首页</a></div></header><main class="wrap">' . $body . '</main></body></html>';
+    }
+
+    private function siteBaseUrl(Request $request): string
+    {
+        $configured = rtrim((string) $this->settings->get('site.url', ''), '/');
+        if ($configured !== '') {
+            return $configured;
+        }
+        $host = (string) ($request->server['HTTP_HOST'] ?? '');
+        if ($host === '') {
+            return '';
+        }
+        $https = strtolower((string) ($request->server['HTTPS'] ?? '')) === 'on' || (string) ($request->server['SERVER_PORT'] ?? '') === '443';
+        return ($https ? 'https://' : 'http://') . $host;
     }
 
     private function e(string $value): string
