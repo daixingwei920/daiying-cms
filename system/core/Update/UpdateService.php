@@ -234,7 +234,7 @@ final class UpdateService
     private function prepareRelease(string $zipPath, UpdatePackageManifest $manifest, string $releaseDir): void
     {
         if (is_dir($releaseDir)) {
-            throw new UpdateException('Release directory already exists.');
+            $this->clearStaleReleaseDirectory($releaseDir);
         }
         $this->copyDirectory($this->rootPath . '/system/core', $releaseDir . '/system/core');
         $this->copyDirectory($this->rootPath . '/system/migrations', $releaseDir . '/system/migrations');
@@ -264,6 +264,18 @@ final class UpdateService
             'created_at' => gmdate('c'),
             'files' => array_keys($manifest->files),
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
+    }
+
+    private function clearStaleReleaseDirectory(string $releaseDir): void
+    {
+        $activePath = (string) ($this->readPointer()['path'] ?? '');
+        $releaseReal = realpath($releaseDir);
+        $activeReal = $activePath !== '' ? realpath($activePath) : false;
+        if ($releaseReal !== false && $activeReal !== false && $releaseReal === $activeReal) {
+            throw new UpdateException('Release directory is already active.');
+        }
+
+        $this->removeDirectory($releaseDir);
     }
 
     private function preflightRelease(string $releaseDir): void

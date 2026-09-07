@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.27 - 2026-09-07
+
+- Cleared stale, non-active Core release directories before preparing an update retry.
+- Made the official plugin registry migration best-effort when the root `system/` directory is not writable by the PHP process; runtime trust still comes from the built-in registry fallback.
+- Preserved the 1.2.26 Stripe Checkout URL compatibility fix.
+- Public install package: `daiying-cms-1.2.27-stable.zip`.
+- SHA-256: `bd70bcab0b6700c521835af319b31c34847a158fe0168b4cba965531ecbc0eb1`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.27>.
+
 ## 1.2.26 - 2026-09-07
 
 - Allowed official Stripe Checkout Session URLs using `https://checkout.stripe.com/pay/cs_...` in addition to the existing `https://checkout.stripe.com/c/pay/cs_...` form.

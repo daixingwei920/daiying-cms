@@ -20,7 +20,10 @@ return new class implements MigrationInterface {
 
         $dir = dirname($target);
         if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
-            throw new RuntimeException('Unable to create official plugin registry directory.');
+            return;
+        }
+        if (!is_writable($dir) || (is_file($target) && !is_writable($target))) {
+            return;
         }
 
         $content = "<?php\n\n"
@@ -30,12 +33,11 @@ return new class implements MigrationInterface {
         $tmp = $target . '.tmp-' . bin2hex(random_bytes(4));
         if (file_put_contents($tmp, $content, LOCK_EX) === false) {
             @unlink($tmp);
-            throw new RuntimeException('Unable to stage official plugin registry.');
+            return;
         }
         @chmod($tmp, 0644);
         if (!rename($tmp, $target)) {
             @unlink($tmp);
-            throw new RuntimeException('Unable to update official plugin registry.');
         }
     }
 
