@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Daiying\Commerce;
 
+use Cms\Core\CardDelivery\CardDeliveryRepository;
 use Cms\Core\Config\Settings;
 use Cms\Core\Content\BlockRenderer;
 use Cms\Core\Content\ContentRepository;
@@ -72,14 +73,18 @@ final class CommerceController
         $gallery = is_array($product['gallery_media_ids'] ?? null) ? implode(',', $product['gallery_media_ids']) : '';
         $specs = $this->keyValueText(is_array($product['specs'] ?? null) ? $product['specs'] : []);
         $status = (string) ($product['status'] ?? 'draft');
+        $savedNotice = !$isNew && !empty($request->query['saved'])
+            ? '<p class="notice">商品已保存。可继续完善图片/内容，发布后到“分发与分享”生成分享链接和文案。</p>'
+            : '';
         $body = '<h1>' . $this->e($title) . '</h1>' .
+            $savedNotice .
             '<form method="post" action="/admin/commerce/products/save">' . CsrfToken::field() .
             '<input type="hidden" name="id" value="' . (int) ($product['id'] ?? 0) . '">' .
             '<label>商品名称<input name="name" required value="' . $this->e((string) ($product['name'] ?? '')) . '"></label>' .
             '<label>SKU / 商品编号<input name="sku" value="' . $this->e((string) ($product['sku'] ?? '')) . '" placeholder="留空自动生成"></label>' .
             '<label>固定链接<input name="slug" value="' . $this->e((string) ($product['slug'] ?? '')) . '" placeholder="留空自动生成"></label>' .
             '<label>状态<select name="status">' . $this->options(['draft' => '草稿', 'active' => '可销售', 'archived' => '归档'], $status) . '</select></label>' .
-            '<label>价格（分）<input name="price_minor" type="number" min="1" required value="' . (int) ($product['price_minor'] ?? 0) . '"></label>' .
+            '<label>价格（最小货币单位，例如 360 元填写 36000）<input name="price_minor" type="number" min="1" required value="' . (int) ($product['price_minor'] ?? 0) . '"></label>' .
             '<label>币种<select name="currency">' . $this->currencyOptions((string) ($product['currency'] ?? 'CNY')) . '</select></label>' .
             '<label>交易区域<input name="region" value="' . $this->e((string) ($product['region'] ?? 'CN')) . '"></label>' .
             '<label>交易类型<select name="transaction_region">' . $this->options(['cn_domestic' => '中国大陆交易', 'cross_border' => '跨境交易', 'international' => '海外/国际交易'], (string) ($product['transaction_region'] ?? 'cn_domestic')) . '</select></label>' .
@@ -90,16 +95,16 @@ final class CommerceController
             '<label>价格说明<input name="price_note" value="' . $this->e((string) ($product['price_note'] ?? '')) . '" placeholder="如 含税 / 不含运费 / 海外仓发货"></label>' .
             '<label>库存数量<input name="stock_quantity" type="number" min="0" value="' . (int) ($product['stock_quantity'] ?? 0) . '"></label>' .
             '<label>摘要<textarea name="summary" rows="3">' . $this->e((string) ($product['summary'] ?? '')) . '</textarea></label>' .
-            '<label>详情内容 ID<input name="description_content_id" type="number" min="0" value="' . (int) ($product['description_content_id'] ?? 0) . '"></label>' .
+            '<label>详情内容 ID<input name="description_content_id" type="number" min="0" value="' . (int) ($product['description_content_id'] ?? 0) . '"></label><p class="muted">商品介绍复用 CMS 内容模块：先在内容管理编辑文章/页面，再填写对应 ID。<a href="/admin/content/new">新建内容</a></p>' .
             '<label>主图媒体 ID<input name="primary_media_id" type="number" min="0" value="' . (int) ($product['primary_media_id'] ?? 0) . '"></label>' .
-            '<label>图库媒体 ID（逗号分隔）<input name="gallery_media_ids" value="' . $this->e($gallery) . '"></label>' .
+            '<label>图库媒体 ID（逗号分隔）<input name="gallery_media_ids" value="' . $this->e($gallery) . '"></label><p class="muted">图片、音频、视频和附件复用 CMS 媒体库。<a href="/admin/media">打开媒体库</a></p>' .
             '<label>品牌<input name="brand" value="' . $this->e((string) ($product['brand'] ?? '')) . '"></label>' .
             '<label>型号<input name="model" value="' . $this->e((string) ($product['model'] ?? '')) . '"></label>' .
             '<label>商品来源 URL<input name="source_url" type="url" value="' . $this->e((string) ($product['source_url'] ?? '')) . '"></label>' .
             '<label>商品来源声明<input name="source_claim_text" value="' . $this->e((string) ($product['source_claim_text'] ?? '')) . '" placeholder="例如 官方店购买 / 自有库存 / 供应商发货"></label>' .
             '<label>规格事实（每行一个：名称: 值）<textarea name="specs" rows="5">' . $this->e($specs) . '</textarea></label>' .
             '<label><input type="checkbox" name="requires_shipping" value="1" ' . ((int) ($product['requires_shipping'] ?? 0) === 1 ? 'checked' : '') . '> 需要物流配送</label>' .
-            '<label><input type="checkbox" name="auto_delivery_enabled" value="1" ' . ((int) ($product['auto_delivery_enabled'] ?? 0) === 1 ? 'checked' : '') . '> 数字商品可自动交付</label>' .
+            '<label><input type="checkbox" name="auto_delivery_enabled" value="1" ' . ((int) ($product['auto_delivery_enabled'] ?? 0) === 1 ? 'checked' : '') . '> 数字商品可自动交付</label><p class="muted">数字交付复用后台“发卡管理”，请在发卡商品里关联当前 Commerce 商品 ID 并导入库存。</p>' .
             '<button type="submit">保存商品</button> <a class="button admin-button-secondary" href="/admin/commerce/products">返回列表</a></form>';
 
         if (!$isNew) {
@@ -114,7 +119,13 @@ final class CommerceController
         try {
             $id = $this->repo->saveProduct($request->body, $this->adminId($request));
             if ($this->repo->activeActions($id) === []) {
-                $this->repo->saveAction(['product_id' => $id, 'action_type' => 'site_checkout', 'label' => '立即购买', 'fulfillment_mode' => !empty($request->body['requires_shipping']) ? 'shipping' : 'none']);
+                $autoDelivery = !empty($request->body['auto_delivery_enabled']) && empty($request->body['requires_shipping']);
+                $this->repo->saveAction([
+                    'product_id' => $id,
+                    'action_type' => $autoDelivery ? 'digital_delivery' : 'site_checkout',
+                    'label' => $autoDelivery ? '购买后自动交付' : '立即购买',
+                    'fulfillment_mode' => $autoDelivery ? 'digital_card' : (!empty($request->body['requires_shipping']) ? 'shipping' : 'none'),
+                ]);
             }
             return Response::redirect('/admin/commerce/products/edit?id=' . $id . '&saved=1');
         } catch (Throwable $exception) {
@@ -675,7 +686,7 @@ final class CommerceController
         foreach ($this->repo->activeActions((int) $product['id']) as $action) {
             $type = (string) $action['action_type'];
             if ($type === 'external_url') {
-                $actions .= '<a class="commerce-button" href="' . $this->e((string) $action['external_url']) . '" target="_blank" rel="nofollow noopener">' . $this->e((string) $action['label']) . '</a>';
+                $actions .= '<a class="commerce-button" href="' . $this->e((string) $action['external_url']) . '" target="_blank" rel="nofollow noopener">' . $this->e((string) $action['label']) . '</a><p class="commerce-muted">将在外部平台成交，支付、物流、退款和售后以实际成交平台为准。</p>';
                 continue;
             }
             if ($type === 'contact') {
@@ -688,13 +699,14 @@ final class CommerceController
                 $variantField .
                 '<label>数量<input name="quantity" type="number" min="1" max="99" value="1"></label>' .
                 '<label>支付方式<select name="provider_id">' . $this->providerOptions((string) $product['currency']) . '</select></label>' .
+                $this->compactPriceSummaryHtml($product, 1) .
                 '<button class="commerce-button" type="submit">' . $this->e((string) $action['label']) . '</button></form>';
         }
         if ($actions === '') {
             $actions = '<p class="commerce-muted">当前商品暂无可用购买方式。</p>';
         }
         $description = $this->descriptionHtml((int) ($product['description_content_id'] ?? 0));
-        $body = '<article class="commerce-product"><div>' . $image . '</div><div><h1>' . $this->e((string) $product['name']) . '</h1><p class="commerce-price">' . $this->money((int) $product['price_minor'], (string) $product['currency']) . '</p><p>' . $this->e((string) ($product['summary'] ?? '')) . '</p><p><strong>库存：</strong>' . (int) $product['available_quantity'] . '</p><p><strong>来源核验：</strong>' . $this->verificationLabel((string) $product['verification_status']) . '</p>' . $actions . '</div></article>' .
+        $body = '<article class="commerce-product"><div>' . $image . '</div><div><h1>' . $this->e((string) $product['name']) . '</h1><p class="commerce-price">' . $this->money((int) $product['price_minor'], (string) $product['currency']) . '</p><p>' . $this->e((string) ($product['summary'] ?? '')) . '</p>' . $this->productAtAGlanceHtml($product) . '<p><strong>库存：</strong>' . (int) $product['available_quantity'] . '</p><p><strong>来源核验：</strong>' . $this->verificationLabel((string) $product['verification_status']) . '</p>' . $actions . '</div></article>' .
             $this->transparencyProfileHtml($product) .
             $description;
 
@@ -776,7 +788,7 @@ final class CommerceController
             return Response::html($this->frontPage('订单待确认', '<h1>订单待确认</h1><p>支付状态暂未完成，请稍后刷新。</p><p class="commerce-muted">' . $this->e($exception->getMessage()) . '</p>'));
         }
         $paid = in_array((string) ($order['status'] ?? ''), ['paid', 'fulfilled'], true);
-        $body = '<h1>' . ($paid ? '支付成功' : '订单待支付') . '</h1><p>订单号：<strong>' . $this->e((string) $order['order_number']) . '</strong></p><p>金额：' . $this->money((int) $order['amount_minor'], (string) $order['currency']) . '</p><p>状态：' . $this->e((string) $order['status']) . '</p>' . $this->orderPriceTransparencyHtml($order) . $this->orderLogisticsHtml($order) . '<p><a href="/commerce">返回商品列表</a></p>';
+        $body = '<h1>' . ($paid ? '支付成功' : '订单待支付') . '</h1><p>订单号：<strong>' . $this->e((string) $order['order_number']) . '</strong></p><p>金额：' . $this->money((int) $order['amount_minor'], (string) $order['currency']) . '</p><p>状态：' . $this->e((string) $order['status']) . '</p>' . $this->orderPriceTransparencyHtml($order) . $this->orderDigitalDeliveryHtml($order) . $this->orderLogisticsHtml($order) . '<p><a href="/commerce">返回商品列表</a></p>';
 
         return Response::html($this->frontPage('订单结果', $body));
     }
@@ -1169,6 +1181,51 @@ final class CommerceController
         return '<section class="commerce-section"><h2>物流</h2><p><strong>' . $this->e($this->logisticsLabel((string) $latest['status'])) . '</strong></p><p>' . $this->e(trim((string) ($latest['carrier'] ?? '') . ' ' . (string) ($latest['tracking_number'] ?? '')) ?: '暂无运单号') . '</p><table class="commerce-specs"><tr><th>时间</th><th>状态</th><th>说明</th></tr>' . $rows . '</table></section>';
     }
 
+    /** @param array<string,mixed> $order */
+    private function orderDigitalDeliveryHtml(array $order): string
+    {
+        $snapshot = is_array($order['snapshot'] ?? null) ? $order['snapshot'] : [];
+        $action = is_array($snapshot['action'] ?? null) ? $snapshot['action'] : [];
+        if ((string) ($action['fulfillment_mode'] ?? '') !== 'digital_card') {
+            return '';
+        }
+        $productId = $this->linkedCardProductId((int) ($order['product_id'] ?? 0));
+        if ($productId <= 0) {
+            return '<section class="commerce-section"><h2>数字交付</h2><p class="commerce-muted">支付已确认，商家正在处理交付。</p></section>';
+        }
+        try {
+            $items = (new CardDeliveryRepository($this->pdo, $this->paymentSecret()))->deliveriesForOrder($productId, 'commerce:' . (int) ($order['id'] ?? 0));
+        } catch (Throwable) {
+            $items = [];
+        }
+        $secretLines = [];
+        foreach ($items as $item) {
+            if ((string) ($item['status'] ?? '') !== 'delivered') {
+                continue;
+            }
+            $secret = (string) ($item['secret'] ?? '');
+            if ($secret !== '' && $secret !== '[encrypted]') {
+                $secretLines[] = $secret;
+            }
+        }
+        if ($secretLines === []) {
+            return '<section class="commerce-section"><h2>数字交付</h2><p class="commerce-muted">支付已确认，但卡密库存暂不可用，订单已进入人工处理。</p></section>';
+        }
+
+        return '<section class="commerce-section"><h2>数字交付</h2><pre>' . $this->e(implode("\n", $secretLines)) . '</pre><p class="commerce-muted">请立即妥善保存，后台默认只显示掩码。</p></section>';
+    }
+
+    private function linkedCardProductId(int $commerceProductId): int
+    {
+        try {
+            $stmt = $this->pdo->prepare("SELECT id FROM cms_card_products WHERE commerce_product_id = :commerce_product_id AND status = 'active' ORDER BY id ASC LIMIT 1");
+            $stmt->execute([':commerce_product_id' => $commerceProductId]);
+            return max(0, (int) ($stmt->fetchColumn() ?: 0));
+        } catch (Throwable) {
+            return 0;
+        }
+    }
+
     /** @param list<array<string,mixed>> $blocks @return array<int,array<string,mixed>> */
     private function mediaViewModels(array $blocks): array
     {
@@ -1212,6 +1269,65 @@ final class CommerceController
         }
 
         return '<table class="commerce-specs">' . $rows . '</table>';
+    }
+
+    /** @param array<string,mixed> $product */
+    private function productAtAGlanceHtml(array $product): string
+    {
+        $specs = is_array($product['specs'] ?? null) ? $product['specs'] : [];
+        $firstSpecs = [];
+        foreach ($specs as $key => $value) {
+            $firstSpecs[] = (string) $key . ': ' . (string) $value;
+            if (count($firstSpecs) >= 2) {
+                break;
+            }
+        }
+        $brandModel = trim((string) ($product['brand'] ?? '') . ' ' . (string) ($product['model'] ?? ''));
+        $specText = $firstSpecs !== [] ? implode(' / ', $firstSpecs) : ($brandModel !== '' ? $brandModel : '未填写核心规格');
+        $region = (string) ($product['region'] ?? 'CN') . ' / ' . $this->transactionRegionLabel((string) ($product['transaction_region'] ?? 'cn_domestic'));
+        $fees = $this->feeSummaryText($product);
+
+        return '<div class="commerce-fact-grid commerce-glance">' .
+            $this->factCard('核心规格', $specText, '品牌/型号和规格来自商家填写') .
+            $this->factCard('交易区域', $region, '不同区域费用展示会按商品设置显示') .
+            $this->factCard('付款前费用', $fees, '最终付款前以订单快照为准') .
+            '</div>';
+    }
+
+    /** @param array<string,mixed> $product */
+    private function feeSummaryText(array $product): string
+    {
+        $parts = [];
+        $currency = (string) ($product['currency'] ?? 'CNY');
+        foreach ([
+            'shipping_fee_minor' => '运费',
+            'tax_fee_minor' => '税费',
+            'service_fee_minor' => '服务费',
+        ] as $field => $label) {
+            $amount = (int) ($product[$field] ?? 0);
+            if ($amount > 0) {
+                $parts[] = $label . ' ' . strip_tags($this->money($amount, $currency));
+            }
+        }
+        $discount = (int) ($product['discount_minor'] ?? 0);
+        if ($discount > 0) {
+            $parts[] = '抵扣 ' . strip_tags($this->money($discount, $currency));
+        }
+
+        return $parts !== [] ? implode(' / ', $parts) : '暂无额外费用';
+    }
+
+    /** @param array<string,mixed> $product */
+    private function compactPriceSummaryHtml(array $product, int $quantity): string
+    {
+        $currency = (string) ($product['currency'] ?? 'CNY');
+        $quantity = max(1, $quantity);
+        $subtotal = (int) ($product['price_minor'] ?? 0) * $quantity;
+        $total = max(0, $subtotal + (int) ($product['shipping_fee_minor'] ?? 0) + (int) ($product['tax_fee_minor'] ?? 0) + (int) ($product['service_fee_minor'] ?? 0) - (int) ($product['discount_minor'] ?? 0));
+        $note = trim((string) ($product['price_note'] ?? ''));
+        $details = $this->feeSummaryText($product);
+
+        return '<div class="commerce-checkout-summary"><strong>预计应付：' . $this->money($total, $currency) . '</strong><span>' . $this->e($details) . '</span>' . ($note !== '' ? '<small>' . $this->e($note) . '</small>' : '') . '</div>';
     }
 
     /** @param array<string,mixed> $product */
@@ -1407,7 +1523,7 @@ final class CommerceController
     private function frontPage(string $title, string $body): string
     {
         return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $this->e($title) . '</title><style>' .
-            'body{margin:0;background:#f8fafc;color:#172033;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}a{color:#1f6feb;text-decoration:none}.wrap{width:min(1120px,100% - 32px);margin:0 auto;padding:28px 0}.top{background:#fff;border-bottom:1px solid #e4e7ec}.top .wrap{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:14px 0}.brand{font-weight:800;color:#172033}.commerce-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.commerce-card{display:block;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:14px;color:#172033}.commerce-card img,.commerce-card .placeholder{width:100%;aspect-ratio:4/3;object-fit:cover;background:#edf2f7;border-radius:6px;display:grid;place-items:center;color:#667085;font-weight:800}.commerce-card strong{display:block;margin-top:10px}.commerce-card span,.commerce-price{font-size:24px;font-weight:800;color:#b42318}.commerce-card p,.commerce-muted{color:#667085}.commerce-product{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;align-items:start}.commerce-hero-img{width:100%;max-height:560px;object-fit:cover;background:#edf2f7;border-radius:8px}.commerce-button,button.commerce-button{display:inline-block;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:12px 16px;font-weight:750;cursor:pointer;margin-top:12px}.commerce-section,.commerce-empty{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:18px;margin-top:18px}.commerce-profile h3{margin:22px 0 8px}.commerce-fact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.commerce-fact{background:#f8fafc;border:1px solid #e4e7ec;border-radius:8px;padding:12px}.commerce-fact span,.commerce-fact small{display:block;color:#667085}.commerce-fact strong{display:block;font-size:18px;margin:4px 0;color:#172033;overflow-wrap:anywhere}.commerce-specs{display:block;width:100%;border-collapse:collapse;margin-top:14px;overflow-x:auto}.commerce-specs th,.commerce-specs td{border-top:1px solid #e4e7ec;text-align:left;padding:10px}.commerce-description img,.commerce-description video,.commerce-description audio{max-width:100%}.media-gallery{display:grid;grid-template-columns:repeat(var(--columns),1fr);gap:12px}.media-gallery img{width:100%;border-radius:6px}.commerce-error{background:#fff1f0;border:1px solid #ffccc7;color:#8c1d18;border-radius:6px;padding:12px}label{display:block;font-weight:700;margin-top:12px}input,select,textarea{width:100%;box-sizing:border-box;border:1px solid #b8c0cc;border-radius:6px;padding:10px;margin-top:6px}@media(max-width:760px){.commerce-product{grid-template-columns:1fr}.wrap{width:min(100% - 24px,1120px)}.media-gallery{grid-template-columns:1fr}.commerce-fact-grid{grid-template-columns:1fr}.commerce-specs th,.commerce-specs td{white-space:nowrap}}' .
+            'body{margin:0;background:#f8fafc;color:#172033;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}a{color:#1f6feb;text-decoration:none}.wrap{width:min(1120px,100% - 32px);margin:0 auto;padding:28px 0}.top{background:#fff;border-bottom:1px solid #e4e7ec}.top .wrap{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:14px 0}.brand{font-weight:800;color:#172033}.commerce-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.commerce-card{display:block;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:14px;color:#172033}.commerce-card img,.commerce-card .placeholder{width:100%;aspect-ratio:4/3;object-fit:cover;background:#edf2f7;border-radius:6px;display:grid;place-items:center;color:#667085;font-weight:800}.commerce-card strong{display:block;margin-top:10px}.commerce-card span,.commerce-price{font-size:24px;font-weight:800;color:#b42318}.commerce-card p,.commerce-muted{color:#667085}.commerce-product{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,420px);gap:28px;align-items:start}.commerce-hero-img{width:100%;max-height:560px;object-fit:cover;background:#edf2f7;border-radius:8px}.commerce-button,button.commerce-button{display:inline-block;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:12px 16px;font-weight:750;cursor:pointer;margin-top:12px}.commerce-section,.commerce-empty{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:18px;margin-top:18px}.commerce-profile h3{margin:22px 0 8px}.commerce-fact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.commerce-glance{margin:14px 0}.commerce-fact{background:#f8fafc;border:1px solid #e4e7ec;border-radius:8px;padding:12px}.commerce-fact span,.commerce-fact small{display:block;color:#667085}.commerce-fact strong{display:block;font-size:18px;margin:4px 0;color:#172033;overflow-wrap:anywhere}.commerce-checkout-summary{margin-top:12px;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:12px}.commerce-checkout-summary strong,.commerce-checkout-summary span,.commerce-checkout-summary small{display:block}.commerce-checkout-summary span,.commerce-checkout-summary small{color:#667085}.commerce-specs{display:block;width:100%;border-collapse:collapse;margin-top:14px;overflow-x:auto}.commerce-specs th,.commerce-specs td{border-top:1px solid #e4e7ec;text-align:left;padding:10px}.commerce-description img,.commerce-description video,.commerce-description audio{max-width:100%}.media-gallery{display:grid;grid-template-columns:repeat(var(--columns),1fr);gap:12px}.media-gallery img{width:100%;border-radius:6px}.commerce-error{background:#fff1f0;border:1px solid #ffccc7;color:#8c1d18;border-radius:6px;padding:12px}label{display:block;font-weight:700;margin-top:12px}input,select,textarea{width:100%;box-sizing:border-box;border:1px solid #b8c0cc;border-radius:6px;padding:10px;margin-top:6px}@media(max-width:760px){.commerce-product{grid-template-columns:1fr}.wrap{width:min(100% - 24px,1120px)}.media-gallery{grid-template-columns:1fr}.commerce-fact-grid{grid-template-columns:1fr}.commerce-specs{font-size:14px}.commerce-specs th,.commerce-specs td{white-space:normal;overflow-wrap:anywhere}.commerce-button,button.commerce-button{width:100%;text-align:center;box-sizing:border-box}}' .
             '</style></head><body><header class="top"><div class="wrap"><a class="brand" href="/commerce">Daiying Commerce</a><a href="/">返回首页</a></div></header><main class="wrap">' . $body . '</main></body></html>';
     }
 

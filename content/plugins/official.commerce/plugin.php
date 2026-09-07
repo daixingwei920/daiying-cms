@@ -23,7 +23,7 @@ return static function (PluginContext $context): void {
     $root = dirname(__DIR__, 3);
     $pdo = $context->pdo();
     $settings = Settings::load($root);
-    $repo = new CommerceRepository($pdo);
+    $repo = new CommerceRepository($pdo, (string) $settings->get('security.encryption_key', ''));
     $controller = new CommerceController($repo, $pdo, $settings);
 
     $context->adminRoute('GET', '/admin/commerce', [$controller, 'adminDashboard'], 'commerce.manage', false);

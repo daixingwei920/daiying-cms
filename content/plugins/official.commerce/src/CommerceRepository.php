@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Daiying\Commerce;
 
+use Cms\Core\CardDelivery\CardDeliveryService;
 use Cms\Core\Payment\PaymentRepository;
 use Cms\Core\Support\CurrencyRegistry;
 use InvalidArgumentException;
@@ -62,7 +63,7 @@ final class CommerceRepository
         'specs_json',
     ];
 
-    public function __construct(private readonly PDO $pdo)
+    public function __construct(private readonly PDO $pdo, private readonly string $encryptionKey = '')
     {
         $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     }
@@ -367,6 +368,9 @@ final class CommerceRepository
             throw new RuntimeException('商品价格无效。');
         }
         $pricing = $this->pricingSnapshot($product, $unit, $quantity);
+        $fulfillmentMode = (string) ($action['fulfillment_mode'] ?? 'none');
+        $shippingRequired = (int) ($product['requires_shipping'] ?? 0) === 1 ? 1 : 0;
+        $initialFulfillmentStatus = $shippingRequired === 1 || $fulfillmentMode === 'digital_card' ? 'pending' : 'not_required';
         $snapshot = [
             'product' => $this->snapshotProduct($product),
             'variant' => $variant !== null ? $this->snapshotVariant($variant) : null,
@@ -374,7 +378,7 @@ final class CommerceRepository
                 'id' => (int) $action['id'],
                 'type' => (string) $action['action_type'],
                 'label' => (string) $action['label'],
-                'fulfillment_mode' => (string) $action['fulfillment_mode'],
+                'fulfillment_mode' => $fulfillmentMode,
             ],
             'pricing' => $pricing,
         ];
@@ -396,8 +400,8 @@ final class CommerceRepository
                 ':buyer_phone' => $this->nullableText((string) ($buyer['phone'] ?? ''), 64),
                 ':quantity' => $quantity,
                 ':status' => 'pending_payment',
-                ':fulfillment_status' => (int) $product['requires_shipping'] === 1 ? 'pending' : 'not_required',
-                ':shipping_required' => (int) $product['requires_shipping'],
+                ':fulfillment_status' => $initialFulfillmentStatus,
+                ':shipping_required' => $shippingRequired,
                 ':amount_minor' => (int) $pricing['total_minor'],
                 ':currency' => (string) $product['currency'],
                 ':provider_id' => $providerId,
@@ -459,8 +463,16 @@ final class CommerceRepository
         $this->pdo->beginTransaction();
         try {
             $this->completeInventorySale((int) $order['product_id'], isset($order['variant_id']) ? (int) $order['variant_id'] : null, $orderId, (int) $order['quantity']);
-            $this->pdo->prepare("UPDATE commerce_orders SET status = 'paid', paid_at = :paid_at, updated_at = :updated_at WHERE id = :id")
-                ->execute([':id' => $orderId, ':paid_at' => $now, ':updated_at' => $now]);
+            $fulfillmentStatus = $this->orderNeedsDigitalCardDelivery($order) ? 'pending' : null;
+            $sql = "UPDATE commerce_orders SET status = 'paid', paid_at = :paid_at, updated_at = :updated_at";
+            $params = [':id' => $orderId, ':paid_at' => $now, ':updated_at' => $now];
+            if ($fulfillmentStatus !== null) {
+                $sql .= ', fulfillment_status = :fulfillment_status';
+                $params[':fulfillment_status'] = $fulfillmentStatus;
+            }
+            $sql .= ' WHERE id = :id';
+            $this->pdo->prepare($sql)
+                ->execute($params);
             $this->pdo->commit();
         } catch (\Throwable $exception) {
             if ($this->pdo->inTransaction()) {
@@ -468,6 +480,8 @@ final class CommerceRepository
             }
             throw $exception;
         }
+
+        $this->fulfillDigitalCardOrder($orderId);
     }
 
     public function markOrderPaymentFailed(int $orderId, string $note = ''): void
@@ -1075,6 +1089,69 @@ final class CommerceRepository
         $sql = "UPDATE $table SET reserved_quantity = CASE WHEN reserved_quantity >= :quantity THEN reserved_quantity - :quantity ELSE 0 END, updated_at = :updated_at WHERE $where";
         $this->pdo->prepare($sql)->execute($params + [':quantity' => $quantity, ':updated_at' => gmdate('Y-m-d H:i:s')]);
         $this->inventoryMovement($productId, $variantId, $orderId, 0, -$quantity, 0, 'payment_failed', $note);
+    }
+
+    /** @param array<string,mixed> $order */
+    private function orderNeedsDigitalCardDelivery(array $order): bool
+    {
+        $snapshot = is_array($order['snapshot'] ?? null) ? $order['snapshot'] : [];
+        $action = is_array($snapshot['action'] ?? null) ? $snapshot['action'] : [];
+        if ((string) ($action['fulfillment_mode'] ?? '') !== 'digital_card') {
+            return false;
+        }
+        $product = $this->product((int) ($order['product_id'] ?? 0));
+
+        return is_array($product) && (int) ($product['auto_delivery_enabled'] ?? 0) === 1;
+    }
+
+    private function fulfillDigitalCardOrder(int $orderId): void
+    {
+        $order = $this->order($orderId);
+        if ($order === null || !$this->orderNeedsDigitalCardDelivery($order)) {
+            return;
+        }
+        $cardProductId = $this->linkedCardProductId((int) ($order['product_id'] ?? 0));
+        if ($cardProductId <= 0) {
+            $this->markDigitalFulfillmentManualReview($orderId, (int) ($order['product_id'] ?? 0), 'linked_card_product_missing');
+            return;
+        }
+        try {
+            $delivery = (new CardDeliveryService($this->pdo, null, $this->encryptionKey))->deliverPaidOrder(
+                $cardProductId,
+                'commerce:' . $orderId,
+                'commerce:' . (string) ($order['payment_id'] ?? $orderId),
+                (int) ($order['quantity'] ?? 1),
+            );
+            $status = (string) ($delivery['status'] ?? '');
+            if ($status === 'delivered') {
+                $this->pdo->prepare("UPDATE commerce_orders SET status = 'fulfilled', fulfillment_status = 'fulfilled', fulfilled_at = :fulfilled_at, updated_at = :updated_at WHERE id = :id AND status = 'paid'")
+                    ->execute([':id' => $orderId, ':fulfilled_at' => gmdate('Y-m-d H:i:s'), ':updated_at' => gmdate('Y-m-d H:i:s')]);
+                return;
+            }
+            $this->markDigitalFulfillmentManualReview($orderId, (int) ($order['product_id'] ?? 0), $status !== '' ? $status : 'delivery_unavailable');
+        } catch (\Throwable) {
+            $this->markDigitalFulfillmentManualReview($orderId, (int) ($order['product_id'] ?? 0), 'delivery_provider_failed');
+        }
+    }
+
+    private function linkedCardProductId(int $commerceProductId): int
+    {
+        try {
+            $stmt = $this->pdo->prepare("SELECT id FROM cms_card_products WHERE commerce_product_id = :commerce_product_id AND status = 'active' ORDER BY id ASC LIMIT 1");
+            $stmt->execute([':commerce_product_id' => $commerceProductId]);
+            return max(0, (int) ($stmt->fetchColumn() ?: 0));
+        } catch (\Throwable) {
+            return 0;
+        }
+    }
+
+    private function markDigitalFulfillmentManualReview(int $orderId, int $productId, string $reason): void
+    {
+        $this->pdo->prepare("UPDATE commerce_orders SET fulfillment_status = 'manual_review', updated_at = :updated_at WHERE id = :id AND status = 'paid'")
+            ->execute([':id' => $orderId, ':updated_at' => gmdate('Y-m-d H:i:s')]);
+        if ($productId > 0) {
+            $this->inventoryMovement($productId, null, $orderId, 0, 0, 0, 'digital_delivery_attention', $reason);
+        }
     }
 
     private function inventoryMovement(int $productId, ?int $variantId, ?int $orderId, int $deltaAvailable, int $deltaReserved, int $deltaSold, string $reason, string $note = ''): void

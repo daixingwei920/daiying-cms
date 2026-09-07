@@ -16,6 +16,7 @@ require __DIR__ . '/../content/plugins/official.commerce/src/TaobaoVerificationP
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceController.php';
 
 use Cms\Core\Config\Settings;
+use Cms\Core\CardDelivery\CardDeliveryRepository;
 use Cms\Core\Http\Request;
 use Cms\Core\Plugin\PluginManifest;
 use Cms\Core\Payment\PaymentRepository;
@@ -84,6 +85,7 @@ $assert(in_array('table:commerce_ai_invocations', $aiMigration['affected_objects
 $distributionMigration = require $root . '/content/plugins/official.commerce/migrations/006_distribution_modules.php';
 $assert(in_array('table:commerce_distribution_channels', $distributionMigration['affected_objects'] ?? [], true), 'Distribution migration declares the channel table.');
 $assert(in_array('table:commerce_distribution_events', $distributionMigration['affected_objects'] ?? [], true), 'Distribution migration declares the event table.');
+$cardDeliveryMigration = require $root . '/system/migrations/2026_08_22_000001_card_delivery_schema.php';
 
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -94,6 +96,7 @@ $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 ($governanceMigration['up'])($pdo);
 ($aiMigration['up'])($pdo);
 ($distributionMigration['up'])($pdo);
+$cardDeliveryMigration->up($pdo);
 $pdo->exec('CREATE TABLE cms_payments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_type VARCHAR(96) NOT NULL,
@@ -133,7 +136,7 @@ $pdo->exec('CREATE TABLE cms_payment_refunds (
     updated_at VARCHAR(64) NOT NULL
 )');
 
-$repo = new CommerceRepository($pdo);
+$repo = new CommerceRepository($pdo, 'commerce-card-secret-123');
 $productId = $repo->saveProduct([
     'name' => '测试商品',
     'sku' => 'TEST-001',
@@ -458,6 +461,32 @@ $fakeTaobao = $fakeTaobaoProvider->verifySource(array_replace($product, ['source
 $assert(($fakeTaobao['status'] ?? '') === 'failed', 'Taobao provider rejects lookalike Taobao domains.');
 $assert(($fakeTaobao['checked_facts']['淘宝域名是否合法'] ?? '') === '不合法或未核验', 'Rejected Taobao domains are not recorded as valid platform facts.');
 
+$externalProductId = $repo->saveProduct([
+    'name' => '外部电商商品',
+    'sku' => 'EXT-001',
+    'status' => 'active',
+    'price_minor' => 8800,
+    'currency' => 'CNY',
+    'stock_quantity' => 1,
+    'source_url' => 'https://item.taobao.com/item.htm?id=812345678901',
+    'source_claim_text' => '商家声明跳转外部平台成交',
+]);
+$repo->saveAction([
+    'product_id' => $externalProductId,
+    'action_type' => 'external_url',
+    'label' => '去淘宝购买',
+    'external_url' => 'https://item.taobao.com/item.htm?id=812345678901',
+]);
+$externalPage = $controllerWithAi->productPage(new Request('GET', '/commerce/product', ['id' => $externalProductId]))->body();
+$assert(str_contains($externalPage, '去淘宝购买') && str_contains($externalPage, '支付、物流、退款和售后以实际成交平台为准'), 'External commerce products clearly route payment and after-sales responsibility to the external platform.');
+$externalCheckoutBlocked = false;
+try {
+    $repo->createPendingOrder($externalProductId, null, (int) $repo->activeActions($externalProductId)[0]['id'], 1, 'fixture', 'commerce-test-external', hash('sha256', 'external'));
+} catch (RuntimeException) {
+    $externalCheckoutBlocked = true;
+}
+$assert($externalCheckoutBlocked, 'External commerce products cannot accidentally create Daiying payment, logistics, refund, or after-sales orders.');
+
 $sellerCannotVerify = false;
 try {
     $repo->appendVerificationRecord([
@@ -529,12 +558,14 @@ $assert(str_contains($productPage, '最近核验'), 'Consumer transparency profi
 $assert(str_contains($productPage, '存在差异'), 'Consumer transparency profile shows mismatches after key product changes.');
 $assert(str_contains($productPage, '商品关键修改历史'), 'Consumer transparency profile includes public key change history.');
 $assert(str_contains($productPage, '价格透明'), 'Consumer transparency profile includes transparent price and fee facts.');
+$assert(str_contains($productPage, '核心规格') && str_contains($productPage, '付款前费用'), 'Product first screen summarizes core specs, region, and estimated fees before checkout.');
 $assert(str_contains($productPage, '支付处理方'), 'Consumer transparency profile includes payment processor context.');
 $assert(str_contains($productPage, '核验历史'), 'Consumer transparency profile includes verification history.');
 $assert(!str_contains($productPage, '正品认证'), 'Consumer transparency wording avoids unsupported authenticity claims.');
 $adminEditPage = $controllerWithAi->adminProductForm(new Request('GET', '/admin/commerce/products/edit', ['id' => $productId]))->body();
 $assert(str_contains($adminEditPage, 'AI 优化描述'), 'Product edit UI exposes the AI description optimization action.');
 $assert(str_contains($adminEditPage, '允许使用收费 AI'), 'Product AI UI requires explicit opt-in before paid modules can be used.');
+$assert(str_contains($adminEditPage, '/admin/media') && str_contains($adminEditPage, '/admin/content/new'), 'Seller product form points to the existing CMS media library and content module instead of reconfiguring them.');
 
 $repo->saveAiModule([
     'id' => $freeOkId,
@@ -621,7 +652,13 @@ $assert(($capturedGoogleRequest['payload']['productAttributes']['price']['amount
 $feedResponse = $controllerWithAi->productFeed(new Request('GET', '/commerce/feed/products.json', [], [], ['HTTP_HOST' => 'www.daiyingcms.com', 'HTTPS' => 'on']));
 $feedPayload = json_decode($feedResponse->body(), true);
 $assert(($feedPayload['version'] ?? '') === 'commerce.feed.v1', 'Public product feed uses the Commerce Feed V1 schema.');
-$assert(($feedPayload['items'][0]['share_url'] ?? '') === 'https://www.daiyingcms.com/commerce/product?id=' . $productId, 'Public product feed includes absolute share links.');
+$feedItemsById = [];
+foreach (($feedPayload['items'] ?? []) as $item) {
+    if (is_array($item)) {
+        $feedItemsById[(string) ($item['id'] ?? '')] = $item;
+    }
+}
+$assert(($feedItemsById[(string) $productId]['share_url'] ?? '') === 'https://www.daiyingcms.com/commerce/product?id=' . $productId, 'Public product feed includes absolute share links.');
 $adminEditPageWithDistribution = $controllerWithAi->adminProductForm(new Request('GET', '/admin/commerce/products/edit', ['id' => $productId]))->body();
 $assert(str_contains($adminEditPageWithDistribution, '分发与分享') && str_contains($adminEditPageWithDistribution, '生成分享内容'), 'Product edit UI exposes the Distribution V1 share loop.');
 
@@ -683,6 +720,10 @@ $shippingProductId = $repo->saveProduct([
 ]);
 $repo->saveAction(['product_id' => $shippingProductId, 'action_type' => 'site_checkout', 'label' => '购买实体商品', 'fulfillment_mode' => 'shipping']);
 $shippingOrder = $repo->createPendingOrder($shippingProductId, null, (int) $repo->activeActions($shippingProductId)[0]['id'], 1, 'fixture', 'commerce-test-shipping', hash('sha256', 'shipping'));
+$pdo->prepare('UPDATE commerce_orders SET completion_claim = :claim WHERE id = :id')->execute([
+    ':id' => (int) $shippingOrder['id'],
+    ':claim' => hash_hmac('sha256', (int) $shippingOrder['id'] . '|commerce-test-shipping', 'commerce-test-secret'),
+]);
 $repo->markOrderPaid((int) $shippingOrder['id']);
 $repo->appendLogisticsEvent([
     'order_id' => (int) $shippingOrder['id'],
@@ -710,6 +751,73 @@ $repo->appendLogisticsEvent([
 $shippingDelivered = $repo->order((int) $shippingOrder['id']);
 $assert(($shippingDelivered['status'] ?? '') === 'fulfilled', 'Delivered logistics status fulfills the shipping order.');
 $assert(($shippingDelivered['fulfillment_status'] ?? '') === 'delivered', 'Delivered logistics status is kept as an explicit fulfillment fact.');
+$shippingCompletePage = $controller->completeOrder(new Request('GET', '/commerce/orders/complete', [
+    'order_id' => (int) $shippingOrder['id'],
+    'payment_key' => 'commerce-test-shipping',
+    'claim' => hash_hmac('sha256', (int) $shippingOrder['id'] . '|commerce-test-shipping', 'commerce-test-secret'),
+]))->body();
+$assert(str_contains($shippingCompletePage, '物流') && str_contains($shippingCompletePage, 'SF123456'), 'Consumer order result shows shipping logistics after seller fulfillment.');
+
+$digitalProductId = $repo->saveProduct([
+    'name' => '数字商品',
+    'sku' => 'DIGI-001',
+    'status' => 'active',
+    'price_minor' => 1900,
+    'currency' => 'CNY',
+    'stock_quantity' => 2,
+    'auto_delivery_enabled' => '1',
+]);
+$digitalDefaultController = new CommerceController($repo, $pdo, Settings::fromArray(['security' => ['encryption_key' => 'commerce-card-secret-123']]));
+$digitalAutoProductResponse = $digitalDefaultController->adminSaveProduct(new Request('POST', '/admin/commerce/products/save', [], [
+    'name' => '默认数字商品',
+    'sku' => 'DIGI-DEFAULT',
+    'status' => 'active',
+    'price_minor' => 2900,
+    'currency' => 'CNY',
+    'stock_quantity' => 1,
+    'auto_delivery_enabled' => '1',
+]));
+$defaultDigitalLocation = $digitalAutoProductResponse->headers()['Location'] ?? '';
+preg_match('/id=([0-9]+)/', (string) $defaultDigitalLocation, $defaultDigitalMatches);
+$defaultDigitalActions = $repo->activeActions((int) ($defaultDigitalMatches[1] ?? 0));
+$assert(($defaultDigitalActions[0]['action_type'] ?? '') === 'digital_delivery' && ($defaultDigitalActions[0]['fulfillment_mode'] ?? '') === 'digital_card', 'New self-owned digital products default to the existing automatic card-delivery flow.');
+
+$cardRepo = new CardDeliveryRepository($pdo, 'commerce-card-secret-123');
+$cardProductId = $cardRepo->saveProduct(null, '数字商品卡密', 1900, 'CNY', 'active', 2, $digitalProductId, 'Commerce 数字商品交付库存');
+$cardRepo->importInventory($cardProductId, "CARD-ONE\nCARD-TWO");
+$repo->saveAction(['product_id' => $digitalProductId, 'action_type' => 'digital_delivery', 'label' => '购买后自动交付', 'fulfillment_mode' => 'digital_card']);
+$digitalOrder = $repo->createPendingOrder($digitalProductId, null, (int) $repo->activeActions($digitalProductId)[0]['id'], 1, 'fixture', 'commerce-test-digital', hash('sha256', 'digital'));
+$pdo->prepare('UPDATE commerce_orders SET completion_claim = :claim WHERE id = :id')->execute([
+    ':id' => (int) $digitalOrder['id'],
+    ':claim' => hash_hmac('sha256', (int) $digitalOrder['id'] . '|commerce-test-digital', 'commerce-card-secret-123'),
+]);
+$repo->markOrderPaid((int) $digitalOrder['id']);
+$digitalPaidOrder = $repo->order((int) $digitalOrder['id']);
+$digitalDeliveries = $cardRepo->deliveriesForOrder($cardProductId, 'commerce:' . (int) $digitalOrder['id']);
+$assert(($digitalPaidOrder['status'] ?? '') === 'fulfilled' && ($digitalPaidOrder['fulfillment_status'] ?? '') === 'fulfilled', 'Self-owned digital products call the existing Core automatic card-delivery service after payment.');
+$assert(($digitalDeliveries[0]['secret'] ?? '') === 'CARD-ONE', 'Commerce digital delivery reuses Core card inventory instead of storing a second card system.');
+$digitalCompletePage = $digitalDefaultController->completeOrder(new Request('GET', '/commerce/orders/complete', [
+    'order_id' => (int) $digitalOrder['id'],
+    'payment_key' => 'commerce-test-digital',
+    'claim' => hash_hmac('sha256', (int) $digitalOrder['id'] . '|commerce-test-digital', 'commerce-card-secret-123'),
+]))->body();
+$assert(str_contains($digitalCompletePage, '数字交付') && str_contains($digitalCompletePage, 'CARD-ONE'), 'Consumer order result displays delivered digital card secrets after payment.');
+
+$digitalOutProductId = $repo->saveProduct([
+    'name' => '缺货数字商品',
+    'sku' => 'DIGI-OOS',
+    'status' => 'active',
+    'price_minor' => 1900,
+    'currency' => 'CNY',
+    'stock_quantity' => 1,
+    'auto_delivery_enabled' => '1',
+]);
+$emptyCardProductId = $cardRepo->saveProduct(null, '缺货数字商品卡密', 1900, 'CNY', 'active', 1, $digitalOutProductId, '');
+$repo->saveAction(['product_id' => $digitalOutProductId, 'action_type' => 'digital_delivery', 'label' => '购买后自动交付', 'fulfillment_mode' => 'digital_card']);
+$digitalOutOrder = $repo->createPendingOrder($digitalOutProductId, null, (int) $repo->activeActions($digitalOutProductId)[0]['id'], 1, 'fixture', 'commerce-test-digital-oos', hash('sha256', 'digital-oos'));
+$repo->markOrderPaid((int) $digitalOutOrder['id']);
+$digitalOutAfterPay = $repo->order((int) $digitalOutOrder['id']);
+$assert(($digitalOutAfterPay['status'] ?? '') === 'paid' && ($digitalOutAfterPay['fulfillment_status'] ?? '') === 'manual_review', 'Automatic card stock shortage only affects digital fulfillment, not the paid Commerce order.');
 
 $blockedNonShipping = false;
 try {
