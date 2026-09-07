@@ -8,6 +8,8 @@ require __DIR__ . '/../content/plugins/official.commerce/src/CommerceRepository.
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceOpenAiCompatibleProvider.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceAiModuleManager.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/CommerceDistributionManager.php';
+require __DIR__ . '/../content/plugins/official.commerce/src/SystemShareDistributionProvider.php';
+require __DIR__ . '/../content/plugins/official.commerce/src/GoogleMerchantDistributionProvider.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/GenericUrlVerificationProvider.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/AmazonVerificationProvider.php';
 require __DIR__ . '/../content/plugins/official.commerce/src/TaobaoVerificationProvider.php';
@@ -21,6 +23,8 @@ use Daiying\Commerce\CommerceController;
 use Daiying\Commerce\CommerceOpenAiCompatibleProvider;
 use Daiying\Commerce\CommerceAiModuleManager;
 use Daiying\Commerce\CommerceDistributionManager;
+use Daiying\Commerce\GoogleMerchantDistributionProvider;
+use Daiying\Commerce\SystemShareDistributionProvider;
 use Daiying\Commerce\CommerceAiModuleInterface;
 use Daiying\Commerce\CommerceDistributionInterface;
 use Daiying\Commerce\CommerceVerificationProviderInterface;
@@ -56,6 +60,8 @@ $assert(in_array('commerce.distribution.manage', $parsed->capabilities, true), '
 $assert(interface_exists(CommerceAiModuleInterface::class), 'Commerce exposes an optional AI module interface without making AI a hard dependency.');
 $assert(class_exists(CommerceOpenAiCompatibleProvider::class), 'Commerce provides a reusable OpenAI-Compatible AI provider.');
 $assert(class_exists(CommerceDistributionManager::class), 'Commerce provides a distribution manager for feed and share-card generation.');
+$assert(class_exists(SystemShareDistributionProvider::class), 'Commerce provides a system-level one-click share distribution provider.');
+$assert(class_exists(GoogleMerchantDistributionProvider::class), 'Commerce provides a Google Merchant API distribution provider.');
 $assert(interface_exists(CommerceDistributionInterface::class), 'Commerce exposes a distribution provider interface for future channels.');
 $assert(interface_exists(CommerceLogisticsProviderInterface::class), 'Commerce exposes a logistics provider interface for future carrier plugins.');
 $assert(interface_exists(CommerceVerificationProviderInterface::class), 'Commerce exposes a source verification provider interface.');
@@ -558,15 +564,19 @@ $manualChannelId = $repo->saveDistributionChannel([
     'target' => '微信群',
 ]);
 $automaticChannelId = $repo->saveDistributionChannel([
-    'name' => '未来自动同步',
-    'provider_type' => 'provider_adapter',
+    'name' => 'Google Merchant 自动同步',
+    'provider_type' => 'google_merchant',
     'mode' => 'automatic',
     'status' => 'enabled',
     'sort_order' => 20,
+    'merchant_account_id' => '123456',
+    'data_source_id' => '7890',
+    'content_language' => 'zh-CN',
+    'feed_label' => 'CN',
 ]);
 $assert(count($repo->enabledDistributionChannels()) === 2, 'Commerce can manage multiple enabled distribution channels.');
 $distributionPage = $controllerWithAi->adminDistributionChannels(new Request('GET', '/admin/commerce/distribution'))->body();
-$assert(str_contains($distributionPage, '添加分发渠道') && str_contains($distributionPage, '标准商品 Feed'), 'Admin exposes Distribution module management and product feed access.');
+$assert(str_contains($distributionPage, '添加分发渠道') && str_contains($distributionPage, '标准商品 Feed') && str_contains($distributionPage, 'Google Merchant API'), 'Admin exposes Distribution module management, product feed access, and the first automatic provider.');
 $shareResponse = $controllerWithAi->adminProductDistribution(new Request('POST', '/admin/commerce/distribution/product', [], [
     'product_id' => $productId,
     'channel_id' => $manualChannelId,
@@ -577,10 +587,37 @@ $failedSyncResponse = $controllerWithAi->adminProductDistribution(new Request('P
     'product_id' => $productId,
     'channel_id' => $automaticChannelId,
 ]))->body();
-$assert(str_contains($failedSyncResponse, '商品销售不受影响'), 'Distribution provider failures are isolated from product sales.');
+$assert(str_contains($failedSyncResponse, 'access_token') || str_contains($failedSyncResponse, '授权'), 'Google Merchant provider fails closed when server-side authorization is unavailable.');
 $distributionEvents = $repo->distributionEvents($productId, 10);
 $assert(count($distributionEvents) >= 2, 'Distribution events record share and sync attempts.');
 $assert(($distributionEvents[0]['status'] ?? '') === 'failed', 'Unavailable automatic provider records a failed sync fact.');
+$systemShare = (new SystemShareDistributionProvider())->publishProduct($feedItem, $feedItem['pricing'], ['share_card' => $shareCard]);
+$assert(($systemShare['status'] ?? '') === 'ready' && ($systemShare['provider'] ?? '') === 'official.commerce.distribution.system_share', 'System share provider returns ready share payload without external platform access.');
+$capturedGoogleRequest = [];
+$googleProvider = new GoogleMerchantDistributionProvider(static function (string $url, array $headers, array $payload) use (&$capturedGoogleRequest): array {
+    $capturedGoogleRequest = ['url' => $url, 'headers' => $headers, 'payload' => $payload];
+    return [
+        'status' => 200,
+        'body' => [
+            'name' => 'accounts/123456/productInputs/zh-CN~CN~TEST-001',
+            'product' => 'accounts/123456/products/zh-CN~CN~TEST-001',
+        ],
+    ];
+});
+$googleResult = $googleProvider->publishProduct($feedItem, $feedItem['pricing'], [
+    'access_token' => 'google-oauth-token',
+    'config' => [
+        'merchant_account_id' => '123456',
+        'data_source_id' => '7890',
+        'content_language' => 'zh-CN',
+        'feed_label' => 'CN',
+    ],
+]);
+$assert(($googleResult['status'] ?? '') === 'synced', 'Google Merchant provider records successful API submission as synced.');
+$assert(str_starts_with((string) ($capturedGoogleRequest['url'] ?? ''), 'https://merchantapi.googleapis.com/products/v1/accounts/123456/productInputs:insert'), 'Google Merchant provider uses the official Merchant API host and productInputs.insert endpoint.');
+$assert(($capturedGoogleRequest['headers']['Authorization'] ?? '') === 'Bearer google-oauth-token', 'Google Merchant provider uses a server-side bearer token without putting it in public feed data.');
+$assert(($capturedGoogleRequest['payload']['offerId'] ?? '') === 'TEST-001', 'Google Merchant provider converts platform-neutral feed items into target ProductInput payloads.');
+$assert(($capturedGoogleRequest['payload']['productAttributes']['price']['amountMicros'] ?? '') === '360000000', 'Google Merchant provider converts minor units into Google amountMicros.');
 $feedResponse = $controllerWithAi->productFeed(new Request('GET', '/commerce/feed/products.json', [], [], ['HTTP_HOST' => 'www.daiyingcms.com', 'HTTPS' => 'on']));
 $feedPayload = json_decode($feedResponse->body(), true);
 $assert(($feedPayload['version'] ?? '') === 'commerce.feed.v1', 'Public product feed uses the Commerce Feed V1 schema.');

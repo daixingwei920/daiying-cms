@@ -552,12 +552,16 @@ final class CommerceController
             '<form method="post" action="/admin/commerce/distribution/save">' . CsrfToken::field() .
             '<input type="hidden" name="id" value="' . (int) ($formChannel['id'] ?? 0) . '">' .
             '<label>渠道名称<input name="name" required value="' . $this->e((string) ($formChannel['name'] ?? '')) . '" placeholder="如 微信群分享 / 标准商品 Feed"></label>' .
-            '<label>Provider 类型<select name="provider_type">' . $this->options(['manual_share' => '一键分享', 'standard_feed' => '标准商品 Feed', 'provider_adapter' => '平台 Provider Adapter'], (string) ($formChannel['provider_type'] ?? 'manual_share')) . '</select></label>' .
+            '<label>Provider 类型<select name="provider_type">' . $this->options(['manual_share' => '一键分享', 'standard_feed' => '标准商品 Feed', 'google_merchant' => 'Google Merchant API', 'provider_adapter' => '平台 Provider Adapter'], (string) ($formChannel['provider_type'] ?? 'manual_share')) . '</select></label>' .
             '<label>分发方式<select name="mode">' . $this->options(['manual' => '一键分享', 'automatic' => '自动同步'], (string) ($formChannel['mode'] ?? 'manual')) . '</select></label>' .
             '<label>启停<select name="status">' . $this->options(['enabled' => '启用', 'disabled' => '停用'], (string) ($formChannel['status'] ?? 'disabled')) . '</select></label>' .
             '<label>调用顺序<input name="sort_order" type="number" value="' . (int) ($formChannel['sort_order'] ?? 0) . '"></label>' .
             '<label>目标 / 备注名<input name="target" value="' . $this->e((string) ($config['target'] ?? '')) . '" placeholder="如 私域社群 / Google Merchant"></label>' .
             '<label>说明<input name="notes" value="' . $this->e((string) ($config['notes'] ?? '')) . '"></label>' .
+            '<label>Google Merchant Account ID<input name="merchant_account_id" value="' . $this->e((string) ($config['merchant_account_id'] ?? '')) . '" placeholder="仅 Google Merchant API 使用"></label>' .
+            '<label>Google API Data Source ID<input name="data_source_id" value="' . $this->e((string) ($config['data_source_id'] ?? '')) . '" placeholder="仅 Google Merchant API 使用"></label>' .
+            '<label>Content Language<input name="content_language" value="' . $this->e((string) ($config['content_language'] ?? 'zh-CN')) . '" placeholder="zh-CN"></label>' .
+            '<label>Feed Label<input name="feed_label" value="' . $this->e((string) ($config['feed_label'] ?? 'CN')) . '" placeholder="CN"></label>' .
             '<p class="muted">平台官方允许自动同步时才使用自动模式；平台不允许或 Provider 不可用时，商品继续正常销售，并记录同步失败。</p>' .
             '<button type="submit">保存分发渠道</button> <a class="button admin-button-secondary" href="/admin/commerce">返回总览</a></form>';
         $events = '';
@@ -596,20 +600,20 @@ final class CommerceController
             $channel = $channelId > 0 ? $this->repo->distributionChannel($channelId) : null;
             $allowPaidAi = !empty($request->body['allow_paid_ai']);
             $manager = new CommerceDistributionManager($this->repo, new CommerceAiModuleManager($this->repo, $this->paymentSecret()));
-            $card = $manager->shareCard($product, $this->siteBaseUrl($request), $allowPaidAi);
-            $eventStatus = 'ready';
-            $message = '已生成分享链接和文案。';
-            if (is_array($channel) && (string) ($channel['mode'] ?? '') === 'automatic' && (string) ($channel['provider_type'] ?? '') === 'provider_adapter') {
-                $eventStatus = 'failed';
-                $message = '该平台 Provider 尚未接入或暂不可用，商品销售不受影响。';
-            }
+            $result = $manager->publishProduct($product, $channel, $this->siteBaseUrl($request), [
+                'allow_paid_ai' => $allowPaidAi,
+            ]);
+            $card = is_array($result['share_card'] ?? null) ? $result['share_card'] : $manager->shareCard($product, $this->siteBaseUrl($request), $allowPaidAi);
+            $eventStatus = (string) ($result['status'] ?? 'ready');
+            $message = (string) ($result['message'] ?? '已生成分享链接和文案。');
             $eventId = $this->repo->recordDistributionEvent([
                 'channel_id' => $channelId > 0 ? $channelId : null,
                 'product_id' => $productId,
-                'event_type' => $eventStatus === 'failed' ? 'provider_sync' : 'manual_share',
+                'event_type' => $eventStatus === 'failed' || $eventStatus === 'synced' ? 'provider_sync' : 'manual_share',
                 'status' => $eventStatus,
+                'external_listing_id' => (string) ($result['external_listing_id'] ?? ''),
                 'message' => $message,
-                'payload' => $card,
+                'payload' => $result,
             ]);
             $body = '<h1>商品分发</h1><p><strong>商品：</strong>' . $this->e((string) $product['name']) . '</p>' .
                 '<p><strong>分享链接：</strong><input id="commerce-share-url" readonly value="' . $this->e((string) $card['url']) . '"></p>' .

@@ -12,6 +12,8 @@ require_once __DIR__ . '/src/CommerceContracts.php';
 require_once __DIR__ . '/src/CommerceOpenAiCompatibleProvider.php';
 require_once __DIR__ . '/src/CommerceAiModuleManager.php';
 require_once __DIR__ . '/src/CommerceDistributionManager.php';
+require_once __DIR__ . '/src/SystemShareDistributionProvider.php';
+require_once __DIR__ . '/src/GoogleMerchantDistributionProvider.php';
 require_once __DIR__ . '/src/GenericUrlVerificationProvider.php';
 require_once __DIR__ . '/src/AmazonVerificationProvider.php';
 require_once __DIR__ . '/src/TaobaoVerificationProvider.php';

@@ -12,6 +12,7 @@ final class CommerceDistributionManager
     public function __construct(
         private readonly CommerceRepository $repo,
         private readonly ?CommerceAiModuleManager $aiManager = null,
+        private $googleMerchantTransport = null,
     ) {
     }
 
@@ -95,6 +96,37 @@ final class CommerceDistributionManager
             'message' => '已生成分享链接和文案。',
             'payload' => $payload,
         ]);
+    }
+
+    /** @param array<string,mixed> $product @param array<string,mixed>|null $channel @param array<string,mixed> $context @return array<string,mixed> */
+    public function publishProduct(array $product, ?array $channel, string $baseUrl = '', array $context = []): array
+    {
+        $card = $this->shareCard($product, $baseUrl, !empty($context['allow_paid_ai']));
+        $feedItem = is_array($card['feed_item'] ?? null) ? $card['feed_item'] : $this->productFeedItem($product, $baseUrl);
+        $pricing = is_array($feedItem['pricing'] ?? null) ? $feedItem['pricing'] : $this->pricingFacts($product);
+        $providerType = is_array($channel) ? (string) ($channel['provider_type'] ?? 'manual_share') : 'manual_share';
+        $config = is_array($channel['config'] ?? null) ? $channel['config'] : [];
+        $provider = $providerType === 'google_merchant'
+            ? new GoogleMerchantDistributionProvider($this->googleMerchantTransport)
+            : new SystemShareDistributionProvider();
+        $result = CommerceProviderIsolation::capture($provider->providerId(), 'publish_product', fn (): array => $provider->publishProduct($feedItem, $pricing, [
+            'share_card' => $card,
+            'config' => $config,
+            'access_token' => (string) ($context['access_token'] ?? ''),
+        ]));
+        if (($result['ok'] ?? false) !== true) {
+            return [
+                'status' => 'failed',
+                'provider' => $provider->providerId(),
+                'message' => (string) ($result['error'] ?? '分发 Provider 暂不可用。'),
+                'share_card' => $card,
+                'payload' => [],
+            ];
+        }
+        $providerResult = is_array($result['result'] ?? null) ? $result['result'] : [];
+        $providerResult['share_card'] = $card;
+
+        return $providerResult;
     }
 
     /** @param array<string,mixed> $item */

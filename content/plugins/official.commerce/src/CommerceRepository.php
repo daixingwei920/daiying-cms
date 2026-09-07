@@ -21,7 +21,7 @@ final class CommerceRepository
     private const AI_STATUSES = ['enabled', 'disabled'];
     private const AI_BILLING_TYPES = ['free', 'paid'];
     private const AI_CAPABILITIES = ['product_copy', 'share_copy', 'content_match', 'sales_insight', 'verification_explanation'];
-    private const DISTRIBUTION_PROVIDER_TYPES = ['manual_share', 'standard_feed', 'provider_adapter'];
+    private const DISTRIBUTION_PROVIDER_TYPES = ['manual_share', 'standard_feed', 'google_merchant', 'provider_adapter'];
     private const DISTRIBUTION_MODES = ['manual', 'automatic'];
     private const DISTRIBUTION_STATUSES = ['enabled', 'disabled'];
     private const CHANGE_FIELDS = [
@@ -926,6 +926,10 @@ final class CommerceRepository
         $config = [
             'target' => $this->nullableText((string) ($input['target'] ?? ''), 191),
             'notes' => $this->nullableText((string) ($input['notes'] ?? ''), 500),
+            'merchant_account_id' => $this->nullableText((string) ($input['merchant_account_id'] ?? ''), 96),
+            'data_source_id' => $this->nullableText((string) ($input['data_source_id'] ?? ''), 96),
+            'content_language' => $this->nullableText((string) ($input['content_language'] ?? ''), 16),
+            'feed_label' => $this->nullableText((string) ($input['feed_label'] ?? ''), 20),
         ];
         $now = gmdate('Y-m-d H:i:s');
         if ($id > 0) {
