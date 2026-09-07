@@ -7,7 +7,7 @@
   "package_type": "plugin",
   "entry": "plugin.php",
   "core": { "min": "1.2.0", "max": "2.0.0" },
-  "php": "8.1.0",
+  "php": ">=8.3.0",
   "trust_level": "trusted_php",
   "official": true,
   "trusted_deployment": "builtin_or_registry_only",
