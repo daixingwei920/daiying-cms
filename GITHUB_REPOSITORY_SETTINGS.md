@@ -36,8 +36,9 @@ Conditional topics after external-channel Distribution becomes stable:
 
 ## Social Preview
 
-Recommended future image:
+Draft image prepared:
 
+- `.github/assets/github-social-preview.png`
 - 1280x640 PNG.
 - Include Daiying CMS logo/name.
 - Include short tagline: `Modular PHP CMS for content, commerce, and external distribution workflows`.
@@ -66,5 +67,5 @@ Daiying CMS is a modular self-hosted PHP CMS with content management, media work
 - Add repository description.
 - Set website URL.
 - Add topics.
-- Upload social preview image after a real branded image is prepared.
+- Review and upload `.github/assets/github-social-preview.png` as the repository Social Preview if approved.
 - Confirm and add a project `LICENSE` if public reuse is intended.

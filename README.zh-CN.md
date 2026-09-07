@@ -6,6 +6,8 @@ Daiying CMS 是一套模块化 PHP CMS，用于构建内容网站、媒体流程
 
 当前公开稳定版本：**1.2.24 stable**。
 
+![Daiying CMS 后台总览](.github/assets/screenshots/admin-dashboard.png)
+
 ## 项目入口
 
 - 官网：<https://www.daiyingcms.com>
@@ -81,7 +83,7 @@ Distribution 的目标是让站长或卖家只在 Daiying CMS 内完成一次内
 -> 返回成功、失败、渠道异常或 AI 异常状态
 ```
 
-当前这个公开仓库分支里还没有独立稳定的 `system/core/Distribution` 模块，也没有最终版 Distribution Provider / Connector 规范。详细支持渠道和工作流会在当前实现合并后再补充文档。
+当前仓库已经在 `content/plugins/official.commerce` 中包含 alpha 阶段的 Commerce Distribution 实现。它仍不是稳定的 Core 模块，最终 Provider / Connector 规范应继续以合并后的真实实现为准。
 
 ### Commerce
 
@@ -97,6 +99,7 @@ Core 已包含支付 Provider 设置、支付记录、付费内容/下载授权�
 
 当前仓库可确认的插件包括：
 
+- `official.commerce`
 - `official.friend-links`
 - `official.novel-collector`
 - `official.video-collector`
@@ -152,7 +155,18 @@ php scripts/validate_production_readiness.php --strict
 
 ## 截图
 
-当前仓库还没有可确认的公开截图文件。后续需要补充的截图清单见：[GITHUB_SCREENSHOT_REQUIREMENTS.md](GITHUB_SCREENSHOT_REQUIREMENTS.md)。
+以下截图均来自当前真实 Daiying CMS 后台。截图采集时已避开、裁剪或遮罩敏感字段、私人文件列表和订单明细。
+
+| 区域 | 截图 |
+| --- | --- |
+| 内容编辑器 | ![内容编辑器](.github/assets/screenshots/content-editor.png) |
+| 媒体库 | ![媒体库](.github/assets/screenshots/media-library.png) |
+| 插件市场 | ![插件市场](.github/assets/screenshots/marketplace.png) |
+| 发卡商业能力 | ![发卡商业能力](.github/assets/screenshots/commerce.png) |
+| 主题市场 | ![主题市场](.github/assets/screenshots/theme-marketplace.png) |
+| 在线更新 | ![在线更新](.github/assets/screenshots/online-update.png) |
+
+截图采集记录见：[DAIYING_CMS_SCREENSHOT_REPORT.md](DAIYING_CMS_SCREENSHOT_REPORT.md)。
 
 ## 授权
 

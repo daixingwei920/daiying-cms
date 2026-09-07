@@ -6,6 +6,8 @@ A modular PHP CMS for building content websites, media workflows, commerce found
 
 Daiying CMS Core is a self-hosted PHP CMS with themes, plugins, media management, commerce foundations, signed online updates, and recovery tooling. The current public release is **1.2.24 stable**.
 
+![Daiying CMS admin dashboard](.github/assets/screenshots/admin-dashboard.png)
+
 ## Project Links
 
 - Official Website: <https://www.daiyingcms.com>
@@ -81,7 +83,7 @@ Content / product data
 
 Distribution is separate from the plugin marketplace, commercial plugin licensing, authorization-code delivery, Core updates, Capability Packs, Site Vault, and Shadow Upgrade.
 
-This repository branch does not currently contain a dedicated stable `system/core/Distribution` module or final Distribution Provider/Connector specification. Detailed supported channels and workflows will be documented after the current implementation is merged.
+The current repository contains an alpha Commerce Distribution implementation under `content/plugins/official.commerce`. It is not a stable Core module, and the final Provider/Connector specification should continue to follow the merged implementation as it matures.
 
 ### Commerce
 
@@ -97,6 +99,7 @@ Plugins are installed from local ZIP packages or official market packages when t
 
 Bundled plugins currently visible in this repository include:
 
+- `official.commerce`
 - `official.friend-links`
 - `official.novel-collector`
 - `official.video-collector`
@@ -156,7 +159,18 @@ Release history is summarized in [CHANGELOG.md](CHANGELOG.md).
 
 ## Screenshots
 
-No verified public screenshots are currently tracked in this repository. Screenshot requirements are documented in [GITHUB_SCREENSHOT_REQUIREMENTS.md](GITHUB_SCREENSHOT_REQUIREMENTS.md).
+The screenshots below come from the current live Daiying CMS admin UI. Sensitive fields, private file lists, and order details were avoided, cropped, or redacted.
+
+| Area | Screenshot |
+| --- | --- |
+| Content editor | ![Content editor](.github/assets/screenshots/content-editor.png) |
+| Media library | ![Media library](.github/assets/screenshots/media-library.png) |
+| Plugin marketplace | ![Plugin marketplace](.github/assets/screenshots/marketplace.png) |
+| Card delivery commerce | ![Card delivery commerce](.github/assets/screenshots/commerce.png) |
+| Theme marketplace | ![Theme marketplace](.github/assets/screenshots/theme-marketplace.png) |
+| Online update | ![Online update](.github/assets/screenshots/online-update.png) |
+
+Additional screenshot capture notes are documented in [DAIYING_CMS_SCREENSHOT_REPORT.md](DAIYING_CMS_SCREENSHOT_REPORT.md).
 
 ## Security
 

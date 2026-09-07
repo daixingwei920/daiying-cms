@@ -6,7 +6,17 @@ Distribution is the Daiying CMS layer for sending prepared content and commerce 
 
 **In Development**
 
-No dedicated stable `system/core/Distribution` module, final Provider/Connector interface, channel list, or user workflow is currently present in this public repository branch. Documentation should stay conservative until the current implementation is merged.
+The current public repository contains an alpha Commerce Distribution implementation under `content/plugins/official.commerce`.
+
+Confirmed implementation points in the current branch:
+
+- Admin routes are registered by `content/plugins/official.commerce/plugin.php`.
+- Distribution management is handled by `CommerceDistributionManager`.
+- Current data tables are created by `migrations/006_distribution_modules.php`.
+- Current event history is stored through the Commerce repository.
+- Current provider classes include system share and Google Merchant provider implementations.
+
+There is still no dedicated stable `system/core/Distribution` module or final standalone Provider/Connector specification. Public documentation should continue to label Distribution as In Development until the workflow, channel contract, and compatibility rules are finalized.
 
 ## Intended Problem Space
 
@@ -53,7 +63,7 @@ Commerce handles products, pricing, orders, payment, and transactions.
 
 Distribution handles sending already prepared content or product data to external channels. For example, Commerce may provide product and transaction capabilities, while Distribution sends appropriate product data to a supported external channel.
 
-The final boundary should follow the merged implementation once it is available.
+The current merged implementation places Distribution inside the official Commerce plugin. The long-term boundary should continue to follow the real architecture as it stabilizes.
 
 ## AI Role
 
@@ -66,6 +76,8 @@ If AI support is implemented, it should be treated as an adapter aid, not as a s
 - Basic data suitability checks.
 
 If an AI service, Provider, or channel fails, the user-facing workflow should report the current error state clearly. It should not invent alternate distribution behavior that is not implemented.
+
+The current Commerce plugin also contains AI module infrastructure. Distribution documentation should only describe AI behavior that is visible in the merged implementation and should not promise channel-specific automation that has not shipped.
 
 ## Documentation Gap
 

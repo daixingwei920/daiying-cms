@@ -8,6 +8,7 @@ Commerce is currently a Core foundation plus plugin extension area.
 
 The current public repository contains:
 
+- Official Commerce plugin foundation under `content/plugins/official.commerce`.
 - Payment Provider settings and registry.
 - Manual payment provider.
 - Hosted redirect payment provider foundation.
@@ -17,6 +18,7 @@ The current public repository contains:
 - Card-code product inventory and delivery.
 - Commercial product and license storage tables.
 - Site license activation storage.
+- Alpha Distribution channel management for commerce data.
 
 ## Payment Providers
 
@@ -33,6 +35,10 @@ Card-code products can be sold through content blocks and fulfilled idempotently
 ## Commercial Licenses
 
 The commercial ecosystem schema contains tables for products, license batches, license keys, license sites, download tokens, and audit events.
+
+## Distribution Boundary
+
+Commerce handles product, price, order, payment, and fulfillment data. Distribution handles sending prepared product or content data to external channels. The current alpha implementation lives inside the official Commerce plugin, but Distribution should not be described as plugin licensing, marketplace delivery, or Core updates.
 
 ## Scope Notes
 

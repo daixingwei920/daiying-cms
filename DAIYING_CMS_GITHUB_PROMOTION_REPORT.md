@@ -29,25 +29,26 @@ Content / product creation
 
 Current public repository status:
 
-- No dedicated stable `system/core/Distribution` directory was found in this branch.
-- No final Distribution Provider/Connector specification was found in this branch.
-- No stable channel list or final Distribution user workflow was found in this branch.
+- After rebasing onto the current remote `main`, alpha Distribution code is present under `content/plugins/official.commerce`.
+- No dedicated stable `system/core/Distribution` directory was found.
+- No final standalone Distribution Provider/Connector specification was found.
+- No stable channel list or final Distribution user workflow should be advertised as production-ready.
 - Historical `distribution-server` directories were found outside this repository under older Codex output paths, but they are not current Daiying CMS Core source in this public Git repository and were not used as README truth.
 
 Confirmed current capabilities in this public branch:
 
 - Content and media foundations exist in Core.
-- Commerce foundations exist for payment providers, paid access, card-code delivery, and commercial license storage.
+- Commerce foundations exist for payment providers, paid access, card-code delivery, commercial license storage, product/order flows, AI modules, and alpha Distribution channel management.
 - Marketplace, update, Capability Pack, Site Vault, and Shadow Upgrade foundations exist as separate architecture areas.
-- Distribution-specific external-channel implementation details are not confirmed in this branch.
+- Distribution-specific implementation currently lives in `content/plugins/official.commerce` and remains In Development.
 
 Capabilities still owned by the other active Distribution development thread:
 
-- Supported external channels.
-- Provider/Connector interface.
-- AI/rule adaptation behavior.
-- Channel error and AI error workflow.
-- Admin UI and screenshots.
+- Final supported external channel list.
+- Final Provider/Connector contract.
+- Final AI/rule adaptation behavior.
+- Final channel error and AI error workflow.
+- Stable admin UI screenshots.
 - Final stable documentation.
 
 README now uses the conservative wording:
@@ -100,7 +101,7 @@ Distribution is shown as **In Development**, not Stable.
 
 The README now defines Distribution as the in-development external-channel distribution layer for Daiying CMS content and commerce data. It explicitly separates Distribution from Marketplace, commercial plugin licensing, authorization-code delivery, Core updates, Capability Pack, Site Vault, and Shadow Upgrade.
 
-The current public repository branch does not contain a stable Distribution module or final Provider/Connector specification, so the README states that detailed supported channels and workflows will be documented after the current implementation is merged.
+After rebasing onto the current remote `main`, the repository contains alpha Commerce Distribution code under `content/plugins/official.commerce`. The README and docs now state that this is not a stable Core module and that the final Provider/Connector specification should continue to follow the real merged implementation as it matures.
 
 ## 4. Commerce Presentation
 
@@ -114,6 +115,7 @@ The docs mention only verified repository capabilities: payment provider setting
 
 - `faq_block`
 - `local.storage.baidu`
+- `official.commerce`
 - `official.friend-links`
 - `official.novel-collector`
 - `official.video-collector`
@@ -177,20 +179,23 @@ Not added:
 
 - `LICENSE`, because the repository does not currently declare a license.
 
-## 10. Screenshot Gaps
+## 10. Screenshots
 
-No verified public screenshot assets were found.
+Real product screenshots were captured from the current live Daiying CMS admin UI and added under `.github/assets/screenshots/`.
 
-Added `GITHUB_SCREENSHOT_REQUIREMENTS.md` with required future screenshots for:
+README files now use:
 
 - Admin dashboard.
 - Content editor.
 - Media library.
-- Plugin manager.
-- Theme manager.
-- Commerce.
-- Distribution.
+- Plugin marketplace.
+- Card-delivery Commerce.
+- Theme marketplace.
 - Online update.
+
+Additional captured screenshots include plugin manager, theme manager, payment providers, safe-cropped Baidu media, and a GitHub Social Preview draft.
+
+Distribution preview remains unavailable for README because the current live backend did not provide a verified Distribution preview page during this screenshot pass.
 
 ## 11. Release Findings
 
@@ -235,6 +240,7 @@ Added `GITHUB_REPOSITORY_SETTINGS.md` with:
 - Set Website to `https://www.daiyingcms.com`.
 - Add recommended topics.
 - Upload a social preview image after a real branded asset exists.
+- Review the draft `.github/assets/github-social-preview.png` and upload it in GitHub repository settings if approved.
 - Confirm and add a `LICENSE` if public reuse is intended.
 
 ## 15. Modified Files
@@ -261,20 +267,19 @@ Added `GITHUB_REPOSITORY_SETTINGS.md` with:
 - `GITHUB_REPOSITORY_SETTINGS.md`
 - `GITHUB_OLD_DOMAIN_AUDIT.md`
 - `DAIYING_CMS_GITHUB_PROMOTION_REPORT.md`
+- `DAIYING_CMS_SCREENSHOT_REPORT.md`
+- `SCREENSHOT_DISCOVERED_PRODUCT_ISSUES.md`
+- `.github/assets/github-social-preview.png`
+- `.github/assets/screenshots/*.png`
 
 ## 16. Git Diff Summary
 
-The tracked diff before adding new files showed:
+Current work after screenshot capture adds real PNG assets, updates README screenshot sections, refreshes Distribution status after rebase, and records screenshot QA notes.
 
-```text
-README.md | 279 ++++++++++++++++++++++++++++++--------------------------------
-1 file changed, 136 insertions(+), 143 deletions(-)
-```
-
-The original promotion commit already exists as `1784b8a docs: improve GitHub project presentation`. The Distribution definition correction is tracked separately so it can be reviewed apart from the original GitHub presentation pass.
+The promotion commit and Distribution correction commit were rebased onto the current remote `main`, so their local hashes changed. Screenshot assets should be committed separately as `docs: add real Daiying CMS product screenshots`.
 
 ## 17. Test Results
 
-- `git diff --check`: PASS after Distribution definition correction.
+- `git diff --check`: rerun after screenshot capture before commit.
 - GitHub release metadata checked with `gh release view`.
 - No PHP business tests were run because this task modified documentation and GitHub metadata files only.

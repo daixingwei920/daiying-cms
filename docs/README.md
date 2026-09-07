@@ -29,7 +29,7 @@ This index collects the public-facing documentation currently available in the G
 
 - [Distribution](distribution.md)
 
-Distribution is currently documented as In Development because this public branch does not yet contain a stable external-channel Provider/Connector specification or final user workflow.
+Distribution is documented as In Development. The current branch contains an alpha Commerce Distribution implementation under `content/plugins/official.commerce`, but it does not yet define a stable standalone Provider/Connector specification or final user workflow.
 
 ## Deployment
 
@@ -50,6 +50,8 @@ Core namespaces currently visible in the repository include:
 - `Cms\Core\Update`
 - `Cms\Core\Recovery`
 - `Cms\Core\ExternalMigration`
+
+Current alpha Distribution work is implemented under the `official.commerce` plugin rather than a stable Core namespace.
 
 ## Existing Root Reports
 

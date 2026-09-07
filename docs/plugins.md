@@ -10,6 +10,7 @@ The following plugin manifests are present in this repository:
 | --- | --- | --- | --- |
 | `faq_block` | `1.0.0` | plugin | FAQ block registration example. |
 | `local.storage.baidu` | `1.0.0-rc13.2` | `storage_provider` | Baidu Netdisk OAuth/media storage integration. |
+| `official.commerce` | `0.1.0-alpha.14` | plugin | Commerce foundation with product, order, AI module, and alpha Distribution workflows. |
 | `official.friend-links` | `1.0.0-alpha.1` | `system-plugin` | Friend links management. |
 | `official.novel-collector` | `0.4.19` | plugin | Novel collection and reading routes. |
 | `official.video-collector` | `0.2.1` | plugin | Video collection and playback routes. |
