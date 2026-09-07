@@ -25,6 +25,7 @@ $encodedSessionUrl = 'https://checkout.stripe.com/c/pay/cs_test_a11YYufWQzNY63zp
 
 stripe_url_check(StripeCheckoutUrlValidator::isSafe($officialUrl), 'allows real Stripe Checkout URL with hosted Checkout fragment');
 stripe_url_check(StripeCheckoutUrlValidator::isSafe($encodedSessionUrl), 'allows Stripe session path characters observed in Checkout URLs');
+stripe_url_check(StripeCheckoutUrlValidator::isSafe('https://checkout.stripe.com/pay/cs_live_a11YYufWQzNY63zpQ6QSNRQhkUp#fid'), 'allows official Stripe Checkout Session URL without /c prefix');
 stripe_url_check(StripeCheckoutUrlValidator::isSafe('https://CHECKOUT.STRIPE.COM/c/pay/cs_live_a11YYufWQzNY63zpQ6QSNRQhkUp#fid'), 'normalizes host case');
 stripe_url_check(StripeCheckoutUrlValidator::isSafe('https://checkout.stripe.com./c/pay/cs_live_a11YYufWQzNY63zpQ6QSNRQhkUp#fid'), 'normalizes a DNS root trailing dot on the official host');
 stripe_url_check(StripeCheckoutUrlValidator::isSafe('https://checkout.stripe.com:443/c/pay/cs_live_a11YYufWQzNY63zpQ6QSNRQhkUp#fid'), 'allows explicit default HTTPS port');
@@ -33,8 +34,8 @@ stripe_url_check(!StripeCheckoutUrlValidator::isSafe('https://checkout.stripe.co
 stripe_url_check(!StripeCheckoutUrlValidator::isSafe('https://checkout.stripe.com.evil.example/c/pay/cs_live_a11YYufWQzNY63zpQ6QSNRQhkUp#fid'), 'rejects lookalike subdomains');
 stripe_url_check(!StripeCheckoutUrlValidator::isSafe('https://checkout.stripe.com@evil.example/c/pay/cs_live_a11YYufWQzNY63zpQ6QSNRQhkUp#fid'), 'rejects userinfo host confusion');
 stripe_url_check(!StripeCheckoutUrlValidator::isSafe('https://stripe.com/c/pay/cs_live_a11YYufWQzNY63zpQ6QSNRQhkUp#fid'), 'rejects non-Checkout Stripe hosts');
-stripe_url_check(!StripeCheckoutUrlValidator::isSafe('https://checkout.stripe.com/pay/cs_live_a11YYufWQzNY63zpQ6QSNRQhkUp#fid'), 'rejects non-Checkout payment paths');
 stripe_url_check(!StripeCheckoutUrlValidator::isSafe('https://checkout.stripe.com/c/pay/not_a_session#fid'), 'rejects paths without Checkout Session id');
+stripe_url_check(!StripeCheckoutUrlValidator::isSafe('https://checkout.stripe.com/session/cs_live_a11YYufWQzNY63zpQ6QSNRQhkUp#fid'), 'rejects non-Checkout payment paths');
 stripe_url_check(!StripeCheckoutUrlValidator::isSafe('https://checkout.stripe.com/c/pay/cs_live_a11?secret=leaked#fid'), 'rejects secret-looking query data');
 stripe_url_check(!StripeCheckoutUrlValidator::isSafe('https://checkout.stripe.com/c/pay/cs_live_a11#authorization=Bearer%20abc'), 'rejects secret-looking fragment data');
 stripe_url_check(!StripeCheckoutUrlValidator::isSafe('https://checkout.stripe.test/pay/cs_test_fake'), 'rejects fake transport host by default');

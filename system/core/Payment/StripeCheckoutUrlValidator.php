@@ -41,7 +41,7 @@ final class StripeCheckoutUrlValidator
         $path = (string) ($parts['path'] ?? '');
         $pattern = $isFake
             ? '#^/pay/cs_(?:test|live)_[A-Za-z0-9_=-]+$#'
-            : '#^/c/pay/cs_(?:test|live)_[A-Za-z0-9_=-]+$#';
+            : '#^/(?:c/)?pay/cs_(?:test|live)_[A-Za-z0-9_=-]+$#';
         if (preg_match($pattern, $path) !== 1) {
             return false;
         }

@@ -2,6 +2,14 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.26 - 2026-09-07
+
+- Allowed official Stripe Checkout Session URLs using `https://checkout.stripe.com/pay/cs_...` in addition to the existing `https://checkout.stripe.com/c/pay/cs_...` form.
+- Preserved Stripe redirect safety checks for HTTPS, official host, default port, userinfo rejection, lookalike host rejection, and secret-looking query or fragment data.
+- Public install package: `daiying-cms-1.2.26-stable.zip`.
+- SHA-256: `3c4d5ef19f4b5658c7156c2b7f369054691714f3d84efcd8022dffa232c04ed4`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.26>.
+
 ## 1.2.25 - 2026-09-07
 
 - Added `official.commerce` to the built-in official plugin registry fallback so trusted bundled Commerce installs are recognized even when older sites have an outdated root registry file.
