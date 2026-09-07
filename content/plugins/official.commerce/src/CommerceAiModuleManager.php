@@ -105,6 +105,24 @@ final class CommerceAiModuleManager
         return self::TASKS;
     }
 
+    /** @return array<string,mixed> */
+    public static function deepSeekDefaults(): array
+    {
+        return [
+            'name' => 'DeepSeek OpenAI-Compatible',
+            'provider_type' => 'domestic',
+            'protocol' => 'openai_compatible',
+            'endpoint' => 'https://api.deepseek.com',
+            'model' => 'deepseek-v4-flash',
+            'status' => 'disabled',
+            'billing_type' => 'free',
+            'sort_order' => 100,
+            'capabilities' => array_keys(self::TASKS),
+            'temperature' => 0.2,
+            'timeout_seconds' => 20,
+        ];
+    }
+
     /** @param array<string,mixed> $module */
     private function callModule(array $module, string $prompt): string
     {
@@ -115,65 +133,17 @@ final class CommerceAiModuleManager
         if ($credential === '') {
             throw new RuntimeException('AI 凭据未配置。');
         }
-        $payload = [
-            'model' => (string) ($module['model'] ?? ''),
-            'messages' => [
-                ['role' => 'system', 'content' => 'You are a Daiying Commerce assistant. Only provide cautious copy and explanations. Never modify verification facts, never claim authenticity, never decide purchases for users.'],
-                ['role' => 'user', 'content' => $prompt],
-            ],
-            'temperature' => (float) ($module['public_config']['temperature'] ?? 0.2),
-        ];
+        $system = 'You are a Daiying Commerce assistant. Only provide cautious copy and explanations. Never modify verification facts, never claim authenticity, never decide purchases for users.';
         $transport = $this->transport;
         $response = is_callable($transport)
             ? $transport($module, $this->redactPromptSecrets($prompt))
-            : $this->httpChatCompletion($module, $credential, $payload);
+            : ['text' => (new CommerceOpenAiCompatibleProvider())->chatCompletion($module, $credential, $system, $prompt)];
         $text = trim((string) ($response['text'] ?? ''));
         if ($text === '') {
             throw new RuntimeException('AI 返回为空。');
         }
 
         return $this->short($text, 4000);
-    }
-
-    /** @param array<string,mixed> $module @param array<string,mixed> $payload @return array<string,mixed> */
-    private function httpChatCompletion(array $module, string $credential, array $payload): array
-    {
-        if (!function_exists('curl_init')) {
-            throw new RuntimeException('PHP cURL 不可用。');
-        }
-        $endpoint = rtrim((string) ($module['endpoint'] ?? ''), '/');
-        if ($endpoint === '') {
-            throw new RuntimeException('AI Endpoint 未配置。');
-        }
-        $url = str_ends_with($endpoint, '/chat/completions') ? $endpoint : $endpoint . '/chat/completions';
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
-            CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $credential,
-            ],
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => (int) ($module['public_config']['timeout_seconds'] ?? 12),
-        ]);
-        $body = curl_exec($ch);
-        $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-        if (!is_string($body) || $body === '') {
-            throw new RuntimeException($error !== '' ? $error : 'AI Provider 无响应。');
-        }
-        $data = json_decode($body, true);
-        if ($status < 200 || $status >= 300) {
-            throw new RuntimeException('AI Provider HTTP ' . $status);
-        }
-        if (!is_array($data)) {
-            throw new RuntimeException('AI Provider 返回格式无效。');
-        }
-        $text = (string) ($data['choices'][0]['message']['content'] ?? $data['choices'][0]['text'] ?? '');
-
-        return ['text' => $text];
     }
 
     /** @return list<array<string,mixed>> */

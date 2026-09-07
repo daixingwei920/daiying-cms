@@ -9,6 +9,7 @@ use Daiying\Commerce\CommerceRepository;
 
 require_once __DIR__ . '/src/CommerceRepository.php';
 require_once __DIR__ . '/src/CommerceContracts.php';
+require_once __DIR__ . '/src/CommerceOpenAiCompatibleProvider.php';
 require_once __DIR__ . '/src/CommerceAiModuleManager.php';
 require_once __DIR__ . '/src/GenericUrlVerificationProvider.php';
 require_once __DIR__ . '/src/AmazonVerificationProvider.php';
