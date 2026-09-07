@@ -197,12 +197,24 @@ $deepSeekDefaults = CommerceAiModuleManager::deepSeekDefaults();
 $assert(($deepSeekDefaults['provider_type'] ?? '') === 'domestic', 'DeepSeek preset is classified as a domestic AI provider.');
 $assert(($deepSeekDefaults['protocol'] ?? '') === 'openai_compatible', 'DeepSeek preset reuses the OpenAI-Compatible provider contract.');
 $assert(($deepSeekDefaults['endpoint'] ?? '') === 'https://api.deepseek.com', 'DeepSeek preset uses the official API base endpoint.');
+$assert(in_array('deepseek-v4-pro', $deepSeekDefaults['recommended_models'] ?? [], true), 'DeepSeek preset exposes recommended models without making one model mandatory.');
 $assert(in_array('verification_explanation', $deepSeekDefaults['capabilities'] ?? [], true), 'DeepSeek preset supports the frozen low-risk Commerce AI tasks.');
 $controllerWithAi = new CommerceController($repo, $pdo, Settings::fromArray(['security' => ['encryption_key' => $aiKey]]));
 $aiPage = $controllerWithAi->adminAiModules(new Request('GET', '/admin/commerce/ai'))->body();
 $assert(str_contains($aiPage, 'Commerce AI 模块'), 'Admin exposes a unified Commerce AI module management entry.');
 $assert(str_contains($aiPage, 'Free Working AI'), 'Admin AI module page lists configured modules.');
+$assert(str_contains($aiPage, '使用 DeepSeek 推荐预设'), 'Admin AI page offers a one-click recommended preset for common providers.');
 $assert(!str_contains($aiPage, 'free-working-key') && !str_contains($aiPage, 'paid-secret-key'), 'Admin AI page never renders API keys.');
+$deepSeekPresetPage = $controllerWithAi->adminAiModules(new Request('GET', '/admin/commerce/ai', ['preset' => 'deepseek']))->body();
+$assert(str_contains($deepSeekPresetPage, 'https://api.deepseek.com'), 'DeepSeek preset fills the official endpoint for faster setup.');
+$assert(str_contains($deepSeekPresetPage, 'name="model"') && str_contains($deepSeekPresetPage, 'deepseek-v4-flash'), 'DeepSeek preset leaves the model field visible and editable.');
+$customModelId = $repo->saveAiModule(array_merge($deepSeekDefaults, [
+    'name' => 'Custom Domestic AI',
+    'model' => 'custom-provider-model',
+    'api_key' => 'custom-model-key',
+    'status' => 'disabled',
+]), $aiKey);
+$assert(($repo->aiModule($customModelId)['model'] ?? '') === 'custom-provider-model', 'Provider model selection is persisted from admin input instead of being hardcoded to a preset.');
 
 $manager = new CommerceAiModuleManager($repo, $aiKey, static function (array $module, string $prompt): array {
     if ((string) $module['name'] === 'Free Broken AI') {
@@ -214,6 +226,7 @@ $testResult = $manager->testModule($freeOkId);
 $assert(($testResult['ok'] ?? false) === true, 'AI modules support explicit connection testing.');
 $testedModule = $repo->aiModule($freeOkId);
 $assert(($testedModule['last_test_status'] ?? '') === 'success', 'AI connection test status and time are recorded.');
+$assert(($testedModule['model'] ?? '') === 'local-free', 'AI connection tests use the configured module model rather than a vendor hardcoded model.');
 $aiResult = $manager->runProductTask('product_copy', $product);
 $assert(($aiResult['ok'] ?? false) === true && ($aiResult['module_id'] ?? 0) === $freeOkId, 'Free AI failures fall back to the next free module by sort order.');
 $assert(($aiResult['billing_type'] ?? '') === 'free', 'Free AI fallback remains free by default.');
@@ -505,6 +518,9 @@ $assert(str_contains($productPage, '价格透明'), 'Consumer transparency profi
 $assert(str_contains($productPage, '支付处理方'), 'Consumer transparency profile includes payment processor context.');
 $assert(str_contains($productPage, '核验历史'), 'Consumer transparency profile includes verification history.');
 $assert(!str_contains($productPage, '正品认证'), 'Consumer transparency wording avoids unsupported authenticity claims.');
+$adminEditPage = $controllerWithAi->adminProductForm(new Request('GET', '/admin/commerce/products/edit', ['id' => $productId]))->body();
+$assert(str_contains($adminEditPage, 'AI 优化描述'), 'Product edit UI exposes the AI description optimization action.');
+$assert(str_contains($adminEditPage, '允许使用收费 AI'), 'Product AI UI requires explicit opt-in before paid modules can be used.');
 
 $variantId = $repo->saveVariant([
     'product_id' => $productId,

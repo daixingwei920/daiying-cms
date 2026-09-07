@@ -406,6 +406,9 @@ final class CommerceController
     {
         $editingId = (int) ($request->query['edit'] ?? 0);
         $editing = $editingId > 0 ? $this->repo->aiModule($editingId) : null;
+        $preset = $editing === null ? (string) ($request->query['preset'] ?? '') : '';
+        $presetDefaults = $preset === 'deepseek' ? CommerceAiModuleManager::deepSeekDefaults() : [];
+        $formModule = $editing ?? $presetDefaults;
         $notice = !empty($request->query['saved']) ? '<p class="notice">AI 模块已保存。</p>' : '';
         $notice .= !empty($request->query['tested']) ? '<p class="notice">AI 模块连接测试已完成。</p>' : '';
         $rows = '';
@@ -425,20 +428,23 @@ final class CommerceController
         if ($rows === '') {
             $rows = '<tr><td colspan="8" class="muted">还没有 AI 模块。</td></tr>';
         }
-        $capabilities = is_array($editing['capabilities'] ?? null) ? $editing['capabilities'] : array_keys(CommerceAiModuleManager::taskLabels());
-        $publicConfig = is_array($editing['public_config'] ?? null) ? $editing['public_config'] : [];
-        $form = '<h2>' . ($editing !== null ? '编辑 AI 模块' : '添加 AI 模块') . '</h2>' .
+        $capabilities = is_array($formModule['capabilities'] ?? null) ? $formModule['capabilities'] : array_keys(CommerceAiModuleManager::taskLabels());
+        $publicConfig = is_array($formModule['public_config'] ?? null) ? $formModule['public_config'] : $presetDefaults;
+        $recommendedModels = is_array($formModule['recommended_models'] ?? null) ? implode(' / ', $formModule['recommended_models']) : '如 deepseek-v4-flash / gpt-4.1-mini / 本地模型名';
+        $presetActions = '<p><a class="button admin-button-secondary" href="/admin/commerce/ai?preset=deepseek">使用 DeepSeek 推荐预设</a></p>' .
+            '<p class="muted">预设只填写推荐 Endpoint 和 Model，保存前仍可修改；测试连接会使用当前填写的模型向 Provider 验证实际可用性。</p>';
+        $form = '<h2>' . ($editing !== null ? '编辑 AI 模块' : '添加 AI 模块') . '</h2>' . ($editing === null ? $presetActions : '') .
             '<form method="post" action="/admin/commerce/ai/save">' . CsrfToken::field() .
-            '<input type="hidden" name="id" value="' . (int) ($editing['id'] ?? 0) . '">' .
-            '<label>模块名称<input name="name" required value="' . $this->e((string) ($editing['name'] ?? '')) . '" placeholder="如 DeepSeek 免费额度 / Local LLM"></label>' .
-            '<label>Provider 类型<select name="provider_type">' . $this->options(['domestic' => '国内 AI', 'overseas' => '海外 AI', 'local' => '本地 AI', 'custom' => '自定义 AI'], (string) ($editing['provider_type'] ?? 'custom')) . '</select></label>' .
-            '<label>协议<select name="protocol">' . $this->options(['openai_compatible' => 'OpenAI-Compatible', 'provider_adapter' => '特殊 Provider Adapter'], (string) ($editing['protocol'] ?? 'openai_compatible')) . '</select></label>' .
-            '<label>Endpoint<input name="endpoint" value="' . $this->e((string) ($editing['endpoint'] ?? '')) . '" placeholder="https://api.example.com/v1"></label>' .
-            '<label>Model<input name="model" value="' . $this->e((string) ($editing['model'] ?? '')) . '" placeholder="model-name"></label>' .
+            '<input type="hidden" name="id" value="' . (int) ($formModule['id'] ?? 0) . '">' .
+            '<label>模块名称<input name="name" required value="' . $this->e((string) ($formModule['name'] ?? '')) . '" placeholder="如 DeepSeek 免费额度 / Local LLM"></label>' .
+            '<label>Provider 类型<select name="provider_type">' . $this->options(['domestic' => '国内 AI', 'overseas' => '海外 AI', 'local' => '本地 AI', 'custom' => '自定义 AI'], (string) ($formModule['provider_type'] ?? 'custom')) . '</select></label>' .
+            '<label>协议<select name="protocol">' . $this->options(['openai_compatible' => 'OpenAI-Compatible', 'provider_adapter' => '特殊 Provider Adapter'], (string) ($formModule['protocol'] ?? 'openai_compatible')) . '</select></label>' .
+            '<label>Endpoint<input name="endpoint" value="' . $this->e((string) ($formModule['endpoint'] ?? '')) . '" placeholder="https://api.example.com/v1"></label>' .
+            '<label>Model<input name="model" value="' . $this->e((string) ($formModule['model'] ?? '')) . '" placeholder="' . $this->e($recommendedModels) . '"></label>' .
             '<label>API Key / 凭据<input name="api_key" type="password" autocomplete="new-password" placeholder="' . (!empty($editing['credential_configured']) ? '留空则保留已有凭据' : '服务端加密保存') . '"></label>' .
-            '<label>启停<select name="status">' . $this->options(['enabled' => '启用', 'disabled' => '停用'], (string) ($editing['status'] ?? 'disabled')) . '</select></label>' .
-            '<label>费用<select name="billing_type">' . $this->options(['free' => '免费', 'paid' => '收费'], (string) ($editing['billing_type'] ?? 'free')) . '</select></label>' .
-            '<label>调用顺序<input name="sort_order" type="number" value="' . (int) ($editing['sort_order'] ?? 0) . '"></label>' .
+            '<label>启停<select name="status">' . $this->options(['enabled' => '启用', 'disabled' => '停用'], (string) ($formModule['status'] ?? 'disabled')) . '</select></label>' .
+            '<label>费用<select name="billing_type">' . $this->options(['free' => '免费', 'paid' => '收费'], (string) ($formModule['billing_type'] ?? 'free')) . '</select></label>' .
+            '<label>调用顺序<input name="sort_order" type="number" value="' . (int) ($formModule['sort_order'] ?? 0) . '"></label>' .
             '<label>温度<input name="temperature" type="number" min="0" max="2" step="0.1" value="' . $this->e((string) ($publicConfig['temperature'] ?? '0.2')) . '"></label>' .
             '<label>超时秒数<input name="timeout_seconds" type="number" min="3" max="60" value="' . (int) ($publicConfig['timeout_seconds'] ?? 12) . '"></label>' .
             '<fieldset><legend>允许用途</legend>' . $this->aiCapabilityCheckboxes($capabilities) . '</fieldset>' .
@@ -721,7 +727,7 @@ final class CommerceController
             '<form method="post" action="/admin/commerce/variants/save">' . CsrfToken::field() . '<input type="hidden" name="product_id" value="' . $productId . '"><label>规格名称<input name="title" placeholder="如 红色 / XL / 256GB"></label><label>规格 SKU<input name="sku"></label><label>库存<input name="stock_quantity" type="number" min="0" value="0"></label><label>价格增量（分）<input name="price_delta_minor" type="number" value="0"></label><label>选项（每行 名称:值）<textarea name="options" rows="3"></textarea></label><button type="submit">添加规格</button></form>' .
             '<hr><h2>购买动作</h2><table><tr><th>按钮</th><th>类型</th><th>履约</th><th>状态</th></tr>' . $actions . '</table>' .
             '<form method="post" action="/admin/commerce/actions/save">' . CsrfToken::field() . '<input type="hidden" name="product_id" value="' . $productId . '"><label>按钮文案<input name="label" placeholder="立即购买"></label><label>动作类型<select name="action_type">' . $this->options(['site_checkout' => '本站购买', 'external_url' => '外部购买', 'contact' => '联系购买', 'digital_delivery' => '数字自动交付'], 'site_checkout') . '</select></label><label>外部链接<input name="external_url" type="url"></label><label>联系说明<input name="contact_text"></label><label>履约模式<select name="fulfillment_mode">' . $this->options(['none' => '无需履约', 'shipping' => '物流配送', 'digital_card' => '自动发卡'], 'none') . '</select></label><button type="submit">添加购买动作</button></form>' .
-            '<hr><h2>AI 辅助</h2><form method="post" action="/admin/commerce/ai/run-product">' . CsrfToken::field() . '<input type="hidden" name="product_id" value="' . $productId . '"><label>AI 任务<select name="task">' . $this->options(CommerceAiModuleManager::taskLabels(), 'product_copy') . '</select></label><label><input type="checkbox" name="allow_paid" value="1"> 允许使用收费 AI</label><p class="muted">默认只调用启用的免费 AI 模块。结果只用于人工参考，不自动写回商品或核验结论。</p><button type="submit">运行 AI 辅助</button> <a class="button admin-button-secondary" href="/admin/commerce/ai">管理 AI 模块</a></form>' .
+            '<hr><h2>AI 辅助</h2><form method="post" action="/admin/commerce/ai/run-product">' . CsrfToken::field() . '<input type="hidden" name="product_id" value="' . $productId . '"><label>AI 任务<select name="task">' . $this->options(CommerceAiModuleManager::taskLabels(), 'product_copy') . '</select></label><label><input type="checkbox" name="allow_paid" value="1"> 允许使用收费 AI</label><p class="muted">默认只调用启用的免费 AI 模块。结果只用于人工参考，不自动写回商品或核验结论。</p><button type="submit">AI 优化描述</button> <a class="button admin-button-secondary" href="/admin/commerce/ai">管理 AI 模块</a></form>' .
             $this->adminVerificationPanel($productId) .
             '<hr><h2>关键变更历史</h2><table><tr><th>时间</th><th>字段</th><th>旧值</th><th>新值</th></tr>' . $changes . '</table>';
     }

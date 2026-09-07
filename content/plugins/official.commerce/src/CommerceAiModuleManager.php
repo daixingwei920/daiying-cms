@@ -109,11 +109,12 @@ final class CommerceAiModuleManager
     public static function deepSeekDefaults(): array
     {
         return [
-            'name' => 'DeepSeek OpenAI-Compatible',
+            'name' => 'DeepSeek 推荐配置',
             'provider_type' => 'domestic',
             'protocol' => 'openai_compatible',
             'endpoint' => 'https://api.deepseek.com',
             'model' => 'deepseek-v4-flash',
+            'recommended_models' => ['deepseek-v4-flash', 'deepseek-v4-pro', 'deepseek-chat'],
             'status' => 'disabled',
             'billing_type' => 'free',
             'sort_order' => 100,
