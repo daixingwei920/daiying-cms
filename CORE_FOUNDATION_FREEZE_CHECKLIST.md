@@ -28,6 +28,8 @@
 - [x] Tagged `v1.2.24` empty-site local upgrade smoke to current Foundation files
 - [x] Tagged `v1.2.19` data upgrade smoke with content, taxonomy, media, plugin state, and payment settings
 - [x] Tagged `v1.2.24` data upgrade smoke with content, taxonomy, media, plugin state, and payment settings
+- [x] Tagged `v1.2.19` old-updater `UpdateService::execute()` smoke to current
+- [x] Tagged `v1.2.24` old-updater `UpdateService::execute()` smoke to current
 - [ ] Full package/browser upgrade from `1.2.0` empty site to current
 - [ ] Full package/browser upgrade from `1.2.0` content/media site to current
 - [ ] Full package/browser upgrade from `1.2.19` plugin/theme site to current

@@ -33,11 +33,11 @@ The following local tests passed during Foundation implementation:
 
 ## Local Package Verification
 
-Built local-only Foundation RC artifacts from exact commit
-`ef8562d6396df28655cd7fbe2fe62ad12cda9c52`:
+Built local-only Foundation RC artifacts. The latest updater-execute package was
+built from exact commit `5fe4b65653f7f3a6554ab13712027088995accb5`:
 
 - Installer ZIP SHA-256: `43e317e748da9d71eee5d539e1961fbd775e7baac85511ddf4d4af6f7778e194`
-- Update ZIP SHA-256: `f04f8a41f4c3c5ddaf3d073454a44a8ebeb8ffd57ec7cfc09f14a68777fb1ea4`
+- Update ZIP SHA-256: `a471365a59e21d8a6b368ad269194ae28ec514d1e46d3982566af1f6c355c5aa`
 - `php scripts/release_parity_gate.php --commit=HEAD --installer-zip=... --update-zip=... --update-metadata=...`: PASS
 
 The update metadata retained:
@@ -110,6 +110,33 @@ local current-release pointer was written. These tests validate migration/data
 persistence behavior, but they are still not a substitute for the final official
 updater UI/browser matrix.
 
+## Local Old-Updater Execute Smoke
+
+After the data smoke, the old Core updater itself was tested by invoking
+`Cms\Core\Update\UpdateService::execute()` from installed `v1.2.19` and
+`v1.2.24` temporary sites. A local Ed25519 test key was used only for these
+temporary sites; no official signing key or production update server was used.
+
+This uncovered and fixed two cross-version blockers:
+
+- New update packages included operational support paths unknown to older
+  updaters. The update package builder and release parity gate now keep
+  cross-version packages to legacy-safe Core-owned paths by default.
+- `2026_09_08_000001_core_ai_provider_presets.php` depended on a new Core class
+  while running inside the old updater process. The migration now contains its
+  own provider normalization logic.
+
+Final execute results:
+
+| Source | UpdateService Execute | Health | Seeded Content | AI Defaults | Mail Defaults | Update Operation |
+| --- | --- | --- | --- | --- | --- | --- |
+| `v1.2.24` | PASS | `1.2.29` PASS | PASS | PASS | PASS | PASS |
+| `v1.2.19` | PASS | `1.2.29` PASS | PASS | PASS | PASS | PASS |
+
+The compatible update package contained 313 changed files and 37 required
+migrations. Metadata retained `min_upgrade_from`, `hard_min_version`, and
+`migration_floor` as `1.2.0`.
+
 ## Upgrade Compatibility Coverage
 
 Implemented migrations are idempotent and provide safe defaults when older sites
@@ -133,10 +160,12 @@ artifacts before declaring Core Foundation Freeze:
 - `1.2.0` site with articles/pages/media -> current
 - `1.2.19` empty-site tagged upgrade smoke -> current: PASS
 - `1.2.19` site with content/media/plugin/payment fixture -> current: PASS
+- `1.2.19` local old-updater execute -> current: PASS
 - `1.2.19` site with plugin/theme browser workflow -> current
 - `1.2.22` site with payment configuration -> current; fixture/tag not available in this pass
 - `1.2.24` empty-site tagged upgrade smoke -> current: PASS
 - `1.2.24` site with content/media/plugin/payment fixture -> current: PASS
+- `1.2.24` local old-updater execute -> current: PASS
 - `1.2.24` site with Commerce data -> current
 - current-minus-one site with AI and mail configuration -> current
 - direct multi-version upgrade through the official updater UI

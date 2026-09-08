@@ -105,3 +105,13 @@ were not published to the official update server.
 - Update ZIP: `outputs/foundation-rc-ef8562d6396d/update/daiying-cms-core-update-1.2.29-foundation-rc-exact-ef8562d6396d.zip`
 - Update SHA-256: `f04f8a41f4c3c5ddaf3d073454a44a8ebeb8ffd57ec7cfc09f14a68777fb1ea4`
 - Release parity gate: PASS
+
+Latest local old-updater execute package:
+
+- Commit: `5fe4b65653f7f3a6554ab13712027088995accb5`
+- Update ZIP: `outputs/foundation-exec-compat-5fe4b65653f7/update/daiying-cms-core-update-1.2.29-foundation-exec-exact-5fe4b65653f7.zip`
+- Update SHA-256: `a471365a59e21d8a6b368ad269194ae28ec514d1e46d3982566af1f6c355c5aa`
+- Changed files: 313
+- Required migrations: 37
+- `v1.2.19` old-updater execute: PASS
+- `v1.2.24` old-updater execute: PASS
