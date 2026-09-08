@@ -20,6 +20,7 @@ This index collects the public-facing documentation currently available in the G
 
 - [Developers](developers.md)
 - [Plugins](plugins.md)
+- [Plugin API v1](../PLUGIN_API_V1.md)
 - [Themes](themes.md)
 - [Theme API v1](../THEME_API_V1.md)
 - [Global AI](ai.md)
@@ -29,6 +30,8 @@ This index collects the public-facing documentation currently available in the G
 - [Core API Stability](../CORE_API_STABILITY.md)
 - [Storage Provider API v1](../STORAGE_PROVIDER_API_V1.md)
 - [REST API v1](../REST_API_V1.md)
+- [Foundation Implementation Report](../DAIYING_CMS_FOUNDATION_IMPLEMENTATION_REPORT.md)
+- [Foundation Freeze Checklist](../CORE_FOUNDATION_FREEZE_CHECKLIST.md)
 - [Examples](../examples/README.md)
 
 ## Commerce
