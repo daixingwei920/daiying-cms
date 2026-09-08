@@ -18,6 +18,9 @@ final class Capability
         'storage.plugin',
         'mail.provider',
         'mail.event',
+        'queue.register',
+        'webhook.register',
+        'cache.use',
         'blocks.register',
     ];
 

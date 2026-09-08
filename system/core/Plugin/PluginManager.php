@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Cms\Core\Plugin;
 
 use Cms\Core\Ai\AiService;
+use Cms\Core\Cache\FileCache;
 use Cms\Core\Mail\MailService;
 use Cms\Core\Config\Settings;
 use Cms\Core\Events\EventDispatcher;
 use Cms\Core\Logging\FileLogger;
+use Cms\Core\Queue\QueueService;
+use Cms\Core\Webhook\WebhookService;
 use PDO;
 
 final class PluginManager
@@ -228,6 +231,9 @@ final class PluginManager
             dirname($entry),
             $this->settings !== null ? new AiService($this->pdo, $this->settings) : null,
             $this->settings !== null ? new MailService($this->pdo, $this->settings) : null,
+            new QueueService($this->pdo),
+            new FileCache($this->storageRoot() . '/cache/core'),
+            new WebhookService($this->pdo, new QueueService($this->pdo)),
         );
 
         $register = require $entry;
@@ -245,6 +251,11 @@ final class PluginManager
         }
 
         return $this->isTrustedOfficialMarketSource($manifest, $pluginRoot);
+    }
+
+    private function storageRoot(): string
+    {
+        return dirname(dirname($this->pluginsPath)) . '/storage';
     }
 
     private function assertManifestTrust(PluginManifest $manifest, bool $trustedOfficial): void

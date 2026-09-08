@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cms\Core\Plugin;
 
 use Cms\Core\Ai\AiService;
+use Cms\Core\Cache\CacheInterface;
 use Cms\Core\Events\EventDispatcher;
 use Cms\Core\Extension\ExtensionAssetController;
 use Cms\Core\Mail\MailEventRegistry;
@@ -13,6 +14,10 @@ use Cms\Core\Mail\MailProviderRegistry;
 use Cms\Core\Mail\MailService;
 use Cms\Core\Media\RemoteMediaProviderInterface;
 use Cms\Core\Media\RemoteMediaProviderRegistry;
+use Cms\Core\Queue\QueueHandlerRegistry;
+use Cms\Core\Queue\QueueService;
+use Cms\Core\Webhook\WebhookEventRegistry;
+use Cms\Core\Webhook\WebhookService;
 use PDO;
 
 final class PluginContext
@@ -29,6 +34,9 @@ final class PluginContext
         private readonly string $pluginRoot = '',
         private readonly ?AiService $ai = null,
         private readonly ?MailService $mail = null,
+        private readonly ?QueueService $queue = null,
+        private readonly ?CacheInterface $cache = null,
+        private readonly ?WebhookService $webhooks = null,
     ) {
     }
 
@@ -137,6 +145,33 @@ final class PluginContext
         return $this->mail;
     }
 
+    public function queue(): QueueService
+    {
+        if ($this->queue === null) {
+            throw new PluginException('Queue service is not available.');
+        }
+
+        return $this->queue;
+    }
+
+    public function cache(): CacheInterface
+    {
+        if ($this->cache === null) {
+            throw new PluginException('Cache service is not available.');
+        }
+
+        return $this->cache;
+    }
+
+    public function webhooks(): WebhookService
+    {
+        if ($this->webhooks === null) {
+            throw new PluginException('Webhook service is not available.');
+        }
+
+        return $this->webhooks;
+    }
+
     public function registerMailProvider(MailProviderInterface $provider): void
     {
         if (!$this->hasCapability('mail.provider')) {
@@ -153,6 +188,25 @@ final class PluginContext
         }
 
         RemoteMediaProviderRegistry::register($provider);
+    }
+
+    /** @param callable(array<string,mixed>): void $handler */
+    public function registerQueueHandler(string $type, callable $handler): void
+    {
+        if (!$this->hasCapability('queue.register') && !$this->hasCapability('cron.register')) {
+            throw new PluginException('Plugin does not declare queue.register capability.');
+        }
+
+        QueueHandlerRegistry::register($type, $handler);
+    }
+
+    public function registerWebhookEvent(string $eventId, string $label, string $version = '1.0'): void
+    {
+        if (!$this->hasCapability('webhook.register')) {
+            throw new PluginException('Plugin does not declare webhook.register capability.');
+        }
+
+        WebhookEventRegistry::register($eventId, $label, $version, $this->manifest->id);
     }
 
     /** @param list<string> $variables */

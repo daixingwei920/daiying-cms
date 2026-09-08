@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cms\Core\Logging;
 
+use Cms\Core\Security\SecretRedactor;
+
 final class FileLogger
 {
     public function __construct(private readonly string $path)
@@ -38,7 +40,7 @@ final class FileLogger
         $record = [
             'time' => gmdate('c'),
             'level' => $level,
-            'message' => $message,
+            'message' => $this->sanitize($message),
             'context' => $this->sanitize($context),
         ];
 
@@ -51,23 +53,12 @@ final class FileLogger
 
     private function sanitize(mixed $value): mixed
     {
-        if (is_array($value)) {
-            $clean = [];
-            foreach ($value as $key => $item) {
-                $keyString = (string) $key;
-                if (preg_match('/password|secret|token|session|private_key|dsn/i', $keyString)) {
-                    $clean[$key] = '[redacted]';
-                    continue;
-                }
-                $clean[$key] = $this->sanitize($item);
-            }
-            return $clean;
-        }
+        $value = SecretRedactor::redact($value);
         if (is_string($value)) {
-            $value = preg_replace('/\b(password|secret|token|session|private_key|dsn)\b\s*[:=]\s*([^\s"\']+)/i', '$1=[redacted]', $value) ?: $value;
             $value = preg_replace('/[A-Z]:[\\\\\\/][^\s"]+|\/[^\s"]+/', '[path]', $value) ?: $value;
             return strlen($value) > 500 ? substr($value, 0, 500) : $value;
         }
+
         return $value;
     }
 }
