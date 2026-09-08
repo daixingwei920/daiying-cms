@@ -103,6 +103,14 @@ final class PublicApiRegistry
                 'capabilities' => ['queue.register', 'cron.register'],
             ],
             [
+                'id' => 'scheduler.service',
+                'version' => self::CONTRACT_VERSION,
+                'class' => 'Cms\\Core\\Scheduler\\SchedulerService',
+                'stability' => 'stable',
+                'summary' => 'Register and run locked retry-aware scheduled tasks for Core and plugins.',
+                'capabilities' => ['scheduler.register', 'cron.register'],
+            ],
+            [
                 'id' => 'cache.service',
                 'version' => self::CONTRACT_VERSION,
                 'class' => 'Cms\\Core\\Cache\\CacheInterface',

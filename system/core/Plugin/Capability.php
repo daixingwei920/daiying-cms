@@ -19,6 +19,7 @@ final class Capability
         'mail.provider',
         'mail.event',
         'queue.register',
+        'scheduler.register',
         'webhook.register',
         'cache.use',
         'content.type',

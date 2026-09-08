@@ -20,6 +20,9 @@ use Cms\Core\Media\RemoteMediaProviderInterface;
 use Cms\Core\Media\RemoteMediaProviderRegistry;
 use Cms\Core\Queue\QueueHandlerRegistry;
 use Cms\Core\Queue\QueueService;
+use Cms\Core\Scheduler\ScheduledTask;
+use Cms\Core\Scheduler\SchedulerService;
+use Cms\Core\Scheduler\SchedulerTaskRegistry;
 use Cms\Core\Seo\SeoExtensionRegistry;
 use Cms\Core\Webhook\WebhookEventRegistry;
 use Cms\Core\Webhook\WebhookService;
@@ -44,6 +47,7 @@ final class PluginContext
         private readonly ?WebhookService $webhooks = null,
         private readonly ?ContentTypeRegistry $contentTypes = null,
         private readonly ?CustomFieldRegistry $customFields = null,
+        private readonly ?SchedulerService $scheduler = null,
     ) {
     }
 
@@ -161,6 +165,15 @@ final class PluginContext
         return $this->queue;
     }
 
+    public function scheduler(): SchedulerService
+    {
+        if ($this->scheduler === null) {
+            throw new PluginException('Scheduler service is not available.');
+        }
+
+        return $this->scheduler;
+    }
+
     public function cache(): CacheInterface
     {
         if ($this->cache === null) {
@@ -205,6 +218,20 @@ final class PluginContext
         }
 
         QueueHandlerRegistry::register($type, $handler);
+    }
+
+    /** @param array<string,mixed> $payload @param callable(array<string,mixed>): void $handler */
+    public function registerScheduledTask(string $taskId, int $intervalSeconds, callable $handler, array $payload = []): void
+    {
+        if (!$this->hasCapability('scheduler.register') && !$this->hasCapability('cron.register')) {
+            throw new PluginException('Plugin does not declare scheduler.register capability.');
+        }
+        if ($this->scheduler === null) {
+            throw new PluginException('Scheduler service is not available.');
+        }
+
+        SchedulerTaskRegistry::register($taskId, $handler);
+        $this->scheduler->register(new ScheduledTask($taskId, $this->manifest->id, $intervalSeconds, $payload));
     }
 
     public function registerWebhookEvent(string $eventId, string $label, string $version = '1.0'): void

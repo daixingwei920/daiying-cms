@@ -36,6 +36,30 @@ Jobs support:
 
 The queue supports delayed jobs, retry counts, max attempts, owner/plugin tracking, and last error redaction.
 
+## Scheduler
+
+Core scheduler classes:
+
+- `Cms\Core\Scheduler\SchedulerService`
+- `Cms\Core\Scheduler\ScheduledTask`
+- `Cms\Core\Scheduler\SchedulerTaskRegistry`
+
+Scheduled tasks support:
+
+- stable task ids
+- owner/plugin tracking
+- interval seconds
+- payload JSON
+- enabled/disabled state
+- next run and last run timestamps
+- lock window
+- fail count
+- redacted last error
+
+Plugins can register scheduled tasks through
+`PluginContext::registerScheduledTask()` when they declare
+`scheduler.register` or the legacy-compatible `cron.register` capability.
+
 ## Cache
 
 Core cache classes:
@@ -94,14 +118,17 @@ Plugins should access Foundation services through:
 
 ```php
 $context->queue();
+$context->scheduler();
 $context->cache();
 $context->webhooks();
 $context->registerQueueHandler(...);
+$context->registerScheduledTask(...);
 $context->registerWebhookEvent(...);
 ```
 
 Plugins must declare the related capabilities:
 
 - `queue.register`
+- `scheduler.register`
 - `webhook.register`
 - `cache.use`

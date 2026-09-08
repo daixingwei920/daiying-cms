@@ -13,6 +13,7 @@ use Cms\Core\Config\Settings;
 use Cms\Core\Events\EventDispatcher;
 use Cms\Core\Logging\FileLogger;
 use Cms\Core\Queue\QueueService;
+use Cms\Core\Scheduler\SchedulerService;
 use Cms\Core\Webhook\WebhookService;
 use PDO;
 
@@ -241,6 +242,7 @@ final class PluginManager
             new WebhookService($this->pdo, new QueueService($this->pdo)),
             $this->contentTypes(),
             $this->customFields(),
+            new SchedulerService($this->pdo),
         );
 
         $register = require $entry;
