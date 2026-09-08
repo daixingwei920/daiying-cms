@@ -61,6 +61,33 @@ tested through PHP's built-in web server using the real HTTP install flow:
 
 Temporary test data was deleted after the smoke test.
 
+## Local Tagged Upgrade Smoke
+
+Available local and remote tags were checked. The repository currently exposes
+`v1.2.19` and `v1.2.24` tags for the requested historical range. No `1.2.0` or
+`1.2.22` tag was found in the local or origin tag list during this pass.
+
+Two old-version temporary sites were created from exact-commit installer
+packages, installed through the real HTTP `/install` flow, overlaid with the
+local Foundation RC Core update files, and then migrated with the current
+MigrationRunner:
+
+| Source | Commit | Old Install | Migrations Applied | Pointer Health | Foundation Tables |
+| --- | --- | --- | --- | --- | --- |
+| `v1.2.19` | `b9e1bb9fc873fb064e9b9fb6cae5ff5c7f444a07` | PASS | 7 | `1.2.29` PASS | PASS |
+| `v1.2.24` | `02eb142c8dd1e4100b5f15f1784e1a9319c4ff34` | PASS | 7 | `1.2.29` PASS | PASS |
+
+Verified Foundation tables after migration:
+
+- `cms_core_ai_settings`
+- `cms_core_mail_settings`
+- `cms_core_queue_jobs`
+- `cms_core_scheduled_tasks`
+- `cms_content_revisions`
+
+These were local smoke tests. They did not publish to the official update server
+and did not modify production.
+
 ## Upgrade Compatibility Coverage
 
 Implemented migrations are idempotent and provide safe defaults when older sites
@@ -80,10 +107,12 @@ to read new private tables directly.
 The following end-to-end matrix still needs to be run against packaged upgrade
 artifacts before declaring Core Foundation Freeze:
 
-- `1.2.0` empty site -> current
+- `1.2.0` empty site -> current; fixture/tag not available in this pass
 - `1.2.0` site with articles/pages/media -> current
+- `1.2.19` empty-site tagged upgrade smoke -> current: PASS
 - `1.2.19` site with plugins/themes -> current
-- `1.2.22` site with payment configuration -> current
+- `1.2.22` site with payment configuration -> current; fixture/tag not available in this pass
+- `1.2.24` empty-site tagged upgrade smoke -> current: PASS
 - `1.2.24` site with Commerce data -> current
 - current-minus-one site with AI and mail configuration -> current
 - direct multi-version upgrade through the official updater UI
