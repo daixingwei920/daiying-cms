@@ -2,6 +2,16 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.30 - 2026-09-08
+
+- Added AI Foundation V1 as a stable Core foundation layer for site-level AI reuse.
+- Added AI Gateway, provider/model registry, usage ledger, quota policies, queue-backed AI jobs, AI Tool/Agent/Prompt registries, and AI audit records.
+- Published AI API v1 contracts for plugins while preserving the existing global AI settings and encrypted API Key storage.
+- Kept DeepSeek, OpenAI, Grok/xAI, Tencent Hunyuan, and custom providers on the shared OpenAI-compatible adapter; Gemini remains on the native Gemini adapter.
+- Official update server and Marketplace AI Review remain isolated from site AI configuration.
+- Public install package: `daiying-cms-1.2.30-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.30>.
+
 ## 1.2.29 - 2026-09-07
 
 - Reissued the Global AI Core update with the migration manifest narrowed to the new AI settings migration.
