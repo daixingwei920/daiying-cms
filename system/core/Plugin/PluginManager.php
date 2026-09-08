@@ -6,6 +6,8 @@ namespace Cms\Core\Plugin;
 
 use Cms\Core\Ai\AiService;
 use Cms\Core\Cache\FileCache;
+use Cms\Core\Content\ContentTypeRegistry;
+use Cms\Core\Content\CustomFieldRegistry;
 use Cms\Core\Mail\MailService;
 use Cms\Core\Config\Settings;
 use Cms\Core\Events\EventDispatcher;
@@ -16,6 +18,9 @@ use PDO;
 
 final class PluginManager
 {
+    private ?ContentTypeRegistry $contentTypes = null;
+    private ?CustomFieldRegistry $customFields = null;
+
     public function __construct(
         private readonly string $pluginsPath,
         private readonly PDO $pdo,
@@ -234,6 +239,8 @@ final class PluginManager
             new QueueService($this->pdo),
             new FileCache($this->storageRoot() . '/cache/core'),
             new WebhookService($this->pdo, new QueueService($this->pdo)),
+            $this->contentTypes(),
+            $this->customFields(),
         );
 
         $register = require $entry;
@@ -256,6 +263,24 @@ final class PluginManager
     private function storageRoot(): string
     {
         return dirname(dirname($this->pluginsPath)) . '/storage';
+    }
+
+    private function contentTypes(): ContentTypeRegistry
+    {
+        if ($this->contentTypes === null) {
+            $this->contentTypes = ContentTypeRegistry::defaults();
+        }
+
+        return $this->contentTypes;
+    }
+
+    private function customFields(): CustomFieldRegistry
+    {
+        if ($this->customFields === null) {
+            $this->customFields = new CustomFieldRegistry();
+        }
+
+        return $this->customFields;
     }
 
     private function assertManifestTrust(PluginManifest $manifest, bool $trustedOfficial): void

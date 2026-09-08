@@ -9,7 +9,7 @@ use Cms\Core\Media\MediaLibrary;
 
 final class ContentRepository
 {
-    private const STATUSES = ['draft', 'published', 'scheduled', 'archived'];
+    private const STATUSES = ['draft', 'published', 'scheduled', 'archived', 'trash'];
     private const RESERVED_SLUGS = ['install', 'admin', 'login', 'register', 'logout', 'comments', 'health', 'recovery', 'api', 'articles', 'category', 'tag', 'search', 'sitemap.xml', 'robots.txt'];
 
     public function __construct(
@@ -58,6 +58,7 @@ final class ContentRepository
         if ($existing === null) {
             throw new ContentException('Content not found.');
         }
+        (new ContentRevisionRepository($this->pdo))->recordFromContent($existing, null, 'before_update');
         [$slug, $cleanBlocks] = $this->prepareForSave($type, $title, $slug, $blocks, $status, $id);
         $now = gmdate('c');
         $publishedAt = $existing['published_at'] ?? null;
@@ -87,6 +88,35 @@ final class ContentRepository
     }
 
     public function delete(int $id): void
+    {
+        $this->trash($id);
+    }
+
+    public function trash(int $id, ?int $actorId = null): void
+    {
+        $content = $this->find($id);
+        if ($content === null) {
+            throw new ContentException('Content not found.');
+        }
+        (new ContentRevisionRepository($this->pdo))->recordFromContent($content, $actorId, 'before_trash');
+        $this->pdo->prepare("UPDATE cms_contents SET status = 'trash', deleted_at = :deleted_at, updated_at = :updated_at WHERE id = :id")
+            ->execute([':id' => $id, ':deleted_at' => gmdate('c'), ':updated_at' => gmdate('c')]);
+    }
+
+    public function restoreFromTrash(int $id, string $status = 'draft'): void
+    {
+        if (!in_array($status, ['draft', 'published', 'scheduled', 'archived'], true)) {
+            throw new ContentException('Invalid content status.');
+        }
+        $content = $this->find($id);
+        if ($content === null || (string) ($content['status'] ?? '') !== 'trash') {
+            throw new ContentException('Trashed content not found.');
+        }
+        $this->pdo->prepare('UPDATE cms_contents SET status = :status, deleted_at = NULL, updated_at = :updated_at WHERE id = :id')
+            ->execute([':id' => $id, ':status' => $status, ':updated_at' => gmdate('c')]);
+    }
+
+    public function hardDelete(int $id): void
     {
         if ($id <= 0) {
             throw new ContentException('Content not found.');
@@ -151,6 +181,11 @@ final class ContentRepository
     public function adminCount(): int
     {
         return (int) $this->pdo->query('SELECT COUNT(*) FROM cms_contents')->fetchColumn();
+    }
+
+    public function revisionCount(int $id): int
+    {
+        return (new ContentRevisionRepository($this->pdo))->countForContent($id);
     }
 
     /** @return array<string, mixed>|null */

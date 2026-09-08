@@ -23,6 +23,7 @@ This page collects developer entry points for Daiying CMS.
 - [Global AI](ai.md)
 - [Mail Infrastructure](mail-infrastructure.md)
 - [Foundation Services](foundation-services.md)
+- [Content Foundation](content-foundation.md)
 - [Core API Stability](../CORE_API_STABILITY.md)
 - [Storage Provider API v1](../STORAGE_PROVIDER_API_V1.md)
 - [REST API v1](../REST_API_V1.md)
@@ -56,6 +57,7 @@ Current Core runtime requirements are PHP 8.3.0+ with `pdo`, `json`, `openssl`, 
 - Plugins should use `Cms\Core\Ai\AI::forSite()` or `PluginContext::ai()` instead of reading AI configuration tables directly.
 - Plugins should use `PluginContext::mail()` instead of reading mail settings tables or implementing their own SMTP sender.
 - Plugins should use `PluginContext::queue()`, `PluginContext::cache()`, and `PluginContext::webhooks()` for shared infrastructure.
+- Plugins should register content types, custom fields, searchable resources, and SEO extensions through `PluginContext`.
 - Prefer plugin/theme APIs before changing Core.
 - Keep migrations reversible where possible and scoped to owned tables.
 - Document new public routes, capabilities, permissions, and data-retention behavior in manifests.

@@ -6,6 +6,10 @@ namespace Cms\Core\Plugin;
 
 use Cms\Core\Ai\AiService;
 use Cms\Core\Cache\CacheInterface;
+use Cms\Core\Content\ContentTypeRegistry;
+use Cms\Core\Content\CustomFieldDefinition;
+use Cms\Core\Content\CustomFieldRegistry;
+use Cms\Core\Content\SearchResourceRegistry;
 use Cms\Core\Events\EventDispatcher;
 use Cms\Core\Extension\ExtensionAssetController;
 use Cms\Core\Mail\MailEventRegistry;
@@ -16,6 +20,7 @@ use Cms\Core\Media\RemoteMediaProviderInterface;
 use Cms\Core\Media\RemoteMediaProviderRegistry;
 use Cms\Core\Queue\QueueHandlerRegistry;
 use Cms\Core\Queue\QueueService;
+use Cms\Core\Seo\SeoExtensionRegistry;
 use Cms\Core\Webhook\WebhookEventRegistry;
 use Cms\Core\Webhook\WebhookService;
 use PDO;
@@ -37,6 +42,8 @@ final class PluginContext
         private readonly ?QueueService $queue = null,
         private readonly ?CacheInterface $cache = null,
         private readonly ?WebhookService $webhooks = null,
+        private readonly ?ContentTypeRegistry $contentTypes = null,
+        private readonly ?CustomFieldRegistry $customFields = null,
     ) {
     }
 
@@ -207,6 +214,60 @@ final class PluginContext
         }
 
         WebhookEventRegistry::register($eventId, $label, $version, $this->manifest->id);
+    }
+
+    /** @param list<string> $fields @param array<string,mixed> $options */
+    public function registerContentType(string $id, string $name, array $fields, array $options = []): void
+    {
+        if (!$this->hasCapability('content.type')) {
+            throw new PluginException('Plugin does not declare content.type capability.');
+        }
+        if ($this->contentTypes === null) {
+            throw new PluginException('Content type registry is not available.');
+        }
+
+        $this->contentTypes->register($id, $name, $fields, $options + ['owner' => $this->manifest->id]);
+    }
+
+    public function registerCustomField(string $contentType, CustomFieldDefinition $field): void
+    {
+        if (!$this->hasCapability('content.field')) {
+            throw new PluginException('Plugin does not declare content.field capability.');
+        }
+        if ($this->customFields === null) {
+            throw new PluginException('Custom field registry is not available.');
+        }
+
+        $this->customFields->register($contentType, $field);
+    }
+
+    public function registerSearchResource(string $id, string $label): void
+    {
+        if (!$this->hasCapability('search.register')) {
+            throw new PluginException('Plugin does not declare search.register capability.');
+        }
+
+        SearchResourceRegistry::register($id, $label, $this->manifest->id);
+    }
+
+    /** @param callable(array<string,mixed>): array<string,mixed> $provider */
+    public function registerSeoJsonLd(string $id, callable $provider): void
+    {
+        if (!$this->hasCapability('seo.extend')) {
+            throw new PluginException('Plugin does not declare seo.extend capability.');
+        }
+
+        SeoExtensionRegistry::registerJsonLd($id, $provider);
+    }
+
+    /** @param callable(array<string,mixed>): array<string,string> $provider */
+    public function registerSeoMeta(string $id, callable $provider): void
+    {
+        if (!$this->hasCapability('seo.extend')) {
+            throw new PluginException('Plugin does not declare seo.extend capability.');
+        }
+
+        SeoExtensionRegistry::registerMeta($id, $provider);
     }
 
     /** @param list<string> $variables */

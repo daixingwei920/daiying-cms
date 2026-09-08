@@ -21,6 +21,10 @@ final class Capability
         'queue.register',
         'webhook.register',
         'cache.use',
+        'content.type',
+        'content.field',
+        'search.register',
+        'seo.extend',
         'blocks.register',
     ];
 
