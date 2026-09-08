@@ -26,6 +26,8 @@
 - [x] Fresh `1.2.29` installer HTTP smoke with SQLite, `/health`, admin login page, and readiness JSON
 - [x] Tagged `v1.2.19` empty-site local upgrade smoke to current Foundation files
 - [x] Tagged `v1.2.24` empty-site local upgrade smoke to current Foundation files
+- [x] Tagged `v1.2.19` data upgrade smoke with content, taxonomy, media, plugin state, and payment settings
+- [x] Tagged `v1.2.24` data upgrade smoke with content, taxonomy, media, plugin state, and payment settings
 - [ ] Full package/browser upgrade from `1.2.0` empty site to current
 - [ ] Full package/browser upgrade from `1.2.0` content/media site to current
 - [ ] Full package/browser upgrade from `1.2.19` plugin/theme site to current

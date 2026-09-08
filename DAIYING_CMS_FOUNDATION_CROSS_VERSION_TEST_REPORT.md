@@ -88,6 +88,28 @@ Verified Foundation tables after migration:
 These were local smoke tests. They did not publish to the official update server
 and did not modify production.
 
+## Local Tagged Data Upgrade Smoke
+
+The same available historical tags were also tested with seeded legacy data
+before applying current Foundation migrations:
+
+- published article
+- published page
+- category and tag relationships
+- local media record and uploaded file
+- enabled bundled plugin record
+- manual payment provider settings
+
+| Source | Content | Taxonomy | Media | Plugin State | Payment Config | AI/Mail Defaults | Queue/Scheduler Tables |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `v1.2.19` | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+| `v1.2.24` | PASS | PASS | PASS | PASS | PASS | PASS | PASS |
+
+Both temporary upgraded sites returned `/health` version `1.2.29` after the
+local current-release pointer was written. These tests validate migration/data
+persistence behavior, but they are still not a substitute for the final official
+updater UI/browser matrix.
+
 ## Upgrade Compatibility Coverage
 
 Implemented migrations are idempotent and provide safe defaults when older sites
@@ -110,9 +132,11 @@ artifacts before declaring Core Foundation Freeze:
 - `1.2.0` empty site -> current; fixture/tag not available in this pass
 - `1.2.0` site with articles/pages/media -> current
 - `1.2.19` empty-site tagged upgrade smoke -> current: PASS
-- `1.2.19` site with plugins/themes -> current
+- `1.2.19` site with content/media/plugin/payment fixture -> current: PASS
+- `1.2.19` site with plugin/theme browser workflow -> current
 - `1.2.22` site with payment configuration -> current; fixture/tag not available in this pass
 - `1.2.24` empty-site tagged upgrade smoke -> current: PASS
+- `1.2.24` site with content/media/plugin/payment fixture -> current: PASS
 - `1.2.24` site with Commerce data -> current
 - current-minus-one site with AI and mail configuration -> current
 - direct multi-version upgrade through the official updater UI
