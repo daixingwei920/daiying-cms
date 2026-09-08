@@ -9,7 +9,7 @@ No production site was modified. No official update-server package was published
 ## Baseline
 
 - Current Core version: `1.2.29`
-- Current implementation commit before this report: `a95e78d`
+- Current implementation commit: `ef8562d6396df28655cd7fbe2fe62ad12cda9c52`
 - Required migration floor for official packages: `1.2.0`
 - Required hard minimum version for official packages: `1.2.0`
 - PHP minimum: `8.3.0`
@@ -30,6 +30,21 @@ The following local tests passed during Foundation implementation:
 - `php tests/foundation_boundary_contract.php`
 - `php tests/commerce_v1_contract.php`
 - `php tests/baidu_storage_provider_contract.php`
+
+## Local Package Verification
+
+Built local-only Foundation RC artifacts from exact commit
+`ef8562d6396df28655cd7fbe2fe62ad12cda9c52`:
+
+- Installer ZIP SHA-256: `43e317e748da9d71eee5d539e1961fbd775e7baac85511ddf4d4af6f7778e194`
+- Update ZIP SHA-256: `f04f8a41f4c3c5ddaf3d073454a44a8ebeb8ffd57ec7cfc09f14a68777fb1ea4`
+- `php scripts/release_parity_gate.php --commit=HEAD --installer-zip=... --update-zip=... --update-metadata=...`: PASS
+
+The update metadata retained:
+
+- `min_upgrade_from`: `1.2.0`
+- `hard_min_version`: `1.2.0`
+- `migration_floor`: `1.2.0`
 
 ## Upgrade Compatibility Coverage
 

@@ -3,7 +3,7 @@
 ## Baseline
 
 - Core version: `1.2.29`
-- Current implementation commit before this report: `a95e78d`
+- Current implementation commit: `ef8562d6396df28655cd7fbe2fe62ad12cda9c52`
 - PHP minimum: `8.3.0`
 - Database targets: SQLite and MySQL-compatible PDO deployments
 - Public API versions: Core `1.0`, Plugin `1.0`, Theme `1.0`, Storage `1.0`, REST `1.0`, Update Protocol `1.0`
@@ -94,3 +94,14 @@ Expanded REST API v1 to provide public reads and protected administrator write o
 
 Foundation is substantially implemented, but final Foundation Freeze should wait
 for the remaining full cross-version package/browser upgrade matrix.
+
+## Local RC Artifacts
+
+Local-only Foundation RC artifacts were built from the exact commit above. They
+were not published to the official update server.
+
+- Installer ZIP: `outputs/foundation-rc-ef8562d6396d/installer/daiying-cms-1.2.29-foundation-rc-exact-ef8562d6396d.zip`
+- Installer SHA-256: `43e317e748da9d71eee5d539e1961fbd775e7baac85511ddf4d4af6f7778e194`
+- Update ZIP: `outputs/foundation-rc-ef8562d6396d/update/daiying-cms-core-update-1.2.29-foundation-rc-exact-ef8562d6396d.zip`
+- Update SHA-256: `f04f8a41f4c3c5ddaf3d073454a44a8ebeb8ffd57ec7cfc09f14a68777fb1ea4`
+- Release parity gate: PASS
