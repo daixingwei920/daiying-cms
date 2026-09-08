@@ -26,6 +26,7 @@ This index collects the public-facing documentation currently available in the G
 - [Foundation Services](foundation-services.md)
 - [Core API Stability](../CORE_API_STABILITY.md)
 - [Storage Provider API v1](../STORAGE_PROVIDER_API_V1.md)
+- [REST API v1](../REST_API_V1.md)
 - [Examples](../examples/README.md)
 
 ## Commerce

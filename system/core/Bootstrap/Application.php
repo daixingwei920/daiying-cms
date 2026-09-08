@@ -41,6 +41,7 @@ use Cms\Core\Payment\PaymentWebhookController;
 use Cms\Core\Payment\TipController;
 use Cms\Core\Recovery\RecoveryController;
 use Cms\Core\Recovery\RunMode;
+use Cms\Core\Rest\ApiV1Controller;
 use Cms\Core\Routing\Router;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Security\SessionManager;
@@ -265,6 +266,19 @@ final class Application
                 'installed' => is_file($rootPath . '/storage/installed.lock'),
             ]);
         });
+
+        $apiV1 = new ApiV1Controller($settings, $rootPath);
+        $router->get('/api/v1', [$apiV1, 'index']);
+        $router->get('/api/v1/contents', [$apiV1, 'contents']);
+        $router->post('/api/v1/contents', [$apiV1, 'contents']);
+        $router->patch('/api/v1/contents', [$apiV1, 'contents']);
+        $router->delete('/api/v1/contents', [$apiV1, 'contents']);
+        $router->get('/api/v1/pages', [$apiV1, 'contents']);
+        $router->get('/api/v1/categories', [$apiV1, 'categories']);
+        $router->get('/api/v1/tags', [$apiV1, 'tags']);
+        $router->get('/api/v1/media', [$apiV1, 'media']);
+        $router->post('/api/v1/media', [$apiV1, 'media']);
+        $router->get('/api/v1/settings', [$apiV1, 'settings']);
 
         $assets = new ExtensionAssetController($rootPath);
         $router->get('/extension-assets/{type}/{id}', [$assets, 'show']);
