@@ -17,7 +17,7 @@ final class ThemeRuntime
     /** @param array<string, mixed> $data */
     public function render(string $template, array $data = []): string
     {
-        $templateFile = $this->path . '/templates/' . $template . '.php';
+        $templateFile = $this->templateFile($template);
         if (!is_file($templateFile)) {
             throw new ThemeException('Template not found: ' . $template);
         }
@@ -36,5 +36,15 @@ final class ThemeRuntime
             ob_end_clean();
             throw $exception;
         }
+    }
+
+    private function templateFile(string $template): string
+    {
+        $template = ThemeViewModel::cleanRelativePath($template);
+        if ($template === '' || str_ends_with($template, '.php')) {
+            throw new ThemeException('Invalid template name.');
+        }
+
+        return $this->path . '/templates/' . $template . '.php';
     }
 }

@@ -151,6 +151,22 @@ final class PublicApiRegistry
                 'capabilities' => ['theme.render'],
             ],
             [
+                'id' => 'theme.template_context',
+                'version' => FoundationVersions::THEME_API,
+                'class' => 'Cms\\Core\\Theme\\TemplateContext',
+                'stability' => 'stable',
+                'summary' => 'Expose stable theme settings, assets, menus, media view models, SEO data, pagination and breadcrumbs to templates.',
+                'capabilities' => ['theme.render'],
+            ],
+            [
+                'id' => 'theme.view_model',
+                'version' => FoundationVersions::THEME_API,
+                'class' => 'Cms\\Core\\Theme\\ThemeViewModel',
+                'stability' => 'stable',
+                'summary' => 'Normalize Core content, media, menu and pagination data for themes without exposing private table shapes.',
+                'capabilities' => ['theme.render'],
+            ],
+            [
                 'id' => 'market.client',
                 'version' => self::CONTRACT_VERSION,
                 'class' => 'Cms\\Core\\Market\\MarketPackageInstaller',

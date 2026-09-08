@@ -20,6 +20,7 @@ This page collects developer entry points for Daiying CMS.
 
 - [Plugin Development](plugins.md)
 - [Theme Development](themes.md)
+- [Theme API v1](../THEME_API_V1.md)
 - [Global AI](ai.md)
 - [Mail Infrastructure](mail-infrastructure.md)
 - [Foundation Services](foundation-services.md)

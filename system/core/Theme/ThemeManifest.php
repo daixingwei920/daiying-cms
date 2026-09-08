@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cms\Core\Theme;
 
+use Cms\Core\Foundation\FoundationVersions;
+
 final class ThemeManifest
 {
     /** @param list<string> $contentTypes @param list<string> $recommendedPlugins @param list<string> $requiredPlugins @param array<string, mixed> $settingsSchema */
@@ -18,6 +20,7 @@ final class ThemeManifest
         public readonly array $recommendedPlugins,
         public readonly array $requiredPlugins,
         public readonly array $settingsSchema,
+        public readonly string $apiVersion = FoundationVersions::THEME_API,
     ) {
     }
 
@@ -67,6 +70,7 @@ final class ThemeManifest
             self::cleanList($recommendedPlugins),
             self::cleanList($requiredPlugins),
             $settingsSchema,
+            (string) ($data['theme_api'] ?? FoundationVersions::THEME_API),
         );
     }
 

@@ -21,6 +21,7 @@ This index collects the public-facing documentation currently available in the G
 - [Developers](developers.md)
 - [Plugins](plugins.md)
 - [Themes](themes.md)
+- [Theme API v1](../THEME_API_V1.md)
 - [Global AI](ai.md)
 - [Mail Infrastructure](mail-infrastructure.md)
 - [Foundation Services](foundation-services.md)

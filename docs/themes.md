@@ -2,6 +2,9 @@
 
 Daiying CMS supports independent themes under `content/themes`.
 
+The stable theme developer contract is documented in
+[`THEME_API_V1.md`](../THEME_API_V1.md).
+
 ## Current Bundled Themes
 
 | Theme ID | Version | Content Types | Notes |
@@ -29,6 +32,7 @@ Themes use `theme.json`. Current manifests may include:
 - `package_type`
 - `market_release`
 - `settings_schema`
+- `theme_api`
 
 ## Theme Behavior
 
@@ -39,6 +43,8 @@ Core theme infrastructure includes:
 - Settings isolation.
 - Safe-theme fallback.
 - Template context rendering.
+- Stable TemplateContext helpers for assets, menus, media view models, SEO data,
+  pagination, and breadcrumbs.
 - Theme package installation.
 
 ## Installation
