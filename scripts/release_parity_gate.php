@@ -412,15 +412,10 @@ function isAllowedUpdatePath(string $path): bool
     return in_array($path, [
         'README.md',
         'CMS_RELEASE_ENVIRONMENT_DEPLOYMENT_CHECKLIST.md',
-        'system/official-plugins.php',
         'scripts/diagnose_payment_providers.php',
         'scripts/publish_scheduled_content.php',
         'scripts/validate_production_readiness.php',
         'scripts/verify_release_audit_counts.php',
-        'scripts/verify_release_artifacts.php',
-        'scripts/build_exact_commit_installer.php',
-        'scripts/build_exact_commit_update_package.php',
-        'scripts/release_parity_gate.php',
     ], true);
 }
 

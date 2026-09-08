@@ -65,10 +65,8 @@ foreach (gitLines($root, ['ls-tree', '-r', '--name-only', $commit]) as $file) {
     }
 }
 ksort($files, SORT_STRING);
-foreach (['system/core-manifest.json', 'system/official-plugins.php'] as $required) {
-    if (!isset($files[$required])) {
-        fail('Required update file is missing from target commit: ' . $required);
-    }
+if (!isset($files['system/core-manifest.json'])) {
+    fail('Required update file is missing from target commit: system/core-manifest.json');
 }
 
 $expectedCoreManifest = buildCoreManifest($root, $commit);
@@ -233,15 +231,10 @@ function isAllowedUpdatePath(string $path): bool
     return in_array($path, [
         'README.md',
         'CMS_RELEASE_ENVIRONMENT_DEPLOYMENT_CHECKLIST.md',
-        'system/official-plugins.php',
         'scripts/diagnose_payment_providers.php',
         'scripts/publish_scheduled_content.php',
         'scripts/validate_production_readiness.php',
         'scripts/verify_release_audit_counts.php',
-        'scripts/verify_release_artifacts.php',
-        'scripts/build_exact_commit_installer.php',
-        'scripts/build_exact_commit_update_package.php',
-        'scripts/release_parity_gate.php',
     ], true);
 }
 

@@ -31,7 +31,7 @@ return new class implements MigrationInterface {
             )'
         );
 
-        $pdo->exec('CREATE UNIQUE INDEX cms_contents_type_slug_unique ON cms_contents (content_type, slug)');
+        $this->createIndexIfMissing($pdo, 'cms_contents_type_slug_unique', 'cms_contents', 'CREATE UNIQUE INDEX cms_contents_type_slug_unique ON cms_contents (content_type, slug)');
 
         $pdo->exec(
             'CREATE TABLE IF NOT EXISTS cms_terms (
@@ -44,7 +44,7 @@ return new class implements MigrationInterface {
             )'
         );
 
-        $pdo->exec('CREATE UNIQUE INDEX cms_terms_taxonomy_slug_unique ON cms_terms (taxonomy, slug)');
+        $this->createIndexIfMissing($pdo, 'cms_terms_taxonomy_slug_unique', 'cms_terms', 'CREATE UNIQUE INDEX cms_terms_taxonomy_slug_unique ON cms_terms (taxonomy, slug)');
 
         $pdo->exec(
             'CREATE TABLE IF NOT EXISTS cms_content_terms (
@@ -71,6 +71,39 @@ return new class implements MigrationInterface {
             )'
         );
 
-        $pdo->exec('CREATE UNIQUE INDEX cms_media_hash_unique ON cms_media (sha256_hash)');
+        $this->createIndexIfMissing($pdo, 'cms_media_hash_unique', 'cms_media', 'CREATE UNIQUE INDEX cms_media_hash_unique ON cms_media (sha256_hash)');
+    }
+
+    private function createIndexIfMissing(\PDO $pdo, string $name, string $table, string $sql): void
+    {
+        if ($this->indexExists($pdo, $name, $table)) {
+            return;
+        }
+
+        $pdo->exec($sql);
+    }
+
+    private function indexExists(\PDO $pdo, string $name, string $table): bool
+    {
+        $driver = (string) $pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'sqlite') {
+            $stmt = $pdo->query('PRAGMA index_list(' . $table . ')');
+            foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+                if ((string) ($row['name'] ?? '') === $name) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        $stmt = $pdo->query('SHOW INDEX FROM ' . $table);
+        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+            if ((string) ($row['Key_name'] ?? '') === $name) {
+                return true;
+            }
+        }
+
+        return false;
     }
 };
