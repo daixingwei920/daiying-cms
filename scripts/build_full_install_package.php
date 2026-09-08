@@ -239,6 +239,7 @@ function isForbiddenEntry(string $path): bool
         || str_starts_with($path, 'storage/sessions/')
         || str_starts_with($path, 'storage/cache/')
         || str_starts_with($path, 'updates.daiyinggame.com/')
+        || str_starts_with($path, 'updates.daiyingcms.com/')
         || preg_match('#(^|/)(\.env|config\.php|id_rsa|id_ed25519|known_hosts)$#', $path) === 1;
 }
 
