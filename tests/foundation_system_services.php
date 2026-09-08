@@ -113,6 +113,12 @@ $logger = new FileLogger($logPath);
 $logger->error('secret=sk_live_123456789 password=hunter2', ['api_key' => 'sk_live_abcdefg', 'nested' => ['refresh_token' => 'refresh-secret']]);
 $log = (string) file_get_contents($logPath);
 $check(!str_contains($log, 'hunter2') && !str_contains($log, 'sk_live_abcdefg') && !str_contains($log, 'refresh-secret'), 'FileLogger uses central secret redaction');
+$rotatingLogger = new FileLogger($logPath, 1024, 2);
+file_put_contents($logPath, str_repeat('x', 1500));
+$check($rotatingLogger->rotateIfNeeded() && is_file($logPath . '.1'), 'FileLogger rotates oversized logs');
+file_put_contents($logPath . '.2', 'old');
+touch($logPath . '.2', time() - 86400 * 40);
+$check($rotatingLogger->cleanup(30) === 1 && !is_file($logPath . '.2'), 'FileLogger cleans old archived logs');
 $redacted = SecretRedactor::redact(['Authorization' => 'Bearer abc.def.ghi', 'safe' => 'ok']);
 $check(($redacted['Authorization'] ?? '') === '[redacted]' && ($redacted['safe'] ?? '') === 'ok', 'SecretRedactor handles authorization-like keys');
 
@@ -150,5 +156,6 @@ $check(PublicApiRegistry::contract('scheduler.service')['version'] === '1.0', 's
 $check(PublicApiRegistry::contract('cache.service')['version'] === '1.0', 'cache service is registered as public API');
 $check(PublicApiRegistry::contract('webhook.service')['version'] === '1.0', 'webhook service is registered as public API');
 $check(PublicApiRegistry::contract('role.capabilities')['version'] === '1.0', 'role capability service is registered as public API');
+$check(PublicApiRegistry::contract('logging.file')['version'] === '1.0', 'file logger is registered as public API');
 
 echo "Foundation system services tests PASS\n";

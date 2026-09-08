@@ -135,6 +135,14 @@ final class PublicApiRegistry
                 'capabilities' => ['users.manage'],
             ],
             [
+                'id' => 'logging.file',
+                'version' => self::CONTRACT_VERSION,
+                'class' => 'Cms\\Core\\Logging\\FileLogger',
+                'stability' => 'stable',
+                'summary' => 'Write redacted structured logs with size rotation and retention cleanup.',
+                'capabilities' => ['core.logging'],
+            ],
+            [
                 'id' => 'payment.service',
                 'version' => self::CONTRACT_VERSION,
                 'class' => 'Cms\\Core\\Payment\\PaymentService',

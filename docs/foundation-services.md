@@ -112,6 +112,23 @@ Cms\Core\Security\SecretRedactor
 
 It is used by logging and queue failure handling to avoid leaking passwords, API keys, authorization headers, tokens, cookies, and signing secrets.
 
+## Logging
+
+Core exposes `Cms\Core\Logging\FileLogger` as the stable file logging adapter.
+
+It provides:
+
+- structured JSON lines
+- central secret redaction
+- path redaction
+- message length guard
+- size-based rotation
+- archived log cleanup
+
+Plugins should log through Core-owned services where possible and must not write
+raw credentials, tokens, cookies, payment secrets, or OAuth tokens into their own
+logs.
+
 ## PluginContext
 
 Plugins should access Foundation services through:
