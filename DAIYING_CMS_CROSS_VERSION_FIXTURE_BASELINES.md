@@ -66,4 +66,27 @@ The matrix can now add real baselines for:
 - `1.2.22` integrity-valid fixture
 - `1.2.22-raw` provenance reference for the original manifest mismatch
 
-The actual upgrade tests from these fixtures to the current latest Core should be run as the next step before marking the full matrix complete.
+## Local Upgrade Smoke to 1.2.30
+
+A local RSA-signed update package was generated for old updater compatibility:
+
+- ZIP: `outputs/cross-version-fixtures-20260908/update-1.2.30-rsa-local-test/daiying-cms-core-update-1.2.30-stable-exact-0d6252c44918.zip`
+- SHA-256: `6319434fae1ac82dff50ef44b1ca0a4aec6334ff45108025fae62e898b554edd`
+- Signature algorithm: `rsa-sha256`
+- Scope: local smoke test only, not an official update server package
+- Metadata floor fields: `min_upgrade_from=1.2.0`, `hard_min_version=1.2.0`, `migration_floor=1.2.0`
+
+Test command:
+
+```bash
+php tests/cross_version_fixture_upgrade.php
+```
+
+Results:
+
+- `1.2.0` fixture -> `1.2.30`: PASS through old `UpdateService::execute()`
+- `1.2.22` fixture -> `1.2.30`: PASS through old `UpdateService::execute()`
+
+The smoke verifies the old updater can complete the Core update, write the `1.2.30` release pointer, and create Foundation/AI tables including `cms_core_queue_jobs`, `cms_ai_jobs`, `cms_ai_usage_ledger`, and `cms_ai_prompts`.
+
+The broader matrix still needs browser/UI verification and data-rich fixtures before the full cross-version checklist is marked complete.

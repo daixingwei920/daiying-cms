@@ -9,6 +9,7 @@ This changelog summarizes public GitHub release information. Detailed engineerin
 - Published AI API v1 contracts for plugins while preserving the existing global AI settings and encrypted API Key storage.
 - Kept DeepSeek, OpenAI, Grok/xAI, Tencent Hunyuan, and custom providers on the shared OpenAI-compatible adapter; Gemini remains on the native Gemini adapter.
 - Official update server and Marketplace AI Review remain isolated from site AI configuration.
+- Added cross-version fixtures for `1.2.0` and `1.2.22`, plus RSA-compatible local update package support for old updater smoke tests.
 - Public install package: `daiying-cms-1.2.30-stable.zip`.
 - Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.30>.
 

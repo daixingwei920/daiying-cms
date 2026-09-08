@@ -26,6 +26,9 @@ $options = getopt('', [
     'release-id::',
     'min-upgrade-from::',
     'key-id::',
+    'signature-algorithm::',
+    'rsa-private-file::',
+    'rsa-private-pem::',
     'ed25519-secret-base64::',
     'ed25519-secret-file::',
 ]);
@@ -45,8 +48,11 @@ if (!preg_match('/^[A-Za-z0-9._:-]{2,191}$/', $releaseId)) {
     fail('Invalid release id: ' . $releaseId);
 }
 $keyId = trim((string) ($options['key-id'] ?? 'foundation-rc-ed25519'));
-$secret = signingSecret($options);
-$public = sodium_crypto_sign_publickey_from_secretkey($secret);
+$signatureAlgorithm = trim((string) ($options['signature-algorithm'] ?? 'ed25519'));
+if (!in_array($signatureAlgorithm, ['ed25519', 'rsa-sha256'], true)) {
+    fail('Unsupported signature algorithm: ' . $signatureAlgorithm);
+}
+$signer = signingMaterial($options, $signatureAlgorithm);
 
 $outputDir = rtrim((string) ($options['output-dir'] ?? ($root . '/outputs/core-update-' . $version . '-exact')), '/');
 if (!is_dir($outputDir) && !mkdir($outputDir, 0755, true) && !is_dir($outputDir)) {
@@ -104,7 +110,7 @@ $update = [
         'core_pointer' => true,
         'operational_support_files' => true,
     ],
-    'signature_algorithm' => 'ed25519',
+    'signature_algorithm' => $signatureAlgorithm,
     'key_id' => $keyId,
     'security_update' => false,
     'features' => ['foundation_release_parity'],
@@ -116,7 +122,7 @@ $updateJson = json_encode($update, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | 
 if (!is_string($updateJson)) {
     fail('Unable to encode update.json.');
 }
-$signature = sodium_crypto_sign_detached($updateJson, $secret);
+$signature = signPayload($updateJson, $signer, $signatureAlgorithm);
 
 $zip = new ZipArchive();
 if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
@@ -147,9 +153,9 @@ $metadata = [
     'migration_floor' => $minUpgradeFrom,
     'required_migrations' => $requiredMigrations,
     'changed_files' => array_keys($files),
-    'signature_algorithm' => 'ed25519',
+    'signature_algorithm' => $signatureAlgorithm,
     'key_id' => $keyId,
-    'public_key' => base64_encode($public),
+    'public_key' => $signer['public_key'],
     'is_current_candidate' => false,
     'created_at' => gmdate('c'),
 ];
@@ -169,6 +175,36 @@ echo "Metadata: {$metadataPath}\n";
 echo "Changed files: " . count($files) . "\n";
 echo "Required migrations: " . count($requiredMigrations) . "\n";
 
+/** @return array{secret:string,public_key:string} */
+function signingMaterial(array $options, string $algorithm): array
+{
+    if ($algorithm === 'rsa-sha256') {
+        $private = trim((string) ($options['rsa-private-pem'] ?? ''));
+        $file = trim((string) ($options['rsa-private-file'] ?? ''));
+        if ($private === '' && $file !== '') {
+            $private = (string) file_get_contents($file);
+        }
+        if ($private === '') {
+            $private = (string) getenv('DAIYING_UPDATE_RSA_PRIVATE_PEM');
+        }
+        $key = openssl_pkey_get_private($private);
+        if ($key === false) {
+            fail('A valid RSA private key is required via --rsa-private-pem, --rsa-private-file, or DAIYING_UPDATE_RSA_PRIVATE_PEM.');
+        }
+        $details = openssl_pkey_get_details($key);
+        $public = is_array($details) ? (string) ($details['key'] ?? '') : '';
+        if ($public === '' || !str_contains($public, 'BEGIN PUBLIC KEY')) {
+            fail('Unable to derive RSA public key from private key.');
+        }
+
+        return ['secret' => $private, 'public_key' => $public];
+    }
+
+    $secret = signingSecret($options);
+
+    return ['secret' => $secret, 'public_key' => base64_encode(sodium_crypto_sign_publickey_from_secretkey($secret))];
+}
+
 function signingSecret(array $options): string
 {
     $encoded = trim((string) ($options['ed25519-secret-base64'] ?? ''));
@@ -185,6 +221,21 @@ function signingSecret(array $options): string
     }
 
     return $secret;
+}
+
+/** @param array{secret:string,public_key:string} $signer */
+function signPayload(string $payload, array $signer, string $algorithm): string
+{
+    if ($algorithm === 'rsa-sha256') {
+        $signature = '';
+        if (!openssl_sign($payload, $signature, $signer['secret'], OPENSSL_ALGO_SHA256)) {
+            fail('Unable to sign update package with RSA private key.');
+        }
+
+        return $signature;
+    }
+
+    return sodium_crypto_sign_detached($payload, $signer['secret']);
 }
 
 function resolveCommit(string $root, string $rev): string
