@@ -22,6 +22,8 @@ This page collects developer entry points for Daiying CMS.
 - [Theme Development](themes.md)
 - [Global AI](ai.md)
 - [Mail Infrastructure](mail-infrastructure.md)
+- [Core API Stability](../CORE_API_STABILITY.md)
+- [Storage Provider API v1](../STORAGE_PROVIDER_API_V1.md)
 - [Commerce Extension](commerce.md)
 - [Distribution In Development](distribution.md)
 
@@ -32,6 +34,15 @@ This page collects developer entry points for Daiying CMS.
 - `php scripts/publish_scheduled_content.php`
 - `php scripts/build_full_install_package.php --version=1.2.29`
 - `php scripts/verify_release_artifacts.php`
+
+## Public API Versions
+
+- Core API: `1.0`
+- Plugin API: `1.0`
+- Theme API: `1.0`
+- Storage Provider API: `1.0`
+- REST API: `1.0`
+- Update Protocol: `1.0`
 
 ## Compatibility
 

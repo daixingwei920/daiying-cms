@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Cms\Core\Support;
 
+use Cms\Core\Foundation\FoundationVersions;
+
 final class PublicApiRegistry
 {
-    public const CONTRACT_VERSION = '1.2.0';
+    public const CONTRACT_VERSION = FoundationVersions::CORE_API;
 
     /** @return list<array{id:string,version:string,class:string,stability:string,summary:string,capabilities:list<string>}> */
     public static function contracts(): array
@@ -27,6 +29,30 @@ final class PublicApiRegistry
                 'stability' => 'stable',
                 'summary' => 'Register, deduplicate, read and localize managed media records.',
                 'capabilities' => ['media.read', 'media.write'],
+            ],
+            [
+                'id' => 'storage.provider',
+                'version' => FoundationVersions::STORAGE_API,
+                'class' => 'Cms\\Core\\Media\\MediaStorageProviderV1Interface',
+                'stability' => 'stable',
+                'summary' => 'Provide versioned media storage capabilities for upload, read, delete, metadata, URL and stream operations.',
+                'capabilities' => ['storage.plugin', 'media.read', 'media.write'],
+            ],
+            [
+                'id' => 'remote.media.provider',
+                'version' => FoundationVersions::STORAGE_API,
+                'class' => 'Cms\\Core\\Media\\RemoteMediaProviderV1Interface',
+                'stability' => 'stable',
+                'summary' => 'Expose external media providers through a versioned provider contract with health and capability metadata.',
+                'capabilities' => ['storage.plugin', 'network.external'],
+            ],
+            [
+                'id' => 'mail.service',
+                'version' => self::CONTRACT_VERSION,
+                'class' => 'Cms\\Core\\Mail\\MailService',
+                'stability' => 'stable',
+                'summary' => 'Send, template, queue and test site mail through registered mail providers.',
+                'capabilities' => ['mail.provider', 'mail.event'],
             ],
             [
                 'id' => 'payment.service',
@@ -90,5 +116,11 @@ final class PublicApiRegistry
     public static function ids(): array
     {
         return array_map(static fn (array $contract): string => $contract['id'], self::contracts());
+    }
+
+    /** @return array<string,string> */
+    public static function versions(): array
+    {
+        return FoundationVersions::all();
     }
 }

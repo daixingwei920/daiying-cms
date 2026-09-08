@@ -16,6 +16,8 @@ final class Capability
         'settings.read',
         'settings.write',
         'storage.plugin',
+        'mail.provider',
+        'mail.event',
         'blocks.register',
     ];
 

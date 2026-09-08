@@ -626,15 +626,7 @@ final class MediaLibrary
         if ($provider === null) {
             return false;
         }
-        if (!method_exists($provider, 'available')) {
-            return true;
-        }
-
-        try {
-            return (bool) $provider->available();
-        } catch (Throwable) {
-            return false;
-        }
+        return RemoteMediaProviderRegistry::available($provider);
     }
 
     private function isStorageKeyUsed(string $storageKey): bool

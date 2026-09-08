@@ -11,6 +11,8 @@ use Cms\Core\Mail\MailEventRegistry;
 use Cms\Core\Mail\MailProviderInterface;
 use Cms\Core\Mail\MailProviderRegistry;
 use Cms\Core\Mail\MailService;
+use Cms\Core\Media\RemoteMediaProviderInterface;
+use Cms\Core\Media\RemoteMediaProviderRegistry;
 use PDO;
 
 final class PluginContext
@@ -142,6 +144,15 @@ final class PluginContext
         }
 
         MailProviderRegistry::register($provider);
+    }
+
+    public function registerRemoteMediaProvider(RemoteMediaProviderInterface $provider): void
+    {
+        if (!$this->hasCapability('storage.plugin')) {
+            throw new PluginException('Plugin does not declare storage.plugin capability.');
+        }
+
+        RemoteMediaProviderRegistry::register($provider);
     }
 
     /** @param list<string> $variables */

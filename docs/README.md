@@ -23,6 +23,8 @@ This index collects the public-facing documentation currently available in the G
 - [Themes](themes.md)
 - [Global AI](ai.md)
 - [Mail Infrastructure](mail-infrastructure.md)
+- [Core API Stability](../CORE_API_STABILITY.md)
+- [Storage Provider API v1](../STORAGE_PROVIDER_API_V1.md)
 - [Examples](../examples/README.md)
 
 ## Commerce
