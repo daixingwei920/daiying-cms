@@ -2,6 +2,13 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.29 - 2026-09-07
+
+- Reissued the Global AI Core update with the migration manifest narrowed to the new AI settings migration.
+- Keeps the complete Core file payload for cross-version file completeness while avoiding legacy migration replays on existing sites.
+- Public install package: `daiying-cms-1.2.29-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.29>.
+
 ## 1.2.28 - 2026-09-07
 
 - Added site-level Global AI Provider settings for CMS and plugin reuse.
