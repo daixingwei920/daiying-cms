@@ -51,8 +51,16 @@ final class Request
     {
         $method = strtoupper($method);
         $contentType = strtolower($contentType);
-        if ($post !== [] || !in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true) || ($contentType !== '' && !str_contains($contentType, 'application/x-www-form-urlencoded'))) {
+        if ($post !== [] || !in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
             return $post;
+        }
+        if ($contentType !== '' && str_contains($contentType, 'application/json')) {
+            $decoded = json_decode($rawBody, true);
+
+            return is_array($decoded) ? $decoded : [];
+        }
+        if ($contentType !== '' && !str_contains($contentType, 'application/x-www-form-urlencoded')) {
+            return [];
         }
 
         parse_str($rawBody, $parsed);

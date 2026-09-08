@@ -8,21 +8,42 @@ Daiying CMS exposes a versioned REST namespace at:
 
 ## Current Status
 
-REST API v1 currently provides public read endpoints and a protected settings endpoint. Write endpoints are reserved behind the v1 contract and return a clear not-implemented response until the permission and write-contract work is complete.
+REST API v1 provides public read endpoints plus protected administrator write
+operations for Core content and taxonomy resources. Media upload remains
+explicitly reserved until the binary upload contract is finalized.
 
 ## Endpoints
 
 - `GET /api/v1`
 - `GET /api/v1/contents?type=article&page=1&per_page=10`
+- `GET /api/v1/contents/{id}`
+- `POST /api/v1/contents`
+- `PATCH /api/v1/contents/{id}`
+- `DELETE /api/v1/contents/{id}`
 - `GET /api/v1/pages?page=1&per_page=10`
+- `POST /api/v1/pages`
+- `PATCH /api/v1/pages/{id}`
+- `DELETE /api/v1/pages/{id}`
 - `GET /api/v1/categories`
+- `POST /api/v1/categories`
+- `PATCH /api/v1/categories/{id}`
+- `DELETE /api/v1/categories/{id}`
 - `GET /api/v1/tags`
+- `POST /api/v1/tags`
+- `PATCH /api/v1/tags/{id}`
+- `DELETE /api/v1/tags/{id}`
 - `GET /api/v1/media?type=image&page=1&per_page=20`
+- `POST /api/v1/media` returns `not_implemented` until media upload v1 is finalized.
+- `GET /api/v1/comments`
+- `PATCH /api/v1/comments/{id}`
+- `DELETE /api/v1/comments/{id}`
+- `GET /api/v1/users`
 - `GET /api/v1/settings`
 
 ## Authentication
 
 Public content, taxonomy, and media list endpoints are anonymous read endpoints.
+Single content reads are anonymous only for published content.
 
 Admin endpoints require either:
 
@@ -30,6 +51,36 @@ Admin endpoints require either:
 - `Authorization: Bearer <token>` where `hash('sha256', token)` matches `api.admin_token_sha256` or `api.tokens.admin_sha256` in site configuration.
 
 Raw API tokens must not be committed or logged.
+
+## Write Contract
+
+Protected content writes use the existing Core `ContentRepository` validation and
+therefore preserve slug checks, block sanitization, media reference validation,
+scheduled publishing fields, revisions, and trash semantics.
+
+Supported body fields:
+
+- `type` or `content_type`
+- `title`
+- `slug`
+- `status`
+- `blocks`
+- `meta`
+- `categories`
+- `tags`
+
+`DELETE` moves content to trash by default. Explicit permanent deletion requires
+`hard_delete=true`.
+
+Protected taxonomy writes accept:
+
+- `name`
+- `slug`
+
+Protected comment writes currently support status moderation and deletion.
+
+`GET /api/v1/users` returns administrator and front-user identity summaries with
+redacted email addresses and never includes password hashes.
 
 ## Response Shape
 
