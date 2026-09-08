@@ -46,6 +46,21 @@ The update metadata retained:
 - `hard_min_version`: `1.2.0`
 - `migration_floor`: `1.2.0`
 
+## Local Fresh Install Smoke
+
+The exact-commit installer ZIP was extracted into a temporary directory and
+tested through PHP's built-in web server using the real HTTP install flow:
+
+- `GET /install`: PASS
+- CSRF token extraction: PASS
+- `POST /install` with SQLite database settings: PASS
+- Redirect to `/admin/login`: PASS
+- `GET /health`: PASS, version `1.2.29`
+- `GET /admin/login`: PASS
+- `php scripts/validate_production_readiness.php --json`: completed and returned 68 checks
+
+Temporary test data was deleted after the smoke test.
+
 ## Upgrade Compatibility Coverage
 
 Implemented migrations are idempotent and provide safe defaults when older sites

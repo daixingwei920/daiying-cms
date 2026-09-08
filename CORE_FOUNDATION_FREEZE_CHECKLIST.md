@@ -23,6 +23,7 @@
 
 ## Freeze Blockers
 
+- [x] Fresh `1.2.29` installer HTTP smoke with SQLite, `/health`, admin login page, and readiness JSON
 - [ ] Full package/browser upgrade from `1.2.0` empty site to current
 - [ ] Full package/browser upgrade from `1.2.0` content/media site to current
 - [ ] Full package/browser upgrade from `1.2.19` plugin/theme site to current
