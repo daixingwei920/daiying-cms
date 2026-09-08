@@ -13,6 +13,7 @@ This index collects the public-facing documentation currently available in the G
 - Content management is available through the admin backend after installation.
 - Media library capabilities are part of Core and can be extended by storage plugins.
 - Site-level AI Provider settings are available through [Global AI](ai.md).
+- Site-level mail delivery and notification foundations are available through [Mail Infrastructure](mail-infrastructure.md).
 - Scheduled publishing can be run with `php scripts/publish_scheduled_content.php`.
 
 ## Developer Guide
@@ -21,6 +22,7 @@ This index collects the public-facing documentation currently available in the G
 - [Plugins](plugins.md)
 - [Themes](themes.md)
 - [Global AI](ai.md)
+- [Mail Infrastructure](mail-infrastructure.md)
 - [Examples](../examples/README.md)
 
 ## Commerce
@@ -45,6 +47,7 @@ Core namespaces currently visible in the repository include:
 
 - `Cms\Core\Content`
 - `Cms\Core\Ai`
+- `Cms\Core\Mail`
 - `Cms\Core\Media`
 - `Cms\Core\Plugin`
 - `Cms\Core\Theme`

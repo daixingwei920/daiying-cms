@@ -38,6 +38,10 @@ use Cms\Core\Import\ImportService;
 use Cms\Core\Import\WordPressImporter;
 use Cms\Core\Import\ZBlogImporter;
 use Cms\Core\Logging\FileLogger;
+use Cms\Core\Mail\MailException;
+use Cms\Core\Mail\MailProviderRegistry;
+use Cms\Core\Mail\MailService;
+use Cms\Core\Mail\SiteMailSettingsRepository;
 use Cms\Core\Market\HttpMarketClient;
 use Cms\Core\Market\InstallAuthorization;
 use Cms\Core\Market\CommercialLicenseStore;
@@ -532,6 +536,81 @@ final class AdminController
         return Response::html(View::page('AI 设置', $this->aiSettingsForm($notice)));
     }
 
+    public function mailSettings(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        $notice = (string) $request->input('saved', '') === '1'
+            ? '<p class="admin-badge admin-badge-success">邮件设置已保存</p>'
+            : '';
+
+        return Response::html(View::page('邮件设置', $this->mailSettingsForm($notice)));
+    }
+
+    public function mailSettingsSave(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if ($request->method !== 'POST') {
+            return Response::html(View::page('邮件设置', $this->mailSettingsForm('<p class="error">邮件设置保存必须通过 POST 请求提交。</p>')), 405)
+                ->withHeaders(['Allow' => 'POST']);
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('邮件设置', $this->mailSettingsForm('<p class="error">CSRF 校验失败，请刷新页面重试。</p>')), 403);
+        }
+        try {
+            $input = $this->mailSettingsInput($request);
+            $repo = new SiteMailSettingsRepository(ConnectionFactory::make($this->settings), (string) $this->settings->get('security.encryption_key', ''));
+            $repo->save($input, (string) $input['smtp_password'], (bool) $input['clear_smtp_password']);
+            (new AuditLogger(ConnectionFactory::make($this->settings)))->record('admin', (int) ($guard['id'] ?? 0), 'site.mail_settings_saved', [
+                'provider_id' => (string) $input['provider_id'],
+                'enabled' => (bool) $input['enabled'],
+            ]);
+
+            return Response::redirect('/admin/settings/mail?saved=1');
+        } catch (MailException|\InvalidArgumentException $exception) {
+            return Response::html(View::page('邮件设置', $this->mailSettingsForm('<p class="error">' . View::escape($exception->getMessage()) . '</p>')), 422);
+        } catch (Throwable $exception) {
+            $this->logger->error('Mail settings save failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('邮件设置', $this->mailSettingsForm('<p class="error">邮件设置保存失败，请检查数据库和配置密钥后重试。</p>')), 500);
+        }
+    }
+
+    public function mailSettingsTest(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('邮件设置', $this->mailSettingsForm('<p class="error">CSRF 校验失败，请刷新页面重试。</p>')), 403);
+        }
+        try {
+            $email = trim((string) $request->input('test_email', ''));
+            if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new \InvalidArgumentException('测试邮箱格式无效。');
+            }
+            $result = (new MailService(ConnectionFactory::make($this->settings), $this->settings))->testConnection($email !== '' ? $email : null);
+            (new AuditLogger(ConnectionFactory::make($this->settings)))->record('admin', (int) ($guard['id'] ?? 0), 'site.mail_connection_tested', [
+                'provider_id' => $result['provider'],
+                'status' => $result['status'],
+            ]);
+            $message = $result['status'] === 'success'
+                ? '<p class="admin-badge admin-badge-success">测试成功：' . View::escape($result['provider']) . '</p>'
+                : '<p class="error">测试失败：' . View::escape((string) ($result['error'] ?? '邮件 Provider 返回失败。')) . '</p>';
+
+            return Response::html(View::page('邮件设置', $this->mailSettingsForm($message)));
+        } catch (\InvalidArgumentException $exception) {
+            return Response::html(View::page('邮件设置', $this->mailSettingsForm('<p class="error">' . View::escape($exception->getMessage()) . '</p>')), 422);
+        } catch (Throwable $exception) {
+            return Response::html(View::page('邮件设置', $this->mailSettingsForm('<p class="error">测试连接失败：网络或 Provider 响应异常。</p>')), 502);
+        }
+    }
+
     public function aiSettingsSave(Request $request): Response
     {
         $guard = $this->requireAdmin();
@@ -972,7 +1051,7 @@ final class AdminController
 
         return '<h1>站点设置</h1>' . $message .
             '<p class="muted">这里保存 CMS Core 站点身份和基础 SEO 抓取策略。关闭索引后，前台页面会输出 noindex,nofollow，robots.txt 会禁止抓取，sitemap.xml 不列出公开内容。</p>' .
-            '<p><a class="button admin-button-secondary" href="/admin/settings/ai">AI 设置</a></p>' .
+            '<p><a class="button admin-button-secondary" href="/admin/settings/ai">AI 设置</a> <a class="button admin-button-secondary" href="/admin/settings/mail">邮件设置</a></p>' .
             '<form method="post" action="/admin/settings" enctype="multipart/form-data">' . CsrfToken::field() .
             '<label>站点名称<input name="site_name" maxlength="120" value="' . View::escape($siteName) . '" required></label>' .
             '<label>站点 URL<input name="site_url" value="' . View::escape($siteUrl) . '" placeholder="https://example.com"></label>' .
@@ -1054,6 +1133,120 @@ final class AdminController
             'developer_mode' => (string) $request->input('developer_mode', '') === '1',
             'market_server_url' => $marketServerUrl,
             'market_site_token' => $marketSiteToken,
+        ];
+    }
+
+    private function mailSettingsForm(string $message = ''): string
+    {
+        try {
+            $config = (new SiteMailSettingsRepository(ConnectionFactory::make($this->settings), (string) $this->settings->get('security.encryption_key', '')))->current();
+        } catch (Throwable $exception) {
+            $config = [
+                'enabled' => false,
+                'provider_id' => 'smtp',
+                'smtp_host' => '',
+                'smtp_port' => 587,
+                'smtp_encryption' => 'tls',
+                'smtp_username' => '',
+                'smtp_password_configured' => false,
+                'smtp_password_masked' => '',
+                'from_name' => '',
+                'from_email' => '',
+                'reply_to' => '',
+                'timeout_seconds' => 20,
+                'queue_enabled' => true,
+            ];
+            $message .= '<p class="error">邮件配置暂不可用：' . View::escape($exception->getMessage()) . '</p>';
+        }
+
+        $providerOptions = '';
+        foreach (MailProviderRegistry::all() as $provider) {
+            $providerOptions .= '<option value="' . View::escape($provider->id()) . '"' . ((string) ($config['provider_id'] ?? 'smtp') === $provider->id() ? ' selected' : '') . '>' . View::escape($provider->label()) . '</option>';
+        }
+        $passwordText = !empty($config['smtp_password_configured']) ? '已配置（' . View::escape((string) $config['smtp_password_masked']) . '），留空则保留' : '未配置';
+        $encryption = (string) ($config['smtp_encryption'] ?? 'tls');
+
+        return '<div class="admin-page-header"><div><h1>邮件设置</h1><p class="muted">站点级邮件 Provider 配置，供 CMS 和插件通过 Core 统一 Mail API 复用。完整 Webmail、Gmail/Outlook 管理器由未来 official.mail 插件实现。</p></div></div>' .
+            $message .
+            '<form method="post" action="/admin/settings/mail">' . CsrfToken::field() .
+            '<label class="checkbox-row"><input type="checkbox" name="enabled" value="1"' . (!empty($config['enabled']) ? ' checked' : '') . '> 启用邮件</label>' .
+            '<label>Provider<select name="provider_id">' . $providerOptions . '</select></label>' .
+            '<label>SMTP Host<input name="smtp_host" maxlength="255" value="' . View::escape((string) ($config['smtp_host'] ?? '')) . '" placeholder="smtp.example.com"></label>' .
+            '<label>Port<input name="smtp_port" type="number" min="1" max="65535" value="' . View::escape((string) ($config['smtp_port'] ?? 587)) . '"></label>' .
+            '<label>Encryption<select name="smtp_encryption"><option value="tls"' . ($encryption === 'tls' ? ' selected' : '') . '>STARTTLS</option><option value="ssl"' . ($encryption === 'ssl' ? ' selected' : '') . '>SSL/TLS</option><option value="none"' . ($encryption === 'none' ? ' selected' : '') . '>None</option></select></label>' .
+            '<label>Username<input name="smtp_username" maxlength="191" value="' . View::escape((string) ($config['smtp_username'] ?? '')) . '" autocomplete="off"></label>' .
+            '<label>Password / App Password<input name="smtp_password" type="password" autocomplete="new-password" placeholder="' . $passwordText . '"></label>' .
+            '<label class="checkbox-row"><input type="checkbox" name="clear_smtp_password" value="1"> 清空已保存的 SMTP 密码</label>' .
+            '<label>From Name<input name="from_name" maxlength="191" value="' . View::escape((string) ($config['from_name'] ?? '')) . '" placeholder="Daiying CMS"></label>' .
+            '<label>From Email<input name="from_email" type="email" maxlength="191" value="' . View::escape((string) ($config['from_email'] ?? '')) . '" placeholder="no-reply@example.com"></label>' .
+            '<label>Reply-To<input name="reply_to" type="email" maxlength="191" value="' . View::escape((string) ($config['reply_to'] ?? '')) . '" placeholder="support@example.com"></label>' .
+            '<label>Timeout 秒<input name="timeout_seconds" type="number" min="1" max="120" value="' . View::escape((string) ($config['timeout_seconds'] ?? 20)) . '"></label>' .
+            '<label class="checkbox-row"><input type="checkbox" name="queue_enabled" value="1"' . (!empty($config['queue_enabled']) ? ' checked' : '') . '> 默认使用邮件队列</label>' .
+            '<button type="submit">保存配置</button></form>' .
+            '<form method="post" action="/admin/settings/mail/test">' . CsrfToken::field() .
+            '<label>Test Email<input name="test_email" type="email" maxlength="191" placeholder="admin@example.com"></label>' .
+            '<button class="admin-button-secondary" type="submit">发送测试邮件 / 测试连接</button></form>' .
+            '<p><a class="button admin-button-secondary" href="/admin/settings">返回站点设置</a></p>';
+    }
+
+    /** @return array{enabled:bool,provider_id:string,smtp_host:string,smtp_port:int,smtp_encryption:string,smtp_username:string,smtp_password:string,clear_smtp_password:bool,from_name:string,from_email:string,reply_to:string,timeout_seconds:int,queue_enabled:bool} */
+    private function mailSettingsInput(Request $request): array
+    {
+        $providerId = trim((string) $request->input('provider_id', 'smtp'));
+        if (!preg_match('/^[a-z0-9._-]{2,120}$/', $providerId)) {
+            throw new \InvalidArgumentException('邮件 Provider 无效。');
+        }
+        $host = trim((string) $request->input('smtp_host', ''));
+        if ($host !== '' && (strlen($host) > 255 || preg_match('/[\r\n\x00-\x1F\x7F]/', $host) === 1)) {
+            throw new \InvalidArgumentException('SMTP Host 格式无效。');
+        }
+        $port = (int) $request->input('smtp_port', 587);
+        if ($port < 1 || $port > 65535) {
+            throw new \InvalidArgumentException('SMTP Port 必须在 1 到 65535 之间。');
+        }
+        $encryption = trim((string) $request->input('smtp_encryption', 'tls'));
+        if (!in_array($encryption, ['none', 'tls', 'ssl'], true)) {
+            throw new \InvalidArgumentException('SMTP Encryption 无效。');
+        }
+        $fromName = trim((string) $request->input('from_name', ''));
+        if (strlen($fromName) > 191 || preg_match('/[\r\n\x00-\x1F\x7F]/', $fromName) === 1) {
+            throw new \InvalidArgumentException('From Name 格式无效。');
+        }
+        $fromEmail = trim((string) $request->input('from_email', ''));
+        if ($fromEmail !== '' && !filter_var($fromEmail, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('From Email 格式无效。');
+        }
+        $replyTo = trim((string) $request->input('reply_to', ''));
+        if ($replyTo !== '' && !filter_var($replyTo, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('Reply-To 格式无效。');
+        }
+        $username = trim((string) $request->input('smtp_username', ''));
+        if (strlen($username) > 191 || preg_match('/[\r\n\x00-\x1F\x7F]/', $username) === 1) {
+            throw new \InvalidArgumentException('SMTP Username 格式无效。');
+        }
+        $password = trim((string) $request->input('smtp_password', ''));
+        if ($password !== '' && (strlen($password) > 4096 || preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', $password) === 1)) {
+            throw new \InvalidArgumentException('SMTP Password 格式无效。');
+        }
+        $timeout = (int) $request->input('timeout_seconds', 20);
+        if ($timeout < 1 || $timeout > 120) {
+            throw new \InvalidArgumentException('Timeout 必须在 1 到 120 秒之间。');
+        }
+
+        return [
+            'enabled' => (string) $request->input('enabled', '') === '1',
+            'provider_id' => $providerId,
+            'smtp_host' => $host,
+            'smtp_port' => $port,
+            'smtp_encryption' => $encryption,
+            'smtp_username' => $username,
+            'smtp_password' => $password,
+            'clear_smtp_password' => (string) $request->input('clear_smtp_password', '') === '1',
+            'from_name' => $fromName,
+            'from_email' => $fromEmail,
+            'reply_to' => $replyTo,
+            'timeout_seconds' => $timeout,
+            'queue_enabled' => (string) $request->input('queue_enabled', '') === '1',
         ];
     }
 

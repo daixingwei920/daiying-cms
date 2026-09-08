@@ -7,6 +7,10 @@ namespace Cms\Core\Plugin;
 use Cms\Core\Ai\AiService;
 use Cms\Core\Events\EventDispatcher;
 use Cms\Core\Extension\ExtensionAssetController;
+use Cms\Core\Mail\MailEventRegistry;
+use Cms\Core\Mail\MailProviderInterface;
+use Cms\Core\Mail\MailProviderRegistry;
+use Cms\Core\Mail\MailService;
 use PDO;
 
 final class PluginContext
@@ -22,6 +26,7 @@ final class PluginContext
         private readonly bool $trustedDatabaseAccess = false,
         private readonly string $pluginRoot = '',
         private readonly ?AiService $ai = null,
+        private readonly ?MailService $mail = null,
     ) {
     }
 
@@ -119,6 +124,34 @@ final class PluginContext
         }
 
         return $this->ai;
+    }
+
+    public function mail(): MailService
+    {
+        if ($this->mail === null) {
+            throw new PluginException('Site mail service is not available.');
+        }
+
+        return $this->mail;
+    }
+
+    public function registerMailProvider(MailProviderInterface $provider): void
+    {
+        if (!$this->hasCapability('mail.provider')) {
+            throw new PluginException('Plugin does not declare mail.provider capability.');
+        }
+
+        MailProviderRegistry::register($provider);
+    }
+
+    /** @param list<string> $variables */
+    public function registerMailEvent(string $eventId, string $label, array $variables = []): void
+    {
+        if (!$this->hasCapability('mail.event')) {
+            throw new PluginException('Plugin does not declare mail.event capability.');
+        }
+
+        MailEventRegistry::register($eventId, $label, $variables, $this->manifest->id);
     }
 
     private function runtime(): PluginRuntimeRegistry

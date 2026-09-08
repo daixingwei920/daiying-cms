@@ -345,6 +345,9 @@ final class Application
         $router->get('/admin/settings/ai', [$admin, 'aiSettings']);
         $router->post('/admin/settings/ai', [$admin, 'aiSettingsSave']);
         $router->post('/admin/settings/ai/test', [$admin, 'aiSettingsTest']);
+        $router->get('/admin/settings/mail', [$admin, 'mailSettings']);
+        $router->post('/admin/settings/mail', [$admin, 'mailSettingsSave']);
+        $router->post('/admin/settings/mail/test', [$admin, 'mailSettingsTest']);
         $router->get('/admin/content', [$admin, 'contentIndex']);
         $router->get('/admin/content/new', [$admin, 'contentCreate']);
         $router->post('/admin/content', [$admin, 'contentStore']);

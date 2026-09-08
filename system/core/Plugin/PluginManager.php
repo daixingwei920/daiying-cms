@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cms\Core\Plugin;
 
 use Cms\Core\Ai\AiService;
+use Cms\Core\Mail\MailService;
 use Cms\Core\Config\Settings;
 use Cms\Core\Events\EventDispatcher;
 use Cms\Core\Logging\FileLogger;
@@ -226,6 +227,7 @@ final class PluginManager
             $this->trustedDatabaseAccess($manifest),
             dirname($entry),
             $this->settings !== null ? new AiService($this->pdo, $this->settings) : null,
+            $this->settings !== null ? new MailService($this->pdo, $this->settings) : null,
         );
 
         $register = require $entry;
