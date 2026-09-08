@@ -16,6 +16,7 @@ Daiying CMS Core is a self-hosted PHP CMS with themes, plugins, media management
 - Releases: <https://github.com/daixingwei920/daiying-cms/releases>
 - Plugins: [docs/plugins.md](docs/plugins.md)
 - Themes: [docs/themes.md](docs/themes.md)
+- Global AI: [docs/ai.md](docs/ai.md)
 
 ## Product Model
 
@@ -126,6 +127,12 @@ See [Themes](docs/themes.md).
 
 Core media support includes MIME validation, randomized storage keys, deduplication, references, safe downloads, and HTML5 audio/video rendering. The repository also contains a Baidu storage plugin for OAuth-based Baidu Netdisk media access.
 
+### Global AI Provider Settings
+
+Core provides optional site-level AI Provider configuration and a reusable AI service API for CMS features and plugins. The AI layer handles configuration, Provider calls, and safe error handling only; business uses such as summaries, SEO, product text, or distribution adaptation belong to plugins or feature modules.
+
+See [Global AI](docs/ai.md).
+
 ## Documentation
 
 - [Documentation Index](docs/README.md)
@@ -133,6 +140,7 @@ Core media support includes MIME validation, randomized storage keys, deduplicat
 - [Developers](docs/developers.md)
 - [Plugins](docs/plugins.md)
 - [Themes](docs/themes.md)
+- [Global AI](docs/ai.md)
 - [Commerce](docs/commerce.md)
 - [Distribution](docs/distribution.md)
 - [Update System](docs/update-system.md)

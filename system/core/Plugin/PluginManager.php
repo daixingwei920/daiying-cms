@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cms\Core\Plugin;
 
+use Cms\Core\Ai\AiService;
+use Cms\Core\Config\Settings;
 use Cms\Core\Events\EventDispatcher;
 use Cms\Core\Logging\FileLogger;
 use PDO;
@@ -19,6 +21,7 @@ final class PluginManager
         private readonly ?PluginRuntimeRegistry $runtime = null,
         private readonly ?OfficialPluginRegistry $officialRegistry = null,
         private readonly ?PluginSecretStore $secrets = null,
+        private readonly ?Settings $settings = null,
     ) {
     }
 
@@ -222,6 +225,7 @@ final class PluginManager
             $this->secrets,
             $this->trustedDatabaseAccess($manifest),
             dirname($entry),
+            $this->settings !== null ? new AiService($this->pdo, $this->settings) : null,
         );
 
         $register = require $entry;

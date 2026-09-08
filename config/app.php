@@ -52,6 +52,15 @@ return [
         'server_url' => 'https://updates.daiyingcms.com',
         'max_zip_bytes' => 20971520,
     ],
+    'ai' => [
+        'enabled' => false,
+        'provider' => 'openai_compatible',
+        'base_url' => '',
+        'model' => '',
+        'timeout_seconds' => 30,
+        'max_tokens' => 1024,
+        'temperature' => 0.7,
+    ],
     'comments' => [
         'enabled' => true,
         'allow_guest' => true,

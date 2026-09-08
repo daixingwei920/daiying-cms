@@ -88,6 +88,7 @@ final class View
             ],
             '平台' => [
                 ['/admin/settings', '站点设置', 'sliders'],
+                ['/admin/settings/ai', 'AI 设置', 'spark'],
                 ['/admin/transfer', '导入导出', 'transfer'],
                 ['/admin/migrations', '旧站迁移', 'transfer'],
                 ['/admin/update', '系统更新', 'refresh'],
@@ -160,6 +161,9 @@ final class View
     {
         if ($href === '/admin') {
             return $path === '/admin';
+        }
+        if ($href === '/admin/settings') {
+            return $path === '/admin/settings';
         }
         return $path === $href || str_starts_with($path, rtrim($href, '/') . '/');
     }

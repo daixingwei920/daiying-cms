@@ -16,6 +16,7 @@ Daiying CMS 是一套模块化 PHP CMS，用于构建内容网站、媒体流程
 - Releases：<https://github.com/daixingwei920/daiying-cms/releases>
 - 插件文档：[docs/plugins.md](docs/plugins.md)
 - 主题文档：[docs/themes.md](docs/themes.md)
+- 全局 AI：[docs/ai.md](docs/ai.md)
 
 ## 产品层级
 
@@ -122,6 +123,12 @@ Core 已包含支付 Provider 设置、支付记录、付费内容/下载授权�
 
 见：[主题文档](docs/themes.md)。
 
+### 全局 AI Provider 设置
+
+Core 提供可选的站点级 AI Provider 配置和统一 AI Service API，供 CMS 功能和插件复用。AI 层只负责配置、Provider 调用和安全错误处理；文章摘要、SEO、商品描述、渠道适配等具体用途应由插件或业务模块决定。
+
+见：[全局 AI](docs/ai.md)。
+
 ## 文档
 
 - [文档导航](docs/README.md)
@@ -129,6 +136,7 @@ Core 已包含支付 Provider 设置、支付记录、付费内容/下载授权�
 - [开发者入口](docs/developers.md)
 - [插件](docs/plugins.md)
 - [主题](docs/themes.md)
+- [全局 AI](docs/ai.md)
 - [Commerce](docs/commerce.md)
 - [Distribution](docs/distribution.md)
 - [Update System](docs/update-system.md)

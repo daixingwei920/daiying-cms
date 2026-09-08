@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Cms\Core\Admin;
 
+use Cms\Core\Ai\AiException;
+use Cms\Core\Ai\AiService;
+use Cms\Core\Ai\SiteAiSettingsRepository;
 use Cms\Core\Advertising\AdRenderer;
 use Cms\Core\Advertising\AdRepository;
 use Cms\Core\CardDelivery\CardDeliveryException;
@@ -513,6 +516,87 @@ final class AdminController
         return Response::html(View::page('站点设置', $this->siteSettingsForm($notice)));
     }
 
+    public function aiSettings(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+
+        $notice = '';
+        if (($request->query['saved'] ?? '') === '1') {
+            $notice = '<p class="admin-badge admin-badge-success">AI 设置已保存</p>';
+        }
+
+        return Response::html(View::page('AI 设置', $this->aiSettingsForm($notice)));
+    }
+
+    public function aiSettingsSave(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if ($request->method !== 'POST') {
+            return Response::html(View::page('AI 设置', $this->aiSettingsForm('<p class="error">AI 设置保存必须通过 POST 请求提交。</p>')), 405)
+                ->withHeaders(['Allow' => 'POST']);
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('AI 设置', $this->aiSettingsForm('<p class="error">CSRF 校验失败，请刷新页面重试。</p>')), 403);
+        }
+
+        try {
+            $input = $this->aiSettingsInput($request);
+            $repo = new SiteAiSettingsRepository(ConnectionFactory::make($this->settings), (string) $this->settings->get('security.encryption_key', ''));
+            $repo->save($input, $input['api_key'], $input['clear_api_key']);
+            (new AuditLogger(ConnectionFactory::make($this->settings)))->record('admin', (int) ($guard['id'] ?? 0), 'site.ai_settings_saved', [
+                'enabled' => (bool) $input['enabled'],
+                'provider' => $input['provider'],
+                'base_url_host' => $this->urlHostForAudit($input['base_url']),
+                'model' => $input['model'],
+            ]);
+
+            return Response::redirect('/admin/settings/ai?saved=1');
+        } catch (\InvalidArgumentException|AiException $exception) {
+            return Response::html(View::page('AI 设置', $this->aiSettingsForm('<p class="error">' . View::escape($exception->getMessage()) . '</p>')), 422);
+        } catch (Throwable $exception) {
+            $this->logger->error('AI settings save failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('AI 设置', $this->aiSettingsForm('<p class="error">AI 设置保存失败，请检查数据库和配置密钥后重试。</p>')), 500);
+        }
+    }
+
+    public function aiSettingsTest(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('AI 设置', $this->aiSettingsForm('<p class="error">CSRF 校验失败，请刷新页面重试。</p>')), 403);
+        }
+
+        try {
+            $result = $this->aiService()->testConnection();
+            (new AuditLogger(ConnectionFactory::make($this->settings)))->record('admin', (int) ($guard['id'] ?? 0), 'site.ai_connection_tested', [
+                'status' => 'success',
+                'provider' => $result['provider'],
+                'model' => $result['model'],
+            ]);
+            $message = '<p class="admin-badge admin-badge-success">连接成功：' . View::escape($result['provider']) . ' / ' . View::escape($result['model']) . '</p>';
+
+            return Response::html(View::page('AI 设置', $this->aiSettingsForm($message)));
+        } catch (AiException $exception) {
+            (new AuditLogger(ConnectionFactory::make($this->settings)))->record('admin', (int) ($guard['id'] ?? 0), 'site.ai_connection_tested', [
+                'status' => 'failed',
+                'reason' => $exception->reason(),
+            ]);
+            return Response::html(View::page('AI 设置', $this->aiSettingsForm('<p class="error">测试连接失败：' . View::escape($exception->getMessage()) . '</p>')), 422);
+        } catch (Throwable $exception) {
+            $this->logger->error('AI connection test failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('AI 设置', $this->aiSettingsForm('<p class="error">测试连接失败：网络或 Provider 响应异常。</p>')), 502);
+        }
+    }
+
     public function adminSecurity(Request $request): Response
     {
         $guard = $this->requireAdmin();
@@ -886,6 +970,7 @@ final class AdminController
 
         return '<h1>站点设置</h1>' . $message .
             '<p class="muted">这里保存 CMS Core 站点身份和基础 SEO 抓取策略。关闭索引后，前台页面会输出 noindex,nofollow，robots.txt 会禁止抓取，sitemap.xml 不列出公开内容。</p>' .
+            '<p><a class="button admin-button-secondary" href="/admin/settings/ai">AI 设置</a></p>' .
             '<form method="post" action="/admin/settings" enctype="multipart/form-data">' . CsrfToken::field() .
             '<label>站点名称<input name="site_name" maxlength="120" value="' . View::escape($siteName) . '" required></label>' .
             '<label>站点 URL<input name="site_url" value="' . View::escape($siteUrl) . '" placeholder="https://example.com"></label>' .
@@ -968,6 +1053,128 @@ final class AdminController
             'market_server_url' => $marketServerUrl,
             'market_site_token' => $marketSiteToken,
         ];
+    }
+
+    private function aiSettingsForm(string $message = ''): string
+    {
+        try {
+            $config = (new SiteAiSettingsRepository(ConnectionFactory::make($this->settings), (string) $this->settings->get('security.encryption_key', '')))->current();
+        } catch (Throwable $exception) {
+            $config = [
+                'enabled' => false,
+                'provider' => 'openai_compatible',
+                'base_url' => '',
+                'model' => '',
+                'timeout_seconds' => 30,
+                'max_tokens' => 1024,
+                'temperature' => 0.7,
+                'api_key_configured' => false,
+                'api_key_masked' => '',
+            ];
+            $message .= '<p class="error">AI 配置暂不可用：' . View::escape($exception->getMessage()) . '</p>';
+        }
+
+        $provider = (string) ($config['provider'] ?? 'openai_compatible');
+        $providerOptions = '';
+        foreach (['deepseek' => 'DeepSeek', 'openai_compatible' => 'OpenAI-compatible'] as $value => $label) {
+            $providerOptions .= '<option value="' . $value . '"' . ($provider === $value ? ' selected' : '') . '>' . $label . '</option>';
+        }
+        $keyText = !empty($config['api_key_configured']) ? '已配置（' . View::escape((string) $config['api_key_masked']) . '），留空则保留' : '未配置';
+
+        return '<div class="admin-page-header"><div><h1>AI 设置</h1><p class="muted">站点级 AI Provider 配置，供 CMS 和插件通过 Core 统一 API 复用。官方更新服务器和市场 AI 审核不使用这里的配置。</p></div></div>' .
+            $message .
+            '<form method="post" action="/admin/settings/ai">' . CsrfToken::field() .
+            '<label class="checkbox-row"><input type="checkbox" name="enabled" value="1"' . (!empty($config['enabled']) ? ' checked' : '') . '> 启用全局 AI</label>' .
+            '<label>Provider<select name="provider">' . $providerOptions . '</select></label>' .
+            '<label>API Key<input name="api_key" type="password" autocomplete="off" placeholder="' . $keyText . '"></label>' .
+            '<label class="checkbox-row"><input type="checkbox" name="clear_api_key" value="1"> 清空已保存的 API Key</label>' .
+            '<label>Base URL<input name="base_url" value="' . View::escape((string) ($config['base_url'] ?? '')) . '" placeholder="https://api.deepseek.com/v1"></label>' .
+            '<label>Model<input name="model" maxlength="191" value="' . View::escape((string) ($config['model'] ?? '')) . '" placeholder="deepseek-chat"></label>' .
+            '<label>Timeout 秒<input name="timeout_seconds" type="number" min="1" max="120" value="' . View::escape((string) ($config['timeout_seconds'] ?? 30)) . '"></label>' .
+            '<label>Max Tokens<input name="max_tokens" type="number" min="1" max="200000" value="' . View::escape((string) ($config['max_tokens'] ?? 1024)) . '"></label>' .
+            '<label>Temperature<input name="temperature" type="number" min="0" max="2" step="0.1" value="' . View::escape((string) ($config['temperature'] ?? 0.7)) . '"></label>' .
+            '<button type="submit">保存配置</button></form>' .
+            '<form method="post" action="/admin/settings/ai/test">' . CsrfToken::field() . '<button class="admin-button-secondary" type="submit">测试连接</button></form>' .
+            '<p><a class="button admin-button-secondary" href="/admin/settings">返回站点设置</a></p>';
+    }
+
+    /** @return array{enabled:bool,provider:string,base_url:string,model:string,timeout_seconds:int,max_tokens:int,temperature:float,api_key:string,clear_api_key:bool} */
+    private function aiSettingsInput(Request $request): array
+    {
+        $provider = (string) $request->input('provider', 'openai_compatible');
+        if (!in_array($provider, ['deepseek', 'openai_compatible'], true)) {
+            throw new \InvalidArgumentException('AI Provider 无效。');
+        }
+
+        $enabled = (string) $request->input('enabled', '') === '1';
+        $baseUrl = rtrim(trim((string) $request->input('base_url', '')), '/');
+        if ($baseUrl === '' && $provider === 'deepseek') {
+            $baseUrl = 'https://api.deepseek.com/v1';
+        }
+        if ($baseUrl !== '') {
+            $parts = parse_url($baseUrl);
+            $scheme = is_array($parts) ? strtolower((string) ($parts['scheme'] ?? '')) : '';
+            $host = is_array($parts) ? (string) ($parts['host'] ?? '') : '';
+            if (strlen($baseUrl) > 2048 || preg_match('/[\x00-\x1F\x7F]/', $baseUrl) === 1 || !in_array($scheme, ['http', 'https'], true) || $host === '' || isset($parts['user']) || isset($parts['pass'])) {
+                throw new \InvalidArgumentException('AI Base URL 必须是 http 或 https 地址，且不能包含用户名或密码。');
+            }
+        }
+        if ($enabled && $baseUrl === '') {
+            throw new \InvalidArgumentException('启用 AI 时必须填写 Base URL。');
+        }
+
+        $model = trim((string) $request->input('model', ''));
+        if ($model === '' && $provider === 'deepseek') {
+            $model = 'deepseek-chat';
+        }
+        if (strlen($model) > 191 || preg_match('/[\x00-\x1F\x7F]/', $model) === 1) {
+            throw new \InvalidArgumentException('AI Model 格式无效。');
+        }
+        if ($enabled && $model === '') {
+            throw new \InvalidArgumentException('启用 AI 时必须填写 Model。');
+        }
+
+        $timeout = (int) $request->input('timeout_seconds', 30);
+        if ($timeout < 1 || $timeout > 120) {
+            throw new \InvalidArgumentException('Timeout 必须在 1 到 120 秒之间。');
+        }
+        $maxTokens = (int) $request->input('max_tokens', 1024);
+        if ($maxTokens < 1 || $maxTokens > 200000) {
+            throw new \InvalidArgumentException('Max Tokens 必须在 1 到 200000 之间。');
+        }
+        $temperature = (float) $request->input('temperature', 0.7);
+        if ($temperature < 0.0 || $temperature > 2.0) {
+            throw new \InvalidArgumentException('Temperature 必须在 0 到 2 之间。');
+        }
+
+        $apiKey = trim((string) $request->input('api_key', ''));
+        if ($apiKey !== '' && (strlen($apiKey) > 4096 || preg_match('/[\x00-\x1F\x7F]/', $apiKey) === 1)) {
+            throw new \InvalidArgumentException('AI API Key 格式无效。');
+        }
+        $clearApiKey = (string) $request->input('clear_api_key', '') === '1';
+
+        return [
+            'enabled' => $enabled,
+            'provider' => $provider,
+            'base_url' => $baseUrl,
+            'model' => $model,
+            'timeout_seconds' => $timeout,
+            'max_tokens' => $maxTokens,
+            'temperature' => $temperature,
+            'api_key' => $apiKey,
+            'clear_api_key' => $clearApiKey,
+        ];
+    }
+
+    private function aiService(): AiService
+    {
+        return new AiService(ConnectionFactory::make($this->settings), $this->settings);
+    }
+
+    private function urlHostForAudit(string $url): string
+    {
+        $parts = parse_url($url);
+        return is_array($parts) ? (string) ($parts['host'] ?? '') : '';
     }
 
     public function contentIndex(?Request $request = null): Response
@@ -2286,7 +2493,7 @@ final class AdminController
         try {
             $pdo = ConnectionFactory::make($this->settings);
             $root = $this->root();
-            $manager = new PluginManager($root . '/content/plugins', $pdo, $this->logger, new EventDispatcher(), new BlockRegistry(), null, new OfficialPluginRegistry($root));
+            $manager = new PluginManager($root . '/content/plugins', $pdo, $this->logger, new EventDispatcher(), new BlockRegistry(), null, new OfficialPluginRegistry($root), null, $this->settings);
             $manager->syncDiscovered();
             $manifests = $manager->discover();
             $stmt = $pdo->query('SELECT plugin_id, name, version, status, trust_level, capabilities_json, source, dependencies_json, last_error FROM cms_plugins ORDER BY plugin_id');
@@ -2349,7 +2556,7 @@ final class AdminController
         try {
             $pdo = ConnectionFactory::make($this->settings);
             $root = $this->root();
-            $manager = new PluginManager($root . '/content/plugins', $pdo, $this->logger, new EventDispatcher(), new BlockRegistry(), null, new OfficialPluginRegistry($root));
+            $manager = new PluginManager($root . '/content/plugins', $pdo, $this->logger, new EventDispatcher(), new BlockRegistry(), null, new OfficialPluginRegistry($root), null, $this->settings);
             $manager->syncDiscovered();
             $manifest = $manager->discover()[$pluginId] ?? null;
             $stmt = $pdo->prepare('SELECT * FROM cms_plugins WHERE plugin_id = :plugin_id LIMIT 1');
@@ -2472,7 +2679,7 @@ final class AdminController
             } elseif ($status === PluginLifecycle::DISABLED) {
                 $lifecycle->disableWithDependents($pluginId, (int) ($user['id'] ?? 0), true);
             } else {
-                (new PluginManager($this->root() . '/content/plugins', $pdo, $this->logger, new EventDispatcher(), new BlockRegistry()))->setStatus($pluginId, $status);
+                (new PluginManager($this->root() . '/content/plugins', $pdo, $this->logger, new EventDispatcher(), new BlockRegistry(), null, null, null, $this->settings))->setStatus($pluginId, $status);
             }
         } catch (Throwable $exception) {
             $this->logger->error('Plugin status change failed', ['source' => 'Core', 'error' => $exception->getMessage()]);

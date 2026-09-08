@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cms\Core\Plugin;
 
+use Cms\Core\Ai\AiService;
 use Cms\Core\Events\EventDispatcher;
 use Cms\Core\Extension\ExtensionAssetController;
 use PDO;
@@ -20,6 +21,7 @@ final class PluginContext
         private readonly ?PluginSecretStore $secrets = null,
         private readonly bool $trustedDatabaseAccess = false,
         private readonly string $pluginRoot = '',
+        private readonly ?AiService $ai = null,
     ) {
     }
 
@@ -108,6 +110,15 @@ final class PluginContext
         }
 
         return $this->secrets;
+    }
+
+    public function ai(): AiService
+    {
+        if ($this->ai === null) {
+            throw new PluginException('Site AI service is not available.');
+        }
+
+        return $this->ai;
     }
 
     private function runtime(): PluginRuntimeRegistry

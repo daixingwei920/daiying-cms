@@ -96,6 +96,7 @@ final class Application
                     $pluginRuntime,
                     new OfficialPluginRegistry($rootPath),
                     $secrets,
+                    $settings,
                 );
                 $plugins->syncDiscovered();
                 $plugins->bootEnabled();
@@ -341,6 +342,9 @@ final class Application
         $router->get('/admin/site-timeline', [$admin, 'siteTimeline']);
         $router->get('/admin/settings', [$admin, 'siteSettings']);
         $router->post('/admin/settings', [$admin, 'siteSettingsSave']);
+        $router->get('/admin/settings/ai', [$admin, 'aiSettings']);
+        $router->post('/admin/settings/ai', [$admin, 'aiSettingsSave']);
+        $router->post('/admin/settings/ai/test', [$admin, 'aiSettingsTest']);
         $router->get('/admin/content', [$admin, 'contentIndex']);
         $router->get('/admin/content/new', [$admin, 'contentCreate']);
         $router->post('/admin/content', [$admin, 'contentStore']);
