@@ -250,6 +250,7 @@ $assert(in_array('verification_explanation', $deepSeekDefaults['capabilities'] ?
 $controllerWithAi = new CommerceController($repo, $pdo, Settings::fromArray(['security' => ['encryption_key' => $aiKey]]));
 $aiPage = $controllerWithAi->adminAiModules(new Request('GET', '/admin/commerce/ai'))->body();
 $assert(str_contains($aiPage, 'Commerce AI 模块'), 'Admin exposes a unified Commerce AI module management entry.');
+$assert(str_contains($aiPage, '当前 Core 尚未提供全局 AI 接口'), 'Commerce AI remains compatible with old Core versions that do not expose site AI.');
 $assert(str_contains($aiPage, 'Free Working AI'), 'Admin AI module page lists configured modules.');
 $assert(str_contains($aiPage, '使用 DeepSeek 推荐预设'), 'Admin AI page offers a one-click recommended preset for common providers.');
 $assert(!str_contains($aiPage, 'free-working-key') && !str_contains($aiPage, 'paid-secret-key'), 'Admin AI page never renders API keys.');
@@ -270,6 +271,54 @@ $manager = new CommerceAiModuleManager($repo, $aiKey, static function (array $mo
     }
     return ['text' => (string) $module['name'] . ' handled ' . (str_contains($prompt, '正品认证') ? 'guarded' : 'copy')];
 });
+$siteAi = new class {
+    public function isEnabled(): bool
+    {
+        return true;
+    }
+
+    /** @param list<array<string,string>> $messages @param array<string,mixed> $options @return array<string,string> */
+    public function chat(array $messages, array $options = []): array
+    {
+        return ['text' => '站点 AI handled ' . (string) ($options['task'] ?? '')];
+    }
+
+    /** @return array<string,string> */
+    public function getConfig(): array
+    {
+        return ['provider' => 'deepseek', 'model' => 'site-model'];
+    }
+};
+$controllerWithSiteAi = new CommerceController($repo, $pdo, Settings::fromArray(['security' => ['encryption_key' => $aiKey]]), $siteAi);
+$siteAiPage = $controllerWithSiteAi->adminAiModules(new Request('GET', '/admin/commerce/ai'))->body();
+$assert(str_contains($siteAiPage, '站点 AI：已启用') && str_contains($siteAiPage, 'deepseek site-model'), 'Commerce AI page shows inherited site AI when Core provides it.');
+$siteAiManager = new CommerceAiModuleManager($repo, $aiKey, static function (): array {
+    throw new RuntimeException('Commerce module should not run before inherited site AI.');
+}, $siteAi);
+$siteAiResult = $siteAiManager->runProductTask('product_copy', $product);
+$assert(($siteAiResult['ok'] ?? false) === true && ($siteAiResult['source'] ?? '') === 'site_ai', 'Commerce defaults to inherited site AI before independent AI modules.');
+$assert(($siteAiResult['billing_type'] ?? '') === 'free', 'Inherited site AI is treated as free fallback-safe capacity unless paid Commerce modules are explicitly allowed.');
+$brokenSiteAi = new class {
+    public function isEnabled(): bool
+    {
+        return true;
+    }
+
+    /** @param list<array<string,string>> $messages @param array<string,mixed> $options */
+    public function chat(array $messages, array $options = []): array
+    {
+        throw new RuntimeException('site ai quota exhausted: ' . 'sk-' . 'SHOULD_NOT_LEAK');
+    }
+};
+$siteAiFallbackManager = new CommerceAiModuleManager($repo, $aiKey, static function (array $module, string $prompt): array {
+    if ((string) $module['name'] === 'Free Broken AI') {
+        throw new RuntimeException('free quota exhausted');
+    }
+    return ['text' => (string) $module['name'] . ' fallback copy'];
+}, $brokenSiteAi);
+$siteAiFallback = $siteAiFallbackManager->runProductTask('product_copy', $product);
+$assert(($siteAiFallback['ok'] ?? false) === true && ($siteAiFallback['module_id'] ?? 0) === $freeOkId, 'Site AI failures fall back to the next enabled free Commerce AI module.');
+$assert(($siteAiFallback['attempts'][0]['module_name'] ?? '') === '站点 AI', 'Site AI failure is recorded as an isolated failed attempt.');
 $testResult = $manager->testModule($freeOkId);
 $assert(($testResult['ok'] ?? false) === true, 'AI modules support explicit connection testing.');
 $testedModule = $repo->aiModule($freeOkId);

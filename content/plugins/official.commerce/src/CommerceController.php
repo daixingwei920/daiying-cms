@@ -27,6 +27,7 @@ final class CommerceController
         private readonly CommerceRepository $repo,
         private readonly PDO $pdo,
         private readonly Settings $settings,
+        private readonly ?object $siteAi = null,
     ) {
     }
 
@@ -424,6 +425,7 @@ final class CommerceController
         $formModule = $editing ?? $presetDefaults;
         $notice = !empty($request->query['saved']) ? '<p class="notice">AI 模块已保存。</p>' : '';
         $notice .= !empty($request->query['tested']) ? '<p class="notice">AI 模块连接测试已完成。</p>' : '';
+        $siteAiStatus = $this->siteAiStatusHtml();
         $rows = '';
         foreach ($this->repo->aiModules() as $module) {
             $test = trim((string) ($module['last_test_status'] ?? '')) !== ''
@@ -461,7 +463,7 @@ final class CommerceController
             '<label>温度<input name="temperature" type="number" min="0" max="2" step="0.1" value="' . $this->e((string) ($publicConfig['temperature'] ?? '0.2')) . '"></label>' .
             '<label>超时秒数<input name="timeout_seconds" type="number" min="3" max="60" value="' . (int) ($publicConfig['timeout_seconds'] ?? 12) . '"></label>' .
             '<fieldset><legend>允许用途</legend>' . $this->aiCapabilityCheckboxes($capabilities) . '</fieldset>' .
-            '<p class="muted">免费模块按顺序失败后会尝试下一个免费模块；收费模块只有在调用方明确允许时才会使用。AI 结果只作辅助文本，不修改核验事实和交易状态。</p>' .
+            '<p class="muted">默认优先继承站点 AI；站点 AI 不可用时，免费模块按顺序失败后会尝试下一个免费模块。收费模块只有在调用方明确允许时才会使用。AI 结果只作辅助文本，不修改核验事实和交易状态。</p>' .
             '<button type="submit">保存 AI 模块</button> <a class="button admin-button-secondary" href="/admin/commerce">返回总览</a></form>';
         $history = '';
         foreach ($this->repo->aiInvocations(20) as $entry) {
@@ -471,7 +473,7 @@ final class CommerceController
             $history = '<tr><td colspan="6" class="muted">暂无 AI 调用记录。</td></tr>';
         }
 
-        return Response::html(View::page('Commerce AI 模块', '<h1>Commerce AI 模块</h1>' . $notice . '<table><tr><th>模块</th><th>Provider</th><th>模型</th><th>费用/状态</th><th>顺序</th><th>凭据</th><th>测试</th><th>操作</th></tr>' . $rows . '</table>' . $form . '<h2>最近调用</h2><table><tr><th>时间</th><th>任务</th><th>模块</th><th>费用</th><th>状态</th><th>摘要</th></tr>' . $history . '</table>'));
+        return Response::html(View::page('Commerce AI 模块', '<h1>Commerce AI 模块</h1>' . $notice . $siteAiStatus . '<table><tr><th>模块</th><th>Provider</th><th>模型</th><th>费用/状态</th><th>顺序</th><th>凭据</th><th>测试</th><th>操作</th></tr>' . $rows . '</table>' . $form . '<h2>最近调用</h2><table><tr><th>时间</th><th>任务</th><th>模块</th><th>费用</th><th>状态</th><th>摘要</th></tr>' . $history . '</table>'));
     }
 
     public function adminSaveAiModule(Request $request): Response
@@ -509,7 +511,7 @@ final class CommerceController
             $task = (string) ($request->body['task'] ?? 'product_copy');
             $records = $this->repo->verificationRecords($productId, 5);
             $latest = $this->latestProviderVerification($records);
-            $manager = new CommerceAiModuleManager($this->repo, $this->paymentSecret());
+            $manager = new CommerceAiModuleManager($this->repo, $this->paymentSecret(), null, $this->siteAi);
             $captured = CommerceProviderIsolation::capture('official.commerce.ai', 'run_product_task', fn (): array => $manager->runProductTask($task, $product, [
                 'allow_paid' => !empty($request->body['allow_paid']),
                 'verification_facts' => is_array($latest['checked_facts'] ?? null) ? $latest['checked_facts'] : [],
@@ -612,7 +614,7 @@ final class CommerceController
             $channelId = (int) ($request->body['channel_id'] ?? 0);
             $channel = $channelId > 0 ? $this->repo->distributionChannel($channelId) : null;
             $allowPaidAi = !empty($request->body['allow_paid_ai']);
-            $manager = new CommerceDistributionManager($this->repo, new CommerceAiModuleManager($this->repo, $this->paymentSecret()));
+            $manager = new CommerceDistributionManager($this->repo, new CommerceAiModuleManager($this->repo, $this->paymentSecret(), null, $this->siteAi));
             $result = $manager->publishProduct($product, $channel, $this->siteBaseUrl($request), [
                 'allow_paid_ai' => $allowPaidAi,
             ]);
@@ -1630,6 +1632,39 @@ final class CommerceController
         $labels = CommerceAiModuleManager::taskLabels();
 
         return $labels[$task] ?? $task;
+    }
+
+    private function siteAiStatusHtml(): string
+    {
+        if ($this->siteAi === null || !method_exists($this->siteAi, 'isEnabled')) {
+            return '<p class="muted">站点 AI：当前 Core 尚未提供全局 AI 接口；Commerce 将使用下方独立 AI 模块。</p>';
+        }
+
+        try {
+            $enabled = $this->siteAi->isEnabled() === true;
+        } catch (Throwable $exception) {
+            return '<p class="muted">站点 AI：暂不可用，Commerce 将回退到下方独立 AI 模块。' . $this->e($exception->getMessage()) . '</p>';
+        }
+
+        $configSummary = '';
+        if (method_exists($this->siteAi, 'getConfig')) {
+            try {
+                $config = $this->siteAi->getConfig();
+                if (is_array($config)) {
+                    $provider = trim((string) ($config['provider'] ?? ''));
+                    $model = trim((string) ($config['model'] ?? ''));
+                    if ($provider !== '' || $model !== '') {
+                        $configSummary = ' · ' . $this->e(trim($provider . ' ' . $model));
+                    }
+                }
+            } catch (Throwable) {
+                $configSummary = '';
+            }
+        }
+
+        return $enabled
+            ? '<p class="notice">站点 AI：已启用' . $configSummary . '。Commerce 默认继承站点 AI；下方独立 AI 模块作为高级回退配置。</p>'
+            : '<p class="muted">站点 AI：未启用。Commerce 将使用下方独立 AI 模块；启用站点 AI 后可免重复配置 API Key。</p>';
     }
 
     private function stat(string $label, string $value): string

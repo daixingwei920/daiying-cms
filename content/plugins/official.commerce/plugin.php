@@ -24,7 +24,8 @@ return static function (PluginContext $context): void {
     $pdo = $context->pdo();
     $settings = Settings::load($root);
     $repo = new CommerceRepository($pdo, (string) $settings->get('security.encryption_key', ''));
-    $controller = new CommerceController($repo, $pdo, $settings);
+    $siteAi = method_exists($context, 'ai') ? $context->ai() : null;
+    $controller = new CommerceController($repo, $pdo, $settings, is_object($siteAi) ? $siteAi : null);
 
     $context->adminRoute('GET', '/admin/commerce', [$controller, 'adminDashboard'], 'commerce.manage', false);
     $context->adminRoute('GET', '/admin/commerce/products', [$controller, 'adminProducts'], 'commerce.manage', false);

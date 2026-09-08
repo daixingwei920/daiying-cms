@@ -24,6 +24,7 @@ final class CommerceAiModuleManager
         private readonly CommerceRepository $repo,
         private readonly string $encryptionKey,
         private $transport = null,
+        private readonly ?object $siteAi = null,
     ) {
     }
 
@@ -64,6 +65,10 @@ final class CommerceAiModuleManager
         $allowPaid = !empty($context['allow_paid']);
         $prompt = $this->buildPrompt($task, $product, $context);
         $attempts = [];
+        $siteAttempt = $this->trySiteAi($task, $prompt, $attempts);
+        if ($siteAttempt !== null) {
+            return $siteAttempt;
+        }
         foreach ($this->eligibleModules($task, $allowPaid) as $module) {
             try {
                 $text = $this->callModule($module, $prompt);
@@ -145,6 +150,73 @@ final class CommerceAiModuleManager
         }
 
         return $this->short($text, 4000);
+    }
+
+    /** @param list<array<string,mixed>> $attempts @return array<string,mixed>|null */
+    private function trySiteAi(string $task, string $prompt, array &$attempts): ?array
+    {
+        if ($this->siteAi === null || !method_exists($this->siteAi, 'isEnabled') || !method_exists($this->siteAi, 'chat')) {
+            return null;
+        }
+
+        try {
+            if ($this->siteAi->isEnabled() !== true) {
+                return null;
+            }
+            $system = 'You are a Daiying Commerce assistant. Only provide cautious copy and explanations. Never modify verification facts, never claim authenticity, never decide purchases for users.';
+            $response = $this->siteAi->chat([
+                ['role' => 'system', 'content' => $system],
+                ['role' => 'user', 'content' => $prompt],
+            ], ['task' => 'commerce.' . $task]);
+            $text = $this->siteAiResponseText($response);
+            if ($text === '') {
+                throw new RuntimeException('站点 AI 返回为空。');
+            }
+            $text = $this->short($text, 4000);
+            $this->repo->recordAiInvocation(null, '站点 AI', $task, 'success', 'free', $prompt, '', $text);
+
+            return [
+                'ok' => true,
+                'task' => $task,
+                'module_id' => null,
+                'module_name' => '站点 AI',
+                'billing_type' => 'free',
+                'result' => $text,
+                'attempts' => $attempts,
+                'source' => 'site_ai',
+            ];
+        } catch (Throwable $exception) {
+            $message = $this->safeError($exception->getMessage());
+            $attempts[] = [
+                'module_id' => null,
+                'module_name' => '站点 AI',
+                'billing_type' => 'free',
+                'error' => $message,
+            ];
+            $this->repo->recordAiInvocation(null, '站点 AI', $task, 'failed', 'free', $prompt, $message);
+
+            return null;
+        }
+    }
+
+    private function siteAiResponseText(mixed $response): string
+    {
+        if (is_string($response)) {
+            return trim($response);
+        }
+        if (!is_array($response)) {
+            return '';
+        }
+        foreach (['text', 'content', 'message', 'result'] as $key) {
+            if (isset($response[$key]) && is_string($response[$key])) {
+                return trim($response[$key]);
+            }
+        }
+        if (isset($response['choices'][0]['message']['content']) && is_string($response['choices'][0]['message']['content'])) {
+            return trim($response['choices'][0]['message']['content']);
+        }
+
+        return '';
     }
 
     /** @return list<array<string,mixed>> */
