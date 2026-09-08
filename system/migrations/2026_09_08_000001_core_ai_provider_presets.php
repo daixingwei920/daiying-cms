@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Cms\Core\Ai\AiProviderPresets;
 use Cms\Core\Migration\MigrationInterface;
 
 return new class implements MigrationInterface {
@@ -52,8 +51,8 @@ return new class implements MigrationInterface {
             if (!is_array($row)) {
                 continue;
             }
-            $provider = AiProviderPresets::normalize((string) ($row['provider'] ?? 'openai_compatible'));
-            $adapter = AiProviderPresets::adapter($provider, (string) ($row['adapter'] ?? ''));
+            $provider = $this->normalizeProvider((string) ($row['provider'] ?? 'openai_compatible'));
+            $adapter = $this->adapterFor($provider, (string) ($row['adapter'] ?? ''));
             $stmt->execute([
                 ':provider' => $provider,
                 ':adapter' => $adapter,
@@ -70,5 +69,34 @@ return new class implements MigrationInterface {
         }
 
         return array_map(static fn (array $row): string => (string) ($row['Field'] ?? ''), $pdo->query('SHOW COLUMNS FROM ' . $table)->fetchAll());
+    }
+
+    private function normalizeProvider(string $provider): string
+    {
+        $provider = trim($provider);
+        if ($provider === '' || $provider === 'custom' || $provider === 'openai-compatible') {
+            return 'openai_compatible';
+        }
+        if ($provider === 'grok' || $provider === 'x.ai') {
+            return 'xai';
+        }
+        if ($provider === 'hunyuan' || $provider === 'tencent') {
+            return 'tencent_hunyuan';
+        }
+        if (!in_array($provider, ['deepseek', 'openai', 'xai', 'tencent_hunyuan', 'gemini', 'openai_compatible'], true)) {
+            return 'openai_compatible';
+        }
+
+        return $provider;
+    }
+
+    private function adapterFor(string $provider, string $adapter): string
+    {
+        $adapter = trim($adapter);
+        if (in_array($adapter, ['openai_compatible', 'gemini'], true)) {
+            return $adapter;
+        }
+
+        return $provider === 'gemini' ? 'gemini' : 'openai_compatible';
     }
 };
