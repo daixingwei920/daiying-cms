@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cms\Core\Support;
 
 use Cms\Core\Config\Settings;
+use Cms\Core\Content\ContentFrontController;
 use Cms\Core\Recovery\IntegrityChecker;
 use PDO;
 use Throwable;
@@ -99,9 +100,11 @@ final class SystemHealthDoctor
     /** @return list<array<string,string>> */
     private function seo(): array
     {
+        $dynamicSeoRoutes = method_exists(ContentFrontController::class, 'sitemap') && method_exists(ContentFrontController::class, 'robots');
+
         return [
             $this->check('seo.site_url', (string) $this->settings->get('site.url', '') !== '' ? 'PASS' : 'WARNING', 'Site URL should be configured for canonical links.', 'Set site.url.'),
-            $this->check('seo.sitemap', is_file($this->rootPath . '/public/sitemap.xml') ? 'PASS' : 'WARNING', 'Sitemap can be generated or served by theme/plugin.', 'Generate sitemap if SEO indexing is required.'),
+            $this->check('seo.sitemap', $dynamicSeoRoutes ? 'PASS' : 'WARNING', 'Sitemap and robots.txt are served by Core dynamic routes.', 'Ensure /sitemap.xml and /robots.txt routes are registered.'),
         ];
     }
 

@@ -112,6 +112,18 @@ final class SystemHealthService
         } catch (Throwable $exception) {
             $add('admin.mfa', '管理员 MFA', 'WARNING', '无法检查 MFA：' . $this->safe($exception->getMessage()), '确认管理员和 MFA 迁移已执行。');
         }
+
+        foreach ([
+            'cms_core_queue_jobs' => ['id' => 'queue.table', 'label' => '队列表'],
+            'cms_core_scheduled_tasks' => ['id' => 'scheduler.table', 'label' => '计划任务表'],
+        ] as $table => $meta) {
+            try {
+                $pdo->query('SELECT COUNT(*) FROM ' . $table)->fetchColumn();
+                $add($meta['id'], $meta['label'], 'PASS', $table . ' 可读取。');
+            } catch (Throwable) {
+                $add($meta['id'], $meta['label'], 'WARNING', $table . ' 不存在或不可读取。', '运行 Foundation 迁移。');
+            }
+        }
     }
 
     private function pendingMigrationCount(PDO $pdo): int
