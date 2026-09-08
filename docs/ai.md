@@ -12,10 +12,18 @@ Administrators can configure site AI under:
 Admin -> Site Settings -> AI Settings
 ```
 
-The first supported Provider modes are:
+Provider choices are user-friendly presets. They do not each map to a separate Core implementation.
 
-- `deepseek`
-- `openai_compatible`
+| Provider | Adapter | Default Base URL | Default Model |
+| --- | --- | --- | --- |
+| `deepseek` | `openai_compatible` | `https://api.deepseek.com/v1` | `deepseek-chat` |
+| `openai` | `openai_compatible` | `https://api.openai.com/v1` | `gpt-4.1-mini` |
+| `xai` | `openai_compatible` | `https://api.x.ai/v1` | `grok-4.6` |
+| `tencent_hunyuan` | `openai_compatible` | `https://api.hunyuan.cloud.tencent.com/v1` | `hunyuan-turbos-latest` |
+| `gemini` | `gemini` | `https://generativelanguage.googleapis.com/v1beta` | `gemini-2.5-flash` |
+| `openai_compatible` | `openai_compatible` | administrator-defined | administrator-defined |
+
+When an administrator selects a preset, the form fills the recommended Base URL, model, and adapter protocol. Base URL and model remain editable, so compatible services can update endpoints or models without a Core code change.
 
 The settings include:
 
@@ -59,6 +67,7 @@ Stable methods:
 - `getConfig(): array`
 - `chat(array $messages, array $options = []): array`
 - `testConnection(): array`
+- `capabilities(): array`
 
 `getConfig()` returns a masked/safe configuration. It does not expose the API Key.
 
@@ -76,11 +85,40 @@ AI is optional. These states must not break normal CMS behavior:
 
 AI calls throw `Cms\Core\Ai\AiException` with a stable `reason()` code and a safe human-readable message. Callers should catch the exception and show a feature-level error instead of letting the page fail.
 
+Common failure reasons include:
+
+- `disabled`
+- `api_key_missing`
+- `auth_failed`
+- `model_missing`
+- `model_not_found`
+- `quota_or_rate_limited`
+- `timeout`
+- `network_error`
+- `response_invalid`
+- `response_empty`
+
+## Adapter Architecture
+
+Core keeps the Provider layer intentionally small:
+
+- `OpenAiCompatibleProviderClient` handles OpenAI-style chat completions for DeepSeek, OpenAI, Grok / xAI, Tencent Hunyuan, and custom compatible endpoints.
+- `GeminiProviderClient` handles Google's native Gemini `generateContent` protocol.
+- `AiProviderPresets` maps friendly Provider names to adapter, Base URL, and model defaults.
+
+New AI services that are compatible with OpenAI chat completions should normally be added as presets only. A new Adapter should be added only when the wire protocol is materially different.
+
 ## Storage And Upgrades
 
 Site AI settings are stored in `cms_core_ai_settings`. The API Key is encrypted with the site's `security.encryption_key` using AES-256-GCM.
 
 The migration `2026_09_07_000002_core_ai_settings` creates the table and inserts disabled safe defaults for older sites. Future schema changes must be handled by migrations or upgrade handlers, not by requiring users to re-enter keys.
+
+The migration `2026_09_08_000001_core_ai_provider_presets` adds the `adapter` field for the preset architecture and backfills existing rows:
+
+- existing `deepseek` settings remain `deepseek` and use the `openai_compatible` adapter
+- existing `openai_compatible` settings remain custom OpenAI-compatible settings
+- existing encrypted API Keys are not rewritten or cleared
 
 Plugins must treat the Core AI API as the compatibility contract and avoid depending on table names, columns, or private implementation files.
 

@@ -129,7 +129,7 @@ Core media support includes MIME validation, randomized storage keys, deduplicat
 
 ### Global AI Provider Settings
 
-Core provides optional site-level AI Provider configuration and a reusable AI service API for CMS features and plugins. The AI layer handles configuration, Provider calls, and safe error handling only; business uses such as summaries, SEO, product text, or distribution adaptation belong to plugins or feature modules.
+Core provides optional site-level AI Provider configuration and a reusable AI service API for CMS features and plugins. DeepSeek, OpenAI, Grok / xAI, Tencent Hunyuan, and custom compatible endpoints share one OpenAI-compatible adapter; Gemini uses a native Gemini adapter. The AI layer handles configuration, Provider calls, and safe error handling only; business uses such as summaries, SEO, product text, or distribution adaptation belong to plugins or feature modules.
 
 See [Global AI](docs/ai.md).
 

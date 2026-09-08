@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cms\Core\Ai;
 
-final class OpenAiCompatibleProviderClient implements AiProviderClientInterface
+final class GeminiProviderClient implements AiProviderClientInterface
 {
     /**
      * @param list<array{role:string,content:string}> $messages
@@ -13,10 +13,10 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface
      */
     public function chat(array $messages, array $config): array
     {
-        $provider = AiProviderPresets::normalize((string) ($config['provider'] ?? 'openai_compatible'));
+        $provider = (string) ($config['provider'] ?? 'gemini');
         $apiKey = (string) ($config['api_key'] ?? '');
         $model = trim((string) ($config['model'] ?? ''));
-        $baseUrl = $this->baseUrl($provider, (string) ($config['base_url'] ?? ''));
+        $baseUrl = $this->baseUrl((string) ($config['base_url'] ?? ''));
         if ($apiKey === '') {
             throw new AiException('AI API Key is not configured.', 'api_key_missing');
         }
@@ -24,21 +24,7 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface
             throw new AiException('AI model is not configured.', 'model_missing');
         }
 
-        $payload = [
-            'model' => $model,
-            'messages' => $messages,
-        ];
-        $maxTokens = (int) ($config['max_tokens'] ?? 0);
-        if ($maxTokens > 0) {
-            $payload['max_tokens'] = min($maxTokens, 200000);
-        }
-        if (array_key_exists('temperature', $config)) {
-            $temperature = (float) $config['temperature'];
-            if ($temperature >= 0.0 && $temperature <= 2.0) {
-                $payload['temperature'] = $temperature;
-            }
-        }
-
+        $payload = $this->payload($messages, $config);
         $json = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         if (!is_string($json)) {
             throw new AiException('AI request payload is invalid.', 'request_invalid');
@@ -47,11 +33,11 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface
         $headers = [
             'Content-Type: application/json',
             'Accept: application/json',
-            'Authorization: Bearer ' . $apiKey,
         ];
         $timeout = max(1, min(120, (int) ($config['timeout_seconds'] ?? 30)));
+        $url = $baseUrl . '/models/' . rawurlencode($model) . ':generateContent?key=' . rawurlencode($apiKey);
         $responseHeaders = [];
-        $body = $this->post($baseUrl . '/chat/completions', $headers, $json, $timeout, $responseHeaders);
+        $body = $this->post($url, $headers, $json, $timeout, $responseHeaders);
         $status = $this->httpStatus($responseHeaders);
         if ($status < 200 || $status >= 300) {
             throw new AiException($this->safeHttpError($status, $body), $this->httpReason($status));
@@ -65,7 +51,15 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface
         if (!is_array($decoded)) {
             throw new AiException('AI provider returned an invalid response.', 'response_invalid');
         }
-        $content = (string) ($decoded['choices'][0]['message']['content'] ?? '');
+        $parts = $decoded['candidates'][0]['content']['parts'] ?? [];
+        $content = '';
+        if (is_array($parts)) {
+            foreach ($parts as $part) {
+                if (is_array($part) && is_string($part['text'] ?? null)) {
+                    $content .= (string) $part['text'];
+                }
+            }
+        }
         if ($content === '') {
             throw new AiException('AI provider returned an empty response.', 'response_empty');
         }
@@ -75,10 +69,56 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface
             'model' => $model,
             'content' => $content,
             'raw' => [
-                'id' => (string) ($decoded['id'] ?? ''),
-                'usage' => is_array($decoded['usage'] ?? null) ? $decoded['usage'] : [],
+                'usage' => is_array($decoded['usageMetadata'] ?? null) ? $decoded['usageMetadata'] : [],
             ],
         ];
+    }
+
+    /**
+     * @param list<array{role:string,content:string}> $messages
+     * @param array<string,mixed> $config
+     * @return array<string,mixed>
+     */
+    private function payload(array $messages, array $config): array
+    {
+        $contents = [];
+        $systemParts = [];
+        foreach ($messages as $message) {
+            $role = (string) $message['role'];
+            $content = (string) $message['content'];
+            if ($role === 'system') {
+                $systemParts[] = ['text' => $content];
+                continue;
+            }
+            $contents[] = [
+                'role' => $role === 'assistant' ? 'model' : 'user',
+                'parts' => [['text' => $content]],
+            ];
+        }
+        if ($contents === [] && $systemParts !== []) {
+            $contents[] = ['role' => 'user', 'parts' => [['text' => 'OK']]];
+        }
+
+        $payload = ['contents' => $contents];
+        if ($systemParts !== []) {
+            $payload['systemInstruction'] = ['parts' => $systemParts];
+        }
+        $generationConfig = [];
+        $maxTokens = (int) ($config['max_tokens'] ?? 0);
+        if ($maxTokens > 0) {
+            $generationConfig['maxOutputTokens'] = min($maxTokens, 200000);
+        }
+        if (array_key_exists('temperature', $config)) {
+            $temperature = (float) $config['temperature'];
+            if ($temperature >= 0.0 && $temperature <= 2.0) {
+                $generationConfig['temperature'] = $temperature;
+            }
+        }
+        if ($generationConfig !== []) {
+            $payload['generationConfig'] = $generationConfig;
+        }
+
+        return $payload;
     }
 
     /** @param list<string> $headers @param list<string> $responseHeaders */
@@ -147,6 +187,17 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface
         return 200;
     }
 
+    private function httpReason(int $status): string
+    {
+        return match ($status) {
+            401, 403 => 'auth_failed',
+            404 => 'model_not_found',
+            408, 504 => 'timeout',
+            429 => 'quota_or_rate_limited',
+            default => 'http_error',
+        };
+    }
+
     private function safeHttpError(int $status, string $body): string
     {
         if ($status === 401 || $status === 403) {
@@ -161,7 +212,7 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface
         $message = 'AI provider request failed. HTTP ' . $status . '.';
         try {
             $decoded = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-            $providerMessage = is_array($decoded) ? (string) ($decoded['error']['message'] ?? '') : '';
+            $providerMessage = is_array($decoded) ? (string) ($decoded['error']['message'] ?? $decoded['error']['status'] ?? '') : '';
             if ($providerMessage !== '') {
                 $message .= ' ' . substr($providerMessage, 0, 160);
             }
@@ -171,14 +222,11 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface
         return $this->redact($message);
     }
 
-    private function baseUrl(string $provider, string $baseUrl): string
+    private function baseUrl(string $baseUrl): string
     {
         $baseUrl = rtrim(trim($baseUrl), '/');
         if ($baseUrl === '') {
-            $baseUrl = AiProviderPresets::get($provider)['base_url'];
-        }
-        if ($baseUrl === '') {
-            throw new AiException('AI Base URL is not configured.', 'base_url_missing');
+            $baseUrl = AiProviderPresets::get('gemini')['base_url'];
         }
         if (strlen($baseUrl) > 2048 || preg_match('/[\x00-\x1F\x7F]/', $baseUrl) === 1) {
             throw new AiException('AI Base URL is invalid.', 'base_url_invalid');
@@ -193,19 +241,8 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface
         return $baseUrl;
     }
 
-    private function httpReason(int $status): string
-    {
-        return match ($status) {
-            401, 403 => 'auth_failed',
-            404 => 'model_not_found',
-            408, 504 => 'timeout',
-            429 => 'quota_or_rate_limited',
-            default => 'http_error',
-        };
-    }
-
     private function redact(string $value): string
     {
-        return preg_replace('/(?:sk|Bearer|api[_-]?key|secret)[A-Za-z0-9_=:.,\/+\-]+/i', '[redacted]', $value) ?: $value;
+        return preg_replace('/(?:sk|Bearer|api[_-]?key|key|secret)[A-Za-z0-9_=:.,\/+\-]+/i', '[redacted]', $value) ?: $value;
     }
 }

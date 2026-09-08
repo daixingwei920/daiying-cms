@@ -24,7 +24,8 @@ final class SiteAiSettingsRepository
 
         return [
             'enabled' => (int) ($row['enabled'] ?? 0) === 1,
-            'provider' => (string) ($row['provider'] ?? 'openai_compatible'),
+            'provider' => AiProviderPresets::normalize((string) ($row['provider'] ?? 'openai_compatible')),
+            'adapter' => AiProviderPresets::adapter((string) ($row['provider'] ?? 'openai_compatible'), (string) ($row['adapter'] ?? '')),
             'base_url' => (string) ($row['base_url'] ?? ''),
             'model' => (string) ($row['model'] ?? ''),
             'timeout_seconds' => (int) ($row['timeout_seconds'] ?? 30),
@@ -40,7 +41,7 @@ final class SiteAiSettingsRepository
     public function runtimeConfig(): array
     {
         $row = $this->row();
-        $config = $this->current();
+        $config = AiProviderPresets::applyDefaults($this->current());
         $config['api_key'] = $this->decrypt((string) ($row['api_key_ciphertext'] ?? ''));
 
         return $config;
@@ -59,17 +60,20 @@ final class SiteAiSettingsRepository
             $this->decrypt($ciphertext);
         }
 
+        $provider = AiProviderPresets::normalize((string) ($config['provider'] ?? 'openai_compatible'));
+        $adapter = AiProviderPresets::adapter($provider, (string) ($config['adapter'] ?? ''));
         $now = gmdate('c');
         $stmt = $this->pdo->prepare(
             'UPDATE ' . self::TABLE . '
-             SET enabled = :enabled, provider = :provider, base_url = :base_url, model = :model,
+             SET enabled = :enabled, provider = :provider, adapter = :adapter, base_url = :base_url, model = :model,
                  timeout_seconds = :timeout_seconds, max_tokens = :max_tokens, temperature = :temperature,
                  api_key_ciphertext = :api_key_ciphertext, updated_at = :updated_at
              WHERE id = 1'
         );
         $stmt->execute([
             ':enabled' => !empty($config['enabled']) ? 1 : 0,
-            ':provider' => (string) $config['provider'],
+            ':provider' => $provider,
+            ':adapter' => $adapter,
             ':base_url' => (string) $config['base_url'],
             ':model' => (string) $config['model'],
             ':timeout_seconds' => (int) $config['timeout_seconds'],
@@ -104,6 +108,7 @@ final class SiteAiSettingsRepository
                 id INTEGER PRIMARY KEY,
                 enabled INTEGER NOT NULL DEFAULT 0,
                 provider VARCHAR(64) NOT NULL DEFAULT "openai_compatible",
+                adapter VARCHAR(64) NOT NULL DEFAULT "openai_compatible",
                 base_url VARCHAR(2048) NOT NULL DEFAULT "",
                 model VARCHAR(191) NOT NULL DEFAULT "",
                 timeout_seconds INTEGER NOT NULL DEFAULT 30,
@@ -119,6 +124,7 @@ final class SiteAiSettingsRepository
                 $this->pdo->exec('ALTER TABLE ' . self::TABLE . ' ADD COLUMN ' . $column . ' ' . $definition);
             }
         }
+        $this->backfillAdapters();
     }
 
     /** @return array<string,string> */
@@ -127,6 +133,7 @@ final class SiteAiSettingsRepository
         return [
             'enabled' => 'INTEGER NOT NULL DEFAULT 0',
             'provider' => 'VARCHAR(64) NOT NULL DEFAULT "openai_compatible"',
+            'adapter' => 'VARCHAR(64) NOT NULL DEFAULT "openai_compatible"',
             'base_url' => 'VARCHAR(2048) NOT NULL DEFAULT ""',
             'model' => 'VARCHAR(191) NOT NULL DEFAULT ""',
             'timeout_seconds' => 'INTEGER NOT NULL DEFAULT 30',
@@ -169,6 +176,7 @@ final class SiteAiSettingsRepository
             'id' => 1,
             'enabled' => 0,
             'provider' => 'openai_compatible',
+            'adapter' => 'openai_compatible',
             'base_url' => '',
             'model' => '',
             'timeout_seconds' => 30,
@@ -229,6 +237,24 @@ final class SiteAiSettingsRepository
     {
         if ($apiKey === '' || $apiKey !== trim($apiKey) || strlen($apiKey) > 4096 || preg_match('/[\x00-\x1F\x7F]/', $apiKey) === 1) {
             throw new AiException('AI API Key format is invalid.', 'api_key_invalid');
+        }
+    }
+
+    private function backfillAdapters(): void
+    {
+        $rows = $this->pdo->query('SELECT id, provider, adapter FROM ' . self::TABLE)->fetchAll();
+        $stmt = $this->pdo->prepare('UPDATE ' . self::TABLE . ' SET provider = :provider, adapter = :adapter WHERE id = :id');
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $provider = AiProviderPresets::normalize((string) ($row['provider'] ?? 'openai_compatible'));
+            $adapter = AiProviderPresets::adapter($provider, (string) ($row['adapter'] ?? ''));
+            $stmt->execute([
+                ':provider' => $provider,
+                ':adapter' => $adapter,
+                ':id' => (int) ($row['id'] ?? 0),
+            ]);
         }
     }
 }

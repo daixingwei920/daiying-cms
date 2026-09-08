@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cms\Core\Admin;
 
 use Cms\Core\Ai\AiException;
+use Cms\Core\Ai\AiProviderPresets;
 use Cms\Core\Ai\AiService;
 use Cms\Core\Ai\SiteAiSettingsRepository;
 use Cms\Core\Advertising\AdRenderer;
@@ -552,6 +553,7 @@ final class AdminController
             (new AuditLogger(ConnectionFactory::make($this->settings)))->record('admin', (int) ($guard['id'] ?? 0), 'site.ai_settings_saved', [
                 'enabled' => (bool) $input['enabled'],
                 'provider' => $input['provider'],
+                'adapter' => $input['adapter'],
                 'base_url_host' => $this->urlHostForAudit($input['base_url']),
                 'model' => $input['model'],
             ]);
@@ -1063,6 +1065,7 @@ final class AdminController
             $config = [
                 'enabled' => false,
                 'provider' => 'openai_compatible',
+                'adapter' => 'openai_compatible',
                 'base_url' => '',
                 'model' => '',
                 'timeout_seconds' => 30,
@@ -1074,49 +1077,59 @@ final class AdminController
             $message .= '<p class="error">AI 配置暂不可用：' . View::escape($exception->getMessage()) . '</p>';
         }
 
-        $provider = (string) ($config['provider'] ?? 'openai_compatible');
+        $provider = AiProviderPresets::normalize((string) ($config['provider'] ?? 'openai_compatible'));
+        $adapter = AiProviderPresets::adapter($provider, (string) ($config['adapter'] ?? ''));
         $providerOptions = '';
-        foreach (['deepseek' => 'DeepSeek', 'openai_compatible' => 'OpenAI-compatible'] as $value => $label) {
+        foreach (AiProviderPresets::all() as $value => $preset) {
+            $label = (string) $preset['label'];
             $providerOptions .= '<option value="' . $value . '"' . ($provider === $value ? ' selected' : '') . '>' . $label . '</option>';
         }
+        $presetJson = json_encode(AiProviderPresets::all(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $presetJson = is_string($presetJson) ? $presetJson : '{}';
         $keyText = !empty($config['api_key_configured']) ? '已配置（' . View::escape((string) $config['api_key_masked']) . '），留空则保留' : '未配置';
 
         return '<div class="admin-page-header"><div><h1>AI 设置</h1><p class="muted">站点级 AI Provider 配置，供 CMS 和插件通过 Core 统一 API 复用。官方更新服务器和市场 AI 审核不使用这里的配置。</p></div></div>' .
             $message .
             '<form method="post" action="/admin/settings/ai">' . CsrfToken::field() .
             '<label class="checkbox-row"><input type="checkbox" name="enabled" value="1"' . (!empty($config['enabled']) ? ' checked' : '') . '> 启用全局 AI</label>' .
-            '<label>Provider<select name="provider">' . $providerOptions . '</select></label>' .
+            '<label>Provider<select name="provider" id="ai-provider-select">' . $providerOptions . '</select></label>' .
+            '<label>协议 / Adapter<input id="ai-adapter-display" value="' . View::escape($adapter) . '" readonly></label>' .
             '<label>API Key<input name="api_key" type="password" autocomplete="off" placeholder="' . $keyText . '"></label>' .
             '<label class="checkbox-row"><input type="checkbox" name="clear_api_key" value="1"> 清空已保存的 API Key</label>' .
-            '<label>Base URL<input name="base_url" value="' . View::escape((string) ($config['base_url'] ?? '')) . '" placeholder="https://api.deepseek.com/v1"></label>' .
-            '<label>Model<input name="model" maxlength="191" value="' . View::escape((string) ($config['model'] ?? '')) . '" placeholder="deepseek-chat"></label>' .
+            '<label>Base URL<input id="ai-base-url" name="base_url" value="' . View::escape((string) ($config['base_url'] ?? '')) . '" placeholder="https://api.deepseek.com/v1"></label>' .
+            '<label>Model<input id="ai-model" name="model" maxlength="191" value="' . View::escape((string) ($config['model'] ?? '')) . '" placeholder="deepseek-chat"></label>' .
             '<label>Timeout 秒<input name="timeout_seconds" type="number" min="1" max="120" value="' . View::escape((string) ($config['timeout_seconds'] ?? 30)) . '"></label>' .
             '<label>Max Tokens<input name="max_tokens" type="number" min="1" max="200000" value="' . View::escape((string) ($config['max_tokens'] ?? 1024)) . '"></label>' .
             '<label>Temperature<input name="temperature" type="number" min="0" max="2" step="0.1" value="' . View::escape((string) ($config['temperature'] ?? 0.7)) . '"></label>' .
             '<button type="submit">保存配置</button></form>' .
             '<form method="post" action="/admin/settings/ai/test">' . CsrfToken::field() . '<button class="admin-button-secondary" type="submit">测试连接</button></form>' .
-            '<p><a class="button admin-button-secondary" href="/admin/settings">返回站点设置</a></p>';
+            '<p><a class="button admin-button-secondary" href="/admin/settings">返回站点设置</a></p>' .
+            '<script>window.DAIYING_AI_PRESETS=' . $presetJson . ';(function(){var select=document.getElementById("ai-provider-select");var base=document.getElementById("ai-base-url");var model=document.getElementById("ai-model");var adapter=document.getElementById("ai-adapter-display");if(!select||!base||!model||!adapter){return;}var presets=window.DAIYING_AI_PRESETS||{};var previous=select.value;select.addEventListener("change",function(){var next=select.value;var oldPreset=presets[previous]||{};var nextPreset=presets[next]||{};if(base.value===""||base.value===(oldPreset.base_url||"")){base.value=nextPreset.base_url||"";}if(model.value===""||model.value===(oldPreset.model||"")){model.value=nextPreset.model||"";}adapter.value=nextPreset.adapter||"openai_compatible";previous=next;});})();</script>';
     }
 
-    /** @return array{enabled:bool,provider:string,base_url:string,model:string,timeout_seconds:int,max_tokens:int,temperature:float,api_key:string,clear_api_key:bool} */
+    /** @return array{enabled:bool,provider:string,adapter:string,base_url:string,model:string,timeout_seconds:int,max_tokens:int,temperature:float,api_key:string,clear_api_key:bool} */
     private function aiSettingsInput(Request $request): array
     {
-        $provider = (string) $request->input('provider', 'openai_compatible');
-        if (!in_array($provider, ['deepseek', 'openai_compatible'], true)) {
+        $rawProvider = trim((string) $request->input('provider', 'openai_compatible'));
+        $supportedProviderInputs = array_merge(array_keys(AiProviderPresets::all()), ['custom', 'openai-compatible', 'grok', 'x.ai', 'hunyuan', 'tencent']);
+        if (!in_array($rawProvider, $supportedProviderInputs, true)) {
             throw new \InvalidArgumentException('AI Provider 无效。');
         }
+        $provider = AiProviderPresets::normalize($rawProvider);
+        $preset = AiProviderPresets::get($provider);
+        $adapter = AiProviderPresets::adapter($provider);
 
         $enabled = (string) $request->input('enabled', '') === '1';
         $baseUrl = rtrim(trim((string) $request->input('base_url', '')), '/');
-        if ($baseUrl === '' && $provider === 'deepseek') {
-            $baseUrl = 'https://api.deepseek.com/v1';
+        if ($baseUrl === '' && $preset['base_url'] !== '') {
+            $baseUrl = $preset['base_url'];
         }
         if ($baseUrl !== '') {
             $parts = parse_url($baseUrl);
             $scheme = is_array($parts) ? strtolower((string) ($parts['scheme'] ?? '')) : '';
             $host = is_array($parts) ? (string) ($parts['host'] ?? '') : '';
-            if (strlen($baseUrl) > 2048 || preg_match('/[\x00-\x1F\x7F]/', $baseUrl) === 1 || !in_array($scheme, ['http', 'https'], true) || $host === '' || isset($parts['user']) || isset($parts['pass'])) {
-                throw new \InvalidArgumentException('AI Base URL 必须是 http 或 https 地址，且不能包含用户名或密码。');
+            if (strlen($baseUrl) > 2048 || preg_match('/[\x00-\x1F\x7F]/', $baseUrl) === 1 || !in_array($scheme, ['http', 'https'], true) || $host === '' || isset($parts['user']) || isset($parts['pass']) || isset($parts['query']) || isset($parts['fragment'])) {
+                throw new \InvalidArgumentException('AI Base URL 必须是 http 或 https 地址，且不能包含用户名、密码、查询参数或片段。');
             }
         }
         if ($enabled && $baseUrl === '') {
@@ -1124,8 +1137,8 @@ final class AdminController
         }
 
         $model = trim((string) $request->input('model', ''));
-        if ($model === '' && $provider === 'deepseek') {
-            $model = 'deepseek-chat';
+        if ($model === '' && $preset['model'] !== '') {
+            $model = $preset['model'];
         }
         if (strlen($model) > 191 || preg_match('/[\x00-\x1F\x7F]/', $model) === 1) {
             throw new \InvalidArgumentException('AI Model 格式无效。');
@@ -1156,6 +1169,7 @@ final class AdminController
         return [
             'enabled' => $enabled,
             'provider' => $provider,
+            'adapter' => $adapter,
             'base_url' => $baseUrl,
             'model' => $model,
             'timeout_seconds' => $timeout,

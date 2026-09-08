@@ -48,7 +48,7 @@ final class AiService
         }
         $cleanMessages = $this->messages($messages);
 
-        return ($this->client ?? new OpenAiCompatibleProviderClient())->chat($cleanMessages, $config);
+        return $this->providerClient($config)->chat($cleanMessages, $config);
     }
 
     /** @return array{provider:string,model:string,status:string,message:string} */
@@ -67,6 +67,17 @@ final class AiService
         ];
     }
 
+    /** @return array<string,mixed> */
+    public function capabilities(): array
+    {
+        return [
+            'chat' => true,
+            'test_connection' => true,
+            'adapters' => ['openai_compatible', 'gemini'],
+            'providers' => array_keys(AiProviderPresets::all()),
+        ];
+    }
+
     private function repository(): SiteAiSettingsRepository
     {
         return new SiteAiSettingsRepository($this->pdo, (string) $this->settings->get('security.encryption_key', ''));
@@ -75,14 +86,28 @@ final class AiService
     /** @param array<string,mixed> $options @return array<string,mixed> */
     private function runtimeConfig(array $options): array
     {
-        $config = $this->repository()->runtimeConfig();
+        $config = AiProviderPresets::applyDefaults($this->repository()->runtimeConfig());
         foreach (['model', 'base_url', 'max_tokens', 'temperature', 'timeout_seconds'] as $key) {
             if (array_key_exists($key, $options)) {
                 $config[$key] = $options[$key];
             }
         }
+        $config = AiProviderPresets::applyDefaults($config);
 
         return $config;
+    }
+
+    /** @param array<string,mixed> $config */
+    private function providerClient(array $config): AiProviderClientInterface
+    {
+        if ($this->client !== null) {
+            return $this->client;
+        }
+        $adapter = AiProviderPresets::adapter((string) ($config['provider'] ?? ''), (string) ($config['adapter'] ?? ''));
+
+        return $adapter === 'gemini'
+            ? new GeminiProviderClient()
+            : new OpenAiCompatibleProviderClient();
     }
 
     /**

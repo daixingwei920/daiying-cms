@@ -125,7 +125,7 @@ Core 已包含支付 Provider 设置、支付记录、付费内容/下载授权�
 
 ### 全局 AI Provider 设置
 
-Core 提供可选的站点级 AI Provider 配置和统一 AI Service API，供 CMS 功能和插件复用。AI 层只负责配置、Provider 调用和安全错误处理；文章摘要、SEO、商品描述、渠道适配等具体用途应由插件或业务模块决定。
+Core 提供可选的站点级 AI Provider 配置和统一 AI Service API，供 CMS 功能和插件复用。DeepSeek、OpenAI、Grok / xAI、腾讯混元和自定义兼容服务共用 OpenAI-compatible Adapter；Gemini 使用原生 Gemini Adapter。AI 层只负责配置、Provider 调用和安全错误处理；文章摘要、SEO、商品描述、渠道适配等具体用途应由插件或业务模块决定。
 
 见：[全局 AI](docs/ai.md)。
 
