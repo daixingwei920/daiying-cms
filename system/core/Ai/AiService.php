@@ -39,32 +39,18 @@ final class AiService
      */
     public function chat(array $messages, array $options = []): array
     {
-        $config = $this->runtimeConfig($options);
-        if (empty($config['enabled'])) {
-            throw new AiException('Global AI is disabled.', 'disabled');
-        }
-        if ((string) ($config['api_key'] ?? '') === '') {
-            throw new AiException('AI API Key is not configured.', 'api_key_missing');
-        }
-        $cleanMessages = $this->messages($messages);
+        return $this->gateway()->chat($messages, $options);
+    }
 
-        return $this->providerClient($config)->chat($cleanMessages, $config);
+    public function request(AiRequest $request): AiResponse
+    {
+        return $this->gateway()->request($request);
     }
 
     /** @return array{provider:string,model:string,status:string,message:string} */
     public function testConnection(): array
     {
-        $config = $this->runtimeConfig(['max_tokens' => 16, 'temperature' => 0.0]);
-        $result = $this->chat([
-            ['role' => 'user', 'content' => 'Reply with OK only.'],
-        ], ['max_tokens' => 16, 'temperature' => 0.0]);
-
-        return [
-            'provider' => (string) ($result['provider'] ?? $config['provider']),
-            'model' => (string) ($result['model'] ?? $config['model']),
-            'status' => 'success',
-            'message' => '连接成功',
-        ];
+        return $this->gateway()->testConnection();
     }
 
     /** @return array<string,mixed> */
@@ -75,6 +61,15 @@ final class AiService
             'test_connection' => true,
             'adapters' => ['openai_compatible', 'gemini'],
             'providers' => array_keys(AiProviderPresets::all()),
+            'provider_registry' => AiProviderRegistry::describe(),
+            'models' => array_merge(...array_values(array_map(static fn (array $provider): array => $provider['models'], AiProviderRegistry::describe()))),
+            'gateway' => true,
+            'usage_ledger' => true,
+            'quota' => true,
+            'jobs' => true,
+            'tools' => true,
+            'agents' => true,
+            'prompts' => true,
         ];
     }
 
@@ -83,8 +78,13 @@ final class AiService
         return new SiteAiSettingsRepository($this->pdo, (string) $this->settings->get('security.encryption_key', ''));
     }
 
+    public function gateway(): AiGateway
+    {
+        return new AiGateway($this);
+    }
+
     /** @param array<string,mixed> $options @return array<string,mixed> */
-    private function runtimeConfig(array $options): array
+    public function runtimeConfigForGateway(array $options): array
     {
         $config = AiProviderPresets::applyDefaults($this->repository()->runtimeConfig());
         foreach (['model', 'base_url', 'max_tokens', 'temperature', 'timeout_seconds'] as $key) {
@@ -98,23 +98,20 @@ final class AiService
     }
 
     /** @param array<string,mixed> $config */
-    private function providerClient(array $config): AiProviderClientInterface
+    public function providerClientForGateway(array $config): ?AiProviderClientInterface
     {
         if ($this->client !== null) {
             return $this->client;
         }
-        $adapter = AiProviderPresets::adapter((string) ($config['provider'] ?? ''), (string) ($config['adapter'] ?? ''));
 
-        return $adapter === 'gemini'
-            ? new GeminiProviderClient()
-            : new OpenAiCompatibleProviderClient();
+        return null;
     }
 
     /**
      * @param list<array{role:string,content:string}> $messages
      * @return list<array{role:string,content:string}>
      */
-    private function messages(array $messages): array
+    public function messagesForGateway(array $messages): array
     {
         $clean = [];
         foreach ($messages as $message) {

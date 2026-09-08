@@ -5,6 +5,14 @@ declare(strict_types=1);
 namespace Cms\Core\Plugin;
 
 use Cms\Core\Ai\AiService;
+use Cms\Core\Ai\AiAgentDefinition;
+use Cms\Core\Ai\AiAgentRegistry;
+use Cms\Core\Ai\AiPromptRegistry;
+use Cms\Core\Ai\AiPromptTemplate;
+use Cms\Core\Ai\AiProviderInterface;
+use Cms\Core\Ai\AiProviderRegistry;
+use Cms\Core\Ai\AiToolDefinition;
+use Cms\Core\Ai\AiToolRegistry;
 use Cms\Core\Cache\CacheInterface;
 use Cms\Core\Content\ContentTypeRegistry;
 use Cms\Core\Content\CustomFieldDefinition;
@@ -199,6 +207,43 @@ final class PluginContext
         }
 
         MailProviderRegistry::register($provider);
+    }
+
+    public function registerAiProvider(AiProviderInterface $provider): void
+    {
+        if (!$this->hasCapability('ai.provider')) {
+            throw new PluginException('Plugin does not declare ai.provider capability.');
+        }
+
+        AiProviderRegistry::register($provider);
+    }
+
+    /** @param callable(array<string,mixed>):array<string,mixed> $handler */
+    public function registerAiTool(AiToolDefinition $definition, callable $handler): void
+    {
+        if (!$this->hasCapability('ai.tool')) {
+            throw new PluginException('Plugin does not declare ai.tool capability.');
+        }
+
+        AiToolRegistry::register($definition, $handler);
+    }
+
+    public function registerAiAgent(AiAgentDefinition $agent): void
+    {
+        if (!$this->hasCapability('ai.agent')) {
+            throw new PluginException('Plugin does not declare ai.agent capability.');
+        }
+
+        AiAgentRegistry::register($agent);
+    }
+
+    public function registerAiPrompt(AiPromptTemplate $prompt): void
+    {
+        if (!$this->hasCapability('ai.prompt')) {
+            throw new PluginException('Plugin does not declare ai.prompt capability.');
+        }
+
+        AiPromptRegistry::register($prompt);
     }
 
     public function registerRemoteMediaProvider(RemoteMediaProviderInterface $provider): void

@@ -15,6 +15,47 @@ final class PublicApiRegistry
     {
         return [
             [
+                'id' => 'ai.gateway',
+                'version' => FoundationVersions::AI_API,
+                'class' => 'Cms\\Core\\Ai\\AiGateway',
+                'stability' => 'stable',
+                'summary' => 'Route AI requests through configured providers with normalized errors, usage, quota and optional queue support.',
+                'capabilities' => ['ai.use'],
+            ],
+            [
+                'id' => 'ai.provider',
+                'version' => FoundationVersions::AI_API,
+                'class' => 'Cms\\Core\\Ai\\AiProviderInterface',
+                'stability' => 'stable',
+                'summary' => 'Register model providers without binding plugins to vendor-specific request code.',
+                'capabilities' => ['ai.provider'],
+            ],
+            [
+                'id' => 'ai.tools',
+                'version' => FoundationVersions::AI_API,
+                'class' => 'Cms\\Core\\Ai\\AiToolRegistry',
+                'stability' => 'stable',
+                'summary' => 'Register permissioned AI tools with READ, WRITE, DESTRUCTIVE and SENSITIVE risk levels.',
+                'capabilities' => ['ai.tool'],
+            ],
+            [
+                'id' => 'ai.agents',
+                'version' => FoundationVersions::AI_API,
+                'class' => 'Cms\\Core\\Ai\\AiAgentRegistry',
+                'stability' => 'stable',
+                'summary' => 'Describe plugin-provided AI agents through a stable registry without embedding business agents in Core.',
+                'capabilities' => ['ai.agent'],
+            ],
+            [
+                'id' => 'ai.prompts',
+                'version' => FoundationVersions::AI_API,
+                'class' => 'Cms\\Core\\Ai\\AiPromptRegistry',
+                'stability' => 'stable',
+                'summary' => 'Register versioned prompt templates owned by Core or plugins.',
+                'capabilities' => ['ai.prompt'],
+            ],
+            [
+                'id' => 'content.repository',
                 'id' => 'content.repository',
                 'version' => self::CONTRACT_VERSION,
                 'class' => 'Cms\\Core\\Content\\ContentRepository',

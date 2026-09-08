@@ -10,6 +10,7 @@ final class FoundationVersions
     public const PLUGIN_API = '1.0';
     public const THEME_API = '1.0';
     public const STORAGE_API = '1.0';
+    public const AI_API = '1.0';
     public const REST_API = '1.0';
     public const UPDATE_PROTOCOL = '1.0';
 
@@ -21,6 +22,7 @@ final class FoundationVersions
             'plugin_api_version' => self::PLUGIN_API,
             'theme_api_version' => self::THEME_API,
             'storage_api_version' => self::STORAGE_API,
+            'ai_api_version' => self::AI_API,
             'rest_api_version' => self::REST_API,
             'update_protocol_version' => self::UPDATE_PROTOCOL,
         ];
