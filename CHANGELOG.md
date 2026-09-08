@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.28 - 2026-09-07
+
+- Added site-level Global AI Provider settings for CMS and plugin reuse.
+- Added the `Cms\Core\Ai` service API and `PluginContext::ai()` runtime entry point.
+- Added DeepSeek and OpenAI-compatible Provider support with masked API Key storage and safe test connection handling.
+- Added cross-version AI settings migration defaults and regression coverage for upgrade/rollback compatibility.
+- Public install package: `daiying-cms-1.2.28-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.28>.
+
 ## 1.2.27 - 2026-09-07
 
 - Cleared stale, non-active Core release directories before preparing an update retry.
