@@ -3,23 +3,27 @@
 declare(strict_types=1);
 
 use Cms\Core\Plugin\PluginContext;
+use Official\Mail\GmailSmtpMailProvider;
 use Official\Mail\MailController;
-use Official\Mail\MailRepository;
-use Official\Mail\MailService;
-use Official\Mail\SmtpTransport;
+use Official\Mail\OfficialSmtpMailProvider;
+use Official\Mail\OutlookSmtpMailProvider;
 
-require_once __DIR__ . '/src/MailRepository.php';
-require_once __DIR__ . '/src/SmtpTransport.php';
-require_once __DIR__ . '/src/MailService.php';
+require_once __DIR__ . '/src/GmailSmtpMailProvider.php';
+require_once __DIR__ . '/src/OfficialSmtpMailProvider.php';
+require_once __DIR__ . '/src/OutlookSmtpMailProvider.php';
 require_once __DIR__ . '/src/MailController.php';
 
 return static function (PluginContext $context): void {
-    $repository = new MailRepository($context->pdo(), $context->secrets());
-    $service = new MailService($repository, new SmtpTransport());
-    $controller = new MailController($repository, $service);
+    if (method_exists($context, 'registerMailProvider')) {
+        $context->registerMailProvider(new OfficialSmtpMailProvider());
+        $context->registerMailProvider(new GmailSmtpMailProvider());
+        $context->registerMailProvider(new OutlookSmtpMailProvider());
+    }
+    if (method_exists($context, 'registerMailEvent')) {
+        $context->registerMailEvent('official.mail.test', '邮件测试', ['site_name', 'admin_email']);
+    }
 
-    $context->adminRoute('GET', '/admin/mail', [$controller, 'adminSettings'], 'mail.manage', false);
-    $context->adminRoute('POST', '/admin/mail/save', [$controller, 'adminSave'], 'mail.manage', true);
-    $context->adminRoute('POST', '/admin/mail/test', [$controller, 'adminTest'], 'mail.send', true);
+    $controller = new MailController();
+    $context->adminRoute('GET', '/admin/mail', [$controller, 'adminIndex'], 'mail.manage', false);
     $context->adminMenu('邮件设置', '/admin/mail', 'mail.manage');
 };

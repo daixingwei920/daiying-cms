@@ -1,7 +1,7 @@
 {
   "plugin_id": "official.mail",
   "name": "Daiying Mail",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "author": "Daiying CMS",
   "type": "plugin",
   "package_type": "plugin",
@@ -14,18 +14,19 @@
   "capabilities": [
     "network.external",
     "settings.read",
-    "settings.write",
+    "mail.provider",
+    "mail.event",
     "mail.manage",
     "mail.send"
   ],
   "capability_namespaces": ["mail"],
   "dependencies": [],
   "required_plugins": [],
-  "migrations": ["migrations/001_mail_core.php"],
+  "migrations": [],
   "table_prefixes": ["mail_"],
   "data_policy": {
     "uninstall": "retain_mail_logs_and_settings",
     "purge": "separate_confirmation_only"
   },
-  "data_schema_version": "0.1.0-alpha.1"
+  "data_schema_version": "0.1.0-alpha.2"
 }

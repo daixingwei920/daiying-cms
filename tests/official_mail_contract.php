@@ -2,31 +2,21 @@
 
 declare(strict_types=1);
 
-use Cms\Core\Http\Request;
-use Cms\Core\Plugin\PluginSecretStore;
-use Cms\Core\Security\CsrfToken;
-use Official\Mail\MailController;
-use Official\Mail\MailRepository;
-use Official\Mail\MailService;
-use Official\Mail\MailTransport;
-
 const CMS_ROOT = __DIR__ . '/..';
 
-require_once CMS_ROOT . '/system/core/Http/Request.php';
-require_once CMS_ROOT . '/system/core/Http/Response.php';
-require_once CMS_ROOT . '/system/core/Plugin/PluginException.php';
-require_once CMS_ROOT . '/system/core/Plugin/PluginSecretStore.php';
-require_once CMS_ROOT . '/system/core/Security/CsrfToken.php';
-require_once CMS_ROOT . '/system/core/Support/View.php';
-require_once CMS_ROOT . '/content/plugins/official.mail/src/MailRepository.php';
-require_once CMS_ROOT . '/content/plugins/official.mail/src/SmtpTransport.php';
-require_once CMS_ROOT . '/content/plugins/official.mail/src/MailService.php';
+require_once CMS_ROOT . '/system/core/Bootstrap/autoload.php';
+require_once CMS_ROOT . '/content/plugins/official.mail/src/OfficialSmtpMailProvider.php';
+require_once CMS_ROOT . '/content/plugins/official.mail/src/GmailSmtpMailProvider.php';
+require_once CMS_ROOT . '/content/plugins/official.mail/src/OutlookSmtpMailProvider.php';
 require_once CMS_ROOT . '/content/plugins/official.mail/src/MailController.php';
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
-$_SERVER['REQUEST_URI'] = '/admin/mail';
+use Cms\Core\Http\Request;
+use Cms\Core\Mail\MailProviderInterface;
+use Cms\Core\Mail\MailProviderRegistry;
+use Official\Mail\GmailSmtpMailProvider;
+use Official\Mail\MailController;
+use Official\Mail\OfficialSmtpMailProvider;
+use Official\Mail\OutlookSmtpMailProvider;
 
 $failures = 0;
 $assert = static function (bool $condition, string $message) use (&$failures): void {
@@ -38,100 +28,70 @@ $assert = static function (bool $condition, string $message) use (&$failures): v
     echo '[PASS] ' . $message . PHP_EOL;
 };
 
-$pdo = new PDO('sqlite::memory:');
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$pdo->exec('CREATE TABLE cms_plugin_secrets (id INTEGER PRIMARY KEY AUTOINCREMENT, plugin_id TEXT, secret_key TEXT, ciphertext TEXT, created_at TEXT, updated_at TEXT)');
-$pdo->exec('CREATE UNIQUE INDEX idx_plugin_secrets_plugin_key ON cms_plugin_secrets (plugin_id, secret_key)');
-$migration = require CMS_ROOT . '/content/plugins/official.mail/migrations/001_mail_core.php';
-$migration['up']($pdo);
-
-$secrets = new PluginSecretStore($pdo, 'official-mail-test-master-key');
-$repo = new MailRepository($pdo, $secrets);
-$transport = new class implements MailTransport {
-    /** @var array<string,mixed> */
-    public array $lastSettings = [];
-    public string $lastPassword = '';
-    /** @var array<string,mixed> */
-    public array $lastMessage = [];
-    public bool $fail = false;
-
-    public function send(array $settings, string $password, array $message): string
-    {
-        $this->lastSettings = $settings;
-        $this->lastPassword = $password;
-        $this->lastMessage = $message;
-        if ($this->fail) {
-            throw new RuntimeException('SMTP password=SHOULD_NOT_LEAK failed');
-        }
-
-        return 'queued-test-1';
-    }
-};
-$service = new MailService($repo, $transport);
-$controller = new MailController($repo, $service);
-
 $manifest = json_decode((string) file_get_contents(CMS_ROOT . '/content/plugins/official.mail/plugin.json'), true);
 $assert(($manifest['plugin_id'] ?? '') === 'official.mail', 'Manifest uses the official mail plugin ID.');
-$assert(($manifest['version'] ?? '') === '0.1.0-alpha.1', 'Manifest version is alpha.1.');
-$assert(in_array('mail.manage', $manifest['capabilities'] ?? [], true) && in_array('mail.send', $manifest['capabilities'] ?? [], true), 'Manifest declares mail management and send capabilities.');
-$assert(($manifest['table_prefixes'] ?? []) === ['mail_'], 'Manifest restricts table ownership to mail_.');
+$assert(($manifest['version'] ?? '') === '0.1.0-alpha.2', 'Manifest version is alpha.2.');
+$assert(($manifest['migrations'] ?? null) === [], 'Provider bridge does not install duplicate mail tables.');
+$assert(in_array('mail.provider', $manifest['capabilities'] ?? [], true), 'Manifest declares mail.provider capability.');
+$assert(in_array('mail.event', $manifest['capabilities'] ?? [], true), 'Manifest declares mail.event capability.');
+$assert(in_array('mail', $manifest['capability_namespaces'] ?? [], true), 'Manifest limits mail capabilities to the mail namespace.');
 
-$repo->saveSettings([
-    'status' => 'enabled',
-    'host' => 'SMTP.Example.COM',
-    'port' => '587',
-    'encryption' => 'starttls',
-    'auth_mode' => 'login',
-    'username' => 'mailer@example.com',
-    'password' => 'smtp-secret-password',
-    'from_email' => 'noreply@example.com',
-    'from_name' => "Daiying\r\nCMS",
-    'reply_to' => 'support@example.com',
-    'timeout_seconds' => '9',
-]);
-$settings = $repo->settings();
-$assert(($settings['host'] ?? '') === 'smtp.example.com', 'SMTP host is normalized.');
-$assert(($settings['from_name'] ?? '') === 'Daiying CMS', 'Header values are cleaned before storage.');
-$assert(($settings['password_configured'] ?? false) === true, 'SMTP password is marked as configured.');
-$assert(!str_contains(json_encode($settings, JSON_UNESCAPED_SLASHES) ?: '', 'smtp-secret-password'), 'SMTP password is never exposed in settings output.');
-$assert($repo->smtpPassword() === 'smtp-secret-password', 'SMTP password can be decrypted server-side through PluginSecretStore.');
+$providers = [
+    new OfficialSmtpMailProvider(),
+    new GmailSmtpMailProvider(),
+    new OutlookSmtpMailProvider(),
+];
 
-$result = $service->send([
-    'to_email' => 'buyer@example.com',
-    'to_name' => 'Buyer',
-    'subject' => 'Order notification',
-    'body_text' => 'Your order has been paid.',
-]);
-$assert($result['status'] === 'sent' && $result['provider_message_id'] === 'queued-test-1', 'Mail service sends through the configured transport.');
-$assert($transport->lastPassword === 'smtp-secret-password', 'Transport receives the decrypted password only at send time.');
-$messages = $repo->recentMessages();
-$assert(($messages[0]['status'] ?? '') === 'sent' && ($messages[0]['recipient_email'] ?? '') === 'buyer@example.com', 'Successful sends are logged.');
-$assert(!array_key_exists('body_text', $messages[0]) && !array_key_exists('body_html', $messages[0]), 'Message body content is not exposed through recent logs.');
-
-$transport->fail = true;
-try {
-    $service->send([
-        'to_email' => 'buyer@example.com',
-        'subject' => 'Failure notification',
-        'body_text' => 'This should fail.',
-    ]);
-    $assert(false, 'SMTP errors should throw.');
-} catch (RuntimeException $exception) {
-    $assert(!str_contains($exception->getMessage(), 'SHOULD_NOT_LEAK'), 'SMTP error messages are redacted.');
+foreach ($providers as $provider) {
+    $assert($provider instanceof MailProviderInterface, $provider->id() . ' implements the Core mail provider interface.');
+    $assert($provider->apiVersion() === '1.0', $provider->id() . ' declares the Core mail provider API version.');
+    $assert(in_array('send', $provider->capabilities(), true), $provider->id() . ' supports sending mail.');
+    $assert(in_array('test_connection', $provider->capabilities(), true), $provider->id() . ' supports connection tests.');
 }
-$failed = $repo->recentMessages();
-$assert(($failed[0]['status'] ?? '') === 'failed' && !str_contains((string) ($failed[0]['error_message'] ?? ''), 'SHOULD_NOT_LEAK'), 'Failed sends are logged with redacted errors.');
 
-$page = $controller->adminSettings(new Request('GET', '/admin/mail'))->body();
-$assert(str_contains($page, '邮件设置') && str_contains($page, '发送测试邮件'), 'Admin settings page renders SMTP and test controls.');
-$assert(!str_contains($page, 'smtp-secret-password'), 'Admin settings page does not render SMTP password.');
-
-try {
-    $repo->saveSettings(['from_email' => "bad\r\nBcc: victim@example.com"]);
-    $assert(false, 'Header injection should be rejected.');
-} catch (RuntimeException) {
-    $assert(true, 'Header injection is rejected.');
+MailProviderRegistry::clear();
+foreach ($providers as $provider) {
+    MailProviderRegistry::register($provider);
 }
+$registered = MailProviderRegistry::all();
+$assert(isset($registered['official.mail.smtp']), 'Official SMTP provider registers with Core registry.');
+$assert(isset($registered['official.mail.gmail']), 'Gmail SMTP provider registers with Core registry.');
+$assert(isset($registered['official.mail.outlook']), 'Outlook SMTP provider registers with Core registry.');
+
+$preset = static function (object $provider, array $config): array {
+    $method = new ReflectionMethod($provider, 'presetConfig');
+
+    return $method->invoke($provider, $config);
+};
+
+$gmailConfig = $preset(new GmailSmtpMailProvider(), [
+    'smtp_host' => '',
+    'smtp_port' => 25,
+    'smtp_encryption' => 'none',
+    'smtp_username' => '',
+    'from_email' => 'sender@gmail.com',
+]);
+$assert(($gmailConfig['smtp_host'] ?? '') === 'smtp.gmail.com', 'Gmail preset forces the official Gmail SMTP host.');
+$assert(($gmailConfig['smtp_port'] ?? 0) === 587, 'Gmail preset forces SMTP port 587.');
+$assert(($gmailConfig['smtp_encryption'] ?? '') === 'tls', 'Gmail preset forces STARTTLS mode.');
+$assert(($gmailConfig['smtp_username'] ?? '') === 'sender@gmail.com', 'Gmail preset falls back to the from address as username.');
+
+$outlookConfig = $preset(new OutlookSmtpMailProvider(), [
+    'smtp_host' => '',
+    'smtp_port' => 25,
+    'smtp_encryption' => 'none',
+    'smtp_username' => '',
+    'from_email' => 'sender@outlook.com',
+]);
+$assert(($outlookConfig['smtp_host'] ?? '') === 'smtp-mail.outlook.com', 'Outlook preset forces the official Outlook SMTP host.');
+$assert(($outlookConfig['smtp_port'] ?? 0) === 587, 'Outlook preset forces SMTP port 587.');
+$assert(($outlookConfig['smtp_encryption'] ?? '') === 'tls', 'Outlook preset forces STARTTLS mode.');
+$assert(($outlookConfig['smtp_username'] ?? '') === 'sender@outlook.com', 'Outlook preset falls back to the from address as username.');
+
+$page = (new MailController())->adminIndex(new Request('GET', '/admin/mail'))->body();
+$assert(str_contains($page, '邮件 Provider') && str_contains($page, '/admin/settings/mail'), 'Admin page links to the Core mail settings page.');
+$assert(str_contains($page, 'official.mail.gmail') && str_contains($page, 'official.mail.outlook'), 'Admin page lists Gmail and Outlook providers.');
+$assert(!str_contains($page, 'name="smtp_password"'), 'Plugin admin page does not expose a duplicate SMTP password field.');
 
 if ($failures > 0) {
     fwrite(STDERR, 'official_mail_contract failed: ' . $failures . PHP_EOL);
