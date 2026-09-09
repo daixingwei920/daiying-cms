@@ -2,6 +2,26 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.40 - 2026-09-09
+
+- Added Passkey passwordless admin login for administrator accounts with registered Passkeys while preserving the existing password login path.
+- Added an article/page editor "AI write with me" action that uses the Core site-level AI service.
+- Added Commerce product-description AI drafting from administrator-provided product fields, with external product URLs treated as context only.
+- Bumped the bundled `official.commerce` source to `0.1.0-alpha.16` for the product-description drafting workflow.
+- Kept AI Provider configuration optional, API Keys masked/encrypted, and official update-server AI Review isolated from site AI settings.
+- Preserved payment, order, inventory, fulfillment, signed-update, and 1.2.0 cross-version upgrade boundaries.
+- Public install package: `daiying-cms-1.2.40-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.40>.
+
+## 1.2.39 - 2026-09-09
+
+- Added the Core notification center foundation for reusable admin notifications.
+- Added admin notification UI, unread counts, read/archive operations, plugin notification contracts, dedupe support, action URL validation, and sensitive payload redaction.
+- Added official.mail integration points for new-mail notifications without storing OAuth tokens or full message bodies in Core notifications.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.39-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.39>.
+
 ## 1.2.38 - 2026-09-09
 
 - Fixed official Marketplace plugin installs and upgrades to run plugin-declared migrations before leaving the package installed.

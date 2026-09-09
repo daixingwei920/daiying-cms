@@ -10,7 +10,7 @@ The following plugin manifests are present in this repository:
 | --- | --- | --- | --- |
 | `faq_block` | `1.0.0` | plugin | FAQ block registration example. |
 | `local.storage.baidu` | `1.0.0-rc13.2` | `storage_provider` | Baidu Netdisk OAuth/media storage integration. |
-| `official.commerce` | `0.1.0-alpha.15` | plugin | Commerce foundation with product, order, AI module, and alpha Distribution workflows. |
+| `official.commerce` | `0.1.0-alpha.16` | plugin | Commerce foundation with product, order, site AI product-description drafting, AI module, and alpha Distribution workflows. |
 | `official.friend-links` | `1.0.0-alpha.1` | `system-plugin` | Friend links management. |
 | `official.mail` | `0.2.0-alpha.4` | plugin | Official Mail Provider bridge and Webmail alpha for Gmail/Outlook OAuth accounts, inbox, message viewing, attachments, send/reply, SMTP providers, OAuth-backed Core mail sending, and new unread mail notifications. |
 | `official.novel-collector` | `0.4.19` | plugin | Novel collection and reading routes. |

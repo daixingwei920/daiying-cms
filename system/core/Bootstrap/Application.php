@@ -368,6 +368,8 @@ final class Application
         $admin = new AdminController($settings, $logger, $rootPath);
         $router->get('/admin/login', [$admin, 'loginForm']);
         $router->post('/admin/login', [$admin, 'login']);
+        $router->post('/admin/login/passkey-options', [$admin, 'loginPasskeyOptions']);
+        $router->post('/admin/login/passkey-verify', [$admin, 'loginPasskeyVerify']);
         $router->get('/admin/forgot-password', [$admin, 'forgotPasswordForm']);
         $router->post('/admin/forgot-password', [$admin, 'forgotPassword']);
         $router->get('/admin/reset-password', [$admin, 'resetPasswordForm']);
@@ -408,6 +410,7 @@ final class Application
         $router->post('/admin/content', [$admin, 'contentStore']);
         $router->get('/admin/content/edit/{id}', [$admin, 'contentEdit']);
         $router->post('/admin/content/edit/{id}', [$admin, 'contentUpdate']);
+        $router->post('/admin/content/ai-write', [$admin, 'contentAiWrite']);
         $router->post('/admin/content/delete/{id}', [$admin, 'contentDelete']);
         $router->get('/admin/categories', [$admin, 'categoryIndex']);
         $router->post('/admin/categories', [$admin, 'categoryStore']);

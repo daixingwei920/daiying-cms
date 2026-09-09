@@ -148,6 +148,81 @@ final class AdminController
         return Response::redirect('/admin');
     }
 
+    public function loginPasskeyOptions(Request $request): Response
+    {
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::json(['error' => 'csrf'], 403);
+        }
+
+        try {
+            $email = strtolower(trim((string) $request->input('email', '')));
+            if ($email === '' || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+                return Response::json(['error' => '请输入管理员邮箱。'], 422);
+            }
+            $pdo = ConnectionFactory::make($this->settings);
+            $stmt = $pdo->prepare('SELECT id, email, display_name FROM cms_admin_users WHERE email = :email LIMIT 1');
+            $stmt->execute([':email' => $email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!is_array($user)) {
+                return Response::json(['error' => '该管理员尚未设置 Passkey。'], 404);
+            }
+
+            $passkeys = new AdminPasskeyService($pdo, $this->settings);
+            $adminId = (int) $user['id'];
+            if (!$passkeys->hasPasskey($adminId)) {
+                return Response::json(['error' => '该管理员尚未设置 Passkey。'], 404);
+            }
+            $_SESSION['admin_passkey_login_pending'] = [
+                'id' => $adminId,
+                'email' => (string) $user['email'],
+                'display_name' => (string) $user['display_name'],
+                'ip' => (string) ($request->server['REMOTE_ADDR'] ?? '0.0.0.0'),
+                'issued_at' => time(),
+            ];
+
+            return Response::json($passkeys->authenticationOptions($adminId));
+        } catch (Throwable $exception) {
+            $this->logger->error('Admin passwordless passkey options failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::json(['error' => 'Passkey 登录暂不可用。'], 500);
+        }
+    }
+
+    public function loginPasskeyVerify(Request $request): Response
+    {
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::json(['error' => 'csrf'], 403);
+        }
+        $pending = $_SESSION['admin_passkey_login_pending'] ?? null;
+        if (!is_array($pending) || (int) ($pending['issued_at'] ?? 0) < time() - 600 || (int) ($pending['id'] ?? 0) <= 0) {
+            unset($_SESSION['admin_passkey_login_pending']);
+            return Response::json(['error' => 'Passkey 登录已过期，请重新开始。'], 401);
+        }
+
+        try {
+            $pdo = ConnectionFactory::make($this->settings);
+            $adminId = (int) $pending['id'];
+            if (!(new AdminPasskeyService($pdo, $this->settings))->verifyAuthentication($adminId, $request->body)) {
+                (new AuditLogger($pdo))->record('admin', $adminId, 'admin.login_passkey_passwordless_failed', ['email' => (string) $pending['email'], 'ip' => (string) $pending['ip']]);
+                return Response::json(['error' => 'Passkey 验证失败。'], 401);
+            }
+
+            $user = [
+                'id' => $adminId,
+                'email' => (string) $pending['email'],
+                'display_name' => (string) $pending['display_name'],
+            ];
+            (new AdminAuthenticator($pdo))->loginUser($user);
+            (new AdminSessionService($pdo))->recordLogin($adminId, (string) $pending['ip'], (string) ($request->server['HTTP_USER_AGENT'] ?? ''), 'passkey_passwordless');
+            (new AuditLogger($pdo))->record('admin', $adminId, 'admin.login', ['email' => (string) $pending['email'], 'ip' => (string) $pending['ip'], 'mfa' => 'passkey_passwordless']);
+            unset($_SESSION['admin_passkey_login_pending']);
+
+            return Response::json(['ok' => true, 'redirect' => '/admin']);
+        } catch (Throwable $exception) {
+            $this->logger->error('Admin passwordless passkey verify failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::json(['error' => 'Passkey 登录暂不可用。'], 500);
+        }
+    }
+
     public function forgotPasswordForm(): Response
     {
         return Response::html(View::page('找回管理员密码', $this->forgotPasswordHtml()));
@@ -1514,6 +1589,36 @@ final class AdminController
         ];
     }
 
+    private function cleanAiField(string $value, int $maxLength): string
+    {
+        $value = trim(strip_tags(str_replace(["\r\n", "\r"], "\n", $value)));
+        $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $value) ?? '';
+
+        return mb_substr($value, 0, $maxLength);
+    }
+
+    private function normalizeAiGeneratedText(string $value): string
+    {
+        $value = trim(str_replace(["\r\n", "\r"], "\n", $value));
+        $value = preg_replace('/^```(?:markdown|md|html|text)?\s*/i', '', $value) ?? $value;
+        $value = preg_replace('/\s*```$/', '', $value) ?? $value;
+        $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $value) ?? '';
+
+        return mb_substr(trim($value), 0, 12000);
+    }
+
+    private function friendlyAiError(AiException $exception): string
+    {
+        return match ($exception->reason()) {
+            'disabled' => '全局 AI 尚未启用，请先到 AI 设置开启。',
+            'api_key_missing' => 'AI API Key 尚未配置。',
+            'provider_not_found' => '当前 AI Provider 不可用。',
+            'message_invalid', 'request_invalid' => 'AI 请求内容格式无效。',
+            'capability_unsupported' => '当前模型不支持这个 AI 写作任务。',
+            default => $exception->getMessage() !== '' ? $exception->getMessage() : 'AI 调用失败。',
+        };
+    }
+
     private function aiService(): AiService
     {
         return new AiService(ConnectionFactory::make($this->settings), $this->settings);
@@ -1679,6 +1784,50 @@ final class AdminController
         }
 
         return Response::redirect('/admin/content');
+    }
+
+    public function contentAiWrite(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return Response::json(['error' => 'not_authenticated'], 401);
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::json(['error' => 'CSRF 校验失败，请刷新页面重试。'], 403);
+        }
+
+        try {
+            $title = $this->cleanAiField((string) $request->input('title', ''), 160);
+            $contentType = in_array((string) $request->input('content_type', 'article'), ['article', 'page'], true)
+                ? (string) $request->input('content_type', 'article')
+                : 'article';
+            $brief = $this->cleanAiField((string) $request->input('brief', ''), 2000);
+            if ($title === '' && $brief === '') {
+                return Response::json(['error' => '请先填写标题或已有正文提示。'], 422);
+            }
+
+            $label = $contentType === 'page' ? '页面' : '文章';
+            $response = (new AiService(ConnectionFactory::make($this->settings), $this->settings))->chat([
+                ['role' => 'system', 'content' => 'You help Daiying CMS administrators draft clean Chinese website content. Return only editable body text. Do not invent private data, credentials, customer facts, legal guarantees, or unavailable product capabilities.'],
+                ['role' => 'user', 'content' => "请根据以下资料撰写一篇{$label}正文，结构清晰、适合直接放入 CMS 编辑器。不要输出 Markdown 代码围栏。\n标题：{$title}\n已有提示：{$brief}"],
+            ], [
+                'operation' => 'content.ai_write',
+                'plugin_id' => 'core',
+                'max_tokens' => 1200,
+                'temperature' => 0.7,
+            ]);
+            $text = $this->normalizeAiGeneratedText((string) ($response['content'] ?? ''));
+            if ($text === '') {
+                return Response::json(['error' => 'AI 返回为空，请稍后重试。'], 502);
+            }
+
+            return Response::json(['ok' => true, 'content' => $text]);
+        } catch (AiException $exception) {
+            return Response::json(['error' => $this->friendlyAiError($exception)], 422);
+        } catch (Throwable $exception) {
+            $this->logger->error('Content AI write failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::json(['error' => 'AI 写作暂不可用，请稍后重试。'], 502);
+        }
     }
 
     public function contentDelete(Request $request): Response
@@ -7479,15 +7628,27 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
 </script>';
     }
 
+    private function passkeyPasswordlessLoginScript(string $csrf): string
+    {
+        return '<script>
+function dyB64uToBuf(v){v=v.replace(/-/g,"+").replace(/_/g,"/");while(v.length%4)v+="=";var s=atob(v);var b=new Uint8Array(s.length);for(var i=0;i<s.length;i++)b[i]=s.charCodeAt(i);return b.buffer}
+function dyBufToB64u(b){var s="";var a=new Uint8Array(b);for(var i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
+var dyPasswordless=document.querySelector("[data-passkey-passwordless-login]");
+if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var status=document.querySelector("[data-passkey-passwordless-status]");try{if(!window.PublicKeyCredential)throw new Error("当前浏览器不支持 Passkey");var email=document.getElementById("admin-login-email");if(!email||!email.value)throw new Error("请先填写管理员邮箱");status.textContent="正在请求 Passkey...";var form=new URLSearchParams();form.set("_csrf","' . View::escape($csrf) . '");form.set("email",email.value);var opt=await fetch("/admin/login/passkey-options",{method:"POST",body:form}).then(r=>r.json());if(opt.error)throw new Error(opt.error);opt.challenge=dyB64uToBuf(opt.challenge);if(opt.allowCredentials){opt.allowCredentials=opt.allowCredentials.map(function(c){return {type:c.type,id:dyB64uToBuf(c.id)}})}var cred=await navigator.credentials.get({publicKey:opt});var out=new URLSearchParams();out.set("_csrf","' . View::escape($csrf) . '");out.set("id",cred.id);out.set("rawId",dyBufToB64u(cred.rawId));out.set("clientDataJSON",dyBufToB64u(cred.response.clientDataJSON));out.set("authenticatorData",dyBufToB64u(cred.response.authenticatorData));out.set("signature",dyBufToB64u(cred.response.signature));var verified=await fetch("/admin/login/passkey-verify",{method:"POST",body:out}).then(r=>r.json());if(verified.error)throw new Error(verified.error);location.href=verified.redirect||"/admin"}catch(e){status.textContent="Passkey 登录失败："+e.message}})}
+</script>';
+    }
+
     private function loginHtml(string $error = ''): string
     {
         $errorHtml = $error === '' ? '' : '<p class="error">' . View::escape($error) . '</p>';
 
         return '<h1>管理员登录</h1>' . $errorHtml .
             '<form method="post" action="/admin/login">' . CsrfToken::field() .
-            '<label>邮箱<input name="email" type="email" required></label>' .
+            '<label>邮箱<input id="admin-login-email" name="email" type="email" autocomplete="username webauthn" required></label>' .
             '<label>密码<input name="password" type="password" required></label>' .
-            '<button type="submit">登录</button></form><p><a href="/admin/forgot-password">忘记管理员密码？</a></p>';
+            '<button type="submit">登录</button> <button type="button" class="admin-button-secondary" data-passkey-passwordless-login>Passkey 无密码登录</button>' .
+            '<p class="muted" data-passkey-passwordless-status></p></form><p><a href="/admin/forgot-password">忘记管理员密码？</a></p>' .
+            $this->passkeyPasswordlessLoginScript(CsrfToken::get());
     }
 
     private function forgotPasswordHtml(string $error = '', string $notice = ''): string
@@ -8280,7 +8441,7 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
             '<div class="content-editor-workbench"><main class="content-editor-main"><section class="editor-title-panel">' .
             '<label class="editor-title-label" for="content-title">标题</label><input id="content-title" class="editor-title-input" name="title" value="' . View::escape((string) ($data['title'] ?? '')) . '" placeholder="请输入标题" required>' .
             '<label class="editor-slug-row"><span>固定链接</span><input name="slug" value="' . View::escape($slug) . '" placeholder="留空则自动生成"></label>' .
-            '</section><section class="editor-card editor-blocks-panel"><div class="editor-section-heading"><div><h2>内容区块</h2><p class="muted">共 ' . $blockCount . ' 个区块，可添加、复制、移动或删除。</p></div><div class="editor-actions"><button type="button" class="editor-secondary" data-editor-block-list-toggle>区块列表</button><button class="editor-primary" name="block_action" value="add" type="submit">添加区块</button></div></div>' . $blockHtml . '</section></main>' .
+            '</section><section class="editor-card editor-ai-panel"><div class="editor-section-heading"><div><h2>AI 帮我写</h2><p class="muted">根据标题、内容类型和已有正文生成草稿，结果会回填到第一个正文区块。</p></div><div class="editor-actions"><button type="button" class="editor-primary" data-content-ai-write>AI 帮我写</button></div></div><p class="muted" data-content-ai-status></p></section><section class="editor-card editor-blocks-panel"><div class="editor-section-heading"><div><h2>内容区块</h2><p class="muted">共 ' . $blockCount . ' 个区块，可添加、复制、移动或删除。</p></div><div class="editor-actions"><button type="button" class="editor-secondary" data-editor-block-list-toggle>区块列表</button><button class="editor-primary" name="block_action" value="add" type="submit">添加区块</button></div></div>' . $blockHtml . '</section></main>' .
             '<aside class="content-editor-sidebar">' .
             '<details class="editor-settings-section" open><summary>发布</summary><div class="editor-settings-body"><p class="muted">当前状态：' . View::escape(AdminUiText::contentStatus($currentStatus)) . '</p>' .
             '<label>状态<select name="status">' . $this->statusOptions($currentStatus) . '</select></label>' .
@@ -8305,7 +8466,7 @@ if(dyPasskeyLogin){dyPasskeyLogin.addEventListener("click",async function(){var 
             '<label><input type="checkbox" name="robots_follow" value="1"' . (($meta['robots_follow'] ?? true) ? ' checked' : '') . '> 允许搜索引擎跟踪链接</label></div></details>' .
             '<details class="editor-settings-section"><summary>高级设置</summary><div class="editor-settings-body"><p class="muted">保留给后续扩展字段，当前内容不会受影响。</p></div></details></aside></div>' .
             '<div class="editor-block-drawer" data-editor-block-drawer hidden><button type="button" class="editor-drawer-backdrop" data-editor-block-drawer-backdrop aria-label="关闭区块列表"></button><div class="editor-block-drawer-panel"><div class="editor-drawer-header"><strong>区块列表</strong><button type="button" data-editor-block-list-close>关闭</button></div><div class="editor-block-list">' . $drawerHtml . '</div></div></div></form>' .
-            $this->mediaPickerComponent() . $this->blockEditorRendererScript();
+            $this->mediaPickerComponent() . $this->blockEditorRendererScript() . $this->contentAiWriterScript(CsrfToken::get());
     }
 
     /** @return array<string, mixed> */
@@ -8737,6 +8898,13 @@ document.addEventListener('input',function(e){var list=e.target.closest('[data-l
 document.querySelectorAll('[data-list-editor]').forEach(syncList);document.querySelectorAll('[data-table-editor]').forEach(syncTable);updatePaidFields();updateScheduleFields();
 })();
 JS . '</script>';
+    }
+
+    private function contentAiWriterScript(string $csrf): string
+    {
+        return '<script>
+(function(){var btn=document.querySelector("[data-content-ai-write]");if(!btn){return;}function text(v){return String(v==null?"":v).trim();}function firstBody(){var preferred=document.querySelector("textarea[name^=\\"blocks\\"][name$=\\"[text]\\"]");return preferred||document.querySelector("textarea[name^=\\"blocks\\"]");}function brief(){return Array.prototype.slice.call(document.querySelectorAll("textarea[name^=\\"blocks\\"]")).map(function(el){return text(el.value);}).filter(Boolean).slice(0,3).join("\\n\\n");}btn.addEventListener("click",async function(){var status=document.querySelector("[data-content-ai-status]");var target=firstBody();try{if(!target){throw new Error("当前编辑器没有可回填的正文区块");}if(text(target.value)&&!confirm("AI 生成内容会覆盖第一个正文区块，确定继续吗？")){return;}btn.disabled=true;if(status){status.textContent="AI 正在生成草稿...";}var form=new URLSearchParams();form.set("_csrf","' . View::escape($csrf) . '");form.set("title",text((document.querySelector("[name=title]")||{}).value));form.set("content_type",text((document.querySelector("[name=content_type]")||{}).value)||"article");form.set("brief",brief());var res=await fetch("/admin/content/ai-write",{method:"POST",body:form,headers:{"Accept":"application/json"}});var data=await res.json();if(!res.ok||data.error){throw new Error(data.error||"AI 生成失败");}target.value=data.content||"";target.dispatchEvent(new Event("input",{bubbles:true}));if(status){status.textContent="AI 草稿已回填，请检查后再保存。";}}catch(e){if(status){status.textContent="AI 帮写失败："+e.message;}}finally{btn.disabled=false;}});})();
+</script>';
     }
 
     /** @param array<string, mixed> $data */

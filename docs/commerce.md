@@ -17,6 +17,7 @@ The current public repository contains:
 - Paid download access.
 - Card-code product inventory and delivery.
 - Commercial product and license storage tables.
+- Product-description drafting through the site-level Core AI service.
 - Site license activation storage.
 - Alpha Distribution channel management for commerce data.
 
@@ -35,6 +36,14 @@ Card-code products can be sold through content blocks and fulfilled idempotently
 ## Commercial Licenses
 
 The commercial ecosystem schema contains tables for products, license batches, license keys, license sites, download tokens, and audit events.
+
+## Product Description AI
+
+The bundled Commerce plugin can inherit the Core site AI configuration and generate a product-description draft from fields the administrator has already entered, including product name, price, transaction region, category/context fields, brand/model, specifications, selling points, and short notes.
+
+The generated text is returned to the product description editor and saved through the normal CMS content pipeline when the product is saved. This keeps Commerce product text on the same long-term content storage path as other CMS content.
+
+The first workflow does not fetch or scrape external product URLs. If a source URL is entered, it is treated only as administrator-provided context for the prompt and as a future extension point.
 
 ## Distribution Boundary
 

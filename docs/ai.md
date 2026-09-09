@@ -4,6 +4,15 @@ Daiying CMS Core provides a site-level AI configuration and service layer that C
 
 Core AI is infrastructure only. It stores configuration, creates Provider requests, normalizes responses, and returns safe errors. Business features such as product descriptions, article summaries, SEO suggestions, or distribution formatting should be implemented by Core features or plugins on top of this API.
 
+## Current Built-In Uses
+
+The current Core and bundled plugin source use the site AI service for these first-party workflows:
+
+- Article/page editor drafting through the admin "AI write with me" action.
+- Commerce product-description drafting from administrator-provided product name, price, category/context fields, specifications, selling points, and short notes.
+
+Commerce may store an external product URL as administrator-provided context, but the first product-description workflow does not crawl or scrape that URL. Plugins should keep AI features optional and must catch `AiException` so ordinary content, media, payment, and commerce workflows continue to work when AI is disabled or unavailable.
+
 ## Admin Settings
 
 Administrators can configure site AI under:
@@ -20,7 +29,7 @@ Provider choices are user-friendly presets. They do not each map to a separate C
 | `openai` | `openai_compatible` | `https://api.openai.com/v1` | `gpt-4.1-mini` |
 | `xai` | `openai_compatible` | `https://api.x.ai/v1` | `grok-4.6` |
 | `tencent_hunyuan` | `openai_compatible` | `https://api.hunyuan.cloud.tencent.com/v1` | `hunyuan-turbos-latest` |
-| `gemini` | `gemini` | `https://generativelanguage.googleapis.com/v1beta` | `gemini-2.5-flash` |
+| `gemini` | `gemini` | `https://generativelanguage.googleapis.com/v1beta` | `gemini-3.6-flash` |
 | `openai_compatible` | `openai_compatible` | administrator-defined | administrator-defined |
 
 When an administrator selects a preset, the form fills the recommended Base URL, model, and adapter protocol. Base URL and model remain editable, so compatible services can update endpoints or models without a Core code change.

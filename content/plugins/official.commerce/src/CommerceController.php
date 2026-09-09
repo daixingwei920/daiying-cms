@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Daiying\Commerce;
 
+use Cms\Core\Ai\AiException;
 use Cms\Core\CardDelivery\CardDeliveryRepository;
 use Cms\Core\Config\Settings;
 use Cms\Core\Content\BlockRenderer;
@@ -75,6 +76,7 @@ final class CommerceController
         $specs = $this->keyValueText(is_array($product['specs'] ?? null) ? $product['specs'] : []);
         $status = (string) ($product['status'] ?? 'draft');
         $currency = (string) ($product['currency'] ?? 'CNY');
+        $descriptionDraft = $this->productDescriptionDraft((int) ($product['description_content_id'] ?? 0));
         $savedNotice = !$isNew && !empty($request->query['saved'])
             ? '<p class="notice">商品已保存。可继续完善图片/内容，发布后到“分发与分享”生成分享链接和文案。</p>'
             : '';
@@ -97,6 +99,7 @@ final class CommerceController
             '<label>价格说明<input name="price_note" value="' . $this->e((string) ($product['price_note'] ?? '')) . '" placeholder="如 含税 / 不含运费 / 海外仓发货"></label>' .
             '<label>库存数量<input name="stock_quantity" type="number" min="0" value="' . (int) ($product['stock_quantity'] ?? 0) . '"></label>' .
             '<label>摘要<textarea name="summary" rows="3">' . $this->e((string) ($product['summary'] ?? '')) . '</textarea></label>' .
+            '<div class="commerce-picker commerce-ai-description"><strong>商品介绍正文</strong><p class="commerce-picker-summary">可手写，也可根据已填写的商品名称、价格、规格、卖点和备注生成。保存商品时会写入下方选中的 CMS 商品介绍内容；未选择时会自动创建一篇草稿内容。</p><textarea name="description_draft" rows="8" data-commerce-description-editor>' . $this->e($descriptionDraft) . '</textarea><p><button type="button" class="button" data-commerce-ai-description>AI 帮我写商品介绍</button> <span class="muted" data-commerce-ai-description-status></span></p></div>' .
             $this->contentPickerField((int) ($product['description_content_id'] ?? 0)) .
             $this->mediaPickerField('primary_media_id', '商品主图', 'image', false, (string) (int) ($product['primary_media_id'] ?? 0)) .
             $this->mediaPickerField('gallery_media_ids', '商品图库', 'image', true, $gallery) .
@@ -108,7 +111,8 @@ final class CommerceController
             '<label><input type="checkbox" name="requires_shipping" value="1" ' . ((int) ($product['requires_shipping'] ?? 0) === 1 ? 'checked' : '') . '> 需要物流配送</label>' .
             '<label><input type="checkbox" name="auto_delivery_enabled" value="1" ' . ((int) ($product['auto_delivery_enabled'] ?? 0) === 1 ? 'checked' : '') . '> 数字商品可自动交付</label><p class="muted">数字交付复用后台“发卡管理”，请在发卡商品里关联当前 Commerce 商品 ID 并导入库存。</p>' .
             '<button type="submit">保存商品</button> <a class="button admin-button-secondary" href="/admin/commerce/products">返回列表</a></form>' .
-            $this->commercePickerAssets();
+            $this->commercePickerAssets() .
+            $this->commerceAiDescriptionScript(CsrfToken::get());
 
         if (!$isNew) {
             $body .= $this->adminProductChildren((int) $product['id']);
@@ -119,19 +123,35 @@ final class CommerceController
 
     public function adminSaveProduct(Request $request): Response
     {
+        $startedTransaction = false;
         try {
-            $id = $this->repo->saveProduct($request->body, $this->adminId($request));
+            if (!$this->pdo->inTransaction()) {
+                $this->pdo->beginTransaction();
+                $startedTransaction = true;
+            }
+            $input = $request->body;
+            $descriptionContentId = $this->persistProductDescriptionDraft($input, $this->adminId($request));
+            if ($descriptionContentId > 0) {
+                $input['description_content_id'] = $descriptionContentId;
+            }
+            $id = $this->repo->saveProduct($input, $this->adminId($request));
             if ($this->repo->activeActions($id) === []) {
-                $autoDelivery = !empty($request->body['auto_delivery_enabled']) && empty($request->body['requires_shipping']);
+                $autoDelivery = !empty($input['auto_delivery_enabled']) && empty($input['requires_shipping']);
                 $this->repo->saveAction([
                     'product_id' => $id,
                     'action_type' => $autoDelivery ? 'digital_delivery' : 'site_checkout',
                     'label' => $autoDelivery ? '购买后自动交付' : '立即购买',
-                    'fulfillment_mode' => $autoDelivery ? 'digital_card' : (!empty($request->body['requires_shipping']) ? 'shipping' : 'none'),
+                    'fulfillment_mode' => $autoDelivery ? 'digital_card' : (!empty($input['requires_shipping']) ? 'shipping' : 'none'),
                 ]);
+            }
+            if ($startedTransaction && $this->pdo->inTransaction()) {
+                $this->pdo->commit();
             }
             return Response::redirect('/admin/commerce/products/edit?id=' . $id . '&saved=1');
         } catch (Throwable $exception) {
+            if ($startedTransaction && $this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
             return $this->error('商品保存失败', $exception, '/admin/commerce/products');
         }
     }
@@ -540,6 +560,84 @@ final class CommerceController
             return Response::html(View::page('AI 辅助结果', $body));
         } catch (Throwable $exception) {
             return $this->error('AI 辅助失败', $exception, '/admin/commerce/products/edit?id=' . $productId);
+        }
+    }
+
+    public function adminProductAiDescription(Request $request): Response
+    {
+        if ($this->siteAi === null || !method_exists($this->siteAi, 'isEnabled') || !method_exists($this->siteAi, 'chat')) {
+            return Response::json(['ok' => false, 'error' => '站点 AI 暂不可用，请先到站点配置里启用全局 AI。'], 503);
+        }
+
+        $name = $this->cleanAiField((string) ($request->body['name'] ?? ''), 160);
+        $summary = $this->cleanAiField((string) ($request->body['summary'] ?? ''), 800);
+        $sourceClaim = $this->cleanAiField((string) ($request->body['source_claim_text'] ?? ''), 500);
+        $specs = $this->cleanAiField((string) ($request->body['specs'] ?? ''), 2000);
+        $sourceUrl = $this->cleanAiField((string) ($request->body['source_url'] ?? ''), 500);
+        $brand = $this->cleanAiField((string) ($request->body['brand'] ?? ''), 120);
+        $model = $this->cleanAiField((string) ($request->body['model'] ?? ''), 120);
+        $price = $this->cleanAiField((string) ($request->body['price'] ?? ''), 80);
+        $currency = $this->cleanAiField((string) ($request->body['currency'] ?? 'CNY'), 12);
+        $priceNote = $this->cleanAiField((string) ($request->body['price_note'] ?? ''), 300);
+        $transactionRegion = $this->transactionRegionLabel((string) ($request->body['transaction_region'] ?? 'cn_domestic'));
+        $category = $this->cleanAiField((string) ($request->body['category'] ?? ''), 160);
+        $sellingPoints = $this->cleanAiField((string) ($request->body['selling_points'] ?? ($request->body['brief'] ?? '')), 1200);
+
+        if ($name === '' && $summary === '' && $specs === '' && $sellingPoints === '') {
+            return Response::json(['ok' => false, 'error' => '请先填写商品名称、摘要、规格或卖点，再让 AI 帮你写商品介绍。'], 422);
+        }
+
+        try {
+            if ($this->siteAi->isEnabled() !== true) {
+                return Response::json(['ok' => false, 'error' => '站点 AI 未启用，请先到站点配置里启用全局 AI。'], 422);
+            }
+            $facts = [
+                '商品名称' => $name,
+                '价格' => trim($price . ' ' . $currency),
+                '分类' => $category,
+                '交易类型' => $transactionRegion,
+                '品牌' => $brand,
+                '型号' => $model,
+                '价格说明' => $priceNote,
+                '简短备注/摘要' => $summary,
+                '卖点' => $sellingPoints,
+                '规格' => $specs,
+                '来源声明' => $sourceClaim,
+                '商品链接' => $sourceUrl,
+            ];
+            $lines = [];
+            foreach ($facts as $label => $value) {
+                $value = trim((string) $value);
+                if ($value !== '') {
+                    $lines[] = $label . '：' . $value;
+                }
+            }
+
+            $result = $this->siteAi->chat([
+                [
+                    'role' => 'system',
+                    'content' => '你是 Daiying CMS 后台的商品文案助手。根据管理员已填写的真实商品资料，生成可直接放入商品详情页的中文商品介绍。不得编造未提供的认证、销量、库存、用户评价、发货承诺或平台背书。不要输出 Markdown 代码块，不要包含价格以外的促销夸张语。',
+                ],
+                [
+                    'role' => 'user',
+                    'content' => "请根据以下资料写一段结构清晰的商品介绍，适合展示在商品详情页。可以包含简短开头、核心卖点、规格说明和购买提醒。商品链接仅作为用户填写的参考字段，本次不要抓取网页内容。\n\n" . implode("\n", $lines),
+                ],
+            ], [
+                'operation' => 'commerce.product_description',
+                'plugin_id' => 'official.commerce',
+                'max_tokens' => 1200,
+                'temperature' => 0.7,
+            ]);
+            $content = $this->normalizeAiText((string) ($result['content'] ?? ''));
+            if ($content === '') {
+                return Response::json(['ok' => false, 'error' => 'AI 返回了空内容，请稍后重试。'], 502);
+            }
+
+            return Response::json(['ok' => true, 'description' => $content]);
+        } catch (AiException $exception) {
+            return Response::json(['ok' => false, 'error' => $this->friendlyAiError($exception)], 502);
+        } catch (Throwable $exception) {
+            return Response::json(['ok' => false, 'error' => 'AI 商品介绍生成失败，请稍后重试。'], 502);
         }
     }
 
@@ -994,6 +1092,13 @@ final class CommerceController
             '<script>window.COMMERCE_MEDIA_ITEMS=' . $mediaJson . ';window.COMMERCE_CONTENT_ITEMS=' . $contentJson . ';(function(){function esc(v){return String(v==null?"":v).replace(/[&<>"\']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","\'":"&#039;"}[c];});}function byId(id){return (window.COMMERCE_MEDIA_ITEMS||[]).find(function(item){return String(item.id)===String(id);});}function mediaSummary(value){var ids=String(value||"").split(",").map(function(v){return v.trim();}).filter(Boolean);if(!ids.length){return "未选择媒体。";}return ids.map(function(id){var item=byId(id);return item?esc(item.name)+" · "+esc(item.type):"媒体 #"+esc(id);}).join("<br>");}function renderMedia(picker,query){var type=picker.getAttribute("data-commerce-media-type")||"";var q=String(query||"").toLowerCase();var box=document.querySelector("[data-commerce-media-results]");box.innerHTML="";(window.COMMERCE_MEDIA_ITEMS||[]).filter(function(item){return (!type||item.type===type)&&(!q||String(item.name).toLowerCase().indexOf(q)>=0);}).forEach(function(item){var button=document.createElement("button");button.type="button";button.className="commerce-picker-card";button.setAttribute("data-commerce-media-choice",item.id);button.innerHTML=(item.thumbnail?\'<img src="\'+esc(item.thumbnail)+\'" alt="">\':\'<div style="aspect-ratio:4/3;display:grid;place-items:center;background:#edf2f7;border-radius:6px;margin-bottom:8px">\'+esc(item.type)+\'</div>\')+"<strong>"+esc(item.name)+"</strong><span>"+esc(item.type)+"</span>";box.appendChild(button);});if(box.innerHTML===""){box.innerHTML="<p class=\\"muted\\">没有找到可选媒体。请先到媒体库上传或引入。</p>";}}function renderContent(query){var q=String(query||"").toLowerCase();var box=document.querySelector("[data-commerce-content-results]");box.innerHTML="";(window.COMMERCE_CONTENT_ITEMS||[]).filter(function(item){return !q||String(item.title).toLowerCase().indexOf(q)>=0;}).forEach(function(item){var button=document.createElement("button");button.type="button";button.className="commerce-picker-row";button.setAttribute("data-commerce-content-choice",item.id);button.innerHTML="<strong>"+esc(item.title)+"</strong><span>"+esc(item.type)+" · "+esc(item.status)+"</span>";box.appendChild(button);});if(box.innerHTML===""){box.innerHTML="<p class=\\"muted\\">没有找到可选内容。可以先新建商品介绍。</p>";}}var currentMediaPicker=null;document.addEventListener("click",function(event){var mediaOpen=event.target.closest("[data-commerce-media-open]");if(mediaOpen){currentMediaPicker=mediaOpen.closest("[data-commerce-media-picker]");document.getElementById("commerce-media-modal").hidden=false;renderMedia(currentMediaPicker,"");return;}var mediaChoice=event.target.closest("[data-commerce-media-choice]");if(mediaChoice&&currentMediaPicker){var input=currentMediaPicker.querySelector("[data-commerce-media-input]");var id=mediaChoice.getAttribute("data-commerce-media-choice");if(currentMediaPicker.getAttribute("data-commerce-media-multiple")==="1"){var ids=String(input.value||"").split(",").map(function(v){return v.trim();}).filter(Boolean);if(ids.indexOf(id)<0){ids.push(id);}input.value=ids.join(",");}else{input.value=id;}currentMediaPicker.querySelector("[data-commerce-media-summary]").innerHTML=mediaSummary(input.value);document.getElementById("commerce-media-modal").hidden=true;return;}var mediaClear=event.target.closest("[data-commerce-media-clear]");if(mediaClear){var picker=mediaClear.closest("[data-commerce-media-picker]");picker.querySelector("[data-commerce-media-input]").value="";picker.querySelector("[data-commerce-media-summary]").textContent="未选择媒体。";return;}var contentOpen=event.target.closest("[data-commerce-content-open]");if(contentOpen){document.getElementById("commerce-content-modal").hidden=false;renderContent("");return;}var contentChoice=event.target.closest("[data-commerce-content-choice]");if(contentChoice){var item=(window.COMMERCE_CONTENT_ITEMS||[]).find(function(row){return String(row.id)===String(contentChoice.getAttribute("data-commerce-content-choice"));});var picker2=document.querySelector("[data-commerce-content-picker]");picker2.querySelector("[data-commerce-content-input]").value=contentChoice.getAttribute("data-commerce-content-choice");picker2.querySelector("[data-commerce-content-summary]").textContent=item?item.title+" · "+item.type+" · "+item.status:"已选择商品介绍";document.getElementById("commerce-content-modal").hidden=true;return;}var contentClear=event.target.closest("[data-commerce-content-clear]");if(contentClear){var picker3=contentClear.closest("[data-commerce-content-picker]");picker3.querySelector("[data-commerce-content-input]").value="";picker3.querySelector("[data-commerce-content-summary]").textContent="未选择商品介绍。";return;}if(event.target.closest("[data-commerce-picker-close]")||event.target.classList.contains("commerce-picker-modal")){document.getElementById("commerce-media-modal").hidden=true;document.getElementById("commerce-content-modal").hidden=true;}});document.addEventListener("input",function(event){if(event.target.matches("[data-commerce-media-search]")&&currentMediaPicker){renderMedia(currentMediaPicker,event.target.value);}if(event.target.matches("[data-commerce-content-search]")){renderContent(event.target.value);}});})();</script>';
     }
 
+    private function commerceAiDescriptionScript(string $csrf): string
+    {
+        $csrfJson = json_encode($csrf, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '""';
+
+        return '<script>(function(){var button=document.querySelector("[data-commerce-ai-description]");if(!button){return;}var form=button.closest("form");var editor=document.querySelector("[data-commerce-description-editor]");var status=document.querySelector("[data-commerce-ai-description-status]");function field(name){var input=form?form.querySelector("[name=\\""+name+"\\"]"):null;return input?input.value:"";}button.addEventListener("click",function(){if(!form||!editor){return;}if(editor.value.trim()!==""&&!window.confirm("当前商品介绍正文已有内容，要用 AI 结果覆盖吗？")){return;}button.disabled=true;if(status){status.textContent="正在生成...";}fetch("/admin/commerce/products/ai-description",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({_csrf:' . $csrfJson . ',name:field("name"),price:field("price"),currency:field("currency"),category:field("category"),transaction_region:field("transaction_region"),brand:field("brand"),model:field("model"),price_note:field("price_note"),summary:field("summary"),selling_points:field("summary"),brief:field("summary"),specs:field("specs"),source_claim_text:field("source_claim_text"),source_url:field("source_url")})}).then(function(response){return response.json().then(function(data){return {ok:response.ok,data:data};});}).then(function(result){if(!result.ok||!result.data.ok){throw new Error(result.data&&result.data.error?result.data.error:"AI 商品介绍生成失败。");}editor.value=result.data.description||"";editor.dispatchEvent(new Event("input",{bubbles:true}));if(status){status.textContent="已生成，保存商品后生效。";}}).catch(function(error){if(status){status.textContent=error.message||"AI 商品介绍生成失败。";}}).finally(function(){button.disabled=false;});});})();</script>';
+    }
+
     private function contentPickerSummary(int $contentId): string
     {
         if ($contentId <= 0) {
@@ -1084,6 +1189,122 @@ final class CommerceController
     private function mediaLibrary(): MediaLibrary
     {
         return new MediaLibrary($this->pdo, $this->rootPath() . '/content/uploads', (array) $this->settings->get('media', []));
+    }
+
+    private function productDescriptionDraft(int $contentId): string
+    {
+        if ($contentId <= 0) {
+            return '';
+        }
+        try {
+            $content = (new ContentRepository($this->pdo, ContentTypeRegistry::defaults()))->find($contentId);
+            if ($content === null) {
+                return '';
+            }
+
+            return $this->blocksToPlainText(is_array($content['blocks'] ?? null) ? $content['blocks'] : []);
+        } catch (Throwable) {
+            return '';
+        }
+    }
+
+    /** @param array<string,mixed> $input */
+    private function persistProductDescriptionDraft(array $input, ?int $actorId): int
+    {
+        $draft = $this->normalizeAiText((string) ($input['description_draft'] ?? ''));
+        $contentId = (int) ($input['description_content_id'] ?? 0);
+        if ($draft === '') {
+            return $contentId;
+        }
+
+        $repo = new ContentRepository($this->pdo, ContentTypeRegistry::defaults());
+        $blocks = [
+            [
+                'type' => 'paragraph',
+                'data' => [
+                    'text' => $draft,
+                ],
+            ],
+        ];
+        $meta = [
+            'source' => 'official.commerce',
+            'commerce_product_description' => true,
+            'updated_by' => $actorId,
+        ];
+
+        if ($contentId > 0) {
+            $content = $repo->find($contentId);
+            if ($content !== null) {
+                $terms = $repo->termsForContent($contentId);
+                $categories = array_values(array_map(
+                    static fn (array $term): string => (string) $term['name'],
+                    array_filter($terms, static fn (array $term): bool => (string) ($term['taxonomy'] ?? '') === 'category')
+                ));
+                $tags = array_values(array_map(
+                    static fn (array $term): string => (string) $term['name'],
+                    array_filter($terms, static fn (array $term): bool => (string) ($term['taxonomy'] ?? '') === 'tag')
+                ));
+                $repo->update(
+                    $contentId,
+                    (string) ($content['content_type'] ?? 'page'),
+                    (string) ($content['title'] ?? $this->descriptionTitle($input)),
+                    (string) ($content['slug'] ?? ''),
+                    $blocks,
+                    (string) ($content['status'] ?? 'draft'),
+                    array_merge(is_array($content['meta'] ?? null) ? $content['meta'] : [], $meta),
+                    $categories,
+                    $tags,
+                );
+
+                return $contentId;
+            }
+        }
+
+        return $repo->create(
+            'page',
+            $this->descriptionTitle($input),
+            'commerce-product-description-' . substr(hash('sha256', (string) ($input['name'] ?? '') . '|' . random_bytes(8)), 0, 16),
+            $blocks,
+            'draft',
+            $meta,
+        );
+    }
+
+    /** @param array<string,mixed> $input */
+    private function descriptionTitle(array $input): string
+    {
+        $name = $this->cleanAiField((string) ($input['name'] ?? ''), 120);
+        return '商品介绍 - ' . ($name !== '' ? $name : gmdate('YmdHis'));
+    }
+
+    /** @param list<array<string,mixed>> $blocks */
+    private function blocksToPlainText(array $blocks): string
+    {
+        $parts = [];
+        foreach ($blocks as $block) {
+            if (!is_array($block)) {
+                continue;
+            }
+            $data = is_array($block['data'] ?? null) ? $block['data'] : [];
+            foreach (['text', 'content', 'html', 'caption'] as $key) {
+                if (!isset($data[$key]) || !is_scalar($data[$key])) {
+                    continue;
+                }
+                $value = trim(strip_tags((string) $data[$key]));
+                if ($value !== '') {
+                    $parts[] = $value;
+                }
+            }
+            if (isset($data['items']) && is_array($data['items'])) {
+                foreach ($data['items'] as $item) {
+                    if (is_scalar($item) && trim((string) $item) !== '') {
+                        $parts[] = '- ' . trim(strip_tags((string) $item));
+                    }
+                }
+            }
+        }
+
+        return mb_substr($this->normalizeAiText(implode("\n\n", $parts)), 0, 12000);
     }
 
     private function descriptionHtml(int $contentId): string
@@ -1572,6 +1793,37 @@ final class CommerceController
             $lines[] = $key . ': ' . $value;
         }
         return implode("\n", $lines);
+    }
+
+    private function cleanAiField(string $value, int $maxLength): string
+    {
+        $value = trim(strip_tags(str_replace(["\r\n", "\r"], "\n", $value)));
+        $value = preg_replace('/[ \t]+/', ' ', $value) ?? $value;
+        $value = preg_replace("/\n{3,}/", "\n\n", $value) ?? $value;
+
+        return mb_substr($value, 0, max(1, $maxLength));
+    }
+
+    private function normalizeAiText(string $value): string
+    {
+        $value = str_replace(["\r\n", "\r"], "\n", $value);
+        $value = preg_replace('/[ \t]+\n/', "\n", $value) ?? $value;
+        $value = preg_replace("/\n{4,}/", "\n\n\n", $value) ?? $value;
+
+        return trim($value);
+    }
+
+    private function friendlyAiError(AiException $exception): string
+    {
+        return match ($exception->reason()) {
+            'disabled' => '站点 AI 未启用，请先到站点配置里启用全局 AI。',
+            'api_key_missing' => 'AI API Key 未配置，请先到站点配置里保存 API Key。',
+            'model_not_found', 'provider_not_found' => 'AI 模型或 Provider 不可用，请检查 AI 设置。',
+            'timeout' => 'AI 请求超时，请稍后重试或调高 Timeout。',
+            'quota_exceeded' => 'AI 额度不足或调用次数达到限制。',
+            'message_invalid' => '提交给 AI 的商品资料格式不正确。',
+            default => 'AI 服务暂不可用：' . $exception->getMessage(),
+        };
     }
 
     private function verificationLabel(string $status): string

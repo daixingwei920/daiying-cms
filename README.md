@@ -4,7 +4,7 @@
 
 A modular PHP CMS for building content websites, media workflows, commerce foundations, and in-development external distribution workflows.
 
-Daiying CMS Core is a self-hosted PHP CMS with themes, plugins, media management, commerce foundations, signed online updates, and recovery tooling. The current public release is **1.2.29 stable**.
+Daiying CMS Core is a self-hosted PHP CMS with themes, plugins, media management, commerce foundations, signed online updates, global AI settings, Passkey-capable admin login, and recovery tooling. The current public release is **1.2.40 stable**.
 
 ![Daiying CMS admin dashboard](.github/assets/screenshots/admin-dashboard.png)
 
@@ -24,7 +24,7 @@ Daiying CMS is organized as a Core platform with optional product layers:
 
 1. **Daiying CMS Core**: installer, admin backend, routing, content, media, themes, plugin lifecycle, recovery, and signed updates.
 2. **Content / Media**: articles, pages, structured blocks, taxonomy, uploads, media rendering, and external media/storage integrations.
-3. **Commerce**: products, pricing, orders, payments, paid access, card-code delivery, and commercial license storage.
+3. **Commerce**: products, pricing, orders, payments, paid access, card-code delivery, commercial license storage, and optional AI-assisted product-description drafting.
 4. **Distribution**: **In Development**. A distribution layer being developed for sending Daiying CMS content and commerce data to supported external channels.
 5. **Plugins / Themes**: packaged extension points and marketplace ecosystem for official and third-party capabilities.
 6. **Update System**: signed Core update flow with restore points, integrity checks, health checks, and rollback paths.
@@ -45,8 +45,8 @@ Download the latest stable package from [GitHub Releases](https://github.com/dai
 
 Current checked release:
 
-- Tag: `v1.2.29`
-- Package: `daiying-cms-1.2.29-stable.zip`
+- Tag: `v1.2.40`
+- Package: `daiying-cms-1.2.40-stable.zip`
 - SHA-256: see the `.sha256` sidecar attached to the release.
 
 ### 3. Install
@@ -90,7 +90,7 @@ The current repository contains an alpha Commerce Distribution implementation un
 
 **Status: Foundation / Beta**
 
-Daiying CMS includes payment provider settings, payment attempts, paid content/download access, and automatic card-code delivery. The current Core ships a manual payment provider and hosted redirect provider foundation. External payment providers and storefront flows may be packaged as plugins.
+Daiying CMS includes payment provider settings, payment attempts, paid content/download access, and automatic card-code delivery. The bundled Commerce plugin provides product and order foundations, and its product editor can draft a product description from administrator-provided product fields through the Core site AI service. The first AI product-description workflow does not crawl external product URLs; a URL can be kept as administrator-provided context for later workflows.
 
 See [Commerce](docs/commerce.md).
 
@@ -129,7 +129,11 @@ Core media support includes MIME validation, randomized storage keys, deduplicat
 
 ### Global AI Provider Settings
 
-Core provides optional site-level AI Provider configuration and a reusable AI service API for CMS features and plugins. DeepSeek, OpenAI, Grok / xAI, Tencent Hunyuan, and custom compatible endpoints share one OpenAI-compatible adapter; Gemini uses a native Gemini adapter. The AI layer handles configuration, Provider calls, and safe error handling only; business uses such as summaries, SEO, product text, or distribution adaptation belong to plugins or feature modules.
+Core provides optional site-level AI Provider configuration and a reusable AI service API for CMS features and plugins. DeepSeek, OpenAI, Grok / xAI, Tencent Hunyuan, and custom compatible endpoints share one OpenAI-compatible adapter; Gemini uses a native Gemini adapter. The content editor can use this service for "AI write with me" drafting, and bundled plugins can inherit the same site AI settings instead of asking administrators to repeat API Keys. The AI layer handles configuration, Provider calls, and safe error handling only; business uses such as summaries, SEO, product text, or distribution adaptation belong to plugins or feature modules.
+
+### Admin Security
+
+Administrators can keep password login while also using registered Passkeys for passwordless admin login. Passkey credentials stay scoped to the administrator account and the site origin; the login page uses the existing Core authentication and CSRF boundaries.
 
 See [Global AI](docs/ai.md).
 

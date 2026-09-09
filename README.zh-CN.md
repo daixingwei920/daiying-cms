@@ -4,7 +4,7 @@
 
 Daiying CMS 是一套模块化 PHP CMS，用于构建内容网站、媒体流程、交易基础能力，以及正在开发中的外部渠道分发能力。
 
-当前公开稳定版本：**1.2.29 stable**。
+当前公开稳定版本：**1.2.40 stable**。
 
 ![Daiying CMS 后台总览](.github/assets/screenshots/admin-dashboard.png)
 
@@ -24,7 +24,7 @@ Daiying CMS 不是单一功能脚本，而是按产品层级组织：
 
 1. **Daiying CMS Core**：安装器、后台、路由、内容、媒体、主题、插件生命周期、恢复诊断、签名更新。
 2. **Content / Media**：文章、页面、结构化区块、分类、媒体库、上传、外部媒体与存储接入。
-3. **Commerce**：商品、价格、订单、支付、付费访问、自动发卡、商业产品和授权存储。
+3. **Commerce**：商品、价格、订单、支付、付费访问、自动发卡、商业产品和授权存储，以及可选的 AI 商品介绍草稿。
 4. **Distribution**：**开发中**。正在开发的外部渠道分发层，用于将 Daiying CMS 的内容数据和 Commerce 数据分发到已支持的外部渠道。
 5. **Plugins / Themes**：官方和第三方插件、主题扩展生态。
 6. **Update System**：签名 Core 更新、恢复点、完整性检查、健康检查和回滚路径。
@@ -45,8 +45,8 @@ Daiying CMS 不是单一功能脚本，而是按产品层级组织：
 
 当前检查到的发行信息：
 
-- Tag：`v1.2.29`
-- 安装包：`daiying-cms-1.2.29-stable.zip`
+- Tag：`v1.2.40`
+- 安装包：`daiying-cms-1.2.40-stable.zip`
 - SHA-256：见 Release 附带的 `.sha256` 校验文件。
 
 ### 3. 安装
@@ -90,7 +90,7 @@ Distribution 的目标是让站长或卖家只在 Daiying CMS 内完成一次内
 
 **状态：基础能力 / Beta**
 
-Core 已包含支付 Provider 设置、支付记录、付费内容/下载授权和自动发卡。当前 Core 自带人工确认支付和 hosted redirect Provider 基础，Stripe、PayPal、支付宝、微信支付等能力可作为 Provider 插件接入。
+Core 已包含支付 Provider 设置、支付记录、付费内容/下载授权和自动发卡。当前仓库内置的 Commerce 插件提供商品和订单基础能力，商品编辑页可以通过 Core 站点 AI，根据管理员已填写的商品字段生成商品介绍草稿。第一版不会抓取外部商品链接；商品链接只作为管理员提供的上下文保留给后续流程。
 
 见：[Commerce 文档](docs/commerce.md)。
 
@@ -125,7 +125,11 @@ Core 已包含支付 Provider 设置、支付记录、付费内容/下载授权�
 
 ### 全局 AI Provider 设置
 
-Core 提供可选的站点级 AI Provider 配置和统一 AI Service API，供 CMS 功能和插件复用。DeepSeek、OpenAI、Grok / xAI、腾讯混元和自定义兼容服务共用 OpenAI-compatible Adapter；Gemini 使用原生 Gemini Adapter。AI 层只负责配置、Provider 调用和安全错误处理；文章摘要、SEO、商品描述、渠道适配等具体用途应由插件或业务模块决定。
+Core 提供可选的站点级 AI Provider 配置和统一 AI Service API，供 CMS 功能和插件复用。DeepSeek、OpenAI、Grok / xAI、腾讯混元和自定义兼容服务共用 OpenAI-compatible Adapter；Gemini 使用原生 Gemini Adapter。内容编辑器可以使用这个服务进行“AI 帮我写”草稿生成，官方插件也可以默认继承站点 AI 设置，不要求管理员重复填写 API Key。AI 层只负责配置、Provider 调用和安全错误处理；文章摘要、SEO、商品描述、渠道适配等具体用途应由插件或业务模块决定。
+
+### 后台安全
+
+管理员可以保留密码登录，同时为已注册 Passkey 的账号使用无密码后台登录。Passkey 凭据限定在管理员账号和当前站点来源内，登录页继续使用 Core 现有认证与 CSRF 边界。
 
 见：[全局 AI](docs/ai.md)。
 
