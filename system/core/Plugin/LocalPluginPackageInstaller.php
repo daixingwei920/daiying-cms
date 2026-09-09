@@ -258,7 +258,7 @@ final class LocalPluginPackageInstaller
         }
         $deps = json_decode((string) ($row['dependencies_json'] ?? '[]'), true) ?: [];
         $this->assertDependencyRows($deps, $pluginId);
-        $this->ensureBundledMigrationsBeforeEnable($pluginId, $row);
+        $this->ensureTrustedSourceMigrationsBeforeEnable($pluginId, $row);
         $this->setPluginStatus($pluginId, PluginLifecycle::ENABLED);
         (new AuditLogger($this->pdo))->record('admin', $adminId, 'plugin.enabled', ['plugin_id' => $pluginId]);
     }
@@ -808,26 +808,30 @@ final class LocalPluginPackageInstaller
     }
 
     /** @param array<string,mixed> $row */
-    private function ensureBundledMigrationsBeforeEnable(string $pluginId, array $row): void
+    private function ensureTrustedSourceMigrationsBeforeEnable(string $pluginId, array $row): void
     {
-        if ((string) ($row['source'] ?? '') !== 'bundled_official' || (string) ($row['review_status'] ?? '') !== 'official_trusted') {
+        $source = (string) ($row['source'] ?? '');
+        $reviewStatus = (string) ($row['review_status'] ?? '');
+        $trustedBundled = $source === 'bundled_official' && $reviewStatus === 'official_trusted';
+        $trustedMarket = in_array($source, ['official_market', 'market'], true)
+            && in_array($reviewStatus, ['published', 'approved', 'official_trusted'], true);
+        if (!$trustedBundled && !$trustedMarket) {
             return;
         }
         $target = $this->rootPath . '/content/plugins/' . $pluginId;
         $manifestFile = $target . '/plugin.json';
         $manifest = json_decode(is_file($manifestFile) ? (string) file_get_contents($manifestFile) : '', true);
         if (!is_array($manifest)) {
-            throw new PluginException('Bundled plugin manifest is invalid.');
+            throw new PluginException('Trusted plugin manifest is invalid.');
         }
-        $official = new OfficialPluginRegistry($this->rootPath);
-        if (!$official->isTrustedBundled($pluginId, $target)) {
+        if ($trustedBundled && !(new OfficialPluginRegistry($this->rootPath))->isTrustedBundled($pluginId, $target)) {
             throw new PluginException('Bundled plugin is not in the official trusted source registry.');
         }
-        $this->validateMigrations($target, $manifest, true);
+        $this->validateMigrations($target, $manifest, $trustedBundled);
         $lock = $this->lock();
         $this->acquireLock($lock);
         try {
-            $this->runMigrations($target, $manifest, true);
+            $this->runMigrations($target, $manifest, $trustedBundled);
         } catch (Throwable $exception) {
             if ($this->hasRecoverableMigrationFailure($pluginId)) {
                 $this->setPluginRecoverable($pluginId, $this->sanitizeError($exception));

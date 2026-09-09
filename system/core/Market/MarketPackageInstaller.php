@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cms\Core\Market;
 
 use Cms\Core\Plugin\PluginLifecycle;
+use Cms\Core\Plugin\PluginMigrationRunner;
 use PDO;
 use ZipArchive;
 
@@ -66,6 +67,10 @@ final class MarketPackageInstaller
         $target = (string) $plan['target_dir'];
         $staging = $this->rootPath . '/storage/market/tmp/install-' . bin2hex(random_bytes(8));
         $backup = $this->rootPath . '/storage/market/tmp/backup-' . $manifest->extensionId . '-' . bin2hex(random_bytes(8));
+        $existingPluginRow = in_array($manifest->type, ['plugin', 'payment_provider'], true)
+            ? $this->pluginRow($pdo, $manifest->extensionId)
+            : null;
+        $movedIntoPlace = false;
 
         try {
             $this->extractPackage($zipPath, $manifest, $staging);
@@ -82,11 +87,9 @@ final class MarketPackageInstaller
                 }
                 throw new MarketException('Unable to move extension into place.');
             }
+            $movedIntoPlace = true;
 
             $this->removeDirectory($staging);
-            if (is_dir($backup)) {
-                $this->removeDirectory($backup);
-            }
 
             $result = $plan + [
                 'status' => 'Installed',
@@ -105,7 +108,14 @@ final class MarketPackageInstaller
                 ], $manifest->dependencies),
             ]);
             if (in_array($manifest->type, ['plugin', 'payment_provider'], true)) {
-                $this->registerPluginRecord($pdo, $target, $manifest, $marketReference);
+                $pluginManifest = $this->registerPluginRecord($pdo, $target, $manifest, $marketReference);
+                $runner = new PluginMigrationRunner($this->rootPath, $pdo);
+                $runner->validate($target, $pluginManifest);
+                $runner->run($target, $pluginManifest);
+            }
+
+            if (is_dir($backup)) {
+                $this->removeDirectory($backup);
             }
             $repo->recordLog($marketReference, $manifest->extensionId, $manifest->type, 'Installed', $result);
 
@@ -114,10 +124,14 @@ final class MarketPackageInstaller
             if (is_dir($staging)) {
                 $this->removeDirectory($staging);
             }
-            if (!is_dir($target) && is_dir($backup)) {
+            if ($movedIntoPlace && is_dir($target)) {
+                $this->removeDirectory($target);
+            }
+            if (is_dir($backup)) {
                 rename($backup, $target);
-            } elseif (is_dir($backup)) {
-                $this->removeDirectory($backup);
+            }
+            if (in_array($manifest->type, ['plugin', 'payment_provider'], true)) {
+                $this->restorePluginRow($pdo, $manifest->extensionId, $existingPluginRow);
             }
             $repo->recordLog($marketReference, $manifest->extensionId, $manifest->type, 'Failed', $plan + ['error' => $exception->getMessage()]);
             throw $exception;
@@ -404,7 +418,8 @@ final class MarketPackageInstaller
         return $version;
     }
 
-    private function registerPluginRecord(PDO $pdo, string $target, MarketPackageManifest $marketManifest, string $marketReference): void
+    /** @return array<string,mixed> */
+    private function registerPluginRecord(PDO $pdo, string $target, MarketPackageManifest $marketManifest, string $marketReference): array
     {
         $pluginJson = $target . '/plugin.json';
         $manifest = is_file($pluginJson) ? json_decode((string) file_get_contents($pluginJson), true) : null;
@@ -459,6 +474,8 @@ final class MarketPackageInstaller
             ':table_prefixes_json' => json_encode(is_array($prefixes) ? array_values(array_map('strval', $prefixes)) : [], JSON_UNESCAPED_SLASHES),
             ':updated_at' => $now,
         ]);
+
+        return $manifest;
     }
 
     /** @return array<string,mixed>|null */
@@ -469,5 +486,30 @@ final class MarketPackageInstaller
         $row = $stmt->fetch();
 
         return is_array($row) ? $row : null;
+    }
+
+    /** @param array<string,mixed>|null $row */
+    private function restorePluginRow(PDO $pdo, string $pluginId, ?array $row): void
+    {
+        if ($row === null) {
+            $stmt = $pdo->prepare('DELETE FROM cms_plugins WHERE plugin_id = :plugin_id');
+            $stmt->execute([':plugin_id' => $pluginId]);
+            return;
+        }
+
+        $columns = array_values(array_filter(array_keys($row), static fn (mixed $column): bool => is_string($column)));
+        $assignments = [];
+        $params = [];
+        foreach ($columns as $column) {
+            if ($column === 'plugin_id') {
+                continue;
+            }
+            $assignments[] = $column . ' = :' . $column;
+            $params[':' . $column] = $row[$column];
+        }
+        $params[':plugin_id'] = $pluginId;
+        $sql = 'UPDATE cms_plugins SET ' . implode(', ', $assignments) . ' WHERE plugin_id = :plugin_id';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
     }
 }

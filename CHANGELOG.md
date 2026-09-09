@@ -2,6 +2,16 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.38 - 2026-09-09
+
+- Fixed official Marketplace plugin installs and upgrades to run plugin-declared migrations before leaving the package installed.
+- Added migration checksum validation, plugin-owned table-prefix checks, and rollback preservation for Marketplace plugin migration failures.
+- Added an enable-time migration backfill for trusted official Marketplace plugins so plugins cannot become Enabled while declared tables are missing.
+- Added regression coverage for Marketplace migration install, upgrade, checksum mismatch, rollback, and official.mail table creation.
+- Preserved Core/plugin data, official update isolation, and the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.38-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.38>.
+
 ## 1.2.37 - 2026-09-09
 
 - Fixed post-switch Core update health checks to inspect the active release directory instead of stale root Core files.
