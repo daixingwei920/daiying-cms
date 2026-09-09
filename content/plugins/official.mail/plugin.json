@@ -1,12 +1,12 @@
 {
   "plugin_id": "official.mail",
   "name": "Daiying Mail",
-  "version": "0.2.0-alpha.3",
+  "version": "0.2.0-alpha.4",
   "author": "Daiying CMS",
   "type": "plugin",
   "package_type": "plugin",
   "entry": "plugin.php",
-  "core": { "min": "1.2.32", "max": "2.0.0" },
+  "core": { "min": "1.2.39", "max": "2.0.0" },
   "php": ">=8.3.0",
   "trust_level": "trusted_php",
   "official": true,
@@ -18,9 +18,10 @@
     "mail.manage",
     "mail.send",
     "mail.read",
-    "mail.oauth"
+    "mail.oauth",
+    "notifications.create"
   ],
-  "capability_namespaces": ["mail"],
+  "capability_namespaces": ["mail", "notifications"],
   "dependencies": [],
   "required_plugins": [],
   "migrations": ["migrations/001_mail_client.php"],
@@ -29,5 +30,5 @@
     "uninstall": "retain_mail_logs_and_settings",
     "purge": "separate_confirmation_only"
   },
-  "data_schema_version": "0.2.0-alpha.3"
+  "data_schema_version": "0.2.0-alpha.4"
 }

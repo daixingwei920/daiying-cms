@@ -42,7 +42,15 @@ return static function (PluginContext $context): void {
         $context->registerMailEvent('official.mail.test', '邮件测试', ['site_name', 'admin_email']);
     }
 
-    $controller = new MailController($repository, $oauth, $factory, method_exists($context, 'mail') ? $context->mail() : null);
+    $notifications = null;
+    if (method_exists($context, 'notifications')) {
+        try {
+            $notifications = $context->notifications();
+        } catch (Throwable) {
+            $notifications = null;
+        }
+    }
+    $controller = new MailController($repository, $oauth, $factory, method_exists($context, 'mail') ? $context->mail() : null, $notifications);
     $context->adminRoute('GET', '/admin/mail', [$controller, 'adminIndex'], 'mail.manage', false);
     $context->adminRoute('POST', '/admin/mail/oauth-config', [$controller, 'saveOAuthConfig'], 'mail.manage', true);
     $context->adminRoute('GET', '/admin/mail/oauth/start', [$controller, 'oauthStart'], 'mail.oauth', false);

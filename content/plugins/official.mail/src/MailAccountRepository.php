@@ -247,10 +247,11 @@ final class MailAccountRepository
             ->execute([':id' => $id, ':error' => $this->redact($message), ':updated' => gmdate('c')]);
     }
 
-    /** @param list<array<string,mixed>> $messages */
-    public function cacheMessages(int $accountId, array $messages): void
+    /** @param list<array<string,mixed>> $messages @return list<string> */
+    public function cacheMessages(int $accountId, array $messages): array
     {
         $now = gmdate('c');
+        $createdRemoteIds = [];
         foreach ($messages as $message) {
             $remoteId = trim((string) ($message['id'] ?? ''));
             if ($remoteId === '') {
@@ -278,13 +279,31 @@ final class MailAccountRepository
                 $this->pdo->prepare('INSERT INTO mail_messages (account_id, remote_id, thread_id, folder, sender_name, sender_email, subject, snippet, received_at, is_read, has_attachments, payload_json, cached_at, created_at, updated_at)
                     VALUES (:account_id, :remote_id, :thread_id, :folder, :sender_name, :sender_email, :subject, :snippet, :received_at, :is_read, :has_attachments, :payload_json, :cached_at, :created_at, :updated_at)')
                     ->execute($params);
+                $createdRemoteIds[] = $remoteId;
             } catch (\Throwable) {
                 $this->pdo->prepare('UPDATE mail_messages SET thread_id = :thread_id, folder = :folder, sender_name = :sender_name, sender_email = :sender_email, subject = :subject, snippet = :snippet, received_at = :received_at, is_read = :is_read, has_attachments = :has_attachments, payload_json = :payload_json, cached_at = :cached_at, updated_at = :updated_at WHERE account_id = :account_id AND remote_id = :remote_id')
-                    ->execute($params);
+                    ->execute([
+                        ':account_id' => $params[':account_id'],
+                        ':remote_id' => $params[':remote_id'],
+                        ':thread_id' => $params[':thread_id'],
+                        ':folder' => $params[':folder'],
+                        ':sender_name' => $params[':sender_name'],
+                        ':sender_email' => $params[':sender_email'],
+                        ':subject' => $params[':subject'],
+                        ':snippet' => $params[':snippet'],
+                        ':received_at' => $params[':received_at'],
+                        ':is_read' => $params[':is_read'],
+                        ':has_attachments' => $params[':has_attachments'],
+                        ':payload_json' => $params[':payload_json'],
+                        ':cached_at' => $params[':cached_at'],
+                        ':updated_at' => $params[':updated_at'],
+                    ]);
             }
         }
         $this->pdo->prepare('UPDATE mail_accounts SET last_sync_at = :synced, updated_at = :updated WHERE id = :id')
             ->execute([':id' => $accountId, ':synced' => $now, ':updated' => $now]);
+
+        return $createdRemoteIds;
     }
 
     /** @return list<array<string,mixed>> */

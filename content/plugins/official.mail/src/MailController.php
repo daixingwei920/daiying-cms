@@ -10,6 +10,7 @@ use Cms\Core\Mail\MailAddress;
 use Cms\Core\Mail\MailMessage;
 use Cms\Core\Mail\MailProviderRegistry;
 use Cms\Core\Mail\MailService;
+use Cms\Core\Notification\NotificationService;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Support\View;
 use Throwable;
@@ -21,6 +22,7 @@ final class MailController
         private readonly MailOAuthService $oauth,
         private readonly MailApiClientFactory $factory,
         private readonly ?MailService $coreMail = null,
+        private readonly ?NotificationService $notifications = null,
     ) {
     }
 
@@ -97,7 +99,8 @@ final class MailController
         $warning = '';
         try {
             $messages = $this->factory->forAccount($account)->listMessages($query, 25);
-            $this->repository->cacheMessages((int) $account['id'], $messages);
+            $createdRemoteIds = $this->repository->cacheMessages((int) $account['id'], $messages);
+            $this->notifyNewUnreadMessages($account, $messages, $createdRemoteIds);
         } catch (Throwable $exception) {
             $this->repository->recordAccountError((int) $account['id'], $exception->getMessage());
             $messages = $this->repository->cachedMessages((int) $account['id'], $query, 25);
@@ -118,6 +121,43 @@ final class MailController
         $html = '<h1>收件箱</h1><p><a href="/admin/mail">返回邮件中心</a></p>' . $warning . '<p><strong>' . $this->e((string) $account['email']) . '</strong> · ' . $this->e((string) $account['provider']) . '</p>' . $form . '<table><tr><th>状态</th><th>发件人</th><th>主题</th><th>时间</th></tr>' . $rows . '</table>';
 
         return Response::html(View::page('收件箱', $html));
+    }
+
+    /** @param array<string,mixed> $account @param list<array<string,mixed>> $messages @param list<string> $createdRemoteIds */
+    private function notifyNewUnreadMessages(array $account, array $messages, array $createdRemoteIds): void
+    {
+        if ($this->notifications === null || $createdRemoteIds === []) {
+            return;
+        }
+        $created = array_fill_keys($createdRemoteIds, true);
+        foreach ($messages as $message) {
+            $remoteId = (string) ($message['id'] ?? '');
+            if ($remoteId === '' || empty($created[$remoteId]) || !empty($message['is_read'])) {
+                continue;
+            }
+            try {
+                $subject = trim((string) ($message['subject'] ?? '')) ?: '(无主题)';
+                $snippet = trim((string) ($message['snippet'] ?? ''));
+                $accountId = (int) ($account['id'] ?? 0);
+                $this->notifications->create('新邮件：' . $subject, $snippet, [
+                    'source_type' => 'mail',
+                    'source_id' => $remoteId,
+                    'severity' => 'info',
+                    'action_url' => '/admin/mail/message?account_id=' . $accountId . '&message_id=' . rawurlencode($remoteId),
+                    'dedupe_key' => 'official.mail:' . $accountId . ':' . sha1($remoteId),
+                    'payload' => [
+                        'account_id' => $accountId,
+                        'remote_message_id' => $remoteId,
+                        'sender_email' => (string) ($message['sender_email'] ?? ''),
+                        'received_at' => (string) ($message['received_at'] ?? ''),
+                        'subject' => $subject,
+                        'snippet' => $snippet,
+                    ],
+                ]);
+            } catch (Throwable) {
+                continue;
+            }
+        }
     }
 
     public function message(Request $request): Response

@@ -21,6 +21,7 @@ require_once CMS_ROOT . '/content/plugins/official.mail/src/MailController.php';
 use Cms\Core\Http\Request;
 use Cms\Core\Mail\MailProviderInterface;
 use Cms\Core\Mail\MailProviderRegistry;
+use Cms\Core\Notification\NotificationService;
 use Cms\Core\Plugin\PluginSecretStore;
 use Official\Mail\GmailSmtpMailProvider;
 use Official\Mail\MailAccountRepository;
@@ -48,14 +49,15 @@ $assert = static function (bool $condition, string $message) use (&$failures): v
 
 $manifest = json_decode((string) file_get_contents(CMS_ROOT . '/content/plugins/official.mail/plugin.json'), true);
 $assert(($manifest['plugin_id'] ?? '') === 'official.mail', 'Manifest uses the official mail plugin ID.');
-$assert(($manifest['version'] ?? '') === '0.2.0-alpha.3', 'Manifest version is Webmail V1 alpha.3.');
-$assert(($manifest['core']['min'] ?? '') === '1.2.32', 'Manifest requires a Core version with Mail API infrastructure.');
+$assert(($manifest['version'] ?? '') === '0.2.0-alpha.4', 'Manifest version is Webmail V1 alpha.4.');
+$assert(($manifest['core']['min'] ?? '') === '1.2.39', 'Manifest requires a Core version with Mail and Notification infrastructure.');
 $assert(($manifest['migrations'] ?? null) === ['migrations/001_mail_client.php'], 'Manifest declares the mail client migration.');
 $assert(in_array('mail.provider', $manifest['capabilities'] ?? [], true), 'Manifest declares mail.provider capability.');
 $assert(in_array('mail.event', $manifest['capabilities'] ?? [], true), 'Manifest declares mail.event capability.');
 $assert(in_array('mail.read', $manifest['capabilities'] ?? [], true), 'Manifest declares mail.read capability.');
 $assert(in_array('mail.oauth', $manifest['capabilities'] ?? [], true), 'Manifest declares mail.oauth capability.');
-$assert(in_array('mail', $manifest['capability_namespaces'] ?? [], true), 'Manifest limits mail capabilities to the mail namespace.');
+$assert(in_array('notifications.create', $manifest['capabilities'] ?? [], true), 'Manifest declares notification creation capability.');
+$assert(in_array('mail', $manifest['capability_namespaces'] ?? [], true) && in_array('notifications', $manifest['capability_namespaces'] ?? [], true), 'Manifest limits capabilities to mail and notification namespaces.');
 
 $providers = [
     new OfficialSmtpMailProvider(),
@@ -140,6 +142,17 @@ $repo->cacheMessages((int) $account['id'], [[
 ]]);
 $cached = $repo->cachedMessages((int) $account['id'], 'Order', 10);
 $assert(count($cached) === 1 && ($cached[0]['remote_id'] ?? '') === 'msg-1', 'Inbox metadata is cached and searchable without storing full mailbox history.');
+$createdAgain = $repo->cacheMessages((int) $account['id'], [[
+    'id' => 'msg-1',
+    'thread_id' => 'thread-1',
+    'folder' => 'inbox',
+    'sender_email' => 'buyer@example.com',
+    'subject' => 'Order question updated',
+    'snippet' => 'Can you ship tomorrow?',
+    'received_at' => gmdate('c'),
+    'is_read' => false,
+]]);
+$assert($createdAgain === [], 'Message cache reports only newly discovered remote messages.');
 
 $http = new MailHttpClient();
 foreach ([
@@ -167,6 +180,34 @@ $assert($oauthProvider->testConnection(['from_email' => 'seller@example.com'])->
 $assert(!$oauthProvider->testConnection(['from_email' => 'missing@example.com'])->success, 'OAuth provider test fails clearly for an unknown configured sender.');
 $repo->upsertAccount('gmail', ['email' => 'second@example.com', 'display_name' => 'Second'], MailOAuthService::defaultScopes('gmail'), 'access-token-two', 'refresh-token-two', 3600);
 $assert(!$oauthProvider->testConnection(['from_email' => ''])->success, 'OAuth provider requires From Email when multiple accounts are connected.');
+
+$notificationMigration = require CMS_ROOT . '/system/migrations/2026_09_09_000002_core_notifications.php';
+$notificationMigration->up($pdo);
+$notifications = (new NotificationService($pdo))->forPlugin('official.mail');
+$controllerForNotifications = new MailController($repo, new MailOAuthService($repo, $http), $factory, null, $notifications);
+$notify = new ReflectionMethod($controllerForNotifications, 'notifyNewUnreadMessages');
+$notify->invoke($controllerForNotifications, $account, [[
+    'id' => 'remote-new-unread',
+    'sender_email' => 'buyer@example.com',
+    'subject' => 'New buyer message',
+    'snippet' => 'Please reply',
+    'received_at' => gmdate('c'),
+    'is_read' => false,
+]], ['remote-new-unread']);
+$notice = (new NotificationService($pdo))->recent(['limit' => 1])[0] ?? [];
+$assert(($notice['source_owner'] ?? '') === 'official.mail' && ($notice['source_type'] ?? '') === 'mail', 'New unread mail notifications are created through the plugin notification owner.');
+$assert(($notice['action_url'] ?? '') === '/admin/mail/message?account_id=' . (int) $account['id'] . '&message_id=remote-new-unread', 'New mail notification action opens the mail message.');
+$payload = json_decode((string) ($notice['payload_json'] ?? '{}'), true);
+$assert(is_array($payload) && ($payload['remote_message_id'] ?? '') === 'remote-new-unread' && !array_key_exists('access_token', $payload), 'New mail notification payload stores only safe message metadata.');
+$notify->invoke($controllerForNotifications, $account, [[
+    'id' => 'remote-new-unread',
+    'sender_email' => 'buyer@example.com',
+    'subject' => 'New buyer message again',
+    'snippet' => 'Please reply',
+    'received_at' => gmdate('c'),
+    'is_read' => false,
+]], ['remote-new-unread']);
+$assert((int) $pdo->query('SELECT COUNT(*) FROM cms_notifications')->fetchColumn() === 1, 'New mail notification dedupe prevents repeated inbox sync noise.');
 
 $_SERVER['REQUEST_URI'] = '/admin/mail';
 $controller = new MailController($repo, new MailOAuthService($repo, $http), new MailApiClientFactory($repo, new MailOAuthService($repo, $http), $http), null);
