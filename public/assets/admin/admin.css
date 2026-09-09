@@ -208,6 +208,30 @@ body {
   padding: 0;
 }
 
+.admin-notification-link {
+  position: relative;
+  text-decoration: none;
+}
+
+.admin-notification-badge {
+  position: absolute;
+  right: -5px;
+  top: -5px;
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--admin-danger);
+  color: #fff;
+  border: 2px solid #fff;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 800;
+  box-sizing: border-box;
+}
+
 .admin-breadcrumb {
   display: flex;
   align-items: center;

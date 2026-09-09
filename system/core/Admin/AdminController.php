@@ -54,6 +54,7 @@ use Cms\Core\Market\ReviewSubmissionClient;
 use Cms\Core\Media\MediaException;
 use Cms\Core\Media\MediaLibrary;
 use Cms\Core\Navigation\NavigationBuilder;
+use Cms\Core\Notification\NotificationService;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Security\SessionManager;
 use Cms\Core\Support\CurrencyRegistry;
@@ -403,6 +404,146 @@ final class AdminController
             '<form method="post" action="/admin/logout">' . CsrfToken::field() . '<button class="admin-button-secondary" type="submit">退出登录</button></form></section></div>';
 
         return Response::html(View::page('管理后台', $body));
+    }
+
+    public function notificationsIndex(?Request $request = null): Response
+    {
+        $request ??= new Request('GET', '/admin/notifications');
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+
+        try {
+            $service = new NotificationService(ConnectionFactory::make($this->settings));
+            $status = (string) ($request->query['status'] ?? '');
+            $filters = ['limit' => 50];
+            if (in_array($status, ['unread', 'read', 'archived'], true)) {
+                $filters['status'] = $status;
+                $filters['include_archived'] = true;
+            }
+            $items = $service->recent($filters);
+            $unreadCount = $service->unreadCount();
+        } catch (Throwable $exception) {
+            $this->logger->error('Notification index failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('通知中心', '<h1>通知中心</h1><p class="error">通知暂不可用。</p>'), 500);
+        }
+
+        $tabs = [
+            '' => '最近',
+            'unread' => '未读',
+            'read' => '已读',
+            'archived' => '已归档',
+        ];
+        $tabHtml = '<div class="admin-action-row">';
+        foreach ($tabs as $value => $label) {
+            $href = $value === '' ? '/admin/notifications' : '/admin/notifications?status=' . rawurlencode($value);
+            $class = $status === $value ? 'button' : 'button admin-button-secondary';
+            $tabHtml .= '<a class="' . $class . '" href="' . View::escape($href) . '">' . View::escape($label) . '</a>';
+        }
+        $tabHtml .= '</div>';
+
+        $rows = '';
+        foreach ($items as $item) {
+            $id = (int) ($item['id'] ?? 0);
+            $statusText = (string) ($item['status'] ?? 'unread');
+            $severity = (string) ($item['severity'] ?? 'info');
+            $actionUrl = (string) ($item['action_url'] ?? '');
+            $open = $actionUrl !== ''
+                ? '<a class="button admin-button-secondary" href="' . View::escape($actionUrl) . '">打开</a> '
+                : '';
+            $read = $statusText === 'unread'
+                ? '<form method="post" action="/admin/notifications/read/' . $id . '" style="display:inline">' . CsrfToken::field() . '<button type="submit" class="admin-button-secondary">标为已读</button></form> '
+                : '';
+            $archive = $statusText !== 'archived'
+                ? '<form method="post" action="/admin/notifications/archive/' . $id . '" style="display:inline">' . CsrfToken::field() . '<button type="submit" class="admin-button-secondary">归档</button></form>'
+                : '';
+            $rows .= '<tr><td><span class="admin-badge admin-badge-' . View::escape($this->notificationBadgeClass($severity)) . '">' . View::escape($this->notificationSeverityLabel($severity)) . '</span><br><span class="muted">' . View::escape($statusText) . '</span></td>' .
+                '<td><strong>' . View::escape((string) ($item['title'] ?? '')) . '</strong><p class="muted">' . View::escape((string) ($item['body'] ?? '')) . '</p><code>' . View::escape((string) ($item['source_owner'] ?? 'core')) . ':' . View::escape((string) ($item['source_type'] ?? 'system')) . '</code></td>' .
+                '<td>' . View::escape((string) ($item['created_at'] ?? '')) . '</td><td>' . $open . $read . $archive . '</td></tr>';
+        }
+        $rows = $rows !== '' ? $rows : '<tr><td colspan="4" class="muted">暂无通知。</td></tr>';
+        $markAll = $unreadCount > 0
+            ? '<form method="post" action="/admin/notifications/read-all">' . CsrfToken::field() . '<button type="submit">全部标为已读</button></form>'
+            : '';
+        $body = '<div class="admin-page-header"><div><h1>通知中心</h1><p class="muted">Core 和插件的后台提醒统一显示在这里。未读 ' . (int) $unreadCount . ' 条。</p></div><div class="admin-action-row">' . $markAll . '</div></div>' .
+            $tabHtml . '<table><thead><tr><th>状态</th><th>通知</th><th>时间</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>';
+
+        return Response::html(View::page('通知中心', $body));
+    }
+
+    public function notificationMarkRead(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::text('请求校验失败，请刷新页面后重试。', 403);
+        }
+        try {
+            (new NotificationService(ConnectionFactory::make($this->settings)))->markRead($this->pathSegmentInt($request->path, 3));
+        } catch (Throwable $exception) {
+            $this->logger->error('Notification mark read failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+        }
+
+        return Response::redirect('/admin/notifications');
+    }
+
+    public function notificationMarkAllRead(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::text('请求校验失败，请刷新页面后重试。', 403);
+        }
+        try {
+            (new NotificationService(ConnectionFactory::make($this->settings)))->markAllRead();
+        } catch (Throwable $exception) {
+            $this->logger->error('Notification mark all read failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+        }
+
+        return Response::redirect('/admin/notifications');
+    }
+
+    public function notificationArchive(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::text('请求校验失败，请刷新页面后重试。', 403);
+        }
+        try {
+            (new NotificationService(ConnectionFactory::make($this->settings)))->archive($this->pathSegmentInt($request->path, 3));
+        } catch (Throwable $exception) {
+            $this->logger->error('Notification archive failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+        }
+
+        return Response::redirect('/admin/notifications');
+    }
+
+    private function notificationSeverityLabel(string $severity): string
+    {
+        return match ($severity) {
+            'success' => '成功',
+            'warning' => '提醒',
+            'error' => '错误',
+            default => '信息',
+        };
+    }
+
+    private function notificationBadgeClass(string $severity): string
+    {
+        return match ($severity) {
+            'success' => 'success',
+            'warning' => 'warning',
+            'error' => 'danger',
+            default => 'muted',
+        };
     }
 
     private function adminTableCount(PDO $pdo, string $table, string $where = ''): int

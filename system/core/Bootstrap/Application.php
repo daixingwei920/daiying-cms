@@ -23,6 +23,7 @@ use Cms\Core\Integrity\CoreBoundary;
 use Cms\Core\Logging\FileLogger;
 use Cms\Core\Media\MediaController;
 use Cms\Core\Navigation\NavigationBuilder;
+use Cms\Core\Notification\NotificationService;
 use Cms\Core\Events\EventDispatcher;
 use Cms\Core\Plugin\BlockRegistry;
 use Cms\Core\Plugin\OfficialPluginRegistry;
@@ -111,6 +112,7 @@ final class Application
         $router = new Router();
         View::setAdminPluginMenus($pluginRuntime->menus());
         View::setFrontNavigation(NavigationBuilder::build($settings, null, $rootPath));
+        self::configureAdminNotifications($settings, $installed);
         self::registerCoreRoutes($router, $settings, $rootPath, $logger, $mode, $pluginRuntime);
 
         return new self($rootPath, $settings, $logger, $router, $installed);
@@ -152,6 +154,25 @@ final class Application
         return $response->withHeaders([
             'Strict-Transport-Security' => $this->hstsValue(),
         ]);
+    }
+
+    private static function configureAdminNotifications(Settings $settings, bool $installed): void
+    {
+        View::setAdminNotificationSummary(0);
+        $path = parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
+        if (!$installed || !is_string($path) || !str_starts_with($path, '/admin') || $path === '/admin/login') {
+            return;
+        }
+
+        try {
+            $pdo = ConnectionFactory::make($settings);
+            $user = (new AdminAuthenticator($pdo))->user();
+            if ($user !== null && (int) ($user['id'] ?? 0) > 0) {
+                View::setAdminNotificationSummary((new NotificationService($pdo))->unreadCount());
+            }
+        } catch (Throwable) {
+            View::setAdminNotificationSummary(0);
+        }
     }
 
     private function hstsEnabled(): bool
@@ -357,6 +378,10 @@ final class Application
         $router->post('/admin/mfa/passkey-verify', [$admin, 'mfaPasskeyVerify']);
         $router->post('/admin/logout', [$admin, 'logout']);
         $router->get('/admin', [$admin, 'dashboard']);
+        $router->get('/admin/notifications', [$admin, 'notificationsIndex']);
+        $router->post('/admin/notifications/read/{id}', [$admin, 'notificationMarkRead']);
+        $router->post('/admin/notifications/read-all', [$admin, 'notificationMarkAllRead']);
+        $router->post('/admin/notifications/archive/{id}', [$admin, 'notificationArchive']);
         $router->get('/admin/security', [$admin, 'adminSecurity']);
         $router->post('/admin/security/mfa-enable', [$admin, 'adminSecurityEnableMfa']);
         $router->post('/admin/security/mfa-disable', [$admin, 'adminSecurityDisableMfa']);

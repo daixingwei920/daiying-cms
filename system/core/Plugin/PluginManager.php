@@ -9,6 +9,7 @@ use Cms\Core\Cache\FileCache;
 use Cms\Core\Content\ContentTypeRegistry;
 use Cms\Core\Content\CustomFieldRegistry;
 use Cms\Core\Mail\MailService;
+use Cms\Core\Notification\NotificationService;
 use Cms\Core\Config\Settings;
 use Cms\Core\Events\EventDispatcher;
 use Cms\Core\Logging\FileLogger;
@@ -243,6 +244,7 @@ final class PluginManager
             $this->contentTypes(),
             $this->customFields(),
             new SchedulerService($this->pdo),
+            new NotificationService($this->pdo),
         );
 
         $register = require $entry;

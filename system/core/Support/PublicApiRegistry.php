@@ -136,6 +136,14 @@ final class PublicApiRegistry
                 'capabilities' => ['mail.provider', 'mail.event'],
             ],
             [
+                'id' => 'notification.service',
+                'version' => self::CONTRACT_VERSION,
+                'class' => 'Cms\\Core\\Notification\\NotificationService',
+                'stability' => 'stable',
+                'summary' => 'Create, deduplicate, list, read and archive safe admin notifications for Core and plugins.',
+                'capabilities' => ['notifications.create'],
+            ],
+            [
                 'id' => 'queue.service',
                 'version' => self::CONTRACT_VERSION,
                 'class' => 'Cms\\Core\\Queue\\QueueService',

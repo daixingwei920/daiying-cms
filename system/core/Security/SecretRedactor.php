@@ -23,7 +23,7 @@ final class SecretRedactor
             return $clean;
         }
         if (is_string($value)) {
-            $value = preg_replace('/\b(password|secret|token|session|private_key|dsn|authorization|api[_-]?key|access[_-]?token|refresh[_-]?token|cookie)\b\s*[:=]\s*([^\s"\']+)/i', '$1=[redacted]', $value) ?: $value;
+            $value = preg_replace('/\b(password|secret|token|session|private_key|dsn|authorization|api[_-]?key|access[_-]?token|refresh[_-]?token|cookie)\b\s*[:=]\s*(?:Bearer\s+)?([^\s"\']+)/i', '$1=[redacted]', $value) ?: $value;
             $value = preg_replace('/Bearer\s+[A-Za-z0-9._~+\/=-]+/i', 'Bearer [redacted]', $value) ?: $value;
             $value = preg_replace('/(sk|pk|whsec|xox[baprs]|gh[pousr])_[A-Za-z0-9_=-]{4,}/i', '$1_[redacted]', $value) ?: $value;
 

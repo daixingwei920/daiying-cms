@@ -10,6 +10,7 @@ final class View
 {
     /** @var list<PluginMenuItem> */
     private static array $adminPluginMenus = [];
+    private static int $adminUnreadNotifications = 0;
     /** @var list<array{label:string,url:string,type:string,enabled:bool,requires_plugin:string}> */
     private static array $frontNavigation = [];
 
@@ -17,6 +18,11 @@ final class View
     public static function setAdminPluginMenus(array $menus): void
     {
         self::$adminPluginMenus = array_values(array_filter($menus, static fn (mixed $menu): bool => $menu instanceof PluginMenuItem));
+    }
+
+    public static function setAdminNotificationSummary(int $unreadCount): void
+    {
+        self::$adminUnreadNotifications = max(0, $unreadCount);
     }
 
     /** @param list<array{label:string,url:string,type:string,enabled:bool,requires_plugin:string}> $items */
@@ -64,6 +70,7 @@ final class View
         $sections = [
             '工作台' => [
                 ['/admin', '总览', 'home'],
+                ['/admin/notifications', '通知中心', 'bell'],
                 ['/admin/security', 'shield'],
             ],
             '内容' => [
@@ -135,7 +142,16 @@ final class View
         return '<header class="admin-topbar"><div class="admin-topbar-left">' .
             '<button class="admin-icon-button" type="button" data-admin-sidebar-toggle aria-controls="admin-sidebar" aria-expanded="true" title="收起或展开侧栏">' . self::icon('menu') . '</button>' .
             '<nav class="admin-breadcrumb" aria-label="当前位置">' . $crumb . '</nav></div>' .
-            '<div class="admin-topbar-actions"><a class="button admin-button-secondary" href="/" target="_blank" rel="noopener">查看站点</a><a class="button" href="/admin/content/new">快速新建</a><span class="admin-account">管理员</span></div></header>';
+            '<div class="admin-topbar-actions">' . self::adminNotificationLink() . '<a class="button admin-button-secondary" href="/" target="_blank" rel="noopener">查看站点</a><a class="button" href="/admin/content/new">快速新建</a><span class="admin-account">管理员</span></div></header>';
+    }
+
+    private static function adminNotificationLink(): string
+    {
+        $badge = self::$adminUnreadNotifications > 0
+            ? '<span class="admin-notification-badge">' . self::escape((string) min(99, self::$adminUnreadNotifications)) . '</span>'
+            : '';
+
+        return '<a class="admin-icon-button admin-notification-link" href="/admin/notifications" title="通知中心" aria-label="通知中心，未读 ' . self::escape((string) self::$adminUnreadNotifications) . ' 条">' . self::icon('bell') . $badge . '</a>';
     }
 
     private static function frontHeader(): string
@@ -226,6 +242,7 @@ final class View
     {
         $paths = [
             'activity' => '<path d="M3 12h4l2-6 4 12 2-6h6"/>',
+            'bell' => '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>',
             'card' => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h5"/>',
             'chart' => '<path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15v-4"/><path d="M13 15V8"/><path d="M18 15v-7"/>',
             'check' => '<path d="m5 12 4 4L19 6"/>',

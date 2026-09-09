@@ -26,6 +26,7 @@ use Cms\Core\Mail\MailProviderRegistry;
 use Cms\Core\Mail\MailService;
 use Cms\Core\Media\RemoteMediaProviderInterface;
 use Cms\Core\Media\RemoteMediaProviderRegistry;
+use Cms\Core\Notification\NotificationService;
 use Cms\Core\Queue\QueueHandlerRegistry;
 use Cms\Core\Queue\QueueService;
 use Cms\Core\Scheduler\ScheduledTask;
@@ -56,6 +57,7 @@ final class PluginContext
         private readonly ?ContentTypeRegistry $contentTypes = null,
         private readonly ?CustomFieldRegistry $customFields = null,
         private readonly ?SchedulerService $scheduler = null,
+        private readonly ?NotificationService $notifications = null,
     ) {
     }
 
@@ -198,6 +200,15 @@ final class PluginContext
         }
 
         return $this->webhooks;
+    }
+
+    public function notifications(): NotificationService
+    {
+        if ($this->notifications === null) {
+            throw new PluginException('Notification service is not available.');
+        }
+
+        return $this->notifications->forPlugin($this->manifest->id);
     }
 
     public function registerMailProvider(MailProviderInterface $provider): void
