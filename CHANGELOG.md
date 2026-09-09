@@ -2,6 +2,14 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.35 - 2026-09-09
+
+- Increased the Gemini test connection token budget so current Gemini models can return visible text instead of stopping at `MAX_TOKENS`.
+- Kept the Gemini test connection deterministic with low temperature and safe diagnostics.
+- Preserved the 1.2.0 cross-version upgrade floor and the existing AI public API.
+- Public install package: `daiying-cms-1.2.35-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.35>.
+
 ## 1.2.34 - 2026-09-09
 
 - Stabilized the Gemini test connection path with deterministic low-temperature test settings.

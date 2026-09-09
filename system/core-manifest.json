@@ -28,7 +28,7 @@
     "Ai/AiToolRisk.php": "2f0ae0326cfe640537b77318780dcf03f59a611da35a7b420256cd2d7d112a18",
     "Ai/AiToolService.php": "76cee1db825eb9c034725c550c32d2d168bced22c801efb545f75729921c9296",
     "Ai/AiUsageLedger.php": "96806e09ec30ce8ad985d03cd44e1e3c353bb8316287df3063e2608c21339f9b",
-    "Ai/GeminiProvider.php": "fc833c1ae2d63622bf989212293747547bdcb41d5e751ec49c34bdd0706a1d55",
+    "Ai/GeminiProvider.php": "5f1d9915e67b8708f7f61fc6d7ba3c18fdf27e2f7806d342a0b1c85f5230a530",
     "Ai/GeminiProviderClient.php": "d25f75881f3665632be330ba5cce03da2ff1aba87cd206f7dece3482cc4fedb4",
     "Ai/OpenAiCompatibleProvider.php": "9793f15bdec36f090d31c40fd5188050cf818400ead9d8924e3e354dde4cd965",
     "Ai/OpenAiCompatibleProviderClient.php": "172a7c19d8edc8154f54d21c490566886cfb815d1a1d5c1929189a6b10228882",
