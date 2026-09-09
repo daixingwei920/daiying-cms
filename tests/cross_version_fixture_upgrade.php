@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 $root = dirname(__DIR__);
 $fixtureDir = $root . '/outputs/cross-version-fixtures-20260908';
-$updateZip = first(glob($fixtureDir . '/update-1.2.30-rsa-local-test/daiying-cms-core-update-1.2.30-*.zip') ?: []);
-$metadataPath = first(glob($fixtureDir . '/update-1.2.30-rsa-local-test/*.metadata.json') ?: []);
+$targetVersion = targetVersion($root);
+$updateZip = first(glob($fixtureDir . '/update-' . $targetVersion . '-rsa-local-test/daiying-cms-core-update-' . $targetVersion . '-*.zip') ?: []);
+$metadataPath = first(glob($fixtureDir . '/update-' . $targetVersion . '-rsa-local-test/*.metadata.json') ?: []);
 $fixtures = [
     '1.2.0' => first(glob($fixtureDir . '/daiying-cms-1.2.0-stable-exact-*.zip') ?: []),
     '1.2.22' => first(glob($fixtureDir . '/daiying-cms-1.2.22-stable-exact-*.zip') ?: []),
@@ -25,8 +26,8 @@ if ($publicKey === '' || !str_contains($publicKey, 'BEGIN PUBLIC KEY')) {
 $failures = 0;
 foreach ($fixtures as $version => $zip) {
     try {
-        runFixtureUpgrade($zip, $version, $updateZip, $publicKey);
-        echo "[PASS] {$version} fixture upgrades to 1.2.30 through old UpdateService\n";
+        runFixtureUpgrade($zip, $version, $targetVersion, $updateZip, $publicKey);
+        echo "[PASS] {$version} fixture upgrades to {$targetVersion} through old UpdateService\n";
     } catch (Throwable $exception) {
         $failures++;
         echo "[FAIL] {$version} fixture upgrade failed: " . $exception->getMessage() . "\n";
@@ -46,7 +47,19 @@ function first(array $items): string
     return (string) ($items[0] ?? '');
 }
 
-function runFixtureUpgrade(string $fixtureZip, string $version, string $updateZip, string $publicKey): void
+function targetVersion(string $root): string
+{
+    $config = require $root . '/config/app.example.php';
+    $version = is_array($config) ? (string) ($config['app']['version'] ?? '') : '';
+    if (!preg_match('/^[0-9]+(?:\.[0-9A-Za-z-]+){1,3}$/', $version)) {
+        fwrite(STDERR, "Unable to detect target version from config/app.example.php.\n");
+        exit(2);
+    }
+
+    return $version;
+}
+
+function runFixtureUpgrade(string $fixtureZip, string $version, string $targetVersion, string $updateZip, string $publicKey): void
 {
     $site = sys_get_temp_dir() . '/daiying-fixture-upgrade-' . str_replace('.', '-', $version) . '-' . bin2hex(random_bytes(4));
     mkdir($site, 0755, true);
@@ -110,8 +123,9 @@ foreach ($files as $file) {
 $service = new UpdateService(CMS_ROOT, $version, new SignatureVerifier($publicKey));
 $result = $service->execute($updateZip, 1, 'UPDATE CORE');
 $pointer = json_decode((string) file_get_contents(CMS_ROOT . '/storage/updates/current-release.json'), true);
-if (($result['status'] ?? '') !== 'Completed' || ($pointer['version'] ?? '') !== '1.2.30') {
-    throw new RuntimeException('Update did not complete to 1.2.30.');
+$targetVersion = $argv[4];
+if (($result['status'] ?? '') !== 'Completed' || ($pointer['version'] ?? '') !== $targetVersion) {
+    throw new RuntimeException('Update did not complete to ' . $targetVersion . '.');
 }
 foreach (['cms_core_queue_jobs', 'cms_ai_jobs', 'cms_ai_usage_ledger', 'cms_ai_prompts'] as $table) {
     $stmt = $pdo->query("SELECT name FROM sqlite_master WHERE type='table' AND name=" . $pdo->quote($table));
@@ -121,7 +135,7 @@ foreach (['cms_core_queue_jobs', 'cms_ai_jobs', 'cms_ai_usage_ledger', 'cms_ai_p
 }
 echo json_encode(['status' => 'ok', 'version' => $pointer['version']], JSON_UNESCAPED_SLASHES) . "\n";
 PHP);
-    $cmd = escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($runner) . ' ' . escapeshellarg($updateZip) . ' ' . escapeshellarg($version) . ' ' . escapeshellarg($publicKey);
+    $cmd = escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($runner) . ' ' . escapeshellarg($updateZip) . ' ' . escapeshellarg($version) . ' ' . escapeshellarg($publicKey) . ' ' . escapeshellarg($targetVersion);
     exec($cmd . ' 2>&1', $output, $code);
     if ($code !== 0) {
         throw new RuntimeException(implode("\n", $output));

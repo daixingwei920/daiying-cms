@@ -2,6 +2,14 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.31 - 2026-09-08
+
+- Restored the released `2026_09_07_000001_official_plugins_registry` migration checksum so sites that already applied the 1.2.25 registry migration can continue cross-version Core updates.
+- Added a new `2026_09_08_000007_official_plugins_registry_sync` migration for best-effort official plugin registry synchronization without mutating the historical migration.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.31-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.31>.
+
 ## 1.2.30 - 2026-09-08
 
 - Added AI Foundation V1 as a stable Core foundation layer for site-level AI reuse.
