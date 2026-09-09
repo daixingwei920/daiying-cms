@@ -15,6 +15,7 @@ require_once CMS_ROOT . '/content/plugins/official.mail/src/MailboxClientInterfa
 require_once CMS_ROOT . '/content/plugins/official.mail/src/GmailMailboxClient.php';
 require_once CMS_ROOT . '/content/plugins/official.mail/src/OutlookMailboxClient.php';
 require_once CMS_ROOT . '/content/plugins/official.mail/src/MailApiClientFactory.php';
+require_once CMS_ROOT . '/content/plugins/official.mail/src/OAuthMailboxMailProvider.php';
 require_once CMS_ROOT . '/content/plugins/official.mail/src/MailController.php';
 
 use Cms\Core\Http\Request;
@@ -27,6 +28,7 @@ use Official\Mail\MailApiClientFactory;
 use Official\Mail\MailController;
 use Official\Mail\MailHttpClient;
 use Official\Mail\MailOAuthService;
+use Official\Mail\OAuthMailboxMailProvider;
 use Official\Mail\OfficialSmtpMailProvider;
 use Official\Mail\OutlookSmtpMailProvider;
 
@@ -46,7 +48,7 @@ $assert = static function (bool $condition, string $message) use (&$failures): v
 
 $manifest = json_decode((string) file_get_contents(CMS_ROOT . '/content/plugins/official.mail/plugin.json'), true);
 $assert(($manifest['plugin_id'] ?? '') === 'official.mail', 'Manifest uses the official mail plugin ID.');
-$assert(($manifest['version'] ?? '') === '0.2.0-alpha.2', 'Manifest version is Webmail V1 alpha.2.');
+$assert(($manifest['version'] ?? '') === '0.2.0-alpha.3', 'Manifest version is Webmail V1 alpha.3.');
 $assert(($manifest['core']['min'] ?? '') === '1.2.32', 'Manifest requires a Core version with Mail API infrastructure.');
 $assert(($manifest['migrations'] ?? null) === ['migrations/001_mail_client.php'], 'Manifest declares the mail client migration.');
 $assert(in_array('mail.provider', $manifest['capabilities'] ?? [], true), 'Manifest declares mail.provider capability.');
@@ -116,6 +118,9 @@ $assert(in_array('Mail.ReadWrite', MailOAuthService::defaultScopes('outlook'), t
 $account = $repo->upsertAccount('gmail', ['email' => 'seller@example.com', 'display_name' => 'Seller'], MailOAuthService::defaultScopes('gmail'), 'access-token-secret', 'refresh-token-secret', 3600);
 $assert(($account['email'] ?? '') === 'seller@example.com', 'OAuth account can be created from provider profile.');
 $assert($repo->accessToken($account) === 'access-token-secret' && $repo->refreshToken($account) === 'refresh-token-secret', 'Access and refresh tokens decrypt server-side.');
+$connected = $repo->connectedAccounts('gmail');
+$assert(count($connected) === 1 && ($connected[0]['email'] ?? '') === 'seller@example.com', 'Connected OAuth accounts can be queried by provider.');
+$assert(($repo->connectedAccountForEmail('gmail', 'SELLER@example.com')['email'] ?? '') === 'seller@example.com', 'Connected OAuth account lookup is case-insensitive by email.');
 $stmt = $pdo->query('SELECT ciphertext FROM cms_plugin_secrets');
 $secretRows = $stmt === false ? [] : $stmt->fetchAll(PDO::FETCH_COLUMN);
 $assert(!str_contains(implode("\n", array_map('strval', $secretRows)), 'access-token-secret'), 'Access token is encrypted at rest.');
@@ -152,6 +157,16 @@ try {
     $blocked = true;
 }
 $assert($blocked, 'Mail HTTP client rejects lookalike API hosts.');
+
+$factory = new MailApiClientFactory($repo, new MailOAuthService($repo, $http), $http);
+$oauthProvider = new OAuthMailboxMailProvider('gmail', $repo, new MailOAuthService($repo, $http), $factory);
+$assert($oauthProvider instanceof MailProviderInterface, 'Gmail OAuth provider implements the Core mail provider interface.');
+$assert($oauthProvider->id() === 'official.mail.oauth.gmail', 'Gmail OAuth provider uses a distinct Core provider id.');
+$assert(in_array('oauth', $oauthProvider->capabilities(), true), 'OAuth provider declares OAuth capability.');
+$assert($oauthProvider->testConnection(['from_email' => 'seller@example.com'])->success, 'OAuth provider test succeeds for a connected account without exposing tokens.');
+$assert(!$oauthProvider->testConnection(['from_email' => 'missing@example.com'])->success, 'OAuth provider test fails clearly for an unknown configured sender.');
+$repo->upsertAccount('gmail', ['email' => 'second@example.com', 'display_name' => 'Second'], MailOAuthService::defaultScopes('gmail'), 'access-token-two', 'refresh-token-two', 3600);
+$assert(!$oauthProvider->testConnection(['from_email' => ''])->success, 'OAuth provider requires From Email when multiple accounts are connected.');
 
 $_SERVER['REQUEST_URI'] = '/admin/mail';
 $controller = new MailController($repo, new MailOAuthService($repo, $http), new MailApiClientFactory($repo, new MailOAuthService($repo, $http), $http), null);

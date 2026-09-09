@@ -12,7 +12,7 @@ The following plugin manifests are present in this repository:
 | `local.storage.baidu` | `1.0.0-rc13.2` | `storage_provider` | Baidu Netdisk OAuth/media storage integration. |
 | `official.commerce` | `0.1.0-alpha.15` | plugin | Commerce foundation with product, order, AI module, and alpha Distribution workflows. |
 | `official.friend-links` | `1.0.0-alpha.1` | `system-plugin` | Friend links management. |
-| `official.mail` | `0.2.0-alpha.2` | plugin | Official Mail Provider bridge and Webmail alpha for Gmail/Outlook OAuth accounts, inbox, message viewing, attachments, send/reply, and SMTP providers. |
+| `official.mail` | `0.2.0-alpha.3` | plugin | Official Mail Provider bridge and Webmail alpha for Gmail/Outlook OAuth accounts, inbox, message viewing, attachments, send/reply, SMTP providers, and OAuth-backed Core mail sending. |
 | `official.novel-collector` | `0.4.19` | plugin | Novel collection and reading routes. |
 | `official.video-collector` | `0.2.1` | plugin | Video collection and playback routes. |
 

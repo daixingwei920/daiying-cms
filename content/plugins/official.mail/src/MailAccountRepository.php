@@ -131,6 +131,31 @@ final class MailAccountRepository
         return is_array($row) ? $row : null;
     }
 
+    /** @return list<array<string,mixed>> */
+    public function connectedAccounts(string $provider): array
+    {
+        $this->assertProvider($provider);
+        $stmt = $this->pdo->prepare('SELECT * FROM mail_accounts WHERE provider = :provider AND status = "connected" ORDER BY email');
+        $stmt->execute([':provider' => $provider]);
+
+        return $stmt->fetchAll();
+    }
+
+    /** @return array<string,mixed>|null */
+    public function connectedAccountForEmail(string $provider, string $email): ?array
+    {
+        $this->assertProvider($provider);
+        $email = strtolower(trim($email));
+        if ($email === '') {
+            return null;
+        }
+        $stmt = $this->pdo->prepare('SELECT * FROM mail_accounts WHERE provider = :provider AND email = :email AND status = "connected" LIMIT 1');
+        $stmt->execute([':provider' => $provider, ':email' => $email]);
+        $row = $stmt->fetch();
+
+        return is_array($row) ? $row : null;
+    }
+
     /** @param array<string,mixed> $profile @param list<string> $scopes */
     public function upsertAccount(string $provider, array $profile, array $scopes, string $accessToken, string $refreshToken, ?int $expiresIn): array
     {
