@@ -70,6 +70,30 @@ try {
     $check($exception->reason() === 'model_not_found' && str_contains($exception->getMessage(), 'gemini-3.6-flash'), 'Gemini 404 returns a safe actionable provider message');
 }
 
+$emptyClient = new GeminiProviderClient(static function (): array {
+    return [
+        'headers' => ['HTTP/1.1 200 OK'],
+        'body' => json_encode([
+            'candidates' => [[
+                'finishReason' => 'MAX_TOKENS',
+                'content' => ['parts' => []],
+            ]],
+        ], JSON_UNESCAPED_SLASHES),
+    ];
+});
+try {
+    $emptyClient->chat([['role' => 'user', 'content' => 'hello']], [
+        'provider' => 'gemini',
+        'api_key' => 'test-key',
+        'base_url' => 'https://generativelanguage.googleapis.com/v1beta',
+        'model' => 'gemini-3.6-flash',
+        'timeout_seconds' => 30,
+    ]);
+    $check(false, 'Gemini empty responses expose a safe finish reason');
+} catch (AiException $exception) {
+    $check($exception->reason() === 'response_empty' && str_contains($exception->getMessage(), 'MAX_TOKENS'), 'Gemini empty responses expose a safe finish reason');
+}
+
 try {
     $client->chat([['role' => 'user', 'content' => 'hello']], [
         'provider' => 'gemini',

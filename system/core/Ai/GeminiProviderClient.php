@@ -71,7 +71,7 @@ final class GeminiProviderClient implements AiProviderClientInterface
             }
         }
         if ($content === '') {
-            throw new AiException('AI provider returned an empty response.', 'response_empty');
+            throw new AiException($this->emptyResponseMessage($decoded), 'response_empty');
         }
 
         $model = str_starts_with($model, 'models/') ? substr($model, 7) : $model;
@@ -253,6 +253,18 @@ final class GeminiProviderClient implements AiProviderClientInterface
         }
 
         return '';
+    }
+
+    /** @param array<string,mixed> $decoded */
+    private function emptyResponseMessage(array $decoded): string
+    {
+        $candidate = $decoded['candidates'][0] ?? [];
+        $finish = is_array($candidate) ? trim((string) ($candidate['finishReason'] ?? '')) : '';
+        if ($finish !== '') {
+            return 'AI provider returned an empty response. Gemini finish reason: ' . $this->redact($finish) . '.';
+        }
+
+        return 'AI provider returned an empty response.';
     }
 
     private function modelPath(string $model): string

@@ -50,10 +50,14 @@ final class GeminiProvider implements AiProviderInterface
 
     public function testConnection(array $config): array
     {
-        $response = $this->execute(AiRequest::chat([['role' => 'user', 'content' => 'Reply with OK only.']], [
+        $testConfig = array_replace($config, [
+            'max_tokens' => 64,
+            'temperature' => 0.0,
+        ]);
+        $response = $this->execute(AiRequest::chat([['role' => 'user', 'content' => 'Reply with exactly OK.']], [
             'max_tokens' => 16,
             'temperature' => 0.0,
-        ]), $config + ['max_tokens' => 16, 'temperature' => 0.0]);
+        ]), $testConfig);
 
         return [
             'provider' => $response->provider,

@@ -2,6 +2,14 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.34 - 2026-09-09
+
+- Stabilized the Gemini test connection path with deterministic low-temperature test settings.
+- Improved Gemini empty-response diagnostics by showing the safe Gemini finish reason when no text is returned.
+- Preserved the 1.2.0 cross-version upgrade floor and the existing AI public API.
+- Public install package: `daiying-cms-1.2.34-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.34>.
+
 ## 1.2.33 - 2026-09-09
 
 - Updated the Google Gemini preset from the retired `gemini-2.5-flash` default to `gemini-3.6-flash`.
