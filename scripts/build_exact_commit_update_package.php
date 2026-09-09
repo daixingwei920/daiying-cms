@@ -314,12 +314,20 @@ function migrationIds(array $files): array
     $ids = [];
     foreach ($files as $file) {
         if (preg_match('#^system/migrations/([A-Za-z0-9_.-]+)\.php$#', (string) $file, $match) === 1) {
+            if (isDeprecatedUpdateManifestMigration($match[1])) {
+                continue;
+            }
             $ids[] = $match[1];
         }
     }
     sort($ids, SORT_STRING);
 
     return array_values(array_unique($ids));
+}
+
+function isDeprecatedUpdateManifestMigration(string $migrationId): bool
+{
+    return $migrationId === '2026_09_07_000001_official_plugins_registry';
 }
 
 /** @return list<string> */

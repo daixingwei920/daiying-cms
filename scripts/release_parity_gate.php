@@ -234,8 +234,11 @@ function verifyUpdatePackage(string $zipPath, array $expected, string $minUpgrad
 
     $requiredMigrations = stringList($update['required_migrations'] ?? []);
     $packagedMigrations = migrationIds(array_keys($manifestFiles));
-    $missingRequired = array_values(array_diff($packagedMigrations, $requiredMigrations));
-    $checks[] = check($missingRequired === [], 'update.required_migrations_cover_package', 'All packaged Core migrations are declared as required migrations.');
+    $missingRequired = array_values(array_filter(
+        array_diff($packagedMigrations, $requiredMigrations),
+        static fn (string $migrationId): bool => !isDeprecatedUpdateManifestMigration($migrationId)
+    ));
+    $checks[] = check($missingRequired === [], 'update.required_migrations_cover_package', 'All non-deprecated packaged Core migrations are declared as required migrations.');
     if (isset($manifestFiles['system/core-manifest.json'])) {
         $manifest = json_decode((string) $zip->getFromName('system/core-manifest.json'), true);
         $checks[] = check(is_array($manifest) && $manifest === $expected['core_manifest'], 'update.core_manifest_exact', 'Update core-manifest matches target commit.');
@@ -431,6 +434,11 @@ function migrationIds(array $files): array
     sort($ids, SORT_STRING);
 
     return array_values(array_unique($ids));
+}
+
+function isDeprecatedUpdateManifestMigration(string $migrationId): bool
+{
+    return $migrationId === '2026_09_07_000001_official_plugins_registry';
 }
 
 /** @return list<string> */

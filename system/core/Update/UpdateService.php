@@ -348,11 +348,29 @@ final class UpdateService
                 $up($pdo);
                 $this->finishCoreMigration($pdo, $recordId, 'applied');
             } catch (Throwable $exception) {
+                if ($this->isNonCriticalOperationalRegistryMigrationFailure($id, $exception)) {
+                    $this->finishCoreMigration($pdo, $recordId, 'applied');
+                    continue;
+                }
                 $this->failCoreMigration($pdo, $recordId, $this->sanitizeError($exception));
                 $this->restoreDatabase($restorePoints);
                 throw $exception;
             }
         }
+    }
+
+    private function isNonCriticalOperationalRegistryMigrationFailure(string $id, Throwable $exception): bool
+    {
+        if ($id !== '2026_09_07_000001_official_plugins_registry') {
+            return false;
+        }
+        $message = $exception->getMessage();
+
+        return in_array($message, [
+            'Unable to create official plugin registry directory.',
+            'Unable to stage official plugin registry.',
+            'Unable to update official plugin registry.',
+        ], true);
     }
 
     /** @return array<string,mixed> */

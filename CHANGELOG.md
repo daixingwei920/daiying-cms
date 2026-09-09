@@ -2,6 +2,14 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.36 - 2026-09-09
+
+- Fixed direct cross-version Core updates for older sites that cannot write root-level operational registry files during migrations.
+- Marked the historical official plugin registry migration as deprecated for update-package required migration manifests.
+- Preserved the built-in official plugin registry fallback, rollback behavior, package integrity checks, and the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.36-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.36>.
+
 ## 1.2.35 - 2026-09-09
 
 - Increased the Gemini test connection token budget so current Gemini models can return visible text instead of stopping at `MAX_TOKENS`.
