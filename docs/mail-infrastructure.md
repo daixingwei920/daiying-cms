@@ -32,7 +32,7 @@ Core does not include:
 - Gmail or Outlook mailbox UI
 - AI mail summaries or automatic replies
 
-Those features belong in a future `official.mail` plugin or other mail plugins.
+Those features belong in `official.mail` or other mail plugins.
 
 ## Admin Settings
 
@@ -79,7 +79,7 @@ Required methods:
 - `send()`
 - `testConnection()`
 
-Future provider plugins can support Gmail OAuth, Microsoft OAuth, Amazon SES, SendGrid, Mailgun, or other delivery services without changing Core mail callers.
+Provider plugins can support Gmail OAuth, Microsoft OAuth, Amazon SES, SendGrid, Mailgun, or other delivery services without changing Core mail callers. The official `official.mail` plugin provides the first Gmail and Outlook mailbox client implementation.
 
 ## Sending Mail
 
