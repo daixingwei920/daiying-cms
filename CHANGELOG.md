@@ -2,6 +2,14 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.37 - 2026-09-09
+
+- Fixed post-switch Core update health checks to inspect the active release directory instead of stale root Core files.
+- Fixed Site Health migration pending counts on upgraded sites whose migration table uses `migration_name`.
+- Preserved rollback behavior, package integrity checks, and the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.37-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.37>.
+
 ## 1.2.36 - 2026-09-09
 
 - Fixed direct cross-version Core updates for older sites that cannot write root-level operational registry files during migrations.

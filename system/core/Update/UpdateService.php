@@ -377,13 +377,14 @@ final class UpdateService
     private function postSwitchHealth(UpdatePackageManifest $manifest, PDO $pdo): array
     {
         $started = time();
+        $activeCorePath = $this->activeCorePath();
         $checks = [
             'pointer' => $this->pointerValid(),
             'database' => (bool) $pdo->query('SELECT 1')->fetchColumn(),
             'version' => $this->readPointer()['version'] ?? '',
             'migrations' => !$this->hasUnresolvedMigrationFailures($pdo),
-            'admin_login' => is_file($this->rootPath . '/system/core/Admin/AdminController.php'),
-            'recovery' => is_file($this->rootPath . '/system/core/Recovery/RecoveryController.php'),
+            'admin_login' => is_file($activeCorePath . '/Admin/AdminController.php'),
+            'recovery' => is_file($activeCorePath . '/Recovery/RecoveryController.php'),
             'safe_theme' => is_dir($this->rootPath . '/content/themes/safe') || is_dir($this->rootPath . '/content/themes/default'),
             'safe_mode_plugins_skipped' => true,
             'logs' => true,
@@ -393,6 +394,17 @@ final class UpdateService
         }
         $ok = $checks['pointer'] && $checks['database'] && $checks['version'] === $manifest->toVersion && $checks['migrations'];
         return ['status' => $ok ? 'ok' : 'failed', 'checks' => $checks];
+    }
+
+    private function activeCorePath(): string
+    {
+        $pointer = $this->readPointer();
+        $releasePath = (string) ($pointer['path'] ?? '');
+        if ($releasePath !== '' && is_dir($releasePath . '/system/core')) {
+            return $releasePath . '/system/core';
+        }
+
+        return $this->rootPath . '/system/core';
     }
 
     private function applyOperationalSupportFiles(UpdatePackageManifest $manifest, string $releaseDir): void

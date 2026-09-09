@@ -130,7 +130,8 @@ final class SystemHealthService
     {
         $applied = [];
         try {
-            $rows = $pdo->query('SELECT migration_id FROM cms_migrations')->fetchAll(PDO::FETCH_COLUMN);
+            $column = in_array('migration_id', $this->migrationColumns($pdo), true) ? 'migration_id' : 'migration_name';
+            $rows = $pdo->query('SELECT ' . $column . ' FROM cms_migrations')->fetchAll(PDO::FETCH_COLUMN);
             $applied = array_fill_keys(array_map('strval', $rows), true);
         } catch (Throwable) {
             return count(glob($this->rootPath . '/system/migrations/*.php') ?: []);
@@ -144,6 +145,20 @@ final class SystemHealthService
             }
         }
         return $pending;
+    }
+
+    /** @return list<string> */
+    private function migrationColumns(PDO $pdo): array
+    {
+        try {
+            if ((string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
+                return array_values(array_map(static fn (array $row): string => (string) $row['name'], $pdo->query('PRAGMA table_info(cms_migrations)')->fetchAll(PDO::FETCH_ASSOC)));
+            }
+
+            return array_values(array_map(static fn (array $row): string => (string) ($row['Field'] ?? ''), $pdo->query('SHOW COLUMNS FROM cms_migrations')->fetchAll(PDO::FETCH_ASSOC)));
+        } catch (Throwable) {
+            return ['migration_name'];
+        }
     }
 
     /** @return array{ok:bool,message:string} */
