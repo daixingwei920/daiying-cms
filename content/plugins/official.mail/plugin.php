@@ -49,5 +49,5 @@ return static function (PluginContext $context): void {
     $context->adminRoute('GET', '/admin/mail/attachment', [$controller, 'downloadAttachment'], 'mail.read', false);
     $context->adminRoute('GET', '/admin/mail/compose', [$controller, 'compose'], 'mail.send', false);
     $context->adminRoute('POST', '/admin/mail/send', [$controller, 'send'], 'mail.send', true);
-    $context->adminMenu('邮件设置', '/admin/mail', 'mail.manage');
+    $context->adminMenu('邮件中心', '/admin/mail', 'mail.manage');
 };

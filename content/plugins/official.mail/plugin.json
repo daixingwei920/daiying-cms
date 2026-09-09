@@ -1,7 +1,7 @@
 {
   "plugin_id": "official.mail",
   "name": "Daiying Mail",
-  "version": "0.2.0-alpha.1",
+  "version": "0.2.0-alpha.2",
   "author": "Daiying CMS",
   "type": "plugin",
   "package_type": "plugin",
@@ -29,5 +29,5 @@
     "uninstall": "retain_mail_logs_and_settings",
     "purge": "separate_confirmation_only"
   },
-  "data_schema_version": "0.2.0-alpha.1"
+  "data_schema_version": "0.2.0-alpha.2"
 }

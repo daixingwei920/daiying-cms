@@ -46,7 +46,7 @@ $assert = static function (bool $condition, string $message) use (&$failures): v
 
 $manifest = json_decode((string) file_get_contents(CMS_ROOT . '/content/plugins/official.mail/plugin.json'), true);
 $assert(($manifest['plugin_id'] ?? '') === 'official.mail', 'Manifest uses the official mail plugin ID.');
-$assert(($manifest['version'] ?? '') === '0.2.0-alpha.1', 'Manifest version is Webmail V1 alpha.1.');
+$assert(($manifest['version'] ?? '') === '0.2.0-alpha.2', 'Manifest version is Webmail V1 alpha.2.');
 $assert(($manifest['core']['min'] ?? '') === '1.2.32', 'Manifest requires a Core version with Mail API infrastructure.');
 $assert(($manifest['migrations'] ?? null) === ['migrations/001_mail_client.php'], 'Manifest declares the mail client migration.');
 $assert(in_array('mail.provider', $manifest['capabilities'] ?? [], true), 'Manifest declares mail.provider capability.');
