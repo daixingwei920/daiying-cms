@@ -21,7 +21,6 @@ return new class implements MigrationInterface {
                 id INTEGER PRIMARY KEY,
                 enabled INTEGER NOT NULL DEFAULT 0,
                 provider VARCHAR(64) NOT NULL DEFAULT "openai_compatible",
-                adapter VARCHAR(64) NOT NULL DEFAULT "openai_compatible",
                 base_url VARCHAR(2048) NOT NULL DEFAULT "",
                 model VARCHAR(191) NOT NULL DEFAULT "",
                 timeout_seconds INTEGER NOT NULL DEFAULT 30,
@@ -56,7 +55,6 @@ return new class implements MigrationInterface {
         return [
             'enabled' => 'INTEGER NOT NULL DEFAULT 0',
             'provider' => 'VARCHAR(64) NOT NULL DEFAULT "openai_compatible"',
-            'adapter' => 'VARCHAR(64) NOT NULL DEFAULT "openai_compatible"',
             'base_url' => 'VARCHAR(2048) NOT NULL DEFAULT ""',
             'model' => 'VARCHAR(191) NOT NULL DEFAULT ""',
             'timeout_seconds' => 'INTEGER NOT NULL DEFAULT 30',

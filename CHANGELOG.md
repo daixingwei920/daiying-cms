@@ -2,6 +2,14 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.32 - 2026-09-09
+
+- Restored the released `2026_09_07_000002_core_ai_settings` migration checksum so sites that already applied the 1.2.28/1.2.29 AI settings migration can continue direct Core updates.
+- Added regression coverage for frozen migration checksums to prevent mutating already-published migrations.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.32-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.32>.
+
 ## 1.2.31 - 2026-09-08
 
 - Restored the released `2026_09_07_000001_official_plugins_registry` migration checksum so sites that already applied the 1.2.25 registry migration can continue cross-version Core updates.
