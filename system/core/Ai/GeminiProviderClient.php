@@ -6,6 +6,15 @@ namespace Cms\Core\Ai;
 
 final class GeminiProviderClient implements AiProviderClientInterface
 {
+    /** @var null|\Closure(string,list<string>,string,int):array{body:string,headers:list<string>} */
+    private ?\Closure $transport;
+
+    /** @param null|\Closure(string,list<string>,string,int):array{body:string,headers:list<string>} $transport */
+    public function __construct(?\Closure $transport = null)
+    {
+        $this->transport = $transport;
+    }
+
     /**
      * @param list<array{role:string,content:string}> $messages
      * @param array<string,mixed> $config
@@ -16,11 +25,12 @@ final class GeminiProviderClient implements AiProviderClientInterface
         $provider = (string) ($config['provider'] ?? 'gemini');
         $apiKey = (string) ($config['api_key'] ?? '');
         $model = trim((string) ($config['model'] ?? ''));
+        $modelPath = $this->modelPath($model);
         $baseUrl = $this->baseUrl((string) ($config['base_url'] ?? ''));
         if ($apiKey === '') {
             throw new AiException('AI API Key is not configured.', 'api_key_missing');
         }
-        if ($model === '') {
+        if ($modelPath === '') {
             throw new AiException('AI model is not configured.', 'model_missing');
         }
 
@@ -35,7 +45,7 @@ final class GeminiProviderClient implements AiProviderClientInterface
             'Accept: application/json',
         ];
         $timeout = max(1, min(120, (int) ($config['timeout_seconds'] ?? 30)));
-        $url = $baseUrl . '/models/' . rawurlencode($model) . ':generateContent?key=' . rawurlencode($apiKey);
+        $url = $baseUrl . '/' . $modelPath . ':generateContent?key=' . rawurlencode($apiKey);
         $responseHeaders = [];
         $body = $this->post($url, $headers, $json, $timeout, $responseHeaders);
         $status = $this->httpStatus($responseHeaders);
@@ -63,6 +73,8 @@ final class GeminiProviderClient implements AiProviderClientInterface
         if ($content === '') {
             throw new AiException('AI provider returned an empty response.', 'response_empty');
         }
+
+        $model = str_starts_with($model, 'models/') ? substr($model, 7) : $model;
 
         return [
             'provider' => $provider,
@@ -124,6 +136,13 @@ final class GeminiProviderClient implements AiProviderClientInterface
     /** @param list<string> $headers @param list<string> $responseHeaders */
     private function post(string $url, array $headers, string $json, int $timeout, array &$responseHeaders): string
     {
+        if ($this->transport !== null) {
+            $result = ($this->transport)($url, $headers, $json, $timeout);
+            $responseHeaders = array_values(array_map('strval', $result['headers']));
+
+            return (string) $result['body'];
+        }
+
         if (function_exists('curl_init')) {
             $ch = curl_init($url);
             if ($ch === false) {
@@ -144,7 +163,7 @@ final class GeminiProviderClient implements AiProviderClientInterface
             $body = curl_exec($ch);
             if (!is_string($body)) {
                 $error = curl_error($ch);
-                curl_close($ch);
+                $this->closeCurl($ch);
                 $reason = stripos($error, 'timed out') !== false ? 'timeout' : 'network_error';
                 throw new AiException($error !== '' ? 'AI network error: ' . $this->redact($error) : 'AI network request failed.', $reason);
             }
@@ -152,7 +171,7 @@ final class GeminiProviderClient implements AiProviderClientInterface
             if ($status > 0) {
                 $responseHeaders[] = 'HTTP/1.1 ' . $status;
             }
-            curl_close($ch);
+            $this->closeCurl($ch);
 
             return $body;
         }
@@ -204,7 +223,7 @@ final class GeminiProviderClient implements AiProviderClientInterface
             return 'AI API Key is invalid or unauthorized. HTTP ' . $status . '.';
         }
         if ($status === 404) {
-            return 'AI model or endpoint was not found. HTTP 404.';
+            return $this->redact('AI model or endpoint was not found. HTTP 404.' . $this->providerMessageSuffix($body));
         }
         if ($status === 429) {
             return 'AI provider quota or rate limit was exceeded. HTTP 429.';
@@ -220,6 +239,37 @@ final class GeminiProviderClient implements AiProviderClientInterface
         }
 
         return $this->redact($message);
+    }
+
+    private function providerMessageSuffix(string $body): string
+    {
+        try {
+            $decoded = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            $providerMessage = is_array($decoded) ? (string) ($decoded['error']['message'] ?? $decoded['error']['status'] ?? '') : '';
+            if ($providerMessage !== '') {
+                return ' ' . substr($providerMessage, 0, 240);
+            }
+        } catch (\JsonException) {
+        }
+
+        return '';
+    }
+
+    private function modelPath(string $model): string
+    {
+        $model = trim($model);
+        if ($model === '') {
+            return '';
+        }
+        $model = ltrim($model, '/');
+        if (str_starts_with($model, 'models/')) {
+            $model = substr($model, 7);
+        }
+        if ($model === '' || str_contains($model, '/') || strlen($model) > 191 || preg_match('/[\x00-\x1F\x7F]/', $model) === 1) {
+            throw new AiException('AI model is invalid.', 'model_invalid');
+        }
+
+        return 'models/' . rawurlencode($model);
     }
 
     private function baseUrl(string $baseUrl): string
@@ -244,5 +294,13 @@ final class GeminiProviderClient implements AiProviderClientInterface
     private function redact(string $value): string
     {
         return preg_replace('/(?:sk|Bearer|api[_-]?key|key|secret)[A-Za-z0-9_=:.,\/+\-]+/i', '[redacted]', $value) ?: $value;
+    }
+
+    /** @param resource|\CurlHandle $ch */
+    private function closeCurl($ch): void
+    {
+        if (PHP_VERSION_ID < 80500) {
+            curl_close($ch);
+        }
     }
 }

@@ -120,7 +120,7 @@ $repo->save([
     'temperature' => 0.1,
 ], '', false);
 $geminiRuntime = $repo->runtimeConfig();
-$check($geminiRuntime['adapter'] === 'gemini' && $geminiRuntime['base_url'] === 'https://generativelanguage.googleapis.com/v1beta' && $geminiRuntime['model'] === 'gemini-2.5-flash', 'Gemini preset fills native adapter defaults while remaining editable');
+$check($geminiRuntime['adapter'] === 'gemini' && $geminiRuntime['base_url'] === 'https://generativelanguage.googleapis.com/v1beta' && $geminiRuntime['model'] === 'gemini-3.6-flash', 'Gemini preset fills native adapter defaults while remaining editable');
 $disabledService = new AiService($pdo, $settings, $mock);
 $check($disabledService->isEnabled() === false, 'AI service reports disabled when the global switch is off');
 try {
@@ -238,6 +238,25 @@ $skippedVersionPdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC)
 $presetMigration->up($skippedVersionPdo);
 $skippedVersionCurrent = (new SiteAiSettingsRepository($skippedVersionPdo, 'core-ai-test-key'))->current();
 $check($skippedVersionCurrent['enabled'] === false && $skippedVersionCurrent['adapter'] === 'openai_compatible', 'preset migration is safe when an older site has not run the first AI migration yet');
+
+$geminiRefreshPdo = new PDO('sqlite::memory:');
+$geminiRefreshPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$geminiRefreshPdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+(new MigrationRunner($geminiRefreshPdo, [$migration, $presetMigration]))->run();
+$geminiRefreshRepo = new SiteAiSettingsRepository($geminiRefreshPdo, 'core-ai-test-key');
+$geminiRefreshRepo->save([
+    'enabled' => true,
+    'provider' => 'gemini',
+    'base_url' => 'https://generativelanguage.googleapis.com/v1beta',
+    'model' => 'gemini-2.5-flash',
+    'timeout_seconds' => 30,
+    'max_tokens' => 1024,
+    'temperature' => 0.7,
+], 'sk-gemini-refresh-secret', false);
+$geminiRefreshMigration = require CMS_ROOT . '/system/migrations/2026_09_09_000001_core_ai_gemini_model_refresh.php';
+$geminiRefreshMigration->up($geminiRefreshPdo);
+$geminiRefreshRuntime = (new SiteAiSettingsRepository($geminiRefreshPdo, 'core-ai-test-key'))->runtimeConfig();
+$check($geminiRefreshRuntime['model'] === 'gemini-3.6-flash' && $geminiRefreshRuntime['api_key'] === 'sk-gemini-refresh-secret', 'Gemini model refresh migrates the obsolete default without losing the API Key');
 
 $root = sys_get_temp_dir() . '/daiying-core-ai-' . bin2hex(random_bytes(4));
 mkdir($root . '/config', 0755, true);

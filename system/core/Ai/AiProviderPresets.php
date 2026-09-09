@@ -38,7 +38,7 @@ final class AiProviderPresets
                 'label' => 'Google Gemini',
                 'adapter' => 'gemini',
                 'base_url' => 'https://generativelanguage.googleapis.com/v1beta',
-                'model' => 'gemini-2.5-flash',
+                'model' => 'gemini-3.6-flash',
             ],
             'openai_compatible' => [
                 'label' => '自定义 OpenAI-compatible',

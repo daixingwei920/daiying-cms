@@ -104,7 +104,7 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface
             $body = curl_exec($ch);
             if (!is_string($body)) {
                 $error = curl_error($ch);
-                curl_close($ch);
+                $this->closeCurl($ch);
                 $reason = stripos($error, 'timed out') !== false ? 'timeout' : 'network_error';
                 throw new AiException($error !== '' ? 'AI network error: ' . $this->redact($error) : 'AI network request failed.', $reason);
             }
@@ -112,7 +112,7 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface
             if ($status > 0) {
                 $responseHeaders[] = 'HTTP/1.1 ' . $status;
             }
-            curl_close($ch);
+            $this->closeCurl($ch);
 
             return $body;
         }
@@ -207,5 +207,13 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface
     private function redact(string $value): string
     {
         return preg_replace('/(?:sk|Bearer|api[_-]?key|secret)[A-Za-z0-9_=:.,\/+\-]+/i', '[redacted]', $value) ?: $value;
+    }
+
+    /** @param resource|\CurlHandle $ch */
+    private function closeCurl($ch): void
+    {
+        if (PHP_VERSION_ID < 80500) {
+            curl_close($ch);
+        }
     }
 }

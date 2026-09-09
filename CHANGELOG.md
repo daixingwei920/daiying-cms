@@ -2,6 +2,17 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.33 - 2026-09-09
+
+- Updated the Google Gemini preset from the retired `gemini-2.5-flash` default to `gemini-3.6-flash`.
+- Added a safe migration that updates only the obsolete Gemini default model while preserving existing encrypted API Keys and custom AI settings.
+- Improved Gemini 404 diagnostics so administrators see the provider's safe model guidance instead of only a generic endpoint error.
+- Accepted `models/...` Gemini model names without generating an invalid `models%2F...` request path.
+- Removed PHP 8.5 `curl_close()` deprecation noise from AI provider HTTP clients.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.33-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.33>.
+
 ## 1.2.32 - 2026-09-09
 
 - Restored the released `2026_09_07_000002_core_ai_settings` migration checksum so sites that already applied the 1.2.28/1.2.29 AI settings migration can continue direct Core updates.
