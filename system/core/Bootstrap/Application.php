@@ -96,7 +96,7 @@ final class Application
                     $events,
                     $blocks,
                     $pluginRuntime,
-                    new OfficialPluginRegistry($rootPath),
+                    new OfficialPluginRegistry($rootPath, $pdo),
                     $secrets,
                     $settings,
                 );

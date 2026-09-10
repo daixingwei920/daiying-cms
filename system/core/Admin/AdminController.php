@@ -83,6 +83,7 @@ use Cms\Core\Payment\PaymentEntitlementService;
 use Cms\Core\Payment\HostedRedirectPaymentProvider;
 use Cms\Core\Payment\ManualPaymentProvider;
 use Cms\Core\Payment\PaymentProviderConfigurationInterface;
+use Cms\Core\Payment\PaymentProviderSettingsSchemaInterface;
 use Cms\Core\Payment\PaymentProviderSelector;
 use Cms\Core\Payment\PaymentProviderRegistry;
 use Cms\Core\Payment\PaymentProviderSettingsRepository;
@@ -2990,7 +2991,7 @@ final class AdminController
         try {
             $pdo = ConnectionFactory::make($this->settings);
             $root = $this->root();
-            $manager = new PluginManager($root . '/content/plugins', $pdo, $this->logger, new EventDispatcher(), new BlockRegistry(), null, new OfficialPluginRegistry($root), null, $this->settings);
+            $manager = new PluginManager($root . '/content/plugins', $pdo, $this->logger, new EventDispatcher(), new BlockRegistry(), null, new OfficialPluginRegistry($root, $pdo), null, $this->settings);
             $manager->syncDiscovered();
             $manifests = $manager->discover();
             $stmt = $pdo->query('SELECT plugin_id, name, version, status, trust_level, capabilities_json, source, dependencies_json, last_error FROM cms_plugins ORDER BY plugin_id');
@@ -3053,7 +3054,7 @@ final class AdminController
         try {
             $pdo = ConnectionFactory::make($this->settings);
             $root = $this->root();
-            $manager = new PluginManager($root . '/content/plugins', $pdo, $this->logger, new EventDispatcher(), new BlockRegistry(), null, new OfficialPluginRegistry($root), null, $this->settings);
+            $manager = new PluginManager($root . '/content/plugins', $pdo, $this->logger, new EventDispatcher(), new BlockRegistry(), null, new OfficialPluginRegistry($root, $pdo), null, $this->settings);
             $manager->syncDiscovered();
             $manifest = $manager->discover()[$pluginId] ?? null;
             $stmt = $pdo->prepare('SELECT * FROM cms_plugins WHERE plugin_id = :plugin_id LIMIT 1');
@@ -5198,6 +5199,10 @@ final class AdminController
     /** @param array<string,mixed> $public @param list<string> $secretKeys */
     private function paymentProviderSchemaFields(string $providerId, array $public, array $secretKeys): string
     {
+        $provider = PaymentProviderRegistry::get($providerId);
+        if ($provider instanceof PaymentProviderSettingsSchemaInterface) {
+            return $this->paymentProviderFieldsFromSchema($provider, $public, $secretKeys);
+        }
         if ($providerId === ManualPaymentProvider::PROVIDER_ID) {
             $instructions = (string) ($public['instructions'] ?? '请按站点说明完成线下付款，管理员确认后自动发卡。');
             return '<fieldset><legend>买家付款说明</legend>' .
@@ -5331,6 +5336,46 @@ final class AdminController
         }
 
         return '<fieldset><legend>第三方 Provider 配置</legend><p class="muted">该支付方式由第三方 Provider 提供，请按它的文档填写。密钥一行一个 KEY=VALUE，留空会保留已有密钥。</p><label>密钥配置<textarea name="secrets_text" rows="4"></textarea></label><p class="muted">Webhook 地址：<code>/payment/webhooks/' . View::escape($providerId) . '</code></p></fieldset>';
+    }
+
+    /** @param array<string,mixed> $public @param list<string> $secretKeys */
+    private function paymentProviderFieldsFromSchema(PaymentProviderSettingsSchemaInterface $provider, array $public, array $secretKeys): string
+    {
+        $fields = '';
+        foreach ($provider->settingsSchema() as $field) {
+            $name = preg_replace('/[^A-Za-z0-9_]/', '', (string) ($field['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+            $label = (string) ($field['label'] ?? $name);
+            $type = (string) ($field['type'] ?? 'text');
+            $secret = ($field['secret'] ?? false) === true;
+            $value = (string) ($public[$name] ?? $field['default'] ?? '');
+            $hint = $secret && in_array($name, $secretKeys, true) ? '已配置，留空则保留' : (string) ($field['placeholder'] ?? '');
+            if ($type === 'textarea') {
+                $fields .= '<label>' . View::escape($label) . '<textarea name="provider_schema_' . View::escape($name) . '" rows="3" placeholder="' . View::escape($hint) . '">' . (!$secret ? View::escape($value) : '') . '</textarea></label>';
+                continue;
+            }
+            if ($type === 'select' && is_array($field['options'] ?? null)) {
+                $options = '';
+                foreach ($field['options'] as $option) {
+                    $optionValue = is_array($option) ? (string) ($option['value'] ?? '') : (string) $option;
+                    $optionLabel = is_array($option) ? (string) ($option['label'] ?? $optionValue) : $optionValue;
+                    $options .= '<option value="' . View::escape($optionValue) . '"' . ($value === $optionValue ? ' selected' : '') . '>' . View::escape($optionLabel) . '</option>';
+                }
+                $fields .= '<label>' . View::escape($label) . '<select name="provider_schema_' . View::escape($name) . '">' . $options . '</select></label>';
+                continue;
+            }
+            $inputType = $secret ? 'password' : (in_array($type, ['text', 'url', 'email', 'number'], true) ? $type : 'text');
+            $fields .= '<label>' . View::escape($label) . '<input name="provider_schema_' . View::escape($name) . '" type="' . View::escape($inputType) . '" value="' . (!$secret ? View::escape($value) : '') . '" autocomplete="new-password" placeholder="' . View::escape($hint) . '"></label>';
+        }
+        if ($fields === '') {
+            $fields = '<p class="muted">该 Provider 未声明可视化配置字段，请使用高级公共 JSON 和密钥配置。</p>';
+        }
+        $help = $provider->help();
+        $helpText = trim((string) ($help['summary'] ?? ''));
+
+        return '<fieldset><legend>Provider 声明配置</legend>' . ($helpText !== '' ? '<p class="muted">' . View::escape($helpText) . '</p>' : '') . $fields . '</fieldset>';
     }
 
     /** @param array<string,mixed> $public */
@@ -6634,6 +6679,25 @@ final class AdminController
                 }
             }
         }
+        $provider = PaymentProviderRegistry::get($providerId);
+        if ($provider instanceof PaymentProviderSettingsSchemaInterface) {
+            foreach ($provider->settingsSchema() as $field) {
+                $name = preg_replace('/[^A-Za-z0-9_]/', '', (string) ($field['name'] ?? ''));
+                if ($name === '' || ($field['secret'] ?? false) === true) {
+                    continue;
+                }
+                $bodyKey = 'provider_schema_' . $name;
+                if (!array_key_exists($bodyKey, $request->body)) {
+                    continue;
+                }
+                $value = trim($this->paymentBodyString($request, $bodyKey, ''));
+                if ($value !== '') {
+                    $public[$name] = $value;
+                } else {
+                    unset($public[$name]);
+                }
+            }
+        }
         if ($this->paymentProviderDefaultFromRequest($request)) {
             $public['default_provider'] = true;
         } else {
@@ -6729,6 +6793,26 @@ final class AdminController
             $privateKey = trim($this->paymentBodyString($request, 'alipay_app_private_key', ''));
             if ($privateKey !== '') {
                 $secrets['app_private_key'] = $privateKey;
+            }
+        }
+        $provider = PaymentProviderRegistry::get($providerId);
+        if ($provider instanceof PaymentProviderSettingsSchemaInterface) {
+            foreach ($provider->settingsSchema() as $field) {
+                if (($field['secret'] ?? false) !== true) {
+                    continue;
+                }
+                $name = preg_replace('/[^A-Za-z0-9_]/', '', (string) ($field['name'] ?? ''));
+                if ($name === '') {
+                    continue;
+                }
+                $bodyKey = 'provider_schema_' . $name;
+                if (!array_key_exists($bodyKey, $request->body)) {
+                    continue;
+                }
+                $value = trim($this->paymentBodyString($request, $bodyKey, ''));
+                if ($value !== '') {
+                    $secrets[$name] = $value;
+                }
             }
         }
 

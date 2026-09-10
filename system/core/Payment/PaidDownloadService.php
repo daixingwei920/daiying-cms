@@ -797,16 +797,15 @@ final class PaidDownloadService
 
     private function isSafeProviderRedirectUrlForProvider(string $providerId, string $url): bool
     {
-        if ($providerId === 'official.payment.stripe' && $this->isSafeStripeCheckoutRedirectUrl($url)) {
+        $provider = PaymentProviderRegistry::get($providerId);
+        if ($provider instanceof PaymentProviderRedirectPolicyInterface && $provider->isSafeRedirectUrl($url)) {
+            return true;
+        }
+        if ($providerId === 'official.payment.stripe' && StripeCheckoutUrlValidator::isSafe($url)) {
             return true;
         }
 
         return $this->isSafeProviderRedirectUrl($url);
-    }
-
-    private function isSafeStripeCheckoutRedirectUrl(string $url): bool
-    {
-        return StripeCheckoutUrlValidator::isSafe($url);
     }
 
     private function isSafeProviderRedirectUrl(string $url): bool

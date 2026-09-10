@@ -215,14 +215,17 @@ final class View
         return 'plugin-' . substr(hash('sha256', $seed), 0, 12);
     }
 
-    /** @return array<string, list<array{0:string,1:string}>> */
+    /** @return array<string, list<array{0:string,1:string,2:string,3:string}>> */
     private static function pluginMenuSections(): array
     {
         $sections = [];
-        foreach (self::$adminPluginMenus as $menu) {
-            $section = AdminUiText::pluginName($menu->pluginId, $menu->pluginId);
+        $menus = self::$adminPluginMenus;
+        usort($menus, static fn (PluginMenuItem $a, PluginMenuItem $b): int => $a->sortOrder <=> $b->sortOrder);
+        foreach ($menus as $menu) {
+            $section = $menu->section !== '' ? $menu->section : AdminUiText::pluginName($menu->pluginId, $menu->pluginId);
             $sections[$section] ??= [];
-            $sections[$section][] = [$menu->path, $menu->label, 'plugin'];
+            $label = $menu->badge !== '' ? $menu->label . ' ' . $menu->badge : $menu->label;
+            $sections[$section][] = [$menu->path, $label, $menu->icon, $menu->breadcrumbParent];
         }
 
         return $sections;
@@ -243,6 +246,12 @@ final class View
             $top = '应用市场';
         } elseif (str_starts_with($path, '/admin/settings') || str_starts_with($path, '/admin/transfer') || str_starts_with($path, '/admin/migrations') || str_starts_with($path, '/admin/update') || str_starts_with($path, '/admin/recovery')) {
             $top = '平台';
+        }
+        foreach (self::$adminPluginMenus as $menu) {
+            if ($path === $menu->path || str_starts_with($path, rtrim($menu->path, '/') . '/')) {
+                $top = $menu->breadcrumbParent !== '' ? $menu->breadcrumbParent : ($menu->section !== '' ? $menu->section : AdminUiText::pluginName($menu->pluginId, $menu->pluginId));
+                break;
+            }
         }
 
         return '<a href="/admin">后台</a><span aria-hidden="true">/</span><span>' . self::escape($top) . '</span><span aria-hidden="true">/</span><strong>' . self::escape($title) . '</strong>';

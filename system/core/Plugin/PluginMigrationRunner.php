@@ -130,7 +130,7 @@ final class PluginMigrationRunner
     /** @param list<string> $objects */
     private function assertPluginOwnedObjects(array $manifest, array $objects, bool $trustedOfficial = false): void
     {
-        $ownership = new PluginTableOwnership($this->pdo, new OfficialPluginRegistry($this->rootPath));
+        $ownership = new PluginTableOwnership($this->pdo, new OfficialPluginRegistry($this->rootPath, $this->pdo));
         $ownership->assertOwnsObjects($objects, $ownership->prefixesFor($manifest, $trustedOfficial));
     }
 

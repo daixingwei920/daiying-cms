@@ -138,7 +138,7 @@ final class LocalPluginPackageInstaller
         if (!is_array($manifest)) {
             throw new PluginException('Bundled plugin manifest is invalid.');
         }
-        $official = new OfficialPluginRegistry($this->rootPath);
+        $official = new OfficialPluginRegistry($this->rootPath, $this->pdo);
         if (!$official->isTrustedBundled((string) ($manifest['plugin_id'] ?? ''), $target)) {
             throw new PluginException('Bundled plugin is not in the official trusted source registry.');
         }
@@ -490,7 +490,7 @@ final class LocalPluginPackageInstaller
     private function validateManifest(array $manifest, string $root, bool $trustedOfficial = false): void
     {
         $pluginManifest = PluginManifest::fromArray($manifest);
-        $official = new OfficialPluginRegistry($this->rootPath);
+        $official = new OfficialPluginRegistry($this->rootPath, $this->pdo);
         if (!$trustedOfficial) {
             PluginRiskBoundaryPolicy::assertLocalManifestAllowed($manifest);
         }
@@ -524,7 +524,7 @@ final class LocalPluginPackageInstaller
 
     private function validateMigrations(string $root, array $manifest, bool $trustedOfficial = false): void
     {
-        $ownership = new PluginTableOwnership($this->pdo, new OfficialPluginRegistry($this->rootPath));
+        $ownership = new PluginTableOwnership($this->pdo, new OfficialPluginRegistry($this->rootPath, $this->pdo));
         $prefixes = $ownership->prefixesFor($manifest, $trustedOfficial);
         $seen = [];
         foreach (($manifest['migrations'] ?? []) as $migration) {
@@ -609,7 +609,7 @@ final class LocalPluginPackageInstaller
         $existing = $this->pluginRow((string) $manifest['plugin_id']);
         $deps = $manifest['required_plugins'] ?? $manifest['dependencies'] ?? [];
         $now = gmdate('c');
-        $prefixes = (new PluginTableOwnership($this->pdo, new OfficialPluginRegistry($this->rootPath)))->prefixesFor($manifest, $trustedOfficial);
+        $prefixes = (new PluginTableOwnership($this->pdo, new OfficialPluginRegistry($this->rootPath, $this->pdo)))->prefixesFor($manifest, $trustedOfficial);
         if ($existing !== null && ($trustedOfficial || in_array((string) $existing['status'], [PluginLifecycle::REMOVED, PluginLifecycle::DORMANT], true))) {
             $stmt = $this->pdo->prepare('UPDATE cms_plugins SET name = :name, version = :version, author = :author, status = :status, trust_level = :trust_level, capabilities_json = :capabilities_json, dependencies_json = :dependencies_json, optional_dependencies_json = :optional_dependencies_json, data_policy_json = :data_policy_json, data_schema_version = :data_schema_version, source = :source, review_status = :review_status, table_prefixes_json = :table_prefixes_json, last_error = NULL, updated_at = :updated_at WHERE plugin_id = :plugin_id');
             $params = [];
@@ -722,7 +722,7 @@ final class LocalPluginPackageInstaller
 
     private function assertPluginOwnedObjects(array $manifest, array $objects, bool $trustedOfficial = false): void
     {
-        $ownership = new PluginTableOwnership($this->pdo, new OfficialPluginRegistry($this->rootPath));
+        $ownership = new PluginTableOwnership($this->pdo, new OfficialPluginRegistry($this->rootPath, $this->pdo));
         $ownership->assertOwnsObjects($objects, $ownership->prefixesFor($manifest, $trustedOfficial));
     }
 
@@ -824,14 +824,19 @@ final class LocalPluginPackageInstaller
         if (!is_array($manifest)) {
             throw new PluginException('Trusted plugin manifest is invalid.');
         }
-        if ($trustedBundled && !(new OfficialPluginRegistry($this->rootPath))->isTrustedBundled($pluginId, $target)) {
+        $official = new OfficialPluginRegistry($this->rootPath, $this->pdo);
+        if ($trustedBundled && !$official->isTrustedBundled($pluginId, $target)) {
             throw new PluginException('Bundled plugin is not in the official trusted source registry.');
         }
-        $this->validateMigrations($target, $manifest, $trustedBundled);
+        $trustedOfficial = $trustedBundled || ($trustedMarket && $official->tablePrefixes($pluginId) !== []);
+        if ($trustedMarket && !$trustedOfficial) {
+            throw new PluginException('Trusted market plugin migrations require an active official trust grant.');
+        }
+        $this->validateMigrations($target, $manifest, $trustedOfficial);
         $lock = $this->lock();
         $this->acquireLock($lock);
         try {
-            $this->runMigrations($target, $manifest, $trustedBundled);
+            $this->runMigrations($target, $manifest, $trustedOfficial);
         } catch (Throwable $exception) {
             if ($this->hasRecoverableMigrationFailure($pluginId)) {
                 $this->setPluginRecoverable($pluginId, $this->sanitizeError($exception));

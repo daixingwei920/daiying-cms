@@ -11,6 +11,11 @@ final class PluginMenuItem
         public readonly string $label,
         public readonly string $path,
         public readonly ?string $capability,
+        public readonly string $section = '',
+        public readonly string $icon = 'plugin',
+        public readonly int $sortOrder = 100,
+        public readonly string $breadcrumbParent = '',
+        public readonly string $badge = '',
     ) {
     }
 }

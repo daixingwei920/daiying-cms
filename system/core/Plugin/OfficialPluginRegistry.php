@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Cms\Core\Plugin;
 
+use PDO;
+
 final class OfficialPluginRegistry
 {
     /** @var array<string,array<string,mixed>> */
     private array $plugins;
+    private ?OfficialExtensionTrustGrantRepository $grants = null;
 
-    public function __construct(private readonly string $rootPath)
+    public function __construct(private readonly string $rootPath, private readonly ?PDO $pdo = null)
     {
         $path = $rootPath . '/system/official-plugins.php';
         $items = is_file($path) ? require $path : [];
@@ -38,13 +41,20 @@ final class OfficialPluginRegistry
     /** @return list<string> */
     public function capabilityNamespaces(string $pluginId): array
     {
-        return array_values(array_filter(array_map('strval', $this->plugins[$pluginId]['capability_namespaces'] ?? [])));
+        return $this->mergedPluginGrantList($pluginId, 'capability_namespaces', 'capabilityNamespaces');
     }
 
     /** @return list<string> */
     public function tablePrefixes(string $pluginId): array
     {
-        return array_values(array_filter(array_map('strval', $this->plugins[$pluginId]['table_prefixes'] ?? [])));
+        return $this->mergedPluginGrantList($pluginId, 'table_prefixes', 'tablePrefixes');
+    }
+
+    public function hasActiveTrustGrant(string $pluginId): bool
+    {
+        $repo = $this->grantRepository();
+
+        return $repo !== null && $repo->activeGrant($pluginId) !== null;
     }
 
     /** @return list<string> */
@@ -56,8 +66,44 @@ final class OfficialPluginRegistry
                 $prefixes[] = (string) $prefix;
             }
         }
+        $repo = $this->grantRepository();
+        if ($repo !== null) {
+            foreach ($repo->activeGrants() as $grant) {
+                foreach ($grant->tablePrefixes as $prefix) {
+                    $prefixes[] = $prefix;
+                }
+            }
+        }
 
         return array_values(array_unique(array_filter($prefixes)));
+    }
+
+    /** @return list<string> */
+    private function mergedPluginGrantList(string $pluginId, string $legacyKey, string $grantMethod): array
+    {
+        $values = array_values(array_filter(array_map('strval', $this->plugins[$pluginId][$legacyKey] ?? [])));
+        $repo = $this->grantRepository();
+        if ($repo !== null) {
+            $grantValues = $grantMethod === 'tablePrefixes'
+                ? $repo->tablePrefixes($pluginId)
+                : $repo->capabilityNamespaces($pluginId);
+            $values = array_merge($values, $grantValues);
+        }
+
+        return array_values(array_unique(array_filter($values)));
+    }
+
+    private function grantRepository(): ?OfficialExtensionTrustGrantRepository
+    {
+        if ($this->pdo === null) {
+            return null;
+        }
+        if ($this->grants === null) {
+            $repo = new OfficialExtensionTrustGrantRepository($this->pdo);
+            $this->grants = $repo->tableExists() ? $repo : null;
+        }
+
+        return $this->grants;
     }
 
     /** @return array<string,array<string,mixed>> */

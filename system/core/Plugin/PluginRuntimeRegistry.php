@@ -26,11 +26,26 @@ final class PluginRuntimeRegistry
         $this->routes[$key] = new PluginRouteDefinition($pluginId, $method, $path, $handler, $capability, $admin, $csrf);
     }
 
-    public function adminMenu(string $pluginId, string $label, string $path, ?string $capability = null): void
+    public function adminMenu(string $pluginId, string $label, string $path, ?string $capability = null, array $metadata = []): void
     {
         $path = $this->normalizePath($path);
         $this->assertRouteAllowed($path);
-        $this->menus[] = new PluginMenuItem($pluginId, $label, $path, $capability);
+        $section = trim((string) ($metadata['section'] ?? ''));
+        $icon = trim((string) ($metadata['icon'] ?? 'plugin'));
+        $sortOrder = (int) ($metadata['sort_order'] ?? $metadata['sortOrder'] ?? 100);
+        $breadcrumbParent = trim((string) ($metadata['breadcrumb_parent'] ?? $metadata['breadcrumbParent'] ?? ''));
+        $badge = trim((string) ($metadata['badge'] ?? ''));
+        $this->menus[] = new PluginMenuItem(
+            $pluginId,
+            $label,
+            $path,
+            $capability,
+            $section,
+            $icon !== '' ? $icon : 'plugin',
+            $sortOrder,
+            $breadcrumbParent,
+            $badge,
+        );
     }
 
     /** @return list<PluginRouteDefinition> */

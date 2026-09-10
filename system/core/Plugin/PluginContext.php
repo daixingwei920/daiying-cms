@@ -106,9 +106,9 @@ final class PluginContext
         $this->runtime()->route($this->manifest->id, $method, $path, $handler, $capability, true, $csrf);
     }
 
-    public function adminMenu(string $label, string $path, ?string $capability = null): void
+    public function adminMenu(string $label, string $path, ?string $capability = null, array $metadata = []): void
     {
-        $this->runtime()->adminMenu($this->manifest->id, $label, $path, $capability);
+        $this->runtime()->adminMenu($this->manifest->id, $label, $path, $capability, $metadata);
     }
 
     public function assetUrl(string $relativePath): string

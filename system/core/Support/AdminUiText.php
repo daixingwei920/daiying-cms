@@ -100,12 +100,7 @@ final class AdminUiText
 
     public static function pluginName(string $pluginId, string $name): string
     {
-        return [
-            'official.payment.stripe' => 'Stripe 官方支付插件',
-            'official.payment-fixture' => '模拟支付',
-            'official.friend-links' => '友情链接',
-            'faq_block' => '常见问题区块',
-        ][$pluginId] ?? ($name !== '' ? $name : $pluginId);
+        return $name !== '' ? $name : $pluginId;
     }
 
     public static function capability(string $capability): string
@@ -119,8 +114,6 @@ final class AdminUiText
 
     public static function pluginSettingsUrl(string $pluginId): string
     {
-        return [
-            'official.friend-links' => '/admin/friend-links',
-        ][$pluginId] ?? '';
+        return '';
     }
 }

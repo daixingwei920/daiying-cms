@@ -12,6 +12,8 @@ final class InstallAuthorization
         public readonly string $expiresAt,
         public readonly string $packageSha256,
         public readonly string $marketId = '',
+        /** @var array<string,mixed> */
+        public readonly array $trustGrant = [],
     ) {
     }
 
@@ -29,6 +31,9 @@ final class InstallAuthorization
             (string) ($data['expires_at'] ?? ''),
             (string) ($data['package_sha256'] ?? ''),
             (string) ($data['market_id'] ?? ''),
+            is_array($data['trust_grant'] ?? null)
+                ? $data['trust_grant']
+                : (is_array($data['official_trust_grant'] ?? null) ? $data['official_trust_grant'] : []),
         );
     }
 }

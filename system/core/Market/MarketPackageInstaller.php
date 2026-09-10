@@ -7,6 +7,12 @@ namespace Cms\Core\Market;
 use Cms\Core\Plugin\PluginLifecycle;
 use Cms\Core\Plugin\PluginMigrationRunner;
 use Cms\Core\Plugin\OfficialPluginRegistry;
+use Cms\Core\Plugin\OfficialExtensionTrustGrant;
+use Cms\Core\Plugin\OfficialExtensionTrustGrantRepository;
+use Cms\Core\Plugin\OfficialExtensionTrustGrantVerifier;
+use Cms\Core\Plugin\PluginManifest;
+use Cms\Core\Plugin\PluginException;
+use Cms\Core\Plugin\Capability;
 use PDO;
 use ZipArchive;
 
@@ -62,7 +68,8 @@ final class MarketPackageInstaller
         $marketReference = $authorization->marketId !== '' ? $authorization->marketId : $authorization->packageUrl;
         (new ExtensionCompatibilityChecker($this->currentCoreVersion()))->assertCompatible($manifest);
         (new ExtensionDependencyResolver($repo))->assertSatisfied($manifest);
-        $trustedOfficial = $this->isTrustedOfficialPackage($manifest);
+        $grant = $this->verifyTrustGrant($authorization, $manifest);
+        $trustedOfficial = $this->isTrustedOfficialPackage($manifest, $pdo, $grant);
 
         $repo->recordLog($marketReference, $manifest->extensionId, $manifest->type, 'Installing', $plan);
 
@@ -73,6 +80,7 @@ final class MarketPackageInstaller
             ? $this->pluginRow($pdo, $manifest->extensionId)
             : null;
         $movedIntoPlace = false;
+        $savedGrantFingerprint = '';
 
         try {
             $this->extractPackage($zipPath, $manifest, $staging);
@@ -111,6 +119,11 @@ final class MarketPackageInstaller
             ]);
             if (in_array($manifest->type, ['plugin', 'payment_provider'], true)) {
                 $pluginManifest = $this->registerPluginRecord($pdo, $target, $manifest, $marketReference);
+                $this->assertMarketPluginTrust($pluginManifest, $manifest, $trustedOfficial, $grant);
+                if ($grant !== null) {
+                    (new OfficialExtensionTrustGrantRepository($pdo))->save($grant, $authorization->trustGrant);
+                    $savedGrantFingerprint = $grant->fingerprint;
+                }
                 $runner = new PluginMigrationRunner($this->rootPath, $pdo);
                 $runner->validate($target, $pluginManifest, $trustedOfficial);
                 $runner->run($target, $pluginManifest, $trustedOfficial);
@@ -135,12 +148,15 @@ final class MarketPackageInstaller
             if (in_array($manifest->type, ['plugin', 'payment_provider'], true)) {
                 $this->restorePluginRow($pdo, $manifest->extensionId, $existingPluginRow);
             }
+            if ($savedGrantFingerprint !== '') {
+                (new OfficialExtensionTrustGrantRepository($pdo))->deleteFingerprint($savedGrantFingerprint);
+            }
             $repo->recordLog($marketReference, $manifest->extensionId, $manifest->type, 'Failed', $plan + ['error' => $exception->getMessage()]);
             throw $exception;
         }
     }
 
-    private function isTrustedOfficialPackage(MarketPackageManifest $manifest): bool
+    private function isTrustedOfficialPackage(MarketPackageManifest $manifest, PDO $pdo, ?OfficialExtensionTrustGrant $grant): bool
     {
         if (!in_array($manifest->type, ['plugin', 'payment_provider'], true)) {
             return false;
@@ -151,8 +167,93 @@ final class MarketPackageInstaller
         if (!in_array($manifest->reviewStatus, ['published', 'approved', 'official_trusted'], true)) {
             return false;
         }
+        if ($grant !== null) {
+            return true;
+        }
 
-        return (new OfficialPluginRegistry($this->rootPath))->tablePrefixes($manifest->extensionId) !== [];
+        return (new OfficialPluginRegistry($this->rootPath, $pdo))->tablePrefixes($manifest->extensionId) !== [];
+    }
+
+    private function verifyTrustGrant(InstallAuthorization $authorization, MarketPackageManifest $manifest): ?OfficialExtensionTrustGrant
+    {
+        if ($authorization->trustGrant === []) {
+            return null;
+        }
+        if ($manifest->source !== ExtensionSource::OFFICIAL_MARKET) {
+            throw new MarketException('Official trust grant may only be used by official market packages.');
+        }
+        if (!in_array($manifest->reviewStatus, ['published', 'approved', 'official_trusted'], true)) {
+            throw new MarketException('Official trust grant package review status is not trusted.');
+        }
+
+        try {
+            $grant = (new OfficialExtensionTrustGrantVerifier(
+                (string) $this->configValue('updates.public_key', ''),
+                (string) $this->configValue('updates.key_id', ''),
+            ))->verify($authorization->trustGrant);
+        } catch (PluginException $exception) {
+            throw new MarketException($exception->getMessage());
+        }
+
+        if ($grant->extensionId !== $manifest->extensionId) {
+            throw new MarketException('Official trust grant extension id does not match package.');
+        }
+        if ($grant->extensionType !== $manifest->type) {
+            throw new MarketException('Official trust grant extension type does not match package.');
+        }
+
+        return $grant;
+    }
+
+    /** @param array<string,mixed> $pluginManifest */
+    private function assertMarketPluginTrust(array $pluginManifest, MarketPackageManifest $marketManifest, bool $trustedOfficial, ?OfficialExtensionTrustGrant $grant): void
+    {
+        $plugin = PluginManifest::fromArray($pluginManifest);
+        $claimsTrustedIdentity = $plugin->bundled
+            || $plugin->type === 'system-plugin'
+            || $plugin->trustLevel === 'trusted_php'
+            || str_starts_with($plugin->id, 'official.');
+        if ($claimsTrustedIdentity && !$trustedOfficial) {
+            throw new MarketException('Market plugin claims official or trusted status without a signed official trust grant.');
+        }
+        if ($grant === null) {
+            return;
+        }
+        if ($plugin->id !== $grant->extensionId) {
+            throw new MarketException('Installed plugin id does not match official trust grant.');
+        }
+        if ($marketManifest->type !== $grant->extensionType) {
+            throw new MarketException('Installed package type does not match official trust grant.');
+        }
+        if ($plugin->trustLevel === 'trusted_php' && $grant->trustLevel !== 'trusted_php') {
+            throw new MarketException('Installed plugin requests trusted PHP without a matching official trust grant.');
+        }
+
+        $pluginNamespaces = $plugin->capabilityNamespaces;
+        $unknownNamespaces = array_values(array_diff($pluginNamespaces, $grant->capabilityNamespaces));
+        if ($unknownNamespaces !== []) {
+            throw new MarketException('Installed plugin requests capability namespaces outside its official trust grant.');
+        }
+        $prefixes = $this->pluginTablePrefixes($pluginManifest);
+        $unknownPrefixes = array_values(array_diff($prefixes, $grant->tablePrefixes));
+        if ($unknownPrefixes !== []) {
+            throw new MarketException('Installed plugin requests table prefixes outside its official trust grant.');
+        }
+        Capability::assertPluginAllowed($plugin->id, $plugin->capabilities, $grant->capabilityNamespaces);
+    }
+
+    /** @param array<string,mixed> $manifest @return list<string> */
+    private function pluginTablePrefixes(array $manifest): array
+    {
+        $prefixes = $manifest['table_prefixes'] ?? ($manifest['database_prefixes'] ?? []);
+        if (!is_array($prefixes) && isset($manifest['database_prefix'])) {
+            $prefixes = [(string) $manifest['database_prefix']];
+        }
+        if (!is_array($prefixes)) {
+            return [];
+        }
+
+        return array_values(array_unique(array_filter(array_map('strval', $prefixes))));
     }
 
     /** @return array{0: MarketPackageManifest, 1: string} */
