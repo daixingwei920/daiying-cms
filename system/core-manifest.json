@@ -217,7 +217,7 @@
     "Plugin/BlockRegistry.php": "3d3b8c3dda5ec407590c3ebf6d1598f752c35e12abd386676eaaee7baaa9212b",
     "Plugin/Capability.php": "a46b7107ba9efa819cc53951110bf144a2f6c633068623b45cab69b0bcb85bd7",
     "Plugin/LocalPluginPackageInstaller.php": "06bb935a9fa4bd18155c2585a53cd6610a8fbdc5e3c4e255b3d09453fc1425ec",
-    "Plugin/OfficialPluginRegistry.php": "8718e86d1eed4c50e9084c7324fc37ab9705558643d797f7b7ef05d81f1b6b2b",
+    "Plugin/OfficialPluginRegistry.php": "042c7c39b684d4ee23b5059e82420235ac24f01cdee27c50ff1dd9e4683288ee",
     "Plugin/PackageScanner.php": "587f3a676b23b325e52d067813c3898540d80fa3470698365f381fdad82a510c",
     "Plugin/PluginAdminRequestContext.php": "a52515d1002c5b7468751c5c927824db8d434ae3f52a56dd8d6655299b9d6cad",
     "Plugin/PluginCircuitBreaker.php": "f855fdedfbfe0320224e3c1a27704a9a623bde79665bd942b459c6d481612759",

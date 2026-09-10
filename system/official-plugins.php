@@ -39,4 +39,13 @@ return [
         'capability_namespaces' => ['commerce'],
         'table_prefixes' => ['commerce_'],
     ],
+    'official.affiliate-hub' => [
+        'directory' => 'official.affiliate-hub',
+        'package_type' => 'plugin',
+        'type' => 'plugin',
+        'bundled' => true,
+        'trust_level' => 'trusted_php',
+        'capability_namespaces' => ['affiliate'],
+        'table_prefixes' => ['affiliate_'],
+    ],
 ];

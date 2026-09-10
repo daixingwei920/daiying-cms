@@ -223,6 +223,25 @@ try {
     $installer->install($commerceZip, $commerceAuth, $pdo);
     $check(market_plugin_table_exists($pdo, 'commerce_market_items'), 'official commerce market install may use its reserved commerce_ table prefix.');
 
+    [$affiliateZip, $affiliateAuth] = market_plugin_migration_package('official.affiliate-hub', '0.1.0-alpha.6', [
+        'content/plugins/official.affiliate-hub/plugin.json' => market_plugin_manifest('official.affiliate-hub', '0.1.0-alpha.6', ['migrations/001_affiliate.php'], ['affiliate_']),
+        'content/plugins/official.affiliate-hub/migrations/001_affiliate.php' => market_plugin_migration_file('affiliate_market_001_create', 'affiliate_market_items'),
+    ]);
+    $installer->install($affiliateZip, $affiliateAuth, $pdo);
+    $check(market_plugin_table_exists($pdo, 'affiliate_market_items'), 'official Affiliate Hub market install may use its reserved affiliate_ table prefix.');
+
+    [$fakeAffiliateZip, $fakeAffiliateAuth] = market_plugin_migration_package('official.fake-affiliate', '1.0.0', [
+        'content/plugins/official.fake-affiliate/plugin.json' => market_plugin_manifest('official.fake-affiliate', '1.0.0', ['migrations/001_fake.php'], ['affiliate_']),
+        'content/plugins/official.fake-affiliate/migrations/001_fake.php' => market_plugin_migration_file('affiliate_fake_001_create', 'affiliate_fake_items'),
+    ]);
+    try {
+        $installer->install($fakeAffiliateZip, $fakeAffiliateAuth, $pdo);
+        $check(false, 'unregistered official-like market plugin cannot use the reserved affiliate_ table prefix.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'table prefix is reserved'), 'unregistered official-like market plugin cannot use the reserved affiliate_ table prefix.');
+    }
+    $check(!market_plugin_table_exists($pdo, 'affiliate_fake_items'), 'rejected affiliate_ prefix package leaves no plugin table behind.');
+
     [$zipV2, $authV2] = market_plugin_migration_package('official.markettest', '1.1.0', [
         'content/plugins/official.markettest/plugin.json' => market_plugin_manifest('official.markettest', '1.1.0', ['migrations/001_create.php', 'migrations/002_more.php']),
         'content/plugins/official.markettest/migrations/001_create.php' => market_plugin_migration_file('market_test_001_create', 'market_test_items'),
