@@ -17,6 +17,7 @@ final class Capability
         'settings.write',
         'storage.plugin',
         'mail.provider',
+        'payment.provider',
         'mail.event',
         'ai.provider',
         'ai.tool',

@@ -9,7 +9,7 @@ use RuntimeException;
 
 final class MigrationRunner
 {
-    /** @param list<MigrationInterface> $migrations */
+    /** @param list<MigrationInterface|array{id:string,up:callable}> $migrations */
     public function __construct(private readonly PDO $pdo, private readonly array $migrations)
     {
     }
@@ -23,20 +23,21 @@ final class MigrationRunner
         $batch = gmdate('YmdHis') . '-' . bin2hex(random_bytes(3));
 
         foreach ($this->migrations as $migration) {
-            if (isset($applied[$migration->id()])) {
+            $migrationId = $this->migrationId($migration);
+            if (isset($applied[$migrationId])) {
                 continue;
             }
 
-            $historyId = $this->startHistory($migration->id(), $batch);
+            $historyId = $this->startHistory($migrationId, $batch);
             $transactional = $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
             if ($transactional) {
                 $this->pdo->beginTransaction();
             }
             try {
-                $migration->up($this->pdo);
+                $this->runMigrationUp($migration);
                 $stmt = $this->pdo->prepare('INSERT INTO cms_core_migrations (migration_id, applied_at) VALUES (:id, :applied_at)');
                 $stmt->execute([
-                    ':id' => $migration->id(),
+                    ':id' => $migrationId,
                     ':applied_at' => gmdate('c'),
                 ]);
                 if ($transactional) {
@@ -49,11 +50,41 @@ final class MigrationRunner
                     $this->pdo->rollBack();
                 }
                 $this->failHistory($historyId, $exception->getMessage());
-                throw new RuntimeException('Migration failed: ' . $migration->id(), 0, $exception);
+                throw new RuntimeException('Migration failed: ' . $migrationId, 0, $exception);
             }
         }
 
         return $count;
+    }
+
+    /** @param MigrationInterface|array{id:string,up:callable} $migration */
+    private function migrationId(MigrationInterface|array $migration): string
+    {
+        if ($migration instanceof MigrationInterface) {
+            return $migration->id();
+        }
+
+        $id = (string) ($migration['id'] ?? '');
+        if ($id === '') {
+            throw new RuntimeException('Migration array is missing an id.');
+        }
+
+        return $id;
+    }
+
+    /** @param MigrationInterface|array{id:string,up:callable} $migration */
+    private function runMigrationUp(MigrationInterface|array $migration): void
+    {
+        if ($migration instanceof MigrationInterface) {
+            $migration->up($this->pdo);
+            return;
+        }
+
+        $up = $migration['up'] ?? null;
+        if (!is_callable($up)) {
+            throw new RuntimeException('Migration array is missing a callable up handler.');
+        }
+        $up($this->pdo);
     }
 
     private function ensureTable(): void

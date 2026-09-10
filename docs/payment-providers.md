@@ -2,6 +2,18 @@
 
 Daiying CMS Core exposes a stable payment provider foundation. Payment plugins should register a provider and use the public payment interfaces instead of changing Core admin forms or checkout redirect rules.
 
+## Registration
+
+Payment plugins should declare the `payment.provider` capability in `plugin.json`, then register the provider from their plugin entry through `PluginContext`:
+
+```php
+return static function (Cms\Core\Plugin\PluginContext $context): void {
+    $context->registerPaymentProvider(new AcmePaymentProvider());
+};
+```
+
+The provider ID only needs to match `PaymentProviderInterface::providerId()`. New providers must not require Core to add their ID to admin settings, checkout redirect policy, or official plugin registry code. Official market packages that need trusted PHP or reserved table prefixes must receive those privileges through a signed Trust Grant.
+
 ## Provider Settings Schema
 
 Payment providers may implement `Cms\Core\Payment\PaymentProviderSettingsSchemaInterface` to let the Core admin settings page render provider-specific fields.

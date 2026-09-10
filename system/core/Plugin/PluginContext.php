@@ -27,6 +27,8 @@ use Cms\Core\Mail\MailService;
 use Cms\Core\Media\RemoteMediaProviderInterface;
 use Cms\Core\Media\RemoteMediaProviderRegistry;
 use Cms\Core\Notification\NotificationService;
+use Cms\Core\Payment\PaymentProviderInterface;
+use Cms\Core\Payment\PaymentProviderRegistry;
 use Cms\Core\Queue\QueueHandlerRegistry;
 use Cms\Core\Queue\QueueService;
 use Cms\Core\Scheduler\ScheduledTask;
@@ -227,6 +229,15 @@ final class PluginContext
         }
 
         AiProviderRegistry::register($provider);
+    }
+
+    public function registerPaymentProvider(PaymentProviderInterface $provider): void
+    {
+        if (!$this->hasCapability('payment.provider')) {
+            throw new PluginException('Plugin does not declare payment.provider capability.');
+        }
+
+        PaymentProviderRegistry::register($provider->providerId(), $provider);
     }
 
     /** @param callable(array<string,mixed>):array<string,mixed> $handler */
