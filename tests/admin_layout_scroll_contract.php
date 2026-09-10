@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+require __DIR__ . '/../system/core/Bootstrap/autoload.php';
+
+use Cms\Core\Support\View;
+use Cms\Core\Update\UpdatePackageManifest;
+
 $root = dirname(__DIR__);
 $cssPath = $root . '/public/assets/admin/admin.css';
 
@@ -59,13 +64,15 @@ $assert(str_contains($adminMain, 'env(safe-area-inset-bottom)'), 'admin main mus
 $assert(str_contains($css, '.admin-card,'), 'admin card selector block missing');
 $assert(str_contains($css, 'minmax(min(220px, 100%), 1fr)'), 'extension/media/theme grids must not overflow narrow admin content');
 $assert(str_contains($css, 'min-width: 0;'), 'admin cards and grid containers must allow content to shrink');
-
-require_once $root . '/system/core/Update/UpdatePackageManifest.php';
-require_once $root . '/system/core/Update/UpdateException.php';
+$assert(str_contains($css, '.admin-nav-group.is-collapsed .admin-nav-group-links'), 'admin nav groups must support collapsed sections');
 
 $assert(
-    \Cms\Core\Update\UpdatePackageManifest::isAllowedUpdatePath('public/assets/admin/admin.css'),
+    UpdatePackageManifest::isAllowedUpdatePath('public/assets/admin/admin.css'),
     'admin shell CSS must be an allowed Core update operational support file'
+);
+$assert(
+    UpdatePackageManifest::isAllowedUpdatePath('public/assets/admin/admin.js'),
+    'admin shell JS must be an allowed Core update operational support file'
 );
 // Keep the exact-commit builder and release parity gate in lockstep with runtime validation.
 foreach ([
@@ -74,11 +81,20 @@ foreach ([
 ] as $script) {
     $content = (string) file_get_contents($script);
     $assert(str_contains($content, "'public/assets/admin/admin.css'"), basename($script) . ' must include admin CSS in the update allow-list');
+    $assert(str_contains($content, "'public/assets/admin/admin.js'"), basename($script) . ' must include admin JS in the update allow-list');
 }
 
 $assert($mobile !== '', 'mobile media block missing');
 $assert(str_contains($mobile, 'height: auto'), 'mobile layout must restore natural document height');
 $assert(str_contains($mobile, 'overflow-y: auto'), 'mobile body must allow normal page scrolling');
 $assert(str_contains($mobile, 'overflow: visible'), 'mobile inner containers must not trap page scrolling');
+
+$_SERVER['REQUEST_URI'] = '/admin/settings/ai';
+$_SESSION = [];
+$html = View::page('AI 设置', '<h1>AI 设置</h1>');
+$assert(str_contains($html, 'data-admin-nav-group="platform"'), 'admin sidebar must render stable platform nav group ids');
+$assert(str_contains($html, 'data-admin-nav-section-toggle'), 'admin sidebar must render section toggle buttons');
+$assert(str_contains($html, 'class="active" aria-current="page" title="AI 设置"'), 'admin sidebar must keep the current page link active inside its group');
+$assert(str_contains($html, 'daiying.admin.navGroups.v1'), 'admin layout must ship nav group collapse behavior through Core View');
 
 echo "admin layout scroll contract PASS\n";

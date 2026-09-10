@@ -71,7 +71,7 @@ final class View
             '工作台' => [
                 ['/admin', '总览', 'home'],
                 ['/admin/notifications', '通知中心', 'bell'],
-                ['/admin/security', 'shield'],
+                ['/admin/security', '后台安全', 'shield'],
             ],
             '内容' => [
                 ['/admin/content', '内容管理', 'content'],
@@ -119,7 +119,11 @@ final class View
 
         $html = '<aside class="admin-sidebar" id="admin-sidebar"><a class="admin-brand" href="/admin"><span class="admin-brand-mark">D</span><span class="admin-brand-text">Daiying CMS</span></a><nav class="admin-nav" aria-label="后台导航">';
         foreach ($sections as $section => $links) {
-            $html .= '<div class="admin-nav-section">' . self::escape($section) . '</div>';
+            $groupId = self::adminNavSectionId((string) $section, $links);
+            $groupPanelId = 'admin-nav-group-' . $groupId;
+            $html .= '<div class="admin-nav-group" data-admin-nav-group="' . self::escape($groupId) . '">';
+            $html .= '<button class="admin-nav-section" type="button" data-admin-nav-section-toggle aria-expanded="true" aria-controls="' . self::escape($groupPanelId) . '"><span class="admin-nav-section-label">' . self::escape((string) $section) . '</span><span class="admin-nav-section-chevron" aria-hidden="true"></span></button>';
+            $html .= '<div class="admin-nav-group-links" id="' . self::escape($groupPanelId) . '">';
             foreach ($links as $link) {
                 [$href, $label] = $link;
                 $icon = (string) ($link[2] ?? 'plugin');
@@ -128,6 +132,7 @@ final class View
                 $current = $active ? ' aria-current="page"' : '';
                 $html .= '<a' . $class . $current . ' title="' . self::escape($label) . '" href="' . self::escape($href) . '"><span class="admin-nav-icon" aria-hidden="true">' . self::icon($icon) . '</span><span class="admin-nav-label">' . self::escape($label) . '</span></a>';
             }
+            $html .= '</div></div>';
         }
         $html .= '</nav><form class="admin-logout-form" method="post" action="/admin/logout">' . \Cms\Core\Security\CsrfToken::field() . '<button type="submit"><span class="admin-nav-icon" aria-hidden="true">' . self::icon('logout') . '</span><span class="admin-nav-label">退出登录</span></button></form></aside>';
         return $html;
@@ -184,6 +189,32 @@ final class View
         return $path === $href || str_starts_with($path, rtrim($href, '/') . '/');
     }
 
+    /**
+     * @param list<array{0:string,1:string}> $links
+     */
+    private static function adminNavSectionId(string $section, array $links): string
+    {
+        $known = [
+            '工作台' => 'dashboard',
+            '内容' => 'content',
+            '外观' => 'appearance',
+            '扩展' => 'extensions',
+            '商业' => 'commerce',
+            '平台' => 'platform',
+            '应用市场' => 'market',
+        ];
+        if (isset($known[$section])) {
+            return $known[$section];
+        }
+
+        $seed = $section;
+        if (isset($links[0][0]) && is_string($links[0][0])) {
+            $seed .= ':' . $links[0][0];
+        }
+
+        return 'plugin-' . substr(hash('sha256', $seed), 0, 12);
+    }
+
     /** @return array<string, list<array{0:string,1:string}>> */
     private static function pluginMenuSections(): array
     {
@@ -230,12 +261,21 @@ final class View
 
     private static function adminScriptTag(bool $isAdmin): string
     {
-        return $isAdmin ? '<script src="/assets/admin/admin.js?v=' . self::assetVersion() . '" defer></script>' : '';
+        if (!$isAdmin) {
+            return '';
+        }
+
+        return self::adminNavGroupScript() . '<script src="/assets/admin/admin.js?v=' . self::assetVersion() . '" defer></script>';
     }
 
     private static function assetVersion(): string
     {
-        return '1.2.3-content-editor-ui-20260827';
+        return '1.2.45-admin-nav-groups-20260910';
+    }
+
+    private static function adminNavGroupScript(): string
+    {
+        return '<script>(function(){var key="daiying.admin.navGroups.v1";var groups=document.querySelectorAll("[data-admin-nav-group]");var state={};try{state=JSON.parse(localStorage.getItem(key)||"{}")||{};}catch(error){state={};}function save(){try{localStorage.setItem(key,JSON.stringify(state));}catch(error){}}function apply(group,collapsed){var toggle=group.querySelector("[data-admin-nav-section-toggle]");group.classList.toggle("is-collapsed",collapsed);if(toggle){toggle.setAttribute("aria-expanded",collapsed?"false":"true");}}groups.forEach(function(group){var id=group.getAttribute("data-admin-nav-group")||"";var toggle=group.querySelector("[data-admin-nav-section-toggle]");var active=!!group.querySelector(".admin-nav-group-links a.active");var collapsed=active?false:(state[id]!==undefined?state[id]===1:true);apply(group,collapsed);if(!toggle||!id){return;}toggle.addEventListener("click",function(){var next=!group.classList.contains("is-collapsed");state[id]=next?1:0;apply(group,next);save();});});})();</script>';
     }
 
     private static function icon(string $name): string
