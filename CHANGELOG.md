@@ -2,6 +2,16 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.49 - 2026-09-10
+
+- Added the official extension Trust Grant foundation so trusted Marketplace packages can receive signed capabilities, table prefixes, route prefixes, and admin menu declarations from the official update server.
+- Decoupled new official plugin installation from Core static plugin ID edits when the Marketplace package carries a valid signed Trust Grant.
+- Kept reserved Core table prefixes and unsafe admin route protections in place for untrusted or tampered packages.
+- Added migration storage for official extension trust grants and regression coverage for Marketplace install, tamper rejection, and non-official package boundaries.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.49-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.49>.
+
 ## 1.2.48 - 2026-09-10
 
 - Published a legacy-verifier bridge update that delivers the collapsible admin sidebar runtime through `system/core/*` only.
