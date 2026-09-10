@@ -144,16 +144,25 @@ final class AffiliateRepository
     /** @param list<array<string,mixed>> $items @param array<string,mixed> $defaults @return array{processed:int,created:int,updated:int,failed:int,errors:list<string>} */
     public function importFeedProducts(array $items, array $defaults = []): array
     {
+        return $this->importProviderProducts('affiliate.feed', $items, $defaults);
+    }
+
+    /** @param list<array<string,mixed>> $items @param array<string,mixed> $defaults @return array{processed:int,created:int,updated:int,failed:int,errors:list<string>} */
+    public function importProviderProducts(string $providerId, array $items, array $defaults = []): array
+    {
+        if (!preg_match('/^affiliate\.[a-z0-9_.-]+$/', $providerId)) {
+            throw new \InvalidArgumentException('Affiliate provider id is invalid.');
+        }
         $result = ['processed' => 0, 'created' => 0, 'updated' => 0, 'failed' => 0, 'errors' => []];
         foreach ($items as $index => $item) {
             $result['processed']++;
             try {
-                $saved = $this->saveFeedProduct($item, $defaults);
+                $saved = $this->saveProviderProduct($providerId, $item, $defaults);
                 $result[$saved['created'] ? 'created' : 'updated']++;
             } catch (\Throwable $exception) {
                 $result['failed']++;
                 if (count($result['errors']) < 20) {
-                    $result['errors'][] = '第 ' . ($index + 1) . ' 行：' . $exception->getMessage();
+                    $result['errors'][] = '第 ' . ($index + 1) . ' 项：' . $exception->getMessage();
                 }
             }
         }
@@ -164,32 +173,40 @@ final class AffiliateRepository
     /** @param array<string,mixed> $input @param array<string,mixed> $defaults @return array{id:int,created:bool} */
     public function saveFeedProduct(array $input, array $defaults = []): array
     {
+        return $this->saveProviderProduct('affiliate.feed', $input, $defaults);
+    }
+
+    /** @param array<string,mixed> $input @param array<string,mixed> $defaults @return array{id:int,created:bool} */
+    public function saveProviderProduct(string $providerId, array $input, array $defaults = []): array
+    {
         $now = gmdate('c');
         $name = $this->text($input['name'] ?? '', 500);
         $destinationUrl = $this->httpsUrl($input['destination_url'] ?? '');
         $affiliateUrl = $this->httpsUrl($input['affiliate_url'] ?? $destinationUrl);
         if ($name === '' || $destinationUrl === '' || $affiliateUrl === '') {
-            throw new \InvalidArgumentException('Feed 商品缺少名称、目标 URL 或 Affiliate URL。');
+            throw new \InvalidArgumentException('联盟商品缺少名称、目标 URL 或 Affiliate URL。');
         }
         $currency = strtoupper($this->text($input['currency'] ?? ($defaults['currency'] ?? ''), 3));
         if ($currency !== '' && !preg_match('/^[A-Z]{3}$/', $currency)) {
             throw new \InvalidArgumentException('币种必须是 ISO 4217 三位代码。');
         }
-        $sourceName = $this->text($defaults['source_name'] ?? 'feed', 96);
+        $sourceName = $this->text($defaults['source_name'] ?? $providerId, 96);
         $external = $this->text($input['external_product_id'] ?? '', 191);
         if ($external === '') {
             $external = substr(hash('sha256', strtolower($destinationUrl) . '|' . strtolower($affiliateUrl)), 0, 32);
         }
-        $externalId = 'feed:' . substr(hash('sha256', strtolower($sourceName) . '|' . strtolower($external)), 0, 40);
+        $externalId = substr($providerId, strlen('affiliate.')) . ':' . substr(hash('sha256', strtolower($sourceName) . '|' . strtolower($external)), 0, 40);
         $price = $this->decimalOrNull($input['price_current'] ?? null);
         $payload = [
             'source_name' => $sourceName,
             'external_product_id' => $external,
+            'advertiser_external_id' => $this->text($input['advertiser_external_id'] ?? '', 191),
             'name' => $name,
             'description' => $this->text($input['description'] ?? '', 5000),
             'brand' => $this->text($input['brand'] ?? '', 191),
             'advertiser_name' => $this->text($input['advertiser_name'] ?? '', 191),
             'category_original' => $this->text($input['category'] ?? '', 191),
+            'sku' => $this->text($input['sku'] ?? '', 191),
             'image_url' => $this->httpsUrl($input['image_url'] ?? ''),
             'price_current' => $price,
             'currency' => $currency !== '' ? $currency : null,
@@ -200,19 +217,23 @@ final class AffiliateRepository
         $hash = hash('sha256', json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
         $status = $this->status($defaults['status'] ?? 'draft');
         $indexable = !empty($defaults['indexable']) ? 1 : 0;
+        $connectionId = isset($defaults['connection_id']) ? max(0, (int) $defaults['connection_id']) : 0;
 
-        $existing = $this->findByProviderExternalId('affiliate.feed', $externalId);
+        $existing = $this->findByProviderExternalId($providerId, $externalId);
         if ($existing !== null) {
             $productId = (int) $existing['id'];
-            $this->pdo->prepare('UPDATE affiliate_products SET advertiser_name = :advertiser_name, external_parent_id = :external_parent_id, name_original = :name, description_original = :description, display_title = COALESCE(display_title, :display_title), brand = :brand, category_original = :category_original, image_url = :image_url, price_current = :price_current, currency = :currency, availability = :availability, destination_url = :destination_url, country = :country, language = :language, status = :status, indexable = :indexable, source_payload_hash = :hash, source_updated_at = :now, last_synced_at = :now, last_seen_at = :now, updated_at = :now WHERE id = :id')
+            $this->pdo->prepare('UPDATE affiliate_products SET connection_id = :connection_id, advertiser_external_id = :advertiser_external_id, advertiser_name = :advertiser_name, external_parent_id = :external_parent_id, name_original = :name, description_original = :description, display_title = COALESCE(display_title, :display_title), brand = :brand, sku = :sku, category_original = :category_original, image_url = :image_url, price_current = :price_current, currency = :currency, availability = :availability, destination_url = :destination_url, country = :country, language = :language, status = :status, indexable = :indexable, source_payload_hash = :hash, source_updated_at = :now, last_synced_at = :now, last_seen_at = :now, updated_at = :now WHERE id = :id')
                 ->execute([
                     ':id' => $productId,
+                    ':connection_id' => $connectionId > 0 ? $connectionId : null,
+                    ':advertiser_external_id' => $payload['advertiser_external_id'] ?: null,
                     ':advertiser_name' => $payload['advertiser_name'] ?: null,
                     ':external_parent_id' => $this->text($input['external_parent_id'] ?? '', 191) ?: null,
                     ':name' => $name,
                     ':description' => $payload['description'] ?: null,
                     ':display_title' => $name,
                     ':brand' => $payload['brand'] ?: null,
+                    ':sku' => $payload['sku'] ?: null,
                     ':category_original' => $payload['category_original'] ?: null,
                     ':image_url' => $payload['image_url'] ?: null,
                     ':price_current' => $price,
@@ -228,10 +249,12 @@ final class AffiliateRepository
                 ]);
             $created = false;
         } else {
-            $this->pdo->prepare('INSERT INTO affiliate_products (uuid, provider_id, connection_id, advertiser_name, catalog_external_id, external_product_id, external_parent_id, name_original, description_original, display_title, brand, category_original, image_url, price_current, currency, availability, destination_url, country, language, status, indexable, source_payload_hash, source_updated_at, last_synced_at, last_seen_at, created_at, updated_at) VALUES (:uuid, :provider_id, NULL, :advertiser_name, :catalog_external_id, :external_product_id, :external_parent_id, :name, :description, :display_title, :brand, :category_original, :image_url, :price_current, :currency, :availability, :destination_url, :country, :language, :status, :indexable, :hash, :now, :now, :now, :now, :now)')
+            $this->pdo->prepare('INSERT INTO affiliate_products (uuid, provider_id, connection_id, advertiser_external_id, advertiser_name, catalog_external_id, external_product_id, external_parent_id, name_original, description_original, display_title, brand, sku, category_original, image_url, price_current, currency, availability, destination_url, country, language, status, indexable, source_payload_hash, source_updated_at, last_synced_at, last_seen_at, created_at, updated_at) VALUES (:uuid, :provider_id, :connection_id, :advertiser_external_id, :advertiser_name, :catalog_external_id, :external_product_id, :external_parent_id, :name, :description, :display_title, :brand, :sku, :category_original, :image_url, :price_current, :currency, :availability, :destination_url, :country, :language, :status, :indexable, :hash, :now, :now, :now, :now, :now)')
                 ->execute([
                     ':uuid' => $this->uuid(),
-                    ':provider_id' => 'affiliate.feed',
+                    ':provider_id' => $providerId,
+                    ':connection_id' => $connectionId > 0 ? $connectionId : null,
+                    ':advertiser_external_id' => $payload['advertiser_external_id'] ?: null,
                     ':advertiser_name' => $payload['advertiser_name'] ?: null,
                     ':catalog_external_id' => $sourceName,
                     ':external_product_id' => $externalId,
@@ -240,6 +263,7 @@ final class AffiliateRepository
                     ':description' => $payload['description'] ?: null,
                     ':display_title' => $name,
                     ':brand' => $payload['brand'] ?: null,
+                    ':sku' => $payload['sku'] ?: null,
                     ':category_original' => $payload['category_original'] ?: null,
                     ':image_url' => $payload['image_url'] ?: null,
                     ':price_current' => $price,
@@ -257,7 +281,7 @@ final class AffiliateRepository
             $created = true;
         }
 
-        $this->upsertGenericOffer($productId, 'affiliate.feed', $payload, $hash, $now);
+        $this->upsertGenericOffer($productId, $providerId, $payload, $hash, $now, $connectionId);
 
         return ['id' => $productId, 'created' => $created];
     }
@@ -304,7 +328,7 @@ final class AffiliateRepository
     }
 
     /** @param array<string,mixed> $payload */
-    private function upsertGenericOffer(int $productId, string $providerId, array $payload, string $hash, string $now): void
+    private function upsertGenericOffer(int $productId, string $providerId, array $payload, string $hash, string $now, int $connectionId = 0): void
     {
         $stmt = $this->pdo->prepare('SELECT * FROM affiliate_offers WHERE product_id = :product_id AND provider_id = :provider_id ORDER BY id ASC LIMIT 1');
         $stmt->execute([':product_id' => $productId, ':provider_id' => $providerId]);
@@ -312,6 +336,8 @@ final class AffiliateRepository
         $params = [
             ':product_id' => $productId,
             ':provider_id' => $providerId,
+            ':connection_id' => $connectionId > 0 ? $connectionId : null,
+            ':advertiser_external_id' => $payload['advertiser_external_id'] ?: null,
             ':advertiser_name' => $payload['advertiser_name'] ?: null,
             ':affiliate_url' => $payload['affiliate_url'],
             ':destination_url' => $payload['destination_url'],
@@ -325,13 +351,13 @@ final class AffiliateRepository
             $updateParams = $params;
             unset($updateParams[':product_id'], $updateParams[':provider_id']);
             $updateParams[':id'] = (int) $existing['id'];
-            $this->pdo->prepare('UPDATE affiliate_offers SET advertiser_name = :advertiser_name, affiliate_url = :affiliate_url, destination_url = :destination_url, price_current = :price_current, currency = :currency, availability = :availability, source_payload_hash = :hash, last_synced_at = :now, updated_at = :now WHERE id = :id')
+            $this->pdo->prepare('UPDATE affiliate_offers SET connection_id = :connection_id, advertiser_external_id = :advertiser_external_id, advertiser_name = :advertiser_name, affiliate_url = :affiliate_url, destination_url = :destination_url, price_current = :price_current, currency = :currency, availability = :availability, source_payload_hash = :hash, last_synced_at = :now, updated_at = :now WHERE id = :id')
                 ->execute($updateParams);
             return;
         }
 
         $params[':uuid'] = $this->uuid();
-        $this->pdo->prepare('INSERT INTO affiliate_offers (uuid, product_id, provider_id, connection_id, advertiser_name, affiliate_url, destination_url, price_current, currency, availability, status, sort_order, source_payload_hash, last_synced_at, created_at, updated_at) VALUES (:uuid, :product_id, :provider_id, NULL, :advertiser_name, :affiliate_url, :destination_url, :price_current, :currency, :availability, \'active\', 0, :hash, :now, :now, :now)')
+        $this->pdo->prepare('INSERT INTO affiliate_offers (uuid, product_id, provider_id, connection_id, advertiser_external_id, advertiser_name, affiliate_url, destination_url, price_current, currency, availability, status, sort_order, source_payload_hash, last_synced_at, created_at, updated_at) VALUES (:uuid, :product_id, :provider_id, :connection_id, :advertiser_external_id, :advertiser_name, :affiliate_url, :destination_url, :price_current, :currency, :availability, \'active\', 0, :hash, :now, :now, :now)')
             ->execute($params);
     }
 

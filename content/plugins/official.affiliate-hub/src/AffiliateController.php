@@ -10,7 +10,12 @@ use Cms\Core\Security\CsrfToken;
 
 final class AffiliateController
 {
-    public function __construct(private readonly AffiliateRepository $repo, private readonly FeedImportService $feed)
+    public function __construct(
+        private readonly AffiliateRepository $repo,
+        private readonly FeedImportService $feed,
+        private readonly ?AffiliateConnectionRepository $connections = null,
+        private readonly ?CjAffiliateAdapter $cj = null,
+    )
     {
     }
 
@@ -27,7 +32,7 @@ final class AffiliateController
             $cards .= '<div style="border:1px solid #d9e2ef;border-radius:8px;padding:18px"><strong style="font-size:28px">' . (int) $stats[$key] . '</strong><div class="muted">' . $this->e($label) . '</div></div>';
         }
 
-        return Response::html($this->shell('联盟商城', '<p class="muted">统一管理 Affiliate Product、Offer、点击跳转和平台 Adapter。联盟商品只导流到广告主，不走本站支付、订单或物流。</p><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0">' . $cards . '</div><p><a class="button" href="/admin/affiliate-hub/products">商品列表</a> <a class="button" href="/admin/affiliate-hub/products/new">新增手工联盟商品</a> <a class="button" href="/admin/affiliate-hub/import">一键导入</a></p>'));
+        return Response::html($this->shell('联盟商城', '<p class="muted">统一管理 Affiliate Product、Offer、点击跳转和平台 Adapter。联盟商品只导流到广告主，不走本站支付、订单或物流。</p><div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0">' . $cards . '</div><p><a class="button" href="/admin/affiliate-hub/products">商品列表</a> <a class="button" href="/admin/affiliate-hub/products/new">新增手工联盟商品</a> <a class="button" href="/admin/affiliate-hub/import">一键导入</a> <a class="button" href="/admin/affiliate-hub/cj">CJ Affiliate</a></p>'));
     }
 
     public function products(Request $request): Response
@@ -111,6 +116,85 @@ final class AffiliateController
         return Response::html($this->shell('导入结果', $html));
     }
 
+    public function cjSettings(Request $request): Response
+    {
+        return Response::html($this->shell('CJ Affiliate', $this->cjSettingsHtml()));
+    }
+
+    public function saveCjSettings(Request $request): Response
+    {
+        try {
+            $this->requireConnections()->saveCjConnection($request->body);
+        } catch (\Throwable $exception) {
+            return Response::html($this->shell('CJ Affiliate', '<div class="alert alert-error">保存失败：' . $this->e($exception->getMessage()) . '</div>' . $this->cjSettingsHtml($request->body)), 422);
+        }
+
+        return Response::redirect('/admin/affiliate-hub/cj?saved=1');
+    }
+
+    public function testCjSettings(Request $request): Response
+    {
+        $connections = $this->requireConnections();
+        try {
+            $config = $connections->cjRuntimeConfig();
+            $result = $this->requireCj()->validateCredentials($config);
+            $connections->updateCjTest($result['ok'] ? 'ok' : 'failed', $result['message']);
+            $class = $result['ok'] ? 'alert-success' : 'alert-error';
+            return Response::html($this->shell('CJ Affiliate', '<div class="alert ' . $class . '">' . $this->e($result['message']) . '</div>' . $this->cjSettingsHtml()));
+        } catch (\Throwable $exception) {
+            $connections->updateCjTest('failed', $exception->getMessage());
+            return Response::html($this->shell('CJ Affiliate', '<div class="alert alert-error">测试失败：' . $this->e($exception->getMessage()) . '</div>' . $this->cjSettingsHtml()), 422);
+        }
+    }
+
+    public function cjSearch(Request $request): Response
+    {
+        try {
+            $config = $this->requireConnections()->cjRuntimeConfig();
+            $result = $this->requireCj()->searchProducts([
+                'config' => $config,
+                'keywords' => $request->input('keywords', ''),
+                'advertiser_ids' => $request->input('advertiser_ids', ''),
+                'limit' => $request->input('limit', 25),
+                'offset' => $request->input('offset', 0),
+            ]);
+        } catch (CjAffiliateRateLimitException $exception) {
+            $this->requireConnections()->markCjRateLimited($exception->getMessage());
+            return Response::html($this->shell('CJ 商品搜索', '<div class="alert alert-error">CJ 限流：请稍后再试。</div>' . $this->cjSearchForm($request->query)), 429);
+        } catch (\Throwable $exception) {
+            return Response::html($this->shell('CJ 商品搜索', '<div class="alert alert-error">CJ 搜索失败：' . $this->e($exception->getMessage()) . '</div>' . $this->cjSearchForm($request->query)), 422);
+        }
+
+        return Response::html($this->shell('CJ 商品搜索', $this->cjSearchForm($request->query) . $this->cjResultsHtml($result['items'], $request->query, $result['next_cursor'])));
+    }
+
+    public function importCj(Request $request): Response
+    {
+        $payload = (string) $request->input('items_json', '');
+        $items = json_decode($payload, true);
+        if (!is_array($items)) {
+            return Response::html($this->shell('CJ 商品导入', '<div class="alert alert-error">CJ 导入数据无效。</div>' . $this->cjSearchForm()), 422);
+        }
+        $config = $this->requireConnections()->cjRuntimeConfig();
+        $result = $this->repo->importProviderProducts('affiliate.cj', array_values(array_filter($items, 'is_array')), [
+            'source_name' => 'cj:' . ((string) ($config['company_id'] ?? '')),
+            'connection_id' => (int) ($config['connection_id'] ?? 0),
+            'status' => $request->input('status', 'draft'),
+            'indexable' => (string) $request->input('indexable', '') === '1',
+        ]);
+        $errors = '';
+        foreach ($result['errors'] as $error) {
+            $errors .= '<li>' . $this->e($error) . '</li>';
+        }
+        $html = '<div class="alert alert-success">CJ 导入完成：处理 ' . (int) $result['processed'] . '，新增 ' . (int) $result['created'] . '，更新 ' . (int) $result['updated'] . '，失败 ' . (int) $result['failed'] . '。</div>';
+        if ($errors !== '') {
+            $html .= '<h2>错误</h2><ul>' . $errors . '</ul>';
+        }
+        $html .= '<p><a class="button" href="/admin/affiliate-hub/products">查看商品</a> <a class="button admin-button-secondary" href="/admin/affiliate-hub/cj/search">继续搜索 CJ</a></p>';
+
+        return Response::html($this->shell('CJ 商品导入', $html));
+    }
+
     public function go(Request $request): Response
     {
         $offerId = (int) $request->input('offer_id', 0);
@@ -162,6 +246,69 @@ final class AffiliateController
             '<label>或粘贴 CSV<textarea name="feed_text" rows="12" placeholder="id,name,price,currency,destination_url,affiliate_url">' . $this->e((string) ($old['feed_text'] ?? '')) . '</textarea></label>' .
             '<p class="muted">V1 先支持 CSV。导入前会进入字段映射和预览，不会在一个请求里导入几万条。</p>' .
             '<button type="submit">读取并预览</button></form>';
+    }
+
+    /** @param array<string,mixed> $old */
+    private function cjSettingsHtml(array $old = []): string
+    {
+        $connection = $this->connections?->cjConnection();
+        $config = is_array($connection['public_config'] ?? null) ? $connection['public_config'] : [];
+        $value = function (string $key) use ($old, $config): string {
+            return $this->e((string) ($old[$key] ?? $config[$key] ?? ''));
+        };
+        $enabled = (string) ($old['status'] ?? ($connection['status'] ?? 'disabled')) === 'enabled';
+        $tokenHint = !empty($connection['token_configured']) ? '已配置（' . $this->e((string) ($connection['token_masked'] ?? '')) . '）' : '未配置';
+        $test = '';
+        if (is_array($connection) && (string) ($connection['last_test_status'] ?? '') !== '') {
+            $test = '<p class="muted">上次测试：' . $this->e((string) $connection['last_test_status']) . ' · ' . $this->e((string) ($connection['last_test_message'] ?? '')) . ' · ' . $this->e((string) ($connection['last_tested_at'] ?? '')) . '</p>';
+        }
+
+        return '<p class="muted">CJ V1 使用官方 Product Feed/Search GraphQL 读取商品，并使用 CJ 返回的 linkCode(pid) 作为 Affiliate Tracking Link。Personal Access Token 只保存在服务端密钥仓库。</p>' .
+            $test .
+            '<form method="post" action="/admin/affiliate-hub/cj/save">' . CsrfToken::field() .
+            '<label><input type="checkbox" name="status" value="enabled"' . ($enabled ? ' checked' : '') . '> 启用 CJ 连接</label>' .
+            '<label>CJ Company ID<input name="company_id" required value="' . $value('company_id') . '"></label>' .
+            '<label>Website ID / PID<input name="website_id" required value="' . $value('website_id') . '"></label>' .
+            '<label>Personal Access Token<input name="personal_access_token" type="password" autocomplete="new-password" placeholder="' . $tokenHint . '"></label>' .
+            '<p class="muted">留空表示保留已保存 Token。Token 不会回显，也不会写入日志或导入结果。</p>' .
+            '<label>限定广告主 Company ID，可选<input name="advertiser_ids" placeholder="111,222" value="' . $value('advertiser_ids') . '"></label>' .
+            '<label>超时秒数<input name="timeout" type="number" min="3" max="60" value="' . ($value('timeout') ?: '20') . '"></label>' .
+            '<button type="submit">保存 CJ 配置</button> <button type="submit" formaction="/admin/affiliate-hub/cj/test">测试连接</button> <a class="button admin-button-secondary" href="/admin/affiliate-hub/cj/search">搜索商品</a></form>';
+    }
+
+    /** @param array<string,mixed> $old */
+    private function cjSearchForm(array $old = []): string
+    {
+        return '<form method="get" action="/admin/affiliate-hub/cj/search">' .
+            '<label>关键词<input name="keywords" value="' . $this->e((string) ($old['keywords'] ?? '')) . '" placeholder="shoes, camera, laptop"></label>' .
+            '<label>广告主 Company ID，可选<input name="advertiser_ids" value="' . $this->e((string) ($old['advertiser_ids'] ?? '')) . '" placeholder="111,222"></label>' .
+            '<label>数量<input name="limit" type="number" min="1" max="100" value="' . $this->e((string) ($old['limit'] ?? '25')) . '"></label>' .
+            '<button type="submit">搜索 CJ 商品</button> <a class="button admin-button-secondary" href="/admin/affiliate-hub/cj">CJ 配置</a></form>';
+    }
+
+    /** @param list<array<string,mixed>> $items @param array<string,mixed> $query */
+    private function cjResultsHtml(array $items, array $query = [], ?string $nextCursor = null): string
+    {
+        if ($items === []) {
+            return '<p class="muted">没有 CJ 商品结果。</p>';
+        }
+        $rows = '';
+        foreach ($items as $item) {
+            $rows .= '<tr><td>' . $this->e((string) ($item['name'] ?? '')) . '</td><td>' . $this->e((string) ($item['advertiser_name'] ?? '')) . '</td><td>' . $this->e($this->money($item['price_current'] ?? null, (string) ($item['currency'] ?? ''))) . '</td><td>' . $this->e((string) ($item['availability'] ?? '')) . '</td><td>' . $this->e((string) ($item['affiliate_url'] ?? '')) . '</td></tr>';
+        }
+        $next = '';
+        if ($nextCursor !== null) {
+            $params = $query;
+            $params['offset'] = $nextCursor;
+            $next = ' <a class="button admin-button-secondary" href="/admin/affiliate-hub/cj/search?' . $this->e(http_build_query($params)) . '">下一页</a>';
+        }
+
+        return '<form method="post" action="/admin/affiliate-hub/cj/import">' . CsrfToken::field() .
+            '<textarea name="items_json" hidden>' . $this->e(json_encode($items, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '[]') . '</textarea>' .
+            '<label>导入状态<select name="status">' . $this->options(['draft' => '草稿', 'active' => '发布', 'inactive' => '停用'], 'draft') . '</select></label>' .
+            '<label><input type="checkbox" name="indexable" value="1"> 允许收录</label>' .
+            '<table><thead><tr><th>商品</th><th>广告主</th><th>价格</th><th>状态</th><th>Tracking URL</th></tr></thead><tbody>' . $rows . '</tbody></table>' .
+            '<p><button type="submit">导入当前结果</button>' . $next . '</p></form>';
     }
 
     /** @param list<string> $headers @param array<string,string> $mapping @param list<array<string,mixed>> $preview @param array<string,mixed> $old @param list<string> $errors */
@@ -255,7 +402,7 @@ final class AffiliateController
 
     private function shell(string $title, string $body): string
     {
-        return '<main class="admin-main"><h1>' . $this->e($title) . '</h1><nav style="margin:0 0 18px"><a href="/admin/affiliate-hub">总览</a> · <a href="/admin/affiliate-hub/products">商品</a> · <a href="/admin/affiliate-hub/products/new">手工商品</a> · <a href="/admin/affiliate-hub/import">一键导入</a></nav>' . $body . '</main>';
+        return '<main class="admin-main"><h1>' . $this->e($title) . '</h1><nav style="margin:0 0 18px"><a href="/admin/affiliate-hub">总览</a> · <a href="/admin/affiliate-hub/products">商品</a> · <a href="/admin/affiliate-hub/products/new">手工商品</a> · <a href="/admin/affiliate-hub/import">CSV 导入</a> · <a href="/admin/affiliate-hub/cj">CJ Affiliate</a></nav>' . $body . '</main>';
     }
 
     private function money(mixed $amount, string $currency): string
@@ -281,5 +428,23 @@ final class AffiliateController
     private function e(string $value): string
     {
         return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+
+    private function requireConnections(): AffiliateConnectionRepository
+    {
+        if (!$this->connections instanceof AffiliateConnectionRepository) {
+            throw new \RuntimeException('Affiliate connection manager is unavailable.');
+        }
+
+        return $this->connections;
+    }
+
+    private function requireCj(): CjAffiliateAdapter
+    {
+        if (!$this->cj instanceof CjAffiliateAdapter) {
+            throw new \RuntimeException('CJ adapter is unavailable.');
+        }
+
+        return $this->cj;
     }
 }

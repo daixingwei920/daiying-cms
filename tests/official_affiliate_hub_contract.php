@@ -7,6 +7,9 @@ const CMS_ROOT = __DIR__ . '/..';
 require_once CMS_ROOT . '/system/core/Bootstrap/autoload.php';
 require_once CMS_ROOT . '/content/plugins/official.affiliate-hub/src/AffiliateContracts.php';
 require_once CMS_ROOT . '/content/plugins/official.affiliate-hub/src/AffiliateRepository.php';
+require_once CMS_ROOT . '/content/plugins/official.affiliate-hub/src/AffiliateConnectionRepository.php';
+require_once CMS_ROOT . '/content/plugins/official.affiliate-hub/src/CjAffiliateClient.php';
+require_once CMS_ROOT . '/content/plugins/official.affiliate-hub/src/CjAffiliateAdapter.php';
 require_once CMS_ROOT . '/content/plugins/official.affiliate-hub/src/FeedImportService.php';
 require_once CMS_ROOT . '/content/plugins/official.affiliate-hub/src/AffiliateController.php';
 
@@ -19,6 +22,7 @@ use Daiying\AffiliateHub\FeedAffiliateAdapter;
 use Daiying\AffiliateHub\FeedImportService;
 use Daiying\AffiliateHub\ManualAffiliateAdapter;
 use Daiying\AffiliateHub\AffiliateController;
+use Daiying\AffiliateHub\CjAffiliateAdapter;
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
@@ -36,9 +40,9 @@ $assert = static function (bool $condition, string $message) use (&$failures): v
 
 $manifest = json_decode((string) file_get_contents(CMS_ROOT . '/content/plugins/official.affiliate-hub/plugin.json'), true, 512, JSON_THROW_ON_ERROR);
 $assert(($manifest['plugin_id'] ?? '') === 'official.affiliate-hub', 'Manifest uses official.affiliate-hub plugin id.');
-$assert(($manifest['version'] ?? '') === '0.1.0-alpha.2', 'Manifest version includes Feed mapping UI.');
+$assert(($manifest['version'] ?? '') === '0.1.0-alpha.3', 'Manifest version includes CJ Affiliate adapter.');
 $assert(($manifest['core']['min'] ?? '') === '1.2.39', 'Manifest targets the current Core notification/scheduler generation.');
-$assert(($manifest['migrations'] ?? []) === ['migrations/001_affiliate_hub.php'], 'Manifest declares the Affiliate Hub migration.');
+$assert(($manifest['migrations'] ?? []) === ['migrations/001_affiliate_hub.php', 'migrations/002_cj_adapter.php'], 'Manifest declares the Affiliate Hub migrations.');
 $assert(($manifest['table_prefixes'] ?? []) === ['affiliate_'], 'Manifest owns only affiliate_ tables.');
 $assert(!in_array('payment.create', $manifest['capabilities'] ?? [], true), 'Affiliate Hub does not claim payment creation capability.');
 $assert(!in_array('commerce.orders', $manifest['capabilities'] ?? [], true), 'Affiliate Hub does not claim Commerce order capability.');
@@ -54,6 +58,8 @@ $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 ($migration['up'])($pdo);
+$migration2 = require CMS_ROOT . '/content/plugins/official.affiliate-hub/migrations/002_cj_adapter.php';
+($migration2['up'])($pdo);
 
 $repo = new AffiliateRepository($pdo);
 $productId = $repo->saveManualProduct([
@@ -134,6 +140,32 @@ $repeat = $repo->importFeedProducts($items, [
 ]);
 $assert($repeat['updated'] === 2 && $repeat['created'] === 0, 'Feed import is idempotent by source name and external product id.');
 
+$cjImport = $repo->importProviderProducts('affiliate.cj', [[
+    'external_product_id' => 'CJ-SKU-1',
+    'external_parent_id' => 'CAT-1',
+    'advertiser_external_id' => '111',
+    'advertiser_name' => 'CJ Merchant',
+    'name' => 'CJ Product',
+    'brand' => 'CJ Brand',
+    'sku' => 'CJ-SKU-1',
+    'destination_url' => 'https://merchant.example/cj-product',
+    'affiliate_url' => 'https://www.kqzyfj.com/click-999-111?url=https%3A%2F%2Fmerchant.example%2Fcj-product&cjsku=CJ-SKU-1',
+    'price_current' => '15.25',
+    'currency' => 'USD',
+    'availability' => 'in stock',
+]], ['source_name' => 'cj:company', 'connection_id' => 7, 'status' => 'active']);
+$assert($cjImport['created'] === 1 && $cjImport['failed'] === 0, 'Generic provider import creates CJ affiliate products.');
+$cjRepeat = $repo->importProviderProducts('affiliate.cj', [[
+    'external_product_id' => 'CJ-SKU-1',
+    'advertiser_name' => 'CJ Merchant',
+    'name' => 'CJ Product Updated',
+    'destination_url' => 'https://merchant.example/cj-product',
+    'affiliate_url' => 'https://www.kqzyfj.com/click-999-111?url=https%3A%2F%2Fmerchant.example%2Fcj-product&cjsku=CJ-SKU-1',
+    'price_current' => '16.25',
+    'currency' => 'USD',
+]], ['source_name' => 'cj:company', 'connection_id' => 7, 'status' => 'active']);
+$assert($cjRepeat['updated'] === 1 && $cjRepeat['created'] === 0, 'CJ provider import is idempotent by provider and external product id.');
+
 $previewPage = $controller->previewImport(new Request('POST', '/admin/affiliate-hub/import/preview', [], [
     'source_name' => 'unit-test-feed',
     'feed_text' => $csv,
@@ -143,11 +175,15 @@ $assert($previewPage->status() === 200 && str_contains($previewPage->body(), 'Fe
 AffiliateAdapterRegistry::clear();
 $manual = new ManualAffiliateAdapter();
 $feed = new FeedAffiliateAdapter();
+$cj = new CjAffiliateAdapter();
 AffiliateAdapterRegistry::register($manual);
 AffiliateAdapterRegistry::register($feed);
+AffiliateAdapterRegistry::register($cj);
 $assert($manual instanceof AffiliateAdapterInterface && $feed instanceof AffiliateAdapterInterface, 'Manual and Feed adapters implement the public adapter contract.');
-$assert(isset(AffiliateAdapterRegistry::all()['affiliate.manual'], AffiliateAdapterRegistry::all()['affiliate.feed']), 'Adapter registry stores independent adapters.');
+$assert($cj instanceof AffiliateAdapterInterface, 'CJ adapter implements the public adapter contract.');
+$assert(isset(AffiliateAdapterRegistry::all()['affiliate.manual'], AffiliateAdapterRegistry::all()['affiliate.feed'], AffiliateAdapterRegistry::all()['affiliate.cj']), 'Adapter registry stores independent adapters.');
 $assert(in_array('field_mapping', $feed->capabilities(), true), 'Feed adapter declares field mapping capability.');
+$assert(in_array('tracking_link', $cj->capabilities(), true), 'CJ adapter declares tracking link capability.');
 $assert($manual->buildTrackingUrl(['affiliate_url' => 'https://tracking.example/a']) === 'https://tracking.example/a', 'Manual adapter returns explicit tracking URL.');
 
 $isolated = AffiliateProviderIsolation::capture('affiliate.feed', 'syncProducts', static function (): void {
