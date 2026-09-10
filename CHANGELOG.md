@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.44 - 2026-09-10
+
+- Fixed official Marketplace plugin installs so trusted official plugins can run migrations against table prefixes registered in the built-in official plugin registry.
+- Restored the `official.commerce` Marketplace upgrade path for packages declaring the `commerce_` table prefix without weakening reserved-prefix protection for ordinary plugins.
+- Added regression coverage for official Marketplace plugin migrations using trusted official table prefixes.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.44-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.44>.
+
 ## 1.2.43 - 2026-09-09
 
 - Published a bridge Core update for sites whose existing update verifier does not yet allow backend public asset paths.
