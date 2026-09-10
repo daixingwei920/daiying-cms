@@ -210,7 +210,6 @@ final class UpdatePackageManifest
             'README.md',
             'CMS_RELEASE_ENVIRONMENT_DEPLOYMENT_CHECKLIST.md',
             'public/assets/admin/admin.css',
-            'public/assets/admin/admin.js',
             'system/official-plugins.php',
             'scripts/diagnose_payment_providers.php',
             'scripts/publish_scheduled_content.php',

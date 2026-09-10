@@ -2,6 +2,16 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.45 - 2026-09-10
+
+- Added collapsible admin sidebar sections for the main dashboard, content, appearance, extensions, commerce, platform, Marketplace, and plugin-provided menu groups.
+- Kept the current page group expanded automatically while remembering administrator collapse preferences in the browser.
+- Fixed the admin security sidebar label so it displays `后台安全` instead of the internal icon name.
+- Preserved the existing admin sidebar icon-only mode and long-page scrolling behavior.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.45-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.45>.
+
 ## 1.2.44 - 2026-09-10
 
 - Fixed official Marketplace plugin installs so trusted official plugins can run migrations against table prefixes registered in the built-in official plugin registry.
