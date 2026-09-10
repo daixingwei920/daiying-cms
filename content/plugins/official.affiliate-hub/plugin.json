@@ -1,0 +1,35 @@
+{
+  "plugin_id": "official.affiliate-hub",
+  "name": "Daiying Affiliate Hub",
+  "version": "0.1.0-alpha.1",
+  "author": "Daiying CMS",
+  "type": "plugin",
+  "package_type": "plugin",
+  "entry": "plugin.php",
+  "core": { "min": "1.2.39", "max": "2.0.0" },
+  "php": ">=8.3.0",
+  "trust_level": "trusted_php",
+  "official": true,
+  "trusted_deployment": "official_market_only",
+  "capabilities": [
+    "affiliate.manage",
+    "affiliate.read",
+    "affiliate.click",
+    "affiliate.adapter",
+    "affiliate.feed",
+    "queue.register",
+    "scheduler.register",
+    "notifications.create",
+    "network.external"
+  ],
+  "capability_namespaces": ["affiliate", "queue", "scheduler", "notifications", "network"],
+  "dependencies": [],
+  "required_plugins": [],
+  "migrations": ["migrations/001_affiliate_hub.php"],
+  "table_prefixes": ["affiliate_"],
+  "data_policy": {
+    "uninstall": "retain_affiliate_products_offers_clicks",
+    "purge": "separate_confirmation_only"
+  },
+  "data_schema_version": "0.1.0-alpha.1"
+}
