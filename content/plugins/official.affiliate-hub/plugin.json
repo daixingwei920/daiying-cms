@@ -1,7 +1,7 @@
 {
   "plugin_id": "official.affiliate-hub",
   "name": "Daiying Affiliate Hub",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "author": "Daiying CMS",
   "type": "plugin",
   "package_type": "plugin",
@@ -31,5 +31,5 @@
     "uninstall": "retain_affiliate_products_offers_clicks",
     "purge": "separate_confirmation_only"
   },
-  "data_schema_version": "0.1.0-alpha.1"
+  "data_schema_version": "0.1.0-alpha.2"
 }

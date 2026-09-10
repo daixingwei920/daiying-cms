@@ -7,6 +7,7 @@ const CMS_ROOT = __DIR__ . '/..';
 require_once CMS_ROOT . '/system/core/Bootstrap/autoload.php';
 require_once CMS_ROOT . '/content/plugins/official.affiliate-hub/src/AffiliateContracts.php';
 require_once CMS_ROOT . '/content/plugins/official.affiliate-hub/src/AffiliateRepository.php';
+require_once CMS_ROOT . '/content/plugins/official.affiliate-hub/src/FeedImportService.php';
 require_once CMS_ROOT . '/content/plugins/official.affiliate-hub/src/AffiliateController.php';
 
 use Cms\Core\Http\Request;
@@ -15,6 +16,7 @@ use Daiying\AffiliateHub\AffiliateAdapterRegistry;
 use Daiying\AffiliateHub\AffiliateProviderIsolation;
 use Daiying\AffiliateHub\AffiliateRepository;
 use Daiying\AffiliateHub\FeedAffiliateAdapter;
+use Daiying\AffiliateHub\FeedImportService;
 use Daiying\AffiliateHub\ManualAffiliateAdapter;
 use Daiying\AffiliateHub\AffiliateController;
 
@@ -34,7 +36,7 @@ $assert = static function (bool $condition, string $message) use (&$failures): v
 
 $manifest = json_decode((string) file_get_contents(CMS_ROOT . '/content/plugins/official.affiliate-hub/plugin.json'), true, 512, JSON_THROW_ON_ERROR);
 $assert(($manifest['plugin_id'] ?? '') === 'official.affiliate-hub', 'Manifest uses official.affiliate-hub plugin id.');
-$assert(($manifest['version'] ?? '') === '0.1.0-alpha.1', 'Manifest starts Affiliate Hub at alpha.1.');
+$assert(($manifest['version'] ?? '') === '0.1.0-alpha.2', 'Manifest version includes Feed mapping UI.');
 $assert(($manifest['core']['min'] ?? '') === '1.2.39', 'Manifest targets the current Core notification/scheduler generation.');
 $assert(($manifest['migrations'] ?? []) === ['migrations/001_affiliate_hub.php'], 'Manifest declares the Affiliate Hub migration.');
 $assert(($manifest['table_prefixes'] ?? []) === ['affiliate_'], 'Manifest owns only affiliate_ tables.');
@@ -75,7 +77,7 @@ $assert(abs((float) ($product['price_current'] ?? 0) - 29.99) < 0.0001 && ($prod
 $assert(count($offers) === 1 && ($offers[0]['affiliate_url'] ?? '') === 'https://tracking.example/click?offer=1', 'Manual product creates one active affiliate offer.');
 $assert((int) $pdo->query('SELECT COUNT(*) FROM affiliate_clicks')->fetchColumn() === 0, 'Saving affiliate products does not create click events.');
 
-$controller = new AffiliateController($repo);
+$controller = new AffiliateController($repo, new FeedImportService());
 $response = $controller->go(new Request('GET', '/go/affiliate', ['offer_id' => (string) $offers[0]['id']], [], [
     'REMOTE_ADDR' => '203.0.113.10',
     'HTTP_USER_AGENT' => 'ContractBrowser/1.0',
@@ -111,6 +113,32 @@ try {
     $badUrlBlocked = true;
 }
 $assert($badUrlBlocked, 'Affiliate Hub rejects non-HTTPS product and tracking URLs.');
+
+$feed = new FeedImportService();
+$csv = "id,name,merchant,price,currency,url,affiliate_url,image_url\nSKU-1,Feed Product,Feed Merchant,12.50,USD,https://merchant.example/feed-1,https://tracking.example/feed-1,https://cdn.example/feed-1.jpg\nSKU-2,Second Product,Feed Merchant,19.00,USD,https://merchant.example/feed-2,https://tracking.example/feed-2,\n";
+$parsed = $feed->parseCsv($csv, 10);
+$mapping = $feed->suggestMapping($parsed['headers']);
+$items = $feed->mapRows($parsed['rows'], $mapping, 10);
+$assert($mapping['name'] === 'name' && $mapping['affiliate_url'] === 'affiliate_url', 'Feed import suggests obvious CSV field mappings.');
+$assert(count($items) === 2 && ($items[0]['name'] ?? '') === 'Feed Product', 'Feed import maps CSV rows into product payloads.');
+$import = $repo->importFeedProducts($items, [
+    'source_name' => 'unit-test-feed',
+    'status' => 'active',
+    'indexable' => true,
+]);
+$assert($import['processed'] === 2 && $import['created'] === 2 && $import['failed'] === 0, 'Feed import creates mapped affiliate products.');
+$assert((int) $pdo->query("SELECT COUNT(*) FROM affiliate_products WHERE provider_id = 'affiliate.feed'")->fetchColumn() === 2, 'Feed products use affiliate.feed provider identity.');
+$repeat = $repo->importFeedProducts($items, [
+    'source_name' => 'unit-test-feed',
+    'status' => 'active',
+]);
+$assert($repeat['updated'] === 2 && $repeat['created'] === 0, 'Feed import is idempotent by source name and external product id.');
+
+$previewPage = $controller->previewImport(new Request('POST', '/admin/affiliate-hub/import/preview', [], [
+    'source_name' => 'unit-test-feed',
+    'feed_text' => $csv,
+]));
+$assert($previewPage->status() === 200 && str_contains($previewPage->body(), 'Feed 字段映射') && str_contains($previewPage->body(), 'Feed Product'), 'Feed preview UI renders mapped products.');
 
 AffiliateAdapterRegistry::clear();
 $manual = new ManualAffiliateAdapter();
