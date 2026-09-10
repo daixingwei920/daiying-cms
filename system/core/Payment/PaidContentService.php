@@ -738,15 +738,11 @@ final class PaidContentService
 
     private function isSafeProviderRedirectUrlForProvider(string $providerId, string $url): bool
     {
-        $provider = PaymentProviderRegistry::get($providerId);
-        if ($provider instanceof PaymentProviderRedirectPolicyInterface && $provider->isSafeRedirectUrl($url)) {
-            return true;
-        }
-        if ($providerId === 'official.payment.stripe' && StripeCheckoutUrlValidator::isSafe($url)) {
-            return true;
-        }
-
-        return $this->isSafeProviderRedirectUrl($url);
+        return PaymentProviderRedirectPolicyResolver::isSafe(
+            $providerId,
+            $url,
+            fn (string $candidate): bool => $this->isSafeProviderRedirectUrl($candidate),
+        );
     }
 
     private function isSafeProviderRedirectUrl(string $url): bool

@@ -5343,17 +5343,32 @@ final class AdminController
     {
         $fields = '';
         foreach ($provider->settingsSchema() as $field) {
-            $name = preg_replace('/[^A-Za-z0-9_]/', '', (string) ($field['name'] ?? ''));
+            if (!is_array($field)) {
+                continue;
+            }
+            $name = $this->paymentProviderSchemaFieldName($field);
             if ($name === '') {
                 continue;
             }
+            $configKey = $this->paymentProviderSchemaConfigKey($field);
+            if ($configKey === '') {
+                continue;
+            }
+            $inputName = $this->paymentProviderSchemaInputName($field);
             $label = (string) ($field['label'] ?? $name);
-            $type = (string) ($field['type'] ?? 'text');
+            $type = $this->paymentProviderSchemaFieldType($field);
             $secret = ($field['secret'] ?? false) === true;
-            $value = (string) ($public[$name] ?? $field['default'] ?? '');
-            $hint = $secret && in_array($name, $secretKeys, true) ? '已配置，留空则保留' : (string) ($field['placeholder'] ?? '');
+            $value = (string) ($public[$configKey] ?? $field['default'] ?? '');
+            $secretConfigured = in_array($name, $secretKeys, true) || in_array($configKey, $secretKeys, true);
+            $hint = $secret && $secretConfigured ? '已配置，留空则保留' : (string) ($field['placeholder'] ?? '');
+            $description = trim((string) ($field['description'] ?? $field['help'] ?? ''));
+            $descriptionHtml = $description !== '' ? '<p class="muted">' . View::escape($description) . '</p>' : '';
+            if ($type === 'hidden') {
+                $fields .= '<input type="hidden" name="' . View::escape($inputName) . '" value="' . View::escape($value) . '">';
+                continue;
+            }
             if ($type === 'textarea') {
-                $fields .= '<label>' . View::escape($label) . '<textarea name="provider_schema_' . View::escape($name) . '" rows="3" placeholder="' . View::escape($hint) . '">' . (!$secret ? View::escape($value) : '') . '</textarea></label>';
+                $fields .= '<label>' . View::escape($label) . '<textarea name="' . View::escape($inputName) . '" rows="3" placeholder="' . View::escape($hint) . '">' . (!$secret ? View::escape($value) : '') . '</textarea></label>' . $descriptionHtml;
                 continue;
             }
             if ($type === 'select' && is_array($field['options'] ?? null)) {
@@ -5363,11 +5378,19 @@ final class AdminController
                     $optionLabel = is_array($option) ? (string) ($option['label'] ?? $optionValue) : $optionValue;
                     $options .= '<option value="' . View::escape($optionValue) . '"' . ($value === $optionValue ? ' selected' : '') . '>' . View::escape($optionLabel) . '</option>';
                 }
-                $fields .= '<label>' . View::escape($label) . '<select name="provider_schema_' . View::escape($name) . '">' . $options . '</select></label>';
+                $fields .= '<label>' . View::escape($label) . '<select name="' . View::escape($inputName) . '">' . $options . '</select></label>' . $descriptionHtml;
+                continue;
+            }
+            if ($type === 'checkbox') {
+                $checked = $this->paymentProviderSchemaTruthyValue($value) ? ' checked' : '';
+                $fields .= '<label><input name="' . View::escape($inputName) . '" type="checkbox" value="1"' . $checked . '> ' . View::escape($label) . '</label>' . $descriptionHtml;
                 continue;
             }
             $inputType = $secret ? 'password' : (in_array($type, ['text', 'url', 'email', 'number'], true) ? $type : 'text');
-            $fields .= '<label>' . View::escape($label) . '<input name="provider_schema_' . View::escape($name) . '" type="' . View::escape($inputType) . '" value="' . (!$secret ? View::escape($value) : '') . '" autocomplete="new-password" placeholder="' . View::escape($hint) . '"></label>';
+            $fields .= '<label>' . View::escape($label) . '<input name="' . View::escape($inputName) . '" type="' . View::escape($inputType) . '" value="' . (!$secret ? View::escape($value) : '') . '" autocomplete="new-password" placeholder="' . View::escape($hint) . '"></label>' . $descriptionHtml;
+            if ($secret && ($field['clearable'] ?? false) === true && $secretConfigured) {
+                $fields .= '<label><input type="checkbox" name="provider_schema_clear_' . View::escape($name) . '" value="1" onclick="if(this.checked&&!confirm(\'确定要清除已保存的密钥吗？清除后可能需要重新填写才能启用该支付方式。\'))this.checked=false;"> 清除已保存 ' . View::escape($label) . '</label>';
+            }
         }
         if ($fields === '') {
             $fields = '<p class="muted">该 Provider 未声明可视化配置字段，请使用高级公共 JSON 和密钥配置。</p>';
@@ -5378,10 +5401,161 @@ final class AdminController
         return '<fieldset><legend>Provider 声明配置</legend>' . ($helpText !== '' ? '<p class="muted">' . View::escape($helpText) . '</p>' : '') . $fields . '</fieldset>';
     }
 
+    /** @param array<string,mixed> $field */
+    private function paymentProviderSchemaFieldName(array $field): string
+    {
+        return preg_replace('/[^A-Za-z0-9_]/', '', (string) ($field['name'] ?? $field['key'] ?? '')) ?? '';
+    }
+
+    /** @param array<string,mixed> $field */
+    private function paymentProviderSchemaInputName(array $field): string
+    {
+        $name = $this->paymentProviderSchemaFieldName($field);
+        $inputName = preg_replace('/[^A-Za-z0-9_]/', '', (string) ($field['input_name'] ?? '')) ?? '';
+
+        return $inputName !== '' ? $inputName : 'provider_schema_' . $name;
+    }
+
+    /** @param array<string,mixed> $field */
+    private function paymentProviderSchemaConfigKey(array $field): string
+    {
+        $key = (string) ($field['key'] ?? $field['public_key'] ?? $field['secret_key'] ?? $field['name'] ?? '');
+        return preg_replace('/[^A-Za-z0-9_.-]/', '', $key) ?? '';
+    }
+
+    /** @param array<string,mixed> $field */
+    private function paymentProviderSchemaFieldType(array $field): string
+    {
+        $type = strtolower((string) ($field['type'] ?? 'text'));
+
+        return in_array($type, ['text', 'url', 'email', 'number', 'password', 'textarea', 'select', 'checkbox', 'hidden'], true) ? $type : 'text';
+    }
+
+    private function paymentProviderSchemaTruthyValue(mixed $value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        return is_string($value) && in_array(strtolower(trim($value)), ['1', 'on', 'true', 'enabled', 'yes', 'y'], true);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function paymentProviderSchemaPublicKeys(PaymentProviderSettingsSchemaInterface $provider): array
+    {
+        $keys = [];
+        foreach ($provider->settingsSchema() as $field) {
+            if (!is_array($field) || ($field['secret'] ?? false) === true) {
+                continue;
+            }
+            $key = $this->paymentProviderSchemaConfigKey($field);
+            if ($key !== '') {
+                $keys[] = $key;
+            }
+        }
+
+        return array_values(array_unique($keys));
+    }
+
+    /** @param array<string,mixed> $field */
+    private function paymentProviderSchemaValueFromRequest(Request $request, array $field): string
+    {
+        $type = $this->paymentProviderSchemaFieldType($field);
+        $inputName = $this->paymentProviderSchemaInputName($field);
+        if ($type === 'checkbox') {
+            return $this->paymentProviderBodyChecked($request, $inputName) ? '1' : '0';
+        }
+
+        return $this->paymentProviderNormalizeSchemaValue($field, $this->paymentBodyString($request, $inputName, ''));
+    }
+
+    /** @param array<string,mixed> $field */
+    private function paymentProviderNormalizeSchemaValue(array $field, string $value): string
+    {
+        $value = trim($value);
+        $normalizers = $field['normalize'] ?? [];
+        if (is_string($normalizers)) {
+            $normalizers = [$normalizers];
+        }
+        if (!is_array($normalizers)) {
+            $normalizers = [];
+        }
+        if (($field['compact'] ?? false) === true) {
+            $normalizers[] = 'compact';
+        }
+        if (($field['uppercase'] ?? false) === true) {
+            $normalizers[] = 'uppercase';
+        }
+        if (($field['lowercase'] ?? false) === true) {
+            $normalizers[] = 'lowercase';
+        }
+        foreach ($normalizers as $normalizer) {
+            $normalizer = strtolower((string) $normalizer);
+            if ($normalizer === 'compact') {
+                $value = preg_replace('/\s+/', '', $value) ?? '';
+            } elseif ($normalizer === 'uppercase') {
+                $value = strtoupper($value);
+            } elseif ($normalizer === 'lowercase') {
+                $value = strtolower($value);
+            }
+        }
+
+        return $value;
+    }
+
+    /** @param array<string,mixed> $field */
+    private function assertPaymentProviderSchemaValue(array $field, string $value): void
+    {
+        $name = $this->paymentProviderSchemaFieldName($field);
+        $label = (string) ($field['label'] ?? $name);
+        if ($value === '') {
+            if (($field['required'] ?? false) === true) {
+                throw new PaymentException($label . ' 不能为空。');
+            }
+            return;
+        }
+        if (isset($field['min_length']) && strlen($value) < max(0, (int) $field['min_length'])) {
+            throw new PaymentException($label . ' 长度不足。');
+        }
+        if (isset($field['max_length']) && strlen($value) > max(0, (int) $field['max_length'])) {
+            throw new PaymentException($label . ' 长度过长。');
+        }
+        if (isset($field['pattern']) && is_string($field['pattern']) && @preg_match($field['pattern'], '') !== false && preg_match($field['pattern'], $value) !== 1) {
+            throw new PaymentException($label . ' 格式无效。');
+        }
+        if (is_array($field['options'] ?? null) && !$this->paymentProviderSchemaOptionAllowsValue($field, $value)) {
+            throw new PaymentException($label . ' 不是可用选项。');
+        }
+        if (is_array($field['allowed_values'] ?? null) && !in_array($value, array_map('strval', $field['allowed_values']), true)) {
+            throw new PaymentException($label . ' 不是可用选项。');
+        }
+    }
+
+    /** @param array<string,mixed> $field */
+    private function paymentProviderSchemaOptionAllowsValue(array $field, string $value): bool
+    {
+        foreach (($field['options'] ?? []) as $option) {
+            $optionValue = is_array($option) ? (string) ($option['value'] ?? '') : (string) $option;
+            if ($value === $optionValue) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** @param array<string,mixed> $public */
     private function paymentProviderAdvancedJson(array $public, string $providerId): string
     {
         unset($public['default_provider']);
+        $provider = PaymentProviderRegistry::get($providerId);
+        if ($provider instanceof PaymentProviderSettingsSchemaInterface) {
+            foreach ($this->paymentProviderSchemaPublicKeys($provider) as $key) {
+                unset($public[$key]);
+            }
+        }
         if ($providerId === ManualPaymentProvider::PROVIDER_ID) {
             unset($public['instructions']);
         }
@@ -6682,19 +6856,32 @@ final class AdminController
         $provider = PaymentProviderRegistry::get($providerId);
         if ($provider instanceof PaymentProviderSettingsSchemaInterface) {
             foreach ($provider->settingsSchema() as $field) {
-                $name = preg_replace('/[^A-Za-z0-9_]/', '', (string) ($field['name'] ?? ''));
+                if (!is_array($field)) {
+                    continue;
+                }
+                $name = $this->paymentProviderSchemaFieldName($field);
                 if ($name === '' || ($field['secret'] ?? false) === true) {
                     continue;
                 }
-                $bodyKey = 'provider_schema_' . $name;
-                if (!array_key_exists($bodyKey, $request->body)) {
+                $type = $this->paymentProviderSchemaFieldType($field);
+                $bodyKey = $this->paymentProviderSchemaInputName($field);
+                if ($type !== 'checkbox' && !array_key_exists($bodyKey, $request->body)) {
                     continue;
                 }
-                $value = trim($this->paymentBodyString($request, $bodyKey, ''));
+                $publicKey = $this->paymentProviderSchemaConfigKey($field);
+                if ($publicKey === '') {
+                    continue;
+                }
+                $value = $this->paymentProviderSchemaValueFromRequest($request, $field);
+                $this->assertPaymentProviderSchemaValue($field, $value);
                 if ($value !== '') {
-                    $public[$name] = $value;
+                    $public[$publicKey] = $type === 'checkbox' ? $value === '1' : $value;
                 } else {
-                    unset($public[$name]);
+                    if (($field['empty_removes'] ?? true) !== false) {
+                        unset($public[$publicKey]);
+                    } else {
+                        $public[$publicKey] = '';
+                    }
                 }
             }
         }
@@ -6798,20 +6985,38 @@ final class AdminController
         $provider = PaymentProviderRegistry::get($providerId);
         if ($provider instanceof PaymentProviderSettingsSchemaInterface) {
             foreach ($provider->settingsSchema() as $field) {
+                if (!is_array($field)) {
+                    continue;
+                }
                 if (($field['secret'] ?? false) !== true) {
                     continue;
                 }
-                $name = preg_replace('/[^A-Za-z0-9_]/', '', (string) ($field['name'] ?? ''));
+                $name = $this->paymentProviderSchemaFieldName($field);
                 if ($name === '') {
                     continue;
                 }
-                $bodyKey = 'provider_schema_' . $name;
-                if (!array_key_exists($bodyKey, $request->body)) {
+                $bodyKey = $this->paymentProviderSchemaInputName($field);
+                $clearKey = 'provider_schema_clear_' . $name;
+                $clear = ($field['clearable'] ?? false) === true && $this->paymentProviderBodyChecked($request, $clearKey);
+                if (!array_key_exists($bodyKey, $request->body) && !$clear) {
                     continue;
                 }
-                $value = trim($this->paymentBodyString($request, $bodyKey, ''));
+                $value = array_key_exists($bodyKey, $request->body)
+                    ? $this->paymentProviderSchemaValueFromRequest($request, $field)
+                    : '';
+                if ($clear && $value !== '') {
+                    throw new PaymentException((string) ($field['label'] ?? $name) . ' 不能同时填写新值并勾选清除。');
+                }
+                $secretKey = $this->paymentProviderSchemaConfigKey($field);
+                if ($secretKey === '') {
+                    continue;
+                }
+                if ($clear) {
+                    $secrets[$secretKey] = PaymentProviderSettingsRepository::CLEAR_SECRET_VALUE;
+                }
                 if ($value !== '') {
-                    $secrets[$name] = $value;
+                    $this->assertPaymentProviderSchemaValue($field, $value);
+                    $secrets[$secretKey] = $value;
                 }
             }
         }

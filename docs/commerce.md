@@ -29,6 +29,8 @@ Core includes the Provider interfaces and registry under `system/core/Payment`. 
 php scripts/diagnose_payment_providers.php --json
 ```
 
+Payment plugins should declare admin settings through the public Provider Settings Schema and checkout redirect allow rules through the Redirect Policy interface. See [Payment Provider Development](payment-providers.md).
+
 ## Card Delivery
 
 Card-code products can be sold through content blocks and fulfilled idempotently after payment confirmation.

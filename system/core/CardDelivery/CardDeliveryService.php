@@ -6,12 +6,10 @@ namespace Cms\Core\CardDelivery;
 
 use Cms\Core\Config\Settings;
 use Cms\Core\Payment\PaymentException;
-use Cms\Core\Payment\PaymentProviderRedirectPolicyInterface;
-use Cms\Core\Payment\PaymentProviderRegistry;
+use Cms\Core\Payment\PaymentProviderRedirectPolicyResolver;
 use Cms\Core\Payment\PaymentProviderSelector;
 use Cms\Core\Payment\PaymentRepository;
 use Cms\Core\Payment\PaymentService;
-use Cms\Core\Payment\StripeCheckoutUrlValidator;
 use PDO;
 use Throwable;
 
@@ -544,15 +542,11 @@ final class CardDeliveryService
 
     private function isSafeProviderRedirectUrlForProvider(string $providerId, string $url): bool
     {
-        $provider = PaymentProviderRegistry::get($providerId);
-        if ($provider instanceof PaymentProviderRedirectPolicyInterface && $provider->isSafeRedirectUrl($url)) {
-            return true;
-        }
-        if ($providerId === 'official.payment.stripe' && StripeCheckoutUrlValidator::isSafe($url)) {
-            return true;
-        }
-
-        return $this->isSafeProviderRedirectUrl($url);
+        return PaymentProviderRedirectPolicyResolver::isSafe(
+            $providerId,
+            $url,
+            fn (string $candidate): bool => $this->isSafeProviderRedirectUrl($candidate),
+        );
     }
 
     private function providerRedirectPartContainsSecret(string $value): bool

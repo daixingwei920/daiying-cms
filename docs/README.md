@@ -25,6 +25,7 @@ This index collects the public-facing documentation currently available in the G
 - [Theme API v1](../THEME_API_V1.md)
 - [Global AI](ai.md)
 - [Mail Infrastructure](mail-infrastructure.md)
+- [Payment Provider Development](payment-providers.md)
 - [Foundation Services](foundation-services.md)
 - [Content Foundation](content-foundation.md)
 - [Core API Stability](../CORE_API_STABILITY.md)
