@@ -185,7 +185,7 @@ final class AffiliateController
 
         return ($warnings !== '' ? '<div class="alert alert-warning"><ul>' . $warnings . '</ul></div>' : '') .
             '<form method="post" action="/admin/affiliate-hub/import/run">' . CsrfToken::field() .
-            '<input type="hidden" name="feed_text" value="' . $this->e($csv) . '">' .
+            '<textarea name="feed_text" hidden>' . $this->e($csv) . '</textarea>' .
             '<label>Feed 名称<input name="source_name" value="' . $this->e((string) ($old['source_name'] ?? 'manual-csv')) . '"></label>' .
             '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">' . $fields . '</div>' .
             '<label>默认币种<input name="default_currency" maxlength="3" placeholder="USD/CNY"></label>' .
