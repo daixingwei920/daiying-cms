@@ -2,6 +2,17 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.50 - 2026-09-10
+
+- Finalized official plugin decoupling so new trusted official plugins can be installed through signed Marketplace Trust Grants without Core plugin ID edits.
+- Added the public `payment.provider` capability and `PluginContext::registerPaymentProvider()` registration path for payment plugins.
+- Added regression coverage for a brand-new `official.decoupled-pay` provider that Core does not know statically, including Trust Grant install, migration, schema-rendered settings, encrypted secrets, provider-owned redirects, and payment creation.
+- Added Core migration runner compatibility for existing array-style migration definitions without modifying frozen historical migrations.
+- Preserved legacy Stripe, PayPal, WeChat Pay, and Alipay compatibility fallbacks while keeping new Payment Providers schema/policy-driven.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.50-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.50>.
+
 ## 1.2.49 - 2026-09-10
 
 - Added the official extension Trust Grant foundation so trusted Marketplace packages can receive signed capabilities, table prefixes, route prefixes, and admin menu declarations from the official update server.
