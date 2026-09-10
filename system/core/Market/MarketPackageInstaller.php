@@ -6,6 +6,7 @@ namespace Cms\Core\Market;
 
 use Cms\Core\Plugin\PluginLifecycle;
 use Cms\Core\Plugin\PluginMigrationRunner;
+use Cms\Core\Plugin\OfficialPluginRegistry;
 use PDO;
 use ZipArchive;
 
@@ -61,6 +62,7 @@ final class MarketPackageInstaller
         $marketReference = $authorization->marketId !== '' ? $authorization->marketId : $authorization->packageUrl;
         (new ExtensionCompatibilityChecker($this->currentCoreVersion()))->assertCompatible($manifest);
         (new ExtensionDependencyResolver($repo))->assertSatisfied($manifest);
+        $trustedOfficial = $this->isTrustedOfficialPackage($manifest);
 
         $repo->recordLog($marketReference, $manifest->extensionId, $manifest->type, 'Installing', $plan);
 
@@ -110,8 +112,8 @@ final class MarketPackageInstaller
             if (in_array($manifest->type, ['plugin', 'payment_provider'], true)) {
                 $pluginManifest = $this->registerPluginRecord($pdo, $target, $manifest, $marketReference);
                 $runner = new PluginMigrationRunner($this->rootPath, $pdo);
-                $runner->validate($target, $pluginManifest);
-                $runner->run($target, $pluginManifest);
+                $runner->validate($target, $pluginManifest, $trustedOfficial);
+                $runner->run($target, $pluginManifest, $trustedOfficial);
             }
 
             if (is_dir($backup)) {
@@ -136,6 +138,21 @@ final class MarketPackageInstaller
             $repo->recordLog($marketReference, $manifest->extensionId, $manifest->type, 'Failed', $plan + ['error' => $exception->getMessage()]);
             throw $exception;
         }
+    }
+
+    private function isTrustedOfficialPackage(MarketPackageManifest $manifest): bool
+    {
+        if (!in_array($manifest->type, ['plugin', 'payment_provider'], true)) {
+            return false;
+        }
+        if ($manifest->source !== ExtensionSource::OFFICIAL_MARKET) {
+            return false;
+        }
+        if (!in_array($manifest->reviewStatus, ['published', 'approved', 'official_trusted'], true)) {
+            return false;
+        }
+
+        return (new OfficialPluginRegistry($this->rootPath))->tablePrefixes($manifest->extensionId) !== [];
     }
 
     /** @return array{0: MarketPackageManifest, 1: string} */

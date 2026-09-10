@@ -155,7 +155,7 @@
     "Market/MarketJobMigrator.php": "29bc4d51c6b9e4f213717aab237cddc2f6e4af3c5f0af5a303bab98a173a1a12",
     "Market/MarketJobRepository.php": "00ec2bce116843992637a48f39c63a6ed91ba5c24cf89b2f41cd099d638a234b",
     "Market/MarketJobRepositoryInterface.php": "1cacf6bc8bfb54c661977d94537359f100b6ba1fd68c373beb9524e34238e7c5",
-    "Market/MarketPackageInstaller.php": "c2581e29cbe8a0f440028bddf875893bb76b8a214ca249830158db0fc6afa6ae",
+    "Market/MarketPackageInstaller.php": "66262f0e3741af7cc9d1649f8f69f423ae8829639f034b425ed1542a653380c3",
     "Market/MarketPackageManifest.php": "31debbc062be53018554a42d4042390d0509547ee35fa8de70dae51ca4e1c4bc",
     "Market/MarketWorkerLock.php": "53bacbd3bce789153a56dc5843306fd334be48d7babd15f3fbc2b8270e882e6c",
     "Market/ObjectStorageAdapterFactory.php": "30b2e113a2e095cb73e83675c5c6b78baebdda7b0f10055a26b215987897d711",

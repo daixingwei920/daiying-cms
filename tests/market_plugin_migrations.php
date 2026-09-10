@@ -153,7 +153,7 @@ function market_plugin_migration_package(string $extensionId, string $version, a
     return [$zipPath, new InstallAuthorization('test-token', 'https://updates.daiyingcms.com/test.zip', gmdate('c', time() + 3600), (string) $sha, 'test-market')];
 }
 
-function market_plugin_manifest(string $pluginId, string $version, array $migrations): string
+function market_plugin_manifest(string $pluginId, string $version, array $migrations, array $tablePrefixes = ['market_test_']): string
 {
     return json_encode([
         'plugin_id' => $pluginId,
@@ -165,7 +165,7 @@ function market_plugin_manifest(string $pluginId, string $version, array $migrat
         'php' => '>=8.3.0',
         'trust_level' => 'api',
         'capabilities' => [],
-        'table_prefixes' => ['market_test_'],
+        'table_prefixes' => $tablePrefixes,
         'migrations' => $migrations,
         'data_policy' => ['uninstall' => 'retain'],
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -215,6 +215,13 @@ try {
     $check($migration === 'applied', 'market install records applied plugin migration checksums.');
     $row = $pdo->query("SELECT status, source, review_status FROM cms_plugins WHERE plugin_id = 'official.markettest'")->fetch(PDO::FETCH_ASSOC);
     $check(($row['status'] ?? '') === PluginLifecycle::INSTALLED && ($row['source'] ?? '') === ExtensionSource::OFFICIAL_MARKET, 'market install leaves plugin installed with official market source.');
+
+    [$commerceZip, $commerceAuth] = market_plugin_migration_package('official.commerce', '0.1.0-alpha.16', [
+        'content/plugins/official.commerce/plugin.json' => market_plugin_manifest('official.commerce', '0.1.0-alpha.16', ['migrations/001_commerce.php'], ['commerce_']),
+        'content/plugins/official.commerce/migrations/001_commerce.php' => market_plugin_migration_file('commerce_market_001_create', 'commerce_market_items'),
+    ]);
+    $installer->install($commerceZip, $commerceAuth, $pdo);
+    $check(market_plugin_table_exists($pdo, 'commerce_market_items'), 'official commerce market install may use its reserved commerce_ table prefix.');
 
     [$zipV2, $authV2] = market_plugin_migration_package('official.markettest', '1.1.0', [
         'content/plugins/official.markettest/plugin.json' => market_plugin_manifest('official.markettest', '1.1.0', ['migrations/001_create.php', 'migrations/002_more.php']),
