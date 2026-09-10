@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.47 - 2026-09-10
+
+- Restored cross-version delivery of the admin sidebar collapse UI by ensuring admin CSS and JS are both treated as Core-owned operational support files.
+- Repaired the release builder and parity gate so future exact Core update packages keep backend assets in lockstep with runtime update validation.
+- Re-delivered the collapsible admin sidebar layout for sites that upgraded directly to 1.2.46 without receiving the 1.2.45 admin layout files.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.47-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.47>.
+
 ## 1.2.46 - 2026-09-10
 
 - Added `official.affiliate-hub` to the trusted official plugin registry with the `affiliate_` table prefix and `affiliate` capability namespace.

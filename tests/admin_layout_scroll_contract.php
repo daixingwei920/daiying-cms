@@ -70,6 +70,10 @@ $assert(
     UpdatePackageManifest::isAllowedUpdatePath('public/assets/admin/admin.css'),
     'admin shell CSS must be an allowed Core update operational support file'
 );
+$assert(
+    UpdatePackageManifest::isAllowedUpdatePath('public/assets/admin/admin.js'),
+    'admin JS must be an allowed Core update operational support file'
+);
 // Keep the exact-commit builder and release parity gate in lockstep with runtime validation.
 foreach ([
     $root . '/scripts/build_exact_commit_update_package.php',
@@ -77,6 +81,7 @@ foreach ([
 ] as $script) {
     $content = (string) file_get_contents($script);
     $assert(str_contains($content, "'public/assets/admin/admin.css'"), basename($script) . ' must include admin CSS in the update allow-list');
+    $assert(str_contains($content, "'public/assets/admin/admin.js'"), basename($script) . ' must include admin JS in the update allow-list');
 }
 
 $assert($mobile !== '', 'mobile media block missing');
