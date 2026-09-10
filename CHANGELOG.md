@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.51 - 2026-09-10
+
+- Added regression coverage confirming trusted official Marketplace plugins keep their Trust Grant table-prefix permissions during the normal enable-time migration backfill.
+- Confirmed `official.affiliate-hub` can install and enable with its granted `affiliate_` namespace without adding platform plugin IDs or Core whitelist entries.
+- Confirmed official-like plugins without an active Trust Grant remain blocked from reserved prefixes during enable.
+- Preserved the global database safety boundary and the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.51-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.51>.
+
 ## 1.2.50 - 2026-09-10
 
 - Finalized official plugin decoupling so new trusted official plugins can be installed through signed Marketplace Trust Grants without Core plugin ID edits.

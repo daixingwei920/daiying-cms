@@ -313,6 +313,15 @@ try {
     ], 'plugin', market_plugin_trust_grant('official.affiliate-hub', ['affiliate'], ['affiliate_']));
     $installer->install($affiliateZip, $affiliateAuth, $pdo);
     $check(market_plugin_table_exists($pdo, 'affiliate_market_items'), 'official Affiliate Hub market install may use its reserved affiliate_ table prefix.');
+    (new LocalPluginPackageInstaller($root, $pdo))->enable('official.affiliate-hub', 1);
+    $check($pdo->query("SELECT status FROM cms_plugins WHERE plugin_id = 'official.affiliate-hub'")->fetchColumn() === PluginLifecycle::ENABLED, 'official Affiliate Hub market install can be enabled with its trusted affiliate_ prefix.');
+
+    $pdo->exec("UPDATE cms_plugins SET status = 'Installed' WHERE plugin_id = 'official.affiliate-hub'");
+    $pdo->exec("DELETE FROM cms_plugin_migrations WHERE plugin_id = 'official.affiliate-hub'");
+    $pdo->exec('DROP TABLE IF EXISTS affiliate_market_items');
+    (new LocalPluginPackageInstaller($root, $pdo))->enable('official.affiliate-hub', 1);
+    $check(market_plugin_table_exists($pdo, 'affiliate_market_items'), 'official Affiliate Hub enable backfills missing trusted affiliate_ migrations.');
+    $check($pdo->query("SELECT status FROM cms_plugin_migrations WHERE plugin_id = 'official.affiliate-hub' AND migration_id = 'affiliate_market_001_create'")->fetchColumn() === 'applied', 'official Affiliate Hub enable records backfilled migration as applied.');
 
     $tamperedGrant = market_plugin_trust_grant('official.tampered', ['tampered'], ['tampered_']);
     $tamperedGrant['payload']['table_prefixes'] = ['commerce_'];
@@ -373,6 +382,40 @@ try {
         $check(str_contains($exception->getMessage(), 'signed official trust grant'), 'unregistered official-like market plugin cannot use the reserved affiliate_ table prefix.');
     }
     $check(!market_plugin_table_exists($pdo, 'affiliate_fake_items'), 'rejected affiliate_ prefix package leaves no plugin table behind.');
+
+    $fakeEnableId = 'official.fake-affiliate-enable';
+    $fakeEnableRoot = $root . '/content/plugins/' . $fakeEnableId;
+    mkdir($fakeEnableRoot . '/migrations', 0777, true);
+    file_put_contents($fakeEnableRoot . '/plugin.php', "<?php\nreturn static function (): void {};\n");
+    file_put_contents($fakeEnableRoot . '/plugin.json', market_plugin_manifest($fakeEnableId, '1.0.0', ['migrations/001_fake.php'], ['affiliate_'], ['affiliate']));
+    file_put_contents($fakeEnableRoot . '/migrations/001_fake.php', market_plugin_migration_file('affiliate_fake_enable_001_create', 'affiliate_fake_enable_items'));
+    $now = gmdate('c');
+    $stmt = $pdo->prepare('INSERT INTO cms_plugins (plugin_id, name, version, author, status, trust_level, capabilities_json, installed_at, updated_at, source, review_status, dependencies_json, optional_dependencies_json, data_policy_json, data_schema_version, table_prefixes_json) VALUES (:plugin_id, :name, :version, :author, :status, :trust_level, :capabilities_json, :installed_at, :updated_at, :source, :review_status, :dependencies_json, :optional_dependencies_json, :data_policy_json, :data_schema_version, :table_prefixes_json)');
+    $stmt->execute([
+        ':plugin_id' => $fakeEnableId,
+        ':name' => 'Fake Affiliate Enable',
+        ':version' => '1.0.0',
+        ':author' => 'Daiying CMS',
+        ':status' => PluginLifecycle::INSTALLED,
+        ':trust_level' => 'trusted_php',
+        ':capabilities_json' => '[]',
+        ':installed_at' => $now,
+        ':updated_at' => $now,
+        ':source' => ExtensionSource::OFFICIAL_MARKET,
+        ':review_status' => 'published',
+        ':dependencies_json' => '[]',
+        ':optional_dependencies_json' => '[]',
+        ':data_policy_json' => '[]',
+        ':data_schema_version' => '1',
+        ':table_prefixes_json' => json_encode(['affiliate_']),
+    ]);
+    try {
+        (new LocalPluginPackageInstaller($root, $pdo))->enable($fakeEnableId, 1);
+        $check(false, 'official-like plugin without Trust Grant cannot enable with reserved affiliate_ prefix.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'active official trust grant'), 'official-like plugin without Trust Grant cannot enable with reserved affiliate_ prefix.');
+    }
+    $check(!market_plugin_table_exists($pdo, 'affiliate_fake_enable_items'), 'rejected enable-time affiliate_ prefix package leaves no plugin table behind.');
 
     [$zipV2, $authV2] = market_plugin_migration_package('acme.markettest', '1.1.0', [
         'content/plugins/acme.markettest/plugin.json' => market_plugin_manifest('acme.markettest', '1.1.0', ['migrations/001_create.php', 'migrations/002_more.php']),
