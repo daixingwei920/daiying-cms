@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.48 - 2026-09-10
+
+- Published a legacy-verifier bridge update that delivers the collapsible admin sidebar runtime through `system/core/*` only.
+- Avoided public asset and operational support file targets so sites still running older update validators can install the bridge cleanly.
+- Kept Affiliate Hub trusted registry support in the built-in Core registry without requiring the root support registry file during the bridge update.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.48-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.48>.
+
 ## 1.2.47 - 2026-09-10
 
 - Restored cross-version delivery of the admin sidebar collapse UI by ensuring admin CSS and JS are both treated as Core-owned operational support files.
