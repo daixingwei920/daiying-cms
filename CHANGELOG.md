@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.46 - 2026-09-10
+
+- Added `official.affiliate-hub` to the trusted official plugin registry with the `affiliate_` table prefix and `affiliate` capability namespace.
+- Restored official Marketplace install/upgrade compatibility for Affiliate Hub packages that declare `affiliate_` migrations.
+- Added regression coverage proving registered Affiliate Hub packages can use `affiliate_` while unregistered official-like packages are still blocked from reserved prefixes.
+- Preserved the official plugin database safety boundary and the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.46-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.46>.
+
 ## 1.2.45 - 2026-09-10
 
 - Added collapsible admin sidebar sections for the main dashboard, content, appearance, extensions, commerce, platform, Marketplace, and plugin-provided menu groups.
