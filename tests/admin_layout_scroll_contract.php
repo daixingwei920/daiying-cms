@@ -60,6 +60,22 @@ $assert(str_contains($css, '.admin-card,'), 'admin card selector block missing')
 $assert(str_contains($css, 'minmax(min(220px, 100%), 1fr)'), 'extension/media/theme grids must not overflow narrow admin content');
 $assert(str_contains($css, 'min-width: 0;'), 'admin cards and grid containers must allow content to shrink');
 
+require_once $root . '/system/core/Update/UpdatePackageManifest.php';
+require_once $root . '/system/core/Update/UpdateException.php';
+
+$assert(
+    \Cms\Core\Update\UpdatePackageManifest::isAllowedUpdatePath('public/assets/admin/admin.css'),
+    'admin shell CSS must be an allowed Core update operational support file'
+);
+// Keep the exact-commit builder and release parity gate in lockstep with runtime validation.
+foreach ([
+    $root . '/scripts/build_exact_commit_update_package.php',
+    $root . '/scripts/release_parity_gate.php',
+] as $script) {
+    $content = (string) file_get_contents($script);
+    $assert(str_contains($content, "'public/assets/admin/admin.css'"), basename($script) . ' must include admin CSS in the update allow-list');
+}
+
 $assert($mobile !== '', 'mobile media block missing');
 $assert(str_contains($mobile, 'height: auto'), 'mobile layout must restore natural document height');
 $assert(str_contains($mobile, 'overflow-y: auto'), 'mobile body must allow normal page scrolling');

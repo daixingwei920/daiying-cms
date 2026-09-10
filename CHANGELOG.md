@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.42 - 2026-09-09
+
+- Added the shared admin stylesheet to the Core update operational-support allow-list so signed online updates can deliver backend layout fixes.
+- Kept the 1.2.41 long-page scrolling fix and extension/media/theme grid clipping fix.
+- Added a release contract check that requires `public/assets/admin/admin.css` to be included in exact Core update packages.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.42-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.42>.
+
 ## 1.2.41 - 2026-09-09
 
 - Fixed the shared admin layout so long backend pages can scroll to the final control on desktop and mobile.
