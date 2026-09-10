@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.43 - 2026-09-09
+
+- Published a bridge Core update for sites whose existing update verifier does not yet allow backend public asset paths.
+- Kept the Core runtime, exact update builder, release parity gate, and update server aligned on `public/assets/admin/admin.css` as an operational support file for future updates.
+- The signed online update package intentionally avoids targeting `public/assets/admin/admin.css` directly so older sites can install the bridge before public admin assets are delivered by later Core updates.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.43-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.43>.
+
 ## 1.2.42 - 2026-09-09
 
 - Added the shared admin stylesheet to the Core update operational-support allow-list so signed online updates can deliver backend layout fixes.
