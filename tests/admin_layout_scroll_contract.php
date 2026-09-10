@@ -1,0 +1,68 @@
+<?php
+
+declare(strict_types=1);
+
+$root = dirname(__DIR__);
+$cssPath = $root . '/public/assets/admin/admin.css';
+
+if (!is_file($cssPath)) {
+    fwrite(STDERR, "admin.css missing\n");
+    exit(1);
+}
+
+$css = (string) file_get_contents($cssPath);
+
+$assert = static function (bool $condition, string $message): void {
+    if (!$condition) {
+        fwrite(STDERR, $message . "\n");
+        exit(1);
+    }
+};
+
+$block = static function (string $selector) use ($css): string {
+    $pattern = '/' . preg_quote($selector, '/') . '\s*\{(?P<body>[^}]*)\}/m';
+    if (!preg_match($pattern, $css, $matches)) {
+        return '';
+    }
+
+    return (string) $matches['body'];
+};
+
+$adminShell = $block('.admin-shell');
+$adminSidebar = $block('.admin-sidebar');
+$adminWorkspace = $block('.admin-workspace');
+$adminMain = $block('.admin-main');
+$mobile = '';
+
+if (preg_match('/@media\s*\(max-width:\s*760px\)\s*\{(?P<body>.*)\z/s', $css, $matches)) {
+    $mobile = (string) $matches['body'];
+}
+
+$assert($adminShell !== '', 'admin shell block missing');
+$assert(str_contains($adminShell, 'height: 100dvh'), 'admin shell must be viewport-height bounded on desktop');
+$assert(str_contains($adminShell, 'overflow: hidden'), 'admin shell must delegate desktop scrolling to inner containers');
+
+$assert($adminSidebar !== '', 'admin sidebar block missing');
+$assert(str_contains($adminSidebar, 'height: 100dvh'), 'admin sidebar must be viewport-height bounded');
+$assert(str_contains($adminSidebar, 'overflow-y: auto'), 'admin sidebar must scroll independently');
+
+$assert($adminWorkspace !== '', 'admin workspace block missing');
+$assert(str_contains($adminWorkspace, 'min-height: 0'), 'admin workspace must allow flex child scrolling');
+$assert(str_contains($adminWorkspace, 'overflow: hidden'), 'admin workspace must keep desktop scroll inside admin main');
+
+$assert($adminMain !== '', 'admin main block missing');
+$assert(str_contains($adminMain, 'flex: 1 1 auto'), 'admin main must fill remaining workspace height');
+$assert(str_contains($adminMain, 'min-height: 0'), 'admin main must be allowed to shrink inside flex layout');
+$assert(str_contains($adminMain, 'overflow-y: auto'), 'admin main must support vertical scrolling');
+$assert(str_contains($adminMain, 'env(safe-area-inset-bottom)'), 'admin main must reserve bottom safe-area padding');
+
+$assert(str_contains($css, '.admin-card,'), 'admin card selector block missing');
+$assert(str_contains($css, 'minmax(min(220px, 100%), 1fr)'), 'extension/media/theme grids must not overflow narrow admin content');
+$assert(str_contains($css, 'min-width: 0;'), 'admin cards and grid containers must allow content to shrink');
+
+$assert($mobile !== '', 'mobile media block missing');
+$assert(str_contains($mobile, 'height: auto'), 'mobile layout must restore natural document height');
+$assert(str_contains($mobile, 'overflow-y: auto'), 'mobile body must allow normal page scrolling');
+$assert(str_contains($mobile, 'overflow: visible'), 'mobile inner containers must not trap page scrolling');
+
+echo "admin layout scroll contract PASS\n";

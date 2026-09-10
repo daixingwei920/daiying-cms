@@ -2,6 +2,16 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.41 - 2026-09-09
+
+- Fixed the shared admin layout so long backend pages can scroll to the final control on desktop and mobile.
+- Added bottom safe-area padding to admin content to keep final fields and buttons away from the browser edge.
+- Kept the sidebar independently scrollable while preserving the sticky topbar and mobile natural scrolling.
+- Fixed extension/media/theme card grids so plugin management and similar pages do not clip cards horizontally.
+- Added an admin layout scroll contract test.
+- Public install package: `daiying-cms-1.2.41-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.41>.
+
 ## 1.2.40 - 2026-09-09
 
 - Added Passkey passwordless admin login for administrator accounts with registered Passkeys while preserving the existing password login path.
