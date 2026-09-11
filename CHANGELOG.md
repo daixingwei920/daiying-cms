@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.52 - 2026-09-11
+
+- Fixed the admin Marketplace authorize install path so signed official Trust Grants are preserved when constructing the final install authorization.
+- Added compatibility for the legacy admin Marketplace install endpoint to accept serialized `trust_grant` / `official_trust_grant` payloads.
+- Added regression coverage proving a new official API plugin can install through Marketplace Trust Grant without static Core registry entries, while unsigned official-like packages remain blocked.
+- Preserved reserved table-prefix security, official plugin decoupling, and the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.52-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.52>.
+
 ## 1.2.51 - 2026-09-10
 
 - Added regression coverage confirming trusted official Marketplace plugins keep their Trust Grant table-prefix permissions during the normal enable-time migration backfill.

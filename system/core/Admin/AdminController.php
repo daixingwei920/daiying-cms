@@ -98,6 +98,7 @@ final class AdminController
         private readonly Settings $settings,
         private readonly FileLogger $logger,
         private readonly ?string $rootPath = null,
+        private readonly ?MarketApiClientInterface $marketClient = null,
     ) {
     }
 
@@ -7677,7 +7678,7 @@ final class AdminController
             );
             $result = (new MarketPackageInstaller($root))->install(
                 $packagePath,
-                new InstallAuthorization($authorization->token, $authorization->packageUrl, $authorization->expiresAt, $authorization->packageSha256, $authorizedMarketId),
+                new InstallAuthorization($authorization->token, $authorization->packageUrl, $authorization->expiresAt, $authorization->packageSha256, $authorizedMarketId, $authorization->trustGrant),
                 ConnectionFactory::make($this->settings)
             );
             $installedType = (string) ($result['extension_type'] ?? $result['type'] ?? '');
@@ -7707,12 +7708,21 @@ final class AdminController
         }
 
         try {
+            $trustGrant = $request->input('trust_grant', $request->input('official_trust_grant', []));
+            if (is_string($trustGrant)) {
+                $decodedGrant = json_decode($trustGrant, true);
+                $trustGrant = is_array($decodedGrant) ? $decodedGrant : [];
+            }
+            if (!is_array($trustGrant)) {
+                $trustGrant = [];
+            }
             $authorization = new InstallAuthorization(
                 (string) $request->input('token', ''),
                 (string) $request->input('package_url', ''),
                 (string) $request->input('expires_at', ''),
                 (string) $request->input('package_sha256', ''),
                 (string) $request->input('market_id', ''),
+                $trustGrant,
             );
             $root = $this->root();
             $packagePath = trim((string) $request->input('package_path', ''));
@@ -8421,6 +8431,10 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
 
     private function marketClient(): MarketApiClientInterface
     {
+        if ($this->marketClient !== null) {
+            return $this->marketClient;
+        }
+
         $url = trim((string) $this->settings->get('market.server_url', ''));
         if ($url === '') {
             $url = trim((string) $this->settings->get('updates.server_url', ''));
