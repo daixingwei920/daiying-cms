@@ -2,6 +2,18 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.53 - 2026-09-13
+
+- Added Local Model and OpenClaw to the unified site AI provider foundation.
+- Kept Local Model providers on the shared OpenAI-compatible adapter so Ollama, LM Studio, llama.cpp server, vLLM, and similar endpoints do not need provider-specific business code.
+- Added an OpenClaw gateway adapter for external agent/provider routing without making Core depend on OpenClaw being installed.
+- Added provider model discovery contracts and an admin model detection action.
+- Kept Cloud fallback administrator-controlled and default off.
+- Preserved official update server and Marketplace AI Review isolation from site-level AI settings.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.53-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.53>.
+
 ## 1.2.52 - 2026-09-11
 
 - Fixed the admin Marketplace authorize install path so signed official Trust Grants are preserved when constructing the final install authorization.
