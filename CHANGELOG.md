@@ -2,6 +2,16 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.54 - 2026-09-13
+
+- Added a Groq Provider preset that uses the shared OpenAI-compatible adapter with `https://api.groq.com/openai/v1` and `openai/gpt-oss-20b`.
+- Updated OpenAI-compatible requests for Groq/GPT-OSS reasoning models to request final content without exposing reasoning by default.
+- Improved OpenAI-compatible response parsing and empty-response diagnostics without logging API keys.
+- Preserved the shared adapter architecture for DeepSeek, OpenAI, Groq, xAI, Qwen, Tencent Hunyuan, and Local Model endpoints.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.54-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.54>.
+
 ## 1.2.53 - 2026-09-13
 
 - Added Local Model and OpenClaw to the unified site AI provider foundation.
