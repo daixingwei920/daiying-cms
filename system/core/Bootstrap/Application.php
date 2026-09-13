@@ -402,6 +402,7 @@ final class Application
         $router->get('/admin/settings/ai', [$admin, 'aiSettings']);
         $router->post('/admin/settings/ai', [$admin, 'aiSettingsSave']);
         $router->post('/admin/settings/ai/test', [$admin, 'aiSettingsTest']);
+        $router->post('/admin/settings/ai/models', [$admin, 'aiSettingsDetectModels']);
         $router->get('/admin/settings/mail', [$admin, 'mailSettings']);
         $router->post('/admin/settings/mail', [$admin, 'mailSettingsSave']);
         $router->post('/admin/settings/mail/test', [$admin, 'mailSettingsTest']);

@@ -31,6 +31,14 @@ final class PublicApiRegistry
                 'capabilities' => ['ai.provider'],
             ],
             [
+                'id' => 'ai.model_discovery',
+                'version' => FoundationVersions::AI_API,
+                'class' => 'Cms\\Core\\Ai\\AiModelDiscoveryInterface',
+                'stability' => 'stable',
+                'summary' => 'Optionally expose provider model discovery without forcing every provider to implement it.',
+                'capabilities' => ['ai.provider'],
+            ],
+            [
                 'id' => 'ai.tools',
                 'version' => FoundationVersions::AI_API,
                 'class' => 'Cms\\Core\\Ai\\AiToolRegistry',

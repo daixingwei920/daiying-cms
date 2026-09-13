@@ -67,7 +67,10 @@ $check(($presets['deepseek']['adapter'] ?? '') === 'openai_compatible', 'DeepSee
 $check(($presets['openai']['adapter'] ?? '') === 'openai_compatible', 'OpenAI preset uses the shared OpenAI-compatible adapter');
 $check(($presets['xai']['adapter'] ?? '') === 'openai_compatible', 'Grok / xAI preset uses the shared OpenAI-compatible adapter');
 $check(($presets['tencent_hunyuan']['adapter'] ?? '') === 'openai_compatible', 'Tencent Hunyuan preset uses the shared OpenAI-compatible adapter');
+$check(($presets['qwen']['adapter'] ?? '') === 'openai_compatible', 'Qwen preset uses the shared OpenAI-compatible adapter');
 $check(($presets['gemini']['adapter'] ?? '') === 'gemini', 'Gemini preset uses the native Gemini adapter');
+$check(($presets['local_model']['adapter'] ?? '') === 'openai_compatible' && ($presets['local_model']['api_key_required'] ?? true) === false, 'Local Model preset uses OpenAI-compatible adapter with optional API Key');
+$check(($presets['openclaw']['adapter'] ?? '') === 'openclaw', 'OpenClaw preset uses its gateway adapter');
 $check(AiProviderPresets::normalize('grok') === 'xai' && AiProviderPresets::normalize('openai-compatible') === 'openai_compatible', 'legacy and alias provider names are normalized');
 
 $settings = Settings::fromArray(['security' => ['encryption_key' => 'core-ai-test-key'], 'database' => ['dsn' => 'sqlite::memory:']]);
@@ -104,7 +107,7 @@ $check($runtime['api_key'] === 'sk-test-site-ai-secret' && $runtime['provider'] 
 $mock = new CoreAiMockClient();
 $service = new AiService($pdo, $settings, $mock);
 $check($service->isEnabled() === true, 'AI service reports enabled only when switch and API Key are both present');
-$check($service->capabilities()['adapters'] === ['openai_compatible', 'gemini'], 'AI service exposes stable adapter capabilities');
+$check($service->capabilities()['adapters'] === ['openai_compatible', 'gemini', 'openclaw'], 'AI service exposes stable adapter capabilities');
 $result = $service->testConnection();
 $check($result['status'] === 'success' && $result['provider'] === 'openai_compatible' && $result['model'] === 'compatible-model', 'testConnection succeeds through the configured provider and model');
 $check(($mock->lastConfig['api_key'] ?? '') === 'sk-test-site-ai-secret', 'provider calls receive the decrypted API Key internally');
@@ -147,6 +150,21 @@ try {
 } catch (AiException $exception) {
     $check($exception->reason() === 'api_key_missing', 'missing API Key returns a clear error');
 }
+
+$repo->save([
+    'enabled' => true,
+    'provider' => 'local_model',
+    'base_url' => 'http://127.0.0.1:11434',
+    'model' => 'llama3.1',
+    'timeout_seconds' => 15,
+    'max_tokens' => 1024,
+    'temperature' => 0.1,
+    'context_window' => 8192,
+    'local_api_type' => 'openai_compatible',
+], '', true);
+$localRuntime = $repo->runtimeConfig();
+$localService = new AiService($pdo, $settings, new CoreAiMockClient());
+$check($localService->isEnabled() === true && $localRuntime['api_key'] === '' && $localRuntime['api_key_required'] === false, 'Local Model can be enabled without storing an API Key');
 
 $repo->save([
     'enabled' => true,

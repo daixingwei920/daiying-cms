@@ -127,9 +127,9 @@ $repo->save([
 ], 'sk-ai-foundation-secret', false);
 
 $presets = AiProviderPresets::all();
-$check($presets['deepseek']['adapter'] === 'openai_compatible' && $presets['gemini']['adapter'] === 'gemini', 'provider presets keep one OpenAI-compatible adapter plus Gemini adapter');
+$check($presets['deepseek']['adapter'] === 'openai_compatible' && $presets['local_model']['adapter'] === 'openai_compatible' && $presets['gemini']['adapter'] === 'gemini' && $presets['openclaw']['adapter'] === 'openclaw', 'provider presets keep shared OpenAI-compatible adapter plus Gemini and OpenClaw adapters');
 $providers = AiProviderRegistry::describe();
-$check(isset($providers['deepseek'], $providers['openai'], $providers['xai'], $providers['tencent_hunyuan'], $providers['gemini'], $providers['openai_compatible']), 'default provider registry exposes all friendly presets');
+$check(isset($providers['deepseek'], $providers['openai'], $providers['xai'], $providers['tencent_hunyuan'], $providers['qwen'], $providers['gemini'], $providers['local_model'], $providers['openai_compatible'], $providers['openclaw']), 'default provider registry exposes all friendly presets');
 $check(in_array('structured_output', $providers['deepseek']['capabilities'], true), 'provider models declare capabilities');
 
 $usage = new AiUsageLedger($pdo);
@@ -214,7 +214,7 @@ try {
 }
 
 $publicIds = PublicApiRegistry::ids();
-$check(in_array('ai.gateway', $publicIds, true) && in_array('ai.provider', $publicIds, true) && in_array('ai.tools', $publicIds, true), 'AI Foundation contracts are published through Public API v1');
+$check(in_array('ai.gateway', $publicIds, true) && in_array('ai.provider', $publicIds, true) && in_array('ai.model_discovery', $publicIds, true) && in_array('ai.tools', $publicIds, true), 'AI Foundation contracts are published through Public API v1');
 $check(!class_exists('Cms\\Core\\Market\\AiReviewProvider') || !str_contains((string) file_get_contents(__FILE__), 'updates.daiyingcms.com'), 'official update server AI review remains outside site AI Foundation runtime');
 
 if ($failures > 0) {

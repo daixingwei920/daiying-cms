@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cms\Core\Ai;
 
-final class OpenAiCompatibleProviderClient implements AiProviderClientInterface, AiModelDiscoveryClientInterface
+final class OpenClawProviderClient implements AiProviderClientInterface, AiModelDiscoveryClientInterface
 {
     /** @var null|\Closure(string,string,list<string>,string,int):array{body:string,headers:list<string>} */
     private ?\Closure $transport;
@@ -15,28 +15,21 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
         $this->transport = $transport;
     }
 
-    /**
-     * @param list<array{role:string,content:string}> $messages
-     * @param array<string,mixed> $config
-     * @return array{provider:string,model:string,content:string,raw?:array<string,mixed>}
-     */
     public function chat(array $messages, array $config): array
     {
-        $provider = AiProviderPresets::normalize((string) ($config['provider'] ?? 'openai_compatible'));
-        $apiKey = (string) ($config['api_key'] ?? '');
+        $provider = 'openclaw';
         $model = trim((string) ($config['model'] ?? ''));
-        $baseUrl = $this->baseUrl($provider, (string) ($config['base_url'] ?? ''));
-        if ($apiKey === '' && !empty($config['api_key_required'])) {
-            throw new AiException('AI API Key is not configured.', 'api_key_missing');
-        }
-        if ($model === '') {
-            throw new AiException('AI model is not configured.', 'model_missing');
-        }
-
+        $agent = trim((string) ($config['openclaw_agent'] ?? ''));
+        $baseUrl = $this->baseUrl((string) ($config['base_url'] ?? ''));
         $payload = [
-            'model' => $model,
             'messages' => $messages,
         ];
+        if ($model !== '') {
+            $payload['model'] = $model;
+        }
+        if ($agent !== '') {
+            $payload['agent'] = $agent;
+        }
         $maxTokens = (int) ($config['max_tokens'] ?? 0);
         if ($maxTokens > 0) {
             $payload['max_tokens'] = min($maxTokens, 200000);
@@ -47,22 +40,20 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
                 $payload['temperature'] = $temperature;
             }
         }
-
         $json = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         if (!is_string($json)) {
             throw new AiException('AI request payload is invalid.', 'request_invalid');
         }
 
-        $headers = [
-            'Content-Type: application/json',
-            'Accept: application/json',
-        ];
-        if ($apiKey !== '') {
-            $headers[] = 'Authorization: Bearer ' . $apiKey;
+        $headers = ['Content-Type: application/json', 'Accept: application/json'];
+        $token = trim((string) ($config['api_key'] ?? ''));
+        if ($token !== '') {
+            $headers[] = 'Authorization: Bearer ' . $token;
         }
         $timeout = max(1, min(120, (int) ($config['timeout_seconds'] ?? 30)));
         $responseHeaders = [];
-        $body = $this->request('POST', $this->joinUrl($baseUrl, 'chat/completions'), $headers, $json, $timeout, $responseHeaders);
+        $path = $agent !== '' ? 'api/v1/agents/' . rawurlencode($agent) . '/chat' : 'api/v1/chat';
+        $body = $this->request('POST', $this->joinUrl($baseUrl, $path), $headers, $json, $timeout, $responseHeaders);
         $status = $this->httpStatus($responseHeaders);
         if ($status < 200 || $status >= 300) {
             throw new AiException($this->safeHttpError($status, $body), $this->httpReason($status));
@@ -71,46 +62,43 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
         try {
             $decoded = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
-            throw new AiException('AI provider returned invalid JSON.', 'response_invalid');
+            throw new AiException('OpenClaw returned invalid JSON.', 'response_invalid');
         }
         if (!is_array($decoded)) {
-            throw new AiException('AI provider returned an invalid response.', 'response_invalid');
+            throw new AiException('OpenClaw returned an invalid response.', 'response_invalid');
         }
-        $content = (string) ($decoded['choices'][0]['message']['content'] ?? '');
+        $content = (string) (
+            $decoded['content']
+            ?? $decoded['message']['content']
+            ?? $decoded['choices'][0]['message']['content']
+            ?? $decoded['data']['content']
+            ?? ''
+        );
         if ($content === '') {
-            throw new AiException('AI provider returned an empty response.', 'response_empty');
+            throw new AiException('OpenClaw returned an empty response.', 'response_empty');
         }
 
         return [
             'provider' => $provider,
-            'model' => $model,
+            'model' => $model !== '' ? $model : ($agent !== '' ? $agent : 'openclaw-agent'),
             'content' => $content,
             'raw' => [
-                'id' => (string) ($decoded['id'] ?? ''),
                 'usage' => is_array($decoded['usage'] ?? null) ? $decoded['usage'] : [],
             ],
         ];
     }
 
-    /**
-     * @param array<string,mixed> $config
-     * @return list<array{id:string,label:string,capabilities:list<string>}>
-     */
     public function models(array $config): array
     {
-        $provider = AiProviderPresets::normalize((string) ($config['provider'] ?? 'openai_compatible'));
-        $apiKey = (string) ($config['api_key'] ?? '');
-        if ($apiKey === '' && !empty($config['api_key_required'])) {
-            throw new AiException('AI API Key is not configured.', 'api_key_missing');
-        }
-        $baseUrl = $this->baseUrl($provider, (string) ($config['base_url'] ?? ''));
+        $baseUrl = $this->baseUrl((string) ($config['base_url'] ?? ''));
         $headers = ['Accept: application/json'];
-        if ($apiKey !== '') {
-            $headers[] = 'Authorization: Bearer ' . $apiKey;
+        $token = trim((string) ($config['api_key'] ?? ''));
+        if ($token !== '') {
+            $headers[] = 'Authorization: Bearer ' . $token;
         }
         $timeout = max(1, min(120, (int) ($config['timeout_seconds'] ?? 30)));
         $responseHeaders = [];
-        $body = $this->request('GET', $this->joinUrl($baseUrl, 'models'), $headers, '', $timeout, $responseHeaders);
+        $body = $this->request('GET', $this->joinUrl($baseUrl, 'api/v1/models'), $headers, '', $timeout, $responseHeaders);
         $status = $this->httpStatus($responseHeaders);
         if ($status < 200 || $status >= 300) {
             throw new AiException($this->safeHttpError($status, $body), $this->httpReason($status));
@@ -119,10 +107,10 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
         try {
             $decoded = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (\JsonException) {
-            throw new AiException('AI provider returned invalid JSON.', 'response_invalid');
+            throw new AiException('OpenClaw returned invalid JSON.', 'response_invalid');
         }
         if (!is_array($decoded)) {
-            throw new AiException('AI provider returned an invalid response.', 'response_invalid');
+            throw new AiException('OpenClaw returned an invalid response.', 'response_invalid');
         }
         $items = is_array($decoded['data'] ?? null) ? $decoded['data'] : (is_array($decoded['models'] ?? null) ? $decoded['models'] : []);
         $models = [];
@@ -130,18 +118,37 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
             if (!is_array($item)) {
                 continue;
             }
-            $id = trim((string) ($item['id'] ?? $item['name'] ?? $item['model'] ?? ''));
-            if ($id === '' || preg_match('/[\x00-\x1F\x7F]/', $id) === 1 || strlen($id) > 191) {
+            $id = trim((string) ($item['id'] ?? $item['name'] ?? ''));
+            if ($id === '' || strlen($id) > 191 || preg_match('/[\x00-\x1F\x7F]/', $id) === 1) {
                 continue;
             }
             $models[] = [
                 'id' => $id,
-                'label' => trim((string) ($item['display_name'] ?? $item['name'] ?? $id)),
-                'capabilities' => ['text', 'chat', 'text_generation'],
+                'label' => trim((string) ($item['label'] ?? $item['name'] ?? $id)),
+                'capabilities' => ['text', 'chat', 'tools', 'agent', 'text_generation'],
             ];
         }
 
         return $models;
+    }
+
+    private function baseUrl(string $baseUrl): string
+    {
+        $baseUrl = rtrim(trim($baseUrl), '/');
+        if ($baseUrl === '') {
+            throw new AiException('OpenClaw URL is not configured.', 'base_url_missing');
+        }
+        if (strlen($baseUrl) > 2048 || preg_match('/[\x00-\x1F\x7F]/', $baseUrl) === 1) {
+            throw new AiException('OpenClaw URL is invalid.', 'base_url_invalid');
+        }
+        $parts = parse_url($baseUrl);
+        $scheme = is_array($parts) ? strtolower((string) ($parts['scheme'] ?? '')) : '';
+        $host = is_array($parts) ? (string) ($parts['host'] ?? '') : '';
+        if (!in_array($scheme, ['http', 'https'], true) || $host === '' || isset($parts['user']) || isset($parts['pass']) || isset($parts['query']) || isset($parts['fragment'])) {
+            throw new AiException('OpenClaw URL must be an http or https URL without credentials, query, or fragment.', 'base_url_invalid');
+        }
+
+        return $baseUrl;
     }
 
     /** @param list<string> $headers @param list<string> $responseHeaders */
@@ -157,7 +164,7 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
         if (function_exists('curl_init')) {
             $ch = curl_init($url);
             if ($ch === false) {
-                throw new AiException('Unable to initialize AI HTTP client.', 'network_error');
+                throw new AiException('Unable to initialize OpenClaw HTTP client.', 'network_error');
             }
             $options = [
                 CURLOPT_HTTPHEADER => $headers,
@@ -179,7 +186,7 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
                 $error = curl_error($ch);
                 $this->closeCurl($ch);
                 $reason = stripos($error, 'timed out') !== false ? 'timeout' : 'network_error';
-                throw new AiException($error !== '' ? 'AI network error: ' . $this->redact($error) : 'AI network request failed.', $reason);
+                throw new AiException($error !== '' ? 'OpenClaw network error: ' . $this->redact($error) : 'OpenClaw network request failed.', $reason);
             }
             $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
             if ($status > 0) {
@@ -202,7 +209,7 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
         $body = @file_get_contents($url, false, $context);
         $responseHeaders = array_values(array_map('strval', $http_response_header ?? []));
         if (!is_string($body)) {
-            throw new AiException('AI network request failed.', 'network_error');
+            throw new AiException('OpenClaw network request failed.', 'network_error');
         }
 
         return $body;
@@ -223,18 +230,18 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
     private function safeHttpError(int $status, string $body): string
     {
         if ($status === 401 || $status === 403) {
-            return 'AI API Key is invalid or unauthorized. HTTP ' . $status . '.';
+            return 'OpenClaw authentication failed. HTTP ' . $status . '.';
         }
         if ($status === 404) {
-            return 'AI model or endpoint was not found. HTTP 404.';
+            return 'OpenClaw model, agent, or endpoint was not found. HTTP 404.';
         }
         if ($status === 429) {
-            return 'AI provider quota or rate limit was exceeded. HTTP 429.';
+            return 'OpenClaw quota or rate limit was exceeded. HTTP 429.';
         }
-        $message = 'AI provider request failed. HTTP ' . $status . '.';
+        $message = 'OpenClaw request failed. HTTP ' . $status . '.';
         try {
             $decoded = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-            $providerMessage = is_array($decoded) ? (string) ($decoded['error']['message'] ?? '') : '';
+            $providerMessage = is_array($decoded) ? (string) ($decoded['error']['message'] ?? $decoded['message'] ?? '') : '';
             if ($providerMessage !== '') {
                 $message .= ' ' . substr($providerMessage, 0, 160);
             }
@@ -242,37 +249,6 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
         }
 
         return $this->redact($message);
-    }
-
-    private function baseUrl(string $provider, string $baseUrl): string
-    {
-        $baseUrl = rtrim(trim($baseUrl), '/');
-        if ($baseUrl === '') {
-            $baseUrl = AiProviderPresets::get($provider)['base_url'];
-        }
-        if ($baseUrl === '') {
-            throw new AiException('AI Base URL is not configured.', 'base_url_missing');
-        }
-        if (strlen($baseUrl) > 2048 || preg_match('/[\x00-\x1F\x7F]/', $baseUrl) === 1) {
-            throw new AiException('AI Base URL is invalid.', 'base_url_invalid');
-        }
-        $parts = parse_url($baseUrl);
-        $scheme = is_array($parts) ? strtolower((string) ($parts['scheme'] ?? '')) : '';
-        $host = is_array($parts) ? (string) ($parts['host'] ?? '') : '';
-        if (!in_array($scheme, ['http', 'https'], true) || $host === '' || isset($parts['user']) || isset($parts['pass']) || isset($parts['query']) || isset($parts['fragment'])) {
-            throw new AiException('AI Base URL must be an http or https URL without credentials, query, or fragment.', 'base_url_invalid');
-        }
-        $path = is_array($parts) ? rtrim((string) ($parts['path'] ?? ''), '/') : '';
-        if ($provider === 'local_model' && ($path === '' || $path === '/')) {
-            $baseUrl .= '/v1';
-        }
-
-        return $baseUrl;
-    }
-
-    private function joinUrl(string $baseUrl, string $path): string
-    {
-        return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
     }
 
     private function httpReason(int $status): string
@@ -286,9 +262,14 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
         };
     }
 
+    private function joinUrl(string $baseUrl, string $path): string
+    {
+        return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+    }
+
     private function redact(string $value): string
     {
-        return preg_replace('/(?:sk|Bearer|api[_-]?key|secret)[A-Za-z0-9_=:.,\/+\-]+/i', '[redacted]', $value) ?: $value;
+        return preg_replace('/(?:sk|Bearer|token|api[_-]?key|secret)[A-Za-z0-9_=:.,\/+\-]+/i', '[redacted]', $value) ?: $value;
     }
 
     /** @param resource|\CurlHandle $ch */

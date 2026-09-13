@@ -69,6 +69,10 @@ final class AiProviderRegistry
                 self::register(new GeminiProvider([$model]));
                 continue;
             }
+            if ($preset['adapter'] === 'openclaw') {
+                self::register(new OpenClawProvider([$model]));
+                continue;
+            }
             self::register(new OpenAiCompatibleProvider($id, $preset['label'], [$model]));
         }
     }
@@ -76,8 +80,10 @@ final class AiProviderRegistry
     /** @return list<string> */
     private static function defaultCapabilities(string $adapter): array
     {
-        return $adapter === 'gemini'
-            ? ['text_generation', 'vision', 'structured_output', 'streaming']
-            : ['text_generation', 'structured_output', 'tool_calling', 'streaming'];
+        return match ($adapter) {
+            'gemini' => ['text', 'chat', 'vision', 'structured_output', 'text_generation', 'streaming'],
+            'openclaw' => ['text', 'chat', 'tools', 'agent', 'text_generation', 'tool_calling', 'streaming'],
+            default => ['text', 'chat', 'structured_output', 'tools', 'text_generation', 'tool_calling', 'streaming'],
+        };
     }
 }

@@ -4,25 +4,23 @@ declare(strict_types=1);
 
 namespace Cms\Core\Ai;
 
-final class OpenAiCompatibleProvider implements AiProviderInterface, AiModelDiscoveryInterface
+final class OpenClawProvider implements AiProviderInterface, AiModelDiscoveryInterface
 {
     /** @param list<AiModel> $models */
     public function __construct(
-        private readonly string $id,
-        private readonly string $label,
         private readonly array $models,
-        private readonly AiProviderClientInterface $client = new OpenAiCompatibleProviderClient(),
+        private readonly AiProviderClientInterface $client = new OpenClawProviderClient(),
     ) {
     }
 
     public function getId(): string
     {
-        return $this->id;
+        return 'openclaw';
     }
 
     public function getLabel(): string
     {
-        return $this->label;
+        return 'OpenClaw';
     }
 
     public function getModels(): array
@@ -42,8 +40,8 @@ final class OpenAiCompatibleProvider implements AiProviderInterface, AiModelDisc
 
     public function execute(AiRequest $request, array $config): AiResponse
     {
-        $config['provider'] = $this->id;
-        if ($request->model !== null && $request->model !== '' && ($request->provider === null || AiProviderPresets::normalize($request->provider) === $this->id)) {
+        $config['provider'] = 'openclaw';
+        if ($request->model !== null && $request->model !== '' && ($request->provider === null || AiProviderPresets::normalize($request->provider) === 'openclaw')) {
             $config['model'] = $request->model;
         }
 
@@ -70,7 +68,7 @@ final class OpenAiCompatibleProvider implements AiProviderInterface, AiModelDisc
         if (!$this->client instanceof AiModelDiscoveryClientInterface) {
             throw new AiException('AI provider does not support model discovery.', 'model_discovery_unsupported');
         }
-        $config['provider'] = $this->id;
+        $config['provider'] = 'openclaw';
 
         return $this->client->models($config);
     }

@@ -38,14 +38,39 @@ final class AiGateway
         if (empty($config['enabled'])) {
             throw new AiException('Global AI is disabled.', 'disabled');
         }
-        if ((string) ($config['api_key'] ?? '') === '') {
-            throw new AiException('AI API Key is not configured.', 'api_key_missing');
-        }
         $providerId = AiProviderPresets::normalize($request->provider ?? (string) ($config['provider'] ?? 'openai_compatible'));
         $model = $request->model ?? (string) ($config['model'] ?? '');
         $config['provider'] = $providerId;
         if ($model !== '') {
             $config['model'] = $model;
+        }
+        try {
+            return $this->executeWithConfig($request, $config, $providerId);
+        } catch (AiException $exception) {
+            $fallbackProvider = AiProviderPresets::normalize((string) ($config['fallback_provider'] ?? ''));
+            if (empty($config['allow_cloud_fallback']) || $fallbackProvider === $providerId || !AiProviderPresets::isCloudProvider($fallbackProvider)) {
+                throw $exception;
+            }
+            $fallbackConfig = AiProviderPresets::applyDefaults([
+                'enabled' => true,
+                'provider' => $fallbackProvider,
+                'api_key' => (string) ($config['api_key'] ?? ''),
+                'max_tokens' => $config['max_tokens'] ?? 1024,
+                'temperature' => $config['temperature'] ?? 0.7,
+                'timeout_seconds' => $config['timeout_seconds'] ?? 30,
+            ]);
+
+            return $this->executeWithConfig($request, $fallbackConfig, $fallbackProvider);
+        }
+    }
+
+    /**
+     * @param array<string,mixed> $config
+     */
+    private function executeWithConfig(AiRequest $request, array $config, string $providerId): AiResponse
+    {
+        if (AiProviderPresets::requiresApiKey($providerId) && (string) ($config['api_key'] ?? '') === '') {
+            throw new AiException('AI API Key is not configured.', 'api_key_missing');
         }
         $this->quota?->assertAllowed($request, $providerId, (string) $config['model']);
         $client = $this->service->providerClientForGateway($config);
@@ -145,7 +170,8 @@ final class AiGateway
         if (empty($config['enabled'])) {
             throw new AiException('Global AI is disabled.', 'disabled');
         }
-        if ((string) ($config['api_key'] ?? '') === '') {
+        $providerId = AiProviderPresets::normalize((string) ($config['provider'] ?? 'openai_compatible'));
+        if (AiProviderPresets::requiresApiKey($providerId) && (string) ($config['api_key'] ?? '') === '') {
             throw new AiException('AI API Key is not configured.', 'api_key_missing');
         }
         $client = $this->service->providerClientForGateway($config);
@@ -159,12 +185,31 @@ final class AiGateway
                 'message' => '连接成功',
             ];
         }
-        $provider = AiProviderRegistry::get((string) ($config['provider'] ?? 'openai_compatible'));
+        $provider = AiProviderRegistry::get($providerId);
         if ($provider === null) {
             throw new AiException('AI provider is not registered.', 'provider_not_found');
         }
 
         return $provider->testConnection($config);
+    }
+
+    /** @return list<array{id:string,label:string,capabilities:list<string>}> */
+    public function detectModels(): array
+    {
+        $config = $this->service->runtimeConfigForGateway([]);
+        if (empty($config['enabled'])) {
+            throw new AiException('Global AI is disabled.', 'disabled');
+        }
+        $providerId = AiProviderPresets::normalize((string) ($config['provider'] ?? 'openai_compatible'));
+        if (AiProviderPresets::requiresApiKey($providerId) && (string) ($config['api_key'] ?? '') === '') {
+            throw new AiException('AI API Key is not configured.', 'api_key_missing');
+        }
+        $provider = AiProviderRegistry::get($providerId);
+        if (!$provider instanceof AiModelDiscoveryInterface) {
+            throw new AiException('AI provider does not support model discovery.', 'model_discovery_unsupported');
+        }
+
+        return $provider->detectModels($config);
     }
 
     /** @return array<string,mixed> */

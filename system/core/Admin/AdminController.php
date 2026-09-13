@@ -896,6 +896,35 @@ final class AdminController
         }
     }
 
+    public function aiSettingsDetectModels(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('AI 设置', $this->aiSettingsForm('<p class="error">CSRF 校验失败，请刷新页面重试。</p>')), 403);
+        }
+
+        try {
+            $models = $this->aiService()->detectModels();
+            $items = '';
+            foreach (array_slice($models, 0, 50) as $model) {
+                $items .= '<li><code>' . View::escape((string) ($model['id'] ?? '')) . '</code> ' . View::escape((string) ($model['label'] ?? '')) . '</li>';
+            }
+            $message = $items !== ''
+                ? '<div class="admin-badge admin-badge-success">已检测到模型</div><ul>' . $items . '</ul>'
+                : '<p class="admin-badge admin-badge-warning">Provider 已响应，但没有返回可展示的模型列表。可继续手动填写 Model ID。</p>';
+
+            return Response::html(View::page('AI 设置', $this->aiSettingsForm($message)));
+        } catch (AiException $exception) {
+            return Response::html(View::page('AI 设置', $this->aiSettingsForm('<p class="error">检测模型失败：' . View::escape($exception->getMessage()) . '</p>')), 422);
+        } catch (Throwable $exception) {
+            $this->logger->error('AI model discovery failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('AI 设置', $this->aiSettingsForm('<p class="error">检测模型失败：网络或 Provider 响应异常。</p>')), 502);
+        }
+    }
+
     public function adminSecurity(Request $request): Response
     {
         $guard = $this->requireAdmin();
@@ -1482,6 +1511,12 @@ final class AdminController
                 'timeout_seconds' => 30,
                 'max_tokens' => 1024,
                 'temperature' => 0.7,
+                'provider_name' => '',
+                'local_api_type' => 'openai_compatible',
+                'context_window' => 0,
+                'openclaw_agent' => '',
+                'allow_cloud_fallback' => false,
+                'fallback_provider' => '',
                 'api_key_configured' => false,
                 'api_key_masked' => '',
             ];
@@ -1495,6 +1530,13 @@ final class AdminController
             $label = (string) $preset['label'];
             $providerOptions .= '<option value="' . $value . '"' . ($provider === $value ? ' selected' : '') . '>' . $label . '</option>';
         }
+        $fallbackOptions = '<option value="">不启用 Cloud Fallback</option>';
+        foreach (AiProviderPresets::all() as $value => $preset) {
+            if (empty($preset['cloud'])) {
+                continue;
+            }
+            $fallbackOptions .= '<option value="' . $value . '"' . ((string) ($config['fallback_provider'] ?? '') === $value ? ' selected' : '') . '>' . View::escape((string) $preset['label']) . '</option>';
+        }
         $presetJson = json_encode(AiProviderPresets::all(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $presetJson = is_string($presetJson) ? $presetJson : '{}';
         $keyText = !empty($config['api_key_configured']) ? '已配置（' . View::escape((string) $config['api_key_masked']) . '），留空则保留' : '未配置';
@@ -1505,24 +1547,31 @@ final class AdminController
             '<label class="checkbox-row"><input type="checkbox" name="enabled" value="1"' . (!empty($config['enabled']) ? ' checked' : '') . '> 启用全局 AI</label>' .
             '<label>Provider<select name="provider" id="ai-provider-select">' . $providerOptions . '</select></label>' .
             '<label>协议 / Adapter<input id="ai-adapter-display" value="' . View::escape($adapter) . '" readonly></label>' .
-            '<label>API Key<input name="api_key" type="password" autocomplete="off" placeholder="' . $keyText . '"></label>' .
+            '<label>Provider Name<input name="provider_name" maxlength="128" value="' . View::escape((string) ($config['provider_name'] ?? '')) . '" placeholder="可选，例如 Office GPU Server"></label>' .
+            '<label>API Type<input name="local_api_type" maxlength="64" value="' . View::escape((string) ($config['local_api_type'] ?? 'openai_compatible')) . '" placeholder="openai_compatible"></label>' .
+            '<label>API Key / Token<input name="api_key" type="password" autocomplete="off" placeholder="' . $keyText . '"></label>' .
             '<label class="checkbox-row"><input type="checkbox" name="clear_api_key" value="1"> 清空已保存的 API Key</label>' .
             '<label>Base URL<input id="ai-base-url" name="base_url" value="' . View::escape((string) ($config['base_url'] ?? '')) . '" placeholder="https://api.deepseek.com/v1"></label>' .
             '<label>Model<input id="ai-model" name="model" maxlength="191" value="' . View::escape((string) ($config['model'] ?? '')) . '" placeholder="deepseek-chat"></label>' .
+            '<label>Context Window<input name="context_window" type="number" min="0" max="2000000" value="' . View::escape((string) ($config['context_window'] ?? 0)) . '"></label>' .
+            '<label>OpenClaw Agent<input name="openclaw_agent" maxlength="191" value="' . View::escape((string) ($config['openclaw_agent'] ?? '')) . '" placeholder="可选 Agent ID"></label>' .
             '<label>Timeout 秒<input name="timeout_seconds" type="number" min="1" max="120" value="' . View::escape((string) ($config['timeout_seconds'] ?? 30)) . '"></label>' .
             '<label>Max Tokens<input name="max_tokens" type="number" min="1" max="200000" value="' . View::escape((string) ($config['max_tokens'] ?? 1024)) . '"></label>' .
             '<label>Temperature<input name="temperature" type="number" min="0" max="2" step="0.1" value="' . View::escape((string) ($config['temperature'] ?? 0.7)) . '"></label>' .
+            '<label class="checkbox-row"><input type="checkbox" name="allow_cloud_fallback" value="1"' . (!empty($config['allow_cloud_fallback']) ? ' checked' : '') . '> 允许本地/OpenClaw 失败后调用 Cloud Fallback</label>' .
+            '<label>Cloud Fallback Provider<select name="fallback_provider">' . $fallbackOptions . '</select></label>' .
             '<button type="submit">保存配置</button></form>' .
             '<form method="post" action="/admin/settings/ai/test">' . CsrfToken::field() . '<button class="admin-button-secondary" type="submit">测试连接</button></form>' .
+            '<form method="post" action="/admin/settings/ai/models">' . CsrfToken::field() . '<button class="admin-button-secondary" type="submit">检测模型</button></form>' .
             '<p><a class="button admin-button-secondary" href="/admin/settings">返回站点设置</a></p>' .
             '<script>window.DAIYING_AI_PRESETS=' . $presetJson . ';(function(){var select=document.getElementById("ai-provider-select");var base=document.getElementById("ai-base-url");var model=document.getElementById("ai-model");var adapter=document.getElementById("ai-adapter-display");if(!select||!base||!model||!adapter){return;}var presets=window.DAIYING_AI_PRESETS||{};var previous=select.value;select.addEventListener("change",function(){var next=select.value;var oldPreset=presets[previous]||{};var nextPreset=presets[next]||{};if(base.value===""||base.value===(oldPreset.base_url||"")){base.value=nextPreset.base_url||"";}if(model.value===""||model.value===(oldPreset.model||"")){model.value=nextPreset.model||"";}adapter.value=nextPreset.adapter||"openai_compatible";previous=next;});})();</script>';
     }
 
-    /** @return array{enabled:bool,provider:string,adapter:string,base_url:string,model:string,timeout_seconds:int,max_tokens:int,temperature:float,api_key:string,clear_api_key:bool} */
+    /** @return array<string,mixed> */
     private function aiSettingsInput(Request $request): array
     {
         $rawProvider = trim((string) $request->input('provider', 'openai_compatible'));
-        $supportedProviderInputs = array_merge(array_keys(AiProviderPresets::all()), ['custom', 'openai-compatible', 'grok', 'x.ai', 'hunyuan', 'tencent']);
+        $supportedProviderInputs = array_merge(array_keys(AiProviderPresets::all()), ['custom', 'openai-compatible', 'grok', 'x.ai', 'hunyuan', 'tencent', 'tongyi', 'dashscope', 'aliyun_qwen', 'local', 'ollama', 'lmstudio', 'lm_studio', 'llama_cpp', 'vllm', 'open-claw', 'open_claw']);
         if (!in_array($rawProvider, $supportedProviderInputs, true)) {
             throw new \InvalidArgumentException('AI Provider 无效。');
         }
@@ -1554,7 +1603,7 @@ final class AdminController
         if (strlen($model) > 191 || preg_match('/[\x00-\x1F\x7F]/', $model) === 1) {
             throw new \InvalidArgumentException('AI Model 格式无效。');
         }
-        if ($enabled && $model === '') {
+        if ($enabled && $model === '' && $provider !== 'openclaw') {
             throw new \InvalidArgumentException('启用 AI 时必须填写 Model。');
         }
 
@@ -1569,6 +1618,32 @@ final class AdminController
         $temperature = (float) $request->input('temperature', 0.7);
         if ($temperature < 0.0 || $temperature > 2.0) {
             throw new \InvalidArgumentException('Temperature 必须在 0 到 2 之间。');
+        }
+
+        $providerName = trim((string) $request->input('provider_name', ''));
+        if (strlen($providerName) > 128 || preg_match('/[\x00-\x1F\x7F]/', $providerName) === 1) {
+            throw new \InvalidArgumentException('Provider Name 格式无效。');
+        }
+        $localApiType = trim((string) $request->input('local_api_type', 'openai_compatible'));
+        if ($localApiType === '') {
+            $localApiType = 'openai_compatible';
+        }
+        if (!in_array($localApiType, ['openai_compatible', 'ollama', 'lm_studio', 'llama_cpp', 'vllm'], true)) {
+            throw new \InvalidArgumentException('API Type 目前支持 openai_compatible、ollama、lm_studio、llama_cpp、vllm。');
+        }
+        $contextWindow = (int) $request->input('context_window', 0);
+        if ($contextWindow < 0 || $contextWindow > 2000000) {
+            throw new \InvalidArgumentException('Context Window 必须在 0 到 2000000 之间。');
+        }
+        $openclawAgent = trim((string) $request->input('openclaw_agent', ''));
+        if (strlen($openclawAgent) > 191 || preg_match('/[\x00-\x1F\x7F]/', $openclawAgent) === 1) {
+            throw new \InvalidArgumentException('OpenClaw Agent 格式无效。');
+        }
+        $allowCloudFallback = (string) $request->input('allow_cloud_fallback', '') === '1';
+        $fallbackProviderRaw = trim((string) $request->input('fallback_provider', ''));
+        $fallbackProvider = $fallbackProviderRaw !== '' ? AiProviderPresets::normalize($fallbackProviderRaw) : '';
+        if ($allowCloudFallback && ($fallbackProvider === '' || !AiProviderPresets::isCloudProvider($fallbackProvider))) {
+            throw new \InvalidArgumentException('启用 Cloud Fallback 时必须选择一个云端 Provider。');
         }
 
         $apiKey = trim((string) $request->input('api_key', ''));
@@ -1586,6 +1661,12 @@ final class AdminController
             'timeout_seconds' => $timeout,
             'max_tokens' => $maxTokens,
             'temperature' => $temperature,
+            'provider_name' => $providerName,
+            'local_api_type' => $localApiType,
+            'context_window' => $contextWindow,
+            'openclaw_agent' => $openclawAgent,
+            'allow_cloud_fallback' => $allowCloudFallback,
+            'fallback_provider' => $fallbackProvider,
             'api_key' => $apiKey,
             'clear_api_key' => $clearApiKey,
         ];

@@ -41,7 +41,7 @@ final class GeminiProvider implements AiProviderInterface
     public function execute(AiRequest $request, array $config): AiResponse
     {
         $config['provider'] = 'gemini';
-        if ($request->model !== null && $request->model !== '') {
+        if ($request->model !== null && $request->model !== '' && ($request->provider === null || AiProviderPresets::normalize($request->provider) === 'gemini')) {
             $config['model'] = $request->model;
         }
 

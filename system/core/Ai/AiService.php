@@ -20,7 +20,8 @@ final class AiService
     {
         try {
             $config = $this->repository()->current();
-            return !empty($config['enabled']) && !empty($config['api_key_configured']);
+            $provider = AiProviderPresets::normalize((string) ($config['provider'] ?? 'openai_compatible'));
+            return !empty($config['enabled']) && (!AiProviderPresets::requiresApiKey($provider) || !empty($config['api_key_configured']));
         } catch (\Throwable) {
             return false;
         }
@@ -53,13 +54,21 @@ final class AiService
         return $this->gateway()->testConnection();
     }
 
+    /** @return list<array{id:string,label:string,capabilities:list<string>}> */
+    public function detectModels(): array
+    {
+        return $this->gateway()->detectModels();
+    }
+
     /** @return array<string,mixed> */
     public function capabilities(): array
     {
         return [
             'chat' => true,
             'test_connection' => true,
-            'adapters' => ['openai_compatible', 'gemini'],
+            'model_discovery' => true,
+            'fallback' => true,
+            'adapters' => ['openai_compatible', 'gemini', 'openclaw'],
             'providers' => array_keys(AiProviderPresets::all()),
             'provider_registry' => AiProviderRegistry::describe(),
             'models' => array_merge(...array_values(array_map(static fn (array $provider): array => $provider['models'], AiProviderRegistry::describe()))),
@@ -87,7 +96,7 @@ final class AiService
     public function runtimeConfigForGateway(array $options): array
     {
         $config = AiProviderPresets::applyDefaults($this->repository()->runtimeConfig());
-        foreach (['model', 'base_url', 'max_tokens', 'temperature', 'timeout_seconds'] as $key) {
+        foreach (['provider', 'adapter', 'model', 'base_url', 'max_tokens', 'temperature', 'timeout_seconds', 'context_window', 'local_api_type', 'openclaw_agent', 'allow_cloud_fallback', 'fallback_provider'] as $key) {
             if (array_key_exists($key, $options)) {
                 $config[$key] = $options[$key];
             }
