@@ -47,6 +47,11 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
                 $payload['temperature'] = $temperature;
             }
         }
+        if (array_key_exists('include_reasoning', $config)) {
+            $payload['include_reasoning'] = (bool) $config['include_reasoning'];
+        } elseif ($this->isGroqEndpoint($provider, $baseUrl) && $this->isReasoningModel($model)) {
+            $payload['include_reasoning'] = false;
+        }
 
         $json = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         if (!is_string($json)) {
@@ -76,9 +81,9 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
         if (!is_array($decoded)) {
             throw new AiException('AI provider returned an invalid response.', 'response_invalid');
         }
-        $content = (string) ($decoded['choices'][0]['message']['content'] ?? '');
+        $content = $this->extractContent($decoded);
         if ($content === '') {
-            throw new AiException('AI provider returned an empty response.', 'response_empty');
+            throw new AiException($this->emptyResponseMessage($status, $decoded), 'response_empty');
         }
 
         return [
@@ -87,6 +92,8 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
             'content' => $content,
             'raw' => [
                 'id' => (string) ($decoded['id'] ?? ''),
+                'http_status' => $status,
+                'response_structure' => $this->responseStructure($decoded),
                 'usage' => is_array($decoded['usage'] ?? null) ? $decoded['usage'] : [],
             ],
         ];
@@ -242,6 +249,87 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
         }
 
         return $this->redact($message);
+    }
+
+    /** @param array<string,mixed> $decoded */
+    private function extractContent(array $decoded): string
+    {
+        $message = $decoded['choices'][0]['message'] ?? null;
+        if (is_array($message)) {
+            $content = $message['content'] ?? '';
+            if (is_string($content)) {
+                return trim($content);
+            }
+            if (is_array($content)) {
+                $parts = [];
+                foreach ($content as $part) {
+                    if (is_string($part)) {
+                        $parts[] = $part;
+                        continue;
+                    }
+                    if (!is_array($part)) {
+                        continue;
+                    }
+                    $text = $part['text'] ?? $part['content'] ?? '';
+                    if (is_string($text) && trim($text) !== '') {
+                        $parts[] = $text;
+                    }
+                }
+
+                return trim(implode("\n", $parts));
+            }
+        }
+
+        $choiceText = $decoded['choices'][0]['text'] ?? '';
+        if (is_string($choiceText)) {
+            return trim($choiceText);
+        }
+        $outputText = $decoded['output_text'] ?? '';
+        if (is_string($outputText)) {
+            return trim($outputText);
+        }
+
+        return '';
+    }
+
+    /** @param array<string,mixed> $decoded */
+    private function emptyResponseMessage(int $status, array $decoded): string
+    {
+        $finishReason = (string) ($decoded['choices'][0]['finish_reason'] ?? '');
+        $message = 'AI provider returned an empty final content response. HTTP ' . $status . '.';
+        if ($finishReason !== '') {
+            $message .= ' finish_reason=' . $this->redact(substr($finishReason, 0, 80)) . '.';
+        }
+        $message .= ' response_structure=' . $this->responseStructure($decoded) . '.';
+
+        return $this->redact($message);
+    }
+
+    /** @param array<string,mixed> $decoded */
+    private function responseStructure(array $decoded): string
+    {
+        $keys = array_slice(array_keys($decoded), 0, 12);
+        $message = $decoded['choices'][0]['message'] ?? null;
+        if (is_array($message)) {
+            $messageKeys = array_slice(array_keys($message), 0, 12);
+            return 'root{' . implode(',', array_map('strval', $keys)) . '}; choices[0].message{' . implode(',', array_map('strval', $messageKeys)) . '}';
+        }
+
+        return 'root{' . implode(',', array_map('strval', $keys)) . '}';
+    }
+
+    private function isGroqEndpoint(string $provider, string $baseUrl): bool
+    {
+        $host = (string) (parse_url($baseUrl, PHP_URL_HOST) ?: '');
+
+        return $provider === 'groq' || strcasecmp($host, 'api.groq.com') === 0;
+    }
+
+    private function isReasoningModel(string $model): bool
+    {
+        $model = strtolower($model);
+
+        return str_contains($model, 'gpt-oss') || str_contains($model, 'reasoning') || str_contains($model, 'qwen3');
     }
 
     private function baseUrl(string $provider, string $baseUrl): string

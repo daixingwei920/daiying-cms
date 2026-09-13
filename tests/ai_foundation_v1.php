@@ -129,7 +129,7 @@ $repo->save([
 $presets = AiProviderPresets::all();
 $check($presets['deepseek']['adapter'] === 'openai_compatible' && $presets['local_model']['adapter'] === 'openai_compatible' && $presets['gemini']['adapter'] === 'gemini' && $presets['openclaw']['adapter'] === 'openclaw', 'provider presets keep shared OpenAI-compatible adapter plus Gemini and OpenClaw adapters');
 $providers = AiProviderRegistry::describe();
-$check(isset($providers['deepseek'], $providers['openai'], $providers['xai'], $providers['tencent_hunyuan'], $providers['qwen'], $providers['gemini'], $providers['local_model'], $providers['openai_compatible'], $providers['openclaw']), 'default provider registry exposes all friendly presets');
+$check(isset($providers['deepseek'], $providers['openai'], $providers['groq'], $providers['xai'], $providers['tencent_hunyuan'], $providers['qwen'], $providers['gemini'], $providers['local_model'], $providers['openai_compatible'], $providers['openclaw']), 'default provider registry exposes all friendly presets');
 $check(in_array('structured_output', $providers['deepseek']['capabilities'], true), 'provider models declare capabilities');
 
 $usage = new AiUsageLedger($pdo);

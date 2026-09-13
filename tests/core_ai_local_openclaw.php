@@ -74,6 +74,52 @@ $check(!in_array('Authorization: Bearer ', $captured[0]['headers'], true), 'Loca
 $models = $localClient->models($runtime);
 $check(array_column($models, 'id') === ['llama3.1', 'qwen2.5:7b'], 'Local Model discovery reads OpenAI-compatible model lists');
 
+$groqCaptured = [];
+$groqClient = new OpenAiCompatibleProviderClient(static function (string $method, string $url, array $headers, string $json, int $timeout) use (&$groqCaptured): array {
+    $groqCaptured[] = compact('method', 'url', 'headers', 'json', 'timeout');
+
+    return [
+        'headers' => ['HTTP/2 200'],
+        'body' => '{"id":"chatcmpl-groq","choices":[{"message":{"role":"assistant","content":"groq ok","reasoning":"hidden reasoning"},"finish_reason":"stop"}],"usage":{"total_tokens":8}}',
+    ];
+});
+$groqRuntime = AiProviderPresets::applyDefaults([
+    'enabled' => true,
+    'provider' => 'groq',
+    'api_key' => 'gsk-test-secret',
+    'timeout_seconds' => 30,
+    'max_tokens' => 32,
+    'temperature' => 0.0,
+]);
+$groqChat = $groqClient->chat([['role' => 'user', 'content' => 'hello']], $groqRuntime);
+$groqPayload = json_decode((string) ($groqCaptured[0]['json'] ?? '{}'), true);
+$check($groqChat['content'] === 'groq ok' && $groqCaptured[0]['url'] === 'https://api.groq.com/openai/v1/chat/completions', 'Groq preset uses the shared OpenAI-compatible chat completions endpoint');
+$check(($groqPayload['model'] ?? '') === 'openai/gpt-oss-20b' && ($groqPayload['include_reasoning'] ?? null) === false, 'Groq GPT-OSS requests send the selected model and hide reasoning by default');
+$check(($groqChat['raw']['http_status'] ?? 0) === 200 && str_contains((string) ($groqChat['raw']['response_structure'] ?? ''), 'choices[0].message'), 'OpenAI-compatible responses include safe status and response structure metadata');
+
+$contentPartsClient = new OpenAiCompatibleProviderClient(static fn (): array => [
+    'headers' => ['HTTP/1.1 200'],
+    'body' => '{"choices":[{"message":{"content":[{"type":"text","text":"part one"},{"type":"text","text":"part two"}]}}]}',
+]);
+$partsChat = $contentPartsClient->chat([['role' => 'user', 'content' => 'hello']], [
+    'provider' => 'openai_compatible',
+    'api_key' => 'sk-test-secret',
+    'api_key_required' => true,
+    'base_url' => 'https://ai.example.test/v1',
+    'model' => 'compatible-model',
+]);
+$check($partsChat['content'] === "part one\npart two", 'OpenAI-compatible parser accepts array content parts');
+
+try {
+    (new OpenAiCompatibleProviderClient(static fn (): array => [
+        'headers' => ['HTTP/1.1 200'],
+        'body' => '{"choices":[{"message":{"role":"assistant","reasoning":"thinking only"},"finish_reason":"length"}]}',
+    ]))->chat([['role' => 'user', 'content' => 'hello']], $groqRuntime);
+    $check(false, 'Empty OpenAI-compatible responses include diagnostics');
+} catch (AiException $exception) {
+    $check($exception->reason() === 'response_empty' && str_contains($exception->getMessage(), 'HTTP 200') && str_contains($exception->getMessage(), 'response_structure='), 'Empty OpenAI-compatible responses include safe HTTP/status diagnostics');
+}
+
 $repo->save([
     'enabled' => true,
     'provider' => 'openclaw',

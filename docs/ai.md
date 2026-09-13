@@ -27,6 +27,7 @@ Provider choices are user-friendly presets. They do not each map to a separate C
 | --- | --- | --- | --- |
 | `deepseek` | `openai_compatible` | `https://api.deepseek.com/v1` | `deepseek-chat` |
 | `openai` | `openai_compatible` | `https://api.openai.com/v1` | `gpt-4.1-mini` |
+| `groq` | `openai_compatible` | `https://api.groq.com/openai/v1` | `openai/gpt-oss-20b` |
 | `xai` | `openai_compatible` | `https://api.x.ai/v1` | `grok-4.6` |
 | `tencent_hunyuan` | `openai_compatible` | `https://api.hunyuan.cloud.tencent.com/v1` | `hunyuan-turbos-latest` |
 | `gemini` | `gemini` | `https://generativelanguage.googleapis.com/v1beta` | `gemini-3.6-flash` |
@@ -111,7 +112,7 @@ Common failure reasons include:
 
 Core keeps the Provider layer intentionally small:
 
-- `OpenAiCompatibleProviderClient` handles OpenAI-style chat completions for DeepSeek, OpenAI, Grok / xAI, Tencent Hunyuan, and custom compatible endpoints.
+- `OpenAiCompatibleProviderClient` handles OpenAI-style chat completions for DeepSeek, OpenAI, Groq, Grok / xAI, Tencent Hunyuan, and custom compatible endpoints.
 - `GeminiProviderClient` handles Google's native Gemini `generateContent` protocol.
 - `AiProviderPresets` maps friendly Provider names to adapter, Base URL, and model defaults.
 

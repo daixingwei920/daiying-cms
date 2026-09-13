@@ -65,13 +65,14 @@ $check(in_array('adapter', array_map(static fn (array $row): string => (string) 
 $presets = AiProviderPresets::all();
 $check(($presets['deepseek']['adapter'] ?? '') === 'openai_compatible', 'DeepSeek preset uses the shared OpenAI-compatible adapter');
 $check(($presets['openai']['adapter'] ?? '') === 'openai_compatible', 'OpenAI preset uses the shared OpenAI-compatible adapter');
+$check(($presets['groq']['adapter'] ?? '') === 'openai_compatible' && ($presets['groq']['base_url'] ?? '') === 'https://api.groq.com/openai/v1', 'Groq preset uses the shared OpenAI-compatible adapter and GroqCloud endpoint');
 $check(($presets['xai']['adapter'] ?? '') === 'openai_compatible', 'Grok / xAI preset uses the shared OpenAI-compatible adapter');
 $check(($presets['tencent_hunyuan']['adapter'] ?? '') === 'openai_compatible', 'Tencent Hunyuan preset uses the shared OpenAI-compatible adapter');
 $check(($presets['qwen']['adapter'] ?? '') === 'openai_compatible', 'Qwen preset uses the shared OpenAI-compatible adapter');
 $check(($presets['gemini']['adapter'] ?? '') === 'gemini', 'Gemini preset uses the native Gemini adapter');
 $check(($presets['local_model']['adapter'] ?? '') === 'openai_compatible' && ($presets['local_model']['api_key_required'] ?? true) === false, 'Local Model preset uses OpenAI-compatible adapter with optional API Key');
 $check(($presets['openclaw']['adapter'] ?? '') === 'openclaw', 'OpenClaw preset uses its gateway adapter');
-$check(AiProviderPresets::normalize('grok') === 'xai' && AiProviderPresets::normalize('openai-compatible') === 'openai_compatible', 'legacy and alias provider names are normalized');
+$check(AiProviderPresets::normalize('groqcloud') === 'groq' && AiProviderPresets::normalize('grok') === 'xai' && AiProviderPresets::normalize('openai-compatible') === 'openai_compatible', 'legacy and alias provider names are normalized');
 
 $settings = Settings::fromArray(['security' => ['encryption_key' => 'core-ai-test-key'], 'database' => ['dsn' => 'sqlite::memory:']]);
 $repo = new SiteAiSettingsRepository($pdo, 'core-ai-test-key');

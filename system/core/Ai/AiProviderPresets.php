@@ -28,6 +28,16 @@ final class AiProviderPresets
                 'cloud' => true,
                 'supports_model_discovery' => true,
             ],
+            'groq' => [
+                'label' => 'Groq',
+                'adapter' => 'openai_compatible',
+                'base_url' => 'https://api.groq.com/openai/v1',
+                'model' => 'openai/gpt-oss-20b',
+                'api_key_required' => true,
+                'cloud' => true,
+                'supports_model_discovery' => true,
+                'include_reasoning' => false,
+            ],
             'xai' => [
                 'label' => 'Grok / xAI',
                 'adapter' => 'openai_compatible',
@@ -110,6 +120,9 @@ final class AiProviderPresets
         if ($provider === 'grok' || $provider === 'x.ai') {
             return 'xai';
         }
+        if ($provider === 'groqcloud') {
+            return 'groq';
+        }
         if ($provider === 'hunyuan' || $provider === 'tencent') {
             return 'tencent_hunyuan';
         }
@@ -163,6 +176,9 @@ final class AiProviderPresets
         $config['api_key_required'] = self::requiresApiKey($provider);
         $config['cloud_provider'] = self::isCloudProvider($provider);
         $config['supports_model_discovery'] = !empty($preset['supports_model_discovery']);
+        if (array_key_exists('include_reasoning', $preset) && !array_key_exists('include_reasoning', $config)) {
+            $config['include_reasoning'] = (bool) $preset['include_reasoning'];
+        }
         if (!isset($config['local_api_type']) || (string) $config['local_api_type'] === '') {
             $config['local_api_type'] = (string) ($preset['local_api_type'] ?? 'openai_compatible');
         }
