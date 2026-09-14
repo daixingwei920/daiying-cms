@@ -1,5 +1,5 @@
 {
-    "Admin/AdminController.php": "1b88507b48dcd9941167ba7f60dd53dba3823f526e219fc2e479ed9960c2c3c9",
+    "Admin/AdminController.php": "13d6fa3342e6fbd9d0f1cf0c6777ca8c812ea026b825994e474cb3a4c7100d81",
     "Advertising/AdController.php": "4ab8107c99746c87b0a05d07dd2c7ac55071d8300fe81fa480f0af4849f4c862",
     "Advertising/AdRenderer.php": "990d4f9c05a8055acdb1c959afbbd38805e0df8682f06adb94815cf31475bc93",
     "Advertising/AdRepository.php": "332f8eb9a15c827d6ae5ac1a95d628e77d0e8bf696b46876f731539438260de9",
@@ -46,7 +46,7 @@
     "Auth/CapabilityRegistry.php": "3314dfa6adbd1ac3418680ce72e630c8ca32a9cd3a0cc04fb5d15df0fae28165",
     "Auth/FrontUserAuthenticator.php": "22bd708bfecd9349d1cd5fdf75e0ea5ab4733a1366304b42bf180539097f83f6",
     "Auth/RoleCapabilityService.php": "9c967b077a6a0d794ec5ba6e097505518d2023b47b9705708f2f42e00928c0b1",
-    "Bootstrap/Application.php": "e969d42833709d81930e655dfd4033997edda51286fa59b1f3f5c5a8c44b8c20",
+    "Bootstrap/Application.php": "fafb8785a8272dfb2190c905e5e09c20cc5906fdf97792d7179fd6c1e01491c6",
     "Bootstrap/autoload.php": "2b32022cde2abea919b9b2a9300fe8a51dd3936c1846cb26e571e2cb78c6e24d",
     "Cache/ArrayCache.php": "946727a1d8cb8ae12cc54c3aeca02fa2570c7f85bcfa185c2033525091ce4f58",
     "Cache/CacheException.php": "9080b181247868172bfea5a16ac39b78948a54899d5927973089e3ac3586a9cb",
@@ -65,6 +65,7 @@
     "Content/ContentAutosaveRepository.php": "0c666982567237cecfc3ce7de785eb8079c1b1fe89d0e84b4e1e8fde0c5b0522",
     "Content/ContentException.php": "8ab8565f8f55b80337042039605be9a2653bb24a59b2679cec6fffffb9223f4a",
     "Content/ContentFrontController.php": "061f408f2764e8e9811c0596fd505a6c91b45e5c3d09aa52cf6979070e7d1fe5",
+    "Content/ContentPublishedEvent.php": "4174e45ad1f33457bf404eadee6954507a5c0e8f8736f3daa8b19044a9179fbb",
     "Content/ContentRepository.php": "3491f3d7b9b481a02dd7b1841634dbb2c09aad3477047383254f3fa5372ae86e",
     "Content/ContentRevisionRepository.php": "ae72da93b25a96ef3b2504b02dec1b39a2e8f67623e89154bbeed61ffa618053",
     "Content/ContentScheduler.php": "5e52f837d89ecb21f18b9f1b3ca834873b84b250108a569c00eaf5cd399fa6fe",

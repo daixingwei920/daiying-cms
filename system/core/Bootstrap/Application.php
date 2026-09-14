@@ -365,7 +365,7 @@ final class Application
         $router->get('/install', [$install, 'show']);
         $router->post('/install', [$install, 'store']);
 
-        $admin = new AdminController($settings, $logger, $rootPath);
+        $admin = new AdminController($settings, $logger, $rootPath, null, $events);
         $router->get('/admin/login', [$admin, 'loginForm']);
         $router->post('/admin/login', [$admin, 'login']);
         $router->post('/admin/login/passkey-options', [$admin, 'loginPasskeyOptions']);

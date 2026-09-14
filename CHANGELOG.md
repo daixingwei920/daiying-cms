@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.58 - 2026-09-14
+
+- Added a generic Core `ContentPublishedEvent` so official plugins can react to newly published articles and pages without embedding provider-specific SEO logic in Core.
+- Added the `official.seo.baidu-submit` V1 plugin for Baidu Search Resource Platform URL submission, with encrypted token storage, same-site URL validation, dedupe, queue integration, and admin-visible Baidu response fields.
+- Kept existing `sitemap.xml`, `robots.txt`, Google SEO, and Bing SEO behavior unchanged.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.58-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.58>.
+
 ## 1.2.57 - 2026-09-13
 
 - Fixed custom Groq/OpenAI-compatible test connections for GPT-OSS reasoning models by using a safe test token budget while keeping the shared OpenAI-compatible adapter.

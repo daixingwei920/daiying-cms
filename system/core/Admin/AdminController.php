@@ -21,6 +21,7 @@ use Cms\Core\Auth\AdminSessionService;
 use Cms\Core\Audit\AuditLogger;
 use Cms\Core\Comment\CommentRepository;
 use Cms\Core\Config\Settings;
+use Cms\Core\Content\ContentPublishedEvent;
 use Cms\Core\Content\ContentRepository;
 use Cms\Core\Content\ContentTypeRegistry;
 use Cms\Core\Database\ConnectionFactory;
@@ -99,6 +100,7 @@ final class AdminController
         private readonly FileLogger $logger,
         private readonly ?string $rootPath = null,
         private readonly ?MarketApiClientInterface $marketClient = null,
+        private readonly ?EventDispatcher $events = null,
     ) {
     }
 
@@ -1815,6 +1817,9 @@ final class AdminController
             $id = $repo->create($input['type'], $input['title'], $input['slug'], $input['blocks'], $input['status'], $input['meta'], $input['categories'], $input['tags']);
             $user = (new AdminAuthenticator($pdo))->user();
             (new AuditLogger($pdo))->record('admin', $user['id'] ?? null, 'content.created', ['content_id' => $id, 'type' => $input['type']]);
+            if ($input['status'] === 'published') {
+                $this->dispatchContentPublishedEvent($repo, $id, 'created');
+            }
         } catch (Throwable $exception) {
             $this->logger->error('Content create failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
             return Response::html(View::page('新建内容', $this->contentForm('保存失败：' . $exception->getMessage(), $input)), 422);
@@ -1859,8 +1864,12 @@ final class AdminController
         try {
             $pdo = ConnectionFactory::make($this->settings);
             $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $before = $repo->find($id);
             $repo->update($id, $input['type'], $input['title'], $input['slug'], $input['blocks'], $input['status'], $input['meta'], $input['categories'], $input['tags']);
             (new AuditLogger($pdo))->record('admin', $guard['id'] ?? null, 'content.updated', ['content_id' => $id, 'type' => $input['type']]);
+            if ($input['status'] === 'published') {
+                $this->dispatchContentPublishedEvent($repo, $id, 'updated', $before);
+            }
         } catch (Throwable $exception) {
             $this->logger->error('Content update failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
             return Response::html(View::page('编辑内容', $this->contentForm('保存失败：' . $exception->getMessage(), $input, $id)), 422);
@@ -9620,6 +9629,48 @@ JS;
         }
 
         return '';
+    }
+
+    /** @param array<string,mixed>|null $before */
+    private function dispatchContentPublishedEvent(ContentRepository $repo, int $id, string $trigger, ?array $before = null): void
+    {
+        if ($this->events === null) {
+            return;
+        }
+
+        try {
+            $content = $repo->find($id);
+            if ($content === null || (string) ($content['status'] ?? '') !== 'published') {
+                return;
+            }
+            $type = (string) ($content['content_type'] ?? '');
+            $slug = (string) ($content['slug'] ?? '');
+            $publicPath = $this->contentPublicPath($type, $slug);
+            $siteUrl = rtrim((string) $this->settings->get('site.url', ''), '/');
+            if ($publicPath === '' || $siteUrl === '' || filter_var($siteUrl, FILTER_VALIDATE_URL) === false) {
+                return;
+            }
+            if ($before !== null
+                && (string) ($before['status'] ?? '') === 'published'
+                && (string) ($before['content_type'] ?? '') === $type
+                && (string) ($before['slug'] ?? '') === $slug
+            ) {
+                return;
+            }
+
+            $this->events->dispatch(new ContentPublishedEvent(
+                $id,
+                $type,
+                (string) ($content['title'] ?? ''),
+                $slug,
+                $publicPath,
+                $siteUrl . $publicPath,
+                (string) ($content['published_at'] ?? gmdate('c')),
+                $trigger,
+            ));
+        } catch (Throwable $exception) {
+            $this->logger->warning('Content published event dispatch failed', ['source' => 'Core', 'error' => $exception->getMessage(), 'content_id' => $id]);
+        }
     }
 
     private function pluginStatusLabel(string $status): string
