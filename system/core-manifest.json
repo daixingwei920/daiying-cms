@@ -32,7 +32,7 @@
     "Ai/AiUsageLedger.php": "96806e09ec30ce8ad985d03cd44e1e3c353bb8316287df3063e2608c21339f9b",
     "Ai/GeminiProvider.php": "6697c1fad615cb84ac0208645b6703687b851371ca8d9fadc770edb42425f611",
     "Ai/GeminiProviderClient.php": "d25f75881f3665632be330ba5cce03da2ff1aba87cd206f7dece3482cc4fedb4",
-    "Ai/OpenAiCompatibleProvider.php": "11607fd144c1572ef7cf0c7924778f9c54b0b306eb77c82590f0f951540b27b1",
+    "Ai/OpenAiCompatibleProvider.php": "59a0a536b2f539faea70da37748b7021676208bf8a3f9e79877b77f39251d8d8",
     "Ai/OpenAiCompatibleProviderClient.php": "26a819176bd82e698fe313415006fca6de42fe4c966c8d0bd8f385d76fe1be68",
     "Ai/OpenClawProvider.php": "bfed16d6666e3888f2bed5d41e4197f1180a1404d7244872f6ef81fdb3c2e049",
     "Ai/OpenClawProviderClient.php": "f9b08e8e4737e2c8efecbcc7d3e3269c73cad2d4e433ddfba5caf55826d596d6",

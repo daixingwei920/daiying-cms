@@ -9,6 +9,7 @@ use Cms\Core\Ai\AiProviderClientInterface;
 use Cms\Core\Ai\AiProviderPresets;
 use Cms\Core\Ai\AiProviderRegistry;
 use Cms\Core\Ai\AiService;
+use Cms\Core\Ai\OpenAiCompatibleProvider;
 use Cms\Core\Ai\OpenAiCompatibleProviderClient;
 use Cms\Core\Ai\OpenClawProviderClient;
 use Cms\Core\Ai\SiteAiSettingsRepository;
@@ -96,6 +97,31 @@ $groqPayload = json_decode((string) ($groqCaptured[0]['json'] ?? '{}'), true);
 $check($groqChat['content'] === 'groq ok' && $groqCaptured[0]['url'] === 'https://api.groq.com/openai/v1/chat/completions', 'Groq preset uses the shared OpenAI-compatible chat completions endpoint');
 $check(($groqPayload['model'] ?? '') === 'openai/gpt-oss-20b' && ($groqPayload['include_reasoning'] ?? null) === false, 'Groq GPT-OSS requests send the selected model and hide reasoning by default');
 $check(($groqChat['raw']['http_status'] ?? 0) === 200 && str_contains((string) ($groqChat['raw']['response_structure'] ?? ''), 'choices[0].message'), 'OpenAI-compatible responses include safe status and response structure metadata');
+
+$customGroqCaptured = [];
+$customGroqClient = new OpenAiCompatibleProviderClient(static function (string $method, string $url, array $headers, string $json, int $timeout) use (&$customGroqCaptured): array {
+    $customGroqCaptured[] = compact('method', 'url', 'headers', 'json', 'timeout');
+
+    return [
+        'headers' => ['HTTP/2 200'],
+        'body' => '{"id":"chatcmpl-custom-groq","choices":[{"message":{"role":"assistant","content":"OK"},"finish_reason":"stop"}],"usage":{"total_tokens":12}}',
+    ];
+});
+$customGroqProvider = new OpenAiCompatibleProvider('openai_compatible', 'Custom OpenAI-compatible', [], $customGroqClient);
+$customGroqResult = $customGroqProvider->testConnection([
+    'provider' => 'openai_compatible',
+    'provider_name' => 'Groq',
+    'api_key' => 'gsk-test-secret',
+    'api_key_required' => true,
+    'base_url' => 'https://api.groq.com/openai/v1',
+    'model' => 'openai/gpt-oss-20b',
+    'max_tokens' => 16,
+    'temperature' => 0.7,
+    'timeout_seconds' => 30,
+]);
+$customGroqPayload = json_decode((string) ($customGroqCaptured[0]['json'] ?? '{}'), true);
+$check($customGroqResult['status'] === 'success' && $customGroqCaptured[0]['url'] === 'https://api.groq.com/openai/v1/chat/completions', 'Custom OpenAI-compatible Groq settings test through the shared chat completions endpoint');
+$check(($customGroqPayload['include_reasoning'] ?? null) === false && (int) ($customGroqPayload['max_tokens'] ?? 0) >= 1024, 'Custom Groq/GPT-OSS test connection hides reasoning and uses a safe token budget');
 
 $contentPartsClient = new OpenAiCompatibleProviderClient(static fn (): array => [
     'headers' => ['HTTP/1.1 200'],

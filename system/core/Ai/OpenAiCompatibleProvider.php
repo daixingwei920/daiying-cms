@@ -52,10 +52,18 @@ final class OpenAiCompatibleProvider implements AiProviderInterface, AiModelDisc
 
     public function testConnection(array $config): array
     {
-        $response = $this->execute(AiRequest::chat([['role' => 'user', 'content' => 'Reply with OK only.']], [
-            'max_tokens' => 16,
+        $testMaxTokens = $this->testConnectionMaxTokens($config);
+        $testConfig = array_replace($config, [
+            'max_tokens' => $testMaxTokens,
             'temperature' => 0.0,
-        ]), $config + ['max_tokens' => 16, 'temperature' => 0.0]);
+        ]);
+        if ($this->shouldHideReasoning($testConfig) && !array_key_exists('include_reasoning', $testConfig)) {
+            $testConfig['include_reasoning'] = false;
+        }
+        $response = $this->execute(AiRequest::chat([['role' => 'user', 'content' => 'Reply with OK only.']], [
+            'max_tokens' => $testMaxTokens,
+            'temperature' => 0.0,
+        ]), $testConfig);
 
         return [
             'provider' => $response->provider,
@@ -73,5 +81,28 @@ final class OpenAiCompatibleProvider implements AiProviderInterface, AiModelDisc
         $config['provider'] = $this->id;
 
         return $this->client->models($config);
+    }
+
+    /** @param array<string,mixed> $config */
+    private function testConnectionMaxTokens(array $config): int
+    {
+        return $this->shouldHideReasoning($config) ? 1024 : 64;
+    }
+
+    /** @param array<string,mixed> $config */
+    private function shouldHideReasoning(array $config): bool
+    {
+        $provider = AiProviderPresets::normalize((string) ($config['provider'] ?? $this->id));
+        $providerName = strtolower((string) ($config['provider_name'] ?? ''));
+        $baseUrl = (string) ($config['base_url'] ?? '');
+        $host = strtolower((string) (parse_url($baseUrl, PHP_URL_HOST) ?: ''));
+        $model = strtolower((string) ($config['model'] ?? ''));
+
+        return $provider === 'groq'
+            || str_contains($providerName, 'groq')
+            || $host === 'api.groq.com'
+            || str_contains($model, 'gpt-oss')
+            || str_contains($model, 'reasoning')
+            || str_contains($model, 'qwen3');
     }
 }
