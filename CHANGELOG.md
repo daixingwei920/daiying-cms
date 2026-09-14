@@ -2,6 +2,14 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.59 - 2026-09-14
+
+- Fixed Core route registration so the shared event dispatcher is passed into admin controllers during boot.
+- Rebuilt the official Core update path as a complete Core-owned snapshot after the 1.2.58 partial package left active release directories with stale Core interfaces.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.59-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.59>.
+
 ## 1.2.58 - 2026-09-14
 
 - Added a generic Core `ContentPublishedEvent` so official plugins can react to newly published articles and pages without embedding provider-specific SEO logic in Core.

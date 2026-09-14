@@ -46,7 +46,7 @@
     "Auth/CapabilityRegistry.php": "3314dfa6adbd1ac3418680ce72e630c8ca32a9cd3a0cc04fb5d15df0fae28165",
     "Auth/FrontUserAuthenticator.php": "22bd708bfecd9349d1cd5fdf75e0ea5ab4733a1366304b42bf180539097f83f6",
     "Auth/RoleCapabilityService.php": "9c967b077a6a0d794ec5ba6e097505518d2023b47b9705708f2f42e00928c0b1",
-    "Bootstrap/Application.php": "fafb8785a8272dfb2190c905e5e09c20cc5906fdf97792d7179fd6c1e01491c6",
+    "Bootstrap/Application.php": "6acf1fcee07099025c9db0fabd29a9918647a2006bd3b52818df5b6219f3373f",
     "Bootstrap/autoload.php": "2b32022cde2abea919b9b2a9300fe8a51dd3936c1846cb26e571e2cb78c6e24d",
     "Cache/ArrayCache.php": "946727a1d8cb8ae12cc54c3aeca02fa2570c7f85bcfa185c2033525091ce4f58",
     "Cache/CacheException.php": "9080b181247868172bfea5a16ac39b78948a54899d5927973089e3ac3586a9cb",

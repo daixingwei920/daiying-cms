@@ -113,7 +113,7 @@ final class Application
         View::setAdminPluginMenus($pluginRuntime->menus());
         View::setFrontNavigation(NavigationBuilder::build($settings, null, $rootPath));
         self::configureAdminNotifications($settings, $installed);
-        self::registerCoreRoutes($router, $settings, $rootPath, $logger, $mode, $pluginRuntime);
+        self::registerCoreRoutes($router, $settings, $rootPath, $logger, $mode, $pluginRuntime, $events);
 
         return new self($rootPath, $settings, $logger, $router, $installed);
     }
@@ -215,7 +215,7 @@ final class Application
         return $path === '/health';
     }
 
-    private static function registerCoreRoutes(Router $router, Settings $settings, string $rootPath, FileLogger $logger, string $mode, PluginRuntimeRegistry $pluginRuntime): void
+    private static function registerCoreRoutes(Router $router, Settings $settings, string $rootPath, FileLogger $logger, string $mode, PluginRuntimeRegistry $pluginRuntime, EventDispatcher $events): void
     {
         $router->get('/', static function () use ($rootPath, $settings, $logger): Response {
             if (!is_file($rootPath . '/storage/installed.lock')) {
