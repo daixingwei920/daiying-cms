@@ -5,6 +5,7 @@ declare(strict_types=1);
 require __DIR__ . '/../system/core/Bootstrap/autoload.php';
 
 use Cms\Core\Support\View;
+use Cms\Core\Plugin\PluginMenuItem;
 use Cms\Core\Update\UpdatePackageManifest;
 
 $root = dirname(__DIR__);
@@ -91,10 +92,15 @@ $assert(str_contains($mobile, 'overflow: visible'), 'mobile inner containers mus
 
 $_SERVER['REQUEST_URI'] = '/admin/settings/ai';
 $_SESSION = [];
+View::setAdminPluginMenus([
+    new PluginMenuItem('official.seo.baidu-submit', '百度推送', '/admin/seo/baidu-submit', 'seo.manage', '平台', 'plugin', 100, '平台'),
+]);
 $html = View::page('AI 设置', '<h1>AI 设置</h1>');
 $assert(str_contains($html, 'data-admin-nav-group="platform"'), 'admin sidebar must render stable platform nav group ids');
 $assert(str_contains($html, 'data-admin-nav-section-toggle'), 'admin sidebar must render section toggle buttons');
 $assert(str_contains($html, 'class="active" aria-current="page" title="AI 设置"'), 'admin sidebar must keep the current page link active inside its group');
+$assert(str_contains($html, 'title="站点设置" href="/admin/settings"'), 'plugin menus sharing the platform section must not replace Core site settings.');
+$assert(str_contains($html, 'title="百度推送" href="/admin/seo/baidu-submit"'), 'plugin menus sharing a Core section must be appended to that section.');
 $assert(str_contains($html, 'daiying.admin.navGroups.v1'), 'admin layout must ship nav group collapse behavior through Core View');
 
 echo "admin layout scroll contract PASS\n";

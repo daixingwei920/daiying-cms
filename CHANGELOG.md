@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.60 - 2026-09-14
+
+- Fixed the collapsible admin sidebar so plugin menu items using an existing Core section, such as `平台`, are appended instead of replacing Core links.
+- Restored the Platform sidebar entries for Site Settings, AI Settings, Import/Export, Update, and Recovery when `official.seo.baidu-submit` is installed.
+- Added regression coverage for Core and plugin menu coexistence in the same admin section.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.60-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.60>.
+
 ## 1.2.59 - 2026-09-14
 
 - Fixed Core route registration so the shared event dispatcher is passed into admin controllers during boot.

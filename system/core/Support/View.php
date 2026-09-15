@@ -114,7 +114,7 @@ final class View
         }
 
         foreach (self::pluginMenuSections() as $section => $links) {
-            $sections[$section] = $links;
+            $sections[$section] = array_values(array_merge($sections[$section] ?? [], $links));
         }
 
         $html = '<aside class="admin-sidebar" id="admin-sidebar"><a class="admin-brand" href="/admin"><span class="admin-brand-mark">D</span><span class="admin-brand-text">Daiying CMS</span></a><nav class="admin-nav" aria-label="后台导航">';
