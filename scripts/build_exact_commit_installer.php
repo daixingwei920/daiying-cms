@@ -13,7 +13,15 @@ if (!class_exists(ZipArchive::class)) {
 }
 
 $root = dirname(__DIR__);
-$options = getopt('', ['commit::', 'version::', 'output-dir::', 'channel::']);
+$options = getopt('', [
+    'commit::',
+    'version::',
+    'output-dir::',
+    'channel::',
+    'key-id::',
+    'ed25519-secret-base64::',
+    'ed25519-secret-file::',
+]);
 $commit = trim((string) ($options['commit'] ?? 'HEAD'));
 $channel = trim((string) ($options['channel'] ?? 'stable'));
 if ($channel === '') {
@@ -46,6 +54,7 @@ $packageName = 'daiying-cms-' . $version . '-' . $channel . '-exact-' . substr($
 $zipPath = $outputDir . '/' . $packageName . '.zip';
 $manifestPath = $outputDir . '/' . $packageName . '.manifest.json';
 $shaPath = $outputDir . '/' . $packageName . '.zip.sha256';
+$signaturePath = $zipPath . '.signature.json';
 
 $tracked = gitLines($root, ['ls-tree', '-r', '--name-only', $resolvedCommit]);
 $include = array_values(array_filter($tracked, static fn (string $file): bool => shouldPackage($file)));
@@ -122,6 +131,7 @@ if (!is_string($json)) {
 }
 file_put_contents($manifestPath, $json . "\n");
 file_put_contents($shaPath, $packageSha256 . '  ' . basename($zipPath) . "\n");
+$signatureWritten = writeSignatureSidecar($signaturePath, $zipPath, $resolvedCommit, $version, $channel, $options);
 
 echo "Exact commit installer built and verified.\n";
 echo "Commit: {$resolvedCommit}\n";
@@ -129,6 +139,7 @@ echo "Version: {$version}\n";
 echo "ZIP: {$zipPath}\n";
 echo "SHA256: {$packageSha256}\n";
 echo "Manifest: {$manifestPath}\n";
+echo "Signature: " . ($signatureWritten ? $signaturePath : 'skipped') . "\n";
 echo "Files: " . count($files) . "\n";
 
 /** @return list<string> */
@@ -206,6 +217,58 @@ function hasManifest(array $files, string $prefix, string $manifest): bool
     }
 
     return false;
+}
+
+function writeSignatureSidecar(string $signaturePath, string $zipPath, string $commit, string $version, string $channel, array $options): bool
+{
+    $secret = signingSecret($options);
+    if ($secret === null) {
+        return false;
+    }
+    if (!function_exists('sodium_crypto_sign_detached')) {
+        fail('Sodium extension is required for Ed25519 installer signing.');
+    }
+    $public = base64_encode(sodium_crypto_sign_publickey_from_secretkey($secret));
+    $payload = [
+        'artifact' => basename($zipPath),
+        'package_type' => 'full_install',
+        'product_id' => 'daiying.cms',
+        'version' => $version,
+        'channel' => $channel,
+        'exact_commit' => $commit,
+        'sha256' => hash_file('sha256', $zipPath),
+        'key_id' => trim((string) ($options['key-id'] ?? 'foundation-rc-ed25519')),
+        'signed_at' => gmdate('c'),
+    ];
+    $payloadJson = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+    file_put_contents($signaturePath, json_encode([
+        'payload' => $payload,
+        'public_key' => $public,
+        'signature' => base64_encode(sodium_crypto_sign_detached($payloadJson, $secret)),
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+
+    return true;
+}
+
+function signingSecret(array $options): ?string
+{
+    $encoded = trim((string) ($options['ed25519-secret-base64'] ?? ''));
+    $file = trim((string) ($options['ed25519-secret-file'] ?? ''));
+    if ($encoded === '' && $file !== '') {
+        $encoded = trim((string) file_get_contents($file));
+    }
+    if ($encoded === '') {
+        $encoded = trim((string) getenv('DAIYING_RELEASE_ED25519_SECRET_BASE64'));
+    }
+    if ($encoded === '') {
+        return null;
+    }
+    $secret = base64_decode($encoded, true);
+    if (!is_string($secret) || strlen($secret) !== SODIUM_CRYPTO_SIGN_SECRETKEYBYTES) {
+        fail('A valid base64 Ed25519 secret key is required for installer signing.');
+    }
+
+    return $secret;
 }
 
 /** @return array<string,string> */

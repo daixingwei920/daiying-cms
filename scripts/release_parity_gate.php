@@ -33,6 +33,7 @@ $checks = [];
 $expected = expectedCommitState($root, $commit);
 $checks[] = pass('commit.resolved', 'Target commit resolved: ' . $commit);
 $checks[] = check($expected['version'] !== '', 'commit.version', 'Config version detected: ' . $expected['version']);
+$checks = array_merge($checks, verifyCommitReleaseSource($root, $commit, $expected));
 
 $tag = trim((string) ($options['tag'] ?? ''));
 if ($tag !== '') {
@@ -43,7 +44,7 @@ if ($tag !== '') {
 $installerZip = trim((string) ($options['installer-zip'] ?? ''));
 if ($installerZip !== '') {
     $installerZip = absolutePath($root, $installerZip);
-    $checks = array_merge($checks, verifyInstaller($installerZip, $options['installer-manifest'] ?? '', $expected, $requireSignature));
+    $checks = array_merge($checks, verifyInstaller($root, $installerZip, $options['installer-manifest'] ?? '', $expected, $requireSignature));
 }
 
 $updateZip = trim((string) ($options['update-zip'] ?? ''));
@@ -81,6 +82,42 @@ if (filter_var((string) ($options['json'] ?? '0'), FILTER_VALIDATE_BOOL)) {
 }
 
 exit($status === 'PASS' ? 0 : 1);
+
+/** @return list<array{id:string,status:string,message:string}> */
+function verifyCommitReleaseSource(string $root, string $commit, array $expected): array
+{
+    $checks = [];
+    $required = [
+        'config/app.php',
+        'config/app.example.php',
+        'system/core-manifest.json',
+        'system/core/Bootstrap/autoload.php',
+        'system/core/Bootstrap/Application.php',
+        'system/core/Update/UpdateService.php',
+        'system/core/Update/UpdatePackageReader.php',
+        'system/core/Update/UpdatePackageManifest.php',
+        'public/index.php',
+        'cli.php',
+    ];
+    foreach ($required as $file) {
+        $checks[] = check(isset($expected['package_files'][$file]), 'source.required.' . str_replace(['/', '.'], '_', $file), 'Required release source file exists: ' . $file);
+    }
+
+    $app = gitBlob($root, $commit, 'config/app.php');
+    $example = gitBlob($root, $commit, 'config/app.example.php');
+    $appVersion = preg_match("/['\"]version['\"]\\s*=>\\s*['\"]([^'\"]+)['\"]/", $app, $match) === 1 ? $match[1] : '';
+    $exampleVersion = preg_match("/['\"]version['\"]\\s*=>\\s*['\"]([^'\"]+)['\"]/", $example, $match) === 1 ? $match[1] : '';
+    $checks[] = check($appVersion === $expected['version'] && $exampleVersion === $expected['version'], 'source.version_config_consistent', 'config/app.php and config/app.example.php use the target version.');
+    $changelog = isset($expected['package_files']['CHANGELOG.md']) ? gitBlob($root, $commit, 'CHANGELOG.md') : '';
+    $checks[] = check($changelog === '' || str_contains($changelog, '## ' . $expected['version']), 'source.changelog_version', 'CHANGELOG contains an entry for the target version.');
+    $checks[] = check($expected['core_manifest'] !== [], 'source.core_manifest_nonempty', 'Core manifest contains Core files.');
+    $checks = array_merge($checks, verifyMigrationFiles($root, $commit, array_keys($expected['update_files'])));
+    $checks = array_merge($checks, verifyPhpSyntaxForCommit($root, $commit, array_keys($expected['update_files'])));
+    $checks = array_merge($checks, verifyCoreReferencesForCommit($root, $commit, array_keys($expected['update_files'])));
+    $checks = array_merge($checks, verifyPublicApiCompatibility($root, $commit, $expected['version']));
+
+    return $checks;
+}
 
 /** @return array{id:string,status:string,message:string} */
 function pass(string $id, string $message): array
@@ -151,7 +188,7 @@ function expectedCommitState(string $root, string $commit): array
 }
 
 /** @return list<array{id:string,status:string,message:string}> */
-function verifyInstaller(string $zipPath, mixed $manifestOption, array $expected, bool $requireSignature): array
+function verifyInstaller(string $root, string $zipPath, mixed $manifestOption, array $expected, bool $requireSignature): array
 {
     $checks = [];
     $zipState = readZipHashes($zipPath);
@@ -169,7 +206,7 @@ function verifyInstaller(string $zipPath, mixed $manifestOption, array $expected
         $checks[] = check(is_array($manifest) && $manifest === $expected['core_manifest'], 'installer.core_manifest_exact', 'Core manifest matches target commit system/core files.');
     }
 
-    $manifestPath = is_string($manifestOption) && trim($manifestOption) !== '' ? absolutePath(dirname($zipPath), $manifestOption) : preg_replace('/\.zip$/', '.manifest.json', $zipPath);
+    $manifestPath = is_string($manifestOption) && trim($manifestOption) !== '' ? absolutePath($root, $manifestOption) : preg_replace('/\.zip$/', '.manifest.json', $zipPath);
     if (is_string($manifestPath) && is_file($manifestPath)) {
         $manifest = readJsonFile($manifestPath);
         $checks[] = check((string) ($manifest['exact_commit'] ?? '') !== '', 'installer.manifest_exact_commit_present', 'Installer manifest records exact_commit.');
@@ -226,6 +263,8 @@ function verifyUpdatePackage(string $zipPath, array $expected, string $minUpgrad
 
     $checks[] = check($zipFiles === $manifestFiles, 'update.zip_manifest_exact', 'Update ZIP entries match update.json files exactly.');
     $checks[] = check($manifestFiles === $expected['update_files'], 'update.exact_commit_files', 'Update package files and hashes match target commit Core-owned release files.');
+    $checks[] = check((string) ($update['snapshot_type'] ?? '') === 'core-owned-full-snapshot', 'update.snapshot_type', 'Update package declares a Core-owned full snapshot.');
+    $checks[] = check(in_array('release_gate_v1', stringList($update['acceptance_gates'] ?? []), true), 'update.release_gate_v1_declared', 'Update package declares Release Gate V1.');
     $checks[] = check((string) ($update['version'] ?? $update['to_version'] ?? '') === $expected['version'], 'update.version', 'Update manifest version matches target commit.');
     $checks[] = check((string) ($update['min_upgrade_from'] ?? '') === $minUpgradeFrom, 'update.min_upgrade_from', 'Update min_upgrade_from stays at ' . $minUpgradeFrom . '.');
     $checks[] = check((string) ($update['hard_min_version'] ?? '') === $minUpgradeFrom, 'update.hard_min_version', 'Update hard_min_version stays at ' . $minUpgradeFrom . '.');
@@ -242,12 +281,190 @@ function verifyUpdatePackage(string $zipPath, array $expected, string $minUpgrad
     if (isset($manifestFiles['system/core-manifest.json'])) {
         $manifest = json_decode((string) $zip->getFromName('system/core-manifest.json'), true);
         $checks[] = check(is_array($manifest) && $manifest === $expected['core_manifest'], 'update.core_manifest_exact', 'Update core-manifest matches target commit.');
+        $checks[] = check(is_array($manifest) && coreManifestCoveredByUpdateFiles($manifest, $manifestFiles), 'update.full_core_snapshot', 'Every manifest-declared Core file is present in the update package.');
     } else {
         $checks[] = failCheck('update.core_manifest_present', 'Update package must include system/core-manifest.json.');
     }
     $zip->close();
 
     return [$update, $checks];
+}
+
+/** @param array<string,string> $coreManifest @param array<string,string> $updateFiles */
+function coreManifestCoveredByUpdateFiles(array $coreManifest, array $updateFiles): bool
+{
+    if ($coreManifest === []) {
+        return false;
+    }
+    foreach ($coreManifest as $relative => $hash) {
+        $path = 'system/core/' . str_replace('\\', '/', (string) $relative);
+        if (!isset($updateFiles[$path]) || !hash_equals((string) $hash, (string) $updateFiles[$path])) {
+            return false;
+        }
+    }
+    foreach ($updateFiles as $path => $_hash) {
+        if (str_starts_with($path, 'system/core/')) {
+            $relative = substr($path, strlen('system/core/'));
+            if (!isset($coreManifest[$relative])) {
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+/** @return list<array{id:string,status:string,message:string}> */
+function verifyMigrationFiles(string $root, string $commit, array $files): array
+{
+    $checks = [];
+    $autoload = $root . '/system/core/Bootstrap/autoload.php';
+    if (is_file($autoload)) {
+        require_once $autoload;
+    }
+    $seen = [];
+    $previous = '';
+    foreach ($files as $file) {
+        if (preg_match('#^system/migrations/([A-Za-z0-9_.-]+)\.php$#', $file, $match) !== 1) {
+            continue;
+        }
+        $id = $match[1];
+        $checks[] = check(!isset($seen[$id]), 'migration.unique.' . $id, 'Core migration id is unique: ' . $id);
+        $checks[] = check($previous === '' || strcmp($previous, $id) <= 0, 'migration.order.' . $id, 'Core migration order is deterministic: ' . $id);
+        $seen[$id] = true;
+        $previous = $id;
+        $tmp = tempnam(sys_get_temp_dir(), 'daiying-migration-');
+        if (!is_string($tmp)) {
+            $checks[] = failCheck('migration.tempfile.' . $id, 'Unable to create migration validation file.');
+            continue;
+        }
+        try {
+            file_put_contents($tmp, gitBlob($root, $commit, $file));
+            $definition = require $tmp;
+            $up = is_array($definition) ? ($definition['up'] ?? null) : (is_object($definition) && method_exists($definition, 'up') ? [$definition, 'up'] : null);
+            $checks[] = check(is_callable($up), 'migration.up.' . $id, 'Core migration defines an up callable: ' . $id);
+        } catch (Throwable $exception) {
+            $checks[] = failCheck('migration.load.' . $id, 'Core migration failed to load: ' . $id . ' - ' . $exception->getMessage());
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
+    return $checks;
+}
+
+/** @return list<array{id:string,status:string,message:string}> */
+function verifyPhpSyntaxForCommit(string $root, string $commit, array $files): array
+{
+    $checks = [];
+    foreach ($files as $file) {
+        if (!str_ends_with($file, '.php')) {
+            continue;
+        }
+        $tmp = tempnam(sys_get_temp_dir(), 'daiying-lint-');
+        if (!is_string($tmp)) {
+            $checks[] = failCheck('php.syntax.tempfile', 'Unable to create lint temp file.');
+            continue;
+        }
+        file_put_contents($tmp, gitBlob($root, $commit, $file));
+        $output = [];
+        $code = 0;
+        exec(PHP_BINARY . ' -l ' . escapeshellarg($tmp) . ' 2>&1', $output, $code);
+        @unlink($tmp);
+        $checks[] = check($code === 0, 'php.syntax.' . str_replace(['/', '.'], '_', $file), 'PHP syntax passes for ' . $file . ($code === 0 ? '' : ': ' . implode(' ', $output)));
+    }
+
+    return $checks;
+}
+
+/** @return list<array{id:string,status:string,message:string}> */
+function verifyCoreReferencesForCommit(string $root, string $commit, array $files): array
+{
+    $coreFiles = array_flip(array_filter($files, static fn (string $file): bool => str_starts_with($file, 'system/core/') && str_ends_with($file, '.php')));
+    $missing = [];
+    foreach ($coreFiles as $file => $_) {
+        $content = gitBlob($root, $commit, $file);
+        if (preg_match_all('/^use\s+(Cms\\\\Core\\\\[A-Za-z0-9_\\\\]+)\s*;/m', $content, $matches) !== false) {
+            foreach ($matches[1] as $fqcn) {
+                $relative = 'system/core/' . str_replace('\\', '/', substr($fqcn, strlen('Cms\\Core\\'))) . '.php';
+                if (!isset($coreFiles[$relative])) {
+                    $missing[$file . ' -> ' . $fqcn] = $relative;
+                }
+            }
+        }
+    }
+
+    if ($missing === []) {
+        return [pass('php.core_references', 'Cms\\Core use imports resolve to files in the Core-owned snapshot.')];
+    }
+
+    return [failCheck('php.core_references', 'Missing Core references: ' . implode('; ', array_map(static fn (string $from, string $to): string => $from . ' missing ' . $to, array_keys($missing), $missing)))];
+}
+
+/** @return list<array{id:string,status:string,message:string}> */
+function verifyPublicApiCompatibility(string $root, string $commit, string $version): array
+{
+    $previous = previousStableTag($root, $version);
+    if ($previous === '') {
+        return [pass('public_api.previous_tag', 'No previous stable tag found; public API compatibility comparison skipped.')];
+    }
+    $current = publicInterfaceSignatures($root, $commit);
+    $old = publicInterfaceSignatures($root, $previous);
+    $changes = [];
+    foreach ($old as $class => $methods) {
+        if (!isset($current[$class])) {
+            $changes[] = $class . ' removed';
+            continue;
+        }
+        foreach ($methods as $method => $signature) {
+            if (!isset($current[$class][$method])) {
+                $changes[] = $class . '::' . $method . ' removed';
+            } elseif ($current[$class][$method] !== $signature) {
+                $changes[] = $class . '::' . $method . ' signature changed';
+            }
+        }
+    }
+
+    return [check($changes === [], 'public_api.backwards_compatible', 'Public Core interfaces are compatible with ' . $previous . ($changes === [] ? '.' : ': ' . implode('; ', $changes)))];
+}
+
+function previousStableTag(string $root, string $version): string
+{
+    $tags = gitLines($root, ['tag', '--list', 'v*', '--sort=-v:refname']);
+    foreach ($tags as $tag) {
+        $tagVersion = ltrim($tag, 'v');
+        if ($tagVersion !== $version && version_compare($tagVersion, $version, '<')) {
+            return $tag;
+        }
+    }
+
+    return '';
+}
+
+/** @return array<string,array<string,string>> */
+function publicInterfaceSignatures(string $root, string $commit): array
+{
+    $interfaces = [];
+    foreach (gitLines($root, ['ls-tree', '-r', '--name-only', $commit, 'system/core']) as $file) {
+        if (!str_ends_with($file, 'Interface.php')) {
+            continue;
+        }
+        $content = gitBlob($root, $commit, $file);
+        $class = str_replace('/', '\\', substr($file, strlen('system/core/'), -4));
+        if (preg_match('/namespace\s+([^;]+);/', $content, $ns) === 1) {
+            $class = trim($ns[1]) . '\\' . basename($file, '.php');
+        }
+        $methods = [];
+        if (preg_match_all('/public\s+function\s+([A-Za-z0-9_]+)\s*\(([^)]*)\)\s*([^;{]*)[;{]/m', $content, $matches, PREG_SET_ORDER) !== false) {
+            foreach ($matches as $match) {
+                $methods[$match[1]] = trim(preg_replace('/\s+/', ' ', $match[2] . ')' . $match[3]));
+            }
+        }
+        $interfaces[$class] = $methods;
+    }
+    ksort($interfaces, SORT_STRING);
+
+    return $interfaces;
 }
 
 /** @return list<array{id:string,status:string,message:string}> */
@@ -417,6 +634,7 @@ function isAllowedUpdatePath(string $path): bool
         'CMS_RELEASE_ENVIRONMENT_DEPLOYMENT_CHECKLIST.md',
         'public/assets/admin/admin.css',
         'public/assets/admin/admin.js',
+        'cli.php',
         'system/official-plugins.php',
         'scripts/diagnose_payment_providers.php',
         'scripts/publish_scheduled_content.php',

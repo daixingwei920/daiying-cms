@@ -8,7 +8,17 @@ use Cms\Core\Database\ConnectionFactory;
 
 $root = getenv('CMS_ROOT_OVERRIDE') !== false ? (string) getenv('CMS_ROOT_OVERRIDE') : dirname(__DIR__);
 
-require $root . '/system/core/Bootstrap/autoload.php';
+$autoload = $root . '/system/core/Bootstrap/autoload.php';
+$pointerFile = $root . '/storage/updates/current-release.json';
+if (is_file($pointerFile)) {
+    $pointer = json_decode((string) file_get_contents($pointerFile), true);
+    $candidate = is_array($pointer) ? (string) ($pointer['path'] ?? '') . '/system/core/Bootstrap/autoload.php' : '';
+    if ($candidate !== '' && is_file($candidate)) {
+        $autoload = $candidate;
+    }
+}
+
+require $autoload;
 
 if (in_array('--help', $argv, true) || in_array('-h', $argv, true)) {
     echo <<<'TXT'

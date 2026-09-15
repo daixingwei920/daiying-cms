@@ -236,12 +236,6 @@ final class UpdateService
         if (is_dir($releaseDir)) {
             $this->clearStaleReleaseDirectory($releaseDir);
         }
-        $this->copyDirectory($this->rootPath . '/system/core', $releaseDir . '/system/core');
-        $this->copyDirectory($this->rootPath . '/system/migrations', $releaseDir . '/system/migrations');
-        if (is_file($this->rootPath . '/system/core-manifest.json')) {
-            $this->ensureDir($releaseDir . '/system');
-            copy($this->rootPath . '/system/core-manifest.json', $releaseDir . '/system/core-manifest.json');
-        }
         $zip = new ZipArchive();
         if ($zip->open($zipPath) !== true) {
             throw new UpdateException('Unable to open update package for release preparation.');
@@ -280,12 +274,16 @@ final class UpdateService
 
     private function preflightRelease(string $releaseDir): void
     {
+        $integrity = (new IntegrityChecker())->check($releaseDir);
+        if (($integrity['status'] ?? '') !== 'ok') {
+            throw new UpdateException('Prepared release Core integrity check failed.');
+        }
         foreach (['system/core/Bootstrap/autoload.php', 'system/core/Bootstrap/Application.php'] as $file) {
             if (!is_file($releaseDir . '/' . $file)) {
                 throw new UpdateException('Prepared release is missing required Core file.');
             }
         }
-        foreach (glob($releaseDir . '/system/core/**/*.php', GLOB_BRACE) ?: [] as $file) {
+        foreach ($this->phpFilesUnder($releaseDir . '/system/core') as $file) {
             $this->phpLint($file);
         }
         $this->phpLint($releaseDir . '/system/core/Bootstrap/autoload.php');
@@ -722,6 +720,24 @@ final class UpdateService
         }
 
         $this->runPreflightProcess([PHP_BINARY, '-l', $file], 'PHP syntax preflight failed.');
+    }
+
+    /** @return list<string> */
+    private function phpFilesUnder(string $dir): array
+    {
+        if (!is_dir($dir)) {
+            return [];
+        }
+        $files = [];
+        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS));
+        foreach ($iterator as $item) {
+            if ($item->isFile() && str_ends_with($item->getFilename(), '.php')) {
+                $files[] = $item->getPathname();
+            }
+        }
+        sort($files, SORT_STRING);
+
+        return $files;
     }
 
     private function hasUnresolvedMigrationFailures(PDO $pdo): bool

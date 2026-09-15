@@ -50,6 +50,7 @@ final class UpdatePackageReader
             throw new UpdateException('Update package hash mismatch.');
         }
         $this->assertZipPaths($zip, $manifest);
+        $this->assertFullCoreSnapshot($zip, $manifest);
         $zip->close();
 
         return $manifest;
@@ -96,6 +97,59 @@ final class UpdatePackageReader
                 throw new UpdateException('Update package is missing declared file: ' . $path);
             }
         }
+    }
+
+    private function assertFullCoreSnapshot(ZipArchive $zip, UpdatePackageManifest $manifest): void
+    {
+        if ($this->isLegacyManifest($manifest)) {
+            return;
+        }
+
+        if (!in_array('release_gate_v1', $manifest->acceptanceGates, true)) {
+            throw new UpdateException('Core update package must declare release_gate_v1.');
+        }
+
+        if (!isset($manifest->files['system/core-manifest.json'])) {
+            throw new UpdateException('Core update package must include system/core-manifest.json.');
+        }
+
+        $manifestJson = $zip->getFromName('system/core-manifest.json');
+        if (!is_string($manifestJson)) {
+            throw new UpdateException('Core update package is missing Core manifest content.');
+        }
+
+        $coreManifest = json_decode($manifestJson, true);
+        if (!is_array($coreManifest) || $coreManifest === []) {
+            throw new UpdateException('Core update package Core manifest is invalid.');
+        }
+
+        foreach ($coreManifest as $relative => $hash) {
+            $relative = str_replace('\\', '/', (string) $relative);
+            $path = 'system/core/' . $relative;
+            if ($relative === '' || str_contains($relative, '..') || !isset($manifest->files[$path])) {
+                throw new UpdateException('Core update package is not a full Core snapshot.');
+            }
+            if (!hash_equals((string) $hash, (string) $manifest->files[$path])) {
+                throw new UpdateException('Core manifest hash does not match update file: ' . $path);
+            }
+        }
+
+        foreach ($manifest->files as $path => $_hash) {
+            if (!str_starts_with($path, 'system/core/')) {
+                continue;
+            }
+            $relative = substr($path, strlen('system/core/'));
+            if (!array_key_exists($relative, $coreManifest)) {
+                throw new UpdateException('Core update package contains a Core file outside manifest: ' . $path);
+            }
+        }
+    }
+
+    private function isLegacyManifest(UpdatePackageManifest $manifest): bool
+    {
+        return $manifest->build === ''
+            && $manifest->keyId === ''
+            && $manifest->acceptanceGates === [];
     }
 
     private function assertEntryName(string $name, array &$seen): void

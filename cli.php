@@ -32,7 +32,20 @@ use Cms\Core\Update\UpdateService;
 define('CMS_SOURCE_ROOT', __DIR__);
 define('CMS_ROOT', getenv('CMS_ROOT_OVERRIDE') !== false ? (string) getenv('CMS_ROOT_OVERRIDE') : __DIR__);
 
-require CMS_SOURCE_ROOT . '/system/core/Bootstrap/autoload.php';
+function cms_cli_active_autoload(string $root, string $sourceRoot): string
+{
+    $autoload = $sourceRoot . '/system/core/Bootstrap/autoload.php';
+    $pointerFile = $root . '/storage/updates/current-release.json';
+    if (!is_file($pointerFile)) {
+        return $autoload;
+    }
+    $pointer = json_decode((string) file_get_contents($pointerFile), true);
+    $candidate = is_array($pointer) ? (string) ($pointer['path'] ?? '') . '/system/core/Bootstrap/autoload.php' : '';
+
+    return $candidate !== '' && is_file($candidate) ? $candidate : $autoload;
+}
+
+require cms_cli_active_autoload(CMS_ROOT, CMS_SOURCE_ROOT);
 
 $command = $argv[1] ?? 'help';
 

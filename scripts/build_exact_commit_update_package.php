@@ -84,6 +84,7 @@ if (!is_array($committedCoreManifest) || $committedCoreManifest !== $expectedCor
 $requiredMigrations = migrationIds(array_keys($files));
 $update = [
     'package_type' => 'core',
+    'snapshot_type' => 'core-owned-full-snapshot',
     'product_id' => 'daiying.cms',
     'package_id' => 'daiying.cms:' . $version . ':' . $channel,
     'release_id' => $releaseId,
@@ -113,8 +114,8 @@ $update = [
     'signature_algorithm' => $signatureAlgorithm,
     'key_id' => $keyId,
     'security_update' => false,
-    'features' => ['foundation_release_parity'],
-    'acceptance_gates' => ['release_parity_gate'],
+    'features' => ['foundation_release_gate_v1', 'core_owned_full_snapshot'],
+    'acceptance_gates' => ['release_gate_v1', 'release_parity_gate'],
     'notes' => 'Exact-commit Core update package. Do not mark current until release_parity_gate passes against metadata.',
     'files' => $files,
 ];
@@ -284,6 +285,7 @@ function isAllowedUpdatePath(string $path): bool
         'CMS_RELEASE_ENVIRONMENT_DEPLOYMENT_CHECKLIST.md',
         'public/assets/admin/admin.css',
         'public/assets/admin/admin.js',
+        'cli.php',
         'system/official-plugins.php',
         'scripts/diagnose_payment_providers.php',
         'scripts/publish_scheduled_content.php',

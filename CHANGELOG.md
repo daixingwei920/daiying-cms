@@ -2,6 +2,16 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.61 - 2026-09-15
+
+- Added Release Gate V1 preflight checks for Core-owned full release snapshots, package completeness, manifest parity, migration declarations, PHP syntax, Core import references, and public interface compatibility.
+- Hardened Core update package reading so modern update packages must include every `system/core-manifest.json` Core file and declare `release_gate_v1`.
+- Changed release preparation to build active release directories from the verified update package itself instead of copying the root Core shell first, preventing mixed old/new Core releases like the 1.2.58 incident.
+- Added active-release bootstrap behavior for CLI and scheduled publish cron entry points so Web and CLI use the same activated Core after updates.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: not yet published.
+- Release URL: not yet published.
+
 ## 1.2.60 - 2026-09-14
 
 - Fixed the collapsible admin sidebar so plugin menu items using an existing Core section, such as `平台`, are appended instead of replacing Core links.
