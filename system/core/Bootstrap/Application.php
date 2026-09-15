@@ -28,6 +28,7 @@ use Cms\Core\Events\EventDispatcher;
 use Cms\Core\Plugin\BlockRegistry;
 use Cms\Core\Plugin\OfficialPluginRegistry;
 use Cms\Core\Plugin\PluginLifecycle;
+use Cms\Core\Plugin\FrontendExtensionRenderer;
 use Cms\Core\Plugin\PluginAdminRequestContext;
 use Cms\Core\Plugin\PluginManager;
 use Cms\Core\Plugin\PluginRuntimeRegistry;
@@ -58,6 +59,7 @@ final class Application
         private readonly FileLogger $logger,
         private readonly Router $router,
         private readonly bool $installed,
+        private readonly PluginRuntimeRegistry $pluginRuntime,
     ) {
     }
 
@@ -115,7 +117,7 @@ final class Application
         self::configureAdminNotifications($settings, $installed);
         self::registerCoreRoutes($router, $settings, $rootPath, $logger, $mode, $pluginRuntime, $events);
 
-        return new self($rootPath, $settings, $logger, $router, $installed);
+        return new self($rootPath, $settings, $logger, $router, $installed, $pluginRuntime);
     }
 
     public function handle(Request $request): Response
@@ -136,6 +138,8 @@ final class Application
 
             $response = Response::text('服务器暂时无法处理请求，请稍后再试。', 500);
         }
+
+        $response = (new FrontendExtensionRenderer($this->pluginRuntime, $this->logger))->inject($request, $response);
 
         return $this->withConfiguredSecurityHeaders($response);
     }

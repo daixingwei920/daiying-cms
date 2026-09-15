@@ -212,8 +212,16 @@ final class PublicApiRegistry
                 'version' => self::CONTRACT_VERSION,
                 'class' => 'Cms\\Core\\Plugin\\PluginContext',
                 'stability' => 'stable',
-                'summary' => 'Expose the bounded plugin runtime registration surface.',
-                'capabilities' => ['blocks.register', 'admin.menu'],
+                'summary' => 'Expose the bounded plugin runtime registration surface, including routes, admin menus and frontend assets.',
+                'capabilities' => ['blocks.register', 'frontend.asset'],
+            ],
+            [
+                'id' => 'frontend.extensions',
+                'version' => self::CONTRACT_VERSION,
+                'class' => 'Cms\\Core\\Plugin\\PluginRuntimeRegistry',
+                'stability' => 'stable',
+                'summary' => 'Let enabled plugins register safe frontend scripts, styles and body-end snippets without editing themes.',
+                'capabilities' => ['frontend.asset'],
             ],
             [
                 'id' => 'theme.runtime',

@@ -141,6 +141,27 @@ final class PluginContext
         return '<script src="' . htmlspecialchars($this->assetUrl($relativePath), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"' . ($defer ? ' defer' : '') . '></script>';
     }
 
+    /** @param array<string,mixed> $attributes */
+    public function frontendScript(string $relativePath, string $key = '', array $attributes = []): void
+    {
+        $this->assertFrontendAssetCapability();
+        $this->runtime()->frontendAsset($this->manifest->id, 'script', $this->assetUrl($relativePath), $key, $attributes);
+    }
+
+    /** @param array<string,mixed> $attributes */
+    public function frontendStyle(string $relativePath, string $key = '', array $attributes = []): void
+    {
+        $this->assertFrontendAssetCapability();
+        $this->runtime()->frontendAsset($this->manifest->id, 'style', $this->assetUrl($relativePath), $key, $attributes);
+    }
+
+    /** @param callable():string $callback */
+    public function frontendBodyEnd(callable $callback, string $key = ''): void
+    {
+        $this->assertFrontendAssetCapability();
+        $this->runtime()->frontendBodyEnd($this->manifest->id, $callback, $key);
+    }
+
     public function secrets(): PluginSecretStore
     {
         if ($this->secrets === null) {
@@ -381,5 +402,12 @@ final class PluginContext
         }
 
         return $this->runtime;
+    }
+
+    private function assertFrontendAssetCapability(): void
+    {
+        if (!$this->hasCapability('frontend.asset')) {
+            throw new PluginException('Plugin does not declare frontend.asset capability.');
+        }
     }
 }

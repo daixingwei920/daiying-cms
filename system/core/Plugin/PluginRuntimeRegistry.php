@@ -10,6 +10,10 @@ final class PluginRuntimeRegistry
     private array $routes = [];
     /** @var list<PluginMenuItem> */
     private array $menus = [];
+    /** @var list<FrontendExtensionAsset> */
+    private array $frontendAssets = [];
+    /** @var list<array{plugin_id:string,key:string,callback:callable():string}> */
+    private array $frontendBodyEndCallbacks = [];
     /** @var list<string> */
     private array $reservedPrefixes = ['/admin/login', '/recovery', '/diagnostics', '/health', '/install', '/admin/update'];
 
@@ -48,6 +52,29 @@ final class PluginRuntimeRegistry
         );
     }
 
+    /** @param array<string,mixed> $attributes */
+    public function frontendAsset(string $pluginId, string $type, string $url, string $key = '', array $attributes = []): void
+    {
+        if (!in_array($type, ['script', 'style'], true)) {
+            throw new PluginException('Invalid frontend asset type.');
+        }
+        if (!str_starts_with($url, '/extension-assets/plugin/' . rawurlencode($pluginId) . '?')) {
+            throw new PluginException('Plugin frontend assets must use the Core extension asset endpoint.');
+        }
+        $key = $key !== '' ? $pluginId . ':' . $key : $type . ':' . $url;
+        $this->frontendAssets[] = new FrontendExtensionAsset($pluginId, $type, $url, $key, $attributes);
+    }
+
+    /** @param callable():string $callback */
+    public function frontendBodyEnd(string $pluginId, callable $callback, string $key = ''): void
+    {
+        $this->frontendBodyEndCallbacks[] = [
+            'plugin_id' => $pluginId,
+            'key' => $key !== '' ? $pluginId . ':' . $key : $pluginId . ':body_end:' . count($this->frontendBodyEndCallbacks),
+            'callback' => $callback,
+        ];
+    }
+
     /** @return list<PluginRouteDefinition> */
     public function routes(): array
     {
@@ -58,6 +85,18 @@ final class PluginRuntimeRegistry
     public function menus(): array
     {
         return $this->menus;
+    }
+
+    /** @return list<FrontendExtensionAsset> */
+    public function frontendAssets(): array
+    {
+        return $this->frontendAssets;
+    }
+
+    /** @return list<array{plugin_id:string,key:string,callback:callable():string}> */
+    public function frontendBodyEndCallbacks(): array
+    {
+        return $this->frontendBodyEndCallbacks;
     }
 
     private function assertRouteAllowed(string $path): void

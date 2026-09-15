@@ -2,6 +2,16 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.62 - 2026-09-15
+
+- Registered `official.ai-customer-service` through the existing Official Plugin Registry with the `ai_customer_service_` table namespace and `ai_customer_service` capability namespace.
+- Added the generic `frontend.asset` plugin capability and frontend extension API so enabled plugins can register body-end scripts, styles, and snippets without modifying themes.
+- Injected frontend extensions only into normal frontend HTML responses, with API, admin, XML, redirect, download-style, and HEAD responses excluded.
+- Added frontend extension isolation, deduplication, and regression tests for enabled/disabled plugins, multiple plugins, duplicate assets, callback failures, and zero theme adaptation.
+- Preserved the 1.2.0 cross-version upgrade floor.
+- Public install package: not yet published.
+- Release URL: not yet published.
+
 ## 1.2.61 - 2026-09-15
 
 - Added Release Gate V1 preflight checks for Core-owned full release snapshots, package completeness, manifest parity, migration declarations, PHP syntax, Core import references, and public interface compatibility.

@@ -28,6 +28,7 @@ final class Capability
         'scheduler.register',
         'webhook.register',
         'cache.use',
+        'frontend.asset',
         'content.type',
         'content.field',
         'search.register',

@@ -155,6 +155,15 @@ final class OfficialPluginRegistry
                 'capability_namespaces' => ['affiliate'],
                 'table_prefixes' => ['affiliate_'],
             ],
+            'official.ai-customer-service' => [
+                'directory' => 'official.ai-customer-service',
+                'package_type' => 'plugin',
+                'type' => 'plugin',
+                'bundled' => true,
+                'trust_level' => 'trusted_php',
+                'capability_namespaces' => ['ai_customer_service'],
+                'table_prefixes' => ['ai_customer_service_'],
+            ],
         ];
     }
 }
