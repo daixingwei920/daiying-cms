@@ -72,6 +72,7 @@ CMS_RELEASE_*_PACKAGE.manifest.json
 daiying-cms-*.zip
 daiying-cms-*.zip.sha256
 daiying-cms-*.manifest.json
+*.metadata.json
 
 # Tooling, test artifacts and local caches
 vendor/
