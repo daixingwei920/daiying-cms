@@ -575,8 +575,15 @@ function gitLines(string $root, array $args): array
 
 function gitBlob(string $root, string $commit, string $path): string
 {
+    static $cache = [];
+
     if (!safePath($path)) {
         throw new RuntimeException('Unsafe git path: ' . $path);
+    }
+
+    $cacheKey = $root . "\0" . $commit . "\0" . $path;
+    if (array_key_exists($cacheKey, $cache)) {
+        return $cache[$cacheKey];
     }
 
     git($root, ['cat-file', '-e', $commit . ':' . $path]);
@@ -585,6 +592,8 @@ function gitBlob(string $root, string $commit, string $path): string
     if (!is_string($content)) {
         throw new RuntimeException('Unable to read git blob: ' . $path);
     }
+
+    $cache[$cacheKey] = $content;
 
     return $content;
 }
