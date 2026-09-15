@@ -15,6 +15,11 @@ final class CoreBoundary
         '/system/migrations',
     ];
 
+    private const LEGACY_EMPTY_SYSTEM_DIRS = [
+        '/system/admin',
+        '/system/recovery',
+    ];
+
     private const WRITABLE_DIRS = [
         '/content/uploads',
         '/content/themes',
@@ -26,6 +31,9 @@ final class CoreBoundary
     {
         foreach (self::SYSTEM_DIRS as $dir) {
             $path = $rootPath . $dir;
+            if (!is_dir($path) && in_array($dir, self::LEGACY_EMPTY_SYSTEM_DIRS, true)) {
+                mkdir($path, 0755, true);
+            }
             if (!is_dir($path)) {
                 throw new RuntimeException('Missing protected core directory: ' . $dir);
             }
