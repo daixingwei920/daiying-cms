@@ -8,8 +8,7 @@ $targetVersion = targetVersion($root);
 $updateZip = first(glob($fixtureDir . '/update-' . $targetVersion . '-rsa-local-test/daiying-cms-core-update-' . $targetVersion . '-*.zip') ?: []);
 $metadataPath = first(glob($fixtureDir . '/update-' . $targetVersion . '-rsa-local-test/*.metadata.json') ?: []);
 $fixtures = [
-    '1.2.0' => first(glob($fixtureDir . '/daiying-cms-1.2.0-stable-exact-*.zip') ?: []),
-    '1.2.22' => first(glob($fixtureDir . '/daiying-cms-1.2.22-stable-exact-*.zip') ?: []),
+    '1.2.52' => first(glob($fixtureDir . '/daiying-cms-1.2.52-stable-exact-*.zip') ?: []),
 ];
 
 if ($updateZip === '' || $metadataPath === '' || in_array('', $fixtures, true)) {

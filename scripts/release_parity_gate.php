@@ -26,7 +26,7 @@ $options = getopt('', [
 ]);
 
 $commit = resolveCommit($root, trim((string) ($options['commit'] ?? 'HEAD')));
-$minUpgradeFrom = trim((string) ($options['min-upgrade-from'] ?? '1.2.0'));
+$minUpgradeFrom = trim((string) ($options['min-upgrade-from'] ?? '1.2.52'));
 $requireSignature = filter_var((string) ($options['require-signature'] ?? '1'), FILTER_VALIDATE_BOOL);
 $checks = [];
 

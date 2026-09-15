@@ -35,7 +35,7 @@ $options = getopt('', [
 
 $commit = resolveCommit($root, trim((string) ($options['commit'] ?? 'HEAD')));
 $channel = trim((string) ($options['channel'] ?? 'stable')) ?: 'stable';
-$minUpgradeFrom = trim((string) ($options['min-upgrade-from'] ?? '1.2.0')) ?: '1.2.0';
+$minUpgradeFrom = trim((string) ($options['min-upgrade-from'] ?? '1.2.52')) ?: '1.2.52';
 $version = trim((string) ($options['version'] ?? ''));
 if ($version === '') {
     $version = detectVersion($root, $commit);
