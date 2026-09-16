@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.63 - 2026-09-16
+
+- Fixed runtime version display so active Core releases are read from `storage/updates/current-release.json` before falling back to the installed app config version.
+- Added `ActiveReleaseResolver` to keep frontend, admin health checks, and update pages aligned with the currently activated release.
+- Refreshed Core manifest entries for the new resolver and settings loader.
+- Preserved the 1.2.52 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.63-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.63>.
+
 ## 1.2.62 - 2026-09-15
 
 - Registered `official.ai-customer-service` through the existing Official Plugin Registry with the `ai_customer_service_` table namespace and `ai_customer_service` capability namespace.

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cms\Core\Config;
 
+use Cms\Core\Update\ActiveReleaseResolver;
+
 final class Settings
 {
     /** @param array<string, mixed> $items */
@@ -20,6 +22,14 @@ final class Settings
             @opcache_invalidate($configFile, true);
         }
         $items = is_file($configFile) ? require $configFile : (is_file($exampleFile) ? require $exampleFile : []);
+        if (is_array($items)) {
+            $configuredVersion = is_array($items['app'] ?? null) ? (string) ($items['app']['version'] ?? '0.0.0') : '0.0.0';
+            $runtimeVersion = ActiveReleaseResolver::version($rootPath, $configuredVersion);
+            if ($runtimeVersion !== '') {
+                $items['app'] = is_array($items['app'] ?? null) ? $items['app'] : [];
+                $items['app']['version'] = $runtimeVersion;
+            }
+        }
 
         return new self(is_array($items) ? $items : []);
     }
