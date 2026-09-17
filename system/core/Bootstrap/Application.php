@@ -122,6 +122,11 @@ final class Application
 
     public function handle(Request $request): Response
     {
+        $themeAssetResponse = $this->maybeServeThemeAsset($request);
+        if ($themeAssetResponse !== null) {
+            return $this->withConfiguredSecurityHeaders($themeAssetResponse);
+        }
+
         try {
             $response = $this->router->dispatch($request);
         } catch (Throwable $exception) {
@@ -142,6 +147,18 @@ final class Application
         $response = (new FrontendExtensionRenderer($this->pluginRuntime, $this->logger))->inject($request, $response);
 
         return $this->withConfiguredSecurityHeaders($response);
+    }
+
+    private function maybeServeThemeAsset(Request $request): ?Response
+    {
+        if (!str_starts_with($request->path, '/content/themes/')) {
+            return null;
+        }
+        if (preg_match('#^/content/themes/[A-Za-z0-9._-]{1,96}/assets/.+#', $request->path) !== 1) {
+            return null;
+        }
+
+        return (new ExtensionAssetController($this->rootPath))->showThemeContentAsset($request);
     }
 
     public function rootPath(): string

@@ -2,6 +2,16 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.64 - 2026-09-17
+
+- Added a generic Core theme asset serving contract for `/content/themes/{theme_id}/assets/**` so market-installed themes can load CSS, JavaScript, images, and fonts without per-theme Apache or Nginx aliases.
+- Kept theme templates, PHP files, `theme.json`, hidden files, environment files, and source/config files private.
+- Updated Apache and Nginx deployment examples to forward only public theme assets to the Core front controller while keeping the rest of `content/themes` denied.
+- Documented the stable `TemplateContext::asset()` contract and market theme packaging rules.
+- Preserved the 1.2.52 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.64-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.64>.
+
 ## 1.2.63 - 2026-09-16
 
 - Fixed runtime version display so active Core releases are read from `storage/updates/current-release.json` before falling back to the installed app config version.

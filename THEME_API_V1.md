@@ -73,6 +73,22 @@ Stable helpers:
 `asset()` and `assetPath()` reject path traversal. Templates should use these
 helpers instead of manually building theme asset paths.
 
+`asset()` accepts paths relative to the theme `assets/` directory:
+
+```php
+$context->asset('css/base.css');        // correct
+$context->asset('assets/css/base.css'); // incorrect
+```
+
+The stable URL contract is:
+
+`/content/themes/{theme_id}/assets/{relative_asset_path}`
+
+Core serves this URL through the generic theme asset serving contract. Themes
+must not require per-theme Apache or Nginx aliases. Core only exposes static
+assets from `assets/`; PHP templates, `_theme.php`, `theme.json`, hidden files
+and sensitive configuration files remain private.
+
 ## View Models
 
 `ThemeViewModel` normalizes Core data into stable array shapes.

@@ -8,6 +8,7 @@ Options -Indexes
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteRule ^content/themes/[A-Za-z0-9._-]+/assets/.+ public/index.php [L,QSA]
     RewriteRule ^(config|storage|system|tests|scripts|content/plugins|content/themes)(/|$) - [F,L]
     RewriteRule ^content/uploads/.*\.(php|phtml|phar|cgi|pl|py|rb|sh|js|html?|svg)$ - [F,L,NC]
     RewriteCond %{REQUEST_URI} !^/public/
