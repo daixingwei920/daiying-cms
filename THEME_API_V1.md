@@ -89,6 +89,93 @@ must not require per-theme Apache or Nginx aliases. Core only exposes static
 assets from `assets/`; PHP templates, `_theme.php`, `theme.json`, hidden files
 and sensitive configuration files remain private.
 
+## Content Permalinks
+
+Theme API v1 does not currently expose a dedicated public
+`TemplateContext::permalink()` or `TemplateContext::contentUrl()` helper. Core
+contains internal content URL builders, but themes must not depend on private
+controller or repository methods.
+
+Until Core publishes a stable permalink helper, themes should follow the
+Default Theme reference implementation:
+
+```php
+function theme_content_url(array $content): string
+{
+    $slug = trim((string) ($content['slug'] ?? ''), '/');
+    if ($slug === '') {
+        return '#';
+    }
+
+    return (($content['content_type'] ?? 'article') === 'article'
+        ? '/articles/'
+        : '/') . rawurlencode($slug);
+}
+```
+
+Standard Content Permalink V1 paths:
+
+- Article: `/articles/{rawurlencode(slug)}`
+- Page: `/{rawurlencode(slug)}`
+
+Themes must not assume `$item['url']` or `$content['url']` is always present in
+content view data. Missing `url` fields are normal and must not break links.
+
+Themes must not use `#`, `#gf-content`, `javascript:void(0)`, or similar values
+as article or page permalink fallbacks. `#anchor` URLs are allowed only for
+explicit current-page navigation, such as a hero button scrolling to a home-page
+content section. They must not be used for article cards, page cards, search
+results, related content, magazine blocks, banner stories, or list items.
+
+Each theme should define one content URL helper and reuse it everywhere content
+cards are rendered, including:
+
+- Home
+- Grid
+- Banner
+- Magazine
+- List
+- Search
+- Related Content
+
+Different templates within one theme must not invent different URL rules for the
+same Core content object.
+
+Theme review must block publication if article or page content cards link to
+`#`, page anchors, or JavaScript placeholders instead of real permalinks.
+
+## Brand Logo
+
+Theme API v1 brand rendering should follow this resolver order:
+
+1. Theme Logo override
+2. Site Global Logo
+3. Site Name text fallback
+
+The Default Theme reference implementation resolves image URLs with theme
+settings first and the site-level logo second:
+
+```php
+$logo = dy_image_url($context, ['logo_image', 'site_logo_url']);
+```
+
+If a Site Global Logo is configured, themes must not ignore it and default to a
+text site name or theme-bundled brand image. Changing themes must not require
+the administrator to upload the same logo again.
+
+The logo/brand link must point to `/`.
+
+Desktop and mobile headers must use the same logo resolver. Themes may change
+layout responsively, but they must not use a different fallback chain on mobile.
+
+Logo images must preserve their original aspect ratio. Themes must not stretch
+or distort logos; use constrained dimensions with `width: auto`,
+`height: auto`, or `object-fit: contain` as appropriate.
+
+If no logo is configured, the fallback must include readable site-name text.
+Decorative marks or initials may be used only as an enhancement, not as a
+replacement for the site-name fallback.
+
 ## View Models
 
 `ThemeViewModel` normalizes Core data into stable array shapes.
