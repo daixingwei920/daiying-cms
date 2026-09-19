@@ -325,7 +325,7 @@ final class ContentFrontController
     /** @param array<string, mixed> $content */
     private function content(array $content, bool $preview = false, ?Request $request = null): Response
     {
-        $view = $this->viewModel($content, $preview, $request);
+        $view = $this->viewModel($content, $preview, $request, true);
         $response = Response::html($this->theme()->render('content', $view));
 
         return $this->paymentTokenRequested($request)
@@ -334,9 +334,10 @@ final class ContentFrontController
     }
 
     /** @param array<string, mixed> $content @return array<string, mixed> */
-    private function viewModel(array $content, bool $preview = false, ?Request $request = null): array
+    private function viewModel(array $content, bool $preview = false, ?Request $request = null, bool $includeAdjacent = false): array
     {
-        $terms = $this->repo()->termsForContent((int) $content['id']);
+        $repo = $this->repo();
+        $terms = $repo->termsForContent((int) $content['id']);
         $meta = is_array($content['meta'] ?? null) ? $content['meta'] : [];
         $url = $this->publicContentUrl((string) $content['content_type'], (string) $content['slug']);
         $seo = $this->seo([
@@ -348,6 +349,10 @@ final class ContentFrontController
             'robots_follow' => (bool) ($meta['robots_follow'] ?? true),
             'type' => (string) $content['content_type'],
         ]);
+        $adjacent = ['previous' => null, 'next' => null];
+        if ($includeAdjacent && !$preview && (string) $content['content_type'] === 'article') {
+            $adjacent = $this->adjacentArticleViewModels($repo, $content);
+        }
 
         $paymentToken = $this->paymentTokenFromRequest($request);
         $blocks = is_array($content['blocks'] ?? null) ? $content['blocks'] : [];
@@ -381,7 +386,7 @@ final class ContentFrontController
             }
         }
 
-        return [
+        $view = [
             'site_name' => (string) $this->settings->get('site.name', 'PHP CMS'),
                 'site_logo_url' => (string) $this->settings->get('site.logo_url', ''),
                 'site_favicon_url' => (string) $this->settings->get('site.favicon_url', ''),
@@ -404,6 +409,90 @@ final class ContentFrontController
             'ad_slots' => $this->adSlots(),
             'comments' => $this->commentsViewModel((int) $content['id'], $url, $preview),
         ];
+        if ($includeAdjacent) {
+            $view['previous'] = $adjacent['previous'];
+            $view['next'] = $adjacent['next'];
+        }
+
+        return $view;
+    }
+
+    /** @param array<string,mixed> $content @return array{previous:array<string,mixed>|null,next:array<string,mixed>|null} */
+    private function adjacentArticleViewModels(ContentRepository $repo, array $content): array
+    {
+        $items = $repo->adjacentPublishedArticles((int) $content['id'], is_string($content['published_at'] ?? null) ? $content['published_at'] : null);
+
+        return [
+            'previous' => $this->adjacentArticleViewModel($items['previous']),
+            'next' => $this->adjacentArticleViewModel($items['next']),
+        ];
+    }
+
+    /** @param array<string,mixed>|null $content @return array<string,mixed>|null */
+    private function adjacentArticleViewModel(?array $content): ?array
+    {
+        if ($content === null) {
+            return null;
+        }
+        $slug = trim((string) ($content['slug'] ?? ''), '/');
+        if ($slug === '') {
+            return null;
+        }
+        $meta = is_array($content['meta'] ?? null) ? $content['meta'] : [];
+
+        return [
+            'id' => (int) ($content['id'] ?? 0),
+            'title' => (string) ($content['title'] ?? ''),
+            'slug' => $slug,
+            'content_type' => 'article',
+            'url' => $this->publicContentUrl('article', $slug),
+            'published_at' => $content['published_at'] ?? null,
+            'cover' => $this->contentCoverUrl($content),
+            'excerpt' => $this->contentExcerpt($content, $meta),
+        ];
+    }
+
+    /** @param array<string,mixed> $content @return string|null */
+    private function contentCoverUrl(array $content): ?string
+    {
+        $meta = is_array($content['meta'] ?? null) ? $content['meta'] : [];
+        foreach (['cover_url', 'image_url', 'thumbnail_url'] as $key) {
+            $value = trim((string) ($meta[$key] ?? ''));
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    /** @param array<string,mixed> $content @param array<string,mixed> $meta */
+    private function contentExcerpt(array $content, array $meta): ?string
+    {
+        $description = trim(strip_tags((string) ($meta['seo_description'] ?? '')));
+        if ($description !== '') {
+            return $this->shortText($description, 180);
+        }
+        $blocks = is_array($content['blocks'] ?? null) ? $content['blocks'] : [];
+        foreach ($blocks as $block) {
+            $data = is_array($block['data'] ?? null) ? $block['data'] : [];
+            $text = trim(strip_tags((string) ($data['text'] ?? $data['content'] ?? '')));
+            if ($text !== '') {
+                return $this->shortText($text, 180);
+            }
+        }
+
+        return null;
+    }
+
+    private function shortText(string $text, int $maxLength): string
+    {
+        $text = trim(preg_replace('/\s+/u', ' ', $text) ?? $text);
+        if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+            return mb_strlen($text, 'UTF-8') > $maxLength ? mb_substr($text, 0, $maxLength, 'UTF-8') : $text;
+        }
+
+        return strlen($text) > $maxLength ? substr($text, 0, $maxLength) : $text;
     }
 
     /** @return array<string,mixed> */

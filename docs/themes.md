@@ -117,6 +117,53 @@ Required permalink review cases:
 - Chinese or special-character slug URL encoding
 - Missing `url` field still produces the correct permalink
 
+## Adjacent Article Navigation
+
+Article detail pages may receive `previous` and `next` fields from Core. Each
+field is either `null` or a published article summary containing at least:
+
+- `id`
+- `title`
+- `slug`
+- `content_type`
+- `url`
+- `published_at`
+
+Optional fields such as `cover` and `excerpt` may also be present.
+
+Ordering is part of the Theme API contract. Core sorts published articles by
+`published_at`, then by `id`. `previous` is the nearest earlier article;
+`next` is the nearest newer article. The first or last article receives `null`
+on the missing side.
+
+Themes should read `$context->get('previous')` and `$context->get('next')`.
+Use the adjacent item's `url` first; fall back to the theme's local content URL
+helper only for older Core releases. Do not access the database, repositories,
+or private controllers to find adjacent content.
+
+`previous` / `next` belong only to article detail ViewModels. List, home,
+category, tag, and search ViewModels must not expose these keys (including
+as `null`).
+
+Example:
+
+```php
+$previous = $context->get('previous');
+$next = $context->get('next');
+if (is_array($previous)) {
+    echo '<a href="' . $context->e($previous['url']) . '">' . $context->e($previous['title']) . '</a>';
+}
+```
+
+Adjacent navigation review cases:
+
+- Middle article shows both previous and next links
+- Earliest article shows only next
+- Latest article shows only previous
+- Adjacent links use real article permalinks
+- Chinese or special-character slug URLs are encoded
+- Pages do not require adjacent article navigation
+
 ## Logo and Brand
 
 Themes must resolve the site brand logo in this order:

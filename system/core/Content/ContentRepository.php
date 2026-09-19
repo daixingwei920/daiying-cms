@@ -258,6 +258,20 @@ final class ContentRepository
         return (int) $stmt->fetchColumn();
     }
 
+    /** @return array{previous:array<string,mixed>|null,next:array<string,mixed>|null} */
+    public function adjacentPublishedArticles(int $contentId, ?string $publishedAt): array
+    {
+        $publishedAt = trim((string) $publishedAt);
+        if ($contentId <= 0 || $publishedAt === '') {
+            return ['previous' => null, 'next' => null];
+        }
+
+        return [
+            'previous' => $this->adjacentPublishedArticle($contentId, $publishedAt, 'previous'),
+            'next' => $this->adjacentPublishedArticle($contentId, $publishedAt, 'next'),
+        ];
+    }
+
     /** @return list<array<string, mixed>> */
     public function publicSearch(string $query, int $page = 1, int $perPage = 10): array
     {
@@ -285,6 +299,36 @@ final class ContentRepository
         $stmt->execute();
 
         return array_map(fn (array $row): array => $this->hydrate($row), $stmt->fetchAll());
+    }
+
+    /** @return array<string,mixed>|null */
+    private function adjacentPublishedArticle(int $contentId, string $publishedAt, string $direction): ?array
+    {
+        $operator = $direction === 'previous' ? '<' : '>';
+        $order = $direction === 'previous' ? 'DESC' : 'ASC';
+        $stmt = $this->pdo->prepare(
+            "SELECT * FROM cms_contents
+             WHERE content_type = 'article'
+                AND status = 'published'
+                AND id <> :id_exclude
+                AND published_at IS NOT NULL
+                AND published_at <> ''
+                AND (
+                    published_at {$operator} :published_at
+                    OR (published_at = :published_at_tie AND id {$operator} :id_tie)
+                )
+             ORDER BY published_at {$order}, id {$order}
+             LIMIT 1"
+        );
+        $stmt->execute([
+            ':id_exclude' => $contentId,
+            ':published_at' => $publishedAt,
+            ':published_at_tie' => $publishedAt,
+            ':id_tie' => $contentId,
+        ]);
+        $row = $stmt->fetch();
+
+        return is_array($row) ? $this->hydrate($row) : null;
     }
 
     public function publicSearchCount(string $query): int

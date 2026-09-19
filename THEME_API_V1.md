@@ -180,6 +180,68 @@ replacement for the site-name fallback.
 
 `ThemeViewModel` normalizes Core data into stable array shapes.
 
+Article detail view model:
+
+- `previous`
+- `next`
+
+`previous` and `next` are available on article detail renders. They are
+optional top-level fields; each value is either `null` or an adjacent published
+article summary. Page detail renders may omit these fields or expose them as
+`null`.
+
+Adjacent article summary:
+
+- `id`
+- `title`
+- `slug`
+- `content_type`
+- `url`
+- `published_at`
+- `cover`
+- `excerpt`
+
+Core builds `url` with the same public Article V1 permalink rule as normal
+article links. Themes should use this `url` directly and only fall back to their
+local content URL helper if an older Core release does not provide it.
+
+Ordering is fixed for Theme API v1: among published articles on the same site,
+Core sorts by `published_at` and then `id`. `previous` is the nearest earlier
+article on that timeline; `next` is the nearest newer article. The earliest or
+latest article receives `null` for the missing side.
+
+Themes must not query Core repositories, controllers, or private tables to
+build adjacent navigation. Read `$context->get('previous')` and
+`$context->get('next')`, render only non-empty sides, and omit the whole
+navigation block when both are empty.
+
+`previous` / `next` exist only on article detail ViewModels. Home, category,
+tag, search, and ordinary article-list ViewModels must not include these keys
+(not even as `null`). Do not conflate them with list/`query`/`items` contracts.
+
+### Adjacent navigation example
+
+```php
+$previous = $context->get('previous');
+$next = $context->get('next');
+
+if (is_array($previous) || is_array($next)): ?>
+<nav class="adjacent-nav" aria-label="Adjacent articles">
+  <?php if (is_array($previous)): ?>
+    <a class="adjacent-prev" href="<?= $context->e((string) ($previous['url'] ?? '')) ?>">
+      <?= $context->e((string) ($previous['title'] ?? '')) ?>
+    </a>
+  <?php endif; ?>
+  <?php if (is_array($next)): ?>
+    <a class="adjacent-next" href="<?= $context->e((string) ($next['url'] ?? '')) ?>">
+      <?= $context->e((string) ($next['title'] ?? '')) ?>
+    </a>
+  <?php endif; ?>
+</nav>
+<?php endif;
+```
+
+
 Media view model:
 
 - `id`

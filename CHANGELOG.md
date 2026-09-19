@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.65 - 2026-09-19
+
+- Added article-detail `previous` and `next` ViewModel fields for Theme API v1 so themes can render adjacent article navigation without querying Core repositories or private tables.
+- Preserved existing article, page, list, category, tag, and search ViewModel contracts; adjacent fields are only added to article detail renders.
+- Documented adjacent article ordering, permalink requirements, and theme-side usage rules.
+- Preserved the 1.2.52 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.65-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.65>.
+
 ## 1.2.64 - 2026-09-17
 
 - Added a generic Core theme asset serving contract for `/content/themes/{theme_id}/assets/**` so market-installed themes can load CSS, JavaScript, images, and fonts without per-theme Apache or Nginx aliases.
