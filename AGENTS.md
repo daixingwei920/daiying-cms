@@ -7,9 +7,9 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 ## Current Core Baseline
 
 - Product: Daiying CMS Core
-- Baseline version: `1.2.63`
-- Git tag: `v1.2.63`
-- Baseline commit: `6d03a96e7c5c2096f9f0f236d68d5e0c1b3bf461`
+- Baseline version: `1.2.66`
+- Git tag: `v1.2.66`
+- Baseline commit: local tag `v1.2.66`
 - Current clean Core worktree:
   `/Users/xingweidai/Documents/Codex/2026-09-03/daiying-cms-core-theme/work/daiying-cms-core-clean-1.2.63`
 - Core closeout report:
@@ -148,4 +148,3 @@ At the start of a Daiying CMS Core task:
 4. Check the current Core version and Git commit.
 5. Refuse to publish from a dirty or legacy/WIP worktree.
 6. Keep plugin/business development in independent plugin threads.
-

@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.66 - 2026-09-20
+
+- Added a generic remote media provider capability gate so Core admin media pages and provider JSON endpoints can enforce provider-declared list, select, and write permissions before exposing remote media operations.
+- Hardened admin session capabilities so new sessions carry explicit capabilities, while legacy sessions without capabilities only retain superadmin compatibility for the first/founder admin account.
+- Registered `official.storage.baidu` in the official plugin registry as an API-trust storage provider namespace without moving Baidu Netdisk business logic into Core.
+- Preserved the 1.2.52 cross-version upgrade floor.
+- Public install package: `daiying-cms-1.2.66-stable.zip`.
+- Release URL: <https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.66>.
+
 ## 1.2.65 - 2026-09-19
 
 - Added article-detail `previous` and `next` ViewModel fields for Theme API v1 so themes can render adjacent article navigation without querying Core repositories or private tables.

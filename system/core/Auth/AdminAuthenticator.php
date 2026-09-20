@@ -76,6 +76,7 @@ final class AdminAuthenticator
             'id' => (int) $user['id'],
             'email' => (string) $user['email'],
             'display_name' => (string) $user['display_name'],
+            'capabilities' => $this->sessionCapabilities((int) $user['id']),
         ];
     }
 
@@ -98,6 +99,23 @@ final class AdminAuthenticator
             'email' => (string) ($user['email'] ?? ''),
             'display_name' => (string) ($user['display_name'] ?? ''),
         ];
+    }
+
+    /** @return list<string> */
+    private function sessionCapabilities(int $adminId): array
+    {
+        if ($adminId <= 0) {
+            return [];
+        }
+
+        try {
+            $stmt = $this->pdo->query('SELECT id FROM cms_admin_users ORDER BY id ASC LIMIT 1');
+            $firstAdminId = (int) ($stmt !== false ? ($stmt->fetchColumn() ?: 0) : 0);
+        } catch (\Throwable) {
+            return [];
+        }
+
+        return $firstAdminId > 0 && $adminId === $firstAdminId ? ['*', 'admin.super'] : [];
     }
 
     private function isRateLimited(string $email, string $ip): bool

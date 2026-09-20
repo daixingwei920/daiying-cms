@@ -155,6 +155,15 @@ final class OfficialPluginRegistry
                 'capability_namespaces' => ['affiliate'],
                 'table_prefixes' => ['affiliate_'],
             ],
+            'official.storage.baidu' => [
+                'directory' => 'official.storage.baidu',
+                'package_type' => 'plugin',
+                'type' => 'storage_provider',
+                'bundled' => true,
+                'trust_level' => 'api',
+                'capability_namespaces' => ['baidu_storage', 'storage_baidu'],
+                'table_prefixes' => ['baidu_storage_'],
+            ],
             'official.ai-customer-service' => [
                 'directory' => 'official.ai-customer-service',
                 'package_type' => 'plugin',

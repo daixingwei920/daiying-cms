@@ -2338,10 +2338,14 @@ final class AdminController
         if ($provider === null) {
             return Response::html(View::page('媒体库', '<div class="admin-page-header"><div><h1>媒体库</h1><p class="error">远程媒体来源暂不可用，请确认插件已启用并完成授权。</p></div></div><p><a class="button" href="/admin/media">返回本地媒体</a></p>'), 503);
         }
+        if (!$this->canUseRemoteMediaProvider($provider, 'list')) {
+            return Response::html(View::page('媒体库', '<div class="admin-page-header"><div><h1>媒体库</h1><p class="error">无权访问该远程媒体来源。</p></div></div><p><a class="button" href="/admin/media">返回本地媒体</a></p>'), 403);
+        }
 
         $path = (string) ($_GET['path'] ?? $this->remoteMediaDefaultPath($providerId));
         $query = trim((string) ($_GET['q'] ?? ''));
         $label = $provider->label();
+        $canSelect = $this->canUseRemoteMediaProvider($provider, 'select');
         try {
             $result = $query !== '' ? $provider->search($query, $path, ['page_size' => 50]) : $provider->list($path, ['page_size' => 50]);
             $rows = '';
@@ -2349,15 +2353,19 @@ final class AdminController
                 if (!$item instanceof \Cms\Core\Media\MediaProviderItem) {
                     continue;
                 }
-                $action = $item->type === 'folder'
-                    ? '<a class="button admin-button-secondary" href="/admin/media?source=' . View::escape(rawurlencode($providerId)) . '&amp;path=' . View::escape(rawurlencode($item->path)) . '">打开</a>'
-                    : '<form method="post" action="/admin/media/provider/select" style="display:inline">' . CsrfToken::field() .
+                if ($item->type === 'folder') {
+                    $action = '<a class="button admin-button-secondary" href="/admin/media?source=' . View::escape(rawurlencode($providerId)) . '&amp;path=' . View::escape(rawurlencode($item->path)) . '">打开</a>';
+                } elseif ($canSelect) {
+                    $action = '<form method="post" action="/admin/media/provider/select" style="display:inline">' . CsrfToken::field() .
                         '<input type="hidden" name="provider" value="' . View::escape($providerId) . '">' .
                         '<input type="hidden" name="id" value="' . View::escape($item->id) . '">' .
                         '<input type="hidden" name="path" value="' . View::escape($item->path) . '">' .
                         '<input type="hidden" name="mode" value="reference">' .
                         '<input type="hidden" name="return_to" value="/admin/media">' .
                         '<button type="submit">引用到媒体库</button></form>';
+                } else {
+                    $action = '<span class="muted">无引用权限</span>';
+                }
                 $rows .= '<tr><td>' . View::escape($item->name) . '</td><td>' . View::escape($item->type) . '</td><td>' . View::escape($item->mimeType) . '</td><td>' . View::escape(number_format($item->byteSize / 1024, 1) . ' KB') . '</td><td><code>' . View::escape($item->path) . '</code></td><td>' . $action . '</td></tr>';
             }
             $rows = $rows !== '' ? $rows : '<tr><td colspan="6" class="muted">' . View::escape($label) . ' 当前目录没有媒体文件。</td></tr>';
@@ -2392,6 +2400,9 @@ final class AdminController
     {
         $providers = [];
         foreach (\Cms\Core\Media\RemoteMediaProviderRegistry::all() as $provider) {
+            if (!$this->canUseRemoteMediaProvider($provider, 'list')) {
+                continue;
+            }
             $id = $provider->id();
             $providers[] = [
                 'id' => $id,
@@ -2462,6 +2473,9 @@ final class AdminController
         if ($provider === null) {
             return Response::json(['ok' => false, 'message' => '媒体来源暂不可用，请确认插件已启用。'], 404);
         }
+        if (!$this->canUseRemoteMediaProvider($provider, 'list')) {
+            return Response::json(['ok' => false, 'message' => '无权访问该远程媒体来源。'], 403);
+        }
 
         try {
             $query = trim((string) $request->input('q', ''));
@@ -2499,6 +2513,9 @@ final class AdminController
         $provider = \Cms\Core\Media\RemoteMediaProviderRegistry::get((string) $request->input('provider', ''));
         if ($provider === null) {
             return Response::json(['ok' => false, 'message' => '媒体来源暂不可用，请确认插件已启用。'], 404);
+        }
+        if (!$this->canUseRemoteMediaProvider($provider, 'select')) {
+            return Response::json(['ok' => false, 'message' => '无权引用该远程媒体来源。'], 403);
         }
 
         try {
@@ -2542,6 +2559,9 @@ final class AdminController
         $provider = \Cms\Core\Media\RemoteMediaProviderRegistry::get((string) $request->input('provider', ''));
         if ($provider === null) {
             return Response::json(['ok' => false, 'message' => '媒体来源暂不可用，请确认插件已启用。'], 404);
+        }
+        if (!$this->canUseRemoteMediaProvider($provider, 'write')) {
+            return Response::json(['ok' => false, 'message' => '无权写入该远程媒体来源。'], 403);
         }
 
         try {
@@ -11310,7 +11330,7 @@ JS;
     {
         $sessionUser = $_SESSION['admin_user'] ?? null;
         if (!is_array($sessionUser) || !array_key_exists('capabilities', $sessionUser)) {
-            return true;
+            return $this->legacySessionIsFounderAdmin($sessionUser);
         }
         $capabilities = $sessionUser['capabilities'];
         if (!is_array($capabilities)) {
@@ -11321,5 +11341,53 @@ JS;
         return in_array('*', $capabilities, true)
             || in_array('admin.super', $capabilities, true)
             || in_array($capability, $capabilities, true);
+    }
+
+    private function canUseRemoteMediaProvider(\Cms\Core\Media\RemoteMediaProviderInterface $provider, string $operation): bool
+    {
+        $capability = $this->remoteMediaProviderCapability($provider, $operation);
+        if ($capability === null || $capability === '') {
+            return true;
+        }
+
+        return $this->adminHasCapability($capability);
+    }
+
+    private function remoteMediaProviderCapability(\Cms\Core\Media\RemoteMediaProviderInterface $provider, string $operation): ?string
+    {
+        if (!method_exists($provider, 'requiredCapability')) {
+            return null;
+        }
+
+        try {
+            $capability = $provider->requiredCapability($operation);
+        } catch (Throwable) {
+            return null;
+        }
+
+        return is_string($capability) && $capability !== '' ? $capability : null;
+    }
+
+    private function legacySessionIsFounderAdmin(mixed $sessionUser): bool
+    {
+        if (!is_array($sessionUser)) {
+            return false;
+        }
+
+        $adminId = (int) ($sessionUser['id'] ?? 0);
+        if ($adminId <= 0) {
+            return false;
+        }
+
+        try {
+            $pdo = ConnectionFactory::make($this->settings);
+            $stmt = $pdo->query('SELECT id FROM cms_admin_users ORDER BY id ASC LIMIT 1');
+            $firstAdminId = (int) ($stmt !== false ? ($stmt->fetchColumn() ?: 0) : 0);
+        } catch (Throwable $exception) {
+            $this->logger->warning('Legacy admin capability fallback failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return false;
+        }
+
+        return $firstAdminId > 0 && $adminId === $firstAdminId;
     }
 }
