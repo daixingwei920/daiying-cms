@@ -1,0 +1,58 @@
+{
+    "theme_id": "daojia",
+    "product_id": "daojia",
+    "name": "清静无为 · Daojia",
+    "version": "1.7.11",
+    "author": "Daiying CMS Official",
+    "description": "沉浸式道家文化主题：1.7.11 修复文章列表页在 Daiying CMS 1.2.65 ViewModel 下文章卡片链接为空的问题；保留 1.7.10 移动端供桌与分页体验。",
+    "theme_api": "1.0",
+    "package_type": "theme",
+    "core": {
+        "min": "1.2.3",
+        "max": "1.x"
+    },
+    "content_types": [
+        "article",
+        "page"
+    ],
+    "recommended_plugins": [],
+    "required_plugins": [],
+    "settings_schema": {
+        "logo_image": {
+            "type": "image",
+            "label": "主题 Logo（可选）",
+            "group": "品牌",
+            "order": 1,
+            "default": "",
+            "help": "留空时自动使用站点全局 Logo。"
+        },
+        "hero_title": {
+            "type": "text",
+            "label": "首页主标题",
+            "group": "首页",
+            "order": 10,
+            "default": "清静无为"
+        },
+        "motto": {
+            "type": "text",
+            "label": "首页箴言",
+            "group": "首页",
+            "order": 11,
+            "default": "人法地 · 地法天 · 天法道 · 道法自然"
+        },
+        "section_title": {
+            "type": "text",
+            "label": "文章区标题",
+            "group": "首页",
+            "order": 12,
+            "default": "典籍与心悟"
+        },
+        "footer_motto": {
+            "type": "text",
+            "label": "页脚箴言",
+            "group": "页脚",
+            "order": 20,
+            "default": "致虚极，守静笃。"
+        }
+    }
+}

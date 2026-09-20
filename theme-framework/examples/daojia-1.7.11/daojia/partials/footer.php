@@ -1,0 +1,1 @@
+<footer class="dj-footer"><div class="dj-seal">道</div><p><?= $context->e((string)$context->setting('footer_motto','致虚极，守静笃。')) ?></p><small>&copy; <?= date('Y') ?> <?= $context->e($context->get('site_name','')) ?></small></footer>

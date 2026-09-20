@@ -1,0 +1,20 @@
+{
+  "id": "blank_theme",
+  "name": "Blank Theme",
+  "version": "0.1.0",
+  "description": "Blank Daiying CMS starter theme.",
+  "author": "Daiying CMS",
+  "min_core_version": "1.2.63",
+  "templates": {
+    "home": "home",
+    "list": "list",
+    "content": "content",
+    "error": "error"
+  },
+  "settings": {
+    "logo_image": "",
+    "hero_eyebrow": "Theme Starter",
+    "hero_title": "Build your next Daiying CMS theme",
+    "home_section_title": "Latest Articles"
+  }
+}

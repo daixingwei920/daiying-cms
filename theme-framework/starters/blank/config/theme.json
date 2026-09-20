@@ -1,0 +1,13 @@
+{
+  "scene": {
+    "id": "blank",
+    "title": "Blank Scene"
+  },
+  "hero": {
+    "layout": "standard",
+    "background": ""
+  },
+  "content": {
+    "home_section_title": "Latest Articles"
+  }
+}

@@ -1,0 +1,115 @@
+:root {
+  --ic-bg: #f7f4ee;
+  --ic-text: #171717;
+  --ic-muted: #6f6a60;
+  --ic-accent: #9c3f35;
+  --ic-panel: #fffdf8;
+}
+
+* { box-sizing: border-box; }
+body.ic-theme {
+  margin: 0;
+  color: var(--ic-text);
+  background: var(--ic-bg);
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+}
+
+.ic-site-header,
+.ic-content-section,
+.ic-list,
+.ic-article,
+.ic-error {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.ic-brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 72px;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 700;
+}
+.ic-brand img {
+  max-height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
+.ic-hero {
+  position: relative;
+  min-height: 100svh;
+  min-height: 100dvh;
+  overflow: clip;
+  isolation: isolate;
+  background: #111;
+}
+.ic-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ic-layer-background { z-index: 10; background: linear-gradient(145deg, #16191f, #56636d); }
+.ic-layer-environment { z-index: 20; }
+.ic-layer-figures { z-index: 30; }
+.ic-layer-foreground { z-index: 40; }
+.ic-layer-effects { z-index: 50; }
+.ic-hero-copy {
+  position: absolute;
+  z-index: 70;
+  left: max(24px, env(safe-area-inset-left));
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(48px, env(safe-area-inset-bottom));
+  color: white;
+}
+.ic-hero-copy h1 {
+  max-width: 760px;
+  font-size: clamp(40px, 8vw, 108px);
+  line-height: .96;
+  margin: 0;
+}
+.ic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+.ic-card {
+  padding: 24px;
+  background: var(--ic-panel);
+  border: 1px solid color-mix(in srgb, var(--ic-muted) 25%, transparent);
+}
+.ic-card img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+.ic-pagination,
+.ic-adjacent {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 32px 0;
+}
+.ic-pagination a,
+.ic-pagination span,
+.ic-adjacent a {
+  padding: 10px 14px;
+  border: 1px solid color-mix(in srgb, var(--ic-accent) 35%, transparent);
+  color: inherit;
+  text-decoration: none;
+}
+.ic-pagination [aria-current="page"] {
+  background: var(--ic-accent);
+  color: white;
+}
+
+@media (max-width: 720px) {
+  .ic-hero {
+    min-height: 100svh;
+  }
+  .ic-hero-copy h1 {
+    font-size: clamp(36px, 14vw, 72px);
+  }
+}

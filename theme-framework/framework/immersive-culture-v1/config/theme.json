@@ -1,0 +1,72 @@
+{
+  "scene": {
+    "id": "immersive-culture",
+    "title": "Immersive Culture Theme",
+    "description": "Reusable scene configuration for Daiying CMS cultural themes."
+  },
+  "hero": {
+    "layout": "full-screen",
+    "min_height": "100svh",
+    "desktop_aspect_ratio": "16 / 9",
+    "mobile_aspect_ratio": "9 / 16",
+    "background": {
+      "image": "images/hero-background.webp",
+      "position": "center",
+      "mobile_position": "center top"
+    }
+  },
+  "layers": [
+    {
+      "id": "background",
+      "type": "image",
+      "asset": "images/hero-background.webp",
+      "z_index": 10
+    },
+    {
+      "id": "environment",
+      "type": "image",
+      "asset": "images/environment.webp",
+      "z_index": 20
+    },
+    {
+      "id": "figures",
+      "type": "figures",
+      "items": [],
+      "z_index": 30
+    },
+    {
+      "id": "foreground",
+      "type": "image",
+      "asset": "images/foreground.webp",
+      "z_index": 40
+    },
+    {
+      "id": "effects",
+      "type": "effects",
+      "preset": "soft-reveal",
+      "z_index": 50
+    }
+  ],
+  "transition": {
+    "preset": "scroll-open",
+    "enabled": true,
+    "duration_ms": 1200
+  },
+  "interactive_props": [
+    {
+      "id": "sample-prop",
+      "image": "images/prop-sample.webp",
+      "position": { "left": "50%", "top": "70%", "width": "10%" },
+      "mobile_position": { "left": "50%", "top": "68%", "width": "22%" },
+      "animation": "float",
+      "click_action": "focus",
+      "hover_action": "glow",
+      "sound": "",
+      "z_index": 60
+    }
+  ],
+  "content": {
+    "home_section_title": "Latest Articles",
+    "list_title": "Articles"
+  }
+}
