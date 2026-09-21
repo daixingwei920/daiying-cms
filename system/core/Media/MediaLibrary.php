@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cms\Core\Media;
 
+use Cms\Core\Routing\BasePath;
 use PDO;
 use Throwable;
 
@@ -317,8 +318,8 @@ final class MediaLibrary
         return [
             'id' => $id,
             'available' => $exists,
-            'url' => '/media/' . $id,
-            'download_url' => '/media/' . $id . '?download=1',
+            'url' => BasePath::prefixCurrent('/media/' . $id),
+            'download_url' => BasePath::prefixCurrent('/media/' . $id . '?download=1'),
             'media_type' => (string) $media['media_type'],
             'mime_type' => (string) $media['mime_type'],
             'filename' => (string) $media['original_name'],
@@ -330,7 +331,7 @@ final class MediaLibrary
             'width' => $media['width'],
             'height' => $media['height'],
             'duration_seconds' => $media['duration_seconds'],
-            'thumbnail_url' => isset($media['metadata']['derivatives']['thumbnail']) ? '/media/' . $id . '?variant=thumbnail' : '',
+            'thumbnail_url' => isset($media['metadata']['derivatives']['thumbnail']) ? BasePath::prefixCurrent('/media/' . $id . '?variant=thumbnail') : '',
             'derivatives' => is_array($media['metadata']['derivatives'] ?? null) ? $media['metadata']['derivatives'] : [],
             'provider' => $provider,
             'remote' => $remote,

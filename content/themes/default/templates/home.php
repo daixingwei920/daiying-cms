@@ -27,7 +27,7 @@ $listLayout = dy_choice($context, 'article_list_layout', 'mixed', ['list', 'grid
             <p class="eyebrow">Daiying Default Theme</p>
             <h1><?= $context->e($siteName) ?></h1>
             <p><?= $context->e($description) ?></p>
-            <p><a class="button" href="/articles">浏览全部文章</a></p>
+            <p><a class="button" href="<?= $context->e(dy_site_url('/articles')) ?>">浏览全部文章</a></p>
         </div>
         <aside class="hero-panel" aria-label="主题能力">
             <dl>
@@ -48,7 +48,7 @@ $listLayout = dy_choice($context, 'article_list_layout', 'mixed', ['list', 'grid
                     <h2><?= $context->e(dy_text($context, 'home_featured_title', '推荐内容')) ?></h2>
                     <p class="section-lead">优先展示最近发布的重点内容，适合放产品公告、教程、案例或置顶文章。</p>
                 </div>
-                <a href="/articles">全部文章</a>
+                <a href="<?= $context->e(dy_site_url('/articles')) ?>">全部文章</a>
             </div>
             <div class="post-list post-list-grid">
                 <?php foreach ($featured as $item): ?><?php dy_article_card($context, $item, true); ?><?php endforeach; ?>
@@ -84,9 +84,9 @@ $listLayout = dy_choice($context, 'article_list_layout', 'mixed', ['list', 'grid
                     <section class="side-block">
                         <h2>快速入口</h2>
                         <ul>
-                            <li><a href="/articles">全部文章</a></li>
-                            <li><a href="/search">搜索内容</a></li>
-                            <li><a href="/sitemap.xml">站点地图</a></li>
+                            <li><a href="<?= $context->e(dy_site_url('/articles')) ?>">全部文章</a></li>
+                            <li><a href="<?= $context->e(dy_site_url('/search')) ?>">搜索内容</a></li>
+                            <li><a href="<?= $context->e(dy_site_url('/sitemap.xml')) ?>">站点地图</a></li>
                         </ul>
                     </section>
                 </aside>

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cms\Core\Plugin;
 
+use Cms\Core\Routing\BasePath;
+
 final class PluginRuntimeRegistry
 {
     /** @var array<string,PluginRouteDefinition> */
@@ -58,7 +60,10 @@ final class PluginRuntimeRegistry
         if (!in_array($type, ['script', 'style'], true)) {
             throw new PluginException('Invalid frontend asset type.');
         }
-        if (!str_starts_with($url, '/extension-assets/plugin/' . rawurlencode($pluginId) . '?')) {
+        $policyPath = BasePath::stripCurrent($url);
+        $query = parse_url($url, PHP_URL_QUERY);
+        $policyUrl = $policyPath . ($query !== null && $query !== false && $query !== '' ? '?' . $query : '');
+        if (!str_starts_with($policyUrl, '/extension-assets/plugin/' . rawurlencode($pluginId) . '?')) {
             throw new PluginException('Plugin frontend assets must use the Core extension asset endpoint.');
         }
         $key = $key !== '' ? $pluginId . ':' . $key : $type . ':' . $url;

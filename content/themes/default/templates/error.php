@@ -20,11 +20,11 @@ $seo = $context->get('seo', []);
         <p class="entry-kicker">404</p>
         <h1 id="error-title"><?= $context->e($title) ?></h1>
         <p><?= $context->e($message) ?></p>
-        <form class="search-form" method="get" action="/search">
+        <form class="search-form" method="get" action="<?= $context->e(dy_site_url('/search')) ?>">
             <input name="q" placeholder="搜索你想找的内容" aria-label="搜索关键词">
             <button class="content-button" type="submit">搜索</button>
         </form>
-        <p><a class="content-button" href="/">返回首页</a> <a class="back-link" href="/articles">浏览文章</a></p>
+        <p><a class="content-button" href="<?= $context->e(dy_site_url('/')) ?>">返回首页</a> <a class="back-link" href="<?= $context->e(dy_site_url('/articles')) ?>">浏览文章</a></p>
     </section>
 </main>
 <?php dy_footer($context); ?>

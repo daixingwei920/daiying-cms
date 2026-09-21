@@ -10,6 +10,7 @@ use Cms\Core\Payment\PaymentProviderRedirectPolicyResolver;
 use Cms\Core\Payment\PaymentProviderSelector;
 use Cms\Core\Payment\PaymentRepository;
 use Cms\Core\Payment\PaymentService;
+use Cms\Core\Routing\BasePath;
 use PDO;
 use Throwable;
 
@@ -58,7 +59,7 @@ final class CardDeliveryService
                     return $this->completeHostedCheckout((int) $existingOrder['id'], $idempotencyKey, $this->completionClaim((int) $existingOrder['id'], $idempotencyKey));
                 }
                 if (in_array((string) ($existingPayment['status'] ?? ''), ['pending', 'authorized'], true)) {
-                    $successPath = '/card-delivery/orders/' . (int) $existingOrder['id'] . '/complete';
+                    $successPath = $this->url('/card-delivery/orders/' . (int) $existingOrder['id'] . '/complete');
                     $claim = $this->completionClaim((int) $existingOrder['id'], $idempotencyKey);
                     $checkoutUrl = $this->providerCheckoutUrl($existingPayment);
                     return [
@@ -95,7 +96,7 @@ final class CardDeliveryService
         if ($orderId <= 0) {
             throw new CardDeliveryException('Card order could not be created.');
         }
-        $successPath = '/card-delivery/orders/' . $orderId . '/complete';
+        $successPath = $this->url('/card-delivery/orders/' . $orderId . '/complete');
         $claim = $this->completionClaim($orderId, $idempotencyKey);
         $payment = (new PaymentService($this->pdo, new PaymentRepository($this->pdo), $this->secret()))->createProviderPayment(
             self::SUBJECT_TYPE,
@@ -109,7 +110,7 @@ final class CardDeliveryService
                 'card_product_id' => $productId,
                 'card_order_id' => $orderId,
                 'success_url' => $successPath . '?payment_key=' . rawurlencode($idempotencyKey) . '&claim=' . rawurlencode($claim),
-                'cancel_url' => '/',
+                'cancel_url' => $this->url('/'),
             ],
         );
         if (isset($payment['id'])) {
@@ -170,7 +171,7 @@ final class CardDeliveryService
                     'provider_redirect' => $checkoutUrl !== '',
                     'checkout_url' => $checkoutUrl,
                     'pending_confirmation' => $checkoutUrl === '',
-                    'completion_url' => '/card-delivery/orders/' . $orderId . '/complete?payment_key=' . rawurlencode($idempotencyKey) . '&claim=' . rawurlencode($claim),
+                    'completion_url' => $this->url('/card-delivery/orders/' . $orderId . '/complete?payment_key=' . rawurlencode($idempotencyKey) . '&claim=' . rawurlencode($claim)),
                     'instructions' => $this->pendingInstructions($payment),
                 ];
             }
@@ -424,6 +425,11 @@ final class CardDeliveryService
     private function subjectId(int $orderId): string
     {
         return 'order:' . $orderId;
+    }
+
+    private function url(string $path): string
+    {
+        return BasePath::prefixCurrent($path);
     }
 
     private function requireSettings(): Settings

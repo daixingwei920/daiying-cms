@@ -12,7 +12,7 @@ final class Request
         public readonly string $path,
         public readonly array $query = [],
         public readonly array $body = [],
-    public readonly array $server = [],
+        public readonly array $server = [],
     ) {
     }
 
@@ -71,5 +71,19 @@ final class Request
     public function input(string $key, mixed $default = null): mixed
     {
         return $this->body[$key] ?? $this->query[$key] ?? $default;
+    }
+
+    public function withPath(string $path): self
+    {
+        $server = $this->server;
+        $server['DAIYING_ORIGINAL_PATH'] = $this->path;
+
+        return new self(
+            $this->method,
+            self::normalizePath($path),
+            $this->query,
+            $this->body,
+            $server,
+        );
     }
 }

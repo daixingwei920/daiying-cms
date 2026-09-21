@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Cms\Core\Content;
 
+use Cms\Core\Routing\BasePath;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Support\Money;
 
@@ -200,7 +201,7 @@ final class BlockRenderer
             $quantityField = $maxQuantity > 1
                 ? '<label>数量<input name="quantity" type="number" min="1" max="' . $maxQuantity . '" value="1"></label>'
                 : '<input type="hidden" name="quantity" value="1">';
-            $html .= '<form method="post" action="/card-delivery/' . $productId . '/checkout">' . CsrfToken::field() . $quantityField . '<button type="submit">' . $this->e($buttonText !== '' ? $buttonText : '立即购买') . '</button></form>';
+            $html .= '<form method="post" action="' . $this->e($this->url('/card-delivery/' . $productId . '/checkout')) . '">' . CsrfToken::field() . $quantityField . '<button type="submit">' . $this->e($buttonText !== '' ? $buttonText : '立即购买') . '</button></form>';
         }
 
         return $html . '</section>';
@@ -243,7 +244,7 @@ final class BlockRenderer
 
         return '<section class="content-tip-block"><h2>' . $this->e($title) . '</h2>' .
             ($description !== '' ? '<p>' . $this->e($description) . '</p>' : '') .
-            '<form method="post" action="/tips/checkout">' . CsrfToken::field() .
+            '<form method="post" action="' . $this->e($this->url('/tips/checkout')) . '">' . CsrfToken::field() .
             '<input type="hidden" name="content_id" value="' . $this->contentId . '">' .
             '<input type="hidden" name="block_index" value="' . $blockIndex . '">' .
             $amountButtons . $custom . $this->paymentProviderFields($providers) .
@@ -336,11 +337,12 @@ final class BlockRenderer
         $pattern = $prefix === '/paid-content/'
             ? '#^/paid-content/[1-9][0-9]{0,17}/checkout$#'
             : '#^/paid-download/[1-9][0-9]{0,17}/[1-9][0-9]{0,17}/checkout$#';
+        $path = BasePath::stripCurrent($path);
         if (preg_match($pattern, $path) !== 1) {
             return '';
         }
 
-        return $path;
+        return $this->url($path);
     }
 
     private function safeAuthorizedDownloadPath(string $path): string
@@ -348,14 +350,15 @@ final class BlockRenderer
         if ($path === '' || $path !== trim($path) || strlen($path) > 4096 || preg_match('/[\x00-\x1F\x7F]/', $path) === 1) {
             return '';
         }
-        if (!str_starts_with($path, '/media/') || str_starts_with($path, '//')) {
-            return '';
-        }
         $parts = parse_url($path);
         if (!is_array($parts) || (string) ($parts['path'] ?? '') === '' || !isset($parts['query'])) {
             return '';
         }
-        if (preg_match('#^/media/[1-9][0-9]{0,17}$#', (string) ($parts['path'] ?? '')) !== 1) {
+        $assetPath = BasePath::stripCurrent((string) ($parts['path'] ?? ''));
+        if (!str_starts_with($assetPath, '/media/') || str_starts_with($assetPath, '//')) {
+            return '';
+        }
+        if (preg_match('#^/media/[1-9][0-9]{0,17}$#', $assetPath) !== 1) {
             return '';
         }
         parse_str((string) $parts['query'], $query);
@@ -372,7 +375,12 @@ final class BlockRenderer
             return '';
         }
 
-        return $path;
+        return $this->url($assetPath . '?' . (string) $parts['query']);
+    }
+
+    private function url(string $path): string
+    {
+        return BasePath::prefixCurrent($path);
     }
 
     /** @param array<string, mixed> $data */

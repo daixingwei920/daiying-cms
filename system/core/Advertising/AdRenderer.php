@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cms\Core\Advertising;
 
+use Cms\Core\Routing\BasePath;
+
 final class AdRenderer
 {
     public static function renderSlot(string $slotKey, string $html): string
@@ -13,7 +15,7 @@ final class AdRenderer
             return '';
         }
 
-        return '<span class="cms-ad-track" aria-hidden="true"><img src="/ads/track/' . self::escapeAttr($slotKey) . '/impression" alt="" width="1" height="1" loading="lazy" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"></span>' .
+        return '<span class="cms-ad-track" aria-hidden="true"><img src="' . self::escapeAttr(BasePath::prefixCurrent('/ads/track/' . rawurlencode($slotKey) . '/impression')) . '" alt="" width="1" height="1" loading="lazy" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"></span>' .
             self::rewriteClicks($slotKey, $safe);
     }
 
@@ -41,7 +43,7 @@ final class AdRenderer
             if (!self::safeClickTarget($target)) {
                 return '<a' . $matches[1] . $matches[4] . '>';
             }
-            $url = '/ads/track/' . rawurlencode($slotKey) . '/click?to=' . rawurlencode($target);
+            $url = BasePath::prefixCurrent('/ads/track/' . rawurlencode($slotKey) . '/click?to=' . rawurlencode($target));
             return '<a' . $matches[1] . 'href="' . self::escapeAttr($url) . '"' . $matches[4] . '>';
         }, $html) ?? $html;
     }
@@ -64,4 +66,3 @@ final class AdRenderer
         return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
     }
 }
-

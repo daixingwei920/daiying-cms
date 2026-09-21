@@ -8,6 +8,7 @@ use Cms\Core\Config\Settings;
 use Cms\Core\Database\ConnectionFactory;
 use Cms\Core\Http\Request;
 use Cms\Core\Http\Response;
+use Cms\Core\Routing\BasePath;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Support\View;
 use Throwable;
@@ -204,11 +205,12 @@ final class PaidDownloadController
         if (preg_match('/(?:^|[?&])payment_token=/', $path) === 1) {
             return '';
         }
+        $path = BasePath::stripCurrent($path);
         if (preg_match('#^/articles/[a-z0-9][a-z0-9-]{0,190}$#', $path) === 1) {
-            return $path;
+            return BasePath::prefixCurrent($path);
         }
         if (preg_match('#^/paid-download/[1-9][0-9]{0,17}/[1-9][0-9]{0,17}/complete\?payment_key=[A-Za-z0-9._~-]{1,191}&claim=[a-f0-9]{64}$#', $path) === 1) {
-            return $path;
+            return BasePath::prefixCurrent($path);
         }
 
         return '';

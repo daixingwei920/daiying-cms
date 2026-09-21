@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cms\Core\Payment;
 
 use Cms\Core\Config\Settings;
+use Cms\Core\Routing\BasePath;
 use PDO;
 use Throwable;
 
@@ -115,7 +116,7 @@ final class PaidContentService
             : (new PaymentProviderSelector($this->pdo, $this->settings))->defaultProviderId((string) $config['currency']);
         $this->secret();
         $this->tokenTtlSeconds();
-        $successPath = '/paid-content/' . $contentId . '/complete';
+        $successPath = $this->url('/paid-content/' . $contentId . '/complete');
         $claim = $this->completionClaim($contentId, $idempotencyKey);
 
         $payment = (new PaymentService($this->pdo, new PaymentRepository($this->pdo), $this->secret()))->createProviderPayment(
@@ -206,7 +207,7 @@ final class PaidContentService
                     'payment' => $payment,
                     'authorization' => null,
                     'content_url' => $this->contentPath($content),
-                    'completion_url' => '/paid-content/' . $contentId . '/complete?payment_key=' . rawurlencode($idempotencyKey) . '&claim=' . rawurlencode($claim),
+                    'completion_url' => $this->url('/paid-content/' . $contentId . '/complete?payment_key=' . rawurlencode($idempotencyKey) . '&claim=' . rawurlencode($claim)),
                     'provider_redirect' => false,
                     'pending_confirmation' => true,
                     'instructions' => $this->pendingInstructions($payment),
@@ -423,7 +424,12 @@ final class PaidContentService
     private function contentPath(array $content): string
     {
         $slug = rawurlencode((string) ($content['slug'] ?? ''));
-        return (string) ($content['content_type'] ?? '') === 'page' ? '/' . $slug : '/articles/' . $slug;
+        return $this->url((string) ($content['content_type'] ?? '') === 'page' ? '/' . $slug : '/articles/' . $slug);
+    }
+
+    private function url(string $path): string
+    {
+        return BasePath::prefixCurrent($path);
     }
 
     /** @param array<string,mixed> $payment @return array{record:array<string,mixed>,token:string} */

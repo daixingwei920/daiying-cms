@@ -42,13 +42,13 @@ $comments = is_array($context->get('comments', [])) ? $context->get('comments', 
         <?php dy_ad_slot($context, 'article_bottom'); ?>
         <?php if (!empty($categories) || !empty($tags)): ?>
             <footer class="entry-footer">
-                <?php if (!empty($categories)): ?><div class="terms"><?php foreach ($categories as $term): ?><a href="/category/<?= $context->e(rawurlencode((string) ($term['slug'] ?? ''))) ?>"><?= $context->e($term['name'] ?? '') ?></a><?php endforeach; ?></div><?php endif; ?>
-                <?php if (!empty($tags)): ?><div class="terms"><?php foreach ($tags as $term): ?><a href="/tag/<?= $context->e(rawurlencode((string) ($term['slug'] ?? ''))) ?>">#<?= $context->e($term['name'] ?? '') ?></a><?php endforeach; ?></div><?php endif; ?>
+                <?php if (!empty($categories)): ?><div class="terms"><?php foreach ($categories as $term): ?><a href="<?= $context->e(dy_site_url('/category/' . rawurlencode((string) ($term['slug'] ?? '')))) ?>"><?= $context->e($term['name'] ?? '') ?></a><?php endforeach; ?></div><?php endif; ?>
+                <?php if (!empty($tags)): ?><div class="terms"><?php foreach ($tags as $term): ?><a href="<?= $context->e(dy_site_url('/tag/' . rawurlencode((string) ($term['slug'] ?? '')))) ?>">#<?= $context->e($term['name'] ?? '') ?></a><?php endforeach; ?></div><?php endif; ?>
             </footer>
         <?php endif; ?>
         <nav class="post-nav" aria-label="内容导航">
-            <a class="back-link" href="<?= $isPage ? '/' : '/articles' ?>"><?= $isPage ? '返回首页' : '返回列表' ?></a>
-            <a class="back-link" href="/search">搜索更多内容</a>
+            <a class="back-link" href="<?= $context->e(dy_site_url($isPage ? '/' : '/articles')) ?>"><?= $isPage ? '返回首页' : '返回列表' ?></a>
+            <a class="back-link" href="<?= $context->e(dy_site_url('/search')) ?>">搜索更多内容</a>
         </nav>
         <?php if (!$isPage && ($comments['enabled'] ?? false)): ?>
             <?php $commentItems = is_array($comments['items'] ?? null) ? $comments['items'] : []; ?>
@@ -75,16 +75,16 @@ $comments = is_array($context->get('comments', [])) ? $context->get('comments', 
                 <?php endif; ?>
                 <?php if ($frontUser !== null): ?>
                     <p class="comment-login-state">当前以 <?= $context->e((string) ($frontUser['display_name'] ?? '会员')) ?> 身份评论。</p>
-                    <form class="inline-logout" method="post" action="/logout">
+                    <form class="inline-logout" method="post" action="<?= $context->e(dy_site_url('/logout')) ?>">
                         <input type="hidden" name="_csrf" value="<?= $context->e((string) ($comments['csrf'] ?? '')) ?>">
                         <input type="hidden" name="redirect" value="<?= $context->e((string) ($comments['redirect'] ?? '/')) ?>">
                         <button type="submit">退出登录</button>
                     </form>
                 <?php elseif (!($comments['allow_guest'] ?? true)): ?>
-                    <p><a class="back-link" href="/login?redirect=<?= $context->e(rawurlencode((string) ($comments['redirect'] ?? '/'))) ?>">登录后评论</a></p>
+                    <p><a class="back-link" href="<?= $context->e(dy_site_url('/login?redirect=' . rawurlencode((string) ($comments['redirect'] ?? '/')))) ?>">登录后评论</a></p>
                 <?php endif; ?>
                 <?php if ($frontUser !== null || ($comments['allow_guest'] ?? true)): ?>
-                    <form class="comment-form" method="post" action="/comments">
+                    <form class="comment-form" method="post" action="<?= $context->e(dy_site_url('/comments')) ?>">
                         <input type="hidden" name="_csrf" value="<?= $context->e((string) ($comments['csrf'] ?? '')) ?>">
                         <input type="hidden" name="content_id" value="<?= (int) ($comments['content_id'] ?? 0) ?>">
                         <input type="hidden" name="redirect" value="<?= $context->e((string) ($comments['redirect'] ?? '/')) ?>">
@@ -93,7 +93,7 @@ $comments = is_array($context->get('comments', [])) ? $context->get('comments', 
                                 <label>昵称<input name="author_name" maxlength="80" required></label>
                                 <label>邮箱<input name="author_email" type="email" maxlength="191"></label>
                             </div>
-                            <p class="muted">也可以 <a href="/login?redirect=<?= $context->e(rawurlencode((string) ($comments['redirect'] ?? '/'))) ?>">登录</a> 或 <a href="/register?redirect=<?= $context->e(rawurlencode((string) ($comments['redirect'] ?? '/'))) ?>">注册</a> 后评论。</p>
+                            <p class="muted">也可以 <a href="<?= $context->e(dy_site_url('/login?redirect=' . rawurlencode((string) ($comments['redirect'] ?? '/')))) ?>">登录</a> 或 <a href="<?= $context->e(dy_site_url('/register?redirect=' . rawurlencode((string) ($comments['redirect'] ?? '/')))) ?>">注册</a> 后评论。</p>
                         <?php endif; ?>
                         <label>评论内容<textarea name="body" rows="5" maxlength="2000" required></textarea></label>
                         <button type="submit">提交评论</button>

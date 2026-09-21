@@ -8,6 +8,7 @@ use Cms\Core\Config\Settings;
 use Cms\Core\Database\ConnectionFactory;
 use Cms\Core\Http\Request;
 use Cms\Core\Http\Response;
+use Cms\Core\Routing\BasePath;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Support\View;
 use Throwable;
@@ -158,6 +159,6 @@ final class TipController
             return '/';
         }
 
-        return $path;
+        return BasePath::prefixCurrent(BasePath::stripCurrent($path));
     }
 }

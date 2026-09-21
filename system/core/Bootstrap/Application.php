@@ -44,6 +44,7 @@ use Cms\Core\Payment\TipController;
 use Cms\Core\Recovery\RecoveryController;
 use Cms\Core\Recovery\RunMode;
 use Cms\Core\Rest\ApiV1Controller;
+use Cms\Core\Routing\BasePath;
 use Cms\Core\Routing\Router;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Security\SessionManager;
@@ -66,11 +67,14 @@ final class Application
     public static function boot(string $rootPath): self
     {
         $settings = Settings::load($rootPath);
+        $basePath = BasePath::fromSettings($settings);
+        BasePath::setCurrent($basePath);
+        View::setBasePath($basePath);
         $logger = new FileLogger($rootPath . '/storage/logs/app.log');
         $installed = is_file($rootPath . '/storage/installed.lock');
 
         ErrorHandler::register($logger, (bool) $settings->get('app.debug', false));
-        if (!self::isStatelessHealthRequest()) {
+        if (!self::isStatelessHealthRequest($basePath)) {
             SessionManager::start($installed && (bool) $settings->get('app.secure_cookies', false));
         }
         CoreBoundary::assertWritablePaths($rootPath);
@@ -122,6 +126,7 @@ final class Application
 
     public function handle(Request $request): Response
     {
+        $request = $this->withBasePathStripped($request);
         $themeAssetResponse = $this->maybeServeThemeAsset($request);
         if ($themeAssetResponse !== null) {
             return $this->withConfiguredSecurityHeaders($themeAssetResponse);
@@ -168,6 +173,7 @@ final class Application
 
     private function withConfiguredSecurityHeaders(Response $response): Response
     {
+        $response = $this->withBasePathRedirect($response);
         if (!$this->hstsEnabled()) {
             return $response;
         }
@@ -181,6 +187,7 @@ final class Application
     {
         View::setAdminNotificationSummary(0);
         $path = parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
+        $path = is_string($path) ? BasePath::stripCurrent($path) : '';
         if (!$installed || !is_string($path) || !str_starts_with($path, '/admin') || $path === '/admin/login') {
             return;
         }
@@ -228,12 +235,33 @@ final class Application
         return $value;
     }
 
-    private static function isStatelessHealthRequest(): bool
+    private static function isStatelessHealthRequest(string $basePath): bool
     {
         $uri = (string) ($_SERVER['REQUEST_URI'] ?? '');
         $path = (string) (parse_url($uri, PHP_URL_PATH) ?: '');
 
-        return $path === '/health';
+        return BasePath::strip($path, $basePath) === '/health';
+    }
+
+    private function withBasePathStripped(Request $request): Request
+    {
+        $path = BasePath::strip($request->path, BasePath::current());
+        return $path === $request->path ? $request : $request->withPath($path);
+    }
+
+    private function withBasePathRedirect(Response $response): Response
+    {
+        $headers = $response->headers();
+        $location = $headers['Location'] ?? '';
+        if ($location === '') {
+            return $response;
+        }
+        $prefixed = BasePath::prefixCurrent($location);
+        if ($prefixed === $location) {
+            return $response;
+        }
+
+        return $response->withHeaders(['Location' => $prefixed]);
     }
 
     private static function registerCoreRoutes(Router $router, Settings $settings, string $rootPath, FileLogger $logger, string $mode, PluginRuntimeRegistry $pluginRuntime, EventDispatcher $events): void

@@ -19,6 +19,7 @@ use Cms\Core\Payment\PaidContentService;
 use Cms\Core\Payment\PaidDownloadService;
 use Cms\Core\Payment\PaymentProviderSelector;
 use Cms\Core\Recovery\RunMode;
+use Cms\Core\Routing\BasePath;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Support\Money;
 use Cms\Core\Support\View;
@@ -49,7 +50,7 @@ final class ContentFrontController
                 'title' => 'Articles',
                 'items' => $items,
                 'pagination' => ['page' => $page, 'per_page' => $perPage, 'total' => $repo->publicCount('article')],
-                'seo' => $this->seo(['title' => 'Articles']),
+                'seo' => $this->seo(['title' => 'Articles', 'path' => '/articles']),
                 'ad_slots' => $this->adSlots(),
             ]));
         } catch (Throwable $exception) {
@@ -225,7 +226,7 @@ final class ContentFrontController
             $user = (new FrontUserAuthenticator($pdo))->user();
             if ($user === null && !(bool) $this->settings->get('comments.allow_guest', true)) {
                 $this->flash('comment_error', '请先登录后再评论。');
-                return Response::redirect('/login?redirect=' . rawurlencode($redirect));
+                return Response::redirect($this->url('/login?redirect=' . rawurlencode($redirect)));
             }
             $status = (bool) $this->settings->get('comments.require_approval', true) ? 'pending' : 'approved';
             (new CommentRepository($pdo))->create([
@@ -272,7 +273,7 @@ final class ContentFrontController
             'navigation' => NavigationBuilder::build($this->settings, null, $this->rootPath),
             'title' => $title,
             'term' => $term,
-                'base_path' => '/' . ($taxonomy === 'tag' ? 'tag' : 'category') . '/' . rawurlencode($term['slug']),
+            'base_path' => $this->url('/' . ($taxonomy === 'tag' ? 'tag' : 'category') . '/' . rawurlencode($term['slug'])),
             'empty_message' => '该' . $label . '暂时没有文章。',
             'items' => $items,
             'pagination' => ['page' => $page, 'per_page' => 10, 'total' => $total],
@@ -286,8 +287,8 @@ final class ContentFrontController
         $base = $this->siteBaseUrl();
         $xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
         if ($this->siteAllowsRobotsIndex()) {
-            $xml .= '<url><loc>' . $this->x($base . '/') . '</loc></url>';
-            $xml .= '<url><loc>' . $this->x($base . '/articles') . '</loc></url>';
+            $xml .= '<url><loc>' . $this->x($base . $this->url('/')) . '</loc></url>';
+            $xml .= '<url><loc>' . $this->x($base . $this->url('/articles')) . '</loc></url>';
             foreach ($this->repo()->sitemapItems() as $item) {
                 $meta = is_array($item['meta'] ?? null) ? $item['meta'] : [];
                 if (($meta['robots_index'] ?? true) !== true) {
@@ -308,16 +309,16 @@ final class ContentFrontController
         $body = "User-agent: *\n";
         if (!$this->siteAllowsRobotsIndex()) {
             $body .= "Disallow: /\n";
-            $body .= 'Sitemap: ' . $base . "/sitemap.xml\n";
+            $body .= 'Sitemap: ' . $base . $this->url('/sitemap.xml') . "\n";
 
             return Response::text($body);
         }
-        $body .= "Disallow: /admin\n";
-        $body .= "Disallow: /install\n";
-        $body .= "Disallow: /recovery\n";
-        $body .= "Disallow: /preview/\n";
+        $body .= 'Disallow: ' . $this->url('/admin') . "\n";
+        $body .= 'Disallow: ' . $this->url('/install') . "\n";
+        $body .= 'Disallow: ' . $this->url('/recovery') . "\n";
+        $body .= 'Disallow: ' . $this->url('/preview/') . "\n";
         $body .= "Allow: /\n";
-        $body .= 'Sitemap: ' . $base . "/sitemap.xml\n";
+        $body .= 'Sitemap: ' . $base . $this->url('/sitemap.xml') . "\n";
 
         return Response::text($body);
     }
@@ -551,7 +552,7 @@ final class ContentFrontController
             return '#';
         }
 
-        return ($type === 'article' ? '/articles/' : '/') . rawurlencode($slug);
+        return $this->url(($type === 'article' ? '/articles/' : '/') . rawurlencode($slug));
     }
 
     /** @param array<string,mixed> $content @param list<array<string,mixed>> $blocks @return array<string,mixed> */
@@ -574,7 +575,7 @@ final class ContentFrontController
                 'currency' => (string) $config['currency'],
                 'available' => $available,
                 'label' => $available ? (string) $config['label'] : '支付配置不可用',
-                'checkout_url' => '/paid-content/' . (int) $content['id'] . '/checkout',
+                'checkout_url' => $this->url('/paid-content/' . (int) $content['id'] . '/checkout'),
                 'payment_providers' => $available ? (new PaymentProviderSelector(ConnectionFactory::make($this->settings), $this->settings))->enabledProviders((string) $config['currency']) : [],
                 'render_blocks' => $authorized ? $blocks : array_slice($blocks, 0, $previewCount),
             ];
@@ -655,11 +656,11 @@ final class ContentFrontController
         $base = $this->siteBaseUrl();
         $canonical = trim((string) ($input['canonical'] ?? ''));
         if ($canonical === '') {
-            $canonical = $base . (string) ($input['path'] ?? '/');
+            $canonical = $base . $this->url((string) ($input['path'] ?? '/'));
         }
         $scheme = strtolower((string) parse_url($canonical, PHP_URL_SCHEME));
         if ($scheme !== '' && !in_array($scheme, ['http', 'https'], true)) {
-            $canonical = $base . (string) ($input['path'] ?? '/');
+            $canonical = $base . $this->url((string) ($input['path'] ?? '/'));
         }
         $robotsIndex = $this->siteAllowsRobotsIndex() && (($input['robots_index'] ?? true) ? true : false);
         $robotsFollow = $this->siteAllowsRobotsIndex() && (($input['robots_follow'] ?? true) ? true : false);
@@ -706,7 +707,7 @@ final class ContentFrontController
             ]), 404);
         } catch (Throwable $exception) {
             $this->logger->error('Theme 404 render failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
-            return Response::html('<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>页面未找到</title><meta name="robots" content="noindex,nofollow"></head><body><h1>页面未找到</h1><p>你访问的页面不存在。</p><p><a href="/">返回首页</a></p></body></html>', 404);
+            return Response::html('<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>页面未找到</title><meta name="robots" content="noindex,nofollow"></head><body><h1>页面未找到</h1><p>你访问的页面不存在。</p><p><a href="' . $this->x($this->url('/')) . '">返回首页</a></p></body></html>', 404);
         }
     }
 
@@ -789,11 +790,11 @@ final class ContentFrontController
                     'currency' => (string) $config['currency'],
                     'available' => $available,
                     'label' => $available ? (string) $config['label'] : '支付配置不可用',
-                    'checkout_url' => '/paid-download/' . $contentId . '/' . $mediaId . '/checkout',
+                    'checkout_url' => $this->url('/paid-download/' . $contentId . '/' . $mediaId . '/checkout'),
                     'payment_providers' => $available ? (new PaymentProviderSelector(ConnectionFactory::make($this->settings), $this->settings))->enabledProviders((string) $config['currency']) : [],
                 ];
                 if ($authorized) {
-                    $viewModels[$mediaId]['download_url'] = '/media/' . $mediaId . '?download=1&content_id=' . $contentId . '&payment_token=' . rawurlencode($paymentToken);
+                    $viewModels[$mediaId]['download_url'] = $this->url('/media/' . $mediaId . '?download=1&content_id=' . $contentId . '&payment_token=' . rawurlencode($paymentToken));
                 }
             }
         }
@@ -931,11 +932,12 @@ final class ContentFrontController
         $pattern = $prefix === '/paid-content/'
             ? '#^/paid-content/[1-9][0-9]{0,17}/checkout$#'
             : '#^/paid-download/[1-9][0-9]{0,17}/[1-9][0-9]{0,17}/checkout$#';
+        $path = BasePath::stripCurrent($path);
         if (preg_match($pattern, $path) !== 1) {
             return '';
         }
 
-        return $path;
+        return $this->url($path);
     }
 
     private function x(string $value): string
@@ -947,14 +949,14 @@ final class ContentFrontController
     {
         $isRegister = $mode === 'register';
         $title = $isRegister ? '会员注册' : '会员登录';
-        $action = $isRegister ? '/register' : '/login';
-        $switchUrl = ($isRegister ? '/login' : '/register') . '?redirect=' . rawurlencode($redirect);
+        $action = $this->url($isRegister ? '/register' : '/login');
+        $switchUrl = $this->url(($isRegister ? '/login' : '/register') . '?redirect=' . rawurlencode($redirect));
         $switchText = $isRegister ? '已有账号，去登录' : '没有账号，去注册';
         $displayName = $isRegister ? '<label>昵称<input name="display_name" autocomplete="name" required></label>' : '';
         $errorHtml = $error !== '' ? '<p class="error">' . View::escape($error) . '</p>' : '';
 
         return '<h1>' . $title . '</h1>' . $errorHtml .
-            '<form method="post" action="' . $action . '">' . CsrfToken::field() .
+            '<form method="post" action="' . View::escape($action) . '">' . CsrfToken::field() .
             '<input type="hidden" name="redirect" value="' . View::escape($redirect) . '">' .
             $displayName .
             '<label>邮箱<input name="email" type="email" autocomplete="email" required></label>' .
@@ -966,14 +968,20 @@ final class ContentFrontController
     private function safeRedirect(string $path): string
     {
         $path = trim($path);
+        $path = BasePath::stripCurrent($path);
         if ($path === '' || $path[0] !== '/' || str_starts_with($path, '//') || preg_match('/[\x00-\x1F\x7F]/', $path) === 1) {
-            return '/';
+            return $this->url('/');
         }
         if (str_starts_with($path, '/admin') || str_starts_with($path, '/api') || str_starts_with($path, '/install')) {
-            return '/';
+            return $this->url('/');
         }
 
         return $path;
+    }
+
+    private function url(string $path): string
+    {
+        return BasePath::prefixCurrent($path);
     }
 
     private function clientIp(Request $request): string

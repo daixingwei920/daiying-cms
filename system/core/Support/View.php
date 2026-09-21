@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Cms\Core\Support;
 
 use Cms\Core\Plugin\PluginMenuItem;
+use Cms\Core\Routing\BasePath;
 
 final class View
 {
     /** @var list<PluginMenuItem> */
     private static array $adminPluginMenus = [];
     private static int $adminUnreadNotifications = 0;
+    private static string $basePath = '';
     /** @var list<array{label:string,url:string,type:string,enabled:bool,requires_plugin:string}> */
     private static array $frontNavigation = [];
 
@@ -23,6 +25,11 @@ final class View
     public static function setAdminNotificationSummary(int $unreadCount): void
     {
         self::$adminUnreadNotifications = max(0, $unreadCount);
+    }
+
+    public static function setBasePath(string $basePath): void
+    {
+        self::$basePath = BasePath::normalize($basePath);
     }
 
     /** @param list<array{label:string,url:string,type:string,enabled:bool,requires_plugin:string}> $items */
@@ -41,7 +48,7 @@ final class View
         $adminOpen = $isAdmin ? '<a class="admin-skip-link" href="#admin-main">跳到主要内容</a>' . $adminNav . '<div class="admin-workspace">' . $adminTopbar : $adminNav;
         $adminClose = $isAdmin ? '</div>' : '';
         $headAssets = $isAdmin
-            ? '<link rel="stylesheet" href="/assets/admin/admin.css?v=' . self::assetVersion() . '">'
+            ? '<link rel="stylesheet" href="' . self::escape(self::url('/assets/admin/admin.css?v=' . self::assetVersion())) . '">'
             : '<style>' . self::baseCss() . '</style>';
 
         return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">' .
@@ -60,13 +67,14 @@ final class View
     {
         $path = parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
         $path = is_string($path) ? $path : '';
+        $path = BasePath::strip($path, self::$basePath);
         return str_starts_with($path, '/admin') && $path !== '/admin/login';
     }
 
     private static function adminSidebar(): string
     {
         $path = parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
-        $path = is_string($path) ? $path : '/admin';
+        $path = is_string($path) ? BasePath::strip($path, self::$basePath) : '/admin';
         $sections = [
             '工作台' => [
                 ['/admin', '总览', 'home'],
@@ -117,7 +125,7 @@ final class View
             $sections[$section] = array_values(array_merge($sections[$section] ?? [], $links));
         }
 
-        $html = '<aside class="admin-sidebar" id="admin-sidebar"><a class="admin-brand" href="/admin"><span class="admin-brand-mark">D</span><span class="admin-brand-text">Daiying CMS</span></a><nav class="admin-nav" aria-label="后台导航">';
+        $html = '<aside class="admin-sidebar" id="admin-sidebar"><a class="admin-brand" href="' . self::escape(self::url('/admin')) . '"><span class="admin-brand-mark">D</span><span class="admin-brand-text">Daiying CMS</span></a><nav class="admin-nav" aria-label="后台导航">';
         foreach ($sections as $section => $links) {
             $groupId = self::adminNavSectionId((string) $section, $links);
             $groupPanelId = 'admin-nav-group-' . $groupId;
@@ -130,24 +138,24 @@ final class View
                 $active = self::isActiveAdminPath($path, $href);
                 $class = $active ? ' class="active"' : '';
                 $current = $active ? ' aria-current="page"' : '';
-                $html .= '<a' . $class . $current . ' title="' . self::escape($label) . '" href="' . self::escape($href) . '"><span class="admin-nav-icon" aria-hidden="true">' . self::icon($icon) . '</span><span class="admin-nav-label">' . self::escape($label) . '</span></a>';
+                $html .= '<a' . $class . $current . ' title="' . self::escape($label) . '" href="' . self::escape(self::url($href)) . '"><span class="admin-nav-icon" aria-hidden="true">' . self::icon($icon) . '</span><span class="admin-nav-label">' . self::escape($label) . '</span></a>';
             }
             $html .= '</div></div>';
         }
-        $html .= '</nav><form class="admin-logout-form" method="post" action="/admin/logout">' . \Cms\Core\Security\CsrfToken::field() . '<button type="submit"><span class="admin-nav-icon" aria-hidden="true">' . self::icon('logout') . '</span><span class="admin-nav-label">退出登录</span></button></form></aside>';
+        $html .= '</nav><form class="admin-logout-form" method="post" action="' . self::escape(self::url('/admin/logout')) . '">' . \Cms\Core\Security\CsrfToken::field() . '<button type="submit"><span class="admin-nav-icon" aria-hidden="true">' . self::icon('logout') . '</span><span class="admin-nav-label">退出登录</span></button></form></aside>';
         return $html;
     }
 
     private static function adminTopbar(string $title): string
     {
         $path = parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
-        $path = is_string($path) ? $path : '/admin';
+        $path = is_string($path) ? BasePath::strip($path, self::$basePath) : '/admin';
         $crumb = self::adminBreadcrumb($path, $title);
 
         return '<header class="admin-topbar"><div class="admin-topbar-left">' .
             '<button class="admin-icon-button" type="button" data-admin-sidebar-toggle aria-controls="admin-sidebar" aria-expanded="true" title="收起或展开侧栏">' . self::icon('menu') . '</button>' .
             '<nav class="admin-breadcrumb" aria-label="当前位置">' . $crumb . '</nav></div>' .
-            '<div class="admin-topbar-actions">' . self::adminNotificationLink() . '<a class="button admin-button-secondary" href="/" target="_blank" rel="noopener">查看站点</a><a class="button" href="/admin/content/new">快速新建</a><span class="admin-account">管理员</span></div></header>';
+            '<div class="admin-topbar-actions">' . self::adminNotificationLink() . '<a class="button admin-button-secondary" href="' . self::escape(self::url('/')) . '" target="_blank" rel="noopener">查看站点</a><a class="button" href="' . self::escape(self::url('/admin/content/new')) . '">快速新建</a><span class="admin-account">管理员</span></div></header>';
     }
 
     private static function adminNotificationLink(): string
@@ -156,7 +164,7 @@ final class View
             ? '<span class="admin-notification-badge">' . self::escape((string) min(99, self::$adminUnreadNotifications)) . '</span>'
             : '';
 
-        return '<a class="admin-icon-button admin-notification-link" href="/admin/notifications" title="通知中心" aria-label="通知中心，未读 ' . self::escape((string) self::$adminUnreadNotifications) . ' 条">' . self::icon('bell') . $badge . '</a>';
+        return '<a class="admin-icon-button admin-notification-link" href="' . self::escape(self::url('/admin/notifications')) . '" title="通知中心" aria-label="通知中心，未读 ' . self::escape((string) self::$adminUnreadNotifications) . ' 条">' . self::icon('bell') . $badge . '</a>';
     }
 
     private static function frontHeader(): string
@@ -169,7 +177,7 @@ final class View
             if (!($item['enabled'] ?? true)) {
                 continue;
             }
-            $links .= '<a href="' . self::escape((string) $item['url']) . '">' . self::escape((string) $item['label']) . '</a>';
+            $links .= '<a href="' . self::escape(self::url((string) $item['url'])) . '">' . self::escape((string) $item['label']) . '</a>';
         }
         if ($links === '') {
             return '';
@@ -254,7 +262,7 @@ final class View
             }
         }
 
-        return '<a href="/admin">后台</a><span aria-hidden="true">/</span><span>' . self::escape($top) . '</span><span aria-hidden="true">/</span><strong>' . self::escape($title) . '</strong>';
+        return '<a href="' . self::escape(self::url('/admin')) . '">后台</a><span aria-hidden="true">/</span><span>' . self::escape($top) . '</span><span aria-hidden="true">/</span><strong>' . self::escape($title) . '</strong>';
     }
 
     private static function baseCss(): string
@@ -274,7 +282,12 @@ final class View
             return '';
         }
 
-        return self::adminNavGroupScript() . '<script src="/assets/admin/admin.js?v=' . self::assetVersion() . '" defer></script>';
+        return self::adminNavGroupScript() . '<script src="' . self::escape(self::url('/assets/admin/admin.js?v=' . self::assetVersion())) . '" defer></script>';
+    }
+
+    private static function url(string $path): string
+    {
+        return BasePath::prefix($path, self::$basePath);
     }
 
     private static function assetVersion(): string

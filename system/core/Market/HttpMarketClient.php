@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Cms\Core\Market;
 
-final class HttpMarketClient implements MarketApiClientInterface
+final class HttpMarketClient implements MarketApiClientInterface, MarketPagedSearchInterface
 {
     public function __construct(
         private readonly string $baseUrl,
@@ -18,13 +18,22 @@ final class HttpMarketClient implements MarketApiClientInterface
 
     public function search(string $type, string $query = '', bool $forceRefresh = false): array
     {
+        return $this->searchPage($type, $query, 1, 100, $forceRefresh)->items;
+    }
+
+    public function searchPage(string $type, string $query = '', int $page = 1, int $perPage = 20, bool $forceRefresh = false): MarketSearchResult
+    {
         if ($this->baseUrl === '') {
             throw new MarketException('Market server URL is not configured.');
         }
+        $page = max(1, $page);
+        $perPage = max(1, min(100, $perPage));
 
         $url = rtrim($this->baseUrl, '/') . '/api/market/search?' . http_build_query([
             'type' => $type,
             'q' => $query,
+            'page' => $page,
+            'per_page' => $perPage,
             'channel' => $this->channel,
             'core_version' => $this->coreVersion,
             'php_version' => PHP_VERSION,
@@ -40,7 +49,15 @@ final class HttpMarketClient implements MarketApiClientInterface
             }
         }
 
-        return $items;
+        $pagination = is_array($payload['pagination'] ?? null) ? $payload['pagination'] : [];
+        $total = $pagination !== []
+            ? (int) ($pagination['total_items'] ?? $pagination['total'] ?? count($items))
+            : count($items);
+        if ($pagination === [] && count($items) > $perPage) {
+            $items = array_slice($items, ($page - 1) * $perPage, $perPage);
+        }
+
+        return MarketSearchResult::fromItems($items, $page, $perPage, $total);
     }
 
     /** @return array<string, mixed> */

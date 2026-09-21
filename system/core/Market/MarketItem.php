@@ -33,6 +33,7 @@ final class MarketItem
         public readonly string $supportUrl = '',
         public readonly string $developerUrl = '',
         public readonly string $pricingText = '',
+        public readonly string $description = '',
     ) {
     }
 
@@ -65,6 +66,7 @@ final class MarketItem
             (string) ($data['support_url'] ?? ''),
             (string) ($data['developer_url'] ?? ''),
             (string) ($data['pricing_text'] ?? $data['price_label'] ?? ''),
+            (string) ($data['description'] ?? $data['summary'] ?? ''),
         );
     }
 }

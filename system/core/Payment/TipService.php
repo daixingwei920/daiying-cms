@@ -7,6 +7,7 @@ namespace Cms\Core\Payment;
 use Cms\Core\Config\Settings;
 use Cms\Core\Content\ContentRepository;
 use Cms\Core\Content\ContentTypeRegistry;
+use Cms\Core\Routing\BasePath;
 use Cms\Core\Support\CurrencyRegistry;
 use Cms\Core\Support\Money;
 use InvalidArgumentException;
@@ -160,7 +161,12 @@ final class TipService
             return '/';
         }
 
-        return ((string) ($content['content_type'] ?? 'article') === 'article' ? '/articles/' : '/') . rawurlencode($slug);
+        return $this->url(((string) ($content['content_type'] ?? 'article') === 'article' ? '/articles/' : '/') . rawurlencode($slug));
+    }
+
+    private function url(string $path): string
+    {
+        return BasePath::prefixCurrent($path);
     }
 
     private function subjectId(int $contentId, int $blockIndex): string

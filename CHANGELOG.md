@@ -2,6 +2,12 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.67 - Pending release
+
+- Added generic `site.base_path` deployment support for subdirectory, demo-platform, and reverse-proxy path-prefix deployments while preserving root deployment behavior.
+- Added official market server-side search and pagination contracts for plugin, payment provider, and theme browsing.
+- Preserved the 1.2.52 cross-version upgrade floor.
+
 ## 1.2.66 - 2026-09-20
 
 - Added a generic remote media provider capability gate so Core admin media pages and provider JSON endpoints can enforce provider-declared list, select, and write permissions before exposing remote media operations.

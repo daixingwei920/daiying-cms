@@ -50,12 +50,15 @@ use Cms\Core\Market\OfflineMarketClient;
 use Cms\Core\Market\MarketApiClientInterface;
 use Cms\Core\Market\MarketInstallRepository;
 use Cms\Core\Market\MarketPackageInstaller;
+use Cms\Core\Market\MarketPagedSearchInterface;
+use Cms\Core\Market\MarketSearchResult;
 use Cms\Core\Market\RemotePackageDownloader;
 use Cms\Core\Market\ReviewSubmissionClient;
 use Cms\Core\Media\MediaException;
 use Cms\Core\Media\MediaLibrary;
 use Cms\Core\Navigation\NavigationBuilder;
 use Cms\Core\Notification\NotificationService;
+use Cms\Core\Routing\BasePath;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Security\SessionManager;
 use Cms\Core\Support\CurrencyRegistry;
@@ -95,6 +98,8 @@ use Throwable;
 
 final class AdminController
 {
+    private const MARKET_ITEMS_PER_PAGE = 20;
+
     public function __construct(
         private readonly Settings $settings,
         private readonly FileLogger $logger,
@@ -7647,7 +7652,7 @@ final class AdminController
             $backUrl = $isTheme ? '/admin/market/themes' : '/admin/market/plugins';
             $backLabel = $isTheme ? '返回主题市场' : '返回插件市场';
             $idLabel = $isTheme ? 'Theme ID' : 'Plugin ID';
-            $body = '<h1>' . $detailTitle . '</h1><p><a class="button admin-button-secondary" href="' . $backUrl . '">' . $backLabel . '</a></p>' .
+            $body = '<h1>' . $detailTitle . '</h1><p><a class="button admin-button-secondary" href="' . View::escape($this->adminPath($backUrl)) . '">' . $backLabel . '</a></p>' .
                 '<table><tbody>' .
                 '<tr><th>Market ID</th><td><code>' . View::escape((string) ($versionData['market_id'] ?? $marketId)) . '</code></td></tr>' .
                 '<tr><th>' . $idLabel . '</th><td><code>' . View::escape((string) ($versionData['extension_id'] ?? $versionData['plugin_id'] ?? $versionData['theme_id'] ?? '')) . '</code></td></tr>' .
@@ -7698,9 +7703,9 @@ final class AdminController
             );
             (new CommercialLicenseStore(ConnectionFactory::make($this->settings)))->saveActivation($payload);
 
-            return Response::redirect('/admin/market/plugins?license=activated');
+            return Response::redirect($this->adminPath('/admin/market/plugins?license=activated'));
         } catch (Throwable $exception) {
-            return Response::html(View::page('授权激活失败', '<h1>授权激活失败</h1><p class="error">' . View::escape($this->licenseErrorText($exception->getMessage())) . '</p><p><a class="button" href="/admin/market/plugins">返回插件市场</a></p>'), 400);
+            return Response::html(View::page('授权激活失败', '<h1>授权激活失败</h1><p class="error">' . View::escape($this->licenseErrorText($exception->getMessage())) . '</p><p><a class="button" href="' . View::escape($this->adminPath('/admin/market/plugins')) . '">返回插件市场</a></p>'), 400);
         }
     }
 
@@ -7714,9 +7719,9 @@ final class AdminController
         $diagnostics = $this->marketClient()->diagnostics();
         $body = '<h1>市场诊断</h1><p class="muted">检查官方更新服务器、市场 API、本地缓存和当前渠道。</p>' .
             '<div class="admin-actions">' .
-            '<form method="post" action="/admin/market/refresh">' . CsrfToken::field() . '<button type="submit">重新同步市场</button></form>' .
-            '<form method="post" action="/admin/market/clear-cache">' . CsrfToken::field() . '<button type="submit">清除市场缓存</button></form>' .
-            '<form method="post" action="/admin/market/test-connection">' . CsrfToken::field() . '<button type="submit">测试官方市场连接</button></form>' .
+            '<form method="post" action="' . View::escape($this->adminPath('/admin/market/refresh')) . '">' . CsrfToken::field() . '<button type="submit">重新同步市场</button></form>' .
+            '<form method="post" action="' . View::escape($this->adminPath('/admin/market/clear-cache')) . '">' . CsrfToken::field() . '<button type="submit">清除市场缓存</button></form>' .
+            '<form method="post" action="' . View::escape($this->adminPath('/admin/market/test-connection')) . '">' . CsrfToken::field() . '<button type="submit">测试官方市场连接</button></form>' .
             '</div><table><tbody>' .
             '<tr><th>官方市场服务器地址</th><td>' . View::escape((string) $this->settings->get('market.server_url', '')) . '</td></tr>' .
             '<tr><th>API 连通状态</th><td>' . View::escape((string) ($diagnostics['api_status'] ?? 'unknown')) . '</td></tr>' .
@@ -7798,11 +7803,11 @@ final class AdminController
             $manageLabel = $isTheme ? '查看主题管理' : '查看插件管理';
             $backUrl = $isTheme ? '/admin/market/themes' : '/admin/market/plugins';
             $backLabel = $isTheme ? '返回主题市场' : '返回插件市场';
-            $body = '<h1>安装完成</h1><p class="success">' . $message . '</p><p><a class="button" href="' . $manageUrl . '">' . $manageLabel . '</a> <a class="button admin-button-secondary" href="' . $backUrl . '">' . $backLabel . '</a></p><pre>' . View::escape(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}') . '</pre>';
+            $body = '<h1>安装完成</h1><p class="success">' . $message . '</p><p><a class="button" href="' . View::escape($this->adminPath($manageUrl)) . '">' . $manageLabel . '</a> <a class="button admin-button-secondary" href="' . View::escape($this->adminPath($backUrl)) . '">' . $backLabel . '</a></p><pre>' . View::escape(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}') . '</pre>';
             return Response::html(View::page('市场安装', $body));
         } catch (Throwable $exception) {
             $this->logger->error('Market install authorization failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
-            return Response::html(View::page('市场安装失败', '<h1>安装失败</h1><p class="error">' . View::escape($exception->getMessage()) . '</p><p><a class="button" href="/admin/market/plugins">返回插件市场</a></p>'), 400);
+            return Response::html(View::page('市场安装失败', '<h1>安装失败</h1><p class="error">' . View::escape($exception->getMessage()) . '</p><p><a class="button" href="' . View::escape($this->adminPath('/admin/market/plugins')) . '">返回插件市场</a></p>'), 400);
         }
     }
 
@@ -8106,19 +8111,15 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
             return $guard;
         }
 
-        $items = [];
         $client = $this->marketClient();
         $query = trim((string) ($_GET['q'] ?? ''));
+        $page = $this->normalizeMarketPage($_GET['page'] ?? 1);
+        $perPage = $this->marketPerPage();
         $forceRefresh = (string) ($_GET['refresh'] ?? '') === '1';
         $errors = [];
-        foreach ($types as $type) {
-            try {
-                $items = array_merge($items, $client->search($type, $query, $forceRefresh));
-            } catch (Throwable $exception) {
-                $this->logger->error('Market API unavailable', ['source' => 'Core', 'type' => $type, 'error' => $exception->getMessage()]);
-                $errors[] = $type . ': ' . $exception->getMessage();
-            }
-        }
+        $searchResult = $this->marketSearchPage($client, $types, $query, $page, $perPage, $forceRefresh, $errors);
+        $items = $searchResult->items;
+        $page = $searchResult->currentPage;
 
         $installed = $this->marketInstalledMap();
         $rows = '';
@@ -8129,13 +8130,13 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
             $installedKey = $item->extensionId . '|' . $item->type;
             $installedItem = $installed[$installedKey] ?? null;
             $state = $this->marketItemState($item, $installedItem);
-            $action = '<a class="button admin-button-secondary" href="/admin/market/detail?market_id=' . rawurlencode($item->marketId) . '&version=' . rawurlencode($item->version) . '">详情</a>';
+            $action = '<a class="button admin-button-secondary" href="' . View::escape($this->adminPath('/admin/market/detail?market_id=' . rawurlencode($item->marketId) . '&version=' . rawurlencode($item->version))) . '">详情</a>';
             if ($state === '不兼容') {
                 $action .= ' <span class="muted">当前 CMS 版本不兼容</span>';
             } elseif ($item->licenseRequired && $this->localLicenseForProduct($item->productId) === []) {
                 $action .= $this->marketInlinePurchaseActions($item, $installedItem !== null);
             } else {
-                $action .= '<form method="post" action="/admin/market/authorize" style="display:inline-block;margin-left:6px">' .
+                $action .= '<form method="post" action="' . View::escape($this->adminPath('/admin/market/authorize')) . '" style="display:inline-block;margin-left:6px">' .
                     CsrfToken::field() . '<input type="hidden" name="market_id" value="' . View::escape($item->marketId) . '">' .
                     '<input type="hidden" name="product_id" value="' . View::escape($item->productId) . '">' .
                     '<button type="submit">' . ($installedItem === null ? '安装' : '更新到 ' . View::escape($item->version)) . '</button></form>';
@@ -8146,17 +8147,142 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
                 '<td>' . View::escape($state . ($item->licenseRequired ? ' / 需授权' : '')) . '</td><td>' . View::escape($item->priceLabel) . '<br><span class="muted">' . View::escape($item->developerName) . '</span></td><td>' . View::escape($item->reviewStatus) .
                 '</td><td>' . View::escape(implode(', ', $item->capabilities)) . '</td><td>' . $action . '</td></tr>';
         }
-        $rows = $rows !== '' ? $rows : '<tr><td colspan="9" class="muted">' . ($errors === [] ? '暂无项目' : '市场 API 异常：' . View::escape(implode('; ', $errors))) . '</td></tr>';
+        $emptyText = $query !== '' ? '没有找到匹配的市场项目。' : '暂无项目';
+        $rows = $rows !== '' ? $rows : '<tr><td colspan="9" class="muted">' . ($errors === [] ? View::escape($emptyText) : '市场 API 异常：' . View::escape(implode('; ', $errors))) . '</td></tr>';
         $errorHtml = $errors === [] ? '' : '<p class="error">市场 API 异常：' . View::escape(implode('; ', $errors)) . '</p>';
+        $marketPath = in_array('theme', $types, true) && count($types) === 1 ? '/admin/market/themes' : '/admin/market/plugins';
+        $summary = '<p class="muted">共 ' . $searchResult->totalItems . ' 个项目，第 ' . $searchResult->currentPage . ' / ' . $searchResult->totalPages . ' 页。</p>';
+        $pagination = $this->marketPaginationHtml($marketPath, $query, $searchResult->currentPage, $searchResult->totalPages);
 
         $body = '<h1>' . View::escape($title) . '</h1><p class="muted">市场不可用不会影响网站、后台和已安装扩展。</p>' . $errorHtml .
-            '<form class="admin-filter-bar" method="get" action="' . (in_array('theme', $types, true) && count($types) === 1 ? '/admin/market/themes' : '/admin/market/plugins') . '">' .
-            '<label>搜索<input name="q" value="' . View::escape($query) . '" placeholder="' . (in_array('theme', $types, true) && count($types) === 1 ? '主题名称 / theme slug' : '支付 / Payment / Stripe / plugin slug') . '"></label><button type="submit">搜索</button></form>' .
-            '<div class="admin-actions"><form method="post" action="/admin/market/refresh">' . CsrfToken::field() . '<button type="submit">' . (in_array('theme', $types, true) && count($types) === 1 ? '刷新主题市场' : '刷新插件市场') . '</button></form>' .
-            '<a class="button admin-button-secondary" href="/admin/market/diagnostics">市场诊断</a></div>' .
-            '<table><thead><tr><th>名称</th><th>类型</th><th>标识</th><th>版本/渠道</th><th>状态</th><th>价格</th><th>审核</th><th>能力</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>';
+            '<form class="admin-filter-bar" method="get" action="' . View::escape($this->adminPath($marketPath)) . '">' .
+            '<label>搜索<input name="q" value="' . View::escape($query) . '" placeholder="' . (in_array('theme', $types, true) && count($types) === 1 ? '主题名称 / theme slug' : '支付 / Payment / Stripe / plugin slug') . '"></label><button type="submit">搜索</button>' .
+            ($query !== '' ? '<a class="button admin-button-secondary" href="' . View::escape($this->adminPath($marketPath)) . '">清空搜索</a>' : '') . '</form>' .
+            '<div class="admin-actions"><form method="post" action="' . View::escape($this->adminPath('/admin/market/refresh')) . '">' . CsrfToken::field() . '<button type="submit">' . (in_array('theme', $types, true) && count($types) === 1 ? '刷新主题市场' : '刷新插件市场') . '</button></form>' .
+            '<a class="button admin-button-secondary" href="' . View::escape($this->adminPath('/admin/market/diagnostics')) . '">市场诊断</a></div>' .
+            $summary .
+            '<table><thead><tr><th>名称</th><th>类型</th><th>标识</th><th>版本/渠道</th><th>状态</th><th>价格</th><th>审核</th><th>能力</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>' .
+            $pagination;
 
         return Response::html(View::page($title, $body));
+    }
+
+    /** @param list<string> $types @param list<string> $errors */
+    private function marketSearchPage(MarketApiClientInterface $client, array $types, string $query, int $page, int $perPage, bool $forceRefresh, array &$errors): MarketSearchResult
+    {
+        $items = [];
+        $totalItems = 0;
+        if ($client instanceof MarketPagedSearchInterface && count($types) === 1) {
+            try {
+                return $client->searchPage($types[0], $query, $page, $perPage, $forceRefresh);
+            } catch (Throwable $exception) {
+                $this->logger->error('Market API unavailable', ['source' => 'Core', 'type' => $types[0], 'error' => $exception->getMessage()]);
+                $errors[] = $types[0] . ': ' . $exception->getMessage();
+                return MarketSearchResult::fromItems([], 1, $perPage, 0);
+            }
+        }
+
+        $fetchLimit = max($perPage, $page * $perPage);
+        foreach ($types as $type) {
+            try {
+                if ($client instanceof MarketPagedSearchInterface) {
+                    $result = $client->searchPage($type, $query, 1, $fetchLimit, $forceRefresh);
+                    $items = array_merge($items, $result->items);
+                    $totalItems += $result->totalItems;
+                } else {
+                    $resultItems = $client->search($type, $query, $forceRefresh);
+                    $items = array_merge($items, $resultItems);
+                    $totalItems += count($resultItems);
+                }
+            } catch (Throwable $exception) {
+                $this->logger->error('Market API unavailable', ['source' => 'Core', 'type' => $type, 'error' => $exception->getMessage()]);
+                $errors[] = $type . ': ' . $exception->getMessage();
+            }
+        }
+
+        $items = array_values(array_filter($items, static fn ($item): bool => $item instanceof \Cms\Core\Market\MarketItem && in_array($item->type, $types, true)));
+        $total = $totalItems > 0 ? $totalItems : count($items);
+        $page = max(1, min($page, max(1, (int) ceil($total / $perPage))));
+        $offset = max(0, ($page - 1) * $perPage);
+
+        return MarketSearchResult::fromItems(array_slice($items, $offset, $perPage), $page, $perPage, $total);
+    }
+
+    private function normalizeMarketPage(mixed $value): int
+    {
+        $page = filter_var($value, FILTER_VALIDATE_INT);
+        return is_int($page) && $page > 0 ? $page : 1;
+    }
+
+    private function marketPerPage(): int
+    {
+        $configured = (int) $this->settings->get('market.items_per_page', self::MARKET_ITEMS_PER_PAGE);
+        return max(5, min(100, $configured));
+    }
+
+    private function marketPaginationHtml(string $path, string $query, int $page, int $totalPages): string
+    {
+        if ($totalPages <= 1) {
+            return '';
+        }
+        $links = [];
+        if ($page > 1) {
+            $links[] = '<a class="button admin-button-secondary" href="' . View::escape($this->marketPageUrl($path, $query, $page - 1)) . '">上一页</a>';
+        }
+        foreach ($this->marketPageWindow($page, $totalPages) as $part) {
+            if ($part === '...') {
+                $links[] = '<span class="muted">...</span>';
+                continue;
+            }
+            $pageNumber = (int) $part;
+            $label = (string) $pageNumber;
+            $links[] = $pageNumber === $page
+                ? '<strong class="admin-badge">' . View::escape($label) . '</strong>'
+                : '<a class="button admin-button-secondary" href="' . View::escape($this->marketPageUrl($path, $query, $pageNumber)) . '">' . View::escape($label) . '</a>';
+        }
+        if ($page < $totalPages) {
+            $links[] = '<a class="button admin-button-secondary" href="' . View::escape($this->marketPageUrl($path, $query, $page + 1)) . '">下一页</a>';
+        }
+
+        return '<nav class="admin-pagination" aria-label="市场分页">' . implode(' ', $links) . '</nav>';
+    }
+
+    /** @return list<int|string> */
+    private function marketPageWindow(int $page, int $totalPages): array
+    {
+        $pages = [1, $totalPages, $page - 1, $page, $page + 1];
+        $pages = array_values(array_unique(array_filter($pages, static fn (int $value): bool => $value >= 1 && $value <= $totalPages)));
+        sort($pages);
+        $window = [];
+        $previous = 0;
+        foreach ($pages as $pageNumber) {
+            if ($previous > 0 && $pageNumber > $previous + 1) {
+                $window[] = '...';
+            }
+            $window[] = $pageNumber;
+            $previous = $pageNumber;
+        }
+
+        return $window;
+    }
+
+    private function marketPageUrl(string $path, string $query, int $page): string
+    {
+        $params = [];
+        if ($query !== '') {
+            $params['q'] = $query;
+        }
+        if ($page > 1) {
+            $params['page'] = (string) $page;
+        }
+        $suffix = $params === [] ? '' : '?' . http_build_query($params);
+
+        return $this->adminPath($path . $suffix);
+    }
+
+    private function adminPath(string $path): string
+    {
+        return BasePath::prefixCurrent($path);
     }
 
     private function marketTypeLabel(string $type): string
@@ -8475,7 +8601,7 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
         if (!(bool) ($versionData['license_required'] ?? false)) {
             $marketId = (string) ($versionData['market_id'] ?? '');
             $productId = (string) ($versionData['product_id'] ?? $versionData['extension_id'] ?? $versionData['plugin_id'] ?? '');
-            return '<section class="admin-panel"><h2>安装</h2><p class="admin-badge admin-badge-success">免费产品，无需授权。</p><form method="post" action="/admin/market/authorize">' . CsrfToken::field() .
+            return '<section class="admin-panel"><h2>安装</h2><p class="admin-badge admin-badge-success">免费产品，无需授权。</p><form method="post" action="' . View::escape($this->adminPath('/admin/market/authorize')) . '">' . CsrfToken::field() .
                 '<input type="hidden" name="market_id" value="' . View::escape($marketId) . '">' .
                 '<input type="hidden" name="product_id" value="' . View::escape($productId) . '">' .
                 '<button type="submit">安装</button></form></section>';
@@ -8496,7 +8622,7 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
 
         $marketId = (string) ($versionData['market_id'] ?? '');
         return '<section class="admin-panel"><h2>商业授权</h2><p>当前授权：' . View::escape($licenseText) . '</p><p>' . $links . '</p>' .
-            '<form method="post" action="/admin/market/authorize">' . CsrfToken::field() .
+            '<form method="post" action="' . View::escape($this->adminPath('/admin/market/authorize')) . '">' . CsrfToken::field() .
             '<input type="hidden" name="market_id" value="' . View::escape($marketId) . '">' .
             '<input type="hidden" name="product_id" value="' . View::escape($productId) . '">' .
             '<label>输入授权码<input name="license_key" required></label><button type="submit">输入授权码并安装</button></form></section>';
@@ -8505,7 +8631,7 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
     private function marketInlinePurchaseActions(\Cms\Core\Market\MarketItem $item, bool $installed): string
     {
         $purchase = $item->purchaseUrl !== '' ? ' <a class="button" target="_blank" rel="noopener noreferrer" href="' . View::escape($item->purchaseUrl) . '">购买授权</a>' : '';
-        return $purchase . '<form method="post" action="/admin/market/authorize" style="display:inline-block;margin-left:6px">' .
+        return $purchase . '<form method="post" action="' . View::escape($this->adminPath('/admin/market/authorize')) . '" style="display:inline-block;margin-left:6px">' .
             CsrfToken::field() . '<input type="hidden" name="product_id" value="' . View::escape($item->productId) . '">' .
             '<input type="hidden" name="market_id" value="' . View::escape($item->marketId) . '">' .
             '<input name="license_key" placeholder="输入授权码" required><button type="submit">' . ($installed ? '输入授权码并更新' : '输入授权码并安装') . '</button></form>';
@@ -8660,11 +8786,11 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
                 $client->search('payment_provider', '', true);
                 $client->search('theme', '', true);
             } catch (Throwable $exception) {
-                return Response::html(View::page('市场诊断', '<h1>市场同步失败</h1><p class="error">' . View::escape($exception->getMessage()) . '</p><p><a class="button" href="/admin/market/diagnostics">返回市场诊断</a></p>'), 502);
+                return Response::html(View::page('市场诊断', '<h1>市场同步失败</h1><p class="error">' . View::escape($exception->getMessage()) . '</p><p><a class="button" href="' . View::escape($this->adminPath('/admin/market/diagnostics')) . '">返回市场诊断</a></p>'), 502);
             }
         }
         $target = $testOnly || $clearCache ? '/admin/market/diagnostics' : '/admin/market/plugins?refresh=1';
-        return Response::redirect($target);
+        return Response::redirect($this->adminPath($target));
     }
 
     /** @return array<string,mixed> */

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cms\Core\Payment;
 
 use Cms\Core\Config\Settings;
+use Cms\Core\Routing\BasePath;
 use PDO;
 use Throwable;
 
@@ -179,7 +180,7 @@ final class PaidDownloadService
         $this->secret();
         $this->tokenTtlSeconds();
         $this->tokenMaxUses();
-        $successPath = '/paid-download/' . $contentId . '/' . $mediaId . '/complete';
+        $successPath = $this->url('/paid-download/' . $contentId . '/' . $mediaId . '/complete');
         $claim = $this->completionClaim($contentId, $mediaId, $idempotencyKey);
 
         $payment = (new PaymentService($this->pdo, new PaymentRepository($this->pdo), $this->secret()))->createProviderPayment(
@@ -194,7 +195,7 @@ final class PaidDownloadService
                 'content_id' => $contentId,
                 'media_id' => $mediaId,
                 'success_url' => $successPath . '?payment_key=' . rawurlencode($idempotencyKey) . '&claim=' . rawurlencode($claim),
-                'cancel_url' => '/articles/' . $contentId,
+                'cancel_url' => $this->url('/articles/' . $contentId),
             ],
         );
 
@@ -214,7 +215,7 @@ final class PaidDownloadService
                 return [
                     'payment' => $payment,
                     'authorization' => null,
-                    'download_url' => '/articles/' . $contentId,
+                    'download_url' => $this->url('/articles/' . $contentId),
                     'completion_url' => $successPath . '?payment_key=' . rawurlencode($idempotencyKey) . '&claim=' . rawurlencode($claim),
                     'provider_redirect' => false,
                     'pending_confirmation' => true,
@@ -230,7 +231,7 @@ final class PaidDownloadService
         return [
             'payment' => $payment,
             'authorization' => $authorization['record'],
-            'download_url' => '/media/' . $mediaId . '?download=1&content_id=' . $contentId . '&payment_token=' . rawurlencode($authorization['token']),
+            'download_url' => $this->url('/media/' . $mediaId . '?download=1&content_id=' . $contentId . '&payment_token=' . rawurlencode($authorization['token'])),
             'provider_redirect' => false,
         ];
     }
@@ -269,8 +270,8 @@ final class PaidDownloadService
                 return [
                     'payment' => $payment,
                     'authorization' => null,
-                    'download_url' => '/articles/' . $contentId,
-                    'completion_url' => '/paid-download/' . $contentId . '/' . $mediaId . '/complete?payment_key=' . rawurlencode($idempotencyKey) . '&claim=' . rawurlencode($claim),
+                    'download_url' => $this->url('/articles/' . $contentId),
+                    'completion_url' => $this->url('/paid-download/' . $contentId . '/' . $mediaId . '/complete?payment_key=' . rawurlencode($idempotencyKey) . '&claim=' . rawurlencode($claim)),
                     'provider_redirect' => false,
                     'pending_confirmation' => true,
                     'instructions' => $this->pendingInstructions($payment),
@@ -310,7 +311,7 @@ final class PaidDownloadService
         return [
             'payment' => $payment,
             'authorization' => $authorization['record'],
-            'download_url' => '/media/' . $mediaId . '?download=1&content_id=' . $contentId . '&payment_token=' . rawurlencode($authorization['token']),
+            'download_url' => $this->url('/media/' . $mediaId . '?download=1&content_id=' . $contentId . '&payment_token=' . rawurlencode($authorization['token'])),
             'provider_redirect' => false,
         ];
     }
@@ -415,6 +416,11 @@ final class PaidDownloadService
         $mediaId = $this->positiveSubjectId($mediaId, 'Paid download subject media id is invalid.');
 
         return 'content:' . $contentId . ':media:' . $mediaId;
+    }
+
+    private function url(string $path): string
+    {
+        return BasePath::prefixCurrent($path);
     }
 
     private function positiveSubjectId(int $value, string $message): int

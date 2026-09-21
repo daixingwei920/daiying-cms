@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace Cms\Core\Theme;
 
+use Cms\Core\Routing\BasePath;
+
 final class ThemeViewModel
 {
     /** @param array<string,mixed> $media @return array{id:int|null,url:string,title:string,alt:string,mime:string,size:int|null,provider:string,metadata:array<string,mixed>} */
     public static function media(array $media): array
     {
         $meta = is_array($media['metadata'] ?? null) ? $media['metadata'] : (is_array($media['meta'] ?? null) ? $media['meta'] : []);
-        $url = trim((string) ($media['url'] ?? $media['public_url'] ?? $media['path'] ?? ''));
+        $url = BasePath::prefixCurrent(trim((string) ($media['url'] ?? $media['public_url'] ?? $media['path'] ?? '')));
 
         return [
             'id' => isset($media['id']) ? (int) $media['id'] : null,
@@ -67,7 +69,7 @@ final class ThemeViewModel
             if ($label === '') {
                 continue;
             }
-            $url = isset($item['url']) ? trim((string) $item['url']) : null;
+            $url = isset($item['url']) ? BasePath::prefixCurrent(trim((string) $item['url'])) : null;
             $result[] = [
                 'label' => $label,
                 'url' => $url !== '' ? $url : null,
@@ -87,7 +89,9 @@ final class ThemeViewModel
         }
         $query = array_filter($query, static fn (mixed $value): bool => $value !== null && $value !== '');
 
-        return $query === [] ? $path : $path . (str_contains($path, '?') ? '&' : '?') . http_build_query($query);
+        $url = $query === [] ? $path : $path . (str_contains($path, '?') ? '&' : '?') . http_build_query($query);
+
+        return BasePath::prefixCurrent($url);
     }
 
     /** @param list<array<string,mixed>> $items @return list<array{label:string,url:string,current:bool}> */
@@ -100,10 +104,11 @@ final class ThemeViewModel
             if ($label === '') {
                 continue;
             }
+            $rawUrl = $url !== '' ? $url : '#';
             $menu[] = [
                 'label' => $label,
-                'url' => $url !== '' ? $url : '#',
-                'current' => (bool) ($item['current'] ?? ($currentPath !== '' && $url === $currentPath)),
+                'url' => BasePath::prefixCurrent($rawUrl),
+                'current' => (bool) ($item['current'] ?? ($currentPath !== '' && BasePath::stripCurrent($rawUrl) === $currentPath)),
             ];
         }
 
@@ -114,7 +119,7 @@ final class ThemeViewModel
     {
         $assetPath = self::cleanRelativePath($assetPath);
 
-        return '/content/themes/' . rawurlencode($themeId) . '/assets/' . str_replace('%2F', '/', rawurlencode($assetPath));
+        return BasePath::prefixCurrent('/content/themes/' . rawurlencode($themeId) . '/assets/' . str_replace('%2F', '/', rawurlencode($assetPath)));
     }
 
     public static function cleanRelativePath(string $path): string

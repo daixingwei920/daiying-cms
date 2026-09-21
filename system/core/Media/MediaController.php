@@ -9,6 +9,7 @@ use Cms\Core\Database\ConnectionFactory;
 use Cms\Core\Http\Request;
 use Cms\Core\Http\Response;
 use Cms\Core\Payment\PaidDownloadService;
+use Cms\Core\Routing\BasePath;
 use Cms\Core\Security\SessionManager;
 use Throwable;
 
@@ -247,7 +248,9 @@ final class MediaController
             ? '<video controls preload="metadata" src="' . $src . '" style="width:min(960px,90vw);max-height:70vh;background:#000"></video>'
             : '<audio controls preload="auto" src="' . $src . '" style="width:min(720px,90vw)"></audio>';
 
-        return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $title . '</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f172a;color:#e5e7eb;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.player{display:grid;gap:18px;justify-items:center;padding:24px}h1{font-size:18px;font-weight:600;margin:0;text-align:center;max-width:90vw;word-break:break-word}.link{color:#93c5fd;text-decoration:none}</style></head><body><main class="player"><h1>' . $title . '</h1>' . $tag . '<a class="link" href="/admin/media/detail/' . $id . '">返回媒体详情</a></main></body></html>';
+        $adminUrl = htmlspecialchars(BasePath::prefixCurrent('/admin/media/detail/' . $id), ENT_QUOTES, 'UTF-8');
+
+        return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $title . '</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0f172a;color:#e5e7eb;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.player{display:grid;gap:18px;justify-items:center;padding:24px}h1{font-size:18px;font-weight:600;margin:0;text-align:center;max-width:90vw;word-break:break-word}.link{color:#93c5fd;text-decoration:none}</style></head><body><main class="player"><h1>' . $title . '</h1>' . $tag . '<a class="link" href="' . $adminUrl . '">返回媒体详情</a></main></body></html>';
     }
 
     private function variant(Request $request): string

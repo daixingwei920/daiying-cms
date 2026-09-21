@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Cms\Core\Theme\TemplateContext;
+use Cms\Core\Routing\BasePath;
 
 if (!function_exists('dy_setting')) {
     function dy_setting(TemplateContext $context, string $key, mixed $default = ''): mixed
@@ -56,7 +57,12 @@ if (!function_exists('dy_setting')) {
         if ($slug === '') {
             return '#';
         }
-        return (($content['content_type'] ?? 'article') === 'article' ? '/articles/' : '/') . rawurlencode($slug);
+        return dy_site_url((($content['content_type'] ?? 'article') === 'article' ? '/articles/' : '/') . rawurlencode($slug));
+    }
+
+    function dy_site_url(string $url): string
+    {
+        return BasePath::prefixCurrent($url);
     }
 
     function dy_safe_url(string $url, string $fallback = '#'): string
@@ -65,8 +71,11 @@ if (!function_exists('dy_setting')) {
         if ($url === '') {
             return $fallback;
         }
-        if (str_starts_with($url, '/') || str_starts_with($url, '#')) {
+        if (str_starts_with($url, '#')) {
             return $url;
+        }
+        if (str_starts_with($url, '/')) {
+            return dy_site_url($url);
         }
         return preg_match('/^https?:\/\/[^\s<>"\']+$/i', $url) === 1 ? $url : $fallback;
     }
@@ -191,7 +200,7 @@ if (!function_exists('dy_setting')) {
         ?>
 <header class="site-header">
     <div class="site-bar">
-        <a class="brand" href="/" aria-label="<?= $context->e($siteName) ?>">
+        <a class="brand" href="<?= $context->e(dy_site_url('/')) ?>" aria-label="<?= $context->e($siteName) ?>">
             <?php if ($logo !== ''): ?><img class="brand-logo" src="<?= $context->e($logo) ?>" alt=""><?php else: ?><span class="brand-mark" aria-hidden="true"><?= $context->e($initial) ?></span><?php endif; ?>
             <?php if (dy_bool($context, 'show_site_name', true)): ?><span><strong><?= $context->e($siteName) ?></strong><small><?= $context->e($description) ?></small></span><?php endif; ?>
         </a>
@@ -201,7 +210,7 @@ if (!function_exists('dy_setting')) {
             <?php foreach ($navigation as $item): ?>
                 <a href="<?= $context->e($item['url']) ?>"<?= dy_nav_current($current, $item) ? ' aria-current="page"' : '' ?>><?= $context->e($item['label']) ?></a>
             <?php endforeach; ?>
-            <?php if ($showSearch): ?><a class="nav-search" href="/search">搜索</a><?php endif; ?>
+            <?php if ($showSearch): ?><a class="nav-search" href="<?= $context->e(dy_site_url('/search')) ?>">搜索</a><?php endif; ?>
         </nav>
     </div>
 </header>
@@ -213,8 +222,8 @@ if (!function_exists('dy_setting')) {
         $items = $context->get('navigation', []);
         if (!is_array($items) || $items === []) {
             return [
-                ['label' => '首页', 'url' => '/', 'type' => 'home'],
-                ['label' => '文章', 'url' => '/articles', 'type' => 'articles'],
+                ['label' => '首页', 'url' => dy_site_url('/'), 'type' => 'home'],
+                ['label' => '文章', 'url' => dy_site_url('/articles'), 'type' => 'articles'],
             ];
         }
         $clean = [];
@@ -228,7 +237,7 @@ if (!function_exists('dy_setting')) {
                 $clean[] = ['label' => $label, 'url' => $url, 'type' => (string) ($item['type'] ?? 'custom')];
             }
         }
-        return $clean !== [] ? $clean : [['label' => '首页', 'url' => '/', 'type' => 'home'], ['label' => '文章', 'url' => '/articles', 'type' => 'articles']];
+        return $clean !== [] ? $clean : [['label' => '首页', 'url' => dy_site_url('/'), 'type' => 'home'], ['label' => '文章', 'url' => dy_site_url('/articles'), 'type' => 'articles']];
     }
 
     function dy_nav_current(string $current, array $item): bool
@@ -325,7 +334,7 @@ if (!function_exists('dy_setting')) {
         </p>
         <h2><a href="<?= $context->e($url) ?>"><?= $context->e($item['title'] ?? $content['title'] ?? '未命名内容') ?></a></h2>
         <p><?= $context->e(dy_excerpt($content, $featured ? 180 : 128)) ?></p>
-        <?php if ($categories !== []): ?><div class="terms"><?php foreach ($categories as $term): ?><a href="/category/<?= $context->e(rawurlencode((string) ($term['slug'] ?? ''))) ?>"><?= $context->e($term['name'] ?? '') ?></a><?php endforeach; ?></div><?php endif; ?>
+        <?php if ($categories !== []): ?><div class="terms"><?php foreach ($categories as $term): ?><a href="<?= $context->e(dy_site_url('/category/' . rawurlencode((string) ($term['slug'] ?? '')))) ?>"><?= $context->e($term['name'] ?? '') ?></a><?php endforeach; ?></div><?php endif; ?>
         <a class="read-more" href="<?= $context->e($url) ?>">阅读全文</a>
     </div>
 </article>

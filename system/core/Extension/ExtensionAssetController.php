@@ -6,6 +6,7 @@ namespace Cms\Core\Extension;
 
 use Cms\Core\Http\Request;
 use Cms\Core\Http\Response;
+use Cms\Core\Routing\BasePath;
 
 final class ExtensionAssetController
 {
@@ -53,7 +54,7 @@ final class ExtensionAssetController
             $query['v'] = $version;
         }
 
-        return '/extension-assets/' . rawurlencode($type) . '/' . rawurlencode($extensionId) . '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+        return BasePath::prefixCurrent('/extension-assets/' . rawurlencode($type) . '/' . rawurlencode($extensionId) . '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986));
     }
 
     public function __construct(private readonly string $rootPath)
