@@ -36,7 +36,8 @@ $autoload = CMS_ROOT . '/system/core/Bootstrap/autoload.php';
 $pointerFile = CMS_ROOT . '/storage/updates/current-release.json';
 if (is_file($pointerFile)) {
     $pointer = json_decode((string) file_get_contents($pointerFile), true);
-    $candidate = is_array($pointer) ? (string) ($pointer['path'] ?? '') . '/system/core/Bootstrap/autoload.php' : '';
+    $releasePath = is_array($pointer) ? cms_public_active_release_path(CMS_ROOT, (string) ($pointer['path'] ?? '')) : '';
+    $candidate = $releasePath !== '' ? $releasePath . '/system/core/Bootstrap/autoload.php' : '';
     if ($candidate !== '' && is_file($candidate)) {
         $autoload = $candidate;
     } else {
@@ -52,3 +53,18 @@ require $autoload;
 
 $app = Application::boot(CMS_ROOT);
 $app->handle(Request::capture())->send();
+
+function cms_public_active_release_path(string $root, string $path): string
+{
+    $path = rtrim($path, '/');
+    if ($path === '' || !is_dir($path)) {
+        return '';
+    }
+    $real = realpath($path);
+    $releasesRoot = realpath($root . '/storage/updates/releases');
+    if ($real === false || $releasesRoot === false) {
+        return '';
+    }
+
+    return ($real === $releasesRoot || str_starts_with($real, $releasesRoot . DIRECTORY_SEPARATOR)) ? $real : '';
+}

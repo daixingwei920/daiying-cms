@@ -2,7 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
-## 1.2.67 - Pending release
+## 1.2.68 - Pending release
+
+- Closed P1 Core technical debt around active-release integrity by making the active release the current Core integrity target when a valid pointer exists.
+- Hardened root launchers so Web, CLI, and scheduled publishing only load active releases from `storage/updates/releases`.
+- Fixed paragraph textarea rendering so single newlines become line breaks, blank lines become paragraphs, and user text remains escaped.
+- Added P1 closeout regression coverage for active release integrity, launcher boundaries, pointer permissions, and multiline paragraph rendering.
+- Preserved the 1.2.52 cross-version upgrade floor.
+
+## 1.2.67 - 2026-09-21
 
 - Added generic `site.base_path` deployment support for subdirectory, demo-platform, and reverse-proxy path-prefix deployments while preserving root deployment behavior.
 - Added official market server-side search and pagination contracts for plugin, payment provider, and theme browsing.

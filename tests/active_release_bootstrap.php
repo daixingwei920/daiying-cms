@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 $root = dirname(__DIR__);
 $tmp = sys_get_temp_dir() . '/daiying-active-bootstrap-' . bin2hex(random_bytes(4));
-$release = $tmp . '/active';
+$release = $tmp . '/storage/updates/releases/active';
 mkdir($release . '/system/core/Bootstrap', 0755, true);
-mkdir($tmp . '/storage/updates', 0755, true);
 $marker = $tmp . '/active-autoload-used';
 file_put_contents($release . '/system/core/Bootstrap/autoload.php', '<?php file_put_contents(' . var_export($marker, true) . ', "yes");' . "\n");
 file_put_contents($tmp . '/storage/updates/current-release.json', json_encode([

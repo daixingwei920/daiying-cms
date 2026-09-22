@@ -209,6 +209,7 @@ final class UpdatePackageManifest
         return [
             'README.md',
             'CMS_RELEASE_ENVIRONMENT_DEPLOYMENT_CHECKLIST.md',
+            'public/index.php',
             'public/assets/admin/admin.css',
             'public/assets/admin/admin.js',
             'cli.php',

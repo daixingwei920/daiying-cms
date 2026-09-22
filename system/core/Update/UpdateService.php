@@ -180,7 +180,8 @@ final class UpdateService
         if ($manifest->databaseTypes !== [] && !in_array($driver, $manifest->databaseTypes, true)) {
             throw new UpdateException('Database driver is not compatible with update package.');
         }
-        $integrity = (new IntegrityChecker())->check($this->rootPath);
+        $currentCore = $this->currentCoreIntegrityTarget();
+        $integrity = (new IntegrityChecker())->check($currentCore['path']);
         if (($integrity['status'] ?? '') !== 'ok') {
             throw new UpdateException('Current Core integrity check failed.');
         }
@@ -218,6 +219,7 @@ final class UpdateService
 
         return [
             'current_integrity' => 'ok',
+            'current_integrity_target' => $currentCore['source'],
             'current_version' => $this->currentVersion,
             'target_version' => $manifest->toVersion,
             'php' => PHP_VERSION,
@@ -403,6 +405,37 @@ final class UpdateService
         }
 
         return $this->rootPath . '/system/core';
+    }
+
+    /** @return array{path:string,source:string} */
+    private function currentCoreIntegrityTarget(): array
+    {
+        $pointer = $this->readPointer();
+        if ($pointer === []) {
+            return ['path' => $this->rootPath, 'source' => 'root-shell'];
+        }
+
+        $releasePath = $this->safeActiveReleasePath((string) ($pointer['path'] ?? ''));
+        if ($releasePath === '' || !is_file($releasePath . '/system/core/Bootstrap/autoload.php')) {
+            throw new UpdateException('Current active release pointer is invalid.');
+        }
+
+        return ['path' => $releasePath, 'source' => 'active-release'];
+    }
+
+    private function safeActiveReleasePath(string $path): string
+    {
+        $path = rtrim($path, '/');
+        if ($path === '' || !is_dir($path)) {
+            return '';
+        }
+        $real = realpath($path);
+        $releasesRoot = realpath($this->rootPath . '/storage/updates/releases');
+        if ($real === false || $releasesRoot === false) {
+            return '';
+        }
+
+        return ($real === $releasesRoot || str_starts_with($real, $releasesRoot . DIRECTORY_SEPARATOR)) ? $real : '';
     }
 
     private function applyOperationalSupportFiles(UpdatePackageManifest $manifest, string $releaseDir): void
@@ -675,7 +708,7 @@ final class UpdateService
             @unlink($tmp);
             throw new UpdateException('Unable to atomically switch Core release pointer.');
         }
-        @chmod($file, 0600);
+        @chmod($file, 0644);
     }
 
     /** @return array<string,mixed> */
@@ -696,6 +729,7 @@ final class UpdateService
             return true;
         }
         $path = (string) ($pointer['path'] ?? '');
+        $path = $this->safeActiveReleasePath($path);
         return $path !== '' && is_file($path . '/system/core/Bootstrap/autoload.php');
     }
 

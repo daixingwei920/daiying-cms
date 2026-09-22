@@ -12,7 +12,8 @@ $autoload = $root . '/system/core/Bootstrap/autoload.php';
 $pointerFile = $root . '/storage/updates/current-release.json';
 if (is_file($pointerFile)) {
     $pointer = json_decode((string) file_get_contents($pointerFile), true);
-    $candidate = is_array($pointer) ? (string) ($pointer['path'] ?? '') . '/system/core/Bootstrap/autoload.php' : '';
+    $releasePath = is_array($pointer) ? cms_scheduled_content_active_release_path($root, (string) ($pointer['path'] ?? '')) : '';
+    $candidate = $releasePath !== '' ? $releasePath . '/system/core/Bootstrap/autoload.php' : '';
     if ($candidate !== '' && is_file($candidate)) {
         $autoload = $candidate;
     }
@@ -41,3 +42,18 @@ $settings = Settings::load($root);
 $result = (new ContentScheduler(ConnectionFactory::make($settings)))->publishDue($now, $limit);
 
 echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . PHP_EOL;
+
+function cms_scheduled_content_active_release_path(string $root, string $path): string
+{
+    $path = rtrim($path, '/');
+    if ($path === '' || !is_dir($path)) {
+        return '';
+    }
+    $real = realpath($path);
+    $releasesRoot = realpath($root . '/storage/updates/releases');
+    if ($real === false || $releasesRoot === false) {
+        return '';
+    }
+
+    return ($real === $releasesRoot || str_starts_with($real, $releasesRoot . DIRECTORY_SEPARATOR)) ? $real : '';
+}

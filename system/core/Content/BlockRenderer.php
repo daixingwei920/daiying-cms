@@ -390,18 +390,7 @@ final class BlockRenderer
         $rawStyle = (string) ($data['style'] ?? 'body');
         $alignment = in_array($rawAlignment, ['left', 'center', 'right'], true) ? $rawAlignment : 'left';
         $style = in_array($rawStyle, ['body', 'lead', 'small'], true) ? $rawStyle : 'body';
-        $text = $this->e($data['text'] ?? '');
-        if (($data['bold'] ?? false) === true) {
-            $text = '<strong>' . $text . '</strong>';
-        }
-        if (($data['italic'] ?? false) === true) {
-            $text = '<em>' . $text . '</em>';
-        }
         $link = (string) ($data['link'] ?? '');
-        if ($link !== '') {
-            $text = '<a href="' . $this->e($link) . '">' . $text . '</a>';
-        }
-
         $classes = [];
         if ($style !== 'body') {
             $classes[] = 'paragraph-' . $style;
@@ -411,7 +400,25 @@ final class BlockRenderer
         }
         $class = $classes === [] ? '' : ' class="' . $this->e(implode(' ', $classes)) . '"';
 
-        return '<p' . $class . '>' . $text . '</p>';
+        $rawText = str_replace(["\r\n", "\r"], "\n", (string) ($data['text'] ?? ''));
+        $paragraphs = preg_split("/\n{2,}/", $rawText) ?: [''];
+        $html = '';
+        foreach ($paragraphs as $paragraph) {
+            $text = $this->e($paragraph);
+            $text = str_replace("\n", '<br>', $text);
+            if (($data['bold'] ?? false) === true) {
+                $text = '<strong>' . $text . '</strong>';
+            }
+            if (($data['italic'] ?? false) === true) {
+                $text = '<em>' . $text . '</em>';
+            }
+            if ($link !== '') {
+                $text = '<a href="' . $this->e($link) . '">' . $text . '</a>';
+            }
+            $html .= '<p' . $class . '>' . $text . '</p>';
+        }
+
+        return $html;
     }
 
     /** @param array<string, mixed> $data */

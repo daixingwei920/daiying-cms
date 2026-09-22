@@ -78,6 +78,7 @@ daiying-cms-*.manifest.json
 vendor/
 node_modules/
 coverage/
+outputs/
 test-results/
 playwright-report/
 .phpunit.result.cache
