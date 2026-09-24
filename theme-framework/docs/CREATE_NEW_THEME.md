@@ -2,6 +2,10 @@
 
 This guide starts from `starters/blank/`.
 
+## Isolated Executor Validation
+
+This short section is used to validate isolated executor workspace changes before any source update.
+
 ## 1. Copy Starter
 
 Copy:
