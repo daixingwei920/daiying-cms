@@ -2,7 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
-## 1.2.68 - Pending release
+## 1.2.69 - 2026-09-24
+
+- Added the Theme Audio Assets contract so themes can serve bundled MP3, OGG, WAV, M4A, and AAC assets through the existing theme asset runtime.
+- Added HTTP byte-range support for theme assets so HTML5 audio playback can request partial content safely.
+- Kept theme asset serving fail-closed: only installed theme `assets/` files with approved extensions are public, while PHP, manifests, hidden files, traversal, symlink escapes, and executable files remain blocked.
+- Documented theme audio asset packaging, playback, autoplay, and mobile fallback rules in the Theme API and Theme Framework docs.
+- Preserved the 1.2.52 cross-version upgrade floor.
+
+## 1.2.68 - 2026-09-24
 
 - Closed P1 Core technical debt around active-release integrity by making the active release the current Core integrity target when a valid pointer exists.
 - Hardened root launchers so Web, CLI, and scheduled publishing only load active releases from `storage/updates/releases`.

@@ -84,7 +84,7 @@
     "Export/ExportPackageBuilder.php": "804a0a0541a67aaf5aaa7bbead49b909f5f1266b8e44c01717b67425f7f7d58b",
     "Export/ExportPackageReader.php": "4b2ddbd4e863026c934b13c8bdfb9b370dd41c9e6d84532ef6b84959dd7a9cd2",
     "Export/OfficialExportContentImporter.php": "58bf397fb3beb0ca228f20b6b1e3f486f3111ac5099f1137053f799707ed6215",
-    "Extension/ExtensionAssetController.php": "3939f11c0254b520e7bad7729f2b9e2a5c2340605fc380ed4bb0dc9e3ffe44bb",
+    "Extension/ExtensionAssetController.php": "d010074f2e716da52df14d709007586df2e4c6445fc40b246ebe88a071b47621",
     "ExternalMigration/DaiyingMigrationPackageBuilder.php": "6a84845abd7639a50587d130009f1d1037b622dfc96259c477aee372e1195fb0",
     "ExternalMigration/EmlogMigrationAdapter.php": "9e1e8404f2e324819da16944fe08bd8318cf92331bcb2e382d1aa7549bdb7130",
     "ExternalMigration/ExternalMigrationService.php": "c67fae162b8913891801a0c002191d434c821000eaf7a7d2cd43a7b3d54f2edb",

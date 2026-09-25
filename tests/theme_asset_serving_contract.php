@@ -48,6 +48,11 @@ function theme_assets_request(ExtensionAssetController $controller, string $path
     return $controller->showThemeContentAsset(new Request($method, $path));
 }
 
+function theme_assets_range_request(ExtensionAssetController $controller, string $path, string $range): \Cms\Core\Http\Response
+{
+    return $controller->showThemeContentAsset(new Request('GET', $path, [], [], ['HTTP_RANGE' => $range]));
+}
+
 try {
     theme_assets_write($root, 'daiying_novel', [
         'assets/style.css' => 'body{color:#111}',
@@ -60,10 +65,17 @@ try {
         'assets/style.css' => '.test{color:blue}',
         'assets/app.js' => 'console.log("ok");',
         'assets/image.svg' => '<svg xmlns="http://www.w3.org/2000/svg"></svg>',
+        'assets/audio/fate-question.mp3' => '0123456789abcdef',
+        'assets/audio/ambient.ogg' => 'ogg-body',
+        'assets/audio/bell.wav' => 'wav-body',
+        'assets/audio/chant.m4a' => 'm4a-body',
         'assets/secret.php' => '<?php echo "secret";',
+        'assets/secret.phar' => 'phar',
         'assets/.hidden.css' => '.hidden{}',
         'assets/.env' => 'SECRET=1',
     ]);
+    file_put_contents($root . '/outside-secret.mp3', 'outside');
+    symlink($root . '/outside-secret.mp3', $root . '/content/themes/test_theme/assets/audio/outside.mp3');
 
     $controller = new ExtensionAssetController($root);
 
@@ -80,6 +92,35 @@ try {
     $third = theme_assets_request($controller, '/content/themes/test_theme/assets/style.css');
     $check($third->status() === 200 && str_contains($third->body(), '.test'), 'serves a third arbitrary theme asset without Apache Alias hard-coding');
 
+    $mp3 = theme_assets_request($controller, '/content/themes/test_theme/assets/audio/fate-question.mp3');
+    $check($mp3->status() === 200 && $mp3->body() === '0123456789abcdef', 'serves MP3 theme audio assets from assets/audio');
+    $check(($mp3->headers()['Content-Type'] ?? '') === 'audio/mpeg', 'serves MP3 with audio/mpeg content type');
+    $check(($mp3->headers()['Accept-Ranges'] ?? '') === 'bytes', 'advertises byte range support for theme audio');
+    $check(($mp3->headers()['Content-Length'] ?? '') === '16', 'serves audio with correct Content-Length');
+
+    $range = theme_assets_range_request($controller, '/content/themes/test_theme/assets/audio/fate-question.mp3', 'bytes=0-3');
+    $check($range->status() === 206 && $range->body() === '0123', 'serves theme audio Range requests with 206');
+    $check(($range->headers()['Content-Range'] ?? '') === 'bytes 0-3/16', 'sets Content-Range for theme audio Range requests');
+    $check(($range->headers()['Content-Length'] ?? '') === '4', 'sets ranged Content-Length for theme audio');
+
+    $suffixRange = theme_assets_range_request($controller, '/content/themes/test_theme/assets/audio/fate-question.mp3', 'bytes=-4');
+    $check($suffixRange->status() === 206 && $suffixRange->body() === 'cdef', 'serves suffix byte ranges for theme audio');
+
+    $invalidRange = theme_assets_range_request($controller, '/content/themes/test_theme/assets/audio/fate-question.mp3', 'bytes=99-120');
+    $check($invalidRange->status() === 416 && ($invalidRange->headers()['Content-Range'] ?? '') === 'bytes */16', 'rejects unsatisfiable audio ranges');
+
+    $ogg = theme_assets_request($controller, '/content/themes/test_theme/assets/audio/ambient.ogg');
+    $check($ogg->status() === 200 && ($ogg->headers()['Content-Type'] ?? '') === 'audio/ogg', 'serves OGG theme audio assets');
+
+    $wav = theme_assets_request($controller, '/content/themes/test_theme/assets/audio/bell.wav');
+    $check($wav->status() === 200 && ($wav->headers()['Content-Type'] ?? '') === 'audio/wav', 'serves WAV theme audio assets');
+
+    $m4a = theme_assets_request($controller, '/content/themes/test_theme/assets/audio/chant.m4a');
+    $check($m4a->status() === 200 && ($m4a->headers()['Content-Type'] ?? '') === 'audio/mp4', 'serves M4A theme audio assets');
+
+    $missingAudio = theme_assets_request($controller, '/content/themes/test_theme/assets/audio/missing.mp3');
+    $check($missingAudio->status() === 404, 'missing theme audio returns 404');
+
     $template = theme_assets_request($controller, '/content/themes/test_theme/templates/home.php');
     $check($template->status() === 404, 'does not serve theme templates through the public asset contract');
 
@@ -89,6 +130,9 @@ try {
     $php = theme_assets_request($controller, '/content/themes/test_theme/assets/secret.php');
     $check($php->status() === 404, 'does not serve PHP from theme assets');
 
+    $phar = theme_assets_request($controller, '/content/themes/test_theme/assets/secret.phar');
+    $check($phar->status() === 404, 'does not serve executable archive extensions from theme assets');
+
     $hiddenCss = theme_assets_request($controller, '/content/themes/test_theme/assets/.hidden.css');
     $check($hiddenCss->status() === 404, 'does not serve hidden files from theme assets');
 
@@ -97,6 +141,12 @@ try {
 
     $traversal = theme_assets_request($controller, '/content/themes/test_theme/assets/../theme.json');
     $check($traversal->status() === 404, 'rejects traversal attempts in theme asset paths');
+
+    $encodedTraversal = theme_assets_request($controller, '/content/themes/test_theme/assets/%2e%2e/theme.json');
+    $check($encodedTraversal->status() === 404, 'rejects encoded traversal attempts in theme asset paths');
+
+    $symlinkEscape = theme_assets_request($controller, '/content/themes/test_theme/assets/audio/outside.mp3');
+    $check($symlinkEscape->status() === 404, 'rejects symlink escapes from theme assets');
 
     $post = theme_assets_request($controller, '/content/themes/test_theme/assets/style.css', 'POST');
     $check($post->status() === 405, 'non-GET theme asset requests are rejected');

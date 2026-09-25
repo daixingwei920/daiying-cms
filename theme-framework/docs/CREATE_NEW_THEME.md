@@ -31,6 +31,13 @@ assets/css/theme.css
 assets/js/theme.js
 ```
 
+Optional scene/immersive assets may include:
+
+```text
+assets/audio/fate-question.mp3
+assets/images/scene.webp
+```
+
 ## 3. Use Theme API
 
 Use `$context` only:
@@ -42,6 +49,24 @@ $seo = $context->seo();
 ```
 
 Do not read database tables or repositories from templates.
+
+Theme assets are addressed relative to `assets/`. For bundled audio, use:
+
+```php
+$voiceUrl = $context->asset('audio/fate-question.mp3');
+```
+
+Do not use `/media/{id}` for packaged theme audio. Media IDs are site data and
+will not be stable across installations.
+
+Supported Theme Audio Assets v1 formats are `mp3`, `ogg`/`oga`, `wav`, `m4a`
+and `aac`. Core serves them with audio MIME types and byte range support for
+HTML5 `<audio>`.
+
+Browsers often block autoplay. Start voiceover, music and effects from a user
+gesture when possible, catch `play()` rejection, and provide a visible fallback
+control. Use `loop` for ambience only, set explicit volume in JavaScript, and
+test mobile behavior.
 
 ## 4. Content Links
 

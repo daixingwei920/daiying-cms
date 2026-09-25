@@ -26,6 +26,12 @@ final class ExtensionAssetController
         'woff' => 'font/woff',
         'woff2' => 'font/woff2',
         'ttf' => 'font/ttf',
+        'mp3' => 'audio/mpeg',
+        'ogg' => 'audio/ogg',
+        'oga' => 'audio/ogg',
+        'wav' => 'audio/wav',
+        'm4a' => 'audio/mp4',
+        'aac' => 'audio/aac',
     ];
 
     /** @var array<string,true> */
@@ -43,6 +49,12 @@ final class ExtensionAssetController
         'woff' => true,
         'woff2' => true,
         'ttf' => true,
+        'mp3' => true,
+        'ogg' => true,
+        'oga' => true,
+        'wav' => true,
+        'm4a' => true,
+        'aac' => true,
     ];
 
     /** @param 'plugin'|'theme' $type */
@@ -95,22 +107,7 @@ final class ExtensionAssetController
             return Response::text('Asset not found.', 404);
         }
 
-        $body = (string) file_get_contents($file);
-        $mtime = (string) (filemtime($file) ?: time());
-        $etag = '"' . hash('sha256', $type . '|' . $extensionId . '|' . $relativePath . '|' . $mtime) . '"';
-        if ((string) ($request->server['HTTP_IF_NONE_MATCH'] ?? '') === $etag) {
-            return new Response('', 304, [
-                'Cache-Control' => 'public, max-age=31536000, immutable',
-                'ETag' => $etag,
-            ]);
-        }
-
-        return new Response($body, 200, [
-            'Content-Type' => self::MIME_TYPES[strtolower(pathinfo($relativePath, PATHINFO_EXTENSION))],
-            'Cache-Control' => 'public, max-age=31536000, immutable',
-            'ETag' => $etag,
-            'X-Content-Type-Options' => 'nosniff',
-        ]);
+        return $this->assetResponse($request, $file, $type, $extensionId, $relativePath);
     }
 
     public function showThemeContentAsset(Request $request): Response
@@ -140,7 +137,7 @@ final class ExtensionAssetController
             return Response::text('Asset not found.', 404);
         }
 
-        return $this->serveAsset('theme', $themeId, $relativePath);
+        return $this->serveAsset($request, 'theme', $themeId, $relativePath);
     }
 
     public static function normalizeRelativePath(string $path): string
@@ -200,7 +197,7 @@ final class ExtensionAssetController
         return false;
     }
 
-    private function serveAsset(string $type, string $extensionId, string $relativePath): Response
+    private function serveAsset(Request $request, string $type, string $extensionId, string $relativePath): Response
     {
         if (!$this->isAllowedAssetPath($relativePath) || !$this->isAllowedExtension($relativePath)) {
             return Response::text('Asset not found.', 404);
@@ -216,16 +213,102 @@ final class ExtensionAssetController
             return Response::text('Asset not found.', 404);
         }
 
-        $body = (string) file_get_contents($file);
+        return $this->assetResponse($request, $file, $type, $extensionId, $relativePath);
+    }
+
+    private function assetResponse(Request $request, string $file, string $type, string $extensionId, string $relativePath): Response
+    {
         $mtime = (string) (filemtime($file) ?: time());
         $etag = '"' . hash('sha256', $type . '|' . $extensionId . '|' . $relativePath . '|' . $mtime) . '"';
+        $size = filesize($file);
+        if (!is_int($size)) {
+            return Response::text('Asset not found.', 404);
+        }
 
-        return new Response($body, 200, [
-            'Content-Type' => self::MIME_TYPES[strtolower(pathinfo($relativePath, PATHINFO_EXTENSION))],
+        $extension = strtolower(pathinfo($relativePath, PATHINFO_EXTENSION));
+        $headers = [
+            'Content-Type' => self::MIME_TYPES[$extension],
             'Cache-Control' => 'public, max-age=31536000, immutable',
             'ETag' => $etag,
             'X-Content-Type-Options' => 'nosniff',
+            'Accept-Ranges' => 'bytes',
+        ];
+
+        $range = trim((string) ($request->server['HTTP_RANGE'] ?? $request->server['Range'] ?? ''));
+        if ($range === '' && (string) ($request->server['HTTP_IF_NONE_MATCH'] ?? '') === $etag) {
+            return new Response('', 304, $headers);
+        }
+
+        if ($range !== '') {
+            $parsed = $this->parseByteRange($range, $size);
+            if ($parsed === null) {
+                return new Response('', 416, $headers + [
+                    'Content-Range' => 'bytes */' . $size,
+                    'Content-Length' => '0',
+                ]);
+            }
+
+            [$start, $end] = $parsed;
+            $length = $end - $start + 1;
+            $body = $this->readFileRange($file, $start, $length);
+
+            return new Response($body, 206, $headers + [
+                'Content-Range' => 'bytes ' . $start . '-' . $end . '/' . $size,
+                'Content-Length' => (string) $length,
+            ]);
+        }
+
+        return new Response((string) file_get_contents($file), 200, $headers + [
+            'Content-Length' => (string) $size,
         ]);
+    }
+
+    /** @return array{0:int,1:int}|null */
+    private function parseByteRange(string $range, int $size): ?array
+    {
+        if ($size < 1 || preg_match('/^bytes=(\d*)-(\d*)$/', $range, $matches) !== 1) {
+            return null;
+        }
+
+        $startRaw = $matches[1];
+        $endRaw = $matches[2];
+        if ($startRaw === '' && $endRaw === '') {
+            return null;
+        }
+
+        if ($startRaw === '') {
+            $suffixLength = (int) $endRaw;
+            if ($suffixLength < 1) {
+                return null;
+            }
+            $start = max(0, $size - $suffixLength);
+            $end = $size - 1;
+        } else {
+            $start = (int) $startRaw;
+            $end = $endRaw === '' ? $size - 1 : (int) $endRaw;
+        }
+
+        if ($start < 0 || $end < $start || $start >= $size) {
+            return null;
+        }
+
+        return [$start, min($end, $size - 1)];
+    }
+
+    private function readFileRange(string $file, int $start, int $length): string
+    {
+        $handle = fopen($file, 'rb');
+        if (!is_resource($handle)) {
+            return '';
+        }
+
+        try {
+            fseek($handle, $start);
+
+            return (string) fread($handle, $length);
+        } finally {
+            fclose($handle);
+        }
     }
 
     private function extensionBasePath(string $type, string $extensionId): ?string

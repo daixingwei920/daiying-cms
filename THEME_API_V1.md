@@ -89,6 +89,48 @@ must not require per-theme Apache or Nginx aliases. Core only exposes static
 assets from `assets/`; PHP templates, `_theme.php`, `theme.json`, hidden files
 and sensitive configuration files remain private.
 
+### Theme Audio Assets
+
+Theme API v1 supports packaged audio assets for scene themes and immersive
+themes. Audio files should live under:
+
+`content/themes/{theme_id}/assets/audio/`
+
+Templates and JavaScript should continue to use `asset()` with a path relative
+to `assets/`:
+
+```php
+$context->asset('audio/fate-question.mp3');
+```
+
+Do not use `/media/{id}` for audio bundled with a public theme. `/media/{id}`
+belongs to site content/data, while theme audio belongs to the theme package and
+must work immediately after the theme is installed.
+
+Supported Theme Audio Asset v1 extensions:
+
+- `mp3` → `audio/mpeg`
+- `ogg` / `oga` → `audio/ogg`
+- `wav` → `audio/wav`
+- `m4a` → `audio/mp4`
+- `aac` → `audio/aac`
+
+Theme audio responses use the same asset security boundary as CSS, JavaScript,
+images and fonts. Core only serves files below the current installed theme's
+`assets/` directory, rejects traversal and symlink escapes, and only serves
+allowlisted static extensions. PHP, PHAR, PHTML, shell scripts, manifests,
+hidden files and configuration files remain private.
+
+Audio responses advertise byte range support and support single `Range:
+bytes=...` requests with `206 Partial Content`, `Content-Range`,
+`Accept-Ranges: bytes` and correct `Content-Length`, so HTML5 `<audio>` can
+seek and stream stable theme-bundled audio.
+
+Browser autoplay is not guaranteed. Scene themes should start music, voiceover
+or effects from a user gesture when needed, handle `play()` promise rejection,
+and provide a visible fallback control. Use `loop`, `preload` and volume
+carefully; mobile browsers may delay or block playback until interaction.
+
 ## Content Permalinks
 
 Theme API v1 does not currently expose a dedicated public

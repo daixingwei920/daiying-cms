@@ -43,6 +43,30 @@ $context->asset('assets/css/theme.css')
 
 The argument is relative to the theme `assets/` directory.
 
+### Audio Assets
+
+Scene themes can bundle audio under `assets/audio/`:
+
+```php
+$context->asset('audio/fate-question.mp3')
+```
+
+Do not point packaged theme audio at `/media/{id}`. Media IDs are site content,
+not theme package assets.
+
+Theme Audio Assets v1 supports:
+
+- `mp3`
+- `ogg` / `oga`
+- `wav`
+- `m4a`
+- `aac`
+
+Core serves these files through the same static asset contract as CSS, JS,
+images and fonts, with correct MIME types and byte range support. Themes should
+handle browser autoplay restrictions with a user gesture fallback and should not
+assume mobile browsers will start audio automatically.
+
 ## Content Permalinks
 
 Themes must not assume `$item['url']` always exists.

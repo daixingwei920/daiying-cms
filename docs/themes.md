@@ -249,6 +249,44 @@ Allowed public theme asset types are:
 - `ico`
 - `woff` / `woff2`
 - `ttf`
+- `mp3`
+- `ogg` / `oga`
+- `wav`
+- `m4a`
+- `aac`
+
+### Theme Audio Assets
+
+Scene themes may bundle voiceover, ambience and sound effects as theme assets.
+Place those files under:
+
+```text
+assets/audio/
+```
+
+Use the same Theme API asset helper:
+
+```php
+<audio src="<?= $context->e($context->asset('audio/fate-question.mp3')) ?>" preload="auto"></audio>
+```
+
+Do not hard-code `/media/{id}` for theme-bundled audio. Media IDs belong to the
+site's media library and will differ on every installation; packaged theme
+audio must travel inside the theme ZIP and work after installation.
+
+Theme Audio Assets v1 supports `mp3`, `ogg`/`oga`, `wav`, `m4a` and `aac`.
+Responses include audio MIME types, `Accept-Ranges: bytes`, and single byte
+range support for HTML5 audio playback and seeking.
+
+Autoplay is controlled by browsers. Use a user gesture fallback for voiceover or
+music, catch `audio.play()` rejections, and provide visible controls when audio
+is part of the scene. Keep volume reasonable, use `loop` only for ambience, and
+test mobile browsers separately.
+
+The security boundary is unchanged: only static allowlisted assets under the
+installed theme's `assets/` directory are public. Traversal, symlink escapes,
+hidden files, manifests, PHP/PHAR/PHTML, shell scripts and configuration files
+remain blocked.
 
 ## Installation
 
