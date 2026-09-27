@@ -1,6 +1,6 @@
 # Daiying Plugin API Reference V1
 
-Only APIs implemented in the Foundation candidate are listed.
+Only public APIs implemented in Daiying CMS Core 1.2.70 Plugin SDK Foundation are listed.
 
 ## PluginContext
 
@@ -9,13 +9,13 @@ Since Core 1.2.69 unless noted.
 ```php
 hasCapability(string $capability): bool
 listen(string $eventName, callable $listener): void
-dispatch(object $event): void // Since Core 1.2.70 candidate; trusted/bundled only
+dispatch(object $event): void // Since Core 1.2.70; trusted/bundled only
 registerBlock(string $type, string $label): void
-registerBlockRenderer(string $type, callable $renderer): void // Since Core 1.2.70 candidate
+registerBlockRenderer(string $type, callable $renderer): void // Since Core 1.2.70
 data(): PluginDataStore
-content(): Cms\Core\Content\PluginContentService // Since Core 1.2.70 candidate
-frontUsers(): Cms\Core\Auth\FrontUserService // Since Core 1.2.70 candidate
-license(): Cms\Core\Plugin\PluginLicenseService // Since Core 1.2.70 candidate
+content(): Cms\Core\Content\PluginContentService // Since Core 1.2.70
+frontUsers(): Cms\Core\Auth\FrontUserService // Since Core 1.2.70
+license(): Cms\Core\Plugin\PluginLicenseService // Since Core 1.2.70
 pdo(): PDO
 frontRoute(string $method, string $path, callable $handler, ?string $capability = null, bool $csrf = false): void
 adminRoute(string $method, string $path, callable $handler, ?string $capability = null, bool $csrf = true): void
@@ -62,7 +62,7 @@ static capture(): self
 static normalizePath(string $path): string
 static captureBody(string $method, array $post, string $contentType, string $rawBody): array
 input(string $key, mixed $default = null): mixed
-rawBody(): string // Since Core 1.2.70 candidate
+rawBody(): string // Since Core 1.2.70
 withPath(string $path): self
 ```
 
@@ -87,11 +87,21 @@ headers(): array
 
 ## PluginContentService
 
-Since Core 1.2.70 candidate.
+Since Core 1.2.70.
+
+```php
+createDraft(array $draft): array
+get(int $contentId): ?array
+list(array $query = []): array
+update(int $contentId, array $patch): array
+publish(int $contentId): array
+```
+
+Capabilities: `content.read`, `content.write`.
 
 ## PluginLicenseService
 
-Since Core 1.2.70 candidate.
+Since Core 1.2.70.
 
 Context-scoped commercial license service. Plugins can only read and enforce their own license state; there is no `pluginId` parameter.
 
@@ -120,21 +130,11 @@ clear(): void
 
 Signed license codes use `dylic_v1.base64url(payload_json).base64url(rsa2048_sha256_signature)`. Payload must include at least `license_id`, `plugin_id`, `domain` or `site`, `tier`, `features`, `issued_at`, and `expires_at`; `key_id` selects a key from `market.license_public_keys`.
 
-Plugins should gate paid behavior with `hasFeature()` / `requireFeature()`, not tier string checks. Private signing keys never belong in CMS config or plugin packages.
-
-```php
-createDraft(array $draft): array
-get(int $contentId): ?array
-list(array $query = []): array
-update(int $contentId, array $patch): array
-publish(int $contentId): array
-```
-
-Capabilities: `content.read`, `content.write`.
+Plugins should gate paid behavior with `hasFeature()` / `requireFeature()`, not tier string checks. Core manages commercial license storage, activation state, public-key verification, and offline grace. Plugins must not implement official commercial license crypto or parse signed payloads themselves. Private signing keys never enter CMS config, the Core package, or plugin packages.
 
 ## FrontUserService
 
-Since Core 1.2.70 candidate.
+Since Core 1.2.70.
 
 ```php
 current(): ?array
@@ -175,7 +175,7 @@ purgePluginSecrets(string $pluginId, string $confirmation): void
 
 ## Block Renderer
 
-Since Core 1.2.70 candidate.
+Since Core 1.2.70.
 
 ```php
 registerBlockRenderer(string $type, callable $renderer): void

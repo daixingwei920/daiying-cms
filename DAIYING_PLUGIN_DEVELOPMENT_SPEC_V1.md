@@ -1,8 +1,8 @@
 # Daiying Plugin Development Specification V1
 
-Status: Plugin SDK Foundation candidate.
+Status: Published for Daiying CMS Core 1.2.70+.
 
-Baseline: Core 1.2.69 plus SDK Foundation changes. New Foundation APIs are marked `Since Core 1.2.70 candidate` until release.
+Baseline: Core 1.2.70 Plugin SDK Foundation.
 
 ## Plugin Structure
 
@@ -123,6 +123,7 @@ Required behavior:
 - Core verifies signatures with configured public keys in `market.license_public_keys`; private signing keys stay only in the official signing system.
 - Site binding compares Core's canonical site domain, ignoring scheme, path, and a leading `www.`.
 - A previously valid signed license may enter finite `offline_grace`; after `grace_until`, paid features fail closed.
+- Core owns commercial license storage, signature verification, activation state, and offline grace calculation.
 - Plugins must not include their own public key constants, private keys, signature verification code, license payload parsers, or grace-period logic.
 
 ## Secrets

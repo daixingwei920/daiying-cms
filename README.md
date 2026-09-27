@@ -4,7 +4,7 @@
 
 A modular PHP CMS for building content websites, media workflows, commerce foundations, and in-development external distribution workflows.
 
-Daiying CMS Core is a self-hosted PHP CMS with themes, plugins, media management, commerce foundations, signed online updates, global AI settings, Passkey-capable admin login, and recovery tooling. The current public release is **1.2.69 stable**.
+Daiying CMS Core is a self-hosted PHP CMS with themes, plugins, media management, commerce foundations, signed online updates, global AI settings, Passkey-capable admin login, and recovery tooling. The current public release is **1.2.70 stable**.
 
 ![Daiying CMS admin dashboard](.github/assets/screenshots/admin-dashboard.png)
 
@@ -15,6 +15,7 @@ Daiying CMS Core is a self-hosted PHP CMS with themes, plugins, media management
 - Download: <https://github.com/daixingwei920/daiying-cms/releases/latest>
 - Releases: <https://github.com/daixingwei920/daiying-cms/releases>
 - Plugins: [docs/plugins.md](docs/plugins.md)
+- Plugin SDK V1: [docs/plugin-sdk/README.md](docs/plugin-sdk/README.md)
 - Themes: [docs/themes.md](docs/themes.md)
 - Global AI: [docs/ai.md](docs/ai.md)
 
@@ -45,8 +46,8 @@ Download the latest stable package from [GitHub Releases](https://github.com/dai
 
 Current checked release:
 
-- Tag: `v1.2.69`
-- Package: `daiying-cms-1.2.69-stable.zip`
+- Tag: `v1.2.70`
+- Package: `daiying-cms-1.2.70-stable.zip`
 - SHA-256: see the `.sha256` sidecar attached to the release.
 
 ### 3. Install
@@ -143,7 +144,8 @@ See [Global AI](docs/ai.md).
 - [Installation](docs/installation.md)
 - [Developers](docs/developers.md)
 - [Plugins](docs/plugins.md)
-- [Plugin API v1](PLUGIN_API_V1.md)
+- [Plugin SDK V1](docs/plugin-sdk/README.md)
+- [Legacy Plugin API v1](PLUGIN_API_V1.md)
 - [Themes](docs/themes.md)
 - [Theme API v1](THEME_API_V1.md)
 - [Storage Provider API v1](STORAGE_PROVIDER_API_V1.md)

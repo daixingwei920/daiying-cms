@@ -18,7 +18,8 @@ This page collects developer entry points for Daiying CMS.
 
 ## Extension Guides
 
-- [Plugin Development](plugins.md)
+- [Plugin SDK V1](plugin-sdk/README.md)
+- [Plugin Packaging And Lifecycle](plugins.md)
 - [Theme Development](themes.md)
 - [Theme API v1](../THEME_API_V1.md)
 - [Global AI](ai.md)
@@ -59,6 +60,7 @@ Current Core runtime requirements are PHP 8.3.0+ with `pdo`, `json`, `openssl`, 
 - Plugins should use `PluginContext::mail()` instead of reading mail settings tables or implementing their own SMTP sender.
 - Plugins should use `PluginContext::queue()`, `PluginContext::scheduler()`, `PluginContext::cache()`, and `PluginContext::webhooks()` for shared infrastructure.
 - Plugins should register content types, custom fields, searchable resources, and SEO extensions through `PluginContext`.
+- Third-party plugins should use the published Plugin SDK V1 boundary and must not rely on private Core classes, tables, sessions, or guessed event names.
 - Prefer plugin/theme APIs before changing Core.
 - Keep migrations reversible where possible and scoped to owned tables.
 - Document new public routes, capabilities, permissions, and data-retention behavior in manifests.

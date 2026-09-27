@@ -33,6 +33,6 @@
 | `seo.extend` | Extend SEO metadata/JSON-LD | `api` allowed | Low | No | `$context->registerSeoMeta(...)` |
 | `blocks.register` | Register content block and renderer | `api` allowed | Medium | No | `$context->registerBlockRenderer(...)` |
 
-`$context->license()` is context-scoped to the current plugin and does not require a separate `license.read` capability. Plugins cannot pass an arbitrary plugin ID to read another plugin's license.
+`$context->license()` is context-scoped to the current plugin and does not require a separate `license.read` capability. Plugins cannot pass an arbitrary plugin ID to read another plugin's license. Paid behavior should be gated with `hasFeature()` or `requireFeature()`, not raw tier checks.
 
-Capabilities are not user roles. They are plugin runtime grants. Unknown Core capability names fail manifest validation.
+Capabilities are not user roles. They are plugin runtime grants. Unknown Core capability names fail manifest validation. `auth.login` is high risk: declaring the capability in `plugin.json` is not enough; Core also requires trusted or bundled status.

@@ -2,6 +2,8 @@
 
 Daiying CMS supports plugin packages for extending Core capabilities.
 
+For Core 1.2.70+ public plugin development, use [Plugin SDK V1](plugin-sdk/README.md). The SDK defines the stable API Reference, Event Registry, Capability Registry, commercial license boundary, and official skeleton.
+
 ## Current Bundled Plugins
 
 The following plugin manifests are present in this repository:
@@ -56,5 +58,7 @@ Core plugin infrastructure includes:
 ## Developer Notes
 
 Use plugin-specific capabilities instead of changing Core directly when the extension can be implemented through existing routes, menus, migrations, storage, media, or content APIs.
+
+Plugins should not read private Core code, touch PDO directly, mutate `$_SESSION`, or guess event names when a published SDK service or event registry entry exists.
 
 When Core changes are unavoidable, document the missing extension point and coordinate the change separately from plugin packaging.
