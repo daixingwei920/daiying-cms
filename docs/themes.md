@@ -2,8 +2,14 @@
 
 Daiying CMS supports independent themes under `content/themes`.
 
-The stable theme developer contract is documented in
-[`THEME_API_V1.md`](../THEME_API_V1.md).
+The current theme developer contract is:
+
+- [Daiying Theme Development Specification V1 — Core 1.2.70+](../DAIYING_THEME_DEVELOPMENT_SPEC_V1.md)
+- [Theme API V1](../THEME_API_V1.md)
+- [Daiying Theme Framework](../theme-framework/README.md)
+
+Legacy website Theme Development Specification pages dated 2026-08-31 are
+Legacy / Superseded and must not be used as the default development entrypoint.
 
 ## Current Bundled Themes
 

@@ -20,7 +20,9 @@ This page collects developer entry points for Daiying CMS.
 
 - [Plugin SDK V1](plugin-sdk/README.md)
 - [Plugin Packaging And Lifecycle](plugins.md)
-- [Theme Development](themes.md)
+- [Theme Development Specification V1](../DAIYING_THEME_DEVELOPMENT_SPEC_V1.md)
+- [Daiying Theme Framework](../theme-framework/README.md)
+- [Theme Guide](themes.md)
 - [Theme API v1](../THEME_API_V1.md)
 - [Global AI](ai.md)
 - [Mail Infrastructure](mail-infrastructure.md)
