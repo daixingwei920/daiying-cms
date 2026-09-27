@@ -8,7 +8,8 @@ Copy this directory when creating a new Daiying CMS theme.
 2. Edit `theme.json`.
 3. Replace generic copy and assets.
 4. Keep `templates/home.php`, `templates/list.php`, `templates/content.php`, and `templates/error.php`.
-5. Package as `content/themes/{theme_id}/...` with `market-package.json`.
+5. Keep CSS, JavaScript, images, fonts, and audio under `assets/`.
+6. Package either as an extension-root ZIP or as `content/themes/{theme_id}/...` with `market-package.json`.
 
 ## Stable API Usage
 

@@ -47,8 +47,9 @@
 
 ## Package
 
-- [ ] `market-package.json` exists.
-- [ ] Package path is `content/themes/{theme_id}/...`.
-- [ ] Each market file declares SHA-256.
+- [ ] Package is either an extension-root ZIP or an explicit `market-package.json` package.
+- [ ] Package root or installed path matches `theme_id`.
+- [ ] Explicit market packages put files under `content/themes/{theme_id}/...`.
+- [ ] Explicit market packages declare SHA-256 for each market file.
 - [ ] Core constraint uses theme compatibility semantics, not update-server minimum-upgrade semantics.
 - [ ] Theme does not require manual web server changes.

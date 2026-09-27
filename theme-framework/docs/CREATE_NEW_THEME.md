@@ -118,7 +118,17 @@ Logo links to `/` and must preserve aspect ratio.
 
 ## 7. Package
 
-Market package layout:
+Core installers support two theme package inputs.
+
+Extension-root ZIP:
+
+```text
+{theme_id}/theme.json
+{theme_id}/templates/...
+{theme_id}/assets/...
+```
+
+Explicit market package layout:
 
 ```text
 market-package.json
@@ -127,4 +137,5 @@ content/themes/{theme_id}/templates/...
 content/themes/{theme_id}/assets/...
 ```
 
-Each market file must declare SHA-256.
+For explicit market packages, each market file must declare SHA-256 in
+`market-package.json`. Both layouts install into `content/themes/{theme_id}`.
