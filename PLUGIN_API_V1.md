@@ -1,5 +1,7 @@
 # Daiying CMS Plugin API v1
 
+> LEGACY / SUPERSEDED: This page is preserved for historical links and broad compatibility notes. For Core 1.2.70+ plugin development, use the published [Daiying Plugin SDK V1](docs/plugin-sdk/README.md) documentation set.
+
 Daiying CMS Plugin API v1 is the stable public contract for site plugins.
 
 Plugins should integrate through `Cms\Core\Plugin\PluginContext`, declared
