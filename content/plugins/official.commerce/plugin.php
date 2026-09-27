@@ -8,6 +8,7 @@ use Daiying\Commerce\CommerceController;
 use Daiying\Commerce\CommerceRepository;
 
 require_once __DIR__ . '/src/CommerceRepository.php';
+require_once __DIR__ . '/src/Events/OrderPaidEvent.php';
 require_once __DIR__ . '/src/CommerceContracts.php';
 require_once __DIR__ . '/src/CommerceOpenAiCompatibleProvider.php';
 require_once __DIR__ . '/src/CommerceAiModuleManager.php';
@@ -23,7 +24,7 @@ return static function (PluginContext $context): void {
     $root = dirname(__DIR__, 3);
     $pdo = $context->pdo();
     $settings = Settings::load($root);
-    $repo = new CommerceRepository($pdo, (string) $settings->get('security.encryption_key', ''));
+    $repo = new CommerceRepository($pdo, (string) $settings->get('security.encryption_key', ''), [$context, 'dispatch']);
     $siteAi = method_exists($context, 'ai') ? $context->ai() : null;
     $controller = new CommerceController($repo, $pdo, $settings, is_object($siteAi) ? $siteAi : null);
 

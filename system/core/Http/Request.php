@@ -13,6 +13,7 @@ final class Request
         public readonly array $query = [],
         public readonly array $body = [],
         public readonly array $server = [],
+        private readonly string $rawBody = '',
     ) {
     }
 
@@ -22,11 +23,12 @@ final class Request
         $path = parse_url($uri, PHP_URL_PATH);
 
         $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+        $rawBody = (string) file_get_contents('php://input');
         $body = self::captureBody(
             $method,
             $_POST,
             (string) ($_SERVER['CONTENT_TYPE'] ?? $_SERVER['HTTP_CONTENT_TYPE'] ?? ''),
-            (string) file_get_contents('php://input'),
+            $rawBody,
         );
 
         return new self(
@@ -35,6 +37,7 @@ final class Request
             $_GET,
             $body,
             $_SERVER,
+            $rawBody,
         );
     }
 
@@ -73,6 +76,11 @@ final class Request
         return $this->body[$key] ?? $this->query[$key] ?? $default;
     }
 
+    public function rawBody(): string
+    {
+        return $this->rawBody;
+    }
+
     public function withPath(string $path): self
     {
         $server = $this->server;
@@ -84,6 +92,7 @@ final class Request
             $this->query,
             $this->body,
             $server,
+            $this->rawBody,
         );
     }
 }

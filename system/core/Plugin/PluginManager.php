@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace Cms\Core\Plugin;
 
 use Cms\Core\Ai\AiService;
+use Cms\Core\Auth\FrontUserAuthenticator;
+use Cms\Core\Auth\FrontUserService;
 use Cms\Core\Cache\FileCache;
+use Cms\Core\Content\ContentRepository;
 use Cms\Core\Content\ContentTypeRegistry;
 use Cms\Core\Content\CustomFieldRegistry;
+use Cms\Core\Content\PluginContentService;
 use Cms\Core\Mail\MailService;
+use Cms\Core\Market\CommercialLicenseStore;
 use Cms\Core\Notification\NotificationService;
 use Cms\Core\Config\Settings;
 use Cms\Core\Events\EventDispatcher;
@@ -245,6 +250,9 @@ final class PluginManager
             $this->customFields(),
             new SchedulerService($this->pdo),
             new NotificationService($this->pdo),
+            new PluginContentService($manifest, new ContentRepository($this->pdo, $this->contentTypes(), array_keys($this->blocks->all())), fn (): ContentRepository => new ContentRepository($this->pdo, $this->contentTypes(), array_keys($this->blocks->all()))),
+            new FrontUserService($manifest, $this->pdo, new FrontUserAuthenticator($this->pdo, $this->events), $this->events),
+            new PluginLicenseService($manifest, new CommercialLicenseStore($this->pdo), $this->settings),
         );
 
         $register = require $entry;

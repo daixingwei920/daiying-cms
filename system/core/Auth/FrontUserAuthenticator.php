@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Cms\Core\Auth;
 
+use Cms\Core\Events\EventDispatcher;
 use Cms\Core\Security\PasswordHasher;
 use Cms\Core\Security\SessionManager;
 use PDO;
 
 final class FrontUserAuthenticator
 {
-    public function __construct(private readonly PDO $pdo)
+    public function __construct(private readonly PDO $pdo, private readonly ?EventDispatcher $events = null)
     {
     }
 
@@ -48,6 +49,7 @@ final class FrontUserAuthenticator
 
         $id = (int) $this->pdo->lastInsertId();
         $this->loginUser(['id' => $id, 'email' => $email, 'display_name' => $displayName]);
+        $this->events?->dispatch(new FrontUserRegisteredEvent($id, $email, 'core.register', $now));
 
         return $id;
     }

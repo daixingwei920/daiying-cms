@@ -37,6 +37,11 @@ $check($versions['update_protocol_version'] === '1.0', 'Update protocol version 
 $check(PublicApiRegistry::contract('storage.provider')['version'] === '1.0', 'Storage provider contract is in the public API registry');
 $check(PublicApiRegistry::contract('remote.media.provider')['version'] === '1.0', 'Remote media provider contract is in the public API registry');
 $check(PublicApiRegistry::contract('mail.service')['version'] === '1.0', 'Mail service contract is in the public API registry');
+$check(PublicApiRegistry::contract('plugin.content')['class'] === 'Cms\\Core\\Content\\PluginContentService', 'Plugin content service contract is in the public API registry');
+$check(PublicApiRegistry::contract('front.user.service')['class'] === 'Cms\\Core\\Auth\\FrontUserService', 'Front user service contract is in the public API registry');
+$check(PublicApiRegistry::contract('plugin.request')['class'] === 'Cms\\Core\\Http\\Request', 'Plugin request contract is in the public API registry');
+$check(PublicApiRegistry::contract('plugin.block_renderer')['class'] === 'Cms\\Core\\Plugin\\BlockRendererRegistry', 'Plugin block renderer contract is in the public API registry');
+$check(PublicApiRegistry::contract('plugin.license')['class'] === 'Cms\\Core\\Plugin\\PluginLicenseService', 'Plugin license service contract is in the public API registry');
 
 $root = sys_get_temp_dir() . '/daiying-storage-v1-' . bin2hex(random_bytes(4));
 $local = new LocalMediaStorageProvider($root);

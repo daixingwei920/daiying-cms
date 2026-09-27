@@ -13,7 +13,9 @@ use Cms\Core\Ai\AiProviderInterface;
 use Cms\Core\Ai\AiProviderRegistry;
 use Cms\Core\Ai\AiToolDefinition;
 use Cms\Core\Ai\AiToolRegistry;
+use Cms\Core\Auth\FrontUserService;
 use Cms\Core\Cache\CacheInterface;
+use Cms\Core\Content\PluginContentService;
 use Cms\Core\Content\ContentTypeRegistry;
 use Cms\Core\Content\CustomFieldDefinition;
 use Cms\Core\Content\CustomFieldRegistry;
@@ -24,6 +26,7 @@ use Cms\Core\Mail\MailEventRegistry;
 use Cms\Core\Mail\MailProviderInterface;
 use Cms\Core\Mail\MailProviderRegistry;
 use Cms\Core\Mail\MailService;
+use Cms\Core\Market\CommercialLicenseStore;
 use Cms\Core\Media\RemoteMediaProviderInterface;
 use Cms\Core\Media\RemoteMediaProviderRegistry;
 use Cms\Core\Notification\NotificationService;
@@ -60,6 +63,9 @@ final class PluginContext
         private readonly ?CustomFieldRegistry $customFields = null,
         private readonly ?SchedulerService $scheduler = null,
         private readonly ?NotificationService $notifications = null,
+        private readonly ?PluginContentService $content = null,
+        private readonly ?FrontUserService $frontUsers = null,
+        private readonly ?PluginLicenseService $license = null,
     ) {
     }
 
@@ -74,6 +80,15 @@ final class PluginContext
         $this->events->listen($eventName, $listener);
     }
 
+    public function dispatch(object $event): void
+    {
+        if ($this->manifest->trustLevel !== 'trusted_php' && !$this->manifest->bundled) {
+            throw new PluginException('Event dispatch is restricted to trusted or bundled plugins.');
+        }
+
+        $this->events->dispatch($event);
+    }
+
     public function registerBlock(string $type, string $label): void
     {
         if (!$this->hasCapability('blocks.register')) {
@@ -83,9 +98,50 @@ final class PluginContext
         $this->blocks->register($this->manifest->id, $type, $label);
     }
 
+    /** @param callable(array<string,mixed>, array<string,mixed>): string $renderer */
+    public function registerBlockRenderer(string $type, callable $renderer): void
+    {
+        if (!$this->hasCapability('blocks.register')) {
+            throw new PluginException('Plugin does not declare blocks.register capability.');
+        }
+
+        $this->blocks->register($this->manifest->id, $type, $type);
+        BlockRendererRegistry::register($this->manifest->id, $type, $renderer);
+    }
+
     public function data(): PluginDataStore
     {
         return $this->data;
+    }
+
+    public function content(): PluginContentService
+    {
+        if ($this->content === null) {
+            throw new PluginException('Content service is not available.');
+        }
+
+        return $this->content;
+    }
+
+    public function frontUsers(): FrontUserService
+    {
+        if ($this->frontUsers === null) {
+            throw new PluginException('Front user service is not available.');
+        }
+
+        return $this->frontUsers;
+    }
+
+    public function license(): PluginLicenseService
+    {
+        if ($this->license !== null) {
+            return $this->license;
+        }
+        if ($this->pdo === null) {
+            throw new PluginException('Plugin license service is not available.');
+        }
+
+        return new PluginLicenseService($this->manifest, new CommercialLicenseStore($this->pdo));
     }
 
     public function pdo(): PDO

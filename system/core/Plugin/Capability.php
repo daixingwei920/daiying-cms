@@ -9,6 +9,9 @@ final class Capability
     public const CORE_KNOWN = [
         'content.read',
         'content.write',
+        'auth.read',
+        'auth.login',
+        'auth.external_identity',
         'media.read',
         'media.write',
         'network.external',

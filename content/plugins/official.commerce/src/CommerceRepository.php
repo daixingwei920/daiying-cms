@@ -8,6 +8,7 @@ use Cms\Core\CardDelivery\CardDeliveryService;
 use Cms\Core\Payment\PaymentRepository;
 use Cms\Core\Support\CurrencyRegistry;
 use Cms\Core\Support\Money;
+use Daiying\Commerce\Events\OrderPaidEvent;
 use InvalidArgumentException;
 use PDO;
 use RuntimeException;
@@ -64,7 +65,8 @@ final class CommerceRepository
         'specs_json',
     ];
 
-    public function __construct(private readonly PDO $pdo, private readonly string $encryptionKey = '')
+    /** @param callable(object):void|null $eventDispatcher */
+    public function __construct(private readonly PDO $pdo, private readonly string $encryptionKey = '', private readonly mixed $eventDispatcher = null)
     {
         $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     }
@@ -482,6 +484,10 @@ final class CommerceRepository
             throw $exception;
         }
 
+        $paidOrder = $this->order($orderId);
+        if (is_array($paidOrder)) {
+            $this->dispatchOrderPaid($paidOrder, $now);
+        }
         $this->fulfillDigitalCardOrder($orderId);
     }
 
@@ -1133,6 +1139,28 @@ final class CommerceRepository
         } catch (\Throwable) {
             $this->markDigitalFulfillmentManualReview($orderId, (int) ($order['product_id'] ?? 0), 'delivery_provider_failed');
         }
+    }
+
+    /** @param array<string,mixed> $order */
+    private function dispatchOrderPaid(array $order, string $paidAt): void
+    {
+        if (!is_callable($this->eventDispatcher)) {
+            return;
+        }
+
+        ($this->eventDispatcher)(new OrderPaidEvent(
+            (int) ($order['id'] ?? 0),
+            (string) ($order['order_number'] ?? ''),
+            isset($order['front_user_id']) && (int) $order['front_user_id'] > 0 ? (int) $order['front_user_id'] : null,
+            isset($order['buyer_email']) && (string) $order['buyer_email'] !== '' ? (string) $order['buyer_email'] : null,
+            (int) ($order['amount_minor'] ?? 0),
+            (string) ($order['currency'] ?? ''),
+            (string) ($order['provider_id'] ?? ''),
+            isset($order['payment_id']) && (int) $order['payment_id'] > 0 ? (int) $order['payment_id'] : null,
+            isset($order['provider_payment_id']) && (string) $order['provider_payment_id'] !== '' ? (string) $order['provider_payment_id'] : null,
+            $paidAt,
+            (string) ($order['idempotency_key'] ?? ('commerce.order.paid:' . (string) ($order['id'] ?? '0'))),
+        ));
     }
 
     private function linkedCardProductId(int $commerceProductId): int

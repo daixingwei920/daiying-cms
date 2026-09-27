@@ -44,4 +44,9 @@ final class CommercialLicenseStore
 
         return is_array($row) ? $row : [];
     }
+
+    public function clear(string $productId): void
+    {
+        $this->pdo->prepare('DELETE FROM cms_site_licenses WHERE product_id = :product_id')->execute([':product_id' => $productId]);
+    }
 }

@@ -7,6 +7,7 @@ namespace Cms\Core\Content;
 use Cms\Core\Routing\BasePath;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Support\Money;
+use Cms\Core\Plugin\BlockRendererRegistry;
 
 final class BlockRenderer
 {
@@ -47,11 +48,35 @@ final class BlockRenderer
                 'card_delivery' => $this->cardDelivery($data),
                 'tip' => $this->tip($data, (int) $index),
                 'missing-extension' => '<div class="missing-extension">此内容需要插件：' . $this->e($block['plugin_id'] ?? 'unknown') . '</div>',
-                default => '',
+                default => $this->pluginBlock($block, (int) $index),
             };
         }
 
         return $html;
+    }
+
+    /** @param array<string,mixed> $block */
+    private function pluginBlock(array $block, int $index): string
+    {
+        $type = (string) ($block['type'] ?? '');
+        if ($type === '') {
+            return '';
+        }
+        $renderer = BlockRendererRegistry::renderer($type);
+        if ($renderer === null) {
+            return '';
+        }
+
+        try {
+            return (string) $renderer($block, [
+                'contentId' => $this->contentId,
+                'mode' => 'front',
+                'blockIndex' => $index,
+                'pluginId' => BlockRendererRegistry::owner($type),
+            ]);
+        } catch (\Throwable) {
+            return '';
+        }
     }
 
     /** @param array<string,mixed> $data */
