@@ -1,0 +1,23 @@
+{
+  "plugin_id": "official.sdk-skeleton",
+  "name": "Official SDK Skeleton",
+  "version": "1.0.0",
+  "author": "Daiying",
+  "core": {
+    "min": "1.2.70"
+  },
+  "php": "8.3.0",
+  "entry": "plugin.php",
+  "trust_level": "trusted_php",
+  "type": "plugin",
+  "bundled": true,
+  "capabilities": [
+    "content.read",
+    "content.write",
+    "auth.read",
+    "auth.external_identity",
+    "scheduler.register",
+    "blocks.register",
+    "settings.write"
+  ]
+}

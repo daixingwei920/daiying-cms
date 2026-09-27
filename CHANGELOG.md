@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.70 - 2026-09-26
+
+- Added Plugin SDK Foundation V1 public APIs for webhook raw bodies, plugin content access, front-user/external identity access, scheduled tasks, block renderers, formal event classes, and context-scoped commercial license checks.
+- Added Core-owned commercial license verification through `$context->license()` with signed feature gates, public-key rotation config, local activation cache, finite offline grace, and fail-closed tamper handling.
+- Added official plugin dogfood coverage proving `official.wechat` can use public SDK boundaries without PDO, private Core code, direct Session writes, guessed event names, or plugin-local license crypto.
+- Preserved the 1.2.52 cross-version upgrade floor.
+- Public install package: not yet published.
+- Release URL: not yet published.
+
 ## 1.2.69 - 2026-09-24
 
 - Added the Theme Audio Assets contract so themes can serve bundled MP3, OGG, WAV, M4A, and AAC assets through the existing theme asset runtime.

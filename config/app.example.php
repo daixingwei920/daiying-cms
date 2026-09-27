@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
     'app' => [
         'name' => 'PHP CMS',
-        'version' => '1.2.69',
+        'version' => '1.2.70',
         'debug' => false,
         'mode' => 'NORMAL',
         'secure_cookies' => true,
@@ -48,6 +48,10 @@ return [
         'server_url' => 'https://updates.daiyingcms.com',
         'channel' => 'stable',
         'site_token' => '',
+        'license_public_keys' => [
+            // '2026-q4' => "-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----",
+        ],
+        'license_public_key' => '',
     ],
     'review' => [
         'server_url' => 'https://updates.daiyingcms.com',

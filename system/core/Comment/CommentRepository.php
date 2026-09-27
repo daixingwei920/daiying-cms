@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Cms\Core\Comment;
 
+use Cms\Core\Events\EventDispatcher;
 use PDO;
 
 final class CommentRepository
 {
-    public function __construct(private readonly PDO $pdo)
+    public function __construct(private readonly PDO $pdo, private readonly ?EventDispatcher $events = null)
     {
     }
 
@@ -36,9 +37,10 @@ final class CommentRepository
         }
 
         $status = in_array((string) ($data['status'] ?? 'pending'), ['pending', 'approved', 'spam', 'trash'], true)
-            ? (string) $data['status']
+            ? (string) ($data['status'] ?? 'pending')
             : 'pending';
         $now = gmdate('c');
+        $userId = (int) ($data['user_id'] ?? 0) > 0 ? (int) $data['user_id'] : null;
         $stmt = $this->pdo->prepare(
             'INSERT INTO cms_comments
                 (content_id, parent_id, user_id, author_name, author_email, author_url, body, status, ip_hash, user_agent_hash, created_at, updated_at)
@@ -48,7 +50,7 @@ final class CommentRepository
         $stmt->execute([
             ':content_id' => $contentId,
             ':parent_id' => null,
-            ':user_id' => (int) ($data['user_id'] ?? 0) > 0 ? (int) $data['user_id'] : null,
+            ':user_id' => $userId,
             ':author_name' => $authorName,
             ':author_email' => $authorEmail !== '' ? $authorEmail : null,
             ':author_url' => null,
@@ -60,7 +62,10 @@ final class CommentRepository
             ':updated_at' => $now,
         ]);
 
-        return (int) $this->pdo->lastInsertId();
+        $id = (int) $this->pdo->lastInsertId();
+        $this->events?->dispatch(new CommentCreatedEvent($id, $contentId, $userId, $authorName, $authorEmail !== '' ? $authorEmail : null, $status, $now));
+
+        return $id;
     }
 
     /** @return list<array<string,mixed>> */
