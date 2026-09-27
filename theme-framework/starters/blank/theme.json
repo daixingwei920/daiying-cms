@@ -1,20 +1,51 @@
 {
-  "id": "blank_theme",
+  "theme_id": "blank_theme",
+  "product_id": "blank_theme",
   "name": "Blank Theme",
   "version": "0.1.0",
   "description": "Blank Daiying CMS starter theme.",
   "author": "Daiying CMS",
-  "min_core_version": "1.2.63",
-  "templates": {
-    "home": "home",
-    "list": "list",
-    "content": "content",
-    "error": "error"
+  "theme_api": "1.0",
+  "package_type": "theme",
+  "core": {
+    "min": "1.2.70",
+    "max": "1.x"
   },
-  "settings": {
-    "logo_image": "",
-    "hero_eyebrow": "Theme Starter",
-    "hero_title": "Build your next Daiying CMS theme",
-    "home_section_title": "Latest Articles"
+  "content_types": [
+    "article",
+    "page"
+  ],
+  "recommended_plugins": [],
+  "required_plugins": [],
+  "settings_schema": {
+    "logo_image": {
+      "type": "image",
+      "label": "Theme Logo",
+      "group": "Brand",
+      "order": 1,
+      "default": "",
+      "help": "Leave empty to use the site global logo."
+    },
+    "hero_eyebrow": {
+      "type": "text",
+      "label": "Hero Eyebrow",
+      "group": "Home",
+      "order": 10,
+      "default": "Theme Starter"
+    },
+    "hero_title": {
+      "type": "text",
+      "label": "Hero Title",
+      "group": "Home",
+      "order": 11,
+      "default": "Build your next Daiying CMS theme"
+    },
+    "home_section_title": {
+      "type": "text",
+      "label": "Home Section Title",
+      "group": "Home",
+      "order": 12,
+      "default": "Latest Articles"
+    }
   }
 }

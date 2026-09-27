@@ -56,6 +56,8 @@ content/themes/{theme_id}/
 
 Theme-specific helper files such as `templates/_theme.php` are allowed, but helpers remain part of the theme package and must not become a private Core dependency.
 
+The installed directory name must match `theme_id` for local ZIP installation. Market installation also resolves the final target as `content/themes/{theme_id}`.
+
 ## Manifest
 
 Current Core 1.2.70 reads `theme.json` through `ThemeManifest`.
@@ -317,11 +319,23 @@ Daiying Theme Framework 1.0.1 is the recommended starting point for new official
 
 The framework is not Core. It is a reusable theme-layer baseline and reference implementation.
 
-Known proposal note: the starter manifest currently uses an older shape (`id`, `min_core_version`, `settings`). Before promoting this proposal to a final V1 spec, either the starter should be aligned to Core 1.2.70 `theme.json` fields or documented as framework-local starter metadata that must be converted before packaging.
+Framework starter alignment note: `theme-framework/starters/blank/theme.json` now uses the Core 1.2.70 manifest shape (`theme_id`, `core`, `settings_schema`). The framework-local `config/theme.json` remains scene/content configuration, not an installable theme manifest and not a second manifest contract.
 
 ## Official Market Package
 
-Official market packages should keep files under:
+Core 1.2.70 accepts two package shapes for market installation.
+
+Extension-root packages may contain:
+
+```text
+{theme_id}/theme.json
+{theme_id}/templates/...
+{theme_id}/assets/...
+```
+
+The market installer maps those files into `content/themes/{theme_id}`.
+
+Explicit market packages may contain:
 
 ```text
 market-package.json
@@ -330,7 +344,7 @@ content/themes/{theme_id}/templates/...
 content/themes/{theme_id}/assets/...
 ```
 
-Every packaged file should be represented by a SHA-256 checksum in the market package manifest. Theme compatibility in `theme.json` and distribution policy in market metadata must be kept aligned but treated as separate concerns.
+Every file in an explicit `market-package.json` package must be represented by a SHA-256 checksum in the market package manifest. Theme compatibility in `theme.json` and distribution policy in market metadata must be kept aligned but treated as separate concerns.
 
 ## Differences From The 2026-08-31 Website Spec
 
@@ -340,4 +354,4 @@ Every packaged file should be represented by a SHA-256 checksum in the market pa
 - Core 1.2.70 passes comments and adjacent article navigation ViewModels to content templates.
 - Core 1.2.70 expects themes to account for `site_logo_url` and `site_favicon_url`.
 - Core 1.2.70 supports plugin block renderers through Core block rendering; themes should render `rendered_blocks`, not own plugin block parsing.
-- Theme Framework 1.0.1 is now a recommended official starting point, but its starter metadata needs review before it can become a final normative spec.
+- Theme Framework 1.0.1 is now a recommended official starting point; the blank starter manifest and asset paths have been aligned to the Core 1.2.70 contract during contract dogfood.
