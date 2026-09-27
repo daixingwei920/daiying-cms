@@ -114,19 +114,54 @@ Minimum prevention:
 3. Website theme links point to `daiying-cms-developer-docs` and Core docs, not to copied 2026-08-31 specs as current.
 4. Any future website article should link to Core docs rather than paste the whole specification.
 
-## Verification Plan
+## Actual Publication Changes
 
-After publication, verify:
+Core repository:
+
+- PR `#6`: `https://github.com/daixingwei920/daiying-cms/pull/6`
+- Merge commit: `b0144ae2686b45a6e8e04a0cf8afb8292e0a7b3c`
+- Added `DAIYING_THEME_DEVELOPMENT_SPEC_V1_PROPOSAL.md`
+- Added this sync report
+
+Developer documentation display repository:
+
+- Repository: `https://github.com/daixingwei920/daiying-cms-developer-docs`
+- Commit: `e436d85`
+- `README.md` now identifies the Core repository as source of truth.
+- `docs/plugin-development-spec.md` is now a Legacy / Superseded page that links to Plugin SDK V1.
+- `docs/theme-development-spec.md` is now a Legacy / Superseded page that links to the Theme Development Specification V1 Proposal.
+- `docs/theme-plugin-development-spec.md` is marked Legacy / Superseded before preserving historical 2026-08-31 content.
+
+Production website display layer:
+
+- Updated active website theme template: `/www/wwwroot/saas.daiyinggame.com/content/themes/daiying_official_clean/templates/_theme.php`
+- Backup created: `/www/wwwroot/saas.daiyinggame.com/storage/backups/_theme-developer-docs-sync-20260927T043008Z.php`
+- `DYO_DOCS_UPDATED` now shows `2026-09-27`.
+- Footer and homepage developer cards now link to:
+  - `https://github.com/daixingwei920/daiying-cms-developer-docs`
+  - `https://github.com/daixingwei920/daiying-cms/blob/main/docs/plugin-sdk/README.md`
+  - `https://github.com/daixingwei920/daiying-cms/blob/main/DAIYING_THEME_DEVELOPMENT_SPEC_V1_PROPOSAL.md`
+
+## Actual Online Verification
+
+Verified URLs:
 
 - `https://www.daiyingcms.com/`
 - `https://www.daiyingcms.com/docs`
 - `https://www.daiyingcms.com/articles/develop-first-daiying-cms-plugin`
 - `https://www.daiyingcms.com/articles/develop-daiying-cms-theme`
 
-Checks:
+Results:
 
-- old developer-docs raw spec links are not presented as current default guidance
-- Plugin SDK V1 / Core 1.2.70+ is visible
-- Theme Development is visible as proposal/review state
-- no current page teaches `registerCron()`, guessed Auth/Content APIs, `comment.created`, or `commerce.order.paid`
-- no Core Runtime, version, 1.2.71 release, or official.wechat state changed
+- `Daiying Developer Documentation` is visible.
+- `Plugin SDK V1` is visible.
+- `Theme Spec Proposal` is visible.
+- Old default links to `daiying-cms-developer-docs/blob/main/docs/plugin-development-spec.md` and `daiying-cms-developer-docs/blob/main/docs/theme-development-spec.md` are not present on the verified pages.
+- The verified pages do not contain `registerCron()`, `comment.created`, `commerce.order.paid`, or `ContentApi`.
+- `https://raw.githubusercontent.com/daixingwei920/daiying-cms-developer-docs/main/README.md` shows Core repository as source of truth.
+- `https://raw.githubusercontent.com/daixingwei920/daiying-cms-developer-docs/main/docs/plugin-development-spec.md` is marked Legacy / Superseded and points to Plugin SDK V1.
+- `https://raw.githubusercontent.com/daixingwei920/daiying-cms-developer-docs/main/docs/theme-development-spec.md` is marked Legacy / Superseded and points to the Theme Development Proposal.
+- `https://raw.githubusercontent.com/daixingwei920/daiying-cms/main/DAIYING_THEME_DEVELOPMENT_SPEC_V1_PROPOSAL.md` is reachable.
+- Production `/health` remained `ok`, `NORMAL`, version `1.2.70`, release id `daiying-cms-core-update-1.2.70`.
+
+GitHub and website are now aligned on the current Plugin SDK V1 entrypoint. Theme Development is intentionally aligned to a proposal/review document, not a final V1 spec.
