@@ -155,8 +155,8 @@ final class OfficialPluginRegistry
                 'capability_namespaces' => ['affiliate'],
                 'table_prefixes' => ['affiliate_'],
             ],
-            'official.storage.baidu' => [
-                'directory' => 'official.storage.baidu',
+            'local.storage.baidu' => [
+                'directory' => 'local.storage.baidu',
                 'package_type' => 'plugin',
                 'type' => 'storage_provider',
                 'bundled' => true,

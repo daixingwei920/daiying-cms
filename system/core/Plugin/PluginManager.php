@@ -78,70 +78,78 @@ final class PluginManager
     {
         $count = 0;
         foreach ($this->discover() as $manifest) {
-            $stmt = $this->pdo->prepare('SELECT plugin_id FROM cms_plugins WHERE plugin_id = :plugin_id LIMIT 1');
-            $stmt->execute([':plugin_id' => $manifest->id]);
-            if ($stmt->fetch()) {
-                continue;
-            }
+            try {
+                $stmt = $this->pdo->prepare('SELECT plugin_id FROM cms_plugins WHERE plugin_id = :plugin_id LIMIT 1');
+                $stmt->execute([':plugin_id' => $manifest->id]);
+                if ($stmt->fetch()) {
+                    continue;
+                }
 
-            $trustedOfficial = $this->isTrustedOfficial($manifest, $this->pluginsPath . '/' . $manifest->id);
-            $prefixes = (new PluginTableOwnership($this->pdo, $this->officialRegistry))->prefixesFor([
-                'plugin_id' => $manifest->id,
-                'table_prefixes' => $trustedOfficial ? $this->officialRegistry?->tablePrefixes($manifest->id) : $manifest->tablePrefixes,
-            ], $trustedOfficial);
-            $columns = $this->columns('cms_plugins');
-            $hasPrefixes = in_array('table_prefixes_json', $columns, true);
-            $hasDependencies = in_array('dependencies_json', $columns, true);
-            $hasDeclaredPermissions = in_array('declared_permissions_json', $columns, true);
-            $hasPermissionGrant = in_array('permission_grant_status', $columns, true);
-            $manifestData = $this->manifestData($manifest->id);
-            $dependencies = is_array($manifestData)
-                ? ($manifestData['required_plugins'] ?? $manifestData['dependencies'] ?? [])
-                : [];
-            $permissionEvaluation = in_array('cms_plugin_permission_grants', $this->tableNames(), true)
-                ? (new PluginPermissionManifest($this->pdo))->evaluate($manifest)
-                : ['status' => $manifest->permissions === [] ? 'LEGACY UNDECLARED PERMISSIONS' : 'declared', 'permissions' => $manifest->permissions];
-            $sql = 'INSERT INTO cms_plugins
-                    (plugin_id, name, version, author, status, trust_level, capabilities_json, installed_at, updated_at, source, review_status'
-                    . ($hasDependencies ? ', dependencies_json' : '')
-                    . ($hasDeclaredPermissions ? ', declared_permissions_json' : '')
-                    . ($hasPermissionGrant ? ', permission_grant_status' : '')
-                    . ($hasPrefixes ? ', table_prefixes_json' : '') . ')
-                 VALUES
-                    (:plugin_id, :name, :version, :author, :status, :trust_level, :capabilities_json, :installed_at, :updated_at, :source, :review_status'
-                    . ($hasDependencies ? ', :dependencies_json' : '')
-                    . ($hasDeclaredPermissions ? ', :declared_permissions_json' : '')
-                    . ($hasPermissionGrant ? ', :permission_grant_status' : '')
-                    . ($hasPrefixes ? ', :table_prefixes_json' : '') . ')';
-            $stmt = $this->pdo->prepare($sql);
-            $now = gmdate('c');
-            $params = [
-                ':plugin_id' => $manifest->id,
-                ':name' => $manifest->name,
-                ':version' => $manifest->version,
-                ':author' => $manifest->author,
-                ':status' => PluginLifecycle::INSTALLED,
-                ':trust_level' => $manifest->trustLevel,
-                ':capabilities_json' => json_encode($manifest->capabilities, JSON_UNESCAPED_SLASHES),
-                ':installed_at' => $now,
-                ':updated_at' => $now,
-                ':source' => $trustedOfficial ? $this->trustedOfficialSource($manifest, $this->pluginsPath . '/' . $manifest->id) : 'bundled',
-                ':review_status' => $trustedOfficial ? $this->trustedOfficialReviewStatus($manifest, $this->pluginsPath . '/' . $manifest->id) : 'unknown',
-            ];
-            if ($hasPrefixes) {
-                $params[':table_prefixes_json'] = json_encode($prefixes, JSON_UNESCAPED_SLASHES);
+                $trustedOfficial = $this->isTrustedOfficial($manifest, $this->pluginsPath . '/' . $manifest->id);
+                $prefixes = (new PluginTableOwnership($this->pdo, $this->officialRegistry))->prefixesFor([
+                    'plugin_id' => $manifest->id,
+                    'table_prefixes' => $trustedOfficial ? $this->officialRegistry?->tablePrefixes($manifest->id) : $manifest->tablePrefixes,
+                ], $trustedOfficial);
+                $columns = $this->columns('cms_plugins');
+                $hasPrefixes = in_array('table_prefixes_json', $columns, true);
+                $hasDependencies = in_array('dependencies_json', $columns, true);
+                $hasDeclaredPermissions = in_array('declared_permissions_json', $columns, true);
+                $hasPermissionGrant = in_array('permission_grant_status', $columns, true);
+                $manifestData = $this->manifestData($manifest->id);
+                $dependencies = is_array($manifestData)
+                    ? ($manifestData['required_plugins'] ?? $manifestData['dependencies'] ?? [])
+                    : [];
+                $permissionEvaluation = in_array('cms_plugin_permission_grants', $this->tableNames(), true)
+                    ? (new PluginPermissionManifest($this->pdo))->evaluate($manifest)
+                    : ['status' => $manifest->permissions === [] ? 'LEGACY UNDECLARED PERMISSIONS' : 'declared', 'permissions' => $manifest->permissions];
+                $sql = 'INSERT INTO cms_plugins
+                        (plugin_id, name, version, author, status, trust_level, capabilities_json, installed_at, updated_at, source, review_status'
+                        . ($hasDependencies ? ', dependencies_json' : '')
+                        . ($hasDeclaredPermissions ? ', declared_permissions_json' : '')
+                        . ($hasPermissionGrant ? ', permission_grant_status' : '')
+                        . ($hasPrefixes ? ', table_prefixes_json' : '') . ')
+                     VALUES
+                        (:plugin_id, :name, :version, :author, :status, :trust_level, :capabilities_json, :installed_at, :updated_at, :source, :review_status'
+                        . ($hasDependencies ? ', :dependencies_json' : '')
+                        . ($hasDeclaredPermissions ? ', :declared_permissions_json' : '')
+                        . ($hasPermissionGrant ? ', :permission_grant_status' : '')
+                        . ($hasPrefixes ? ', :table_prefixes_json' : '') . ')';
+                $stmt = $this->pdo->prepare($sql);
+                $now = gmdate('c');
+                $params = [
+                    ':plugin_id' => $manifest->id,
+                    ':name' => $manifest->name,
+                    ':version' => $manifest->version,
+                    ':author' => $manifest->author,
+                    ':status' => PluginLifecycle::INSTALLED,
+                    ':trust_level' => $manifest->trustLevel,
+                    ':capabilities_json' => json_encode($manifest->capabilities, JSON_UNESCAPED_SLASHES),
+                    ':installed_at' => $now,
+                    ':updated_at' => $now,
+                    ':source' => $trustedOfficial ? $this->trustedOfficialSource($manifest, $this->pluginsPath . '/' . $manifest->id) : 'bundled',
+                    ':review_status' => $trustedOfficial ? $this->trustedOfficialReviewStatus($manifest, $this->pluginsPath . '/' . $manifest->id) : 'unknown',
+                ];
+                if ($hasPrefixes) {
+                    $params[':table_prefixes_json'] = json_encode($prefixes, JSON_UNESCAPED_SLASHES);
+                }
+                if ($hasDependencies) {
+                    $params[':dependencies_json'] = json_encode(is_array($dependencies) ? $dependencies : [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                }
+                if ($hasDeclaredPermissions) {
+                    $params[':declared_permissions_json'] = json_encode($permissionEvaluation['permissions'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                }
+                if ($hasPermissionGrant) {
+                    $params[':permission_grant_status'] = (string) ($permissionEvaluation['status'] ?? 'legacy');
+                }
+                $stmt->execute($params);
+                $count++;
+            } catch (\Throwable $exception) {
+                $this->logger->error('Plugin discovery skipped invalid plugin', [
+                    'source' => 'Core',
+                    'plugin_id' => $manifest->id,
+                    'error' => $exception->getMessage(),
+                ]);
             }
-            if ($hasDependencies) {
-                $params[':dependencies_json'] = json_encode(is_array($dependencies) ? $dependencies : [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-            }
-            if ($hasDeclaredPermissions) {
-                $params[':declared_permissions_json'] = json_encode($permissionEvaluation['permissions'] ?? [], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-            }
-            if ($hasPermissionGrant) {
-                $params[':permission_grant_status'] = (string) ($permissionEvaluation['status'] ?? 'legacy');
-            }
-            $stmt->execute($params);
-            $count++;
         }
 
         return $count;

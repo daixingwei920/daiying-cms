@@ -259,6 +259,7 @@ final class LocalPluginPackageInstaller
         $deps = json_decode((string) ($row['dependencies_json'] ?? '[]'), true) ?: [];
         $this->assertDependencyRows($deps, $pluginId);
         $this->ensureTrustedSourceMigrationsBeforeEnable($pluginId, $row);
+        $this->validateInstalledManifestBeforeEnable($pluginId, $row);
         $this->setPluginStatus($pluginId, PluginLifecycle::ENABLED);
         (new AuditLogger($this->pdo))->record('admin', $adminId, 'plugin.enabled', ['plugin_id' => $pluginId]);
     }
@@ -519,6 +520,42 @@ final class LocalPluginPackageInstaller
             if (!is_file($file) || hash_file('sha256', $file) !== (string) $hash) {
                 throw new PluginException('Plugin file manifest hash mismatch.');
             }
+        }
+    }
+
+    /** @param array<string,mixed> $row */
+    private function validateInstalledManifestBeforeEnable(string $pluginId, array $row): void
+    {
+        $root = $this->rootPath . '/content/plugins/' . $pluginId;
+        $manifestFile = $root . '/plugin.json';
+        $decoded = json_decode(is_file($manifestFile) ? (string) file_get_contents($manifestFile) : '', true);
+        if (!is_array($decoded)) {
+            throw new PluginException('Plugin manifest is missing or invalid.');
+        }
+        $manifest = PluginManifest::fromArray($decoded);
+        if ($manifest->id !== $pluginId) {
+            throw new PluginException('Plugin manifest id does not match installed plugin.');
+        }
+
+        $official = new OfficialPluginRegistry($this->rootPath, $this->pdo);
+        $source = (string) ($row['source'] ?? '');
+        $review = (string) ($row['review_status'] ?? '');
+        $trustedOfficial = $official->isTrustedBundled($manifest->id, $root)
+            || (in_array($source, ['official_market', 'official', 'bundled_official'], true) && in_array($review, ['published', 'approved', 'official_trusted'], true));
+        if (!$trustedOfficial && ($manifest->bundled || $manifest->type === 'system-plugin' || $manifest->trustLevel === 'trusted_php' || $official->isReservedOfficialId($manifest->id))) {
+            throw new PluginException('Plugin claims a trusted or official identity without a trusted official source.');
+        }
+
+        $allowedNamespaces = $trustedOfficial ? $official->capabilityNamespaces($manifest->id) : $manifest->capabilityNamespaces;
+        Capability::assertPluginAllowed($manifest->id, $manifest->capabilities, $allowedNamespaces);
+        if (!is_file($root . '/' . $manifest->entry)) {
+            throw new PluginException('Plugin entry file is missing.');
+        }
+        if (!version_compare((string) $this->config('app.version', '0.0.0'), $manifest->coreMin, '>=')) {
+            throw new PluginException('Plugin requires a newer CMS core.');
+        }
+        if (!VersionConstraint::matches(PHP_VERSION, '>=' . $manifest->phpMin)) {
+            throw new PluginException('Plugin requires a different PHP version.');
         }
     }
 

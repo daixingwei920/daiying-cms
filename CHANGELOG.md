@@ -2,6 +2,13 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.71 - 2026-09-27
+
+- Fixed Core updater post-switch cleanup semantics so a successful pointer switch and health check cannot be converted into a failed upgrade by late cleanup/audit work.
+- Protected the running updater runtime release from pruning during the same PHP process.
+- Kept recovery mode file operations inside the stable updater boundary instead of requiring a separate Recovery class to be autoloadable during rollback/recovery.
+- Preserved the 1.2.69 upgrade floor for the patch candidate.
+
 ## 1.2.70 - 2026-09-26
 
 - Added Plugin SDK Foundation V1 public APIs for webhook raw bodies, plugin content access, front-user/external identity access, scheduled tasks, block renderers, formal event classes, and context-scoped commercial license checks.
