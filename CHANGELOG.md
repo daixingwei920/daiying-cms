@@ -2,6 +2,12 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.72 - 2026-09-29
+
+- Fixed plugin enablement and lifecycle Core-version checks so they use the active runtime release version before falling back to `config/app.php`.
+- Prevented official/market plugin enablement from failing after active-release updates when a site-local config version lags behind the running Core.
+- Preserved the 1.2.71 upgrade floor for this hotfix update.
+
 ## 1.2.71 - 2026-09-27
 
 - Fixed Core updater post-switch cleanup semantics so a successful pointer switch and health check cannot be converted into a failed upgrade by late cleanup/audit work.
