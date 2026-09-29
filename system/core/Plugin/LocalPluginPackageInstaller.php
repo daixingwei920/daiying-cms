@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cms\Core\Plugin;
 
 use Cms\Core\Audit\AuditLogger;
+use Cms\Core\Update\ActiveReleaseResolver;
 use PDO;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -1185,6 +1186,11 @@ final class LocalPluginPackageInstaller
             }
             $value = $value[$part];
         }
+
+        if ($key === 'app.version') {
+            return ActiveReleaseResolver::version($this->rootPath, (string) $value);
+        }
+
         return $value;
     }
 
