@@ -64,6 +64,10 @@ final class Capability
             if (in_array($capability, self::CORE_KNOWN, true)) {
                 continue;
             }
+            $root = explode('.', $capability, 2)[0];
+            if (in_array($root, self::RESERVED_NAMESPACES, true) && !in_array($root, $allowedNamespaces, true)) {
+                throw new PluginException('Unknown capability: ' . $capability);
+            }
             $allowed = false;
             foreach ($namespaces as $namespace) {
                 if (str_starts_with($capability, $namespace . '.')) {
@@ -73,10 +77,6 @@ final class Capability
             }
             if (!$allowed) {
                 throw new PluginException('Plugin capability is outside the plugin namespace: ' . $capability);
-            }
-            $root = explode('.', $capability, 2)[0];
-            if (in_array($root, self::RESERVED_NAMESPACES, true) && !in_array($root, $allowedNamespaces, true)) {
-                throw new PluginException('Plugin capability namespace is reserved: ' . $root);
             }
         }
     }

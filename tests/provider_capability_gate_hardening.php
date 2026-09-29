@@ -81,9 +81,9 @@ try {
     $check($canUseRemoteMediaProvider->invoke($controller, $provider, 'write') === true, 'provider write gate allows superadmin wildcard');
 
     $registry = new OfficialPluginRegistry(dirname(__DIR__));
-    $check(in_array('baidu_storage', $registry->capabilityNamespaces('official.storage.baidu'), true), 'official.storage.baidu registry exposes baidu_storage namespace');
-    $check(in_array('storage_baidu', $registry->capabilityNamespaces('official.storage.baidu'), true), 'official.storage.baidu registry exposes storage_baidu namespace');
-    $check(in_array('baidu_storage_', $registry->tablePrefixes('official.storage.baidu'), true), 'official.storage.baidu registry exposes table prefix');
+    $check(in_array('baidu_storage', $registry->capabilityNamespaces('local.storage.baidu'), true), 'local.storage.baidu registry exposes baidu_storage namespace');
+    $check(in_array('storage_baidu', $registry->capabilityNamespaces('local.storage.baidu'), true), 'local.storage.baidu registry exposes storage_baidu namespace');
+    $check(in_array('baidu_storage_', $registry->tablePrefixes('local.storage.baidu'), true), 'local.storage.baidu registry exposes table prefix');
 } finally {
     @unlink($db);
 }

@@ -8,7 +8,6 @@ use Cms\Core\Audit\AuditLogger;
 use Cms\Core\Config\Settings;
 use Cms\Core\Database\ConnectionFactory;
 use Cms\Core\Recovery\IntegrityChecker;
-use Cms\Core\Recovery\RecoveryActions;
 use PDO;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -79,6 +78,7 @@ final class UpdateService
         $lock = $this->acquireLock($operationId, $adminId, $manifest);
         $restorePoints = [];
         $releaseDir = $this->releaseDir($manifest->releaseId);
+        $postSwitchOk = false;
 
         try {
             $this->recordOperation($pdo, $operationId, $adminId, $manifest, $zipPath, 'Running', 'preflight', $plan);
@@ -106,19 +106,30 @@ final class UpdateService
             if (($health['status'] ?? '') !== 'ok') {
                 throw new UpdateException('Post-switch health check failed.');
             }
+            $postSwitchOk = true;
 
             $this->recordOperationStatus($pdo, $operationId, 'Completed', 'completed');
-            $this->pruneOldReleases(2);
-            $this->exitMaintenance();
-            (new AuditLogger($pdo))->record('admin', $adminId, 'core.updated', [
+            $cleanupWarnings = $this->postCommitCleanup($pdo, $adminId, $operationId, $manifest);
+
+            return [
+                'status' => 'Completed',
                 'operation_id' => $operationId,
                 'release_id' => $manifest->releaseId,
-                'from_version' => $this->currentVersion,
-                'to_version' => $manifest->toVersion,
-            ]);
-
-            return ['status' => 'Completed', 'operation_id' => $operationId, 'release_id' => $manifest->releaseId, 'health' => $health];
+                'health' => $health,
+                'cleanup_warnings' => $cleanupWarnings,
+            ];
         } catch (Throwable $exception) {
+            if ($postSwitchOk && $this->pointerTargetsRelease($manifest, $releaseDir)) {
+                $this->exitMaintenance();
+                $this->recordPostCommitWarning($operationId, $exception);
+                return [
+                    'status' => 'Completed',
+                    'operation_id' => $operationId,
+                    'release_id' => $manifest->releaseId,
+                    'health' => ['status' => 'ok', 'checks' => ['pointer' => true, 'post_commit_exception' => $this->sanitizeError($exception)]],
+                    'cleanup_warnings' => [$this->sanitizeError($exception)],
+                ];
+            }
             $rollback = $this->rollback($pdo, $operationId, $previousPointer, $restorePoints, $this->sanitizeError($exception));
             $this->recordOperationStatus($pdo, $operationId, $rollback['status'] === 'RolledBack' ? 'RolledBack' : 'RecoveryMode', 'rollback', $this->sanitizeError($exception));
             (new AuditLogger($pdo))->record('admin', $adminId, 'core.update_failed', [
@@ -139,7 +150,7 @@ final class UpdateService
         $state = $this->lockState();
         if ($state === null) {
             if (!$this->pointerValid()) {
-                (new RecoveryActions($this->rootPath))->enableRecoveryMode();
+                $this->enableRecoveryMode();
                 return ['status' => 'RecoveryMode', 'reason' => 'current pointer is missing or invalid'];
             }
             return ['status' => 'NoInterruptedUpdate'];
@@ -147,7 +158,7 @@ final class UpdateService
         if (in_array((string) ($state['step'] ?? ''), ['package_uploaded', 'unpacked', 'restore_points', 'prepare_release'], true)) {
             return ['status' => 'ManualRecoveryRequired', 'reason' => 'stale update lock requires administrator review', 'operation_id' => $state['operation_id'] ?? ''];
         }
-        (new RecoveryActions($this->rootPath))->enableRecoveryMode();
+        $this->enableRecoveryMode();
         return ['status' => 'RecoveryMode', 'reason' => 'interrupted during dangerous update step', 'operation_id' => $state['operation_id'] ?? ''];
     }
 
@@ -479,7 +490,7 @@ final class UpdateService
     /** @return array<string,mixed> */
     private function rollback(PDO $pdo, string $operationId, array $previousPointer, array $restorePoints, string $reason): array
     {
-        (new RecoveryActions($this->rootPath))->enableRecoveryMode();
+        $this->enableRecoveryMode();
         try {
             if ($previousPointer !== []) {
                 $this->writePointer($previousPointer);
@@ -495,11 +506,11 @@ final class UpdateService
                 throw new UpdateException('Old Core health check failed after rollback.');
             }
             $this->exitMaintenance();
-            (new RecoveryActions($this->rootPath))->disableRecoveryMode();
+            $this->disableRecoveryMode();
             (new AtomicUpdateState($this->rootPath))->markRollback($operationId, $reason);
             return ['status' => 'RolledBack', 'health' => $oldHealth];
         } catch (Throwable $exception) {
-            (new RecoveryActions($this->rootPath))->enableRecoveryMode();
+            $this->enableRecoveryMode();
             return ['status' => 'RecoveryMode', 'error' => $this->sanitizeError($exception)];
         }
     }
@@ -738,13 +749,102 @@ final class UpdateService
         return $this->rootPath . '/storage/updates/releases/' . preg_replace('/[^A-Za-z0-9_.-]/', '_', $releaseId);
     }
 
+    /** @return list<string> */
+    private function postCommitCleanup(PDO $pdo, int $adminId, string $operationId, UpdatePackageManifest $manifest): array
+    {
+        $warnings = [];
+        foreach ([
+            'exit_maintenance' => fn (): mixed => $this->exitMaintenance(),
+            'audit_core_updated' => fn (): mixed => (new AuditLogger($pdo))->record('admin', $adminId, 'core.updated', [
+                'operation_id' => $operationId,
+                'release_id' => $manifest->releaseId,
+                'from_version' => $this->currentVersion,
+                'to_version' => $manifest->toVersion,
+            ]),
+            'prune_old_releases' => fn (): mixed => $this->pruneOldReleases(2),
+        ] as $step => $callback) {
+            try {
+                $callback();
+            } catch (Throwable $exception) {
+                $warnings[] = $step . ': ' . $this->sanitizeError($exception);
+            }
+        }
+
+        if ($warnings !== []) {
+            $this->recordPostCommitWarning($operationId, new UpdateException(implode('; ', $warnings)));
+        }
+
+        return $warnings;
+    }
+
+    private function recordPostCommitWarning(string $operationId, Throwable $exception): void
+    {
+        $dir = $this->rootPath . '/storage/updates/history';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        $file = $dir . '/post-commit-warning-' . preg_replace('/[^A-Za-z0-9_.-]/', '_', $operationId) . '.json';
+        file_put_contents($file, json_encode([
+            'operation_id' => $operationId,
+            'warning' => $this->sanitizeError($exception),
+            'recorded_at' => gmdate('c'),
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), LOCK_EX);
+        @chmod($file, 0600);
+    }
+
+    private function pointerTargetsRelease(UpdatePackageManifest $manifest, string $releaseDir): bool
+    {
+        $pointer = $this->readPointer();
+        return (string) ($pointer['release_id'] ?? '') === $manifest->releaseId
+            && (string) ($pointer['version'] ?? '') === $manifest->toVersion
+            && rtrim((string) ($pointer['path'] ?? ''), '/') === rtrim($releaseDir, '/');
+    }
+
+    private function enableRecoveryMode(): void
+    {
+        $file = $this->rootPath . '/storage/recovery.mode';
+        $this->ensureDir(dirname($file));
+        file_put_contents($file, gmdate('c') . PHP_EOL, LOCK_EX);
+        @chmod($file, 0600);
+    }
+
+    private function disableRecoveryMode(): void
+    {
+        @unlink($this->rootPath . '/storage/recovery.mode');
+    }
+
     private function pruneOldReleases(int $keep): void
     {
         $dirs = array_values(array_filter(glob($this->rootPath . '/storage/updates/releases/*') ?: [], 'is_dir'));
         usort($dirs, static fn (string $a, string $b): int => filemtime($b) <=> filemtime($a));
+        $protected = array_filter([
+            $this->safeActiveReleasePath((string) ($this->readPointer()['path'] ?? '')),
+            $this->runningUpdaterReleasePath(),
+        ]);
         foreach (array_slice($dirs, max(0, $keep)) as $dir) {
+            $real = realpath($dir);
+            if ($real !== false && in_array($real, $protected, true)) {
+                continue;
+            }
             $this->removeDirectory($dir);
         }
+    }
+
+    private function runningUpdaterReleasePath(): string
+    {
+        $file = realpath(__FILE__);
+        $releasesRoot = realpath($this->rootPath . '/storage/updates/releases');
+        if ($file === false || $releasesRoot === false || !str_starts_with($file, $releasesRoot . DIRECTORY_SEPARATOR)) {
+            return '';
+        }
+        $relative = substr($file, strlen($releasesRoot) + 1);
+        $firstSeparator = strpos($relative, DIRECTORY_SEPARATOR);
+        if ($firstSeparator === false) {
+            return '';
+        }
+
+        $candidate = $releasesRoot . DIRECTORY_SEPARATOR . substr($relative, 0, $firstSeparator);
+        return is_dir($candidate) ? $candidate : '';
     }
 
     private function phpLint(string $file): void

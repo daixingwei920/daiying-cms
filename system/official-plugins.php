@@ -87,6 +87,23 @@ return array (
       0 => 'affiliate_',
     ),
   ),
+  'local.storage.baidu' =>
+  array (
+    'directory' => 'local.storage.baidu',
+    'package_type' => 'plugin',
+    'type' => 'storage_provider',
+    'bundled' => true,
+    'trust_level' => 'api',
+    'capability_namespaces' =>
+    array (
+      0 => 'baidu_storage',
+      1 => 'storage_baidu',
+    ),
+    'table_prefixes' =>
+    array (
+      0 => 'baidu_storage_',
+    ),
+  ),
   'official.ai-customer-service' =>
   array (
     'directory' => 'official.ai-customer-service',

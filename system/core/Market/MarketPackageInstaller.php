@@ -217,6 +217,7 @@ final class MarketPackageInstaller
             throw new MarketException('Market plugin claims official or trusted status without a signed official trust grant.');
         }
         if ($grant === null) {
+            Capability::assertPluginAllowed($plugin->id, $plugin->capabilities, $plugin->capabilityNamespaces);
             return;
         }
         if ($plugin->id !== $grant->extensionId) {
