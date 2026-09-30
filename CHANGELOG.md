@@ -2,6 +2,13 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.75 - 2026-09-30
+
+- Republishes the Notification Producer V1 patch as a full Core snapshot update package.
+- Supersedes the revoked 1.2.73 artifact and the withdrawn 1.2.74 delta artifact.
+- Preserves the frozen checksum for `2026_09_09_000002_core_notifications` and keeps recipient-scope changes in `2026_09_29_000001_notification_recipients`.
+- Preserved the 1.2.72 upgrade floor for this patch release.
+
 ## 1.2.74 - 2026-09-30
 
 - Restored the frozen checksum for the already-published `2026_09_09_000002_core_notifications` migration.
