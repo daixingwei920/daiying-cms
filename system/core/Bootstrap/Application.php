@@ -196,7 +196,7 @@ final class Application
             $pdo = ConnectionFactory::make($settings);
             $user = (new AdminAuthenticator($pdo))->user();
             if ($user !== null && (int) ($user['id'] ?? 0) > 0) {
-                View::setAdminNotificationSummary((new NotificationService($pdo))->unreadCount());
+                View::setAdminNotificationSummary((new NotificationService($pdo))->unreadCountForAdmin((int) $user['id']));
             }
         } catch (Throwable) {
             View::setAdminNotificationSummary(0);
