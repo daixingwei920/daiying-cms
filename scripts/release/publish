@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cat >&2 <<'EOF'
+FAIL-CLOSED: publish is intentionally not automated from a development machine.
+
+Required manual approvals before publish:
+- PR merged to protected origin/main.
+- Preflight, build, signing, verify, staging upgrade, rollback/recovery checks all PASS.
+- Official update-server production signing completed server-side.
+- Human confirms READY_TO_PUBLISH.
+
+Only then publish through the existing official Update Server / GitHub Release / Market admin flows.
+Record final URLs, SHA256, signatures, commit, and latest API response in the handoff.
+EOF
+exit 1
+

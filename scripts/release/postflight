@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
+
+root="$(release_root)"
+version="${1:-}"
+health_url="${2:-}"
+latest_url="${3:-}"
+
+[[ -n "$version" && -n "$health_url" && -n "$latest_url" ]] || release_fail "usage: scripts/release/postflight <version> <production-health-url> <latest-api-url>"
+
+health="$(curl -fsS "$health_url")"
+latest="$(curl -fsS "$latest_url")"
+
+php -r '
+$version = $argv[1];
+$health = json_decode($argv[2], true, 512, JSON_THROW_ON_ERROR);
+$latest = json_decode($argv[3], true, 512, JSON_THROW_ON_ERROR);
+if (($health["status"] ?? "") !== "ok") {
+    fwrite(STDERR, "FAIL-CLOSED: production health is not ok\n");
+    exit(1);
+}
+if (($health["version"] ?? "") !== $version) {
+    fwrite(STDERR, "FAIL-CLOSED: production health version mismatch\n");
+    exit(1);
+}
+if (($latest["version"] ?? "") !== $version) {
+    fwrite(STDERR, "FAIL-CLOSED: latest API version mismatch\n");
+    exit(1);
+}
+echo "PRODUCTION_VERIFIED version={$version}\n";
+' "$version" "$health" "$latest"
+
+printf 'Postflight complete for %s\n' "$version"
+

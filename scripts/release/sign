@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cat >&2 <<'EOF'
+FAIL-CLOSED: production update signing is server-side only.
+
+Use the existing Daiying official market / update-server signing flow.
+Do not search for local production signing keys.
+Do not generate a new production key.
+Do not export or copy the official market private key.
+
+After server-side signing, run:
+  scripts/release/verify <version> <signed-update-zip> <production-latest-json>
+EOF
+exit 1
+
