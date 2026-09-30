@@ -2,6 +2,13 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.73 - 2026-09-30
+
+- Added Notification Producer V1 Core foundations so system update checks, preparation, verification, execution, and failures produce administrator-visible notifications.
+- Added public and administrator-private notification recipient scopes, with the admin notification center and unread badge showing public notifications plus the current administrator's private notifications.
+- Added dedupe for repeated update-check notifications to avoid notification flooding.
+- Preserved the 1.2.72 upgrade floor for this patch release.
+
 ## 1.2.72 - 2026-09-29
 
 - Fixed plugin enablement and lifecycle Core-version checks so they use the active runtime release version before falling back to `config/app.php`.
