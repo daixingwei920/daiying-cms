@@ -2,6 +2,13 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.74 - 2026-09-30
+
+- Restored the frozen checksum for the already-published `2026_09_09_000002_core_notifications` migration.
+- Kept Notification Producer V1 recipient-scope schema changes in the new `2026_09_29_000001_notification_recipients` migration.
+- Supersedes the revoked 1.2.73 stable update artifact; sites should update from 1.2.72 to 1.2.74.
+- Preserved the 1.2.72 upgrade floor for this patch release.
+
 ## 1.2.73 - 2026-09-30
 
 - Added Notification Producer V1 Core foundations so system update checks, preparation, verification, execution, and failures produce administrator-visible notifications.
