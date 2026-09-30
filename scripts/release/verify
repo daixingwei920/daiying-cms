@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
+
+root="$(release_root)"
+version="${1:-}"
+signed_update="${2:-}"
+latest_json="${3:-}"
+
+[[ -n "$version" ]] || release_fail "usage: scripts/release/verify <version> <signed-update-zip> <latest-api-json>"
+[[ -f "$signed_update" ]] || release_fail "signed update package is missing: ${signed_update}"
+[[ -f "$latest_json" ]] || release_fail "latest API JSON is missing: ${latest_json}"
+
+commit="$(release_resolve_commit "$root" HEAD)"
+release_require_origin_main_commit "$root" "$commit"
+
+cd "$root"
+php scripts/release_parity_gate.php \
+  --commit="$commit" \
+  --update-zip="$signed_update" \
+  --update-metadata="$latest_json"
+
+php -r '
+$version = $argv[1];
+$zip = $argv[2];
+$latest = json_decode(file_get_contents($argv[3]), true, 512, JSON_THROW_ON_ERROR);
+$sha = hash_file("sha256", $zip);
+if (($latest["version"] ?? "") !== $version) {
+    fwrite(STDERR, "FAIL-CLOSED: latest API version mismatch\n");
+    exit(1);
+}
+if (($latest["package_sha256"] ?? "") !== $sha) {
+    fwrite(STDERR, "FAIL-CLOSED: latest API SHA256 mismatch\n");
+    exit(1);
+}
+echo "ARTIFACT_VERIFIED version={$version} sha={$sha}\n";
+' "$version" "$signed_update" "$latest_json"
+

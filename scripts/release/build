@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
+
+root="$(release_root)"
+commit_arg="${1:-HEAD}"
+commit="$(release_resolve_commit "$root" "$commit_arg")"
+version="$(release_detect_version "$root" "$commit")"
+short="${commit:0:12}"
+out="${root}/outputs/production-release-${version}"
+
+release_require_clean_worktree "$root"
+release_require_origin_main_commit "$root" "$commit"
+
+rm -rf "$out"
+mkdir -p "$out/unsigned-update-source"
+
+cd "$root"
+php scripts/build_exact_commit_installer.php \
+  --commit="$commit" \
+  --version="$version" \
+  --channel=stable \
+  --output-dir="$out"
+
+installer_exact="$out/daiying-cms-${version}-stable-exact-${short}.zip"
+installer_public="$out/daiying-cms-${version}-stable.zip"
+manifest_exact="$out/daiying-cms-${version}-stable-exact-${short}.manifest.json"
+manifest_public="$out/daiying-cms-${version}-stable.manifest.json"
+cp "$installer_exact" "$installer_public"
+cp "$manifest_exact" "$manifest_public"
+shasum -a 256 "$installer_public" | awk '{print $1 "  daiying-cms-'"${version}"'-stable.zip"}' > "$installer_public.sha256"
+
+allow_update_path() {
+  case "$1" in
+    system/core/*|system/migrations/*|system/core-manifest.json|README.md|CMS_RELEASE_ENVIRONMENT_DEPLOYMENT_CHECKLIST.md|public/index.php|public/assets/admin/admin.css|public/assets/admin/admin.js|cli.php|system/official-plugins.php|scripts/diagnose_payment_providers.php|scripts/publish_scheduled_content.php|scripts/validate_production_readiness.php|scripts/verify_release_audit_counts.php) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+while IFS= read -r file; do
+  if allow_update_path "$file"; then
+    mkdir -p "$out/unsigned-update-source/$(dirname "$file")"
+    git show "${commit}:${file}" > "$out/unsigned-update-source/$file"
+  fi
+done < <(git ls-tree -r --name-only "$commit")
+
+update_zip="$out/daiying-cms-core-change-${version}-stable-exact-${short}.full-snapshot.unsigned.zip"
+( cd "$out/unsigned-update-source" && zip -qr "$update_zip" . )
+shasum -a 256 "$update_zip" | awk -v name="$(basename "$update_zip")" '{print $1 "  " name}' > "$update_zip.sha256"
+
+for forbidden in update.json signature.bin config/app.php; do
+  if unzip -l "$update_zip" | awk '{print $4}' | grep -Fxq "$forbidden"; then
+    release_fail "unsigned update source contains forbidden path ${forbidden}"
+  fi
+done
+
+php tests/frozen_migration_checksums.php
+php scripts/release_parity_gate.php \
+  --commit="$commit" \
+  --installer-zip="$installer_public" \
+  --installer-manifest="$manifest_public" \
+  --require-signature=0
+
+printf 'ARTIFACT_BUILT commit=%s version=%s\n' "$commit" "$version"
+printf 'Installer: %s\n' "$installer_public"
+printf 'Unsigned update source: %s\n' "$update_zip"

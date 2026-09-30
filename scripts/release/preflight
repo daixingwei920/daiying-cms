@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
+
+root="$(release_root)"
+commit_arg="${1:-HEAD}"
+commit="$(release_resolve_commit "$root" "$commit_arg")"
+version="$(release_detect_version "$root" "$commit")"
+
+printf 'Release preflight\n'
+printf 'Root: %s\n' "$root"
+printf 'Commit: %s\n' "$commit"
+printf 'Version: %s\n' "$version"
+
+release_require_clean_worktree "$root"
+release_require_origin_main_commit "$root" "$commit"
+release_require_remote_ref "$root" "$commit"
+
+local_branch="$(cd "$root" && git branch --show-current)"
+if [[ "$local_branch" != "main" ]]; then
+  release_fail "release preflight must run from main, current branch is ${local_branch}"
+fi
+
+ahead="$(cd "$root" && git rev-list --count origin/main..HEAD)"
+behind="$(cd "$root" && git rev-list --count HEAD..origin/main)"
+[[ "$ahead" == "0" && "$behind" == "0" ]] || release_fail "main is not exactly aligned with origin/main (ahead=${ahead}, behind=${behind})"
+
+release_assert_version_tag_absent "$root" "$version"
+
+cd "$root"
+php tests/frozen_migration_checksums.php
+php tests/core_notifications.php
+php tests/plugin_sdk_foundation_v1.php
+php tests/release_gate_v1_contract.php
+php tests/release_phase0_gate.php
+php scripts/release_parity_gate.php --commit="$commit"
+
+printf 'PREFLIGHT_PASSED commit=%s version=%s\n' "$commit" "$version"
+
