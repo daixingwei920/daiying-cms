@@ -18,9 +18,9 @@ final class NotificationRepository
     {
         $stmt = $this->pdo->prepare(
             'INSERT INTO cms_notifications
-                (uuid, site_id, source_type, source_owner, source_id, severity, title, body, action_url, status, dedupe_key, payload_json, created_at, read_at, archived_at)
+                (uuid, site_id, source_type, source_owner, source_id, recipient_type, recipient_id, severity, title, body, action_url, status, dedupe_key, payload_json, created_at, read_at, archived_at)
              VALUES
-                (:uuid, :site_id, :source_type, :source_owner, :source_id, :severity, :title, :body, :action_url, :status, :dedupe_key, :payload_json, :created_at, :read_at, :archived_at)'
+                (:uuid, :site_id, :source_type, :source_owner, :source_id, :recipient_type, :recipient_id, :severity, :title, :body, :action_url, :status, :dedupe_key, :payload_json, :created_at, :read_at, :archived_at)'
         );
         $stmt->execute([
             ':uuid' => (string) $data['uuid'],
@@ -28,6 +28,8 @@ final class NotificationRepository
             ':source_type' => (string) $data['source_type'],
             ':source_owner' => (string) $data['source_owner'],
             ':source_id' => (string) $data['source_id'],
+            ':recipient_type' => (string) $data['recipient_type'],
+            ':recipient_id' => (int) $data['recipient_id'],
             ':severity' => (string) $data['severity'],
             ':title' => (string) $data['title'],
             ':body' => (string) $data['body'],
@@ -54,13 +56,20 @@ final class NotificationRepository
     }
 
     /** @return array<string,mixed>|null */
-    public function findByDedupeKey(string $dedupeKey): ?array
+    public function findByDedupeKey(string $dedupeKey, string $recipientType = '', int $recipientId = -1): ?array
     {
         if ($dedupeKey === '') {
             return null;
         }
-        $stmt = $this->pdo->prepare('SELECT * FROM cms_notifications WHERE dedupe_key = :dedupe_key ORDER BY id DESC LIMIT 1');
-        $stmt->execute([':dedupe_key' => $dedupeKey]);
+        $where = 'dedupe_key = :dedupe_key';
+        $params = [':dedupe_key' => $dedupeKey];
+        if ($recipientType !== '' && $recipientId >= 0) {
+            $where .= ' AND recipient_type = :recipient_type AND recipient_id = :recipient_id';
+            $params[':recipient_type'] = $recipientType;
+            $params[':recipient_id'] = $recipientId;
+        }
+        $stmt = $this->pdo->prepare('SELECT * FROM cms_notifications WHERE ' . $where . ' ORDER BY id DESC LIMIT 1');
+        $stmt->execute($params);
         $row = $stmt->fetch();
 
         return is_array($row) ? $row : null;
@@ -120,10 +129,48 @@ final class NotificationRepository
         return $stmt !== false ? (int) $stmt->fetchColumn() : 0;
     }
 
+    /** @param array{status?:string,limit?:int,include_archived?:bool} $filters @return list<array<string,mixed>> */
+    public function recentForAdmin(int $adminId, array $filters = []): array
+    {
+        $limit = max(1, min(100, (int) ($filters['limit'] ?? 30)));
+        $where = [$this->recipientWhere()];
+        $params = [':admin_id' => $adminId];
+        $status = (string) ($filters['status'] ?? '');
+        if ($status !== '') {
+            $where[] = 'status = :status';
+            $params[':status'] = $status;
+        } elseif (empty($filters['include_archived'])) {
+            $where[] = "status <> 'archived'";
+        }
+        $sql = 'SELECT * FROM cms_notifications WHERE ' . implode(' AND ', $where) . ' ORDER BY id DESC LIMIT :limit';
+        $stmt = $this->pdo->prepare($sql);
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value, $key === ':admin_id' ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    public function unreadCountForAdmin(int $adminId): int
+    {
+        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM cms_notifications WHERE status = 'unread' AND " . $this->recipientWhere());
+        $stmt->execute([':admin_id' => $adminId]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
     public function markRead(int $id): void
     {
         $this->pdo->prepare("UPDATE cms_notifications SET status = 'read', read_at = COALESCE(read_at, :read_at) WHERE id = :id AND status <> 'archived'")
             ->execute([':id' => $id, ':read_at' => gmdate('c')]);
+    }
+
+    public function markReadForAdmin(int $id, int $adminId): void
+    {
+        $this->pdo->prepare("UPDATE cms_notifications SET status = 'read', read_at = COALESCE(read_at, :read_at) WHERE id = :id AND status <> 'archived' AND " . $this->recipientWhere())
+            ->execute([':id' => $id, ':admin_id' => $adminId, ':read_at' => gmdate('c')]);
     }
 
     public function markAllRead(): int
@@ -134,9 +181,28 @@ final class NotificationRepository
         return $stmt->rowCount();
     }
 
+    public function markAllReadForAdmin(int $adminId): int
+    {
+        $stmt = $this->pdo->prepare("UPDATE cms_notifications SET status = 'read', read_at = COALESCE(read_at, :read_at) WHERE status = 'unread' AND " . $this->recipientWhere());
+        $stmt->execute([':admin_id' => $adminId, ':read_at' => gmdate('c')]);
+
+        return $stmt->rowCount();
+    }
+
     public function archive(int $id): void
     {
         $this->pdo->prepare("UPDATE cms_notifications SET status = 'archived', archived_at = COALESCE(archived_at, :archived_at) WHERE id = :id")
             ->execute([':id' => $id, ':archived_at' => gmdate('c')]);
+    }
+
+    public function archiveForAdmin(int $id, int $adminId): void
+    {
+        $this->pdo->prepare("UPDATE cms_notifications SET status = 'archived', archived_at = COALESCE(archived_at, :archived_at) WHERE id = :id AND " . $this->recipientWhere())
+            ->execute([':id' => $id, ':admin_id' => $adminId, ':archived_at' => gmdate('c')]);
+    }
+
+    private function recipientWhere(): string
+    {
+        return "(recipient_type = 'all' OR (recipient_type = 'admin' AND recipient_id = :admin_id))";
     }
 }

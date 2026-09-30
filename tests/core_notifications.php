@@ -29,8 +29,21 @@ $migration->up($pdo);
 $migration->up($pdo);
 $pdo->exec('CREATE TABLE cms_plugin_data (id INTEGER PRIMARY KEY AUTOINCREMENT, plugin_id TEXT, data_type TEXT, data_key TEXT, payload_json TEXT, created_at TEXT, updated_at TEXT)');
 $check((int) $pdo->query("SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = 'cms_notifications'")->fetchColumn() === 1, 'notification migration creates cms_notifications idempotently');
+$columns = array_map(static fn (array $row): string => (string) $row['name'], $pdo->query('PRAGMA table_info(cms_notifications)')->fetchAll(PDO::FETCH_ASSOC));
+$check(in_array('recipient_type', $columns, true) && in_array('recipient_id', $columns, true), 'notification migration creates recipient scope columns');
+
+$legacyPdo = new PDO('sqlite::memory:');
+$legacyPdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$legacyPdo->exec('CREATE TABLE cms_notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, uuid TEXT NOT NULL, status TEXT NOT NULL DEFAULT "unread")');
+$recipientMigration = require __DIR__ . '/../system/migrations/2026_09_29_000001_notification_recipients.php';
+$recipientMigration->up($legacyPdo);
+$recipientMigration->up($legacyPdo);
+$legacyColumns = array_map(static fn (array $row): string => (string) $row['name'], $legacyPdo->query('PRAGMA table_info(cms_notifications)')->fetchAll(PDO::FETCH_ASSOC));
+$check(in_array('recipient_type', $legacyColumns, true) && in_array('recipient_id', $legacyColumns, true), 'recipient migration upgrades existing notification tables idempotently');
 
 $service = new NotificationService($pdo);
+$capabilities = $service->capabilities();
+$check(in_array('admin', (array) ($capabilities['recipients'] ?? []), true), 'notification service exposes admin recipient capability');
 $id = $service->create('新邮件：测试', 'Authorization: Bearer abc.def.ghi api_key=sk_live_secret', [
     'source_type' => 'mail',
     'source_id' => 'remote-message-1',
@@ -49,6 +62,7 @@ $id = $service->create('新邮件：测试', 'Authorization: Bearer abc.def.ghi 
 $row = $service->find($id) ?? [];
 $payload = json_decode((string) ($row['payload_json'] ?? '{}'), true);
 $check($id > 0 && $service->unreadCount() === 1, 'notification service creates unread notifications');
+$check(($row['recipient_type'] ?? '') === 'all' && (int) ($row['recipient_id'] ?? -1) === 0, 'notification service defaults notifications to public scope');
 $check(($row['action_url'] ?? '') === '/admin/mail/message?account_id=1&message_id=remote-message-1', 'notification action URL allows local admin paths');
 $check(!str_contains((string) ($row['body'] ?? ''), 'abc.def.ghi') && !str_contains((string) ($row['body'] ?? ''), 'sk_live_secret'), 'notification body redacts secrets before persistence');
 $check(($payload['refresh_token'] ?? '') === '[redacted]' && ($payload['sender_email'] ?? '') === 'sender@example.com', 'notification payload redacts sensitive fields only');
@@ -96,6 +110,31 @@ $check($service->markAllRead() === 2 && $service->unreadCount() === 0, 'mark all
 $service->archive($id);
 $check(($service->find($id)['status'] ?? '') === 'archived', 'notifications can be archived');
 $check(count($service->recent(['limit' => 10])) === 2 && count($service->recent(['include_archived' => true, 'limit' => 10])) === 3, 'recent notifications hide archived entries by default');
+
+$privateAdmin1 = $service->create('管理员 1 私信', '', [
+    'source_type' => 'update',
+    'recipient_admin_id' => 1,
+    'dedupe_key' => 'admin-1-private',
+]);
+$privateAdmin2 = $service->create('管理员 2 私信', '', [
+    'source_type' => 'update',
+    'recipient_type' => 'admin',
+    'recipient_id' => 2,
+    'dedupe_key' => 'admin-2-private',
+]);
+$publicUpdate = $service->create('公共更新通知', '', [
+    'source_type' => 'update',
+    'dedupe_key' => 'public-update',
+]);
+$admin1Ids = array_map(static fn (array $row): int => (int) $row['id'], $service->recentForAdmin(1, ['include_archived' => true, 'limit' => 20]));
+$admin2Ids = array_map(static fn (array $row): int => (int) $row['id'], $service->recentForAdmin(2, ['include_archived' => true, 'limit' => 20]));
+$check(in_array($privateAdmin1, $admin1Ids, true) && !in_array($privateAdmin2, $admin1Ids, true) && in_array($publicUpdate, $admin1Ids, true), 'admin notification feed includes public and own private notifications only');
+$check(in_array($privateAdmin2, $admin2Ids, true) && !in_array($privateAdmin1, $admin2Ids, true) && in_array($publicUpdate, $admin2Ids, true), 'private notification scope is isolated between admins');
+$check($service->unreadCountForAdmin(1) === 2 && $service->unreadCountForAdmin(2) === 2, 'admin unread count includes public and own private notifications');
+$service->markReadForAdmin($privateAdmin2, 1);
+$check(($service->find($privateAdmin2)['status'] ?? '') === 'unread', 'admin cannot mark another admin private notification read');
+$service->archiveForAdmin($privateAdmin1, 2);
+$check(($service->find($privateAdmin1)['status'] ?? '') === 'unread', 'admin cannot archive another admin private notification');
 
 $manifest = new PluginManifest('official.mail', 'Official Mail', '0.2.0-alpha.3', 'Daiying CMS', '1.0.0', '8.3.0', 'plugin.php', 'api', [], [], [], 'plugin', false, [], [], '');
 $context = new PluginContext(

@@ -500,14 +500,15 @@ final class AdminController
 
         try {
             $service = new NotificationService(ConnectionFactory::make($this->settings));
+            $adminId = (int) ($guard['id'] ?? 0);
             $status = (string) ($request->query['status'] ?? '');
             $filters = ['limit' => 50];
             if (in_array($status, ['unread', 'read', 'archived'], true)) {
                 $filters['status'] = $status;
                 $filters['include_archived'] = true;
             }
-            $items = $service->recent($filters);
-            $unreadCount = $service->unreadCount();
+            $items = $service->recentForAdmin($adminId, $filters);
+            $unreadCount = $service->unreadCountForAdmin($adminId);
         } catch (Throwable $exception) {
             $this->logger->error('Notification index failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
             return Response::html(View::page('通知中心', '<h1>通知中心</h1><p class="error">通知暂不可用。</p>'), 500);
@@ -566,7 +567,7 @@ final class AdminController
             return Response::text('请求校验失败，请刷新页面后重试。', 403);
         }
         try {
-            (new NotificationService(ConnectionFactory::make($this->settings)))->markRead($this->pathSegmentInt($request->path, 3));
+            (new NotificationService(ConnectionFactory::make($this->settings)))->markReadForAdmin($this->pathSegmentInt($request->path, 3), (int) ($guard['id'] ?? 0));
         } catch (Throwable $exception) {
             $this->logger->error('Notification mark read failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
         }
@@ -584,7 +585,7 @@ final class AdminController
             return Response::text('请求校验失败，请刷新页面后重试。', 403);
         }
         try {
-            (new NotificationService(ConnectionFactory::make($this->settings)))->markAllRead();
+            (new NotificationService(ConnectionFactory::make($this->settings)))->markAllReadForAdmin((int) ($guard['id'] ?? 0));
         } catch (Throwable $exception) {
             $this->logger->error('Notification mark all read failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
         }
@@ -602,7 +603,7 @@ final class AdminController
             return Response::text('请求校验失败，请刷新页面后重试。', 403);
         }
         try {
-            (new NotificationService(ConnectionFactory::make($this->settings)))->archive($this->pathSegmentInt($request->path, 3));
+            (new NotificationService(ConnectionFactory::make($this->settings)))->archiveForAdmin($this->pathSegmentInt($request->path, 3), (int) ($guard['id'] ?? 0));
         } catch (Throwable $exception) {
             $this->logger->error('Notification archive failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
         }
@@ -7481,10 +7482,103 @@ final class AdminController
     {
         try {
             $safeContext = ['package_name' => basename($packagePath)] + $context;
-            (new AuditLogger(ConnectionFactory::make($this->settings)))->record('admin', (int) ($guard['id'] ?? 0), $action, $safeContext);
+            $pdo = ConnectionFactory::make($this->settings);
+            (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), $action, $safeContext);
+            $this->notifyCoreUpdateAction($pdo, $guard, $action, $safeContext);
         } catch (Throwable $exception) {
             $this->logger->error('Core update audit write failed', ['source' => 'Core', 'action' => $action, 'error' => $exception->getMessage()]);
         }
+    }
+
+    /** @param array<string,mixed> $guard @param array<string,mixed> $context */
+    private function notifyCoreUpdateAction(PDO $pdo, array $guard, string $action, array $context): void
+    {
+        try {
+            $notice = $this->coreUpdateNotificationContent($action, $context);
+            if ($notice === null) {
+                return;
+            }
+            $service = new NotificationService($pdo);
+            $target = $this->coreUpdateNotificationTarget($context);
+            $dedupeBase = 'core-update-' . str_replace('.', '-', $action) . '-' . $target;
+            $common = [
+                'source_type' => 'update',
+                'source_owner' => 'core',
+                'source_id' => $action,
+                'severity' => $notice['severity'],
+                'action_url' => '/admin/update',
+                'payload' => ['action' => $action] + $context,
+            ];
+            $service->create((string) $notice['title'], (string) $notice['body'], $common + [
+                'dedupe_key' => 'public-' . $dedupeBase,
+            ]);
+            $adminId = (int) ($guard['id'] ?? 0);
+            if ($adminId > 0) {
+                $service->create((string) $notice['title'], (string) $notice['private_body'], $common + [
+                    'recipient_type' => 'admin',
+                    'recipient_id' => $adminId,
+                    'dedupe_key' => 'admin-' . $adminId . '-' . $dedupeBase,
+                ]);
+            }
+        } catch (Throwable $exception) {
+            $this->logger->error('Core update notification write failed', ['source' => 'Core', 'action' => $action, 'error' => $exception->getMessage()]);
+        }
+    }
+
+    /** @param array<string,mixed> $context @return array{title:string,body:string,private_body:string,severity:string}|null */
+    private function coreUpdateNotificationContent(string $action, array $context): ?array
+    {
+        $target = (string) ($context['target_version'] ?? $context['release_id'] ?? '');
+        $target = $target !== '' ? $target : '最新版本';
+        $error = (string) ($context['error'] ?? '');
+
+        return match ($action) {
+            'core.update_checked' => !empty($context['update_available']) ? [
+                'title' => '发现可用系统更新',
+                'body' => '检测到 Daiying CMS ' . $target . ' 可更新，请进入系统更新页面处理。',
+                'private_body' => '你刚刚检查到 Daiying CMS ' . $target . ' 可更新。',
+                'severity' => 'info',
+            ] : null,
+            'core.update_prepared' => [
+                'title' => '系统更新包已准备',
+                'body' => 'Daiying CMS ' . $target . ' 更新包已下载并完成校验。',
+                'private_body' => '你准备的 Daiying CMS ' . $target . ' 更新包已下载并完成校验。',
+                'severity' => 'info',
+            ],
+            'core.update_verified' => [
+                'title' => '系统更新包验证通过',
+                'body' => 'Daiying CMS ' . $target . ' 更新包已通过验证/演练。',
+                'private_body' => '你验证的 Daiying CMS ' . $target . ' 更新包已通过验证/演练。',
+                'severity' => 'success',
+            ],
+            'core.update_execute_completed' => [
+                'title' => '系统更新已完成',
+                'body' => 'Daiying CMS 已完成更新：' . $target . '。',
+                'private_body' => '你执行的 Daiying CMS 更新已完成：' . $target . '。',
+                'severity' => 'success',
+            ],
+            'core.update_check_failed', 'core.update_prepare_failed', 'core.update_verify_failed', 'core.update_execute_failed' => [
+                'title' => '系统更新操作失败',
+                'body' => 'Daiying CMS 更新流程失败' . ($error !== '' ? '：' . $error : '。'),
+                'private_body' => '你刚刚执行的 Daiying CMS 更新操作失败' . ($error !== '' ? '：' . $error : '。'),
+                'severity' => 'error',
+            ],
+            default => null,
+        };
+    }
+
+    /** @param array<string,mixed> $context */
+    private function coreUpdateNotificationTarget(array $context): string
+    {
+        foreach (['target_version', 'release_id', 'operation_id', 'prepared_package_name', 'package_name'] as $key) {
+            $value = preg_replace('/[^a-zA-Z0-9._-]+/', '-', (string) ($context[$key] ?? '')) ?: '';
+            $value = trim($value, '-');
+            if ($value !== '') {
+                return substr($value, 0, 80);
+            }
+        }
+
+        return substr(sha1(json_encode($context, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: ''), 0, 16);
     }
 
     private function safeAdminErrorSummary(Throwable $exception): string

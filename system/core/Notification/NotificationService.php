@@ -41,6 +41,7 @@ final class NotificationService
             'source_owner' => $this->sourceOwner,
             'source_types' => self::SOURCE_TYPES,
             'severities' => self::SEVERITIES,
+            'recipients' => ['all', 'admin'],
         ];
     }
 
@@ -49,7 +50,7 @@ final class NotificationService
     {
         $data = $this->normalize($title, $body, $options);
         $repo = $this->repo();
-        $existing = $repo->findByDedupeKey((string) $data['dedupe_key']);
+        $existing = $repo->findByDedupeKey((string) $data['dedupe_key'], (string) $data['recipient_type'], (int) $data['recipient_id']);
         if (is_array($existing)) {
             $repo->updateDedupe((int) $existing['id'], $data);
             return (int) $existing['id'];
@@ -75,9 +76,25 @@ final class NotificationService
         return $this->repo()->unreadCount();
     }
 
+    /** @param array{status?:string,limit?:int,include_archived?:bool} $filters @return list<array<string,mixed>> */
+    public function recentForAdmin(int $adminId, array $filters = []): array
+    {
+        return $this->repo()->recentForAdmin(max(0, $adminId), $filters);
+    }
+
+    public function unreadCountForAdmin(int $adminId): int
+    {
+        return $this->repo()->unreadCountForAdmin(max(0, $adminId));
+    }
+
     public function markRead(int $id): void
     {
         $this->repo()->markRead($id);
+    }
+
+    public function markReadForAdmin(int $id, int $adminId): void
+    {
+        $this->repo()->markReadForAdmin($id, max(0, $adminId));
     }
 
     public function markAllRead(): int
@@ -85,9 +102,19 @@ final class NotificationService
         return $this->repo()->markAllRead();
     }
 
+    public function markAllReadForAdmin(int $adminId): int
+    {
+        return $this->repo()->markAllReadForAdmin(max(0, $adminId));
+    }
+
     public function archive(int $id): void
     {
         $this->repo()->archive($id);
+    }
+
+    public function archiveForAdmin(int $id, int $adminId): void
+    {
+        $this->repo()->archiveForAdmin($id, max(0, $adminId));
     }
 
     /** @return array<string,mixed>|null */
@@ -111,6 +138,7 @@ final class NotificationService
         if (!in_array($severity, self::SEVERITIES, true)) {
             $severity = 'info';
         }
+        $recipient = $this->normalizeRecipient($options);
         $safeTitle = $this->safeText($title, 191);
         if ($safeTitle === '') {
             throw new InvalidArgumentException('Notification title is required.');
@@ -124,6 +152,8 @@ final class NotificationService
             'source_type' => $sourceType,
             'source_owner' => $sourceOwner,
             'source_id' => $this->safeText((string) ($options['source_id'] ?? ''), 191),
+            'recipient_type' => $recipient['type'],
+            'recipient_id' => $recipient['id'],
             'severity' => $severity,
             'title' => $safeTitle,
             'body' => $this->safeText((string) SecretRedactor::redact($body), 2000),
@@ -135,6 +165,36 @@ final class NotificationService
             'read_at' => null,
             'archived_at' => null,
         ];
+    }
+
+    /** @param array<string,mixed> $options @return array{type:string,id:int} */
+    private function normalizeRecipient(array $options): array
+    {
+        if (isset($options['recipient_admin_id'])) {
+            $adminId = (int) $options['recipient_admin_id'];
+            if ($adminId <= 0) {
+                throw new InvalidArgumentException('Notification recipient admin id is invalid.');
+            }
+
+            return ['type' => 'admin', 'id' => $adminId];
+        }
+
+        $recipientType = $this->cleanIdentifier((string) ($options['recipient_type'] ?? 'all'), 32);
+        if ($recipientType === '' || $recipientType === 'public') {
+            $recipientType = 'all';
+        }
+        if (!in_array($recipientType, ['all', 'admin'], true)) {
+            throw new InvalidArgumentException('Notification recipient type is invalid.');
+        }
+        if ($recipientType === 'all') {
+            return ['type' => 'all', 'id' => 0];
+        }
+        $recipientId = (int) ($options['recipient_id'] ?? 0);
+        if ($recipientId <= 0) {
+            throw new InvalidArgumentException('Notification recipient admin id is required.');
+        }
+
+        return ['type' => 'admin', 'id' => $recipientId];
     }
 
     private function safeActionUrl(string $url): string
