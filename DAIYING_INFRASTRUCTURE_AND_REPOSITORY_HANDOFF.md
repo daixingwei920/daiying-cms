@@ -14,7 +14,8 @@ This section supersedes older dated state below when there is a conflict.
 
 - Current Core source-of-truth: GitHub `origin/main`.
 - Current baseline version: Daiying CMS Core `1.2.75`.
-- Current `origin/main` commit: `c9f16e2c41ba84fe3bf211a6d75e2d5b698ced6c`.
+- Current repository `origin/main` commit after SOP documentation: `d0918db1dcdf2f2231340ed827743a41269552a5`.
+- Current released Core `1.2.75` exact commit: `c9f16e2c41ba84fe3bf211a6d75e2d5b698ced6c`.
 - GitHub Full Installer release: `v1.2.75`.
 - GitHub Full Installer ZIP: `daiying-cms-1.2.75-stable.zip`.
 - GitHub Full Installer SHA256: `7960a444477ed663e54911aa41ad067c119df8eeeef93ceadedc79a92ea0f474`.
@@ -324,38 +325,38 @@ Human approves. Scripts check. Codex does not publish from memory.
 - Prevent: Full Snapshot Update Gate and Single Uploadable Artifact Gate.
 - Stage: RELEASE.
 
-## 0. CURRENT STATE - 2026-09-27
+## 0B. HISTORICAL STATE - 2026-09-27
 
-This section supersedes older dated state below when there is a conflict.
+Historical record only. This section does not describe current release state. The current state is `CURRENT STATE - 2026-09-30` above.
 
-### Production
+### Historical Production Snapshot
 
-- Daiying CMS production is on Core `1.2.70`.
-- Current production state verified after the 1.2.69 -> 1.2.70 release:
+- Daiying CMS production was on Core `1.2.70` at this historical checkpoint.
+- Historical production state verified after the 1.2.69 -> 1.2.70 release:
   - `/health`: `ok`
   - mode: `NORMAL`
   - version: `1.2.70`
   - active release id: `daiying-cms-core-update-1.2.70`
   - maintenance: `false`
   - active release integrity: `ok`
-- Do not rollback production 1.2.70.
-- Do not patch production Core files directly.
-- Do not overwrite the already-published 1.2.70 artifact, tag, GitHub Release, or Update Server package.
+- Historical rule at that time: do not rollback production 1.2.70.
+- Historical rule at that time: do not patch production Core files directly.
+- Historical rule at that time: do not overwrite the already-published 1.2.70 artifact, tag, GitHub Release, or Update Server package.
 
-### Authoritative Repository / Worktree
+### Historical Repository / Worktree
 
 - GitHub repository: `https://github.com/daixingwei920/daiying-cms.git`
 - `origin/main`: `92daf80e5641b644fb73ad69a54ccf65b77ad2d9`
 - `v1.2.70` tag: `22e72ee442722e8fa28498cf872aead071421830`
-- Current active development worktree for the 1.2.71 updater fix:
+- Historical active development worktree for the 1.2.71 updater fix:
 
 ```text
 /Users/xingweidai/Documents/Codex/2026-09-25/files-mentioned-by-the-user-daiying-2/work/daiying-cms-sdk-foundation
 ```
 
-- Current local branch in that worktree: `plugin-sdk-foundation-v1`
-- Current local HEAD before 1.2.71 docs/state refresh: `b0c2eff593842a7ab8fb38da68814fbacaa76816`
-- Current worktree has intentional uncommitted 1.2.71 candidate changes for updater/runtime bridge work. It is not a release-ready clean tree.
+- Historical local branch in that worktree: `plugin-sdk-foundation-v1`
+- Historical local HEAD before 1.2.71 docs/state refresh: `b0c2eff593842a7ab8fb38da68814fbacaa76816`
+- Historical note: that worktree had intentional uncommitted 1.2.71 candidate changes for updater/runtime bridge work and was not a release-ready clean tree.
 - The older path below is no longer the authoritative release source unless re-verified:
 
 ```text
@@ -378,13 +379,13 @@ Core `1.2.70` has been formally released with Plugin SDK Foundation V1:
 
 The Plugin SDK Foundation was dogfooded with `official.wechat`. Dogfood adaptation is complete, but `official.wechat` has not been formally published. Do not continue `official.wechat` RC or Market publication until the updater technical debt is closed.
 
-### Current Core Candidate
+### Historical Core Candidate
 
-- Current candidate: Daiying CMS Core `1.2.71`
+- Historical candidate: Daiying CMS Core `1.2.71`
 - Purpose: fix Updater / Recovery cross-version runtime technical debt before any more plugin or SDK feature work.
-- Target-side updater fix is implemented in the current worktree, but not released.
-- Runtime bridge / preflight for 1.2.70 -> 1.2.71 is implemented and tested locally, but not run on production.
-- 1.2.71 Release Gate was intentionally paused while developer documentation publication and Theme Contract alignment work completed. NEXT ACTION remains the 1.2.71 Release Gate.
+- Target-side updater fix was implemented in the historical worktree at this point, but not yet released.
+- Runtime bridge / preflight for 1.2.70 -> 1.2.71 was implemented and tested locally at this point, but not run on production.
+- Historical note: 1.2.71 Release Gate was paused while developer documentation publication and Theme Contract alignment work completed. This is no longer the current NEXT ACTION.
 
 ### Theme Development Spec V1 / Theme Framework
 
@@ -412,11 +413,11 @@ Theme Spec V1 Finalization and website publication completed on 2026-09-27.
 - PR: `https://github.com/daixingwei920/daiying-cms/pull/9`
 - Merged `origin/main`: `5113715ec839e27b42e1bdb03ea41e306bd27f0a`
 - Publication report PR: `https://github.com/daixingwei920/daiying-cms/pull/10`
-- Current `origin/main` after report merge: `92daf80e5641b644fb73ad69a54ccf65b77ad2d9`
+- Historical `origin/main` after report merge: `92daf80e5641b644fb73ad69a54ccf65b77ad2d9`
 - Developer docs display commit: `6c7609323975014112ce76440be98add7c1dbe56`
 - Report: `THEME_DEVELOPMENT_SPEC_V1_FINALIZATION_AND_PUBLICATION_REPORT.md`
 - Theme Spec status: `V1 FINAL / PUBLISHED`
-- Current source of truth: `DAIYING_THEME_DEVELOPMENT_SPEC_V1.md`
+- Theme source of truth: `DAIYING_THEME_DEVELOPMENT_SPEC_V1.md`
 - Target: `Daiying CMS Core 1.2.70+`
 - Website entry verified: `Theme Spec V1（Core 1.2.70+）`
 - Legacy 2026-08-31 Theme Development Specification remains Legacy / Superseded and is not the default entry.
@@ -469,7 +470,7 @@ Detailed report:
 
 ### 1.2.70 -> 1.2.71 Runtime Bridge
 
-The 1.2.71 target-side fix cannot flow backward into an already-running 1.2.70 updater process. Therefore the current worktree adds a strict preflight bridge:
+The 1.2.71 target-side fix cannot flow backward into an already-running 1.2.70 updater process. Therefore the historical worktree added a strict preflight bridge:
 
 ```text
 /Users/xingweidai/Documents/Codex/2026-09-25/files-mentioned-by-the-user-daiying-2/work/daiying-cms-sdk-foundation/scripts/preflight_updater_runtime_bridge.php
@@ -537,15 +538,15 @@ Detailed report:
 /Users/xingweidai/Documents/Codex/2026-09-25/files-mentioned-by-the-user-daiying-2/work/daiying-cms-sdk-foundation/UPDATER_RUNTIME_BRIDGE_1.2.70_TO_1.2.71_REPORT.md
 ```
 
-### NEXT ACTION
+### Historical NEXT ACTION
 
-Next approved technical step:
+Historical approved technical step at this checkpoint:
 
 ```text
 Daiying CMS Core 1.2.71 Release Gate
 ```
 
-Before formal production deployment, first run this read-only preflight against production 1.2.70:
+Historical instruction before the 1.2.71 production deployment:
 
 ```bash
 php scripts/preflight_updater_runtime_bridge.php \
@@ -556,9 +557,9 @@ php scripts/preflight_updater_runtime_bridge.php \
 
 Do not include `--apply-cleanup` on the first run.
 
-If the result is `SAFE`, continue the normal Release Gate / deployment flow. If the result is `UNSAFE`, inspect the JSON output. Only run `--apply-cleanup` if every deletion candidate is proven to be an inactive stale release. If active identity, running identity, target state, realpath, or rollback source is unclear, fail closed and stop.
+If the result was `SAFE`, continue the normal Release Gate / deployment flow. If the result was `UNSAFE`, inspect the JSON output. Only run `--apply-cleanup` if every deletion candidate is proven to be an inactive stale release. If active identity, running identity, target state, realpath, or rollback source is unclear, fail closed and stop.
 
-### LAST COMPLETED
+### Historical LAST COMPLETED
 
 - Daiying CMS Core `1.2.70` Plugin SDK Foundation production release completed through protected PR flow.
 - PR `plugin-sdk-foundation-v1 -> main` merged normally; no branch protection bypass.
@@ -579,13 +580,13 @@ If the result is `SAFE`, continue the normal Release Gate / deployment flow. If 
 - `daiying-cms-developer-docs` commit `e436d85` now treats the Core repository as source of truth and marks old Plugin/Theme specs as Legacy / Superseded.
 - Production website developer links were updated in the active website theme template after backing it up; production health remained `ok`, `NORMAL`, `1.2.70`.
 
-### BLOCKERS
+### Historical BLOCKERS
 
-- Do not start 1.2.71 Release Gate until this Handoff and bridge reports have been reviewed.
-- 1.2.71 production deployment must start with the read-only bridge preflight; cleanup requires explicit review of deletion candidates.
-- The bridge script must not be inserted into the 1.2.71 update ZIP as a new operational support file because previous stable 1.2.70 rejects unknown support paths.
+- Historical blocker: do not start 1.2.71 Release Gate until this Handoff and bridge reports have been reviewed.
+- Historical blocker: 1.2.71 production deployment must start with the read-only bridge preflight; cleanup requires explicit review of deletion candidates.
+- Historical blocker: the bridge script must not be inserted into the 1.2.71 update ZIP as a new operational support file because previous stable 1.2.70 rejects unknown support paths.
 
-### EXACT COMMITS
+### Historical EXACT COMMITS
 
 ```text
 1.2.70 original candidate head: b0c2eff593842a7ab8fb38da68814fbacaa76816
@@ -596,12 +597,12 @@ Plugin SDK V1 docs publication branch commit: 74b69cbc9319055e929e48a879d1a0edcb
 Developer docs website sync PR #6 merge commit: b0144ae2686b45a6e8e04a0cf8afb8292e0a7b3c
 Developer docs website verification PR #7 merge commit: 723e95143a16b5b84e788e1bdb48184841c95c1e
 daiying-cms-developer-docs display-layer commit: e436d85
-current local 1.2.71 candidate worktree HEAD before uncommitted changes: b0c2eff593842a7ab8fb38da68814fbacaa76816
+historical local 1.2.71 candidate worktree HEAD before uncommitted changes: b0c2eff593842a7ab8fb38da68814fbacaa76816
 ```
 
 ### IMPORTANT REPORTS
 
-Do not move or duplicate these solely for handoff. Current verified paths:
+Do not move or duplicate these solely for handoff. Historical verified paths:
 
 ```text
 /Users/xingweidai/Documents/Codex/2026-09-25/files-mentioned-by-the-user-daiying-2/outputs/DAIYING_PLUGIN_SDK_V1_DESIGN_PROPOSAL.md
@@ -639,12 +640,12 @@ COMPLETED on 2026-09-27.
 
 No runtime code, updater code, release artifacts, production configuration, package versions, or marketplace publication state changed as part of that docs-only task.
 
-### Current DO NOT List
+### Historical DO NOT List
 
-- Do not rollback production 1.2.70.
-- Do not overwrite the published 1.2.70 artifact.
-- Do not modify the 1.2.70 tag.
-- Do not secretly patch production 1.2.70 Core.
+- Historical rule: do not rollback production 1.2.70.
+- Historical rule: do not overwrite the published 1.2.70 artifact.
+- Historical rule: do not modify the 1.2.70 tag.
+- Historical rule: do not secretly patch production 1.2.70 Core.
 - Do not continue official.wechat RC.
 - Do not publish the WeChat market package.
 - Do not migrate AI Writer.
@@ -657,7 +658,7 @@ No runtime code, updater code, release artifacts, production configuration, pack
 Before any new Codex session performs Daiying work:
 
 1. Read this file: `DAIYING_INFRASTRUCTURE_AND_REPOSITORY_HANDOFF.md`.
-2. Read `CURRENT STATE`, `LAST COMPLETED`, `NEXT ACTION`, `BLOCKERS`, and `EXACT COMMITS`.
+2. Read `CURRENT STATE - 2026-09-30`, `Current NEXT ACTION`, and `Daiying CMS Production Release SOP`.
 3. Read the detailed report referenced by the current task.
 4. Run `git fetch`.
 5. Verify remote, branch, HEAD, `origin/main`, and worktree status.
@@ -665,16 +666,14 @@ Before any new Codex session performs Daiying work:
 7. If Handoff, Git, or production state disagree, stop and report the difference.
 8. Do not continue from old chat memory.
 9. Do not rerun tasks already marked completed.
-10. Start from `NEXT ACTION`.
+10. Start from the current NEXT ACTION in section `0A`; do not treat historical NEXT ACTION/BLOCKERS as current work.
 
 ### Handoff Maintenance Rule
 
 Before closing a Codex conversation, update:
 
 - CURRENT STATE
-- LAST COMPLETED
 - NEXT ACTION
-- BLOCKERS
 - EXACT COMMITS
 - PRODUCTION VERSION
 - ACTIVE RELEASE
@@ -812,7 +811,7 @@ Production domain:
 
 - `https://www.daiyingcms.com`
 
-Current production health verified (refreshed 2026-09-27; see `CURRENT STATE - 2026-09-27` for latest release context):
+Historical production health snapshot verified on 2026-09-27 during the 1.2.70 release. This is not the current release state:
 
 ```json
 {
@@ -825,13 +824,13 @@ Current production health verified (refreshed 2026-09-27; see `CURRENT STATE - 2
 }
 ```
 
-Current production version:
+Current release baseline version:
 
-- Daiying CMS `1.2.70`
+- Daiying CMS `1.2.75`
 
 Current active release id:
 
-- `daiying-cms-core-update-1.2.70`
+- Must be re-read from production before any production operation. Do not infer it from this historical 1.2.70 snapshot.
 
 Architecture fact:
 
@@ -878,23 +877,24 @@ https://github.com/daixingwei920/daiying-cms.git
 ```
 
 - Default branch: `main`
-- Current verified local branch for active updater candidate worktree: `plugin-sdk-foundation-v1`
-- Current verified HEAD:
+- Current verified release baseline branch: `main`
+- Current verified HEAD / `origin/main`:
 
 ```text
-b0c2eff593842a7ab8fb38da68814fbacaa76816
+d0918db1dcdf2f2231340ed827743a41269552a5
 ```
 
-- Current verified `origin/main` / `v1.2.70` release commit:
+- Current Core release baseline before the next release SOP run:
 
 ```text
-22e72ee442722e8fa28498cf872aead071421830
+Daiying CMS Core 1.2.75
 ```
 
-- Current production release: Daiying CMS `1.2.70`
-- Current production release id: `daiying-cms-core-update-1.2.70`
+- Current GitHub Full Installer release: `v1.2.75`
+- Current GitHub Full Installer SHA256: `7960a444477ed663e54911aa41ad067c119df8eeeef93ceadedc79a92ea0f474`
+- Current production release id: must be re-read from production before production operations.
 
-Verified local Git state:
+Historical local Git state from the old 1.2.71 candidate worktree:
 
 ```text
  M CHANGELOG.md
@@ -909,11 +909,11 @@ Verified local Git state:
 ?? tests/updater_runtime_bridge_preflight.php
 ```
 
-That means the active 1.2.71 candidate worktree is intentionally dirty with updater/runtime bridge changes and reports. It is not a release-ready clean tree.
+Historical interpretation: the old 1.2.71 candidate worktree was intentionally dirty with updater/runtime bridge changes and reports. It is not the current release source.
 
-### Authoritative Core Worktree
+### Historical Core Worktree
 
-Current authoritative active worktree for 1.2.71 updater candidate:
+Historical active worktree for the 1.2.71 updater candidate:
 
 ```text
 /Users/xingweidai/Documents/Codex/2026-09-25/files-mentioned-by-the-user-daiying-2/work/daiying-cms-sdk-foundation
