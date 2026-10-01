@@ -622,6 +622,7 @@ $repo->saveProduct([
     'source_claim_text' => '官方授权渠道采购',
     'brand' => 'Daiying Updated',
     'model' => 'V1',
+    'summary' => 'Overview:Unique&nbsp;design.Good&nbsp;materialProduct information:Pattern',
     'specs' => "颜色: 黑色\n容量: 128GB",
 ]);
 $pendingProduct = $repo->product($productId);
@@ -639,6 +640,9 @@ $assert(str_contains($productPage, '存在差异'), 'Consumer transparency profi
 $assert(str_contains($productPage, '商品关键修改历史'), 'Consumer transparency profile includes public key change history.');
 $assert(str_contains($productPage, '价格透明'), 'Consumer transparency profile includes transparent price and fee facts.');
 $assert(str_contains($productPage, '核心规格') && str_contains($productPage, '付款前费用'), 'Product first screen summarizes core specs, region, and estimated fees before checkout.');
+$assert(str_contains($productPage, 'Overview: Unique design. Good material Product information: Pattern'), 'Product page cleans imported product summaries before display.');
+$assert(!str_contains($productPage, '&amp;nbsp;') && !str_contains($productPage, '&nbsp;'), 'Product page does not render raw HTML entities in product summaries.');
+$assert(str_contains($productPage, 'grid-template-columns:minmax(360px,520px) minmax(420px,1fr)') && str_contains($productPage, 'object-fit:contain'), 'Product page uses stable two-column product-detail layout rules.');
 $assert(str_contains($productPage, '支付处理方'), 'Consumer transparency profile includes payment processor context.');
 $assert(str_contains($productPage, '核验历史'), 'Consumer transparency profile includes verification history.');
 $assert(!str_contains($productPage, '正品认证'), 'Consumer transparency wording avoids unsupported authenticity claims.');
