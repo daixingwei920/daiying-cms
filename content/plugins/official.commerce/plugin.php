@@ -30,6 +30,8 @@ return static function (PluginContext $context): void {
 
     $context->adminRoute('GET', '/admin/commerce', [$controller, 'adminDashboard'], 'commerce.manage', false);
     $context->adminRoute('GET', '/admin/commerce/products', [$controller, 'adminProducts'], 'commerce.manage', false);
+    $context->adminRoute('GET', '/admin/commerce/storefront', [$controller, 'adminStorefrontSettings'], 'commerce.manage', false);
+    $context->adminRoute('POST', '/admin/commerce/storefront/save', [$controller, 'adminSaveStorefrontSettings'], 'commerce.manage', true);
     $context->adminRoute('GET', '/admin/commerce/products/new', [$controller, 'adminProductForm'], 'commerce.manage', false);
     $context->adminRoute('GET', '/admin/commerce/products/edit', [$controller, 'adminProductForm'], 'commerce.manage', false);
     $context->adminRoute('POST', '/admin/commerce/products/save', [$controller, 'adminSaveProduct'], 'commerce.manage', true);

@@ -42,9 +42,35 @@ final class CommerceController
             $this->stat('订单', (string) $stats['orders']) .
             $this->stat('已支付', (string) $stats['paid_orders']) .
             '</div>' .
-            '<p><a class="button" href="/admin/commerce/products/new">新建商品</a> <a class="button admin-button-secondary" href="/admin/commerce/products">商品管理</a> <a class="button admin-button-secondary" href="/admin/commerce/orders">订单管理</a> <a class="button admin-button-secondary" href="/admin/commerce/distribution">分发渠道</a> <a class="button admin-button-secondary" href="/admin/commerce/ai">AI 模块</a></p>';
+            '<p><a class="button" href="/admin/commerce/products/new">新建商品</a> <a class="button admin-button-secondary" href="/admin/commerce/products">商品管理</a> <a class="button admin-button-secondary" href="/admin/commerce/storefront">首页设置</a> <a class="button admin-button-secondary" href="/admin/commerce/orders">订单管理</a> <a class="button admin-button-secondary" href="/admin/commerce/distribution">分发渠道</a> <a class="button admin-button-secondary" href="/admin/commerce/ai">AI 模块</a></p>';
 
         return Response::html(View::page('Commerce', $body));
+    }
+
+
+    public function adminStorefrontSettings(Request $request): Response
+    {
+        $config = $this->storefrontSettings();
+        $notice = !empty($request->query['saved']) ? '<p class="notice">首页文案已保存。</p>' : '';
+        $body = '<h1>Commerce 首页设置</h1>' . $notice .
+            '<form method="post" action="/admin/commerce/storefront/save">' . CsrfToken::field() .
+            '<label>小标题<input name="eyebrow" maxlength="80" value="' . $this->e($config['eyebrow']) . '"></label>' .
+            '<label>主标题<input name="title" maxlength="120" required value="' . $this->e($config['title']) . '"></label>' .
+            '<label>描述<textarea name="subtitle" rows="4" maxlength="300">' . $this->e($config['subtitle']) . '</textarea></label>' .
+            '<p><button type="submit">保存首页设置</button> <a class="button admin-button-secondary" href="/admin/commerce">返回总览</a> <a class="button admin-button-secondary" href="/commerce" target="_blank" rel="noopener">查看前台</a></p>' .
+            '</form>';
+
+        return Response::html(View::page('Commerce 首页设置', $body));
+    }
+
+    public function adminSaveStorefrontSettings(Request $request): Response
+    {
+        $defaults = $this->defaultStorefrontSettings();
+        $this->saveCoreSetting('commerce.storefront_eyebrow', $this->cleanStorefrontText((string) $request->input('eyebrow', ''), 80));
+        $this->saveCoreSetting('commerce.storefront_title', $this->cleanStorefrontText((string) $request->input('title', ''), 120) ?: $defaults['title']);
+        $this->saveCoreSetting('commerce.storefront_subtitle', $this->cleanStorefrontText((string) $request->input('subtitle', ''), 300));
+
+        return Response::redirect('/admin/commerce/storefront?saved=1');
     }
 
     public function adminProducts(Request $request): Response
@@ -770,7 +796,10 @@ final class CommerceController
             $cards = '<section class="commerce-empty">暂无可售商品。</section>';
         }
 
-        return Response::html($this->frontPage('商品', '<h1>商品</h1><div class="commerce-grid">' . $cards . '</div>'));
+        $config = $this->storefrontSettings();
+        $hero = $this->storefrontHeroHtml($config['title'], $config['subtitle'], $config['eyebrow']);
+
+        return Response::html($this->frontPage($config['title'], $hero . '<div class="commerce-grid">' . $cards . '</div>'));
     }
 
     public function productPage(Request $request): Response
@@ -1956,7 +1985,7 @@ final class CommerceController
     private function frontPage(string $title, string $body): string
     {
         return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $this->e($title) . '</title><style>' .
-            'body{margin:0;background:#f8fafc;color:#172033;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}a{color:#1f6feb;text-decoration:none}.wrap{width:min(1120px,100% - 32px);margin:0 auto;padding:28px 0}.top{background:#fff;border-bottom:1px solid #e4e7ec}.top .wrap{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:14px 0}.brand{font-weight:800;color:#172033}.commerce-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.commerce-card{display:block;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:14px;color:#172033}.commerce-card img,.commerce-card .placeholder{width:100%;aspect-ratio:4/3;object-fit:cover;background:#edf2f7;border-radius:6px;display:grid;place-items:center;color:#667085;font-weight:800}.commerce-card strong{display:block;margin-top:10px}.commerce-card span,.commerce-price{font-size:24px;font-weight:800;color:#b42318}.commerce-card p,.commerce-muted{color:#667085}.commerce-product{display:grid;grid-template-columns:minmax(360px,520px) minmax(420px,1fr);gap:28px;align-items:start;max-width:1120px;margin:0 auto}.commerce-product>div{min-width:0}.commerce-product h1{overflow-wrap:anywhere;line-height:1.12}.commerce-summary{max-width:68ch;color:#475467;overflow-wrap:break-word}.commerce-hero-img{width:100%;aspect-ratio:1/1;max-height:520px;object-fit:contain;background:#edf2f7;border-radius:8px}.commerce-button,button.commerce-button{display:inline-block;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:12px 16px;font-weight:750;cursor:pointer;margin-top:12px}.commerce-section,.commerce-empty{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:18px;margin-top:18px}.commerce-profile h3{margin:22px 0 8px}.commerce-fact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.commerce-glance{margin:14px 0}.commerce-fact{background:#f8fafc;border:1px solid #e4e7ec;border-radius:8px;padding:12px}.commerce-fact span,.commerce-fact small{display:block;color:#667085}.commerce-fact strong{display:block;font-size:18px;margin:4px 0;color:#172033;overflow-wrap:anywhere}.commerce-checkout-summary{margin-top:12px;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:12px}.commerce-checkout-summary strong,.commerce-checkout-summary span,.commerce-checkout-summary small{display:block}.commerce-checkout-summary span,.commerce-checkout-summary small{color:#667085}.commerce-specs{display:block;width:100%;border-collapse:collapse;margin-top:14px;overflow-x:auto}.commerce-specs th,.commerce-specs td{border-top:1px solid #e4e7ec;text-align:left;padding:10px}.commerce-description img,.commerce-description video,.commerce-description audio{max-width:100%}.media-gallery{display:grid;grid-template-columns:repeat(var(--columns),1fr);gap:12px}.media-gallery img{width:100%;border-radius:6px}.commerce-error{background:#fff1f0;border:1px solid #ffccc7;color:#8c1d18;border-radius:6px;padding:12px}label{display:block;font-weight:700;margin-top:12px}input,select,textarea{width:100%;box-sizing:border-box;border:1px solid #b8c0cc;border-radius:6px;padding:10px;margin-top:6px}@media(max-width:980px){.commerce-product{grid-template-columns:1fr;max-width:720px}.commerce-hero-img{max-height:none}}@media(max-width:760px){.commerce-product{max-width:100%}.wrap{width:min(100% - 24px,1120px)}.media-gallery{grid-template-columns:1fr}.commerce-fact-grid{grid-template-columns:1fr}.commerce-specs{font-size:14px}.commerce-specs th,.commerce-specs td{white-space:normal;overflow-wrap:anywhere}.commerce-button,button.commerce-button{width:100%;text-align:center;box-sizing:border-box}}' .
+            'body{margin:0;background:#f8fafc;color:#172033;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}a{color:#1f6feb;text-decoration:none}.wrap{width:min(1120px,100% - 32px);margin:0 auto;padding:28px 0}.top{background:#fff;border-bottom:1px solid #e4e7ec}.top .wrap{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:14px 0}.brand{font-weight:800;color:#172033}.commerce-shop-hero{background:#111827;color:#fff;border-radius:8px;padding:34px;margin-bottom:18px}.commerce-shop-hero p{margin:0 0 4px;color:#9fb7d9;font-weight:800;text-transform:uppercase}.commerce-shop-hero h1{margin:0;font-size:clamp(30px,5vw,52px);line-height:1.05}.commerce-shop-hero span{display:block;margin-top:12px;max-width:720px;color:#d7deeb}.commerce-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}.commerce-card{display:block;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:14px;color:#172033}.commerce-card img,.commerce-card .placeholder{width:100%;aspect-ratio:4/3;object-fit:cover;background:#edf2f7;border-radius:6px;display:grid;place-items:center;color:#667085;font-weight:800}.commerce-card strong{display:block;margin-top:10px}.commerce-card span,.commerce-price{font-size:24px;font-weight:800;color:#b42318}.commerce-card p,.commerce-muted{color:#667085}.commerce-product{display:grid;grid-template-columns:minmax(360px,520px) minmax(420px,1fr);gap:28px;align-items:start;max-width:1120px;margin:0 auto}.commerce-product>div{min-width:0}.commerce-product h1{overflow-wrap:anywhere;line-height:1.12}.commerce-summary{max-width:68ch;color:#475467;overflow-wrap:break-word}.commerce-hero-img{width:100%;aspect-ratio:1/1;max-height:520px;object-fit:contain;background:#edf2f7;border-radius:8px}.commerce-button,button.commerce-button{display:inline-block;background:#1f6feb;color:#fff;border:0;border-radius:6px;padding:12px 16px;font-weight:750;cursor:pointer;margin-top:12px}.commerce-section,.commerce-empty{background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:18px;margin-top:18px}.commerce-profile h3{margin:22px 0 8px}.commerce-fact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.commerce-glance{margin:14px 0}.commerce-fact{background:#f8fafc;border:1px solid #e4e7ec;border-radius:8px;padding:12px}.commerce-fact span,.commerce-fact small{display:block;color:#667085}.commerce-fact strong{display:block;font-size:18px;margin:4px 0;color:#172033;overflow-wrap:anywhere}.commerce-checkout-summary{margin-top:12px;background:#fff;border:1px solid #d8dee8;border-radius:8px;padding:12px}.commerce-checkout-summary strong,.commerce-checkout-summary span,.commerce-checkout-summary small{display:block}.commerce-checkout-summary span,.commerce-checkout-summary small{color:#667085}.commerce-specs{display:block;width:100%;border-collapse:collapse;margin-top:14px;overflow-x:auto}.commerce-specs th,.commerce-specs td{border-top:1px solid #e4e7ec;text-align:left;padding:10px}.commerce-description img,.commerce-description video,.commerce-description audio{max-width:100%}.media-gallery{display:grid;grid-template-columns:repeat(var(--columns),1fr);gap:12px}.media-gallery img{width:100%;border-radius:6px}.commerce-error{background:#fff1f0;border:1px solid #ffccc7;color:#8c1d18;border-radius:6px;padding:12px}label{display:block;font-weight:700;margin-top:12px}input,select,textarea{width:100%;box-sizing:border-box;border:1px solid #b8c0cc;border-radius:6px;padding:10px;margin-top:6px}@media(max-width:980px){.commerce-product{grid-template-columns:1fr;max-width:720px}.commerce-hero-img{max-height:none}}@media(max-width:760px){.commerce-product{max-width:100%}.wrap{width:min(100% - 24px,1120px)}.media-gallery{grid-template-columns:1fr}.commerce-fact-grid{grid-template-columns:1fr}.commerce-specs{font-size:14px}.commerce-specs th,.commerce-specs td{white-space:normal;overflow-wrap:anywhere}.commerce-button,button.commerce-button{width:100%;text-align:center;box-sizing:border-box}}' .
             '</style></head><body><header class="top"><div class="wrap"><a class="brand" href="/commerce">Daiying Commerce</a><a href="/">返回首页</a></div></header><main class="wrap">' . $body . '</main></body></html>';
     }
 
@@ -1972,6 +2001,69 @@ final class CommerceController
         }
         $https = strtolower((string) ($request->server['HTTPS'] ?? '')) === 'on' || (string) ($request->server['SERVER_PORT'] ?? '') === '443';
         return ($https ? 'https://' : 'http://') . $host;
+    }
+
+
+    private function storefrontHeroHtml(string $title, string $subtitle, string $eyebrow): string
+    {
+        return '<section class="commerce-shop-hero"><p>' . $this->e($eyebrow) . '</p><h1>' . $this->e($title) . '</h1><span>' . $this->e($subtitle) . '</span></section>';
+    }
+
+    /** @return array{eyebrow:string,title:string,subtitle:string} */
+    private function defaultStorefrontSettings(): array
+    {
+        return [
+            'eyebrow' => 'Commerce Shop',
+            'title' => '精选商品',
+            'subtitle' => '浏览 Daiying Commerce 商品，本站商品直接结账，联盟商品前往商家购买。',
+        ];
+    }
+
+    /** @return array{eyebrow:string,title:string,subtitle:string} */
+    private function storefrontSettings(): array
+    {
+        $defaults = $this->defaultStorefrontSettings();
+        return [
+            'eyebrow' => $this->coreSetting('commerce.storefront_eyebrow', $defaults['eyebrow']),
+            'title' => $this->coreSetting('commerce.storefront_title', $defaults['title']),
+            'subtitle' => $this->coreSetting('commerce.storefront_subtitle', $defaults['subtitle']),
+        ];
+    }
+
+    private function coreSetting(string $key, string $default): string
+    {
+        try {
+            $stmt = $this->pdo->prepare('SELECT setting_value FROM cms_core_settings WHERE setting_key = :key LIMIT 1');
+            $stmt->execute([':key' => $key]);
+            $value = $stmt->fetchColumn();
+
+            return is_string($value) && trim($value) !== '' ? $value : $default;
+        } catch (Throwable) {
+            return $default;
+        }
+    }
+
+    private function saveCoreSetting(string $key, string $value): void
+    {
+        $now = gmdate('c');
+        $exists = $this->pdo->prepare('SELECT COUNT(*) FROM cms_core_settings WHERE setting_key = :key');
+        $exists->execute([':key' => $key]);
+        if ((int) $exists->fetchColumn() > 0) {
+            $this->pdo->prepare('UPDATE cms_core_settings SET setting_value = :value, updated_at = :updated_at WHERE setting_key = :key')
+                ->execute([':key' => $key, ':value' => $value, ':updated_at' => $now]);
+            return;
+        }
+        $this->pdo->prepare('INSERT INTO cms_core_settings (setting_key, setting_value, updated_at) VALUES (:key, :value, :updated_at)')
+            ->execute([':key' => $key, ':value' => $value, ':updated_at' => $now]);
+    }
+
+    private function cleanStorefrontText(string $value, int $maxLength): string
+    {
+        $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $value = trim(strip_tags(str_replace(["\r\n", "\r", "\n"], ' ', $value)));
+        $value = preg_replace('/[ \t\x{00a0}]+/u', ' ', $value) ?? $value;
+
+        return mb_substr($value, 0, max(1, $maxLength));
     }
 
     private function e(string $value): string

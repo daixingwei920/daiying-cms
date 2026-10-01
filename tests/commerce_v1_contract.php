@@ -110,6 +110,11 @@ $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 ($aiMigration['up'])($pdo);
 ($distributionMigration['up'])($pdo);
 $cardDeliveryMigration->up($pdo);
+$pdo->exec('CREATE TABLE cms_core_settings (
+    setting_key VARCHAR(191) PRIMARY KEY,
+    setting_value TEXT,
+    updated_at VARCHAR(64) NOT NULL
+)');
 $pdo->exec('CREATE TABLE cms_payments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     subject_type VARCHAR(96) NOT NULL,
@@ -632,6 +637,17 @@ $assert(($verificationAfterChange[0]['provider'] ?? '') === 'system', 'Verificat
 $assert(($verificationAfterChange[0]['record_type'] ?? '') === 'system_invalidation', 'System invalidation is distinguishable from seller requests and provider results.');
 
 $controller = new CommerceController($repo, $pdo, Settings::fromArray(['security' => ['encryption_key' => 'commerce-test-secret']]));
+$storefrontDefault = $controller->storefront(new Request('GET', '/commerce'))->body();
+$assert(str_contains($storefrontDefault, 'Commerce Shop') && str_contains($storefrontDefault, '精选商品'), 'Commerce storefront renders configurable default hero text.');
+$settingsPage = $controller->adminStorefrontSettings(new Request('GET', '/admin/commerce/storefront'))->body();
+$assert(str_contains($settingsPage, 'Commerce 首页设置') && str_contains($settingsPage, 'name="eyebrow"'), 'Commerce admin exposes storefront hero settings.');
+$controller->adminSaveStorefrontSettings(new Request('POST', '/admin/commerce/storefront/save', [], [
+    'eyebrow' => 'SHOE-ZY SHOP',
+    'title' => '精选鞋款',
+    'subtitle' => '精选男鞋、女鞋与日常休闲鞋，支持在线下单与安全支付。',
+]));
+$storefrontCustom = $controller->storefront(new Request('GET', '/commerce'))->body();
+$assert(str_contains($storefrontCustom, 'SHOE-ZY SHOP') && str_contains($storefrontCustom, '精选鞋款') && str_contains($storefrontCustom, '精选男鞋、女鞋与日常休闲鞋'), 'Commerce storefront reads saved hero settings from CMS settings.');
 $productPage = $controller->productPage(new Request('GET', '/commerce/product', ['id' => $productId]))->body();
 $assert(str_contains($productPage, '商品透明档案'), 'Public product page exposes a consumer transparency profile.');
 $assert(str_contains($productPage, '来源声明'), 'Consumer transparency profile includes the seller source declaration.');
