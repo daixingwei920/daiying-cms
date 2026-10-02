@@ -2,6 +2,14 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.76 - 2026-10-01
+
+- Fixed OpenAI-compatible Meta Muse requests so `muse-spark-1.3` uses `max_completion_tokens`, requests `reasoning_effort=minimal`, and does not send unsupported `include_reasoning`.
+- Raised Meta Muse test-connection output budget to 2048 tokens so reasoning tokens do not exhaust the response before final content.
+- Added safe empty-response diagnostics that include `finish_reason` and usage token counts without exposing secrets.
+- Removed the unusable bundled `daiying_novel` and `daiying-video` themes from the official CMS installer package so new installs stay aligned with supported themes.
+- Preserved the 1.2.72 upgrade floor for this patch release.
+
 ## 1.2.75 - 2026-09-30
 
 - Republishes the Notification Producer V1 patch as a full Core snapshot update package.

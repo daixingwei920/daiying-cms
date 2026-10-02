@@ -86,6 +86,10 @@ final class OpenAiCompatibleProvider implements AiProviderInterface, AiModelDisc
     /** @param array<string,mixed> $config */
     private function testConnectionMaxTokens(array $config): int
     {
+        if ($this->isMetaMuseProvider($config)) {
+            return 2048;
+        }
+
         return $this->shouldHideReasoning($config) ? 1024 : 64;
     }
 
@@ -104,5 +108,21 @@ final class OpenAiCompatibleProvider implements AiProviderInterface, AiModelDisc
             || str_contains($model, 'gpt-oss')
             || str_contains($model, 'reasoning')
             || str_contains($model, 'qwen3');
+    }
+
+    /** @param array<string,mixed> $config */
+    private function isMetaMuseProvider(array $config): bool
+    {
+        $provider = AiProviderPresets::normalize((string) ($config['provider'] ?? $this->id));
+        $providerName = strtolower((string) ($config['provider_name'] ?? ''));
+        $baseUrl = (string) ($config['base_url'] ?? '');
+        $host = strtolower((string) (parse_url($baseUrl, PHP_URL_HOST) ?: ''));
+        $model = strtolower((string) ($config['model'] ?? ''));
+
+        return str_contains($provider, 'meta')
+            || str_contains($providerName, 'meta')
+            || $host === 'api.meta.ai'
+            || str_contains($host, '.meta.ai')
+            || str_contains($model, 'muse');
     }
 }
