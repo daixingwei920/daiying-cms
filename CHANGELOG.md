@@ -2,6 +2,14 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.77 - 2026-10-02
+
+- Fixed Core sitemap URL normalization so absolute URLs are not double-prefixed with the site domain.
+- Rebuilt `/sitemap.xml` with structured XML generation, sitemap namespace, escaped `<loc>` values, and normalized Atom `<lastmod>` values.
+- Normalized robots.txt Sitemap URLs and canonical fallback URLs through the same Core URL helper.
+- Added Core sitemap regression coverage for multiple site URLs, absolute/relative paths, XML parsing, Content-Type, escaping, and cross-domain isolation.
+- Preserved the 1.2.72 upgrade floor for this patch release.
+
 ## 1.2.76 - 2026-10-01
 
 - Fixed OpenAI-compatible Meta Muse requests so `muse-spark-1.3` uses `max_completion_tokens`, requests `reasoning_effort=minimal`, and does not send unsupported `include_reasoning`.
