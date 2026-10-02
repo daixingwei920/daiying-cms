@@ -68,7 +68,7 @@
     "Content/BlockSanitizer.php": "9359b5468b2f54cf8786b50a5ec97c6a104ab796c744b83b885f5b004303f615",
     "Content/ContentAutosaveRepository.php": "0c666982567237cecfc3ce7de785eb8079c1b1fe89d0e84b4e1e8fde0c5b0522",
     "Content/ContentException.php": "8ab8565f8f55b80337042039605be9a2653bb24a59b2679cec6fffffb9223f4a",
-    "Content/ContentFrontController.php": "b46f9b7b5a9c7e723e40feaacf10f5f2bbe58c94456d90ad85f940093464cc0d",
+    "Content/ContentFrontController.php": "df0459bd1d88700e302718e0e9f1eb299a1637a6933bb1c76327f61b245525a0",
     "Content/ContentPublishedEvent.php": "4174e45ad1f33457bf404eadee6954507a5c0e8f8736f3daa8b19044a9179fbb",
     "Content/ContentRepository.php": "28ace40025b4db48a363f061531275e5a8ffb09fd5a600a5c5ee92509dc5c490",
     "Content/ContentRevisionRepository.php": "ae72da93b25a96ef3b2504b02dec1b39a2e8f67623e89154bbeed61ffa618053",
