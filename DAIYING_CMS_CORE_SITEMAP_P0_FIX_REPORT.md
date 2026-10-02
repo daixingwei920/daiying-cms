@@ -2,7 +2,7 @@
 
 Date: 2026-10-02
 Branch: `fix/sitemap-p0-xml-url-normalization`
-Commit: `fc761d95bd8ad9c59e5d7f949b59a0422848bb2c`
+Core fix commit: `cdabb9eb51d923267f7fd0fdca8707c619e65e20`
 
 ## Root Cause
 
