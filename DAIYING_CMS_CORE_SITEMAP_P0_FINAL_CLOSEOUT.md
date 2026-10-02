@@ -13,26 +13,22 @@ The sitemap was also generated through manual string concatenation. Current prod
 
 The same URL class of issue existed in canonical URL fallback logic, so the fix normalizes canonical URLs through the same helper.
 
-## Why Production Did Not Trigger It
+## Production Status Correction
 
-Current production for both checked sites is root-path deployment with site-local route values:
+Manual production re-check after this report found that the earlier production verification was not reliable.
 
-- `https://www.daiyingcms.com`
-- `https://www.shoe-zy.com`
+Current authoritative status:
 
-With this configuration, the old implementation's `$base . $this->url('/articles')` still yields a correct URL. Production is therefore currently normal because the triggering condition is absent, not because the Core implementation was already robust.
+- `https://www.daiyingcms.com/sitemap.xml`: still broken in production.
+- `https://www.shoe-zy.com/sitemap.xml`: still broken in production.
 
-Live production still shows the old compact sitemap shape:
+Production still runs the old sitemap implementation. The new Core fix has not been deployed.
 
-```text
-<?xml version="1.0" encoding="UTF-8"?><urlset ...
-```
-
-That confirms the new sitemap fix has not been deployed.
+Therefore, previous production verification notes in this report or the earlier fix report must not be used as a release basis. Sitemap P0 remains OPEN until the approved Core patch release is deployed and production is revalidated.
 
 ## Why Core Still Needs The Fix
 
-This is a Core-level latent SEO bug. Any future path that passes an absolute URL into sitemap/canonical generation can still produce invalid repeated domains unless Core normalizes URLs centrally.
+This is a Core-level SEO P0 bug. Any path that passes an absolute URL into sitemap/canonical generation can produce invalid repeated domains unless Core normalizes URLs centrally.
 
 The fix also replaces manual sitemap XML concatenation with `DOMDocument`, reducing invalid XML and XML escaping risk.
 
@@ -138,8 +134,18 @@ These failures are pre-existing and not caused by the sitemap branch:
 
 - `tests/official_mail_contract.php`
   - 4 existing notification assertions fail.
+  - Relation to sitemap Core modification: none found.
+  - Relation to release package generation: none found.
+  - Relation to install/upgrade flow: none found.
+  - Relation to sitemap runtime dependencies: none found.
+  - Status: PRE-EXISTING TEST DEBT -- WAIVED FOR SITEMAP P0 RELEASE.
 - `tests/theme_productization_contract.php`
   - fails because it still references removed `content/themes/daiying_novel/theme.json`.
+  - Relation to sitemap Core modification: none found.
+  - Relation to release package generation: none found.
+  - Relation to install/upgrade flow: none found.
+  - Relation to sitemap runtime dependencies: none found.
+  - Status: PRE-EXISTING TEST DEBT -- WAIVED FOR SITEMAP P0 RELEASE.
 
 Do not attribute these failures to the sitemap fix.
 
@@ -229,35 +235,29 @@ https://www.daiyingcms.com/https://www.daiyingcms.com/articles
 
 ## Production Current Status
 
-Checked live production without deploying this branch.
+Manual production re-check supersedes the earlier automated production notes.
 
 ### Daiying CMS
 
 URL: `https://www.daiyingcms.com/sitemap.xml`
 
-- HTTP 200: YES
-- XML Content-Type: YES
-- XML parser: PASS
-- root: `urlset`
-- double prefix: NO
-- output shape: old compact Core sitemap implementation
+- Current production status: BROKEN
+- New fix deployed: NO
+- P0 status: OPEN
 
 ### Shoe-ZY
 
 URL: `https://www.shoe-zy.com/sitemap.xml`
 
-- HTTP 200: YES
-- XML Content-Type: YES
-- XML parser: PASS
-- root: `urlset`
-- double prefix: NO
-- output shape: old compact Core sitemap implementation
+- Current production status: BROKEN
+- New fix deployed: NO
+- P0 status: OPEN
 
 ## Release Recommendation
 
-Recommend merge after human approval.
+Merge was approved and completed into the Core main development baseline.
 
-Recommend inclusion in the next Core patch release because this is a Core SEO P0 latent defect, even though current production configuration does not trigger it.
+Recommend inclusion in the next Core patch release because this is a Core SEO P0 defect and production remains broken until the patch is deployed.
 
 Do not automatically merge, push stable, update latest API, deploy production, or modify version number from this closeout.
 

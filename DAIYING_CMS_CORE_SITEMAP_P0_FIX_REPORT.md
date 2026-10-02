@@ -109,28 +109,17 @@ Temporary PHP server:
 Sitemap: http://127.0.0.1:18076/sitemap.xml
 ```
 
-## Daiying CMS Verification
+## Daiying CMS Production Verification Correction
 
-Checked live current production, without deploying this branch:
+Superseded by later manual production re-check.
 
-- URL: `https://www.daiyingcms.com/sitemap.xml`
-- HTTP 200: YES
-- Content-Type XML: YES
-- XML parse: YES
-- Double-prefix `https://www.daiyingcms.com/https://www.daiyingcms.com/`: NO
-- Sample loc domain: `https://www.daiyingcms.com/...`
+Current authoritative status: `https://www.daiyingcms.com/sitemap.xml` remains broken in production. This branch's fix has not been deployed. Earlier production verification must not be used as release evidence.
 
-## Shoe-ZY Verification
+## Shoe-ZY Production Verification Correction
 
-Checked live current production, without deploying this branch:
+Superseded by later manual production re-check.
 
-- URL: `https://www.shoe-zy.com/sitemap.xml`
-- HTTP 200: YES
-- Content-Type XML: YES
-- XML parse: YES
-- Uses `https://www.shoe-zy.com/...`: YES
-- Leaks `https://www.daiyingcms.com`: NO
-- Double-prefix `https://www.shoe-zy.com/https://www.shoe-zy.com/`: NO
+Current authoritative status: `https://www.shoe-zy.com/sitemap.xml` remains broken in production. This branch's fix has not been deployed. Earlier production verification must not be used as release evidence.
 
 ## Core Search Result
 
