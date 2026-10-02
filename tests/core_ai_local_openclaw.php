@@ -123,6 +123,46 @@ $customGroqPayload = json_decode((string) ($customGroqCaptured[0]['json'] ?? '{}
 $check($customGroqResult['status'] === 'success' && $customGroqCaptured[0]['url'] === 'https://api.groq.com/openai/v1/chat/completions', 'Custom OpenAI-compatible Groq settings test through the shared chat completions endpoint');
 $check(($customGroqPayload['include_reasoning'] ?? null) === false && (int) ($customGroqPayload['max_tokens'] ?? 0) >= 1024, 'Custom Groq/GPT-OSS test connection hides reasoning and uses a safe token budget');
 
+$metaMuseCaptured = [];
+$metaMuseClient = new OpenAiCompatibleProviderClient(static function (string $method, string $url, array $headers, string $json, int $timeout) use (&$metaMuseCaptured): array {
+    $metaMuseCaptured[] = compact('method', 'url', 'headers', 'json', 'timeout');
+
+    return [
+        'headers' => ['HTTP/2 200'],
+        'body' => '{"id":"chatcmpl-muse","choices":[{"message":{"role":"assistant","content":"muse ok"},"finish_reason":"stop"}],"usage":{"prompt_tokens":9,"completion_tokens":17,"completion_tokens_details":{"reasoning_tokens":3},"total_tokens":26}}',
+    ];
+});
+$metaMuseRuntime = [
+    'provider' => 'openai_compatible',
+    'provider_name' => 'Meta Muse',
+    'api_key' => 'meta-test-secret',
+    'api_key_required' => true,
+    'base_url' => 'https://api.meta.ai/v1',
+    'model' => 'muse-spark-1.3',
+    'max_tokens' => 512,
+    'temperature' => 0.0,
+    'timeout_seconds' => 30,
+];
+$metaMuseChat = $metaMuseClient->chat([['role' => 'user', 'content' => 'hello']], $metaMuseRuntime);
+$metaMusePayload = json_decode((string) ($metaMuseCaptured[0]['json'] ?? '{}'), true);
+$check($metaMuseChat['content'] === 'muse ok' && ($metaMusePayload['max_completion_tokens'] ?? null) === 512 && !array_key_exists('max_tokens', $metaMusePayload), 'Meta Muse normal requests use max_completion_tokens without changing other OpenAI-compatible providers');
+$check(($metaMusePayload['reasoning_effort'] ?? '') === 'minimal', 'Meta Muse normal requests request minimal reasoning effort');
+
+$metaMuseTestCaptured = [];
+$metaMuseProvider = new OpenAiCompatibleProvider('openai_compatible', 'Custom OpenAI-compatible', [], new OpenAiCompatibleProviderClient(static function (string $method, string $url, array $headers, string $json, int $timeout) use (&$metaMuseTestCaptured): array {
+    $metaMuseTestCaptured[] = compact('method', 'url', 'headers', 'json', 'timeout');
+
+    return [
+        'headers' => ['HTTP/2 200'],
+        'body' => '{"id":"chatcmpl-muse-test","choices":[{"message":{"role":"assistant","content":"OK"},"finish_reason":"stop"}],"usage":{"prompt_tokens":8,"completion_tokens":12,"completion_tokens_details":{"reasoning_tokens":2},"total_tokens":20}}',
+    ];
+}));
+$metaMuseResult = $metaMuseProvider->testConnection($metaMuseRuntime + ['max_tokens' => 16]);
+$metaMuseTestPayload = json_decode((string) ($metaMuseTestCaptured[0]['json'] ?? '{}'), true);
+$check($metaMuseResult['status'] === 'success' && ($metaMuseTestPayload['max_completion_tokens'] ?? null) === 2048 && !array_key_exists('max_tokens', $metaMuseTestPayload), 'Meta Muse test connection uses a 2048 output budget through max_completion_tokens');
+$check(($metaMuseTestPayload['reasoning_effort'] ?? '') === 'minimal', 'Meta Muse test connection requests minimal reasoning effort');
+$check(!array_key_exists('include_reasoning', $metaMuseTestPayload), 'Meta Muse test connection does not send unsupported include_reasoning');
+
 $contentPartsClient = new OpenAiCompatibleProviderClient(static fn (): array => [
     'headers' => ['HTTP/1.1 200'],
     'body' => '{"choices":[{"message":{"content":[{"type":"text","text":"part one"},{"type":"text","text":"part two"}]}}]}',
@@ -139,11 +179,11 @@ $check($partsChat['content'] === "part one\npart two", 'OpenAI-compatible parser
 try {
     (new OpenAiCompatibleProviderClient(static fn (): array => [
         'headers' => ['HTTP/1.1 200'],
-        'body' => '{"choices":[{"message":{"role":"assistant","reasoning":"thinking only"},"finish_reason":"length"}]}',
+        'body' => '{"choices":[{"message":{"role":"assistant","reasoning":"thinking only"},"finish_reason":"length"}],"usage":{"prompt_tokens":5,"completion_tokens":64,"completion_tokens_details":{"reasoning_tokens":64},"total_tokens":69}}',
     ]))->chat([['role' => 'user', 'content' => 'hello']], $groqRuntime);
     $check(false, 'Empty OpenAI-compatible responses include diagnostics');
 } catch (AiException $exception) {
-    $check($exception->reason() === 'response_empty' && str_contains($exception->getMessage(), 'HTTP 200') && str_contains($exception->getMessage(), 'response_structure='), 'Empty OpenAI-compatible responses include safe HTTP/status diagnostics');
+    $check($exception->reason() === 'response_empty' && str_contains($exception->getMessage(), 'HTTP 200') && str_contains($exception->getMessage(), 'finish_reason=length') && str_contains($exception->getMessage(), 'reasoning_tokens:64') && str_contains($exception->getMessage(), 'response_structure='), 'Empty OpenAI-compatible responses include safe HTTP/status/usage diagnostics');
 }
 
 $repo->save([

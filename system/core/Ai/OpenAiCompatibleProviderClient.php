@@ -39,7 +39,8 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
         ];
         $maxTokens = (int) ($config['max_tokens'] ?? 0);
         if ($maxTokens > 0) {
-            $payload['max_tokens'] = min($maxTokens, 200000);
+            $tokenBudgetField = $this->usesMaxCompletionTokens($provider, $baseUrl, $model) ? 'max_completion_tokens' : 'max_tokens';
+            $payload[$tokenBudgetField] = min($maxTokens, 200000);
         }
         if (array_key_exists('temperature', $config)) {
             $temperature = (float) $config['temperature'];
@@ -51,6 +52,12 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
             $payload['include_reasoning'] = (bool) $config['include_reasoning'];
         } elseif ($this->isGroqEndpoint($provider, $baseUrl) && $this->isReasoningModel($model)) {
             $payload['include_reasoning'] = false;
+        }
+        if ($this->supportsReasoningEffort($provider, $baseUrl, $model)) {
+            $reasoningEffort = trim((string) ($config['reasoning_effort'] ?? 'minimal'));
+            if (in_array($reasoningEffort, ['minimal', 'low', 'medium', 'high'], true)) {
+                $payload['reasoning_effort'] = $reasoningEffort;
+            }
         }
 
         $json = json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
@@ -300,9 +307,36 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
         if ($finishReason !== '') {
             $message .= ' finish_reason=' . $this->redact(substr($finishReason, 0, 80)) . '.';
         }
+        $usage = $this->usageSummary($decoded);
+        if ($usage !== '') {
+            $message .= ' usage=' . $usage . '.';
+        }
         $message .= ' response_structure=' . $this->responseStructure($decoded) . '.';
 
         return $this->redact($message);
+    }
+
+    /** @param array<string,mixed> $decoded */
+    private function usageSummary(array $decoded): string
+    {
+        $usage = $decoded['usage'] ?? null;
+        if (!is_array($usage)) {
+            return '';
+        }
+        $details = is_array($usage['completion_tokens_details'] ?? null) ? $usage['completion_tokens_details'] : [];
+        $parts = [];
+        foreach ([
+            'prompt_tokens' => $usage['prompt_tokens'] ?? null,
+            'completion_tokens' => $usage['completion_tokens'] ?? null,
+            'reasoning_tokens' => $details['reasoning_tokens'] ?? ($usage['reasoning_tokens'] ?? null),
+            'total_tokens' => $usage['total_tokens'] ?? null,
+        ] as $key => $value) {
+            if (is_int($value) || (is_string($value) && preg_match('/^\d+$/', $value) === 1)) {
+                $parts[] = $key . ':' . (int) $value;
+            }
+        }
+
+        return implode(',', $parts);
     }
 
     /** @param array<string,mixed> $decoded */
@@ -329,7 +363,28 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
     {
         $model = strtolower($model);
 
-        return str_contains($model, 'gpt-oss') || str_contains($model, 'reasoning') || str_contains($model, 'qwen3');
+        return str_contains($model, 'gpt-oss') || str_contains($model, 'reasoning') || str_contains($model, 'qwen3') || str_contains($model, 'muse');
+    }
+
+    private function supportsReasoningEffort(string $provider, string $baseUrl, string $model): bool
+    {
+        return $this->isMetaMuseEndpoint($provider, $baseUrl, $model);
+    }
+
+    private function usesMaxCompletionTokens(string $provider, string $baseUrl, string $model): bool
+    {
+        return $this->isMetaMuseEndpoint($provider, $baseUrl, $model);
+    }
+
+    private function isMetaMuseEndpoint(string $provider, string $baseUrl, string $model): bool
+    {
+        $host = strtolower((string) (parse_url($baseUrl, PHP_URL_HOST) ?: ''));
+        $model = strtolower($model);
+
+        return $host === 'api.meta.ai'
+            || str_contains($host, '.meta.ai')
+            || str_contains($provider, 'meta')
+            || str_contains($model, 'muse');
     }
 
     private function baseUrl(string $provider, string $baseUrl): string
