@@ -284,32 +284,34 @@ final class ContentFrontController
 
     public function sitemap(): Response
     {
-        $base = $this->siteBaseUrl();
-        $xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        $entries = [];
         if ($this->siteAllowsRobotsIndex()) {
-            $xml .= '<url><loc>' . $this->x($base . $this->url('/')) . '</loc></url>';
-            $xml .= '<url><loc>' . $this->x($base . $this->url('/articles')) . '</loc></url>';
+            $entries[] = ['loc' => $this->absoluteUrl($this->url('/'))];
+            $entries[] = ['loc' => $this->absoluteUrl($this->url('/articles'))];
             foreach ($this->repo()->sitemapItems() as $item) {
                 $meta = is_array($item['meta'] ?? null) ? $item['meta'] : [];
                 if (($meta['robots_index'] ?? true) !== true) {
                     continue;
                 }
                 $path = $this->publicContentUrl((string) $item['content_type'], (string) $item['slug']);
-                $xml .= '<url><loc>' . $this->x($base . $path) . '</loc><lastmod>' . $this->x((string) $item['updated_at']) . '</lastmod></url>';
+                $entry = ['loc' => $this->absoluteUrl($path)];
+                $lastmod = $this->sitemapLastmod($item['updated_at'] ?? null);
+                if ($lastmod !== null) {
+                    $entry['lastmod'] = $lastmod;
+                }
+                $entries[] = $entry;
             }
         }
-        $xml .= '</urlset>';
 
-        return new Response($xml, 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+        return new Response($this->buildSitemapXml($entries), 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
     }
 
     public function robots(): Response
     {
-        $base = $this->siteBaseUrl();
         $body = "User-agent: *\n";
         if (!$this->siteAllowsRobotsIndex()) {
             $body .= "Disallow: /\n";
-            $body .= 'Sitemap: ' . $base . $this->url('/sitemap.xml') . "\n";
+            $body .= 'Sitemap: ' . $this->absoluteUrl($this->url('/sitemap.xml')) . "\n";
 
             return Response::text($body);
         }
@@ -318,7 +320,7 @@ final class ContentFrontController
         $body .= 'Disallow: ' . $this->url('/recovery') . "\n";
         $body .= 'Disallow: ' . $this->url('/preview/') . "\n";
         $body .= "Allow: /\n";
-        $body .= 'Sitemap: ' . $base . $this->url('/sitemap.xml') . "\n";
+        $body .= 'Sitemap: ' . $this->absoluteUrl($this->url('/sitemap.xml')) . "\n";
 
         return Response::text($body);
     }
@@ -653,14 +655,16 @@ final class ContentFrontController
     {
         $title = trim((string) ($input['title'] ?? $this->settings->get('site.name', 'PHP CMS')));
         $description = trim((string) ($input['description'] ?? ''));
-        $base = $this->siteBaseUrl();
+        $path = (string) ($input['path'] ?? '/');
         $canonical = trim((string) ($input['canonical'] ?? ''));
         if ($canonical === '') {
-            $canonical = $base . $this->url((string) ($input['path'] ?? '/'));
+            $canonical = $this->absoluteUrl($path);
         }
         $scheme = strtolower((string) parse_url($canonical, PHP_URL_SCHEME));
-        if ($scheme !== '' && !in_array($scheme, ['http', 'https'], true)) {
-            $canonical = $base . $this->url((string) ($input['path'] ?? '/'));
+        if ($scheme === '') {
+            $canonical = $this->absoluteUrl($canonical);
+        } elseif (!in_array($scheme, ['http', 'https'], true)) {
+            $canonical = $this->absoluteUrl($path);
         }
         $robotsIndex = $this->siteAllowsRobotsIndex() && (($input['robots_index'] ?? true) ? true : false);
         $robotsFollow = $this->siteAllowsRobotsIndex() && (($input['robots_follow'] ?? true) ? true : false);
@@ -982,6 +986,72 @@ final class ContentFrontController
     private function url(string $path): string
     {
         return BasePath::prefixCurrent($path);
+    }
+
+    /** @param list<array{loc:string,lastmod?:string}> $entries */
+    private function buildSitemapXml(array $entries): string
+    {
+        $document = new \DOMDocument('1.0', 'UTF-8');
+        $document->formatOutput = true;
+        $urlset = $document->createElementNS('http://www.sitemaps.org/schemas/sitemap/0.9', 'urlset');
+        $document->appendChild($urlset);
+
+        foreach ($entries as $entry) {
+            $loc = trim((string) ($entry['loc'] ?? ''));
+            if ($loc === '') {
+                continue;
+            }
+            $url = $document->createElement('url');
+            $locElement = $document->createElement('loc');
+            $locElement->appendChild($document->createTextNode($loc));
+            $url->appendChild($locElement);
+
+            $lastmod = $entry['lastmod'] ?? null;
+            if (is_string($lastmod) && $lastmod !== '') {
+                $lastmodElement = $document->createElement('lastmod');
+                $lastmodElement->appendChild($document->createTextNode($lastmod));
+                $url->appendChild($lastmodElement);
+            }
+
+            $urlset->appendChild($url);
+        }
+
+        $xml = $document->saveXML();
+        if (!is_string($xml)) {
+            return '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"/>' . "\n";
+        }
+
+        return $xml;
+    }
+
+    private function absoluteUrl(string $url): string
+    {
+        $url = trim($url);
+        $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+        if (in_array($scheme, ['http', 'https'], true)) {
+            return $url;
+        }
+        if ($url === '' || $url === '#') {
+            $url = '/';
+        }
+        if (str_starts_with($url, '//')) {
+            $url = '/' . ltrim($url, '/');
+        }
+
+        return rtrim($this->siteBaseUrl(), '/') . '/' . ltrim($url, '/');
+    }
+
+    private function sitemapLastmod(mixed $value): ?string
+    {
+        $raw = trim((string) $value);
+        if ($raw === '') {
+            return null;
+        }
+        try {
+            return (new \DateTimeImmutable($raw))->format(\DateTimeInterface::ATOM);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     private function clientIp(Request $request): string
