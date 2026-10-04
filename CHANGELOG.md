@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.78 - 2026-10-03
+
+- Added SEO Structural P0 fixes for canonical, sitemap category/tag inclusion, and homepage H1 handling without changing the established sitemap policy.
+- Added SEO Keyword System P1 fields for content, categories, and tags, including target keywords as internal SEO planning data.
+- Added SEO Keyword Center P2 for target keyword bindings, primary landing pages, status/source tracking, conflict detection, and observed metrics display.
+- Added SEO Search Engine P3 foundations with CSV observed-metric import and a generic search-engine UI.
+- Kept Baidu URL submission owned by `official.seo.baidu-submit`; Core reads plugin status/logs through `OfficialBaiduSubmitBridge` and does not store a second token or POST directly to Baidu.
+- Preserved the 1.2.72 upgrade floor for this patch release.
+
 ## 1.2.77 - 2026-10-02
 
 - Fixed Core sitemap URL normalization so absolute URLs are not double-prefixed with the site domain.
