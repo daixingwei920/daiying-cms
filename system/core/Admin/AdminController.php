@@ -61,6 +61,8 @@ use Cms\Core\Notification\NotificationService;
 use Cms\Core\Routing\BasePath;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Security\SessionManager;
+use Cms\Core\Seo\SearchEngine\OfficialBaiduSubmitBridge;
+use Cms\Core\Seo\SearchEngine\SearchEngineDataRepository;
 use Cms\Core\Support\CurrencyRegistry;
 use Cms\Core\Support\Money;
 use Cms\Core\Support\SystemHealthDoctor;
@@ -2001,7 +2003,7 @@ final class AdminController
         try {
             $pdo = ConnectionFactory::make($this->settings);
             $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
-            $id = $repo->saveTerm('category', (string) $request->input('name', ''), (string) $request->input('slug', ''));
+            $id = $repo->saveTerm('category', (string) $request->input('name', ''), (string) $request->input('slug', ''), null, $this->termSeoInput($request));
             (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'category.created', ['category_id' => $id]);
         } catch (Throwable $exception) {
             $this->logger->error('Category create failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
@@ -2047,15 +2049,283 @@ final class AdminController
         try {
             $pdo = ConnectionFactory::make($this->settings);
             $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
-            $repo->saveTerm('category', (string) $request->input('name', ''), (string) $request->input('slug', ''), $id);
+            $repo->saveTerm('category', (string) $request->input('name', ''), (string) $request->input('slug', ''), $id, $this->termSeoInput($request));
             (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'category.updated', ['category_id' => $id]);
         } catch (Throwable $exception) {
             $this->logger->error('Category update failed', ['source' => 'Core', 'category_id' => $id, 'error' => $exception->getMessage()]);
-            $category = ['id' => $id, 'name' => (string) $request->input('name', ''), 'slug' => (string) $request->input('slug', ''), 'content_count' => 0];
+            $category = ['id' => $id, 'taxonomy' => 'category', 'name' => (string) $request->input('name', ''), 'slug' => (string) $request->input('slug', ''), 'content_count' => 0, 'meta' => $this->termSeoInput($request)];
             return Response::html(View::page('编辑分类', $this->categoryEditHtml($category, '保存失败：' . $exception->getMessage())), 422);
         }
 
         return Response::redirect('/admin/categories?notice=updated');
+    }
+
+    public function tagIndex(?Request $request = null): Response
+    {
+        $request ??= new Request('GET', '/admin/tags');
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+
+        try {
+            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $tags = $repo->terms('tag');
+        } catch (Throwable $exception) {
+            $this->logger->error('Tag index failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('标签管理', '<h1>标签管理</h1><p class="error">标签服务暂不可用。</p>'), 500);
+        }
+
+        $notice = match ((string) ($request->query['notice'] ?? '')) {
+            'created' => '<p class="muted">标签已创建。</p>',
+            'updated' => '<p class="muted">标签已保存。</p>',
+            'deleted' => '<p class="muted">标签已删除。</p>',
+            default => '',
+        };
+
+        return Response::html(View::page('标签管理', $this->categoryIndexHtml($tags, $notice, 'tag')));
+    }
+
+    public function tagStore(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('标签管理', $this->categoryIndexHtml($this->categoryRows('tag'), '<p class="error">CSRF 校验失败，请刷新页面重试。</p>', 'tag')), 403);
+        }
+
+        try {
+            $pdo = ConnectionFactory::make($this->settings);
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $id = $repo->saveTerm('tag', (string) $request->input('name', ''), (string) $request->input('slug', ''), null, $this->termSeoInput($request));
+            (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'tag.created', ['tag_id' => $id]);
+        } catch (Throwable $exception) {
+            $this->logger->error('Tag create failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('标签管理', $this->categoryIndexHtml($this->categoryRows('tag'), '<p class="error">保存失败：' . View::escape($exception->getMessage()) . '</p>', 'tag')), 422);
+        }
+
+        return Response::redirect('/admin/tags?notice=created');
+    }
+
+    public function tagEdit(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        $id = $this->pathSegmentInt($request->path, 3);
+
+        try {
+            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $tag = $repo->termById($id);
+            if ($tag === null || $tag['taxonomy'] !== 'tag') {
+                return Response::html(View::page('编辑标签', '<h1>编辑标签</h1><p class="error">标签不存在。</p><p><a class="button" href="/admin/tags">返回标签管理</a></p>'), 404);
+            }
+        } catch (Throwable $exception) {
+            $this->logger->error('Tag edit failed', ['source' => 'Core', 'tag_id' => $id, 'error' => $exception->getMessage()]);
+            return Response::html(View::page('编辑标签', '<h1>编辑标签</h1><p class="error">标签服务暂不可用。</p>'), 500);
+        }
+
+        return Response::html(View::page('编辑标签', $this->categoryEditHtml($tag, '', 'tag')));
+    }
+
+    public function tagUpdate(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('编辑标签', '<h1>编辑标签</h1><p class="error">CSRF 校验失败，请刷新页面重试。</p><p><a class="button" href="/admin/tags">返回标签管理</a></p>'), 403);
+        }
+        $id = $this->pathSegmentInt($request->path, 3);
+
+        try {
+            $pdo = ConnectionFactory::make($this->settings);
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $repo->saveTerm('tag', (string) $request->input('name', ''), (string) $request->input('slug', ''), $id, $this->termSeoInput($request));
+            (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'tag.updated', ['tag_id' => $id]);
+        } catch (Throwable $exception) {
+            $this->logger->error('Tag update failed', ['source' => 'Core', 'tag_id' => $id, 'error' => $exception->getMessage()]);
+            $tag = ['id' => $id, 'taxonomy' => 'tag', 'name' => (string) $request->input('name', ''), 'slug' => (string) $request->input('slug', ''), 'content_count' => 0, 'meta' => $this->termSeoInput($request)];
+            return Response::html(View::page('编辑标签', $this->categoryEditHtml($tag, '保存失败：' . $exception->getMessage(), 'tag')), 422);
+        }
+
+        return Response::redirect('/admin/tags?notice=updated');
+    }
+
+    public function tagDelete(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('标签管理', '<h1>标签管理</h1><p class="error">CSRF 校验失败，请刷新页面重试。</p><p><a class="button" href="/admin/tags">返回标签管理</a></p>'), 403);
+        }
+        $id = $this->pathSegmentInt($request->path, 3);
+
+        try {
+            $pdo = ConnectionFactory::make($this->settings);
+            (new ContentRepository($pdo, ContentTypeRegistry::defaults()))->deleteTerm($id, 'tag');
+            (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'tag.deleted', ['tag_id' => $id]);
+        } catch (Throwable $exception) {
+            $this->logger->error('Tag delete failed', ['source' => 'Core', 'tag_id' => $id, 'error' => $exception->getMessage()]);
+            return Response::html(View::page('标签管理', $this->categoryIndexHtml($this->categoryRows('tag'), '<p class="error">删除失败：' . View::escape($exception->getMessage()) . '</p>', 'tag')), 422);
+        }
+
+        return Response::redirect('/admin/tags?notice=deleted');
+    }
+
+    public function seoKeywordIndex(?Request $request = null): Response
+    {
+        $request ??= new Request('GET', '/admin/seo/keywords');
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+
+        try {
+            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $filters = [
+                'q' => trim((string) ($request->query['q'] ?? '')),
+                'type' => trim((string) ($request->query['type'] ?? 'all')),
+                'conflict' => trim((string) ($request->query['conflict'] ?? 'all')),
+                'status' => trim((string) ($request->query['status'] ?? 'all')),
+            ];
+            $rows = $repo->seoKeywordCenterRows($filters);
+            $stats = $repo->seoKeywordCenterStats();
+        } catch (Throwable $exception) {
+            $this->logger->error('SEO keyword center failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('关键词中心', '<h1>关键词中心</h1><p class="error">关键词中心暂不可用。</p>'), 500);
+        }
+
+        return Response::html(View::page('关键词中心', $this->seoKeywordIndexHtml($rows, $stats, $filters)));
+    }
+
+    public function seoKeywordDetail(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        $keyword = trim((string) ($request->query['keyword'] ?? ''));
+        if ($keyword === '') {
+            return Response::redirect('/admin/seo/keywords');
+        }
+
+        try {
+            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $detail = $repo->seoKeywordDetail($keyword);
+        } catch (Throwable $exception) {
+            $this->logger->error('SEO keyword detail failed', ['source' => 'Core', 'keyword' => $keyword, 'error' => $exception->getMessage()]);
+            return Response::html(View::page('关键词详情', '<h1>关键词详情</h1><p class="error">关键词详情暂不可用。</p>'), 500);
+        }
+
+        return Response::html(View::page('关键词详情', $this->seoKeywordDetailHtml($detail)));
+    }
+
+    public function seoKeywordSave(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('关键词中心', '<h1>关键词中心</h1><p class="error">CSRF 校验失败，请刷新页面重试。</p>'), 403);
+        }
+
+        $keyword = trim((string) $request->input('keyword', ''));
+        try {
+            $pdo = ConnectionFactory::make($this->settings);
+            (new ContentRepository($pdo, ContentTypeRegistry::defaults()))->saveSeoKeyword(
+                $keyword,
+                (string) $request->input('primary_url', ''),
+                (string) $request->input('status', 'draft'),
+                (string) $request->input('source', 'manual'),
+                (string) $request->input('notes', '')
+            );
+            (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'seo.keyword.save', ['keyword' => $keyword]);
+        } catch (Throwable $exception) {
+            $this->logger->error('SEO keyword save failed', ['source' => 'Core', 'keyword' => $keyword, 'error' => $exception->getMessage()]);
+            return Response::html(View::page('关键词中心', '<h1>关键词中心</h1><p class="error">保存失败：' . View::escape($exception->getMessage()) . '</p><p><a class="button" href="/admin/seo/keywords">返回关键词中心</a></p>'), 422);
+        }
+
+        return Response::redirect('/admin/seo/keywords/detail?keyword=' . rawurlencode($keyword));
+    }
+
+    public function seoSearchEngines(?Request $request = null): Response
+    {
+        $request ??= new Request('GET', '/admin/seo/search-engines');
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+
+        try {
+            $baiduBridge = $this->officialBaiduSubmitBridge();
+            $baidu = $baiduBridge->status();
+            $submissions = $baiduBridge->recentLogs(10);
+        } catch (Throwable $exception) {
+            $this->logger->error('SEO search engine page failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">搜索引擎连接暂不可用。</p>'), 500);
+        }
+
+        $notice = match ((string) ($request->query['notice'] ?? '')) {
+            'imported' => '<p class="admin-badge admin-badge-success">CSV 已导入。</p>',
+            'submitted' => '<p class="admin-badge admin-badge-success">URL 已提交。Submitted 不等于 Indexed。</p>',
+            default => '',
+        };
+
+        return Response::html(View::page('搜索引擎连接', $this->seoSearchEnginesHtml($baidu, $submissions, $notice)));
+    }
+
+    public function seoSearchEngineManualImport(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">CSRF 校验失败，请刷新页面重试。</p>'), 403);
+        }
+
+        try {
+            $rows = $this->seoMetricsCsvRows((string) $request->input('csv_text', ''));
+            $result = $this->searchEngineRepo()->importMetrics($rows, 'manual_import');
+        } catch (Throwable $exception) {
+            $this->logger->error('SEO metrics import failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">导入失败：' . View::escape($exception->getMessage()) . '</p><p><a class="button" href="/admin/seo/search-engines">返回</a></p>'), 422);
+        }
+
+        return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="admin-badge admin-badge-success">CSV 导入完成：inserted=' . (int) $result['inserted'] . ', updated=' . (int) $result['updated'] . ', skipped=' . (int) $result['skipped'] . '</p><p><a class="button" href="/admin/seo/search-engines">返回搜索引擎连接</a> <a class="button admin-button-secondary" href="/admin/seo/keywords">返回关键词中心</a></p>'));
+    }
+
+    public function seoSearchEngineSubmit(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">CSRF 校验失败，请刷新页面重试。</p>'), 403);
+        }
+
+        $url = trim((string) $request->input('url', ''));
+        try {
+            $absoluteUrl = $this->validatedSiteUrl($url);
+            $result = $this->officialBaiduSubmitBridge()->submitUrl($absoluteUrl);
+            if (in_array((string) ($result['status'] ?? ''), ['plugin_missing', 'plugin_schema_missing', 'disabled', 'invalid_site', 'missing_token', 'invalid_url', 'failed'], true)) {
+                throw new \RuntimeException((string) ($result['message'] ?? 'Baidu submission failed.'));
+            }
+        } catch (Throwable $exception) {
+            $this->logger->error('SEO Baidu URL submission failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">提交失败：' . View::escape($exception->getMessage()) . '</p><p class="muted">Submitted 不等于 Indexed。</p><p><a class="button" href="/admin/seo/search-engines">返回</a></p>'), 422);
+        }
+
+        return Response::redirect('/admin/seo/search-engines?notice=submitted');
     }
 
     public function categoryDelete(Request $request): Response
@@ -9094,6 +9364,8 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
             '<details class="editor-settings-section"><summary>SEO</summary><div class="editor-settings-body">' .
             '<label>SEO 标题<input name="seo_title" value="' . View::escape((string) ($meta['seo_title'] ?? '')) . '"></label>' .
             '<label>SEO 描述<textarea name="seo_description" rows="3">' . View::escape((string) ($meta['seo_description'] ?? '')) . '</textarea></label>' .
+            '<label>SEO Keywords<textarea name="seo_keywords" rows="2" placeholder="用逗号分隔，输出到 meta keywords">' . View::escape((string) ($meta['seo_keywords'] ?? '')) . '</textarea></label>' .
+            '<label>Target Keywords<textarea name="target_keywords" rows="2" placeholder="内部 SEO 目标关键词，不直接输出到 meta keywords">' . View::escape((string) ($meta['target_keywords'] ?? '')) . '</textarea></label>' .
             '<label>规范链接<input name="canonical_url" value="' . View::escape((string) ($meta['canonical_url'] ?? '')) . '"></label>' .
             '<label><input type="checkbox" name="robots_index" value="1"' . (($meta['robots_index'] ?? true) ? ' checked' : '') . '> 允许搜索引擎索引</label>' .
             '<label><input type="checkbox" name="robots_follow" value="1"' . (($meta['robots_follow'] ?? true) ? ' checked' : '') . '> 允许搜索引擎跟踪链接</label></div></details>' .
@@ -9148,6 +9420,8 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
             'meta' => [
                 'seo_title' => trim((string) $request->input('seo_title', '')),
                 'seo_description' => trim((string) $request->input('seo_description', '')),
+                'seo_keywords' => trim((string) $request->input('seo_keywords', '')),
+                'target_keywords' => trim((string) $request->input('target_keywords', '')),
                 'canonical_url' => trim((string) $request->input('canonical_url', '')),
                 'robots_index' => (string) $request->input('robots_index', '') === '1',
                 'robots_follow' => (string) $request->input('robots_follow', '') === '1',
@@ -9935,48 +10209,304 @@ JS;
     }
 
     /** @param list<array<string,mixed>> $categories */
-    private function categoryIndexHtml(array $categories, string $notice = ''): string
+    private function categoryIndexHtml(array $categories, string $notice = '', string $taxonomy = 'category'): string
     {
+        $isTag = $taxonomy === 'tag';
+        $label = $isTag ? '标签' : '分类';
+        $adminPath = $isTag ? '/admin/tags' : '/admin/categories';
+        $frontBase = $isTag ? '/tag/' : '/category/';
+        $editBase = $adminPath . '/edit/';
+        $deleteBase = $adminPath . '/delete/';
         $rows = '';
         foreach ($categories as $category) {
             $count = (int) ($category['content_count'] ?? 0);
             $delete = $count === 0
-                ? '<form method="post" action="/admin/categories/delete/' . (int) $category['id'] . '" style="display:inline" onsubmit="return confirm(\'确定要删除这个分类吗？\');">' . CsrfToken::field() . '<button class="admin-danger" type="submit">删除</button></form>'
+                ? '<form method="post" action="' . $deleteBase . (int) $category['id'] . '" style="display:inline" onsubmit="return confirm(\'确定要删除这个' . $label . '吗？\');">' . CsrfToken::field() . '<button class="admin-danger" type="submit">删除</button></form>'
                 : '<span class="muted">有内容时不可删除</span>';
-            $rows .= '<tr><td>' . (int) $category['id'] . '</td><td><strong>' . View::escape((string) $category['name']) . '</strong><br><code>' . View::escape((string) $category['slug']) . '</code></td><td>' . $count . '</td><td><a class="button" href="/category/' . rawurlencode((string) $category['slug']) . '" target="_blank" rel="noopener">前台</a> <a class="button admin-button-secondary" href="/admin/categories/edit/' . (int) $category['id'] . '">编辑</a> ' . $delete . '</td></tr>';
+            $meta = is_array($category['meta'] ?? null) ? $category['meta'] : [];
+            $seoMark = trim((string) ($meta['seo_title'] ?? $meta['seo_description'] ?? $meta['seo_keywords'] ?? $meta['target_keywords'] ?? '')) !== '' ? '<span class="admin-tag">SEO</span>' : '';
+            $rows .= '<tr><td>' . (int) $category['id'] . '</td><td><strong>' . View::escape((string) $category['name']) . '</strong> ' . $seoMark . '<br><code>' . View::escape((string) $category['slug']) . '</code></td><td>' . $count . '</td><td><a class="button" href="' . $frontBase . rawurlencode((string) $category['slug']) . '" target="_blank" rel="noopener">前台</a> <a class="button admin-button-secondary" href="' . $editBase . (int) $category['id'] . '">编辑</a> ' . $delete . '</td></tr>';
         }
-        $rows = $rows !== '' ? $rows : '<tr><td colspan="4" class="muted">暂无分类，先在下方创建一个。</td></tr>';
+        $rows = $rows !== '' ? $rows : '<tr><td colspan="4" class="muted">暂无' . $label . '，先在下方创建一个。</td></tr>';
 
-        return '<div class="admin-page-header"><div><h1>分类管理</h1><p class="muted">创建和维护文章分类，发布文章时可以直接选择。</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/content">返回内容管理</a><a class="button" href="/admin/content/new">新建内容</a></div></div>' .
+        return '<div class="admin-page-header"><div><h1>' . $label . '管理</h1><p class="muted">创建和维护文章' . $label . '，可配置独立 SEO 信息。</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/content">返回内容管理</a><a class="button admin-button-secondary" href="' . ($isTag ? '/admin/categories' : '/admin/tags') . '">' . ($isTag ? '分类管理' : '标签管理') . '</a><a class="button" href="/admin/content/new">新建内容</a></div></div>' .
             $notice .
-            '<section class="editor-card"><h2>新建分类</h2><form method="post" action="/admin/categories">' . CsrfToken::field() .
-            '<div class="admin-grid two"><label>分类名称<input name="name" required placeholder="例如：生活日常"></label><label>URL Slug<input name="slug" placeholder="留空自动生成"></label></div>' .
-            '<p><button type="submit">创建分类</button></p></form></section>' .
-            '<section class="editor-card"><h2>已有分类</h2><table><thead><tr><th>ID</th><th>分类</th><th>内容数</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table></section>';
+            '<section class="editor-card"><h2>新建' . $label . '</h2><form method="post" action="' . $adminPath . '">' . CsrfToken::field() .
+            '<div class="admin-grid two"><label>' . $label . '名称<input name="name" required placeholder="例如：' . ($isTag ? 'Daiying CMS' : '教程文档') . '"></label><label>URL Slug<input name="slug" placeholder="留空自动生成"></label></div>' .
+            $this->termSeoFields([]) .
+            '<p><button type="submit">创建' . $label . '</button></p></form></section>' .
+            '<section class="editor-card"><h2>已有' . $label . '</h2><table><thead><tr><th>ID</th><th>' . $label . '</th><th>内容数</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table></section>';
     }
 
     /** @param array<string,mixed> $category */
-    private function categoryEditHtml(array $category, string $error = ''): string
+    private function categoryEditHtml(array $category, string $error = '', string $taxonomy = 'category'): string
     {
         $errorHtml = $error === '' ? '' : '<p class="error">' . View::escape($error) . '</p>';
+        $isTag = $taxonomy === 'tag';
+        $label = $isTag ? '标签' : '分类';
+        $adminPath = $isTag ? '/admin/tags' : '/admin/categories';
+        $meta = is_array($category['meta'] ?? null) ? $category['meta'] : [];
 
-        return '<div class="admin-page-header"><div><h1>编辑分类</h1><p class="muted">修改分类名称和前台 URL Slug。</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/categories">返回分类管理</a></div></div>' .
+        return '<div class="admin-page-header"><div><h1>编辑' . $label . '</h1><p class="muted">修改' . $label . '名称、前台 URL Slug 和 SEO 信息。</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="' . $adminPath . '">返回' . $label . '管理</a></div></div>' .
             $errorHtml .
-            '<section class="editor-card"><form method="post" action="/admin/categories/edit/' . (int) $category['id'] . '">' . CsrfToken::field() .
-            '<label>分类名称<input name="name" value="' . View::escape((string) ($category['name'] ?? '')) . '" required></label>' .
+            '<section class="editor-card"><form method="post" action="' . $adminPath . '/edit/' . (int) $category['id'] . '">' . CsrfToken::field() .
+            '<label>' . $label . '名称<input name="name" value="' . View::escape((string) ($category['name'] ?? '')) . '" required></label>' .
             '<label>URL Slug<input name="slug" value="' . View::escape((string) ($category['slug'] ?? '')) . '" required></label>' .
             '<p class="muted">当前关联内容：' . (int) ($category['content_count'] ?? 0) . ' 篇。</p>' .
-            '<button type="submit">保存分类</button></form></section>';
+            $this->termSeoFields($meta) .
+            '<button type="submit">保存' . $label . '</button></form></section>';
     }
 
     /** @return list<array<string,mixed>> */
-    private function categoryRows(): array
+    private function categoryRows(string $taxonomy = 'category'): array
     {
         try {
-            return (new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults()))->terms('category');
+            return (new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults()))->terms($taxonomy);
         } catch (Throwable) {
             return [];
         }
+    }
+
+    /** @param array<string,mixed> $meta */
+    private function termSeoFields(array $meta): string
+    {
+        return '<details class="editor-settings-section" open><summary>SEO</summary><div class="editor-settings-body">' .
+            '<label>SEO 标题<input name="seo_title" value="' . View::escape((string) ($meta['seo_title'] ?? '')) . '"></label>' .
+            '<label>SEO 描述<textarea name="seo_description" rows="3">' . View::escape((string) ($meta['seo_description'] ?? '')) . '</textarea></label>' .
+            '<label>SEO Keywords<textarea name="seo_keywords" rows="2" placeholder="用逗号分隔，输出到 meta keywords">' . View::escape((string) ($meta['seo_keywords'] ?? '')) . '</textarea></label>' .
+            '<label>Target Keywords<textarea name="target_keywords" rows="2" placeholder="内部 SEO 目标关键词，不直接输出到 meta keywords">' . View::escape((string) ($meta['target_keywords'] ?? '')) . '</textarea></label>' .
+            '<label>规范链接<input name="canonical_url" value="' . View::escape((string) ($meta['canonical_url'] ?? '')) . '"></label>' .
+            '<label><input type="checkbox" name="robots_index" value="1"' . (($meta['robots_index'] ?? true) ? ' checked' : '') . '> 允许搜索引擎索引</label>' .
+            '<label><input type="checkbox" name="robots_follow" value="1"' . (($meta['robots_follow'] ?? true) ? ' checked' : '') . '> 允许搜索引擎跟踪链接</label>' .
+            '</div></details>';
+    }
+
+    /** @return array<string,mixed> */
+    private function termSeoInput(Request $request): array
+    {
+        return [
+            'seo_title' => trim((string) $request->input('seo_title', '')),
+            'seo_description' => trim((string) $request->input('seo_description', '')),
+            'seo_keywords' => trim((string) $request->input('seo_keywords', '')),
+            'target_keywords' => trim((string) $request->input('target_keywords', '')),
+            'canonical_url' => trim((string) $request->input('canonical_url', '')),
+            'robots_index' => (string) $request->input('robots_index', '') === '1',
+            'robots_follow' => (string) $request->input('robots_follow', '') === '1',
+        ];
+    }
+
+    /** @param list<array<string,mixed>> $rows @param array<string,mixed> $stats @param array<string,string> $filters */
+    private function seoKeywordIndexHtml(array $rows, array $stats, array $filters): string
+    {
+        $cards = [
+            ['Total Target Keywords', (string) (int) ($stats['total'] ?? 0)],
+            ['Active Keywords', (string) (int) ($stats['active'] ?? 0)],
+            ['Conflict Keywords', (string) (int) ($stats['conflicts'] ?? 0)],
+            ['Unassigned / Draft Keywords', (string) (int) ($stats['unassigned_draft'] ?? 0)],
+            ['Baidu / GSC Data', 'Not Connected'],
+        ];
+        $cardHtml = '';
+        foreach ($cards as [$label, $value]) {
+            $cardHtml .= '<section class="admin-dashboard-card"><span class="muted">' . View::escape($label) . '</span><strong>' . View::escape($value) . '</strong></section>';
+        }
+
+        $rowHtml = '';
+        foreach ($rows as $row) {
+            $keyword = (string) ($row['keyword'] ?? '');
+            $bindings = is_array($row['bindings'] ?? null) ? $row['bindings'] : [];
+            $primary = (string) ($row['primary_url'] ?? '');
+            $primaryLabel = $primary !== '' ? $primary : 'Unassigned';
+            $types = implode(', ', array_filter(array_map('strval', is_array($row['content_types'] ?? null) ? $row['content_types'] : [])));
+            $conflict = !empty($row['conflict']);
+            $rowHtml .= '<tr><td><strong><a href="/admin/seo/keywords/detail?keyword=' . rawurlencode($keyword) . '">' . View::escape($keyword) . '</a></strong></td>' .
+                '<td><code>' . View::escape($primaryLabel) . '</code></td>' .
+                '<td>' . count($bindings) . '</td>' .
+                '<td>' . View::escape($types !== '' ? $types : 'Unassigned') . '</td>' .
+                '<td>' . View::escape((string) ($row['source'] ?? 'content')) . '</td>' .
+                '<td><span class="admin-badge">' . View::escape((string) ($row['status'] ?? 'active')) . '</span></td>' .
+                '<td>' . ($conflict ? '<span class="admin-badge admin-badge-warning">Potential Cannibalization</span>' : '<span class="admin-badge admin-badge-success">正常</span>') . '</td>' .
+                '<td>' . View::escape((string) ($row['updated_at'] ?? '')) . '</td></tr>';
+        }
+        $rowHtml = $rowHtml !== '' ? $rowHtml : '<tr><td colspan="8" class="muted">暂无匹配关键词。</td></tr>';
+
+        return '<div class="admin-page-header"><div><h1>关键词中心</h1><p class="muted">基于 Content / Category / Tag 的 target keywords 聚合展示，不自动修改任何页面。</p></div></div>' .
+            '<div class="admin-dashboard-grid">' . $cardHtml . '</div>' .
+            '<section class="editor-card"><h2>筛选</h2><form method="get" action="/admin/seo/keywords"><div class="admin-grid four">' .
+            '<label>关键词搜索<input name="q" value="' . View::escape((string) ($filters['q'] ?? '')) . '" placeholder="PHP CMS"></label>' .
+            '<label>内容类型' . $this->selectHtml('type', ['all' => '全部', 'article' => 'Article', 'page' => 'Page', 'category' => 'Category', 'tag' => 'Tag'], (string) ($filters['type'] ?? 'all')) . '</label>' .
+            '<label>冲突' . $this->selectHtml('conflict', ['all' => '全部', 'yes' => 'Potential Cannibalization', 'no' => '正常'], (string) ($filters['conflict'] ?? 'all')) . '</label>' .
+            '<label>状态' . $this->selectHtml('status', ['all' => '全部', 'draft' => 'draft', 'active' => 'active', 'paused' => 'paused'], (string) ($filters['status'] ?? 'all')) . '</label>' .
+            '</div><p><button type="submit">应用筛选</button> <a class="button admin-button-secondary" href="/admin/seo/keywords">清空</a></p></form></section>' .
+            '<section class="editor-card"><h2>新增 / 预留关键词</h2><form method="post" action="/admin/seo/keywords/save">' . CsrfToken::field() .
+            '<div class="admin-grid four"><label>Keyword<input name="keyword" required></label><label>Primary URL<input name="primary_url" placeholder="/category/php-cms"></label><label>状态' . $this->selectHtml('status', ['draft' => 'draft', 'active' => 'active', 'paused' => 'paused'], 'draft') . '</label><label>来源' . $this->selectHtml('source', ['manual' => 'manual', 'content' => 'content', 'baidu' => 'baidu', 'google' => 'google', 'ai_suggestion' => 'ai_suggestion'], 'manual') . '</label></div>' .
+            '<label>Notes<textarea name="notes" rows="2"></textarea></label><p><button type="submit">保存关键词</button></p></form></section>' .
+            '<section class="editor-card"><h2>关键词列表</h2><table><thead><tr><th>关键词</th><th>主落地页</th><th>绑定页面数量</th><th>内容类型</th><th>来源</th><th>状态</th><th>是否冲突</th><th>最后更新时间</th></tr></thead><tbody>' . $rowHtml . '</tbody></table><p class="muted">搜索量 / 点击 / 排名：Not Connected。</p></section>';
+    }
+
+    /** @param array<string,mixed> $detail */
+    private function seoKeywordDetailHtml(array $detail): string
+    {
+        $keyword = (string) ($detail['keyword'] ?? '');
+        $bindings = is_array($detail['bindings'] ?? null) ? $detail['bindings'] : [];
+        $metrics = is_array($detail['observed_metrics'] ?? null) ? $detail['observed_metrics'] : [];
+        $conflict = !empty($detail['conflict']);
+        $bindingRows = '';
+        foreach ($bindings as $binding) {
+            $bindingRows .= '<tr><td><a href="' . View::escape((string) ($binding['url_path'] ?? '#')) . '" target="_blank" rel="noopener"><code>' . View::escape((string) ($binding['url_path'] ?? '')) . '</code></a></td>' .
+                '<td>' . View::escape((string) ($binding['source_type'] ?? '')) . '</td>' .
+                '<td>' . View::escape((string) ($binding['title'] ?? '')) . '</td>' .
+                '<td>' . View::escape((string) ($binding['index_status'] ?? 'index')) . '</td>' .
+                '<td><code>' . View::escape((string) ($binding['canonical'] ?? '')) . '</code></td>' .
+                '<td>' . View::escape((string) ($binding['seo_title'] ?? '')) . '</td>' .
+                '<td>' . View::escape((string) ($binding['seo_description'] ?? '')) . '</td>' .
+                '<td>' . View::escape((string) ($binding['target_keywords'] ?? '')) . '</td></tr>';
+        }
+        $bindingRows = $bindingRows !== '' ? $bindingRows : '<tr><td colspan="8" class="muted">该关键词还没有绑定页面。</td></tr>';
+        $metricRows = '';
+        foreach ($metrics as $metric) {
+            $metricRows .= '<tr><td>' . View::escape((string) ($metric['search_engine'] ?? 'Not Available')) . '</td>' .
+                '<td><code>' . View::escape((string) ($metric['url_path'] ?? 'Not Available')) . '</code></td>' .
+                '<td>' . View::escape((string) ($metric['impressions'] ?? 'Not Available')) . '</td>' .
+                '<td>' . View::escape((string) ($metric['clicks'] ?? 'Not Available')) . '</td>' .
+                '<td>' . View::escape((string) ($metric['ctr'] ?? 'Not Available')) . '</td>' .
+                '<td>' . View::escape((string) ($metric['average_position'] ?? 'Not Available')) . '</td>' .
+                '<td>' . View::escape((string) ($metric['period_start'] ?? 'Not Available')) . ' - ' . View::escape((string) ($metric['period_end'] ?? 'Not Available')) . '</td>' .
+                '<td>' . View::escape((string) ($metric['source'] ?? 'Not Available')) . '</td></tr>';
+        }
+        $metricRows = $metricRows !== '' ? $metricRows : '<tr><td colspan="8" class="muted">Observed Data: Not Available。</td></tr>';
+        $primary = trim((string) ($detail['primary_url'] ?? ''));
+        $submitPrimary = $primary !== ''
+            ? '<form method="post" action="/admin/seo/search-engines/submit">' . CsrfToken::field() . '<input type="hidden" name="url" value="' . View::escape($primary) . '"><button type="submit">通过百度推送插件提交 Primary 到百度</button><p class="muted">Submitted 不等于 Indexed。</p></form>'
+            : '<p class="muted">设置 Primary URL 后可提交到百度。</p>';
+
+        return '<div class="admin-page-header"><div><h1>关键词详情</h1><p class="muted">' . View::escape($keyword) . '</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/seo/keywords">返回关键词中心</a></div></div>' .
+            ($conflict ? '<p class="error">Potential Keyword Cannibalization：该关键词绑定了多个页面。</p>' : '<p class="muted">1 page: 正常；2+ pages: Potential Cannibalization。</p>') .
+            '<section class="editor-card"><h2>Primary Landing Page</h2><form method="post" action="/admin/seo/keywords/save">' . CsrfToken::field() .
+            '<input type="hidden" name="keyword" value="' . View::escape($keyword) . '">' .
+            '<div class="admin-grid four"><label>Primary URL<input name="primary_url" value="' . View::escape((string) ($detail['primary_url'] ?? '')) . '" placeholder="/category/php-cms"></label><label>状态' . $this->selectHtml('status', ['draft' => 'draft', 'active' => 'active', 'paused' => 'paused'], (string) ($detail['status'] ?? 'draft')) . '</label><label>来源' . $this->selectHtml('source', ['manual' => 'manual', 'content' => 'content', 'baidu' => 'baidu', 'google' => 'google', 'ai_suggestion' => 'ai_suggestion'], (string) ($detail['source'] ?? 'manual')) . '</label><label>搜索引擎数据<input value="Not Connected" disabled></label></div>' .
+            '<label>Notes<textarea name="notes" rows="2">' . View::escape((string) ($detail['notes'] ?? '')) . '</textarea></label><p><button type="submit">保存 Primary / 状态</button></p></form></section>' .
+            '<section class="editor-card"><h2>Baidu URL Submission</h2>' . $submitPrimary . '</section>' .
+            '<section class="editor-card"><h2>Target Data / Bindings</h2><table><thead><tr><th>URL</th><th>Content Type</th><th>Content Title</th><th>Index Status</th><th>Canonical</th><th>SEO Title</th><th>SEO Description</th><th>Target Keywords</th></tr></thead><tbody>' . $bindingRows . '</tbody></table></section>' .
+            '<section class="editor-card"><h2>Observed Data</h2><table><thead><tr><th>Search Engine</th><th>URL</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Average Position</th><th>Period</th><th>Source</th></tr></thead><tbody>' . $metricRows . '</tbody></table><p class="muted">没有搜索引擎返回的数据时显示 Not Available，不显示 0。</p></section>';
+    }
+
+    /** @param array<string,mixed> $baidu @param list<array<string,string>> $submissions */
+    private function seoSearchEnginesHtml(array $baidu, array $submissions, string $notice = ''): string
+    {
+        $tokenText = !empty($baidu['token_configured']) ? 'Configured' : 'Missing';
+        $status = (string) ($baidu['status'] ?? 'not_connected');
+        $credentialStatus = (string) ($baidu['credential_status'] ?? 'missing');
+        $submissionRows = '';
+        foreach ($submissions as $submission) {
+            $submissionRows .= '<tr><td><code>' . View::escape((string) ($submission['url'] ?? '')) . '</code></td><td>' . View::escape((string) ($submission['status'] ?? '')) . '</td><td>' . View::escape((string) ($submission['http_status'] ?? '')) . '</td><td>' . View::escape((string) ($submission['baidu_success'] ?? '')) . '</td><td>' . View::escape((string) ($submission['baidu_remain'] ?? '')) . '</td><td>' . View::escape((string) ($submission['error_summary'] ?? '')) . '</td><td>' . View::escape((string) ($submission['created_at'] ?? '')) . '</td></tr>';
+        }
+        $submissionRows = $submissionRows !== '' ? $submissionRows : '<tr><td colspan="7" class="muted">暂无提交记录。</td></tr>';
+
+        return '<div class="admin-page-header"><div><h1>搜索引擎连接</h1><p class="muted">Observed Data 与 CMS Target Keywords 分层保存。</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/seo/keywords">关键词中心</a></div></div>' .
+            $notice .
+            '<section class="editor-card"><h2>Baidu</h2><table><tbody>' .
+            '<tr><th>Connected</th><td>' . View::escape($status === 'connected' ? 'Connected' : 'Not Connected') . '</td></tr>' .
+            '<tr><th>Token owner</th><td><code>official.seo.baidu-submit</code></td></tr>' .
+            '<tr><th>Site</th><td>' . View::escape((string) ($baidu['site'] ?? '')) . '</td></tr>' .
+            '<tr><th>Credential status</th><td>' . View::escape($credentialStatus . ' / ' . $tokenText) . '</td></tr>' .
+            '<tr><th>Last submit</th><td>' . View::escape((string) ($baidu['last_submit_at'] ?? '')) . '</td></tr>' .
+            '<tr><th>Keyword metrics API</th><td>Not Available</td></tr>' .
+            '</tbody></table>' .
+            '<p><a class="button admin-button-secondary" href="/admin/seo/baidu-submit">管理百度推送插件</a></p><p class="muted">Core 不保存百度 Token；URL 提交、日志、Queue/Retry、Dedupe 均由 official.seo.baidu-submit 提供。</p></section>' .
+            '<section class="editor-card"><h2>Manual Import Fallback</h2><form method="post" action="/admin/seo/search-engines/import">' . CsrfToken::field() .
+            '<label>CSV<textarea name="csv_text" rows="8" placeholder="keyword,url_path,search_engine,impressions,clicks,ctr,average_position,period_start,period_end&#10;PHP CMS,/category/php-cms,baidu,100,10,10,3.2,2026-10-01,2026-10-02"></textarea></label><p><button type="submit">导入 CSV</button></p></form></section>' .
+            '<section class="editor-card"><h2>Baidu URL Submission</h2><form method="post" action="/admin/seo/search-engines/submit">' . CsrfToken::field() . '<label>URL<input name="url" placeholder="/category/php-cms"></label><p><button type="submit">通过百度推送插件提交到百度</button></p><p class="muted">Submitted / Submission Accepted 不等于 Indexed。</p></form><table><thead><tr><th>URL</th><th>Status</th><th>HTTP</th><th>Success</th><th>Remain</th><th>Error</th><th>Submitted At</th></tr></thead><tbody>' . $submissionRows . '</tbody></table></section>';
+    }
+
+    private function searchEngineRepo(): SearchEngineDataRepository
+    {
+        $pdo = ConnectionFactory::make($this->settings);
+        return new SearchEngineDataRepository($pdo);
+    }
+
+    private function officialBaiduSubmitBridge(): OfficialBaiduSubmitBridge
+    {
+        return new OfficialBaiduSubmitBridge(ConnectionFactory::make($this->settings), $this->root(), (string) $this->settings->get('security.encryption_key', ''));
+    }
+
+    /** @return list<array<string,string>> */
+    private function seoMetricsCsvRows(string $csv): array
+    {
+        $csv = trim($csv);
+        if ($csv === '') {
+            throw new \InvalidArgumentException('CSV is required.');
+        }
+        $handle = fopen('php://temp', 'r+');
+        if (!is_resource($handle)) {
+            throw new \RuntimeException('Unable to parse CSV.');
+        }
+        fwrite($handle, $csv);
+        rewind($handle);
+        $header = fgetcsv($handle);
+        if (!is_array($header)) {
+            return [];
+        }
+        $header = array_map(static fn (mixed $value): string => strtolower(trim((string) $value)), $header);
+        $rows = [];
+        while (($data = fgetcsv($handle)) !== false) {
+            if (!is_array($data) || $data === []) {
+                continue;
+            }
+            $row = [];
+            foreach ($header as $index => $key) {
+                $row[$key] = (string) ($data[$index] ?? '');
+            }
+            $rows[] = $row;
+            if (count($rows) > 5000) {
+                throw new \InvalidArgumentException('CSV row limit exceeded.');
+            }
+        }
+        fclose($handle);
+
+        return $rows;
+    }
+
+    private function validatedSiteUrl(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '' || strlen($url) > 1024 || preg_match('/[\x00-\x1F\x7F]/', $url) === 1) {
+            throw new \InvalidArgumentException('URL is invalid.');
+        }
+        $siteUrl = rtrim((string) $this->settings->get('site.url', ''), '/');
+        if ($siteUrl === '') {
+            throw new \InvalidArgumentException('site.url is not configured.');
+        }
+        if (str_starts_with($url, '/')) {
+            $url = $siteUrl . '/' . ltrim($url, '/');
+        }
+        $parts = parse_url($url);
+        $siteParts = parse_url($siteUrl);
+        if (!is_array($parts) || !is_array($siteParts)) {
+            throw new \InvalidArgumentException('URL is invalid.');
+        }
+        $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+        if (!in_array($scheme, ['http', 'https'], true)) {
+            throw new \InvalidArgumentException('Only HTTP/HTTPS URLs can be submitted.');
+        }
+        if (strtolower((string) ($parts['host'] ?? '')) !== strtolower((string) ($siteParts['host'] ?? ''))) {
+            throw new \InvalidArgumentException('Only current site URLs can be submitted.');
+        }
+        if (($parts['user'] ?? '') !== '' || ($parts['pass'] ?? '') !== '' || ($parts['fragment'] ?? '') !== '') {
+            throw new \InvalidArgumentException('URL must not contain credentials or fragments.');
+        }
+
+        return $url;
+    }
+
+    /** @param array<string,string> $options */
+    private function selectHtml(string $name, array $options, string $selected): string
+    {
+        $html = '<select name="' . View::escape($name) . '">';
+        foreach ($options as $value => $label) {
+            $html .= '<option value="' . View::escape((string) $value) . '"' . ((string) $value === $selected ? ' selected' : '') . '>' . View::escape($label) . '</option>';
+        }
+
+        return $html . '</select>';
     }
 
     /** @param mixed $selected */

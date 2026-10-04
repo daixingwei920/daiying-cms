@@ -26,6 +26,7 @@ foreach ([
     '2026_08_12_000011_content_scheduler_schema.php',
     '2026_08_29_000001_members_comments_schema.php',
     '2026_09_08_000004_content_foundation_safety.php',
+    '2026_10_03_000001_seo_keyword_system_p1.php',
 ] as $migrationFile) {
     $migration = require __DIR__ . '/../system/migrations/' . $migrationFile;
     $migration->up($pdo);
@@ -119,12 +120,14 @@ $check(($single['data']['item']['status'] ?? '') === 'published', 'REST contents
 $deleted = json_decode($controller->contents(new Request('DELETE', '/api/v1/contents/' . $createdId, [], [], ['HTTP_AUTHORIZATION' => 'Bearer rest-secret']))->body(), true);
 $check(($deleted['data']['status'] ?? '') === 'trash', 'REST contents endpoint deletes to trash by default');
 
-$termCreated = json_decode($controller->categories(new Request('POST', '/api/v1/categories', [], ['name' => 'REST Category', 'slug' => 'rest-category'], ['HTTP_AUTHORIZATION' => 'Bearer rest-secret']))->body(), true);
+$termCreated = json_decode($controller->categories(new Request('POST', '/api/v1/categories', [], ['name' => 'REST Category', 'slug' => 'rest-category', 'meta' => ['seo_title' => 'REST SEO', 'seo_keywords' => 'rest keyword', 'target_keywords' => 'rest target']], ['HTTP_AUTHORIZATION' => 'Bearer rest-secret']))->body(), true);
 $termId = (int) ($termCreated['data']['item']['id'] ?? 0);
 $check($termId > 0 && ($termCreated['data']['item']['slug'] ?? '') === 'rest-category', 'REST categories endpoint creates terms with auth');
+$check(($termCreated['data']['item']['meta']['seo_keywords'] ?? '') === 'rest keyword', 'REST categories endpoint stores SEO metadata');
 
-$termUpdated = json_decode($controller->categories(new Request('PATCH', '/api/v1/categories/' . $termId, [], ['name' => 'REST Category Updated', 'slug' => 'rest-category-updated'], ['HTTP_AUTHORIZATION' => 'Bearer rest-secret']))->body(), true);
+$termUpdated = json_decode($controller->categories(new Request('PATCH', '/api/v1/categories/' . $termId, [], ['name' => 'REST Category Updated', 'slug' => 'rest-category-updated', 'meta' => ['seo_keywords' => 'updated keyword', 'robots_index' => false]], ['HTTP_AUTHORIZATION' => 'Bearer rest-secret']))->body(), true);
 $check(($termUpdated['data']['item']['name'] ?? '') === 'REST Category Updated', 'REST categories endpoint updates terms with auth');
+$check(($termUpdated['data']['item']['meta']['robots_index'] ?? true) === false, 'REST categories endpoint updates term robots metadata');
 
 $commentsUnauthorized = $controller->comments(new Request('GET', '/api/v1/comments'));
 $check($commentsUnauthorized->status() === 401, 'REST comments endpoint requires auth');

@@ -16,13 +16,16 @@ $secondaries = array_slice($items, 1, 2);
 $rest = array_slice($items, 1);
 $tabs = dm_lines(dm_setting($context, 'home_tabs', "最新\n科技\n游戏\n开发\n生活\n评测"));
 $showSidebar = dm_bool($context, 'show_sidebar', true);
+$homeSeo = is_array($context->get('seo', [])) ? $context->get('seo', []) : [];
+$homeSeo = array_merge($homeSeo, ['title' => $siteName, 'description' => $description]);
 ?>
 <!doctype html>
 <html lang="zh-CN">
-<?php dm_head($context, $siteName, ['title' => $siteName, 'description' => $description]); ?>
+<?php dm_head($context, $siteName, $homeSeo); ?>
 <body>
 <?php dm_header($context, 'home'); ?>
 <main id="content">
+    <h1 class="visually-hidden"><?= $context->e($homeTitle !== '' ? $homeTitle : $siteName) ?></h1>
     <?php if ($heroMode !== 'off'): ?>
         <section class="hero" aria-label="焦点内容">
             <div class="container">
@@ -36,7 +39,7 @@ $showSidebar = dm_bool($context, 'show_sidebar', true);
                         <?= dm_cover($context, $featured, 'focus-cover') ?><span class="shade" aria-hidden="true"></span>
                         <div class="focus-body">
                             <p class="kicker"><?= $context->e(dm_first_category($featured)) ?></p>
-                            <h1><a href="<?= $context->e(dm_url($content)) ?>"><?= $context->e((string) ($featured['title'] ?? $content['title'] ?? $homeTitle)) ?></a></h1>
+                            <h2><a href="<?= $context->e(dm_url($content)) ?>"><?= $context->e((string) ($featured['title'] ?? $content['title'] ?? $homeTitle)) ?></a></h2>
                             <p><?= $context->e(dm_excerpt($content, 92)) ?></p>
                         </div>
                     </article>

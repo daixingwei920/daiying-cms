@@ -50,7 +50,7 @@ final class ContentFrontController
                 'title' => 'Articles',
                 'items' => $items,
                 'pagination' => ['page' => $page, 'per_page' => $perPage, 'total' => $repo->publicCount('article')],
-                'seo' => $this->seo(['title' => 'Articles', 'path' => '/articles']),
+                'seo' => $this->seo(['title' => 'Articles', 'path' => $this->archiveCanonicalPath('/articles', $page)]),
                 'ad_slots' => $this->adSlots(),
             ]));
         } catch (Throwable $exception) {
@@ -263,8 +263,10 @@ final class ContentFrontController
         $page = max(1, (int) ($request->query['page'] ?? 1));
         $items = array_map(fn (array $item): array => $this->viewModel($item), $repo->publicByTerm($taxonomy, $slug, $page, 10));
         $label = $taxonomy === 'tag' ? '标签' : '分类';
-        $title = ucfirst($taxonomy) . ': ' . $term['name'];
+        $meta = is_array($term['meta'] ?? null) ? $term['meta'] : [];
+        $title = trim((string) ($meta['seo_title'] ?? '')) !== '' ? (string) $meta['seo_title'] : ucfirst($taxonomy) . ': ' . $term['name'];
         $total = $repo->publicCountByTerm($taxonomy, $slug);
+        $canonicalPath = $this->archiveCanonicalPath('/' . ($taxonomy === 'tag' ? 'tag' : 'category') . '/' . $term['slug'], $page);
 
         return Response::html($this->theme()->render('list', [
             'site_name' => (string) $this->settings->get('site.name', 'PHP CMS'),
@@ -277,7 +279,16 @@ final class ContentFrontController
             'empty_message' => '该' . $label . '暂时没有文章。',
             'items' => $items,
             'pagination' => ['page' => $page, 'per_page' => 10, 'total' => $total],
-            'seo' => $this->seo(['title' => $title, 'path' => '/' . ($taxonomy === 'tag' ? 'tag' : 'category') . '/' . $term['slug']]),
+            'archive' => ['type' => $taxonomy, 'slug' => $term['slug'], 'name' => $term['name']],
+            'seo' => $this->seo([
+                'title' => $title,
+                'description' => (string) ($meta['seo_description'] ?? ''),
+                'keywords' => (string) ($meta['seo_keywords'] ?? ''),
+                'canonical' => (string) ($meta['canonical_url'] ?? ''),
+                'path' => $canonicalPath,
+                'robots_index' => (bool) ($meta['robots_index'] ?? true),
+                'robots_follow' => (bool) ($meta['robots_follow'] ?? true),
+            ]),
             'ad_slots' => $this->adSlots(),
         ]));
     }
@@ -296,6 +307,15 @@ final class ContentFrontController
                 $path = $this->publicContentUrl((string) $item['content_type'], (string) $item['slug']);
                 $entry = ['loc' => $this->absoluteUrl($path)];
                 $lastmod = $this->sitemapLastmod($item['updated_at'] ?? null);
+                if ($lastmod !== null) {
+                    $entry['lastmod'] = $lastmod;
+                }
+                $entries[] = $entry;
+            }
+            foreach ($this->repo()->sitemapTerms() as $term) {
+                $path = '/' . ((string) $term['taxonomy'] === 'tag' ? 'tag' : 'category') . '/' . (string) $term['slug'];
+                $entry = ['loc' => $this->absoluteUrl($path)];
+                $lastmod = $this->sitemapLastmod($term['updated_at'] ?? null);
                 if ($lastmod !== null) {
                     $entry['lastmod'] = $lastmod;
                 }
@@ -346,6 +366,7 @@ final class ContentFrontController
         $seo = $this->seo([
             'title' => (string) ($meta['seo_title'] ?? $content['title']),
             'description' => (string) ($meta['seo_description'] ?? ''),
+            'keywords' => (string) ($meta['seo_keywords'] ?? ''),
             'canonical' => (string) ($meta['canonical_url'] ?? ''),
             'path' => $url,
             'robots_index' => $preview ? false : (bool) ($meta['robots_index'] ?? true),
@@ -674,9 +695,17 @@ final class ContentFrontController
             'title' => $title !== '' ? $title : (string) $this->settings->get('site.name', 'PHP CMS'),
             'description' => $description !== '' ? $description : $title,
             'canonical' => $canonical,
+            'keywords' => trim((string) ($input['keywords'] ?? '')),
             'robots' => $robots,
             'og_type' => ($input['type'] ?? '') === 'article' ? 'article' : 'website',
         ];
+    }
+
+    private function archiveCanonicalPath(string $basePath, int $page): string
+    {
+        $page = max(1, $page);
+
+        return $page > 1 ? rtrim($basePath, '/') . '?page=' . $page : $basePath;
     }
 
     /** @return array{target:string,status:int}|null */
