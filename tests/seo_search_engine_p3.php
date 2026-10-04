@@ -63,6 +63,19 @@ foreach ([
 }
 $pluginMigration = require CMS_ROOT . '/content/plugins/official.seo.baidu-submit/migrations/001_baidu_url_submission.php';
 $pluginMigration['up']($pdo);
+$now = gmdate('c');
+$pdo->prepare('INSERT INTO cms_plugins (plugin_id, name, version, author, status, trust_level, capabilities_json, installed_at, updated_at) VALUES (:plugin_id, :name, :version, :author, :status, :trust_level, :capabilities_json, :installed_at, :updated_at)')
+    ->execute([
+        ':plugin_id' => 'official.seo.baidu-submit',
+        ':name' => 'Baidu URL Submit',
+        ':version' => '0.1.0-alpha.2',
+        ':author' => 'Daiying CMS',
+        ':status' => 'Enabled',
+        ':trust_level' => 'trusted_php',
+        ':capabilities_json' => json_encode(['seo.manage', 'seo.submit', 'queue.register', 'network.external'], JSON_UNESCAPED_SLASHES),
+        ':installed_at' => $now,
+        ':updated_at' => $now,
+    ]);
 
 $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
 $repo->create('article', 'PHP CMS Guide', 'php-cms-guide', [
