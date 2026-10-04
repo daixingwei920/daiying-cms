@@ -84,7 +84,7 @@ final class SearchEngineDataRepository
     private function engine(string $engine): string
     {
         $engine = strtolower(trim($engine));
-        if (!in_array($engine, ['baidu', 'google', 'manual'], true)) {
+        if (!in_array($engine, ['baidu', 'google', 'bing', 'manual'], true)) {
             return '';
         }
         return $engine;

@@ -2,6 +2,15 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.79 - 2026-10-04
+
+- Added SEO P4.1 read-only lifecycle and opportunity views to the existing Keyword Center, including page readiness, sitemap membership, evidence-based index status, observed metric trends, and explainable deterministic opportunity scores.
+- Added Baidu/Google/Bing metric trend separation using the existing `cms_seo_keyword_metrics` table without adding new P4 migrations.
+- Fixed Search Engine UI state handling for `official.seo.baidu-submit` so plugin-not-installed, disabled, route-error, not-configured, and connected states are shown accurately.
+- Prevented dead `/admin/seo/baidu-submit` management links unless the Baidu submit plugin is installed, enabled, and route-available.
+- Preserved Baidu single ownership: Token, actual POST, dedupe, queue/retry, and submission logs remain owned by `official.seo.baidu-submit`.
+- Preserved the 1.2.72 upgrade floor for this patch release.
+
 ## 1.2.78 - 2026-10-03
 
 - Added SEO Structural P0 fixes for canonical, sitemap category/tag inclusion, and homepage H1 handling without changing the established sitemap policy.

@@ -61,6 +61,7 @@ use Cms\Core\Notification\NotificationService;
 use Cms\Core\Routing\BasePath;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Security\SessionManager;
+use Cms\Core\Seo\Keyword\SeoLifecycleAggregator;
 use Cms\Core\Seo\SearchEngine\OfficialBaiduSubmitBridge;
 use Cms\Core\Seo\SearchEngine\SearchEngineDataRepository;
 use Cms\Core\Support\CurrencyRegistry;
@@ -2188,21 +2189,24 @@ final class AdminController
         }
 
         try {
-            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $pdo = ConnectionFactory::make($this->settings);
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
             $filters = [
                 'q' => trim((string) ($request->query['q'] ?? '')),
                 'type' => trim((string) ($request->query['type'] ?? 'all')),
                 'conflict' => trim((string) ($request->query['conflict'] ?? 'all')),
                 'status' => trim((string) ($request->query['status'] ?? 'all')),
             ];
-            $rows = $repo->seoKeywordCenterRows($filters);
-            $stats = $repo->seoKeywordCenterStats();
+            $dashboard = (new SeoLifecycleAggregator($pdo, $repo, $this->officialBaiduSubmitBridge(), (string) $this->settings->get('site.url', '')))->dashboard($filters);
+            $rows = $dashboard['rows'];
+            $stats = $dashboard['stats'];
+            $opportunities = $dashboard['opportunities'];
         } catch (Throwable $exception) {
             $this->logger->error('SEO keyword center failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
             return Response::html(View::page('关键词中心', '<h1>关键词中心</h1><p class="error">关键词中心暂不可用。</p>'), 500);
         }
 
-        return Response::html(View::page('关键词中心', $this->seoKeywordIndexHtml($rows, $stats, $filters)));
+        return Response::html(View::page('关键词中心', $this->seoKeywordIndexHtml($rows, $stats, $filters, $opportunities)));
     }
 
     public function seoKeywordDetail(Request $request): Response
@@ -2217,8 +2221,9 @@ final class AdminController
         }
 
         try {
-            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
-            $detail = $repo->seoKeywordDetail($keyword);
+            $pdo = ConnectionFactory::make($this->settings);
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $detail = (new SeoLifecycleAggregator($pdo, $repo, $this->officialBaiduSubmitBridge(), (string) $this->settings->get('site.url', '')))->detail($keyword);
         } catch (Throwable $exception) {
             $this->logger->error('SEO keyword detail failed', ['source' => 'Core', 'keyword' => $keyword, 'error' => $exception->getMessage()]);
             return Response::html(View::page('关键词详情', '<h1>关键词详情</h1><p class="error">关键词详情暂不可用。</p>'), 500);
@@ -2317,7 +2322,7 @@ final class AdminController
         try {
             $absoluteUrl = $this->validatedSiteUrl($url);
             $result = $this->officialBaiduSubmitBridge()->submitUrl($absoluteUrl);
-            if (in_array((string) ($result['status'] ?? ''), ['plugin_missing', 'plugin_schema_missing', 'disabled', 'invalid_site', 'missing_token', 'invalid_url', 'failed'], true)) {
+            if (in_array((string) ($result['status'] ?? ''), ['plugin_missing', 'plugin_disabled', 'plugin_schema_missing', 'integration_error', 'disabled', 'invalid_site', 'missing_token', 'invalid_url', 'failed'], true)) {
                 throw new \RuntimeException((string) ($result['message'] ?? 'Baidu submission failed.'));
             }
         } catch (Throwable $exception) {
@@ -10296,19 +10301,39 @@ JS;
     }
 
     /** @param list<array<string,mixed>> $rows @param array<string,mixed> $stats @param array<string,string> $filters */
-    private function seoKeywordIndexHtml(array $rows, array $stats, array $filters): string
+    private function seoKeywordIndexHtml(array $rows, array $stats, array $filters, array $opportunities = []): string
     {
         $cards = [
             ['Total Target Keywords', (string) (int) ($stats['total'] ?? 0)],
             ['Active Keywords', (string) (int) ($stats['active'] ?? 0)],
-            ['Conflict Keywords', (string) (int) ($stats['conflicts'] ?? 0)],
-            ['Unassigned / Draft Keywords', (string) (int) ($stats['unassigned_draft'] ?? 0)],
-            ['Baidu / GSC Data', 'Not Connected'],
+            ['Landing Pages Assigned', (string) (int) ($stats['landing_pages_assigned'] ?? 0)],
+            ['SEO Ready', (string) (int) ($stats['seo_ready'] ?? 0)],
+            ['In Sitemap', (string) (int) ($stats['in_sitemap'] ?? 0)],
+            ['Baidu Submitted', (string) (int) ($stats['baidu_submitted'] ?? 0)],
+            ['With Observed Data', (string) (int) ($stats['with_observed_data'] ?? 0)],
+            ['Missing Observed Data', (string) (int) ($stats['missing_observed_data'] ?? 0)],
+            ['Potential Cannibalization', (string) (int) ($stats['conflicts'] ?? 0)],
+            ['Data Freshness', (string) ($stats['data_freshness'] ?? 'Not Available')],
         ];
         $cardHtml = '';
         foreach ($cards as [$label, $value]) {
             $cardHtml .= '<section class="admin-dashboard-card"><span class="muted">' . View::escape($label) . '</span><strong>' . View::escape($value) . '</strong></section>';
         }
+
+        $opportunityRows = '';
+        foreach ($opportunities as $opportunity) {
+            $opportunityRows .= '<tr><td><a href="/admin/seo/keywords/detail?keyword=' . rawurlencode((string) ($opportunity['keyword'] ?? '')) . '">' . View::escape((string) ($opportunity['keyword'] ?? '')) . '</a></td>' .
+                '<td><code>' . View::escape((string) ($opportunity['primary_url'] ?? '')) . '</code></td>' .
+                '<td>' . View::escape((string) ($opportunity['engine'] ?? 'Not Available')) . '</td>' .
+                '<td>' . View::escape((string) ($opportunity['type'] ?? 'Review')) . '</td>' .
+                '<td><strong>' . View::escape((string) ($opportunity['score'] ?? 0)) . '</strong></td>' .
+                '<td>' . View::escape((string) ($opportunity['evidence'] ?? '')) . '</td>' .
+                '<td>' . View::escape((string) ($opportunity['suggested_action'] ?? 'Review manually')) . '</td>' .
+                '<td>' . View::escape((string) ($opportunity['last_metric_period'] ?? 'Not Available')) . '</td>' .
+                '<td>' . View::escape((string) ($opportunity['last_baidu_submission'] ?? 'Not Available')) . '</td>' .
+                '<td>' . View::escape((string) ($opportunity['index_evidence'] ?? 'unknown')) . '</td></tr>';
+        }
+        $opportunityRows = $opportunityRows !== '' ? $opportunityRows : '<tr><td colspan="10" class="muted">No SEO opportunities detected from available observed data.</td></tr>';
 
         $rowHtml = '';
         foreach ($rows as $row) {
@@ -10318,6 +10343,8 @@ JS;
             $primaryLabel = $primary !== '' ? $primary : 'Unassigned';
             $types = implode(', ', array_filter(array_map('strval', is_array($row['content_types'] ?? null) ? $row['content_types'] : [])));
             $conflict = !empty($row['conflict']);
+            $opportunity = is_array($row['opportunity'] ?? null) ? $row['opportunity'] : ['score' => 0, 'types' => []];
+            $indexEvidence = is_array($row['index_evidence'] ?? null) ? (string) ($row['index_evidence']['status'] ?? 'unknown') : 'unknown';
             $rowHtml .= '<tr><td><strong><a href="/admin/seo/keywords/detail?keyword=' . rawurlencode($keyword) . '">' . View::escape($keyword) . '</a></strong></td>' .
                 '<td><code>' . View::escape($primaryLabel) . '</code></td>' .
                 '<td>' . count($bindings) . '</td>' .
@@ -10325,12 +10352,16 @@ JS;
                 '<td>' . View::escape((string) ($row['source'] ?? 'content')) . '</td>' .
                 '<td><span class="admin-badge">' . View::escape((string) ($row['status'] ?? 'active')) . '</span></td>' .
                 '<td>' . ($conflict ? '<span class="admin-badge admin-badge-warning">Potential Cannibalization</span>' : '<span class="admin-badge admin-badge-success">正常</span>') . '</td>' .
+                '<td>' . View::escape((string) ($row['sitemap_status'] ?? 'unknown')) . '</td>' .
+                '<td>' . View::escape($indexEvidence) . '</td>' .
+                '<td><strong>' . View::escape((string) ($opportunity['score'] ?? 0)) . '</strong><br><span class="muted">' . View::escape(implode(', ', (array) ($opportunity['types'] ?? []))) . '</span></td>' .
                 '<td>' . View::escape((string) ($row['updated_at'] ?? '')) . '</td></tr>';
         }
-        $rowHtml = $rowHtml !== '' ? $rowHtml : '<tr><td colspan="8" class="muted">暂无匹配关键词。</td></tr>';
+        $rowHtml = $rowHtml !== '' ? $rowHtml : '<tr><td colspan="11" class="muted">暂无匹配关键词。</td></tr>';
 
         return '<div class="admin-page-header"><div><h1>关键词中心</h1><p class="muted">基于 Content / Category / Tag 的 target keywords 聚合展示，不自动修改任何页面。</p></div></div>' .
             '<div class="admin-dashboard-grid">' . $cardHtml . '</div>' .
+            '<section class="editor-card"><h2>Today\'s SEO Opportunities</h2><table><thead><tr><th>Keyword</th><th>Primary URL</th><th>Engine</th><th>Opportunity Type</th><th>Score</th><th>Evidence</th><th>Suggested Action</th><th>Last Metric Period</th><th>Last Baidu Submission</th><th>Index Evidence</th></tr></thead><tbody>' . $opportunityRows . '</tbody></table><p class="muted">Scores are deterministic and explainable. Submitted does not mean Indexed.</p></section>' .
             '<section class="editor-card"><h2>筛选</h2><form method="get" action="/admin/seo/keywords"><div class="admin-grid four">' .
             '<label>关键词搜索<input name="q" value="' . View::escape((string) ($filters['q'] ?? '')) . '" placeholder="PHP CMS"></label>' .
             '<label>内容类型' . $this->selectHtml('type', ['all' => '全部', 'article' => 'Article', 'page' => 'Page', 'category' => 'Category', 'tag' => 'Tag'], (string) ($filters['type'] ?? 'all')) . '</label>' .
@@ -10340,7 +10371,7 @@ JS;
             '<section class="editor-card"><h2>新增 / 预留关键词</h2><form method="post" action="/admin/seo/keywords/save">' . CsrfToken::field() .
             '<div class="admin-grid four"><label>Keyword<input name="keyword" required></label><label>Primary URL<input name="primary_url" placeholder="/category/php-cms"></label><label>状态' . $this->selectHtml('status', ['draft' => 'draft', 'active' => 'active', 'paused' => 'paused'], 'draft') . '</label><label>来源' . $this->selectHtml('source', ['manual' => 'manual', 'content' => 'content', 'baidu' => 'baidu', 'google' => 'google', 'ai_suggestion' => 'ai_suggestion'], 'manual') . '</label></div>' .
             '<label>Notes<textarea name="notes" rows="2"></textarea></label><p><button type="submit">保存关键词</button></p></form></section>' .
-            '<section class="editor-card"><h2>关键词列表</h2><table><thead><tr><th>关键词</th><th>主落地页</th><th>绑定页面数量</th><th>内容类型</th><th>来源</th><th>状态</th><th>是否冲突</th><th>最后更新时间</th></tr></thead><tbody>' . $rowHtml . '</tbody></table><p class="muted">搜索量 / 点击 / 排名：Not Connected。</p></section>';
+            '<section class="editor-card"><h2>关键词列表</h2><table><thead><tr><th>关键词</th><th>主落地页</th><th>绑定页面数量</th><th>内容类型</th><th>来源</th><th>状态</th><th>是否冲突</th><th>Sitemap</th><th>Index Evidence</th><th>Opportunity</th><th>最后更新时间</th></tr></thead><tbody>' . $rowHtml . '</tbody></table><p class="muted">Missing observed metrics render as Not Available, not 0.</p></section>';
     }
 
     /** @param array<string,mixed> $detail */
@@ -10350,6 +10381,12 @@ JS;
         $bindings = is_array($detail['bindings'] ?? null) ? $detail['bindings'] : [];
         $metrics = is_array($detail['observed_metrics'] ?? null) ? $detail['observed_metrics'] : [];
         $conflict = !empty($detail['conflict']);
+        $readiness = is_array($detail['page_readiness'] ?? null) ? $detail['page_readiness'] : [];
+        $indexEvidence = is_array($detail['index_evidence'] ?? null) ? $detail['index_evidence'] : [];
+        $submission = is_array($detail['latest_baidu_submission'] ?? null) ? $detail['latest_baidu_submission'] : [];
+        $trends = is_array($detail['metric_trends'] ?? null) ? $detail['metric_trends'] : [];
+        $opportunity = is_array($detail['opportunity'] ?? null) ? $detail['opportunity'] : ['score' => 0, 'reasons' => [], 'types' => []];
+        $detailOpportunities = is_array($detail['opportunities'] ?? null) ? $detail['opportunities'] : [];
         $bindingRows = '';
         foreach ($bindings as $binding) {
             $bindingRows .= '<tr><td><a href="' . View::escape((string) ($binding['url_path'] ?? '#')) . '" target="_blank" rel="noopener"><code>' . View::escape((string) ($binding['url_path'] ?? '')) . '</code></a></td>' .
@@ -10374,6 +10411,37 @@ JS;
                 '<td>' . View::escape((string) ($metric['source'] ?? 'Not Available')) . '</td></tr>';
         }
         $metricRows = $metricRows !== '' ? $metricRows : '<tr><td colspan="8" class="muted">Observed Data: Not Available。</td></tr>';
+        $trendRows = '';
+        foreach ($trends as $engine => $windows) {
+            if (!is_array($windows)) {
+                continue;
+            }
+            foreach (['7d', '30d', '90d'] as $window) {
+                $data = is_array($windows[$window] ?? null) ? $windows[$window] : [];
+                $trendRows .= '<tr><td>' . View::escape((string) $engine) . '</td><td>' . View::escape($window) . '</td>' .
+                    '<td>' . View::escape((string) ($data['impressions'] ?? 'Not Available')) . '</td>' .
+                    '<td>' . View::escape((string) ($data['clicks'] ?? 'Not Available')) . '</td>' .
+                    '<td>' . View::escape((string) ($data['ctr'] ?? 'Not Available')) . '</td>' .
+                    '<td>' . View::escape((string) ($data['average_position'] ?? 'Not Available')) . '</td>' .
+                    '<td>' . View::escape((string) ($windows['latest_period_end'] ?? 'Not Available')) . '</td></tr>';
+            }
+        }
+        $trendRows = $trendRows !== '' ? $trendRows : '<tr><td colspan="7" class="muted">Trend Data: Not Available。</td></tr>';
+        $gapHtml = '';
+        foreach ((array) ($readiness['gaps'] ?? []) as $gap) {
+            $gapHtml .= '<li>' . View::escape((string) $gap) . '</li>';
+        }
+        $gapHtml = $gapHtml !== '' ? '<ul>' . $gapHtml . '</ul>' : '<p class="admin-badge admin-badge-success">SEO Ready</p>';
+        $reasonHtml = '';
+        foreach ((array) ($opportunity['reasons'] ?? []) as $reason) {
+            $reasonHtml .= '<li>' . View::escape((string) $reason) . '</li>';
+        }
+        $reasonHtml = $reasonHtml !== '' ? '<ul>' . $reasonHtml . '</ul>' : '<p class="muted">No score reasons from current data.</p>';
+        $opportunityDetailRows = '';
+        foreach ($detailOpportunities as $item) {
+            $opportunityDetailRows .= '<tr><td>' . View::escape((string) ($item['type'] ?? 'Review')) . '</td><td><strong>' . View::escape((string) ($item['score'] ?? 0)) . '</strong></td><td>' . View::escape((string) ($item['evidence'] ?? '')) . '</td><td>' . View::escape((string) ($item['suggested_action'] ?? 'Review manually')) . '</td></tr>';
+        }
+        $opportunityDetailRows = $opportunityDetailRows !== '' ? $opportunityDetailRows : '<tr><td colspan="4" class="muted">No opportunities from available data.</td></tr>';
         $primary = trim((string) ($detail['primary_url'] ?? ''));
         $submitPrimary = $primary !== ''
             ? '<form method="post" action="/admin/seo/search-engines/submit">' . CsrfToken::field() . '<input type="hidden" name="url" value="' . View::escape($primary) . '"><button type="submit">通过百度推送插件提交 Primary 到百度</button><p class="muted">Submitted 不等于 Indexed。</p></form>'
@@ -10386,16 +10454,46 @@ JS;
             '<div class="admin-grid four"><label>Primary URL<input name="primary_url" value="' . View::escape((string) ($detail['primary_url'] ?? '')) . '" placeholder="/category/php-cms"></label><label>状态' . $this->selectHtml('status', ['draft' => 'draft', 'active' => 'active', 'paused' => 'paused'], (string) ($detail['status'] ?? 'draft')) . '</label><label>来源' . $this->selectHtml('source', ['manual' => 'manual', 'content' => 'content', 'baidu' => 'baidu', 'google' => 'google', 'ai_suggestion' => 'ai_suggestion'], (string) ($detail['source'] ?? 'manual')) . '</label><label>搜索引擎数据<input value="Not Connected" disabled></label></div>' .
             '<label>Notes<textarea name="notes" rows="2">' . View::escape((string) ($detail['notes'] ?? '')) . '</textarea></label><p><button type="submit">保存 Primary / 状态</button></p></form></section>' .
             '<section class="editor-card"><h2>Baidu URL Submission</h2>' . $submitPrimary . '</section>' .
+            '<section class="editor-card"><h2>Page Readiness</h2><table><tbody>' .
+            '<tr><th>HTTP / Route</th><td>' . View::escape((string) ($readiness['http_status'] ?? 'unknown')) . '</td></tr>' .
+            '<tr><th>Title</th><td>' . View::escape((string) ($readiness['title'] ?? 'Not Available')) . '</td></tr>' .
+            '<tr><th>Description</th><td>' . View::escape((string) ($readiness['description'] ?? 'Not Available')) . '</td></tr>' .
+            '<tr><th>H1</th><td>' . View::escape((string) ($readiness['h1'] ?? 'Not Available')) . '</td></tr>' .
+            '<tr><th>Canonical</th><td><code>' . View::escape((string) ($readiness['canonical'] ?? 'Not Available')) . '</code></td></tr>' .
+            '<tr><th>Robots</th><td>' . View::escape((string) ($readiness['robots_index'] ?? 'unknown')) . ' / ' . View::escape((string) ($readiness['robots_follow'] ?? 'Not Available')) . '</td></tr>' .
+            '<tr><th>Primary URL Consistency</th><td>' . View::escape(!empty($readiness['canonical_consistent']) ? 'PASS' : 'FAIL') . '</td></tr>' .
+            '<tr><th>Gaps</th><td>' . $gapHtml . '</td></tr>' .
+            '</tbody></table></section>' .
+            '<section class="editor-card"><h2>Discovery / Index Evidence</h2><table><tbody>' .
+            '<tr><th>Sitemap</th><td>' . View::escape((string) ($detail['sitemap_status'] ?? 'unknown')) . '</td></tr>' .
+            '<tr><th>Last Baidu Submission</th><td>' . View::escape((string) ($submission['created_at'] ?? 'Not Available')) . ' / ' . View::escape((string) ($submission['status'] ?? 'Not Available')) . '</td></tr>' .
+            '<tr><th>Baidu Success / Remain</th><td>' . View::escape((string) ($submission['baidu_success'] ?? 'Not Available')) . ' / ' . View::escape((string) ($submission['baidu_remain'] ?? 'Not Available')) . '</td></tr>' .
+            '<tr><th>Index Evidence</th><td>' . View::escape((string) ($indexEvidence['status'] ?? 'unknown')) . '</td></tr>' .
+            '<tr><th>Evidence</th><td>' . View::escape((string) ($indexEvidence['evidence'] ?? 'No reliable URL-level index evidence')) . '</td></tr>' .
+            '</tbody></table><p class="muted">Submitted / success=1 is not Indexed. Missing observed data is not Not Indexed.</p></section>' .
             '<section class="editor-card"><h2>Target Data / Bindings</h2><table><thead><tr><th>URL</th><th>Content Type</th><th>Content Title</th><th>Index Status</th><th>Canonical</th><th>SEO Title</th><th>SEO Description</th><th>Target Keywords</th></tr></thead><tbody>' . $bindingRows . '</tbody></table></section>' .
-            '<section class="editor-card"><h2>Observed Data</h2><table><thead><tr><th>Search Engine</th><th>URL</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Average Position</th><th>Period</th><th>Source</th></tr></thead><tbody>' . $metricRows . '</tbody></table><p class="muted">没有搜索引擎返回的数据时显示 Not Available，不显示 0。</p></section>';
+            '<section class="editor-card"><h2>Observed Data</h2><table><thead><tr><th>Search Engine</th><th>URL</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Average Position</th><th>Period</th><th>Source</th></tr></thead><tbody>' . $metricRows . '</tbody></table><p class="muted">没有搜索引擎返回的数据时显示 Not Available，不显示 0。</p></section>' .
+            '<section class="editor-card"><h2>Metric Trends</h2><table><thead><tr><th>Search Engine</th><th>Window</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Average Position</th><th>Latest Period</th></tr></thead><tbody>' . $trendRows . '</tbody></table></section>' .
+            '<section class="editor-card"><h2>Opportunities</h2><p><strong>Score ' . View::escape((string) ($opportunity['score'] ?? 0)) . '</strong> <span class="muted">' . View::escape(implode(', ', (array) ($opportunity['types'] ?? []))) . '</span></p>' . $reasonHtml . '<table><thead><tr><th>Type</th><th>Score</th><th>Evidence</th><th>Suggested Human Action</th></tr></thead><tbody>' . $opportunityDetailRows . '</tbody></table></section>';
     }
 
     /** @param array<string,mixed> $baidu @param list<array<string,string>> $submissions */
     private function seoSearchEnginesHtml(array $baidu, array $submissions, string $notice = ''): string
     {
         $tokenText = !empty($baidu['token_configured']) ? 'Configured' : 'Missing';
-        $status = (string) ($baidu['status'] ?? 'not_connected');
+        $status = (string) ($baidu['status'] ?? 'plugin_not_installed');
+        $statusLabel = (string) ($baidu['status_label'] ?? match ($status) {
+            'connected' => 'Connected',
+            'not_configured' => 'Not Configured',
+            'plugin_disabled' => 'Plugin Disabled',
+            'integration_error' => 'Integration Error',
+            default => 'Plugin Not Installed',
+        });
         $credentialStatus = (string) ($baidu['credential_status'] ?? 'missing');
+        $manageAvailable = !empty($baidu['management_available']) && (string) ($baidu['manage_url'] ?? '') !== '';
+        $manageHtml = $manageAvailable
+            ? '<p><a class="button admin-button-secondary" href="' . View::escape((string) $baidu['manage_url']) . '">管理百度推送插件</a></p>'
+            : '<p class="admin-badge admin-badge-warning">' . View::escape((string) ($baidu['message'] ?? '百度推送插件不可用')) . '</p>';
         $submissionRows = '';
         foreach ($submissions as $submission) {
             $submissionRows .= '<tr><td><code>' . View::escape((string) ($submission['url'] ?? '')) . '</code></td><td>' . View::escape((string) ($submission['status'] ?? '')) . '</td><td>' . View::escape((string) ($submission['http_status'] ?? '')) . '</td><td>' . View::escape((string) ($submission['baidu_success'] ?? '')) . '</td><td>' . View::escape((string) ($submission['baidu_remain'] ?? '')) . '</td><td>' . View::escape((string) ($submission['error_summary'] ?? '')) . '</td><td>' . View::escape((string) ($submission['created_at'] ?? '')) . '</td></tr>';
@@ -10405,14 +10503,17 @@ JS;
         return '<div class="admin-page-header"><div><h1>搜索引擎连接</h1><p class="muted">Observed Data 与 CMS Target Keywords 分层保存。</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/seo/keywords">关键词中心</a></div></div>' .
             $notice .
             '<section class="editor-card"><h2>Baidu</h2><table><tbody>' .
-            '<tr><th>Connected</th><td>' . View::escape($status === 'connected' ? 'Connected' : 'Not Connected') . '</td></tr>' .
+            '<tr><th>Status</th><td>' . View::escape($statusLabel) . '</td></tr>' .
+            '<tr><th>Plugin installed</th><td>' . View::escape(!empty($baidu['plugin_installed']) ? 'YES' : 'NO') . '</td></tr>' .
+            '<tr><th>Plugin enabled</th><td>' . View::escape(!empty($baidu['plugin_enabled']) ? 'YES' : 'NO') . '</td></tr>' .
+            '<tr><th>Admin route</th><td>' . View::escape(!empty($baidu['route_available']) ? 'Available' : 'Not Available') . '</td></tr>' .
             '<tr><th>Token owner</th><td><code>official.seo.baidu-submit</code></td></tr>' .
             '<tr><th>Site</th><td>' . View::escape((string) ($baidu['site'] ?? '')) . '</td></tr>' .
             '<tr><th>Credential status</th><td>' . View::escape($credentialStatus . ' / ' . $tokenText) . '</td></tr>' .
             '<tr><th>Last submit</th><td>' . View::escape((string) ($baidu['last_submit_at'] ?? '')) . '</td></tr>' .
             '<tr><th>Keyword metrics API</th><td>Not Available</td></tr>' .
             '</tbody></table>' .
-            '<p><a class="button admin-button-secondary" href="/admin/seo/baidu-submit">管理百度推送插件</a></p><p class="muted">Core 不保存百度 Token；URL 提交、日志、Queue/Retry、Dedupe 均由 official.seo.baidu-submit 提供。</p></section>' .
+            $manageHtml . '<p class="muted">Core 不保存百度 Token；URL 提交、日志、Queue/Retry、Dedupe 均由 official.seo.baidu-submit 提供。</p></section>' .
             '<section class="editor-card"><h2>Manual Import Fallback</h2><form method="post" action="/admin/seo/search-engines/import">' . CsrfToken::field() .
             '<label>CSV<textarea name="csv_text" rows="8" placeholder="keyword,url_path,search_engine,impressions,clicks,ctr,average_position,period_start,period_end&#10;PHP CMS,/category/php-cms,baidu,100,10,10,3.2,2026-10-01,2026-10-02"></textarea></label><p><button type="submit">导入 CSV</button></p></form></section>' .
             '<section class="editor-card"><h2>Baidu URL Submission</h2><form method="post" action="/admin/seo/search-engines/submit">' . CsrfToken::field() . '<label>URL<input name="url" placeholder="/category/php-cms"></label><p><button type="submit">通过百度推送插件提交到百度</button></p><p class="muted">Submitted / Submission Accepted 不等于 Indexed。</p></form><table><thead><tr><th>URL</th><th>Status</th><th>HTTP</th><th>Success</th><th>Remain</th><th>Error</th><th>Submitted At</th></tr></thead><tbody>' . $submissionRows . '</tbody></table></section>';
