@@ -169,6 +169,7 @@ if (!function_exists('dy_setting')) {
         $siteName = dy_site_name($context);
         $pageTitle = trim((string) ($seo['title'] ?? $title));
         $description = trim((string) ($seo['description'] ?? dy_text($context, 'site_description', '')));
+        $keywords = trim((string) ($seo['keywords'] ?? dy_text($context, 'seo_keywords', '')));
         $canonical = trim((string) ($seo['canonical'] ?? $context->get('canonical', '')));
         $favicon = dy_image_url($context, ['favicon_image', 'favicon_url', 'site_favicon_url'], true);
         ?>
@@ -177,6 +178,7 @@ if (!function_exists('dy_setting')) {
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title><?= $context->e($pageTitle !== '' ? $pageTitle : $siteName) ?></title>
     <meta name="description" content="<?= $context->e($description !== '' ? $description : $siteName) ?>">
+    <?php if ($keywords !== ''): ?><meta name="keywords" content="<?= $context->e($keywords) ?>"><?php endif; ?>
     <?php if ($favicon !== ''): ?><link rel="icon" href="<?= $context->e($favicon) ?>"><?php endif; ?>
     <?php if ($canonical !== ''): ?><link rel="canonical" href="<?= $context->e($canonical) ?>"><?php endif; ?>
     <meta name="robots" content="<?= $context->e($seo['robots'] ?? 'index,follow') ?>">

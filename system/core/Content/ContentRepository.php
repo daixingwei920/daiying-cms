@@ -354,13 +354,13 @@ final class ContentRepository
         return (int) $stmt->fetchColumn();
     }
 
-    /** @return array{id:int,taxonomy:string,name:string,slug:string}|null */
+    /** @return array{id:int,taxonomy:string,name:string,slug:string,meta:array<string,mixed>}|null */
     public function termBySlug(string $taxonomy, string $slug): ?array
     {
         if (!$this->safeTaxonomy($taxonomy) || !$this->safePublicSlug($slug)) {
             return null;
         }
-        $stmt = $this->pdo->prepare('SELECT id, taxonomy, name, slug FROM cms_terms WHERE taxonomy = :taxonomy AND slug = :slug LIMIT 1');
+        $stmt = $this->pdo->prepare('SELECT id, taxonomy, name, slug, meta_json FROM cms_terms WHERE taxonomy = :taxonomy AND slug = :slug LIMIT 1');
         $stmt->execute([':taxonomy' => $taxonomy, ':slug' => $slug]);
         $row = $stmt->fetch();
 
@@ -369,6 +369,7 @@ final class ContentRepository
             'taxonomy' => (string) $row['taxonomy'],
             'name' => (string) $row['name'],
             'slug' => (string) $row['slug'],
+            'meta' => $this->decodeMeta($row['meta_json'] ?? null),
         ] : null;
     }
 
@@ -413,34 +414,40 @@ final class ContentRepository
         return (int) $stmt->fetchColumn();
     }
 
-    /** @return list<array{id:int,name:string,slug:string,taxonomy:string}> */
+    /** @return list<array{id:int,name:string,slug:string,taxonomy:string,meta:array<string,mixed>}> */
     public function termsForContent(int $id): array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT t.id, t.name, t.slug, t.taxonomy FROM cms_terms t INNER JOIN cms_content_terms ct ON ct.term_id = t.id WHERE ct.content_id = :id ORDER BY t.taxonomy, t.name'
+            'SELECT t.id, t.name, t.slug, t.taxonomy, t.meta_json FROM cms_terms t INNER JOIN cms_content_terms ct ON ct.term_id = t.id WHERE ct.content_id = :id ORDER BY t.taxonomy, t.name'
         );
         $stmt->execute([':id' => $id]);
 
-        return $stmt->fetchAll();
+        return array_map(fn (array $row): array => [
+            'id' => (int) $row['id'],
+            'name' => (string) $row['name'],
+            'slug' => (string) $row['slug'],
+            'taxonomy' => (string) $row['taxonomy'],
+            'meta' => $this->decodeMeta($row['meta_json'] ?? null),
+        ], $stmt->fetchAll());
     }
 
-    /** @return list<array{id:int,taxonomy:string,name:string,slug:string,content_count:int,created_at:string,updated_at:string}> */
+    /** @return list<array{id:int,taxonomy:string,name:string,slug:string,content_count:int,created_at:string,updated_at:string,meta:array<string,mixed>}> */
     public function terms(string $taxonomy): array
     {
         if (!$this->safeTaxonomy($taxonomy)) {
             return [];
         }
         $stmt = $this->pdo->prepare(
-            'SELECT t.id, t.taxonomy, t.name, t.slug, t.created_at, t.updated_at, COUNT(ct.content_id) AS content_count
+            'SELECT t.id, t.taxonomy, t.name, t.slug, t.meta_json, t.created_at, t.updated_at, COUNT(ct.content_id) AS content_count
              FROM cms_terms t
              LEFT JOIN cms_content_terms ct ON ct.term_id = t.id
              WHERE t.taxonomy = :taxonomy
-             GROUP BY t.id, t.taxonomy, t.name, t.slug, t.created_at, t.updated_at
+             GROUP BY t.id, t.taxonomy, t.name, t.slug, t.meta_json, t.created_at, t.updated_at
              ORDER BY t.name ASC'
         );
         $stmt->execute([':taxonomy' => $taxonomy]);
 
-        return array_map(static fn (array $row): array => [
+        return array_map(fn (array $row): array => [
             'id' => (int) $row['id'],
             'taxonomy' => (string) $row['taxonomy'],
             'name' => (string) $row['name'],
@@ -448,21 +455,22 @@ final class ContentRepository
             'content_count' => (int) ($row['content_count'] ?? 0),
             'created_at' => (string) ($row['created_at'] ?? ''),
             'updated_at' => (string) ($row['updated_at'] ?? ''),
+            'meta' => $this->decodeMeta($row['meta_json'] ?? null),
         ], $stmt->fetchAll());
     }
 
-    /** @return array{id:int,taxonomy:string,name:string,slug:string,content_count:int,created_at:string,updated_at:string}|null */
+    /** @return array{id:int,taxonomy:string,name:string,slug:string,content_count:int,created_at:string,updated_at:string,meta:array<string,mixed>}|null */
     public function termById(int $id): ?array
     {
         if ($id <= 0) {
             return null;
         }
         $stmt = $this->pdo->prepare(
-            'SELECT t.id, t.taxonomy, t.name, t.slug, t.created_at, t.updated_at, COUNT(ct.content_id) AS content_count
+            'SELECT t.id, t.taxonomy, t.name, t.slug, t.meta_json, t.created_at, t.updated_at, COUNT(ct.content_id) AS content_count
              FROM cms_terms t
              LEFT JOIN cms_content_terms ct ON ct.term_id = t.id
              WHERE t.id = :id
-             GROUP BY t.id, t.taxonomy, t.name, t.slug, t.created_at, t.updated_at
+             GROUP BY t.id, t.taxonomy, t.name, t.slug, t.meta_json, t.created_at, t.updated_at
              LIMIT 1'
         );
         $stmt->execute([':id' => $id]);
@@ -479,10 +487,12 @@ final class ContentRepository
             'content_count' => (int) ($row['content_count'] ?? 0),
             'created_at' => (string) ($row['created_at'] ?? ''),
             'updated_at' => (string) ($row['updated_at'] ?? ''),
+            'meta' => $this->decodeMeta($row['meta_json'] ?? null),
         ];
     }
 
-    public function saveTerm(string $taxonomy, string $name, string $slug, ?int $id = null): int
+    /** @param array<string,mixed>|null $meta */
+    public function saveTerm(string $taxonomy, string $name, string $slug, ?int $id = null, ?array $meta = null): int
     {
         if (!$this->safeTaxonomy($taxonomy)) {
             throw new ContentException('Unsupported taxonomy.');
@@ -500,9 +510,14 @@ final class ContentRepository
         }
 
         $now = gmdate('c');
+        $cleanMeta = $meta !== null ? $this->cleanTermMeta($meta) : $this->cleanTermMeta([]);
         if ($id !== null && $id > 0) {
-            $stmt = $this->pdo->prepare('UPDATE cms_terms SET name = :name, slug = :slug, updated_at = :updated_at WHERE id = :id AND taxonomy = :taxonomy');
-            $stmt->execute([':id' => $id, ':taxonomy' => $taxonomy, ':name' => $name, ':slug' => $slug, ':updated_at' => $now]);
+            if ($meta === null) {
+                $existingTerm = $this->termById($id);
+                $cleanMeta = $this->cleanTermMeta(is_array($existingTerm['meta'] ?? null) ? $existingTerm['meta'] : []);
+            }
+            $stmt = $this->pdo->prepare('UPDATE cms_terms SET name = :name, slug = :slug, meta_json = :meta_json, updated_at = :updated_at WHERE id = :id AND taxonomy = :taxonomy');
+            $stmt->execute([':id' => $id, ':taxonomy' => $taxonomy, ':name' => $name, ':slug' => $slug, ':meta_json' => $this->json($cleanMeta), ':updated_at' => $now]);
             if ($stmt->rowCount() < 1 && $this->termById($id) === null) {
                 throw new ContentException('Category not found.');
             }
@@ -510,8 +525,8 @@ final class ContentRepository
             return $id;
         }
 
-        $stmt = $this->pdo->prepare('INSERT INTO cms_terms (taxonomy, name, slug, created_at, updated_at) VALUES (:taxonomy, :name, :slug, :created_at, :updated_at)');
-        $stmt->execute([':taxonomy' => $taxonomy, ':name' => $name, ':slug' => $slug, ':created_at' => $now, ':updated_at' => $now]);
+        $stmt = $this->pdo->prepare('INSERT INTO cms_terms (taxonomy, name, slug, meta_json, created_at, updated_at) VALUES (:taxonomy, :name, :slug, :meta_json, :created_at, :updated_at)');
+        $stmt->execute([':taxonomy' => $taxonomy, ':name' => $name, ':slug' => $slug, ':meta_json' => $this->json($cleanMeta), ':created_at' => $now, ':updated_at' => $now]);
 
         return (int) $this->pdo->lastInsertId();
     }
@@ -557,6 +572,225 @@ final class ContentRepository
         $stmt = $this->pdo->query("SELECT * FROM cms_contents WHERE status = 'published' ORDER BY updated_at DESC");
 
         return array_map(fn (array $row): array => $this->hydrate($row), $stmt->fetchAll());
+    }
+
+    /** @return list<array{taxonomy:string,name:string,slug:string,content_count:int,updated_at:string}> */
+    public function sitemapTerms(): array
+    {
+        $stmt = $this->pdo->query(
+            "SELECT t.taxonomy, t.name, t.slug, t.meta_json, COUNT(DISTINCT c.id) AS content_count, MAX(c.updated_at) AS updated_at
+             FROM cms_terms t
+             INNER JOIN cms_content_terms ct ON ct.term_id = t.id
+             INNER JOIN cms_contents c ON c.id = ct.content_id
+             WHERE c.status = 'published'
+               AND c.content_type = 'article'
+               AND t.taxonomy IN ('category', 'tag')
+             GROUP BY t.id, t.taxonomy, t.name, t.slug, t.meta_json
+             HAVING COUNT(DISTINCT c.id) > 0
+             ORDER BY t.taxonomy ASC, t.name ASC"
+        );
+
+        $terms = [];
+        foreach ($stmt->fetchAll() as $row) {
+            $slug = (string) $row['slug'];
+            if (!$this->safePublicSlug($slug)) {
+                continue;
+            }
+            $meta = $this->decodeMeta($row['meta_json'] ?? null);
+            if (($meta['robots_index'] ?? true) !== true) {
+                continue;
+            }
+            $terms[] = [
+                'taxonomy' => (string) $row['taxonomy'],
+                'name' => (string) $row['name'],
+                'slug' => $slug,
+                'content_count' => (int) ($row['content_count'] ?? 0),
+                'updated_at' => (string) ($row['updated_at'] ?? ''),
+                'meta' => $meta,
+            ];
+        }
+
+        return $terms;
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function targetKeywordBindings(): array
+    {
+        $bindings = [];
+        $stmt = $this->pdo->query("SELECT id, content_type, title, slug, meta_json FROM cms_contents WHERE status = 'published' ORDER BY id ASC");
+        foreach ($stmt->fetchAll() as $row) {
+            $meta = $this->decodeMeta($row['meta_json'] ?? null);
+            foreach ($this->keywordList((string) ($meta['target_keywords'] ?? '')) as $keyword) {
+                $type = (string) ($row['content_type'] ?? 'article');
+                $slug = (string) ($row['slug'] ?? '');
+                $urlPath = $type === 'page' ? '/' . ltrim($slug, '/') : '/articles/' . ltrim($slug, '/');
+                $fallbackTitle = (string) $row['title'];
+                $bindings[] = [
+                    'keyword' => $keyword,
+                    'source_type' => 'content:' . $type,
+                    'source_id' => (int) $row['id'],
+                    'content_type' => $type,
+                    'title' => $fallbackTitle,
+                    'url_path' => $urlPath,
+                    'index_status' => (($meta['robots_index'] ?? true) === true) ? 'index' : 'noindex',
+                    'canonical' => trim((string) ($meta['canonical_url'] ?? '')) !== '' ? (string) $meta['canonical_url'] : $urlPath,
+                    'seo_title' => (string) ($meta['seo_title'] ?? $fallbackTitle),
+                    'seo_description' => (string) ($meta['seo_description'] ?? ''),
+                    'target_keywords' => (string) ($meta['target_keywords'] ?? ''),
+                ];
+            }
+        }
+
+        $termStmt = $this->pdo->query("SELECT id, taxonomy, name, slug, meta_json FROM cms_terms WHERE taxonomy IN ('category', 'tag') ORDER BY id ASC");
+        foreach ($termStmt->fetchAll() as $row) {
+            $meta = $this->decodeMeta($row['meta_json'] ?? null);
+            foreach ($this->keywordList((string) ($meta['target_keywords'] ?? '')) as $keyword) {
+                $taxonomy = (string) $row['taxonomy'];
+                $urlPath = '/' . ($taxonomy === 'tag' ? 'tag' : 'category') . '/' . ltrim((string) $row['slug'], '/');
+                $bindings[] = [
+                    'keyword' => $keyword,
+                    'source_type' => 'term:' . $taxonomy,
+                    'source_id' => (int) $row['id'],
+                    'content_type' => $taxonomy,
+                    'title' => (string) $row['name'],
+                    'url_path' => $urlPath,
+                    'index_status' => (($meta['robots_index'] ?? true) === true) ? 'index' : 'noindex',
+                    'canonical' => trim((string) ($meta['canonical_url'] ?? '')) !== '' ? (string) $meta['canonical_url'] : $urlPath,
+                    'seo_title' => trim((string) ($meta['seo_title'] ?? '')) !== '' ? (string) $meta['seo_title'] : ucfirst($taxonomy) . ': ' . (string) $row['name'],
+                    'seo_description' => (string) ($meta['seo_description'] ?? ''),
+                    'target_keywords' => (string) ($meta['target_keywords'] ?? ''),
+                ];
+            }
+        }
+
+        return $bindings;
+    }
+
+    /** @return array<string,list<array<string,mixed>>> */
+    public function targetKeywordConflicts(): array
+    {
+        $grouped = [];
+        foreach ($this->targetKeywordBindings() as $binding) {
+            $grouped[$binding['keyword']][] = $binding;
+        }
+
+        return array_filter($grouped, static fn (array $items): bool => count($items) > 1);
+    }
+
+    /** @param array<string,string> $filters @return list<array<string,mixed>> */
+    public function seoKeywordCenterRows(array $filters = []): array
+    {
+        $bindingsByKeyword = [];
+        foreach ($this->targetKeywordBindings() as $binding) {
+            $bindingsByKeyword[(string) $binding['keyword']][] = $binding;
+        }
+        $configs = $this->seoKeywordConfigs();
+        $keywords = array_values(array_unique(array_merge(array_keys($bindingsByKeyword), array_keys($configs))));
+        sort($keywords, SORT_NATURAL | SORT_FLAG_CASE);
+
+        $rows = [];
+        foreach ($keywords as $keyword) {
+            $bindings = $bindingsByKeyword[$keyword] ?? [];
+            $config = $configs[$keyword] ?? [];
+            $bindingCount = count($bindings);
+            $status = (string) ($config['status'] ?? ($bindingCount > 0 ? 'active' : 'draft'));
+            $source = (string) ($config['source'] ?? ($bindingCount > 0 ? 'content' : 'manual'));
+            $primaryUrl = (string) ($config['primary_url'] ?? '');
+            $contentTypes = array_values(array_unique(array_map(static fn (array $binding): string => (string) ($binding['content_type'] ?? $binding['source_type'] ?? ''), $bindings)));
+            $updatedAt = (string) ($config['updated_at'] ?? '');
+            $conflict = $bindingCount > 1;
+
+            if (!$this->seoKeywordRowMatches($keyword, $status, $conflict, $contentTypes, $filters)) {
+                continue;
+            }
+
+            $rows[] = [
+                'keyword' => $keyword,
+                'primary_url' => $primaryUrl,
+                'binding_count' => $bindingCount,
+                'content_types' => $contentTypes,
+                'source' => $source,
+                'status' => $status,
+                'conflict' => $conflict,
+                'updated_at' => $updatedAt,
+                'bindings' => $bindings,
+                'search_metrics_connected' => false,
+            ];
+        }
+
+        return $rows;
+    }
+
+    /** @return array<string,mixed> */
+    public function seoKeywordCenterStats(): array
+    {
+        $rows = $this->seoKeywordCenterRows();
+
+        return [
+            'total' => count($rows),
+            'active' => count(array_filter($rows, static fn (array $row): bool => ($row['status'] ?? '') === 'active')),
+            'conflicts' => count(array_filter($rows, static fn (array $row): bool => ($row['conflict'] ?? false) === true)),
+            'unassigned_draft' => count(array_filter($rows, static fn (array $row): bool => ($row['status'] ?? '') === 'draft' || (string) ($row['primary_url'] ?? '') === '')),
+            'search_metrics_connected' => false,
+        ];
+    }
+
+    /** @return array<string,mixed> */
+    public function seoKeywordDetail(string $keyword): array
+    {
+        $keyword = $this->cleanKeyword($keyword);
+        $rows = $this->seoKeywordCenterRows(['q' => $keyword]);
+        foreach ($rows as $row) {
+            if ((string) ($row['keyword'] ?? '') === $keyword) {
+                $row['observed_metrics'] = $this->seoKeywordMetrics($keyword);
+                return $row;
+            }
+        }
+
+        return [
+            'keyword' => $keyword,
+            'primary_url' => '',
+            'binding_count' => 0,
+            'content_types' => [],
+            'source' => 'manual',
+            'status' => 'draft',
+            'conflict' => false,
+            'updated_at' => '',
+            'bindings' => [],
+            'observed_metrics' => $this->seoKeywordMetrics($keyword),
+            'search_metrics_connected' => false,
+        ];
+    }
+
+    public function saveSeoKeyword(string $keyword, string $primaryUrl, string $status, string $source, string $notes = ''): void
+    {
+        $keyword = $this->cleanKeyword($keyword);
+        if ($keyword === '') {
+            throw new ContentException('Keyword is required.');
+        }
+        if (!in_array($status, ['draft', 'active', 'paused'], true)) {
+            throw new ContentException('Invalid keyword status.');
+        }
+        if (!in_array($source, ['manual', 'content', 'baidu', 'google', 'ai_suggestion'], true)) {
+            throw new ContentException('Invalid keyword source.');
+        }
+        $primaryUrl = trim($primaryUrl);
+        if ($primaryUrl !== '' && !str_starts_with($primaryUrl, '/') && !in_array(strtolower((string) parse_url($primaryUrl, PHP_URL_SCHEME)), ['http', 'https'], true)) {
+            throw new ContentException('Primary URL must be a site path or HTTP/HTTPS URL.');
+        }
+        $notes = trim(strip_tags($notes));
+        $now = gmdate('c');
+        $existing = $this->pdo->prepare('SELECT id FROM cms_seo_keywords WHERE keyword = :keyword LIMIT 1');
+        $existing->execute([':keyword' => $keyword]);
+        $id = (int) $existing->fetchColumn();
+        if ($id > 0) {
+            $stmt = $this->pdo->prepare('UPDATE cms_seo_keywords SET primary_url = :primary_url, status = :status, source = :source, notes = :notes, updated_at = :updated_at WHERE id = :id');
+            $stmt->execute([':id' => $id, ':primary_url' => $primaryUrl, ':status' => $status, ':source' => $source, ':notes' => $notes, ':updated_at' => $now]);
+            return;
+        }
+
+        $stmt = $this->pdo->prepare('INSERT INTO cms_seo_keywords (keyword, primary_url, status, source, notes, created_at, updated_at) VALUES (:keyword, :primary_url, :status, :source, :notes, :created_at, :updated_at)');
+        $stmt->execute([':keyword' => $keyword, ':primary_url' => $primaryUrl, ':status' => $status, ':source' => $source, ':notes' => $notes, ':created_at' => $now, ':updated_at' => $now]);
     }
 
     /** @param list<array<string, mixed>> $blocks @return array{0:string,1:list<array<string,mixed>>} */
@@ -757,6 +991,8 @@ final class ContentRepository
         return [
             'seo_title' => $seoTitle !== '' ? $seoTitle : $title,
             'seo_description' => trim((string) ($meta['seo_description'] ?? '')),
+            'seo_keywords' => implode(', ', $this->keywordList((string) ($meta['seo_keywords'] ?? ''))),
+            'target_keywords' => implode(', ', $this->keywordList((string) ($meta['target_keywords'] ?? ''))),
             'canonical_url' => $canonical,
             'robots_index' => (bool) ($meta['robots_index'] ?? true),
             'robots_follow' => (bool) ($meta['robots_follow'] ?? true),
@@ -769,6 +1005,129 @@ final class ContentRepository
             'paid_content_label' => $paidLabel !== '' ? $paidLabel : '解锁全文',
             'paid_content_preview_blocks' => $paidPreviewBlocks,
         ];
+    }
+
+    /** @param array<string,mixed> $meta @return array<string,mixed> */
+    private function cleanTermMeta(array $meta): array
+    {
+        $canonical = trim((string) ($meta['canonical_url'] ?? ''));
+        $scheme = strtolower((string) parse_url($canonical, PHP_URL_SCHEME));
+        if ($canonical !== '' && !in_array($scheme, ['http', 'https'], true)) {
+            throw new ContentException('Canonical URL must be HTTP or HTTPS.');
+        }
+
+        return [
+            'seo_title' => trim((string) ($meta['seo_title'] ?? '')),
+            'seo_description' => trim((string) ($meta['seo_description'] ?? '')),
+            'seo_keywords' => implode(', ', $this->keywordList((string) ($meta['seo_keywords'] ?? ''))),
+            'target_keywords' => implode(', ', $this->keywordList((string) ($meta['target_keywords'] ?? ''))),
+            'canonical_url' => $canonical,
+            'robots_index' => (bool) ($meta['robots_index'] ?? true),
+            'robots_follow' => (bool) ($meta['robots_follow'] ?? true),
+        ];
+    }
+
+    /** @return array<string,array<string,mixed>> */
+    private function seoKeywordConfigs(): array
+    {
+        if (!$this->tableExists('cms_seo_keywords')) {
+            return [];
+        }
+        $configs = [];
+        foreach ($this->pdo->query('SELECT keyword, primary_url, status, source, notes, created_at, updated_at FROM cms_seo_keywords ORDER BY keyword ASC')->fetchAll() as $row) {
+            $keyword = $this->cleanKeyword((string) ($row['keyword'] ?? ''));
+            if ($keyword === '') {
+                continue;
+            }
+            $configs[$keyword] = [
+                'keyword' => $keyword,
+                'primary_url' => (string) ($row['primary_url'] ?? ''),
+                'status' => (string) ($row['status'] ?? 'draft'),
+                'source' => (string) ($row['source'] ?? 'manual'),
+                'notes' => (string) ($row['notes'] ?? ''),
+                'created_at' => (string) ($row['created_at'] ?? ''),
+                'updated_at' => (string) ($row['updated_at'] ?? ''),
+            ];
+        }
+
+        return $configs;
+    }
+
+    /** @return list<array<string,string>> */
+    private function seoKeywordMetrics(string $keyword): array
+    {
+        if (!$this->tableExists('cms_seo_keyword_metrics')) {
+            return [];
+        }
+        $keyword = $this->cleanKeyword($keyword);
+        try {
+            $stmt = $this->pdo->prepare('SELECT keyword, url_path, search_engine, impressions, clicks, ctr, average_position, period_start, period_end, source, created_at FROM cms_seo_keyword_metrics WHERE keyword = :keyword ORDER BY period_end DESC, search_engine ASC, url_path ASC');
+            $stmt->execute([':keyword' => $keyword]);
+            return array_map(static fn (array $row): array => array_map(static fn (mixed $value): string => $value === null || $value === '' ? 'Not Available' : (string) $value, $row), $stmt->fetchAll());
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
+    /** @param list<string> $contentTypes @param array<string,string> $filters */
+    private function seoKeywordRowMatches(string $keyword, string $status, bool $conflict, array $contentTypes, array $filters): bool
+    {
+        $query = trim((string) ($filters['q'] ?? ''));
+        if ($query !== '' && stripos($keyword, $query) === false) {
+            return false;
+        }
+        $statusFilter = trim((string) ($filters['status'] ?? ''));
+        if ($statusFilter !== '' && $statusFilter !== 'all' && $status !== $statusFilter) {
+            return false;
+        }
+        $conflictFilter = trim((string) ($filters['conflict'] ?? ''));
+        if ($conflictFilter === 'yes' && !$conflict) {
+            return false;
+        }
+        if ($conflictFilter === 'no' && $conflict) {
+            return false;
+        }
+        $typeFilter = trim((string) ($filters['type'] ?? ''));
+        if ($typeFilter !== '' && $typeFilter !== 'all' && !in_array($typeFilter, $contentTypes, true)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function cleanKeyword(string $keyword): string
+    {
+        $keyword = trim(preg_replace('/\s+/u', ' ', strip_tags($keyword)) ?? $keyword);
+        if (function_exists('mb_substr')) {
+            return mb_substr($keyword, 0, 120, 'UTF-8');
+        }
+
+        return substr($keyword, 0, 120);
+    }
+
+    /** @return list<string> */
+    private function keywordList(string $value): array
+    {
+        $parts = preg_split('/[,，\n\r]+/u', strip_tags($value)) ?: [];
+        $keywords = [];
+        foreach ($parts as $part) {
+            $keyword = trim(preg_replace('/\s+/u', ' ', (string) $part) ?? (string) $part);
+            if ($keyword === '') {
+                continue;
+            }
+            if (function_exists('mb_substr')) {
+                $keyword = mb_substr($keyword, 0, 80, 'UTF-8');
+            } else {
+                $keyword = substr($keyword, 0, 80);
+            }
+            $key = function_exists('mb_strtolower') ? mb_strtolower($keyword, 'UTF-8') : strtolower($keyword);
+            $keywords[$key] = $keyword;
+            if (count($keywords) >= 20) {
+                break;
+            }
+        }
+
+        return array_values($keywords);
     }
 
     /** @param array<string, mixed> $meta */
@@ -899,10 +1258,17 @@ final class ContentRepository
     private function hydrate(array $row): array
     {
         $row['blocks'] = json_decode((string) ($row['blocks_json'] ?? '[]'), true) ?: [];
-        $meta = json_decode((string) ($row['meta_json'] ?? '{}'), true);
-        $row['meta'] = is_array($meta) ? $meta : [];
-        $row['_meta_json_malformed'] = !is_array($meta);
+        $row['meta'] = $this->decodeMeta($row['meta_json'] ?? null);
+        $row['_meta_json_malformed'] = !is_array(json_decode((string) ($row['meta_json'] ?? '{}'), true));
 
         return $row;
+    }
+
+    /** @return array<string,mixed> */
+    private function decodeMeta(mixed $value): array
+    {
+        $decoded = json_decode((string) ($value ?? '{}'), true);
+
+        return is_array($decoded) ? $decoded : [];
     }
 }

@@ -294,12 +294,14 @@ final class Application
                 : $themes->activeWithPlugins($enabledPlugins);
 
             try {
+                $siteUrl = rtrim((string) $settings->get('site.url', ''), '/');
                 return Response::html($theme->render('home', [
                     'site_name' => (string) $settings->get('site.name', 'PHP CMS'),
                     'site_logo_url' => (string) $settings->get('site.logo_url', ''),
                     'site_favicon_url' => (string) $settings->get('site.favicon_url', ''),
                     'contents' => $contents,
                     'navigation' => NavigationBuilder::build($settings, null, $rootPath),
+                    'seo' => $siteUrl !== '' ? ['canonical' => $siteUrl] : [],
                     'ad_slots' => self::adSlots($settings),
                 ]));
             } catch (Throwable $exception) {
@@ -467,6 +469,17 @@ final class Application
         $router->get('/admin/categories/edit/{id}', [$admin, 'categoryEdit']);
         $router->post('/admin/categories/edit/{id}', [$admin, 'categoryUpdate']);
         $router->post('/admin/categories/delete/{id}', [$admin, 'categoryDelete']);
+        $router->get('/admin/tags', [$admin, 'tagIndex']);
+        $router->post('/admin/tags', [$admin, 'tagStore']);
+        $router->get('/admin/tags/edit/{id}', [$admin, 'tagEdit']);
+        $router->post('/admin/tags/edit/{id}', [$admin, 'tagUpdate']);
+        $router->post('/admin/tags/delete/{id}', [$admin, 'tagDelete']);
+        $router->get('/admin/seo/keywords', [$admin, 'seoKeywordIndex']);
+        $router->get('/admin/seo/keywords/detail', [$admin, 'seoKeywordDetail']);
+        $router->post('/admin/seo/keywords/save', [$admin, 'seoKeywordSave']);
+        $router->get('/admin/seo/search-engines', [$admin, 'seoSearchEngines']);
+        $router->post('/admin/seo/search-engines/import', [$admin, 'seoSearchEngineManualImport']);
+        $router->post('/admin/seo/search-engines/submit', [$admin, 'seoSearchEngineSubmit']);
         $router->get('/admin/media', [$admin, 'mediaIndex']);
         $router->post('/admin/media/upload', [$admin, 'mediaUpload']);
         $router->get('/admin/media/provider/list', [$admin, 'mediaProviderList']);

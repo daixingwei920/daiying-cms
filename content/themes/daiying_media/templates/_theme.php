@@ -400,7 +400,10 @@ if (!function_exists('dm_setting')) {
         if ($description === '') {
             $description = $pageTitle;
         }
-        $keywords = dm_setting_any($context, ['seo_keywords', 'Keywords']);
+        $keywords = trim((string) ($seo['keywords'] ?? ''));
+        if ($keywords === '') {
+            $keywords = dm_setting_any($context, ['seo_keywords', 'Keywords']);
+        }
         $canonical = trim((string) ($seo['canonical'] ?? $context->get('canonical', '')));
         $canonical = $canonical !== '' ? dm_absolute_url($context, $canonical) : '';
         $favicon = dm_image_setting($context, ['favicon_url', 'favicon']);

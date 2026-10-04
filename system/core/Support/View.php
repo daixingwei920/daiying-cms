@@ -89,6 +89,10 @@ final class View
                 ['/admin/ads', '广告统计', 'chart'],
                 ['/admin/navigation', '导航菜单', 'menu'],
             ],
+            'SEO' => [
+                ['/admin/seo/keywords', '关键词中心', 'chart'],
+                ['/admin/seo/search-engines', '搜索引擎连接', 'settings'],
+            ],
             '外观' => [
                 ['/admin/themes', '主题管理', 'palette'],
             ],

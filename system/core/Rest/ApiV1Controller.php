@@ -296,6 +296,7 @@ final class ApiV1Controller
                 $this->requiredString($request->body['name'] ?? '', 'name'),
                 (string) ($request->body['slug'] ?? ''),
                 $id,
+                array_key_exists('meta', $request->body) && is_array($request->body['meta'] ?? null) ? $request->body['meta'] : null,
             );
 
             return $this->ok(['item' => $repo->termById($termId)]);
