@@ -195,14 +195,14 @@ $admin = new AdminController(Settings::fromArray([
 ]), new FileLogger(sys_get_temp_dir() . '/daiying-seo-p4-1-admin.log'), CMS_ROOT);
 $indexMethod = new ReflectionMethod(AdminController::class, 'seoKeywordIndexHtml');
 $indexHtml = (string) $indexMethod->invoke($admin, $dashboard['rows'], $dashboard['stats'], [], $dashboard['opportunities']);
-$check(str_contains($indexHtml, 'Today\'s SEO Opportunities'), 'Keyword Center dashboard renders opportunities UI');
-$check(str_contains($indexHtml, 'SEO Ready') && str_contains($indexHtml, 'Baidu Submitted'), 'Keyword Center dashboard renders P4.1 overview stats');
-$check(str_contains($indexHtml, 'Submitted does not mean Indexed'), 'Keyword Center UI keeps Submitted separate from Indexed');
+$check(str_contains($indexHtml, '今日 SEO 机会'), 'Keyword Center dashboard renders opportunities UI');
+$check(str_contains($indexHtml, 'SEO 已就绪') && str_contains($indexHtml, '已提交百度'), 'Keyword Center dashboard renders P4.1 overview stats');
+$check(str_contains($indexHtml, 'Submitted 不等于 Indexed'), 'Keyword Center UI keeps Submitted separate from Indexed');
 
 $detailMethod = new ReflectionMethod(AdminController::class, 'seoKeywordDetailHtml');
 $detailHtml = (string) $detailMethod->invoke($admin, $aggregator->detail('Ready Keyword'));
 $check(str_contains($detailHtml, 'Page Readiness') && str_contains($detailHtml, 'Discovery / Index Evidence'), 'Keyword detail renders readiness and index evidence sections');
-$check(str_contains($detailHtml, 'Metric Trends') && str_contains($detailHtml, 'Opportunities'), 'Keyword detail renders trends and opportunity sections');
+$check(str_contains($detailHtml, '搜索表现趋势') && str_contains($detailHtml, '优化机会'), 'Keyword detail renders trends and opportunity sections');
 
 $coreTokenSecrets = (int) $pdo->query("SELECT COUNT(*) FROM cms_plugin_secrets WHERE plugin_id = 'core.seo.search_engine.baidu'")->fetchColumn();
 $check($coreTokenSecrets === 0, 'P4.1 does not create a Core Baidu token owner');

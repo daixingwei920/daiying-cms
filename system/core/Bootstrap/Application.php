@@ -47,6 +47,7 @@ use Cms\Core\Rest\ApiV1Controller;
 use Cms\Core\Routing\BasePath;
 use Cms\Core\Routing\Router;
 use Cms\Core\Security\CsrfToken;
+use Cms\Core\Seo\SearchMetrics\SearchMetricsSyncService;
 use Cms\Core\Security\SessionManager;
 use Cms\Core\Support\View;
 use Cms\Core\Theme\ThemeManager;
@@ -119,6 +120,9 @@ final class Application
         View::setAdminPluginMenus($pluginRuntime->menus());
         View::setFrontNavigation(NavigationBuilder::build($settings, null, $rootPath));
         self::configureAdminNotifications($settings, $installed);
+        if ($installed) {
+            SearchMetricsSyncService::register($settings);
+        }
         self::registerCoreRoutes($router, $settings, $rootPath, $logger, $mode, $pluginRuntime, $events);
 
         return new self($rootPath, $settings, $logger, $router, $installed, $pluginRuntime);
@@ -480,6 +484,10 @@ final class Application
         $router->get('/admin/seo/search-engines', [$admin, 'seoSearchEngines']);
         $router->post('/admin/seo/search-engines/import', [$admin, 'seoSearchEngineManualImport']);
         $router->post('/admin/seo/search-engines/submit', [$admin, 'seoSearchEngineSubmit']);
+        $router->post('/admin/seo/search-engines/google/save', [$admin, 'seoSearchEngineGoogleSave']);
+        $router->post('/admin/seo/search-engines/google/sync', [$admin, 'seoSearchEngineGoogleSync']);
+        $router->get('/admin/seo/search-engines/google/oauth/start', [$admin, 'seoSearchEngineGoogleOauthStart']);
+        $router->get('/admin/seo/search-engines/google/oauth/callback', [$admin, 'seoSearchEngineGoogleOauthCallback']);
         $router->get('/admin/media', [$admin, 'mediaIndex']);
         $router->post('/admin/media/upload', [$admin, 'mediaUpload']);
         $router->get('/admin/media/provider/list', [$admin, 'mediaProviderList']);

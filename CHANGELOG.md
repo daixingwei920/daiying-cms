@@ -2,6 +2,14 @@
 
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
+## 1.2.80 - 2026-10-05
+
+- Added SEO P4.2 Search Metrics provider foundations with Google Search Console OAuth 2.0, Search Analytics sync, and daily Scheduler registration.
+- Kept observed search data in the existing `cms_seo_keyword_metrics` table so Keyword Center `With Observed Data` changes only when real metrics are synced or imported.
+- Added Google Search Console connection controls to the existing Search Engine UI, including the production OAuth Redirect URI display and Chinese administrator-facing copy.
+- Preserved Baidu URL submission ownership in `official.seo.baidu-submit`; Core still does not store a Baidu token, POST directly to Baidu, or treat submitted URLs as indexed.
+- Preserved the existing P3 migration tail and the 1.2.72 upgrade floor for this patch release.
+
 ## 1.2.79 - 2026-10-04
 
 - Added SEO P4.1 read-only lifecycle and opportunity views to the existing Keyword Center, including page readiness, sitemap membership, evidence-based index status, observed metric trends, and explainable deterministic opportunity scores.
