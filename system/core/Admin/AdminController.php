@@ -64,6 +64,9 @@ use Cms\Core\Security\SessionManager;
 use Cms\Core\Seo\Keyword\SeoLifecycleAggregator;
 use Cms\Core\Seo\SearchEngine\OfficialBaiduSubmitBridge;
 use Cms\Core\Seo\SearchEngine\SearchEngineDataRepository;
+use Cms\Core\Seo\SearchMetrics\GoogleSearchConsoleConnectionRepository;
+use Cms\Core\Seo\SearchMetrics\GoogleSearchConsoleProvider;
+use Cms\Core\Seo\SearchMetrics\SearchMetricsSyncService;
 use Cms\Core\Support\CurrencyRegistry;
 use Cms\Core\Support\Money;
 use Cms\Core\Support\SystemHealthDoctor;
@@ -81,6 +84,7 @@ use Cms\Core\Events\EventDispatcher;
 use Cms\Core\Plugin\BlockRegistry;
 use Cms\Core\Plugin\LocalPluginPackageInstaller;
 use Cms\Core\Plugin\OfficialPluginRegistry;
+use Cms\Core\Plugin\PluginSecretStore;
 use Cms\Core\Plugin\PluginLifecycle;
 use Cms\Core\Plugin\PluginManager;
 use Cms\Core\Support\AdminUiText;
@@ -2273,6 +2277,9 @@ final class AdminController
             $baiduBridge = $this->officialBaiduSubmitBridge();
             $baidu = $baiduBridge->status();
             $submissions = $baiduBridge->recentLogs(10);
+            $googleRepo = $this->googleSearchConsoleConnections();
+            $google = $googleRepo->status();
+            $googleConfig = $googleRepo->config();
         } catch (Throwable $exception) {
             $this->logger->error('SEO search engine page failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
             return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">搜索引擎连接暂不可用。</p>'), 500);
@@ -2281,10 +2288,13 @@ final class AdminController
         $notice = match ((string) ($request->query['notice'] ?? '')) {
             'imported' => '<p class="admin-badge admin-badge-success">CSV 已导入。</p>',
             'submitted' => '<p class="admin-badge admin-badge-success">URL 已提交。Submitted 不等于 Indexed。</p>',
+            'google_saved' => '<p class="admin-badge admin-badge-success">Google Search Console 配置已保存。</p>',
+            'google_connected' => '<p class="admin-badge admin-badge-success">Google OAuth 已连接。</p>',
+            'google_synced' => '<p class="admin-badge admin-badge-success">Google Search Console 搜索表现数据已同步。</p>',
             default => '',
         };
 
-        return Response::html(View::page('搜索引擎连接', $this->seoSearchEnginesHtml($baidu, $submissions, $notice)));
+        return Response::html(View::page('搜索引擎连接', $this->seoSearchEnginesHtml($baidu, $submissions, $notice, $google, $googleConfig)));
     }
 
     public function seoSearchEngineManualImport(Request $request): Response
@@ -2331,6 +2341,109 @@ final class AdminController
         }
 
         return Response::redirect('/admin/seo/search-engines?notice=submitted');
+    }
+
+    public function seoSearchEngineGoogleSave(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">CSRF 校验失败，请刷新页面重试。</p>'), 403);
+        }
+
+        try {
+            $repo = $this->googleSearchConsoleConnections();
+            $repo->savePublicConfig(
+                (string) $request->input('client_id', ''),
+                (string) $request->input('property_url', ''),
+                (string) $request->input('enabled', '') === '1'
+            );
+            $repo->saveClientSecret((string) $request->input('client_secret', ''));
+            $repo->saveRefreshToken((string) $request->input('refresh_token', ''));
+        } catch (Throwable $exception) {
+            $this->logger->error('Google Search Console settings save failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">保存 Google 配置失败：' . View::escape($exception->getMessage()) . '</p><p><a class="button" href="/admin/seo/search-engines">返回</a></p>'), 422);
+        }
+
+        return Response::redirect('/admin/seo/search-engines?notice=google_saved');
+    }
+
+    public function seoSearchEngineGoogleSync(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">CSRF 校验失败，请刷新页面重试。</p>'), 403);
+        }
+
+        $result = $this->googleSearchMetricsSync()->syncGoogle();
+        if (!$result['ok']) {
+            return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">Google 同步失败：' . View::escape($result['message']) . '</p><p><a class="button" href="/admin/seo/search-engines">返回</a></p>'), 422);
+        }
+
+        return Response::redirect('/admin/seo/search-engines?notice=google_synced');
+    }
+
+    public function seoSearchEngineGoogleOauthStart(): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+
+        $config = $this->googleSearchConsoleConnections()->config();
+        $clientId = (string) ($config['client_id'] ?? '');
+        if ($clientId === '') {
+            return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">请先保存 Google Client ID。</p><p><a class="button" href="/admin/seo/search-engines">返回</a></p>'), 422);
+        }
+        $state = bin2hex(random_bytes(16));
+        $_SESSION['seo_google_oauth_state'] = $state;
+        $query = http_build_query([
+            'client_id' => $clientId,
+            'redirect_uri' => $this->googleOauthRedirectUri(),
+            'response_type' => 'code',
+            'scope' => 'https://www.googleapis.com/auth/webmasters.readonly',
+            'access_type' => 'offline',
+            'prompt' => 'consent',
+            'state' => $state,
+        ]);
+
+        return Response::redirect('https://accounts.google.com/o/oauth2/v2/auth?' . $query);
+    }
+
+    public function seoSearchEngineGoogleOauthCallback(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        $state = (string) ($request->query['state'] ?? '');
+        if ($state === '' || !hash_equals((string) ($_SESSION['seo_google_oauth_state'] ?? ''), $state)) {
+            return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">Google OAuth state 无效。</p><p><a class="button" href="/admin/seo/search-engines">返回</a></p>'), 403);
+        }
+        unset($_SESSION['seo_google_oauth_state']);
+        $code = trim((string) ($request->query['code'] ?? ''));
+        if ($code === '') {
+            return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">Google OAuth 未返回授权码。</p><p><a class="button" href="/admin/seo/search-engines">返回</a></p>'), 422);
+        }
+
+        try {
+            $repo = $this->googleSearchConsoleConnections();
+            $result = (new GoogleSearchConsoleProvider($repo))->exchangeCode($code, $this->googleOauthRedirectUri());
+            if (!$result['ok']) {
+                throw new \RuntimeException($result['message']);
+            }
+            $repo->saveRefreshToken((string) $result['refresh_token']);
+        } catch (Throwable $exception) {
+            $this->logger->error('Google Search Console OAuth failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">Google OAuth 连接失败：' . View::escape($exception->getMessage()) . '</p><p><a class="button" href="/admin/seo/search-engines">返回</a></p>'), 422);
+        }
+
+        return Response::redirect('/admin/seo/search-engines?notice=google_connected');
     }
 
     public function categoryDelete(Request $request): Response
@@ -9370,7 +9483,7 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
             '<label>SEO 标题<input name="seo_title" value="' . View::escape((string) ($meta['seo_title'] ?? '')) . '"></label>' .
             '<label>SEO 描述<textarea name="seo_description" rows="3">' . View::escape((string) ($meta['seo_description'] ?? '')) . '</textarea></label>' .
             '<label>SEO Keywords<textarea name="seo_keywords" rows="2" placeholder="用逗号分隔，输出到 meta keywords">' . View::escape((string) ($meta['seo_keywords'] ?? '')) . '</textarea></label>' .
-            '<label>Target Keywords<textarea name="target_keywords" rows="2" placeholder="内部 SEO 目标关键词，不直接输出到 meta keywords">' . View::escape((string) ($meta['target_keywords'] ?? '')) . '</textarea></label>' .
+            '<label>目标关键词<textarea name="target_keywords" rows="2" placeholder="内部 SEO 目标关键词，不直接输出到 meta keywords">' . View::escape((string) ($meta['target_keywords'] ?? '')) . '</textarea></label>' .
             '<label>规范链接<input name="canonical_url" value="' . View::escape((string) ($meta['canonical_url'] ?? '')) . '"></label>' .
             '<label><input type="checkbox" name="robots_index" value="1"' . (($meta['robots_index'] ?? true) ? ' checked' : '') . '> 允许搜索引擎索引</label>' .
             '<label><input type="checkbox" name="robots_follow" value="1"' . (($meta['robots_follow'] ?? true) ? ' checked' : '') . '> 允许搜索引擎跟踪链接</label></div></details>' .
@@ -10279,7 +10392,7 @@ JS;
             '<label>SEO 标题<input name="seo_title" value="' . View::escape((string) ($meta['seo_title'] ?? '')) . '"></label>' .
             '<label>SEO 描述<textarea name="seo_description" rows="3">' . View::escape((string) ($meta['seo_description'] ?? '')) . '</textarea></label>' .
             '<label>SEO Keywords<textarea name="seo_keywords" rows="2" placeholder="用逗号分隔，输出到 meta keywords">' . View::escape((string) ($meta['seo_keywords'] ?? '')) . '</textarea></label>' .
-            '<label>Target Keywords<textarea name="target_keywords" rows="2" placeholder="内部 SEO 目标关键词，不直接输出到 meta keywords">' . View::escape((string) ($meta['target_keywords'] ?? '')) . '</textarea></label>' .
+            '<label>目标关键词<textarea name="target_keywords" rows="2" placeholder="内部 SEO 目标关键词，不直接输出到 meta keywords">' . View::escape((string) ($meta['target_keywords'] ?? '')) . '</textarea></label>' .
             '<label>规范链接<input name="canonical_url" value="' . View::escape((string) ($meta['canonical_url'] ?? '')) . '"></label>' .
             '<label><input type="checkbox" name="robots_index" value="1"' . (($meta['robots_index'] ?? true) ? ' checked' : '') . '> 允许搜索引擎索引</label>' .
             '<label><input type="checkbox" name="robots_follow" value="1"' . (($meta['robots_follow'] ?? true) ? ' checked' : '') . '> 允许搜索引擎跟踪链接</label>' .
@@ -10304,16 +10417,16 @@ JS;
     private function seoKeywordIndexHtml(array $rows, array $stats, array $filters, array $opportunities = []): string
     {
         $cards = [
-            ['Total Target Keywords', (string) (int) ($stats['total'] ?? 0)],
-            ['Active Keywords', (string) (int) ($stats['active'] ?? 0)],
-            ['Landing Pages Assigned', (string) (int) ($stats['landing_pages_assigned'] ?? 0)],
-            ['SEO Ready', (string) (int) ($stats['seo_ready'] ?? 0)],
-            ['In Sitemap', (string) (int) ($stats['in_sitemap'] ?? 0)],
-            ['Baidu Submitted', (string) (int) ($stats['baidu_submitted'] ?? 0)],
-            ['With Observed Data', (string) (int) ($stats['with_observed_data'] ?? 0)],
-            ['Missing Observed Data', (string) (int) ($stats['missing_observed_data'] ?? 0)],
-            ['Potential Cannibalization', (string) (int) ($stats['conflicts'] ?? 0)],
-            ['Data Freshness', (string) ($stats['data_freshness'] ?? 'Not Available')],
+            ['目标关键词', (string) (int) ($stats['total'] ?? 0)],
+            ['活跃关键词', (string) (int) ($stats['active'] ?? 0)],
+            ['已分配落地页', (string) (int) ($stats['landing_pages_assigned'] ?? 0)],
+            ['SEO 已就绪', (string) (int) ($stats['seo_ready'] ?? 0)],
+            ['已进入 Sitemap', (string) (int) ($stats['in_sitemap'] ?? 0)],
+            ['已提交百度', (string) (int) ($stats['baidu_submitted'] ?? 0)],
+            ['已有搜索表现数据', (string) (int) ($stats['with_observed_data'] ?? 0)],
+            ['暂无搜索表现数据', (string) (int) ($stats['missing_observed_data'] ?? 0)],
+            ['潜在关键词内耗', (string) (int) ($stats['conflicts'] ?? 0)],
+            ['数据新鲜度', (string) ($stats['data_freshness'] ?? 'Not Available')],
         ];
         $cardHtml = '';
         foreach ($cards as [$label, $value]) {
@@ -10361,17 +10474,17 @@ JS;
 
         return '<div class="admin-page-header"><div><h1>关键词中心</h1><p class="muted">基于 Content / Category / Tag 的 target keywords 聚合展示，不自动修改任何页面。</p></div></div>' .
             '<div class="admin-dashboard-grid">' . $cardHtml . '</div>' .
-            '<section class="editor-card"><h2>Today\'s SEO Opportunities</h2><table><thead><tr><th>Keyword</th><th>Primary URL</th><th>Engine</th><th>Opportunity Type</th><th>Score</th><th>Evidence</th><th>Suggested Action</th><th>Last Metric Period</th><th>Last Baidu Submission</th><th>Index Evidence</th></tr></thead><tbody>' . $opportunityRows . '</tbody></table><p class="muted">Scores are deterministic and explainable. Submitted does not mean Indexed.</p></section>' .
+            '<section class="editor-card"><h2>今日 SEO 机会</h2><table><thead><tr><th>关键词</th><th>Primary URL</th><th>搜索引擎</th><th>机会类型</th><th>分数</th><th>证据</th><th>建议操作</th><th>最新指标周期</th><th>最近百度提交</th><th>Index Evidence</th></tr></thead><tbody>' . $opportunityRows . '</tbody></table><p class="muted">分数由确定性规则计算并可解释。Submitted 不等于 Indexed。</p></section>' .
             '<section class="editor-card"><h2>筛选</h2><form method="get" action="/admin/seo/keywords"><div class="admin-grid four">' .
             '<label>关键词搜索<input name="q" value="' . View::escape((string) ($filters['q'] ?? '')) . '" placeholder="PHP CMS"></label>' .
             '<label>内容类型' . $this->selectHtml('type', ['all' => '全部', 'article' => 'Article', 'page' => 'Page', 'category' => 'Category', 'tag' => 'Tag'], (string) ($filters['type'] ?? 'all')) . '</label>' .
-            '<label>冲突' . $this->selectHtml('conflict', ['all' => '全部', 'yes' => 'Potential Cannibalization', 'no' => '正常'], (string) ($filters['conflict'] ?? 'all')) . '</label>' .
+            '<label>冲突' . $this->selectHtml('conflict', ['all' => '全部', 'yes' => '潜在关键词内耗', 'no' => '正常'], (string) ($filters['conflict'] ?? 'all')) . '</label>' .
             '<label>状态' . $this->selectHtml('status', ['all' => '全部', 'draft' => 'draft', 'active' => 'active', 'paused' => 'paused'], (string) ($filters['status'] ?? 'all')) . '</label>' .
             '</div><p><button type="submit">应用筛选</button> <a class="button admin-button-secondary" href="/admin/seo/keywords">清空</a></p></form></section>' .
             '<section class="editor-card"><h2>新增 / 预留关键词</h2><form method="post" action="/admin/seo/keywords/save">' . CsrfToken::field() .
-            '<div class="admin-grid four"><label>Keyword<input name="keyword" required></label><label>Primary URL<input name="primary_url" placeholder="/category/php-cms"></label><label>状态' . $this->selectHtml('status', ['draft' => 'draft', 'active' => 'active', 'paused' => 'paused'], 'draft') . '</label><label>来源' . $this->selectHtml('source', ['manual' => 'manual', 'content' => 'content', 'baidu' => 'baidu', 'google' => 'google', 'ai_suggestion' => 'ai_suggestion'], 'manual') . '</label></div>' .
-            '<label>Notes<textarea name="notes" rows="2"></textarea></label><p><button type="submit">保存关键词</button></p></form></section>' .
-            '<section class="editor-card"><h2>关键词列表</h2><table><thead><tr><th>关键词</th><th>主落地页</th><th>绑定页面数量</th><th>内容类型</th><th>来源</th><th>状态</th><th>是否冲突</th><th>Sitemap</th><th>Index Evidence</th><th>Opportunity</th><th>最后更新时间</th></tr></thead><tbody>' . $rowHtml . '</tbody></table><p class="muted">Missing observed metrics render as Not Available, not 0.</p></section>';
+            '<div class="admin-grid four"><label>关键词<input name="keyword" required></label><label>Primary URL<input name="primary_url" placeholder="/category/php-cms"></label><label>状态' . $this->selectHtml('status', ['draft' => 'draft', 'active' => 'active', 'paused' => 'paused'], 'draft') . '</label><label>来源' . $this->selectHtml('source', ['manual' => 'manual', 'content' => 'content', 'baidu' => 'baidu', 'google' => 'google', 'ai_suggestion' => 'ai_suggestion'], 'manual') . '</label></div>' .
+            '<label>备注<textarea name="notes" rows="2"></textarea></label><p><button type="submit">保存关键词</button></p></form></section>' .
+            '<section class="editor-card"><h2>关键词列表</h2><table><thead><tr><th>关键词</th><th>主落地页</th><th>绑定页面数量</th><th>内容类型</th><th>来源</th><th>状态</th><th>是否冲突</th><th>Sitemap</th><th>索引证据</th><th>优化机会</th><th>最后更新时间</th></tr></thead><tbody>' . $rowHtml . '</tbody></table><p class="muted">缺失的搜索表现数据会显示 Not Available，不显示 0。</p></section>';
     }
 
     /** @param array<string,mixed> $detail */
@@ -10410,7 +10523,7 @@ JS;
                 '<td>' . View::escape((string) ($metric['period_start'] ?? 'Not Available')) . ' - ' . View::escape((string) ($metric['period_end'] ?? 'Not Available')) . '</td>' .
                 '<td>' . View::escape((string) ($metric['source'] ?? 'Not Available')) . '</td></tr>';
         }
-        $metricRows = $metricRows !== '' ? $metricRows : '<tr><td colspan="8" class="muted">Observed Data: Not Available。</td></tr>';
+        $metricRows = $metricRows !== '' ? $metricRows : '<tr><td colspan="8" class="muted">搜索表现数据：Not Available。</td></tr>';
         $trendRows = '';
         foreach ($trends as $engine => $windows) {
             if (!is_array($windows)) {
@@ -10426,33 +10539,33 @@ JS;
                     '<td>' . View::escape((string) ($windows['latest_period_end'] ?? 'Not Available')) . '</td></tr>';
             }
         }
-        $trendRows = $trendRows !== '' ? $trendRows : '<tr><td colspan="7" class="muted">Trend Data: Not Available。</td></tr>';
+        $trendRows = $trendRows !== '' ? $trendRows : '<tr><td colspan="7" class="muted">趋势数据：Not Available。</td></tr>';
         $gapHtml = '';
         foreach ((array) ($readiness['gaps'] ?? []) as $gap) {
             $gapHtml .= '<li>' . View::escape((string) $gap) . '</li>';
         }
-        $gapHtml = $gapHtml !== '' ? '<ul>' . $gapHtml . '</ul>' : '<p class="admin-badge admin-badge-success">SEO Ready</p>';
+        $gapHtml = $gapHtml !== '' ? '<ul>' . $gapHtml . '</ul>' : '<p class="admin-badge admin-badge-success">SEO 已就绪</p>';
         $reasonHtml = '';
         foreach ((array) ($opportunity['reasons'] ?? []) as $reason) {
             $reasonHtml .= '<li>' . View::escape((string) $reason) . '</li>';
         }
-        $reasonHtml = $reasonHtml !== '' ? '<ul>' . $reasonHtml . '</ul>' : '<p class="muted">No score reasons from current data.</p>';
+        $reasonHtml = $reasonHtml !== '' ? '<ul>' . $reasonHtml . '</ul>' : '<p class="muted">当前数据没有评分原因。</p>';
         $opportunityDetailRows = '';
         foreach ($detailOpportunities as $item) {
             $opportunityDetailRows .= '<tr><td>' . View::escape((string) ($item['type'] ?? 'Review')) . '</td><td><strong>' . View::escape((string) ($item['score'] ?? 0)) . '</strong></td><td>' . View::escape((string) ($item['evidence'] ?? '')) . '</td><td>' . View::escape((string) ($item['suggested_action'] ?? 'Review manually')) . '</td></tr>';
         }
-        $opportunityDetailRows = $opportunityDetailRows !== '' ? $opportunityDetailRows : '<tr><td colspan="4" class="muted">No opportunities from available data.</td></tr>';
+        $opportunityDetailRows = $opportunityDetailRows !== '' ? $opportunityDetailRows : '<tr><td colspan="4" class="muted">当前可用数据没有优化机会。</td></tr>';
         $primary = trim((string) ($detail['primary_url'] ?? ''));
         $submitPrimary = $primary !== ''
             ? '<form method="post" action="/admin/seo/search-engines/submit">' . CsrfToken::field() . '<input type="hidden" name="url" value="' . View::escape($primary) . '"><button type="submit">通过百度推送插件提交 Primary 到百度</button><p class="muted">Submitted 不等于 Indexed。</p></form>'
             : '<p class="muted">设置 Primary URL 后可提交到百度。</p>';
 
         return '<div class="admin-page-header"><div><h1>关键词详情</h1><p class="muted">' . View::escape($keyword) . '</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/seo/keywords">返回关键词中心</a></div></div>' .
-            ($conflict ? '<p class="error">Potential Keyword Cannibalization：该关键词绑定了多个页面。</p>' : '<p class="muted">1 page: 正常；2+ pages: Potential Cannibalization。</p>') .
+            ($conflict ? '<p class="error">潜在关键词内耗：该关键词绑定了多个页面。</p>' : '<p class="muted">1 page: 正常；2+ pages: 潜在关键词内耗。</p>') .
             '<section class="editor-card"><h2>Primary Landing Page</h2><form method="post" action="/admin/seo/keywords/save">' . CsrfToken::field() .
             '<input type="hidden" name="keyword" value="' . View::escape($keyword) . '">' .
-            '<div class="admin-grid four"><label>Primary URL<input name="primary_url" value="' . View::escape((string) ($detail['primary_url'] ?? '')) . '" placeholder="/category/php-cms"></label><label>状态' . $this->selectHtml('status', ['draft' => 'draft', 'active' => 'active', 'paused' => 'paused'], (string) ($detail['status'] ?? 'draft')) . '</label><label>来源' . $this->selectHtml('source', ['manual' => 'manual', 'content' => 'content', 'baidu' => 'baidu', 'google' => 'google', 'ai_suggestion' => 'ai_suggestion'], (string) ($detail['source'] ?? 'manual')) . '</label><label>搜索引擎数据<input value="Not Connected" disabled></label></div>' .
-            '<label>Notes<textarea name="notes" rows="2">' . View::escape((string) ($detail['notes'] ?? '')) . '</textarea></label><p><button type="submit">保存 Primary / 状态</button></p></form></section>' .
+            '<div class="admin-grid four"><label>Primary URL<input name="primary_url" value="' . View::escape((string) ($detail['primary_url'] ?? '')) . '" placeholder="/category/php-cms"></label><label>状态' . $this->selectHtml('status', ['draft' => 'draft', 'active' => 'active', 'paused' => 'paused'], (string) ($detail['status'] ?? 'draft')) . '</label><label>来源' . $this->selectHtml('source', ['manual' => 'manual', 'content' => 'content', 'baidu' => 'baidu', 'google' => 'google', 'ai_suggestion' => 'ai_suggestion'], (string) ($detail['source'] ?? 'manual')) . '</label><label>搜索引擎数据<input value="未连接" disabled></label></div>' .
+            '<label>备注<textarea name="notes" rows="2">' . View::escape((string) ($detail['notes'] ?? '')) . '</textarea></label><p><button type="submit">保存 Primary / 状态</button></p></form></section>' .
             '<section class="editor-card"><h2>Baidu URL Submission</h2>' . $submitPrimary . '</section>' .
             '<section class="editor-card"><h2>Page Readiness</h2><table><tbody>' .
             '<tr><th>HTTP / Route</th><td>' . View::escape((string) ($readiness['http_status'] ?? 'unknown')) . '</td></tr>' .
@@ -10470,26 +10583,31 @@ JS;
             '<tr><th>Baidu Success / Remain</th><td>' . View::escape((string) ($submission['baidu_success'] ?? 'Not Available')) . ' / ' . View::escape((string) ($submission['baidu_remain'] ?? 'Not Available')) . '</td></tr>' .
             '<tr><th>Index Evidence</th><td>' . View::escape((string) ($indexEvidence['status'] ?? 'unknown')) . '</td></tr>' .
             '<tr><th>Evidence</th><td>' . View::escape((string) ($indexEvidence['evidence'] ?? 'No reliable URL-level index evidence')) . '</td></tr>' .
-            '</tbody></table><p class="muted">Submitted / success=1 is not Indexed. Missing observed data is not Not Indexed.</p></section>' .
-            '<section class="editor-card"><h2>Target Data / Bindings</h2><table><thead><tr><th>URL</th><th>Content Type</th><th>Content Title</th><th>Index Status</th><th>Canonical</th><th>SEO Title</th><th>SEO Description</th><th>Target Keywords</th></tr></thead><tbody>' . $bindingRows . '</tbody></table></section>' .
-            '<section class="editor-card"><h2>Observed Data</h2><table><thead><tr><th>Search Engine</th><th>URL</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Average Position</th><th>Period</th><th>Source</th></tr></thead><tbody>' . $metricRows . '</tbody></table><p class="muted">没有搜索引擎返回的数据时显示 Not Available，不显示 0。</p></section>' .
-            '<section class="editor-card"><h2>Metric Trends</h2><table><thead><tr><th>Search Engine</th><th>Window</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Average Position</th><th>Latest Period</th></tr></thead><tbody>' . $trendRows . '</tbody></table></section>' .
-            '<section class="editor-card"><h2>Opportunities</h2><p><strong>Score ' . View::escape((string) ($opportunity['score'] ?? 0)) . '</strong> <span class="muted">' . View::escape(implode(', ', (array) ($opportunity['types'] ?? []))) . '</span></p>' . $reasonHtml . '<table><thead><tr><th>Type</th><th>Score</th><th>Evidence</th><th>Suggested Human Action</th></tr></thead><tbody>' . $opportunityDetailRows . '</tbody></table></section>';
+            '</tbody></table><p class="muted">Submitted / success=1 不等于 Indexed。缺失搜索表现数据不等于 Not Indexed。</p></section>' .
+            '<section class="editor-card"><h2>目标数据 / 绑定页面</h2><table><thead><tr><th>URL</th><th>内容类型</th><th>内容标题</th><th>索引状态</th><th>Canonical</th><th>SEO Title</th><th>SEO Description</th><th>目标关键词</th></tr></thead><tbody>' . $bindingRows . '</tbody></table></section>' .
+            '<section class="editor-card"><h2>搜索表现数据</h2><table><thead><tr><th>搜索引擎</th><th>URL</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Average Position</th><th>周期</th><th>来源</th></tr></thead><tbody>' . $metricRows . '</tbody></table><p class="muted">没有搜索引擎返回的数据时显示 Not Available，不显示 0。</p></section>' .
+            '<section class="editor-card"><h2>搜索表现趋势</h2><table><thead><tr><th>搜索引擎</th><th>时间窗口</th><th>Impressions</th><th>Clicks</th><th>CTR</th><th>Average Position</th><th>最新周期</th></tr></thead><tbody>' . $trendRows . '</tbody></table></section>' .
+            '<section class="editor-card"><h2>优化机会</h2><p><strong>Score ' . View::escape((string) ($opportunity['score'] ?? 0)) . '</strong> <span class="muted">' . View::escape(implode(', ', (array) ($opportunity['types'] ?? []))) . '</span></p>' . $reasonHtml . '<table><thead><tr><th>类型</th><th>Score</th><th>证据</th><th>建议人工操作</th></tr></thead><tbody>' . $opportunityDetailRows . '</tbody></table></section>';
     }
 
-    /** @param array<string,mixed> $baidu @param list<array<string,string>> $submissions */
-    private function seoSearchEnginesHtml(array $baidu, array $submissions, string $notice = ''): string
+    /** @param array<string,mixed> $baidu @param list<array<string,string>> $submissions @param array<string,mixed> $google @param array<string,mixed> $googleConfig */
+    private function seoSearchEnginesHtml(array $baidu, array $submissions, string $notice = '', array $google = [], array $googleConfig = []): string
     {
-        $tokenText = !empty($baidu['token_configured']) ? 'Configured' : 'Missing';
+        $tokenText = !empty($baidu['token_configured']) ? '已配置' : '未配置';
         $status = (string) ($baidu['status'] ?? 'plugin_not_installed');
-        $statusLabel = (string) ($baidu['status_label'] ?? match ($status) {
-            'connected' => 'Connected',
-            'not_configured' => 'Not Configured',
-            'plugin_disabled' => 'Plugin Disabled',
-            'integration_error' => 'Integration Error',
-            default => 'Plugin Not Installed',
-        });
+        $statusLabel = match ($status) {
+            'connected' => '已连接',
+            'not_configured' => '未配置',
+            'plugin_disabled' => '插件未启用',
+            'integration_error' => '集成异常',
+            default => '插件未安装',
+        };
         $credentialStatus = (string) ($baidu['credential_status'] ?? 'missing');
+        $credentialStatusLabel = match ($credentialStatus) {
+            'configured' => '已配置',
+            'missing' => '未配置',
+            default => $credentialStatus,
+        };
         $manageAvailable = !empty($baidu['management_available']) && (string) ($baidu['manage_url'] ?? '') !== '';
         $manageHtml = $manageAvailable
             ? '<p><a class="button admin-button-secondary" href="' . View::escape((string) $baidu['manage_url']) . '">管理百度推送插件</a></p>'
@@ -10499,24 +10617,48 @@ JS;
             $submissionRows .= '<tr><td><code>' . View::escape((string) ($submission['url'] ?? '')) . '</code></td><td>' . View::escape((string) ($submission['status'] ?? '')) . '</td><td>' . View::escape((string) ($submission['http_status'] ?? '')) . '</td><td>' . View::escape((string) ($submission['baidu_success'] ?? '')) . '</td><td>' . View::escape((string) ($submission['baidu_remain'] ?? '')) . '</td><td>' . View::escape((string) ($submission['error_summary'] ?? '')) . '</td><td>' . View::escape((string) ($submission['created_at'] ?? '')) . '</td></tr>';
         }
         $submissionRows = $submissionRows !== '' ? $submissionRows : '<tr><td colspan="7" class="muted">暂无提交记录。</td></tr>';
+        $googleStatus = (string) ($google['message'] ?? '未连接');
+        $googleProperty = (string) ($googleConfig['property_url'] ?? '');
+        $googleClientId = (string) ($googleConfig['client_id'] ?? '');
+        $googleEnabled = !empty($googleConfig['enabled']);
+        $googleCanSync = !empty($google['ok']);
+        $googleSyncButton = $googleCanSync
+            ? '<form method="post" action="/admin/seo/search-engines/google/sync" style="display:inline">' . CsrfToken::field() . '<button type="submit">立即同步</button></form>'
+            : '<span class="admin-badge admin-badge-warning">Google 同步需要先完成 OAuth 连接。</span>';
 
-        return '<div class="admin-page-header"><div><h1>搜索引擎连接</h1><p class="muted">Observed Data 与 CMS Target Keywords 分层保存。</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/seo/keywords">关键词中心</a></div></div>' .
+        return '<div class="admin-page-header"><div><h1>搜索引擎连接</h1><p class="muted">搜索表现数据与 CMS 目标关键词分层保存。</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/seo/keywords">关键词中心</a></div></div>' .
             $notice .
             '<section class="editor-card"><h2>Baidu</h2><table><tbody>' .
-            '<tr><th>Status</th><td>' . View::escape($statusLabel) . '</td></tr>' .
-            '<tr><th>Plugin installed</th><td>' . View::escape(!empty($baidu['plugin_installed']) ? 'YES' : 'NO') . '</td></tr>' .
-            '<tr><th>Plugin enabled</th><td>' . View::escape(!empty($baidu['plugin_enabled']) ? 'YES' : 'NO') . '</td></tr>' .
-            '<tr><th>Admin route</th><td>' . View::escape(!empty($baidu['route_available']) ? 'Available' : 'Not Available') . '</td></tr>' .
+            '<tr><th>状态</th><td>' . View::escape($statusLabel) . '</td></tr>' .
+            '<tr><th>插件已安装</th><td>' . View::escape(!empty($baidu['plugin_installed']) ? 'YES' : 'NO') . '</td></tr>' .
+            '<tr><th>插件已启用</th><td>' . View::escape(!empty($baidu['plugin_enabled']) ? 'YES' : 'NO') . '</td></tr>' .
+            '<tr><th>后台路由</th><td>' . View::escape(!empty($baidu['route_available']) ? '可用' : '不可用') . '</td></tr>' .
             '<tr><th>Token owner</th><td><code>official.seo.baidu-submit</code></td></tr>' .
             '<tr><th>Site</th><td>' . View::escape((string) ($baidu['site'] ?? '')) . '</td></tr>' .
-            '<tr><th>Credential status</th><td>' . View::escape($credentialStatus . ' / ' . $tokenText) . '</td></tr>' .
-            '<tr><th>Last submit</th><td>' . View::escape((string) ($baidu['last_submit_at'] ?? '')) . '</td></tr>' .
-            '<tr><th>Keyword metrics API</th><td>Not Available</td></tr>' .
+            '<tr><th>凭据状态</th><td>' . View::escape($credentialStatusLabel . ' / ' . $tokenText) . '</td></tr>' .
+            '<tr><th>最近提交</th><td>' . View::escape((string) ($baidu['last_submit_at'] ?? '')) . '</td></tr>' .
+            '<tr><th>关键词搜索表现 API</th><td>百度目前未提供可用的公开官方接口</td></tr>' .
             '</tbody></table>' .
             $manageHtml . '<p class="muted">Core 不保存百度 Token；URL 提交、日志、Queue/Retry、Dedupe 均由 official.seo.baidu-submit 提供。</p></section>' .
-            '<section class="editor-card"><h2>Manual Import Fallback</h2><form method="post" action="/admin/seo/search-engines/import">' . CsrfToken::field() .
+            '<section class="editor-card"><h2>Google Search Console</h2><table><tbody>' .
+            '<tr><th>状态</th><td>' . View::escape($googleStatus) . '</td></tr>' .
+            '<tr><th>Search Console 站点资源</th><td><code>' . View::escape($googleProperty) . '</code></td></tr>' .
+            '<tr><th>Client Secret</th><td>' . View::escape(!empty($google['client_secret_configured']) ? '已配置' : '未配置') . '</td></tr>' .
+            '<tr><th>Refresh Token</th><td>' . View::escape(!empty($google['refresh_token_configured']) ? '已配置' : '未配置') . '</td></tr>' .
+            '<tr><th>上次同步</th><td>' . View::escape((string) ($google['last_sync_at'] ?? '')) . '</td></tr>' .
+            '<tr><th>上次同步结果</th><td>' . View::escape((string) ($google['last_sync_result'] ?? '')) . '</td></tr>' .
+            '<tr><th>OAuth 回调地址</th><td><code>' . View::escape($this->googleOauthRedirectUri()) . '</code></td></tr>' .
+            '</tbody></table><form method="post" action="/admin/seo/search-engines/google/save">' . CsrfToken::field() .
+            '<div class="admin-grid four"><label><input type="checkbox" name="enabled" value="1"' . ($googleEnabled ? ' checked' : '') . '> 启用</label>' .
+            '<label>Search Console 站点资源<input name="property_url" value="' . View::escape($googleProperty) . '" placeholder="https://www.example.com/"></label>' .
+            '<label>Client ID<input name="client_id" value="' . View::escape($googleClientId) . '" autocomplete="off"></label>' .
+            '<label>Client Secret<input type="password" name="client_secret" placeholder="留空则保留" autocomplete="new-password"></label></div>' .
+            '<label>Refresh Token<textarea name="refresh_token" rows="2" placeholder="通常通过 OAuth 连接自动保存；留空则保留。"></textarea></label>' .
+            '<p><button type="submit">保存 Google 配置</button> <a class="button admin-button-secondary" href="/admin/seo/search-engines/google/oauth/start">连接 Google OAuth</a> ' . $googleSyncButton . '</p>' .
+            '<p class="muted">Google 搜索表现数据来自官方 Search Analytics API；缺失数据继续显示 Not Available，不显示 0。</p></form></section>' .
+            '<section class="editor-card"><h2>手动导入 CSV</h2><form method="post" action="/admin/seo/search-engines/import">' . CsrfToken::field() .
             '<label>CSV<textarea name="csv_text" rows="8" placeholder="keyword,url_path,search_engine,impressions,clicks,ctr,average_position,period_start,period_end&#10;PHP CMS,/category/php-cms,baidu,100,10,10,3.2,2026-10-01,2026-10-02"></textarea></label><p><button type="submit">导入 CSV</button></p></form></section>' .
-            '<section class="editor-card"><h2>Baidu URL Submission</h2><form method="post" action="/admin/seo/search-engines/submit">' . CsrfToken::field() . '<label>URL<input name="url" placeholder="/category/php-cms"></label><p><button type="submit">通过百度推送插件提交到百度</button></p><p class="muted">Submitted / Submission Accepted 不等于 Indexed。</p></form><table><thead><tr><th>URL</th><th>Status</th><th>HTTP</th><th>Success</th><th>Remain</th><th>Error</th><th>Submitted At</th></tr></thead><tbody>' . $submissionRows . '</tbody></table></section>';
+            '<section class="editor-card"><h2>Baidu URL Submission</h2><form method="post" action="/admin/seo/search-engines/submit">' . CsrfToken::field() . '<label>URL<input name="url" placeholder="/category/php-cms"></label><p><button type="submit">通过百度推送插件提交到百度</button></p><p class="muted">Submitted / Submission Accepted 不等于 Indexed。</p></form><table><thead><tr><th>URL</th><th>状态</th><th>HTTP</th><th>Success</th><th>Remain</th><th>Error</th><th>提交时间</th></tr></thead><tbody>' . $submissionRows . '</tbody></table></section>';
     }
 
     private function searchEngineRepo(): SearchEngineDataRepository
@@ -10528,6 +10670,25 @@ JS;
     private function officialBaiduSubmitBridge(): OfficialBaiduSubmitBridge
     {
         return new OfficialBaiduSubmitBridge(ConnectionFactory::make($this->settings), $this->root(), (string) $this->settings->get('security.encryption_key', ''));
+    }
+
+    private function googleSearchConsoleConnections(): GoogleSearchConsoleConnectionRepository
+    {
+        $pdo = ConnectionFactory::make($this->settings);
+        return new GoogleSearchConsoleConnectionRepository($pdo, new PluginSecretStore($pdo, (string) $this->settings->get('security.encryption_key', '')));
+    }
+
+    private function googleSearchMetricsSync(): SearchMetricsSyncService
+    {
+        $pdo = ConnectionFactory::make($this->settings);
+        $connections = new GoogleSearchConsoleConnectionRepository($pdo, new PluginSecretStore($pdo, (string) $this->settings->get('security.encryption_key', '')));
+        return new SearchMetricsSyncService($pdo, new GoogleSearchConsoleProvider($connections), $connections);
+    }
+
+    private function googleOauthRedirectUri(): string
+    {
+        $siteUrl = rtrim((string) $this->settings->get('site.url', ''), '/');
+        return ($siteUrl !== '' ? $siteUrl : '') . '/admin/seo/search-engines/google/oauth/callback';
     }
 
     /** @return list<array<string,string>> */
