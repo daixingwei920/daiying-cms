@@ -37,10 +37,12 @@ final class GoogleSearchConsoleProvider implements SearchMetricsProviderInterfac
             return new SearchMetricsSyncResult(false, (string) $status['status'], (string) $status['message']);
         }
 
-        $token = $this->accessToken((string) ($config['client_id'] ?? ''));
+        $tokenResult = $this->accessToken((string) ($config['client_id'] ?? ''));
+        $token = $tokenResult['token'];
         $rows = [];
         $startRow = 0;
         $rowLimit = max(1, min(25000, $request->rowLimit));
+        $httpStatuses = ['token_refresh' => (int) $tokenResult['http_status'], 'search_analytics' => []];
         do {
             $payload = [
                 'startDate' => $request->periodStart,
@@ -53,6 +55,7 @@ final class GoogleSearchConsoleProvider implements SearchMetricsProviderInterfac
             ];
             $url = 'https://www.googleapis.com/webmasters/v3/sites/' . rawurlencode($request->siteUrl) . '/searchAnalytics/query';
             $response = $this->request('POST', $url, ['Authorization' => 'Bearer ' . $token, 'Content-Type' => 'application/json'], $payload);
+            $httpStatuses['search_analytics'][] = (int) $response['status'];
             $decoded = $this->decodeResponse($response, 'Google Search Analytics query failed.');
             $items = is_array($decoded['rows'] ?? null) ? $decoded['rows'] : [];
             foreach ($items as $item) {
@@ -81,7 +84,7 @@ final class GoogleSearchConsoleProvider implements SearchMetricsProviderInterfac
             $startRow += $rowLimit;
         } while (count($items) === $rowLimit);
 
-        return new SearchMetricsSyncResult(true, 'synced', 'Google Search Console 搜索表现数据已同步。', $rows, ['row_count' => count($rows)]);
+        return new SearchMetricsSyncResult(true, 'synced', 'Google Search Console 搜索表现数据已同步。', $rows, ['row_count' => count($rows), 'http_statuses' => $httpStatuses]);
     }
 
     /** @return array{ok:bool,status:string,message:string,refresh_token:string} */
@@ -103,7 +106,8 @@ final class GoogleSearchConsoleProvider implements SearchMetricsProviderInterfac
         return ['ok' => true, 'status' => 'connected', 'message' => 'Google OAuth connected.', 'refresh_token' => $refresh];
     }
 
-    private function accessToken(string $clientId): string
+    /** @return array{token:string,http_status:int} */
+    private function accessToken(string $clientId): array
     {
         $response = $this->request('POST', 'https://oauth2.googleapis.com/token', ['Content-Type' => 'application/x-www-form-urlencoded'], [
             'client_id' => $clientId,
@@ -116,7 +120,7 @@ final class GoogleSearchConsoleProvider implements SearchMetricsProviderInterfac
         if ($token === '') {
             throw new SearchMetricsException('Google OAuth access token is missing.');
         }
-        return $token;
+        return ['token' => $token, 'http_status' => (int) $response['status']];
     }
 
     /** @param array<string,string> $headers @param array<string,mixed> $body @return array{status:int,body:string} */

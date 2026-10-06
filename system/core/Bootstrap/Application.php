@@ -481,6 +481,9 @@ final class Application
         $router->get('/admin/seo/keywords', [$admin, 'seoKeywordIndex']);
         $router->get('/admin/seo/keywords/detail', [$admin, 'seoKeywordDetail']);
         $router->post('/admin/seo/keywords/save', [$admin, 'seoKeywordSave']);
+        $router->get('/admin/seo/historical-backfill', [$admin, 'seoHistoricalBackfill']);
+        $router->get('/admin/seo/content-quality', [$admin, 'seoContentQuality']);
+        $router->post('/admin/seo/historical-backfill/action', [$admin, 'seoHistoricalBackfillAction']);
         $router->get('/admin/seo/search-engines', [$admin, 'seoSearchEngines']);
         $router->post('/admin/seo/search-engines/import', [$admin, 'seoSearchEngineManualImport']);
         $router->post('/admin/seo/search-engines/submit', [$admin, 'seoSearchEngineSubmit']);

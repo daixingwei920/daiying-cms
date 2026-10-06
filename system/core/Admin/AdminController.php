@@ -62,6 +62,7 @@ use Cms\Core\Routing\BasePath;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Security\SessionManager;
 use Cms\Core\Seo\Keyword\SeoLifecycleAggregator;
+use Cms\Core\Seo\Historical\HistoricalArticleSeoBackfillService;
 use Cms\Core\Seo\SearchEngine\OfficialBaiduSubmitBridge;
 use Cms\Core\Seo\SearchEngine\SearchEngineDataRepository;
 use Cms\Core\Seo\SearchMetrics\GoogleSearchConsoleConnectionRepository;
@@ -2265,6 +2266,103 @@ final class AdminController
         return Response::redirect('/admin/seo/keywords/detail?keyword=' . rawurlencode($keyword));
     }
 
+    public function seoHistoricalBackfill(?Request $request = null): Response
+    {
+        $request ??= new Request('GET', '/admin/seo/historical-backfill');
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+
+        try {
+            $service = $this->historicalArticleSeoBackfillService();
+            $filters = [
+                'q' => trim((string) ($request->query['q'] ?? '')),
+                'quality' => trim((string) ($request->query['quality'] ?? 'all')),
+                'seo' => trim((string) ($request->query['seo'] ?? 'all')),
+            ];
+            $stats = $service->jobStats();
+            $rows = $service->rows($filters, 100);
+        } catch (Throwable $exception) {
+            $this->logger->error('Historical article SEO backfill page failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('历史文章 SEO 补全', '<h1>历史文章 SEO 补全</h1><p class="error">历史文章 SEO 补全暂不可用。</p>'), 500);
+        }
+
+        return Response::html(View::page('历史文章 SEO 补全', $this->historicalArticleSeoBackfillHtml($stats, $rows, $filters, 'seo')));
+    }
+
+    public function seoContentQuality(?Request $request = null): Response
+    {
+        $request ??= new Request('GET', '/admin/seo/content-quality');
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+
+        try {
+            $service = $this->historicalArticleSeoBackfillService();
+            $filters = [
+                'q' => trim((string) ($request->query['q'] ?? '')),
+                'quality' => trim((string) ($request->query['quality'] ?? 'all')),
+                'seo' => trim((string) ($request->query['seo'] ?? 'all')),
+            ];
+            $stats = $service->jobStats();
+            $rows = $service->rows($filters, 100);
+        } catch (Throwable $exception) {
+            $this->logger->error('Historical content quality page failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::html(View::page('历史内容优化', '<h1>历史内容优化</h1><p class="error">历史内容优化暂不可用。</p>'), 500);
+        }
+
+        return Response::html(View::page('历史内容优化', $this->historicalArticleSeoBackfillHtml($stats, $rows, $filters, 'quality')));
+    }
+
+    public function seoHistoricalBackfillAction(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return $guard;
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::html(View::page('历史文章 SEO 补全', '<h1>历史文章 SEO 补全</h1><p class="error">CSRF 校验失败，请刷新页面重试。</p>'), 403);
+        }
+
+        $action = (string) $request->input('action', '');
+        $contentId = (int) $request->input('content_id', 0);
+        $regenerate = (string) $request->input('regenerate', '') === '1';
+        $notice = 'done';
+        try {
+            $service = $this->historicalArticleSeoBackfillService();
+            if ($action === 'scan') {
+                $result = $service->scan(500);
+                $notice = 'scan-' . $result['processed'] . '-' . $result['failed'];
+            } elseif ($action === 'generate_batch') {
+                $result = $service->generateBatch((int) $request->input('limit', 10), false);
+                $notice = 'generate-' . $result['processed'] . '-' . $result['failed'];
+            } elseif ($action === 'generate_ai_batch') {
+                $result = $service->generateAiBatch((int) $request->input('limit', 5), false);
+                $notice = 'ai-generate-' . $result['processed'] . '-' . $result['failed'];
+            } elseif ($action === 'generate' && $contentId > 0) {
+                $service->generateForArticleId($contentId, $regenerate);
+                $notice = 'generated';
+            } elseif ($action === 'generate_ai' && $contentId > 0) {
+                $service->generateAiForArticleId($contentId, $regenerate);
+                $notice = 'ai_generated';
+            } elseif ($action === 'apply' && $contentId > 0) {
+                $service->applySeo($contentId, $regenerate);
+                $notice = 'applied';
+            } else {
+                throw new \RuntimeException('未知操作。');
+            }
+            $pdo = ConnectionFactory::make($this->settings);
+            (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'seo.historical_article_backfill.' . $action, ['content_id' => $contentId]);
+        } catch (Throwable $exception) {
+            $this->logger->error('Historical article SEO backfill action failed', ['source' => 'Core', 'action' => $action, 'content_id' => $contentId, 'error' => $exception->getMessage()]);
+            return Response::html(View::page('历史文章 SEO 补全', '<h1>历史文章 SEO 补全</h1><p class="error">操作失败：' . View::escape($exception->getMessage()) . '</p><p><a class="button" href="/admin/seo/historical-backfill">返回</a></p>'), 422);
+        }
+
+        return Response::redirect('/admin/seo/historical-backfill?notice=' . rawurlencode($notice));
+    }
+
     public function seoSearchEngines(?Request $request = null): Response
     {
         $request ??= new Request('GET', '/admin/seo/search-engines');
@@ -2285,12 +2383,13 @@ final class AdminController
             return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">搜索引擎连接暂不可用。</p>'), 500);
         }
 
-        $notice = match ((string) ($request->query['notice'] ?? '')) {
+        $noticeKey = (string) ($request->query['notice'] ?? '');
+        $notice = match ($noticeKey) {
             'imported' => '<p class="admin-badge admin-badge-success">CSV 已导入。</p>',
             'submitted' => '<p class="admin-badge admin-badge-success">URL 已提交。Submitted 不等于 Indexed。</p>',
             'google_saved' => '<p class="admin-badge admin-badge-success">Google Search Console 配置已保存。</p>',
             'google_connected' => '<p class="admin-badge admin-badge-success">Google OAuth 已连接。</p>',
-            'google_synced' => '<p class="admin-badge admin-badge-success">Google Search Console 搜索表现数据已同步。</p>',
+            'google_synced' => '<p class="admin-badge admin-badge-success">Google 搜索数据同步成功：获取 ' . (int) ($request->query['rows'] ?? 0) . '，新增 ' . (int) ($request->query['inserted'] ?? 0) . '，更新 ' . (int) ($request->query['updated'] ?? 0) . '，跳过 ' . (int) ($request->query['skipped'] ?? 0) . '。</p>',
             default => '',
         };
 
@@ -2385,7 +2484,7 @@ final class AdminController
             return Response::html(View::page('搜索引擎连接', '<h1>搜索引擎连接</h1><p class="error">Google 同步失败：' . View::escape($result['message']) . '</p><p><a class="button" href="/admin/seo/search-engines">返回</a></p>'), 422);
         }
 
-        return Response::redirect('/admin/seo/search-engines?notice=google_synced');
+        return Response::redirect('/admin/seo/search-engines?notice=google_synced&rows=' . (int) $result['rows'] . '&inserted=' . (int) $result['inserted'] . '&updated=' . (int) $result['updated'] . '&skipped=' . (int) $result['skipped']);
     }
 
     public function seoSearchEngineGoogleOauthStart(): Response
@@ -10622,9 +10721,9 @@ JS;
         $googleClientId = (string) ($googleConfig['client_id'] ?? '');
         $googleEnabled = !empty($googleConfig['enabled']);
         $googleCanSync = !empty($google['ok']);
-        $googleSyncButton = $googleCanSync
-            ? '<form method="post" action="/admin/seo/search-engines/google/sync" style="display:inline">' . CsrfToken::field() . '<button type="submit">立即同步</button></form>'
-            : '<span class="admin-badge admin-badge-warning">Google 同步需要先完成 OAuth 连接。</span>';
+        $googleSyncPanel = $googleCanSync
+            ? '<form method="post" action="/admin/seo/search-engines/google/sync">' . CsrfToken::field() . '<button type="submit">立即同步</button><p class="muted">执行后会刷新本页，并显示获取、新增、更新、跳过数量。</p></form>'
+            : '<p><span class="admin-badge admin-badge-warning">Google 同步需要先完成 OAuth 连接。</span></p>';
 
         return '<div class="admin-page-header"><div><h1>搜索引擎连接</h1><p class="muted">搜索表现数据与 CMS 目标关键词分层保存。</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/seo/keywords">关键词中心</a></div></div>' .
             $notice .
@@ -10654,11 +10753,95 @@ JS;
             '<label>Client ID<input name="client_id" value="' . View::escape($googleClientId) . '" autocomplete="off"></label>' .
             '<label>Client Secret<input type="password" name="client_secret" placeholder="留空则保留" autocomplete="new-password"></label></div>' .
             '<label>Refresh Token<textarea name="refresh_token" rows="2" placeholder="通常通过 OAuth 连接自动保存；留空则保留。"></textarea></label>' .
-            '<p><button type="submit">保存 Google 配置</button> <a class="button admin-button-secondary" href="/admin/seo/search-engines/google/oauth/start">连接 Google OAuth</a> ' . $googleSyncButton . '</p>' .
-            '<p class="muted">Google 搜索表现数据来自官方 Search Analytics API；缺失数据继续显示 Not Available，不显示 0。</p></form></section>' .
+            '<p><button type="submit">保存 Google 配置</button> <a class="button admin-button-secondary" href="/admin/seo/search-engines/google/oauth/start">连接 Google OAuth</a></p>' .
+            '<p class="muted">Google 搜索表现数据来自官方 Search Analytics API；缺失数据继续显示 Not Available，不显示 0。</p></form>' .
+            '<div class="admin-card-subsection"><h3>同步 Google 搜索表现数据</h3>' . $googleSyncPanel . '</div></section>' .
             '<section class="editor-card"><h2>手动导入 CSV</h2><form method="post" action="/admin/seo/search-engines/import">' . CsrfToken::field() .
             '<label>CSV<textarea name="csv_text" rows="8" placeholder="keyword,url_path,search_engine,impressions,clicks,ctr,average_position,period_start,period_end&#10;PHP CMS,/category/php-cms,baidu,100,10,10,3.2,2026-10-01,2026-10-02"></textarea></label><p><button type="submit">导入 CSV</button></p></form></section>' .
             '<section class="editor-card"><h2>Baidu URL Submission</h2><form method="post" action="/admin/seo/search-engines/submit">' . CsrfToken::field() . '<label>URL<input name="url" placeholder="/category/php-cms"></label><p><button type="submit">通过百度推送插件提交到百度</button></p><p class="muted">Submitted / Submission Accepted 不等于 Indexed。</p></form><table><thead><tr><th>URL</th><th>状态</th><th>HTTP</th><th>Success</th><th>Remain</th><th>Error</th><th>提交时间</th></tr></thead><tbody>' . $submissionRows . '</tbody></table></section>';
+    }
+
+    /** @param array<string,int> $stats @param list<array<string,mixed>> $rows @param array<string,string> $filters */
+    private function historicalArticleSeoBackfillHtml(array $stats, array $rows, array $filters, string $mode): string
+    {
+        $isQuality = $mode === 'quality';
+        $title = $isQuality ? '历史内容优化' : '历史文章 SEO 补全';
+        $cards = [
+            '文章总数' => $stats['article_total'] ?? 0,
+            '已完成 SEO' => ($stats['article_total'] ?? 0) - ($stats['incomplete_seo'] ?? 0),
+            'SEO 不完整' => $stats['incomplete_seo'] ?? 0,
+            '完全未设置 SEO' => $stats['no_seo'] ?? 0,
+            '短文章' => $stats['short_articles'] ?? 0,
+            '低质量文章' => $stats['low_quality'] ?? 0,
+            '疑似重复' => $stats['possible_duplicates'] ?? 0,
+            '已应用补全' => $stats['jobs_applied'] ?? 0,
+        ];
+        $cardsHtml = '<div class="admin-grid four">';
+        foreach ($cards as $label => $value) {
+            $cardsHtml .= '<section class="editor-card"><p class="muted">' . View::escape($label) . '</p><strong style="font-size:32px">' . View::escape((string) $value) . '</strong></section>';
+        }
+        $cardsHtml .= '</div>';
+
+        $actionBar = '<section class="editor-card"><form method="post" action="/admin/seo/historical-backfill/action" style="display:inline-block;margin-right:8px">' . CsrfToken::field() .
+            '<input type="hidden" name="action" value="scan"><button type="submit">一键扫描历史文章</button></form>' .
+            '<form method="post" action="/admin/seo/historical-backfill/action" style="display:inline-block">' . CsrfToken::field() .
+            '<input type="hidden" name="action" value="generate_batch"><input type="hidden" name="limit" value="10"><button type="submit">批量生成缺失 SEO（10篇）</button></form>' .
+            '<form method="post" action="/admin/seo/historical-backfill/action" style="display:inline-block;margin-left:8px">' . CsrfToken::field() .
+            '<input type="hidden" name="action" value="generate_ai_batch"><input type="hidden" name="limit" value="5"><button type="submit">批量 AI 生成草稿（5篇）</button></form>' .
+            '<p class="muted">规则建议用于基础 SEO / fallback；AI 内容优化通过站点统一 AI Provider 生成 Pending Review 草稿。两者默认都不覆盖已有人工 SEO，不直接替换线上正文。</p></section>';
+
+        $filterAction = $isQuality ? '/admin/seo/content-quality' : '/admin/seo/historical-backfill';
+        $filtersHtml = '<section class="editor-card"><h2>筛选</h2><form method="get" action="' . $filterAction . '" class="admin-grid four">' .
+            '<label>关键词搜索<input name="q" value="' . View::escape((string) ($filters['q'] ?? '')) . '" placeholder="文章标题"></label>' .
+            '<label>质量等级<select name="quality">' . $this->option('all', (string) ($filters['quality'] ?? 'all'), '全部') . $this->option('A', (string) ($filters['quality'] ?? 'all'), 'A：完整') . $this->option('B', (string) ($filters['quality'] ?? 'all'), 'B：可扩写') . $this->option('C', (string) ($filters['quality'] ?? 'all'), 'C：需重写/扩写') . $this->option('D', (string) ($filters['quality'] ?? 'all'), 'D：人工审核') . '</select></label>' .
+            '<label>SEO 状态<select name="seo">' . $this->option('all', (string) ($filters['seo'] ?? 'all'), '全部') . $this->option('incomplete', (string) ($filters['seo'] ?? 'all'), 'SEO 不完整') . $this->option('missing', (string) ($filters['seo'] ?? 'all'), '完全未设置 SEO') . '</select></label>' .
+            '<p><button type="submit">筛选</button></p></form></section>';
+
+        $rowHtml = '';
+        foreach ($rows as $row) {
+            $meta = json_decode((string) ($row['meta_json'] ?? '{}'), true) ?: [];
+            $proposed = json_decode((string) ($row['proposed_meta_json'] ?? '{}'), true) ?: [];
+            $target = trim((string) ($meta['target_keywords'] ?? ''));
+            $status = $this->historicalSeoStatusLabel((string) ($row['seo_status'] ?? ''));
+            $quality = (string) ($row['quality_grade'] ?? 'C');
+            $source = (string) ($row['suggestion_source'] ?? 'rules');
+            $preview = $proposed === [] ? '<span class="muted">尚未生成</span>' : '<details><summary>预览建议（' . View::escape($source === 'ai' ? 'AI 优化' : '规则建议') . '）</summary><dl class="admin-definition-list"><dt>SEO Title</dt><dd>' . View::escape((string) ($proposed['seo_title'] ?? '')) . '</dd><dt>Description</dt><dd>' . View::escape((string) ($proposed['seo_description'] ?? '')) . '</dd><dt>Target Keywords</dt><dd>' . View::escape((string) ($proposed['target_keywords'] ?? '')) . '</dd><dt>Canonical</dt><dd>' . View::escape((string) ($proposed['canonical_url'] ?? '')) . '</dd><dt>Search Intent</dt><dd>' . View::escape((string) ($row['search_intent'] ?? '')) . '</dd><dt>Primary Keyword</dt><dd>' . View::escape((string) ($row['primary_keyword'] ?? '')) . '</dd><dt>Auxiliary Keywords</dt><dd>' . View::escape((string) ($row['auxiliary_keywords'] ?? '')) . '</dd><dt>AI Provider / Model</dt><dd>' . View::escape(trim((string) ($row['ai_provider'] ?? '') . ' / ' . (string) ($row['ai_model'] ?? ''), ' /')) . '</dd><dt>修改摘要</dt><dd>' . View::escape((string) ($row['ai_change_summary'] ?? '')) . '</dd></dl></details>';
+            $draft = trim((string) ($row['proposed_blocks_json'] ?? '')) !== '' ? '<span class="admin-badge admin-badge-warning">有待审核正文草稿</span>' : '<span class="muted">无正文草稿</span>';
+            $forms = '<form method="post" action="/admin/seo/historical-backfill/action" style="display:inline-block;margin-right:6px">' . CsrfToken::field() .
+                '<input type="hidden" name="action" value="generate"><input type="hidden" name="content_id" value="' . (int) $row['content_id'] . '"><button type="submit">生成 SEO</button></form>' .
+                '<form method="post" action="/admin/seo/historical-backfill/action" style="display:inline-block;margin-right:6px">' . CsrfToken::field() .
+                '<input type="hidden" name="action" value="generate_ai"><input type="hidden" name="content_id" value="' . (int) $row['content_id'] . '"><button type="submit">AI 优化草稿</button></form>' .
+                '<form method="post" action="/admin/seo/historical-backfill/action" style="display:inline-block;margin-right:6px">' . CsrfToken::field() .
+                '<input type="hidden" name="action" value="apply"><input type="hidden" name="content_id" value="' . (int) $row['content_id'] . '"><button type="submit">保存缺失 SEO</button></form>' .
+                '<form method="post" action="/admin/seo/historical-backfill/action" style="display:inline-block">' . CsrfToken::field() .
+                '<input type="hidden" name="action" value="generate"><input type="hidden" name="regenerate" value="1"><input type="hidden" name="content_id" value="' . (int) $row['content_id'] . '"><button type="submit">重新生成</button></form>';
+            $rowHtml .= '<tr><td><a href="/admin/content/edit/' . (int) $row['content_id'] . '">' . View::escape((string) ($row['title'] ?? '')) . '</a><br><span class="muted">/articles/' . View::escape((string) ($row['slug'] ?? '')) . '</span></td>' .
+                '<td>' . View::escape($quality) . '</td><td>' . View::escape((string) ($row['word_count'] ?? 0)) . '</td><td>' . View::escape($status) . '</td><td>' . View::escape($target !== '' ? $target : '暂无') . '</td><td>' . $draft . '</td><td>' . $preview . '</td><td>' . $forms . '</td></tr>';
+        }
+        if ($rowHtml === '') {
+            $rowHtml = '<tr><td colspan="8" class="muted">暂无符合条件的历史文章。</td></tr>';
+        }
+
+        $qualityNote = $isQuality
+            ? '<p class="muted">A：内容完整；B：基本可用但建议扩写；C：信息量不足，需要重点扩写/重写；D：重复或低价值，进入人工审核队列。</p>'
+            : '<p class="muted">SEO 补全只补缺失字段：已有 SEO 标题、描述、关键词、canonical 默认不覆盖。</p>';
+
+        return '<h1>' . View::escape($title) . '</h1>' . $qualityNote . $cardsHtml . $actionBar . $filtersHtml .
+            '<section class="editor-card"><h2>文章列表</h2><table><thead><tr><th>文章</th><th>质量</th><th>字数</th><th>SEO 状态</th><th>当前关键词</th><th>内容草稿</th><th>预览</th><th>操作</th></tr></thead><tbody>' . $rowHtml . '</tbody></table></section>';
+    }
+
+    private function historicalSeoStatusLabel(string $status): string
+    {
+        return match ($status) {
+            'complete' => '完整',
+            'missing' => '完全未设置',
+            default => '不完整',
+        };
+    }
+
+    private function option(string $value, string $selected, string $label): string
+    {
+        return '<option value="' . View::escape($value) . '"' . ($value === $selected ? ' selected' : '') . '>' . View::escape($label) . '</option>';
     }
 
     private function searchEngineRepo(): SearchEngineDataRepository
@@ -10670,6 +10853,12 @@ JS;
     private function officialBaiduSubmitBridge(): OfficialBaiduSubmitBridge
     {
         return new OfficialBaiduSubmitBridge(ConnectionFactory::make($this->settings), $this->root(), (string) $this->settings->get('security.encryption_key', ''));
+    }
+
+    private function historicalArticleSeoBackfillService(): HistoricalArticleSeoBackfillService
+    {
+        $pdo = ConnectionFactory::make($this->settings);
+        return new HistoricalArticleSeoBackfillService($pdo, new ContentRepository($pdo, ContentTypeRegistry::defaults()), $this->settings, new AiService($pdo, $this->settings));
     }
 
     private function googleSearchConsoleConnections(): GoogleSearchConsoleConnectionRepository

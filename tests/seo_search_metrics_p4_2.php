@@ -136,6 +136,12 @@ $html = (string) $method->invoke($admin, ['status' => 'plugin_not_installed', 'm
 $check(str_contains($html, 'Google Search Console') && str_contains($html, '已连接'), 'Search Engine UI renders Google connected state');
 $check(str_contains($html, '百度目前未提供可用的公开官方接口'), 'Search Engine UI renders Baidu Metrics as Not Available from official API');
 $check(!str_contains($html, 'google-client-secret') && !str_contains($html, 'google-refresh-token'), 'Search Engine UI does not expose Google secrets');
+$saveFormStart = strpos($html, 'action="/admin/seo/search-engines/google/save"');
+$syncFormStart = strpos($html, 'action="/admin/seo/search-engines/google/sync"');
+$saveFormEnd = $saveFormStart === false ? false : strpos($html, '</form>', $saveFormStart);
+$check($saveFormStart !== false && $syncFormStart !== false, 'Search Engine UI renders separate Google save and sync forms');
+$check($saveFormEnd !== false && $syncFormStart !== false && $saveFormEnd < $syncFormStart, 'Google sync form is not nested inside the Google save form');
+$check(substr_count($html, 'action="/admin/seo/search-engines/google/sync"') === 1, 'Search Engine UI renders exactly one Google sync form');
 
 if ($failures > 0) {
     fwrite(STDERR, $failures . ' SEO P4.2 search metrics checks failed.' . PHP_EOL);

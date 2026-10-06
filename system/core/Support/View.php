@@ -92,6 +92,8 @@ final class View
             'SEO' => [
                 ['/admin/seo/keywords', '关键词中心', 'chart'],
                 ['/admin/seo/search-engines', '搜索引擎连接', 'settings'],
+                ['/admin/seo/historical-backfill', '历史文章 SEO 补全', 'content'],
+                ['/admin/seo/content-quality', '历史内容优化', 'chart'],
             ],
             '外观' => [
                 ['/admin/themes', '主题管理', 'palette'],
