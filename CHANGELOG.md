@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.81 - 2026-10-06
+
+- Fixed Google Search Console manual sync so the save form and sync form are independent, with visible rows/inserted/updated/skipped feedback after sync.
+- Added safe Google OAuth and Search Analytics HTTP status observability to sync results without exposing credentials.
+- Added Historical Article SEO Backfill and Historical Content Optimization workflows for auditing legacy articles, generating protected SEO proposals, and producing AI draft optimizations for administrator review.
+- Preserved existing manual SEO fields and live article bodies by default; AI content optimization creates pending-review drafts and does not publish automatically.
+- Kept historical optimization on the existing AI Provider stack so the configured provider/model remains replaceable and no single model is hard-coded.
+- Preserved the 1.2.72 upgrade floor for this patch release.
+
 This changelog summarizes public GitHub release information. Detailed engineering reports may exist in historical root-level `DAIYING_*.md` files.
 
 ## 1.2.80 - 2026-10-05

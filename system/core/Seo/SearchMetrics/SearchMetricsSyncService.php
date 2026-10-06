@@ -38,6 +38,12 @@ final class SearchMetricsSyncService
             }
             $import = (new SearchEngineDataRepository($this->pdo))->importMetrics($result->rows, 'google_search_console');
             $message = 'rows=' . count($result->rows) . ', inserted=' . (int) $import['inserted'] . ', updated=' . (int) $import['updated'] . ', skipped=' . (int) $import['skipped'];
+            $httpStatuses = is_array($result->raw['http_statuses'] ?? null) ? $result->raw['http_statuses'] : [];
+            $tokenStatus = isset($httpStatuses['token_refresh']) ? (int) $httpStatuses['token_refresh'] : 0;
+            $searchStatuses = array_filter(array_map('intval', is_array($httpStatuses['search_analytics'] ?? null) ? $httpStatuses['search_analytics'] : []));
+            if ($tokenStatus > 0 || $searchStatuses !== []) {
+                $message .= ', token_http=' . ($tokenStatus > 0 ? (string) $tokenStatus : 'n/a') . ', search_http=' . ($searchStatuses !== [] ? implode('|', $searchStatuses) : 'n/a');
+            }
             $this->googleConnections->recordSync(true, $message);
             return ['ok' => true, 'status' => 'synced', 'message' => $message, 'inserted' => (int) $import['inserted'], 'updated' => (int) $import['updated'], 'skipped' => (int) $import['skipped'], 'rows' => count($result->rows)];
         } catch (\Throwable $exception) {
