@@ -135,8 +135,10 @@ Checked without modifying production:
 
 ## P2/P3 Newly Observed
 
-P2: Full historical upgrade matrix remains partially blocked because true local 1.2.0 and 1.2.22 fixture artifacts are still missing, as previously recorded by Release Gate V1.
+P2: Full historical upgrade matrix is no longer required for current release operations. The project no longer needs to maintain true local 1.2.0 and 1.2.22 fixture artifacts as a release blocker. Closure basis: product/operations decision to retire this historical matrix requirement; current releases continue to rely on Release Gate, previous-stable upgrade coverage, package integrity checks, updater dry-run, and production rollback readiness. Status: CLOSED_BY_SCOPE_RETIREMENT.
 
 P2: Health/admin version display still reads pointer metadata directly in some locations; this is acceptable today but should eventually centralize on `ActiveReleaseResolver` for consistency.
 
 P3: Root launcher active release path validation is implemented separately in Web, CLI, and scheduled publishing scripts; future cleanup could consolidate this helper if a safe shared bootstrap utility exists.
+
+P2: AI Provider technical debt: Core 1.2.81 OpenAI-compatible Adapter does not yet fully support GPT-5 family token budget parameters. `gpt-5-mini` rejects `max_tokens` and requires `max_completion_tokens`, while current compatibility logic only switches this field for Meta Muse-style providers. Current operational workaround: use `gpt-4.1-mini`. Future fix should update the shared OpenAI-compatible Adapter to detect GPT-5 family models, send `max_completion_tokens`, preserve existing Meta Muse/Groq/OpenAI-compatible behavior, and add regression coverage for both test-connection and normal chat requests.
