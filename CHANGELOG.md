@@ -531,3 +531,7 @@ Use GitHub Releases for public download artifacts.
 - Remove only novel assertions from the shared productization gate; retain video assertions and shared infrastructure tests. Archive product-only novel tests outside the active Core suite.
 
 - Owner also retires `daiying-video` and `official.video-collector`; exclude new installer distributions, archive product-only acceptance tests and preserve legacy trust/source/assets.
+
+## Official mail notification contract — 1.2.82-rc1 testing
+
+- Correct isolated mail test setup to include the existing notification recipient migration; preserve the four original notification assertions. Verify distinct events, encoded local links, safe metadata, failure fallback, route authentication, capabilities and CSRF without live provider calls. No runtime mail/Core changes.

@@ -183,6 +183,8 @@ $assert(!$oauthProvider->testConnection(['from_email' => ''])->success, 'OAuth p
 
 $notificationMigration = require CMS_ROOT . '/system/migrations/2026_09_09_000002_core_notifications.php';
 $notificationMigration->up($pdo);
+// Current NotificationService requires the recipient migration used by official installs.
+(require CMS_ROOT . '/system/migrations/2026_09_29_000001_notification_recipients.php')->up($pdo);
 $notifications = (new NotificationService($pdo))->forPlugin('official.mail');
 $controllerForNotifications = new MailController($repo, new MailOAuthService($repo, $http), $factory, null, $notifications);
 $notify = new ReflectionMethod($controllerForNotifications, 'notifyNewUnreadMessages');
@@ -208,6 +210,65 @@ $notify->invoke($controllerForNotifications, $account, [[
     'is_read' => false,
 ]], ['remote-new-unread']);
 $assert((int) $pdo->query('SELECT COUNT(*) FROM cms_notifications')->fetchColumn() === 1, 'New mail notification dedupe prevents repeated inbox sync noise.');
+
+// Additional isolation checks: no live provider calls and no outbound mail.
+$notify->invoke($controllerForNotifications, $account, [[
+    'id' => 'distinct/remote?item=2', 'subject' => 'Another event', 'is_read' => false,
+    'access_token' => 'never-copy-message-token', 'password' => 'never-copy-message-password',
+]], ['distinct/remote?item=2']);
+$assert((int) $pdo->query('SELECT COUNT(*) FROM cms_notifications')->fetchColumn() === 2, 'Different remote events create separate notifications.');
+$latest = $pdo->query('SELECT * FROM cms_notifications ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
+$assert(($latest['action_url'] ?? '') === '/admin/mail/message?account_id=' . (int) $account['id'] . '&message_id=distinct%2Fremote%3Fitem%3D2', 'Remote message identifiers are encoded into local same-site links.');
+$assert(!str_contains(json_encode($latest), 'never-copy-message') && !str_contains(json_encode($latest), 'access-token-secret'), 'Notification allowlist excludes message and account credentials.');
+$notify->invoke($controllerForNotifications, $account, [['id' => 'already-read', 'is_read' => true], ['id' => 'not-new']], ['already-read']);
+$assert((int) $pdo->query('SELECT COUNT(*) FROM cms_notifications')->fetchColumn() === 2, 'Read or previously cached messages do not produce new notifications.');
+$invalidConfig = false;
+try { (new MailOAuthService($repo, $http))->enabledConfig('outlook', ''); }
+catch (RuntimeException $e) { $invalidConfig = $e->getMessage() === 'OAuth provider is not enabled.'; }
+$assert($invalidConfig, 'Disabled OAuth configuration is rejected before network access.');
+$invalidAccount = $controllerForNotifications->inbox(new Request('GET', '/admin/mail/inbox', ['account_id' => -1]));
+$assert($invalidAccount->status() === 400, 'Invalid mailbox account fails without provider access.');
+// A deliberately unsupported provider fails locally, exercising the actual inbox fallback.
+$pdo->exec('UPDATE mail_accounts SET provider = "unavailable-test" WHERE id = ' . (int) $account['id']);
+$fallback = $controllerForNotifications->inbox(new Request('GET', '/admin/mail/inbox', ['account_id' => (int) $account['id']]));
+$assert($fallback->status() === 200 && str_contains($fallback->body(), 'Provider 暂时不可用'), 'Unavailable provider returns cached inbox with an explicit warning.');
+$assert((int) $pdo->query('SELECT COUNT(*) FROM cms_notifications')->fetchColumn() === 2, 'Unavailable provider does not claim new notifications or duplicate existing events.');
+$assert(!str_contains($fallback->body(), 'access-token-secret') && !str_contains($fallback->body(), 'refresh-token-secret'), 'Provider failure output excludes account credentials.');
+$pdo->exec('UPDATE mail_accounts SET provider = "gmail", status = "connected" WHERE id = ' . (int) $account['id']);
+
+// Exercise the real Core plugin route wrapper, rather than invoking controller auth assumptions.
+$guardRoot = sys_get_temp_dir() . '/mail-route-guard-' . bin2hex(random_bytes(6));
+mkdir($guardRoot . '/config', 0700, true);
+try {
+    $guardPdo = new PDO('sqlite:' . $guardRoot . '/guard.sqlite');
+    $guardPdo->exec('CREATE TABLE cms_plugins (plugin_id TEXT, status TEXT, capabilities_json TEXT)');
+    $guardPdo->exec('INSERT INTO cms_plugins VALUES ("official.mail", "Enabled", \'["mail.read"]\')');
+    file_put_contents($guardRoot . '/config/app.php', '<?php return ' . var_export(['database' => ['dsn' => 'sqlite:' . $guardRoot . '/guard.sqlite']], true) . ';');
+    $settings = Cms\Core\Config\Settings::load($guardRoot);
+    $runtime = new Cms\Core\Plugin\PluginRuntimeRegistry();
+    $handlerCalled = false;
+    $runtime->route('official.mail', 'GET', '/admin/mail/inbox', static function () use (&$handlerCalled) { $handlerCalled = true; return Cms\Core\Http\Response::text('unexpected'); }, 'mail.read', true, false);
+    $runtime->route('official.mail', 'POST', '/admin/mail/send', static function () use (&$handlerCalled) { $handlerCalled = true; return Cms\Core\Http\Response::text('unexpected'); }, 'mail.send', true, true);
+    $router = new Cms\Core\Routing\Router();
+    (new ReflectionMethod(Cms\Core\Bootstrap\Application::class, 'registerPluginRoutes'))->invoke(null, $router, $settings, new Cms\Core\Logging\FileLogger($guardRoot . '/guard.log'), $runtime);
+    $savedAdmin = $_SESSION['admin_user'] ?? null;
+    unset($_SESSION['admin_user']);
+    $denied = $router->dispatch(new Request('GET', '/admin/mail/inbox'));
+    $assert($denied->status() === 302 && ($denied->headers()['Location'] ?? '') === '/admin/login' && !$handlerCalled, 'Unauthenticated mail request is rejected by the actual Core route wrapper.');
+    $guardPdo->exec('UPDATE cms_plugins SET capabilities_json = "[]"');
+    $denied = $router->dispatch(new Request('GET', '/admin/mail/inbox'));
+    $assert($denied->status() === 403 && !$handlerCalled, 'Missing mail.read permission is rejected before mailbox access.');
+    $guardPdo->exec('UPDATE cms_plugins SET capabilities_json = \'["mail.send"]\'');
+    $_SESSION['admin_user'] = ['id' => 1];
+    $denied = $router->dispatch(new Request('POST', '/admin/mail/send', [], ['_csrf' => 'invalid']));
+    $assert($denied->status() === 403 && !$handlerCalled, 'Authenticated mail send without valid CSRF is rejected before sending.');
+    unset($_SESSION['admin_user']);
+    if ($savedAdmin !== null) { $_SESSION['admin_user'] = $savedAdmin; }
+} finally {
+    $guardPdo = null;
+    foreach (glob($guardRoot . '/*') ?: [] as $file) { if (is_file($file)) { unlink($file); } }
+    unlink($guardRoot . '/config/app.php'); rmdir($guardRoot . '/config'); rmdir($guardRoot);
+}
 
 $_SERVER['REQUEST_URI'] = '/admin/mail';
 $controller = new MailController($repo, new MailOAuthService($repo, $http), new MailApiClientFactory($repo, new MailOAuthService($repo, $http), $http), null);
