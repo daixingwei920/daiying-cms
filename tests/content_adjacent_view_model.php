@@ -35,6 +35,7 @@ foreach ([
     '2026_08_12_000008_media_release_schema.php',
     '2026_08_12_000011_content_scheduler_schema.php',
     '2026_09_08_000004_content_foundation_safety.php',
+    '2026_10_03_000001_seo_keyword_system_p1.php',
 ] as $migrationFile) {
     $migration = require __DIR__ . '/../system/migrations/' . $migrationFile;
     $migration->up($pdo);
