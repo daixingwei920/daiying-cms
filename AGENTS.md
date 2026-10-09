@@ -151,8 +151,9 @@ At the start of a Daiying CMS Core task:
 
 ## Retired Product Boundary
 
-Owner decision (2026-10-09): `DAIYING_NOVEL = RETIRED`.
-`daiying_novel` and `official.novel-collector` are no longer maintained,
+Owner decision (2026-10-09): `DAIYING_NOVEL = RETIRED`, `DAIYING_VIDEO = RETIRED`.
+`daiying_novel`, `official.novel-collector`, `daiying-video` and
+`official.video-collector` are no longer maintained,
 planned products, new installer components, or mandatory Core acceptance targets.
 Preserve historical source, frozen migrations, installed customer assets,
 trust records, orders and licenses. Do not revive this product as a Core task.

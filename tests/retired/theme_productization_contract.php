@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-$root = dirname(__DIR__);
+$root = dirname(__DIR__, 2);
 
 $assert = static function (bool $condition, string $message): void {
     if (!$condition) {

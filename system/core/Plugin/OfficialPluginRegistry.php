@@ -129,6 +129,7 @@ final class OfficialPluginRegistry
                 'capability_namespaces' => ['novel', 'novel_collector'],
                 'table_prefixes' => ['novel_', 'novel_collector_'],
             ],
+            // RETIRED: legacy identity/trust retained for installed customers; not a new bundle.
             'official.video-collector' => [
                 'directory' => 'official.video-collector',
                 'package_type' => 'plugin',

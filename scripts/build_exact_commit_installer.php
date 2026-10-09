@@ -186,7 +186,9 @@ function shouldPackage(string $file): bool
     }
     // RETIRED: exclude new distribution only; installed customer assets are untouched.
     if (str_starts_with($file, 'content/plugins/official.novel-collector/')
-        || str_starts_with($file, 'content/themes/daiying_novel/')) {
+        || str_starts_with($file, 'content/themes/daiying_novel/')
+        || str_starts_with($file, 'content/plugins/official.video-collector/')
+        || str_starts_with($file, 'content/themes/daiying-video/')) {
         return false;
     }
     if (str_starts_with($file, 'tests/') || str_starts_with($file, 'outputs/')) {

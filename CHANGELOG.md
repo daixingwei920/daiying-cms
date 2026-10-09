@@ -529,3 +529,5 @@ Use GitHub Releases for public download artifacts.
 
 - DAIYING_NOVEL = RETIRED: stop novel theme/collector maintenance and exclude new installer distributions; preserve historical source, installed assets, trust records and licenses.
 - Remove only novel assertions from the shared productization gate; retain video assertions and shared infrastructure tests. Archive product-only novel tests outside the active Core suite.
+
+- Owner also retires `daiying-video` and `official.video-collector`; exclude new installer distributions, archive product-only acceptance tests and preserve legacy trust/source/assets.

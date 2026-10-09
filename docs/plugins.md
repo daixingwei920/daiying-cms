@@ -15,11 +15,10 @@ The following plugin manifests are present in this repository:
 | `official.commerce` | `0.1.0-alpha.17` | plugin | Commerce foundation with product, order, site AI product-description drafting, AI module, and alpha Distribution workflows. |
 | `official.friend-links` | `1.0.0-alpha.1` | `system-plugin` | Friend links management. |
 | `official.mail` | `0.2.0-alpha.4` | plugin | Official Mail Provider bridge and Webmail alpha for Gmail/Outlook OAuth accounts, inbox, message viewing, attachments, send/reply, SMTP providers, OAuth-backed Core mail sending, and new unread mail notifications. |
-| `official.video-collector` | `0.2.1` | plugin | Video collection and playback routes. |
 
 ## Retired Products
 
-`daiying_novel` / `official.novel-collector`: **RETIRED**, not maintained or required for Core releases. Historical assets are retained; no customer uninstall or license revocation is performed. See [retirement policy](retired-products.md).
+`daiying_novel` / `official.novel-collector` / `daiying-video` / `official.video-collector`: **RETIRED**, not maintained or required for Core releases. Historical assets are retained; no customer uninstall or license revocation is performed. See [retirement policy](retired-products.md).
 
 ## Manifest Basics
 

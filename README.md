@@ -103,7 +103,6 @@ Bundled plugins currently visible in this repository include:
 
 - `official.commerce`
 - `official.friend-links`
-- `official.video-collector`
 - `local.storage.baidu`
 - `faq_block`
 
@@ -117,12 +116,11 @@ Bundled themes currently visible in this repository include:
 
 - `default`
 - `daiying_media`
-- `daiying-video`
 - `safe`
 
 See [Themes](docs/themes.md).
 
-`daiying_novel` and `official.novel-collector` are **RETIRED** as of 2026-10-09. They are not maintained, required by Core release acceptance, or included in new installer packages. Historical source, migrations, orders and customer licenses are retained. See [retirement policy](docs/retired-products.md).
+`daiying_novel`, `official.novel-collector`, `daiying-video` and `official.video-collector` are **RETIRED** as of 2026-10-09. They are not maintained, required by Core release acceptance, or included in new installer packages. Historical source, migrations, orders and customer licenses are retained. See [retirement policy](docs/retired-products.md).
 
 ### Media And External Storage
 

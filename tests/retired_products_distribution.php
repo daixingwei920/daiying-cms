@@ -15,10 +15,10 @@ foreach (['build_exact_commit_installer', 'build_full_install_package', 'release
     $assert($start !== false && $end !== false, 'Packaging filter must exist: ' . $script);
     $function = 'retired_filter_' . $index;
     eval(str_replace('function shouldPackage(', 'function ' . $function . '(', substr($source, $start, $end - $start)));
-    foreach (['content/plugins/official.novel-collector/plugin.json', 'content/themes/daiying_novel/theme.json'] as $path) {
+    foreach (['content/plugins/official.novel-collector/plugin.json', 'content/themes/daiying_novel/theme.json', 'content/plugins/official.video-collector/plugin.json', 'content/themes/daiying-video/theme.json'] as $path) {
         $assert(!$function($path), 'Retired product must not be newly distributed: ' . $script);
     }
-    foreach (['content/plugins/official.video-collector/plugin.json', 'content/themes/daiying-video/theme.json', 'content/themes/default/theme.json', 'content/plugins/official.mail/plugin.json', 'system/migrations/2026_09_07_000001_official_plugins_registry.php'] as $path) {
+    foreach (['content/themes/default/theme.json', 'content/themes/daiying_media/theme.json', 'content/themes/safe/theme.json', 'content/plugins/official.mail/plugin.json', 'system/migrations/2026_09_07_000001_official_plugins_registry.php'] as $path) {
         $assert($function($path), 'Maintained products/history must remain eligible: ' . $path);
     }
 }
@@ -26,10 +26,15 @@ require_once $root . '/system/core/Plugin/OfficialPluginRegistry.php';
 $registry = new Cms\Core\Plugin\OfficialPluginRegistry($root);
 $assert($registry->isTrustedBundled('official.novel-collector', $root . '/content/plugins/official.novel-collector'), 'Existing customer legacy trust must be preserved.');
 $assert(in_array('novel_', $registry->tablePrefixes('official.novel-collector'), true), 'Legacy table ownership must be preserved.');
-$contract = (string) file_get_contents($root . '/tests/theme_productization_contract.php');
-$assert(!str_contains($contract, 'novel'), 'No retired product acceptance in shared gate.');
-foreach (['Video theme version must be 1.0.0.', 'Video theme must require official.video-collector.', 'Video collector must register /videos/search.'] as $assertion) {
-    $assert(str_contains($contract, $assertion), 'Retain maintained video assertion: ' . $assertion);
+$assert($registry->isTrustedBundled('official.video-collector', $root . '/content/plugins/official.video-collector'), 'Existing video customer legacy trust must be preserved.');
+$assert(in_array('video_', $registry->tablePrefixes('official.video-collector'), true), 'Legacy video table ownership must be preserved.');
+$assert(!is_file($root . '/tests/theme_productization_contract.php'), 'Retired-only acceptance must not be required by Core.');
+$assert(is_file($root . '/tests/retired/theme_productization_contract.php'), 'Retain historical productization assertions.');
+foreach (['default', 'daiying_media', 'safe'] as $id) {
+    $manifest = json_decode((string) file_get_contents($root . '/content/themes/' . $id . '/theme.json'), true, 512, JSON_THROW_ON_ERROR);
+    $assert(($manifest['theme_id'] ?? '') === $id, 'Maintained theme manifest remains present: ' . $id);
 }
-$assert(str_contains((string) file_get_contents($root . '/docs/retired-products.md'), 'DAIYING_NOVEL = RETIRED'), 'Explicit retirement decision must be recorded.');
+foreach (['DAIYING_NOVEL = RETIRED', 'DAIYING_VIDEO = RETIRED'] as $status) {
+    $assert(str_contains((string) file_get_contents($root . '/docs/retired-products.md'), $status), 'Explicit retirement decision must be recorded.');
+}
 echo "retired_products_distribution: PASS ($checks assertions)\n";
