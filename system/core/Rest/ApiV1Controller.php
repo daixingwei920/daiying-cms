@@ -219,7 +219,7 @@ final class ApiV1Controller
 
     private function contentsRepository(): ContentRepository
     {
-        return new ContentRepository($this->pdo(), ContentTypeRegistry::defaults());
+        return new ContentRepository($this->pdo(), ContentTypeRegistry::defaults(), [], $this->rootPath);
     }
 
     private function pdo(): PDO

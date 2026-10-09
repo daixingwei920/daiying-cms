@@ -258,7 +258,7 @@ final class PluginManager
             $this->customFields(),
             new SchedulerService($this->pdo),
             new NotificationService($this->pdo),
-            new PluginContentService($manifest, new ContentRepository($this->pdo, $this->contentTypes(), array_keys($this->blocks->all())), fn (): ContentRepository => new ContentRepository($this->pdo, $this->contentTypes(), array_keys($this->blocks->all()))),
+            new PluginContentService($manifest, new ContentRepository($this->pdo, $this->contentTypes(), array_keys($this->blocks->all()), dirname(dirname($this->pluginsPath))), fn (): ContentRepository => new ContentRepository($this->pdo, $this->contentTypes(), array_keys($this->blocks->all()), dirname(dirname($this->pluginsPath)))),
             new FrontUserService($manifest, $this->pdo, new FrontUserAuthenticator($this->pdo, $this->events), $this->events),
             new PluginLicenseService($manifest, new CommercialLicenseStore($this->pdo), $this->settings),
         );

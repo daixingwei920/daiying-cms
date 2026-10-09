@@ -16,6 +16,7 @@ final class ContentRepository
         private readonly PDO $pdo,
         private readonly ContentTypeRegistry $types,
         private readonly array $registeredBlockTypes = [],
+        private readonly ?string $rootPath = null,
     ) {
     }
 
@@ -826,8 +827,13 @@ final class ContentRepository
 
     private function mediaLibrary(): MediaLibrary
     {
-        $root = dirname(__DIR__, 4);
-        return new MediaLibrary($this->pdo, $root . '/content/uploads');
+        $root = $this->rootPath ?? (defined('CMS_ROOT') ? (string) constant('CMS_ROOT') : '');
+        $resolvedRoot = $root !== '' ? realpath($root) : false;
+        if ($resolvedRoot === false || !is_dir($resolvedRoot)) {
+            throw new ContentException('A trusted CMS instance root is required for media storage.');
+        }
+
+        return new MediaLibrary($this->pdo, $resolvedRoot . '/content/uploads');
     }
 
     private function deleteIfTableExists(string $table, string $column, int $contentId): void
