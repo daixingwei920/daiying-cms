@@ -1,4 +1,4 @@
-# 1.2.82-rc1 — local unreleased maintenance candidate
+## 1.2.82-rc1 — local unreleased maintenance candidate
 
 - Bind content media to the trusted instance root; reject symlinked media roots.
 - Preserve omitted taxonomies and non-target meta in REST PATCH and plugin partial updates; keep repository update / REST PUT replacement semantics.
