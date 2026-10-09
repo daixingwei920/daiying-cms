@@ -17,9 +17,12 @@ Legacy / Superseded and must not be used as the default development entrypoint.
 | --- | --- | --- | --- |
 | `default` | `1.0.0` | `article`, `page` | Default CMS theme. |
 | `daiying_media` | `1.0.5` | `article`, `page` | Media/article oriented theme. |
-| `daiying_novel` | `1.0.2` | `novel`, `novel_author`, `novel_chapter` | Novel theme; requires `official.novel-collector`. |
 | `daiying-video` | `1.0.0` | `video`, `video_episode`, `short_drama` | Video theme; requires `official.video-collector`. |
 | `safe` | `1.0.0` | `article`, `page` | Recovery fallback theme. |
+
+## Retired Products
+
+`daiying_novel` / `official.novel-collector`: **RETIRED**, not maintained or required for Core releases. Historical assets are retained; no customer uninstall or license revocation is performed. See [retirement policy](retired-products.md).
 
 ## Manifest Basics
 

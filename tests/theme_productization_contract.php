@@ -27,21 +27,11 @@ $readTree = static function (string $dir): string {
     return $buffer;
 };
 
-$novelThemeDir = $root . '/content/themes/daiying_novel';
 $videoThemeDir = $root . '/content/themes/daiying-video';
 $videoPluginDir = $root . '/content/plugins/official.video-collector';
 
-$novelManifest = $readJson($novelThemeDir . '/theme.json');
 $videoManifest = $readJson($videoThemeDir . '/theme.json');
 $videoPluginManifest = $readJson($videoPluginDir . '/plugin.json');
-
-$assert(($novelManifest['theme_id'] ?? '') === 'daiying_novel', 'Novel theme ID must remain daiying_novel.');
-$assert(($novelManifest['version'] ?? '') === '1.0.2', 'Novel theme version must be 1.0.2.');
-$assert(($novelManifest['core']['max'] ?? '') === '2.0.0', 'Novel theme core max should be a concrete semver upper bound.');
-$assert(($novelManifest['local_dev'] ?? true) === false, 'Novel theme must not be marked local_dev.');
-$assert(($novelManifest['market_release'] ?? false) === true, 'Novel theme must be marked market_release.');
-$assert(in_array('official.novel-collector', $novelManifest['recommended_plugins'] ?? [], true), 'Novel theme must recommend official.novel-collector.');
-$assert(in_array('official.novel-collector', $novelManifest['required_plugins'] ?? [], true), 'Novel theme must require official.novel-collector.');
 
 $assert(($videoManifest['theme_id'] ?? '') === 'daiying-video', 'Video theme ID must remain daiying-video.');
 $assert(($videoManifest['version'] ?? '') === '1.0.0', 'Video theme version must be 1.0.0.');
@@ -50,35 +40,10 @@ $assert(($videoManifest['market_release'] ?? false) === true, 'Video theme must 
 $assert(in_array('official.video-collector', $videoManifest['recommended_plugins'] ?? [], true), 'Video theme must recommend official.video-collector.');
 $assert(in_array('official.video-collector', $videoManifest['required_plugins'] ?? [], true), 'Video theme must require official.video-collector.');
 
-$novelTree = $readTree($novelThemeDir);
 $videoTree = $readTree($videoThemeDir);
-
-foreach (['local.novel-collector', '/novel/'] as $forbidden) {
-    $assert(!str_contains($novelTree, $forbidden), 'Novel theme must not contain legacy token: ' . $forbidden);
-}
 
 foreach (['/video/', '/movie/', '/tv/', '/short-drama/', '/anime/', '/variety/'] as $forbidden) {
     $assert(!str_contains($videoTree, $forbidden), 'Video theme must not contain legacy hard-coded route: ' . $forbidden);
-}
-
-foreach ([
-    'novel_url',
-    'novel_chapter_url',
-    'novel_search_url',
-    'novel_bookshelf_url',
-    '/novels/search',
-    '/novels/bookshelf',
-    'daiying_novel_bookshelf',
-    'daiying_novel_reading_progress',
-    'data-fullscreen',
-    '最近 100 章',
-    'update-table',
-    'formal_',
-    'novel_sections',
-    'chapter_count > 0',
-    'cover_url',
-] as $needle) {
-    $assert(str_contains($novelTree, $needle), 'Novel theme missing product token: ' . $needle);
 }
 
 foreach ([

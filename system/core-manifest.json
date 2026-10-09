@@ -238,7 +238,7 @@
   "Plugin/OfficialExtensionTrustGrant.php": "ba8cca1a80e5b882c27093a53cc1c81b0b8c6382e714f4b9d798d54230cee374",
   "Plugin/OfficialExtensionTrustGrantRepository.php": "a11fc10a4afb5c4e1f0ad5c9faa0f875bd45489329b9eace7cac612b45f3311f",
   "Plugin/OfficialExtensionTrustGrantVerifier.php": "2f7759fbe14b239b04fec41e7ec239a9bb63b3cbf8c349065f1bbc2d181fa2be",
-  "Plugin/OfficialPluginRegistry.php": "35feb66f00fcf2e99afd65b804b0e082213a44d5681652520e6e2f9bb4d22eea",
+  "Plugin/OfficialPluginRegistry.php": "390114cbb5aec0633f4752e7e94525ca0bde4463d521f548034d21fbde69a011",
   "Plugin/PackageScanner.php": "587f3a676b23b325e52d067813c3898540d80fa3470698365f381fdad82a510c",
   "Plugin/PluginAdminRequestContext.php": "a52515d1002c5b7468751c5c927824db8d434ae3f52a56dd8d6655299b9d6cad",
   "Plugin/PluginCircuitBreaker.php": "f855fdedfbfe0320224e3c1a27704a9a623bde79665bd942b459c6d481612759",

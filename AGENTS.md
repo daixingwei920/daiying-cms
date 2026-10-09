@@ -148,3 +148,13 @@ At the start of a Daiying CMS Core task:
 4. Check the current Core version and Git commit.
 5. Refuse to publish from a dirty or legacy/WIP worktree.
 6. Keep plugin/business development in independent plugin threads.
+
+## Retired Product Boundary
+
+Owner decision (2026-10-09): `DAIYING_NOVEL = RETIRED`.
+`daiying_novel` and `official.novel-collector` are no longer maintained,
+planned products, new installer components, or mandatory Core acceptance targets.
+Preserve historical source, frozen migrations, installed customer assets,
+trust records, orders and licenses. Do not revive this product as a Core task.
+Do not remove assertions for other products to make the release gate pass.
+See `docs/retired-products.md`.

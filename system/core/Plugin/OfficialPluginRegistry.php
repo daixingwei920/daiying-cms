@@ -119,6 +119,7 @@ final class OfficialPluginRegistry
                 'capability_namespaces' => ['friend_links'],
                 'table_prefixes' => ['friend_links_'],
             ],
+            // RETIRED: legacy identity/trust retained for installed customers; not a new bundle.
             'official.novel-collector' => [
                 'directory' => 'official.novel-collector',
                 'package_type' => 'plugin',

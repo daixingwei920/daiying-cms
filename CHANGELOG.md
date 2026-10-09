@@ -524,3 +524,8 @@ The local repository also contains previous tags including:
 - `v1.2.4`
 
 Use GitHub Releases for public download artifacts.
+
+## Product retirement — 2026-10-09 (development candidate)
+
+- DAIYING_NOVEL = RETIRED: stop novel theme/collector maintenance and exclude new installer distributions; preserve historical source, installed assets, trust records and licenses.
+- Remove only novel assertions from the shared productization gate; retain video assertions and shared infrastructure tests. Archive product-only novel tests outside the active Core suite.

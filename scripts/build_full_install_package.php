@@ -155,6 +155,11 @@ function shouldPackage(string $file): bool
     if ($file === '' || str_starts_with($file, '.') && !in_array($file, ['.htaccess'], true)) {
         return false;
     }
+    // RETIRED: exclude new distribution only; installed customer assets are untouched.
+    if (str_starts_with($file, 'content/plugins/official.novel-collector/')
+        || str_starts_with($file, 'content/themes/daiying_novel/')) {
+        return false;
+    }
     if (str_starts_with($file, 'tests/') || str_starts_with($file, 'outputs/')) {
         return false;
     }
