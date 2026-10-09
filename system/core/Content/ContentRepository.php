@@ -23,6 +23,7 @@ final class ContentRepository
     /** @param list<array<string, mixed>> $blocks @param array<string, mixed> $meta @param list<string> $categories @param list<string> $tags */
     public function create(string $type, string $title, string $slug, array $blocks, string $status = 'draft', array $meta = [], array $categories = [], array $tags = []): int
     {
+        $this->mediaLibrary();
         [$slug, $cleanBlocks] = $this->prepareForSave($type, $title, $slug, $blocks, $status, null);
         $now = gmdate('c');
         $stmt = $this->pdo->prepare(
@@ -60,6 +61,7 @@ final class ContentRepository
             throw new ContentException('Content not found.');
         }
         (new ContentRevisionRepository($this->pdo))->recordFromContent($existing, null, 'before_update');
+        $this->mediaLibrary();
         [$slug, $cleanBlocks] = $this->prepareForSave($type, $title, $slug, $blocks, $status, $id);
         $now = gmdate('c');
         $publishedAt = $existing['published_at'] ?? null;
@@ -86,6 +88,116 @@ final class ContentRepository
         ]);
         $this->syncTerms($id, $categories, $tags);
         $this->mediaLibrary()->syncContentReferences($id, $cleanBlocks);
+    }
+
+    /** Partial update; legacy update() remains a full replacement API.
+     * @param array<string,mixed> $patch
+     * @return array<string,mixed>
+     */
+    public function patch(int $id, array $patch, ?array &$before = null): array
+    {
+        $owns = !$this->pdo->inTransaction();
+        $sqlite = $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
+        if ($owns) {
+            $sqlite ? $this->pdo->exec('BEGIN IMMEDIATE') : $this->pdo->beginTransaction();
+        }
+        try {
+            if (!$sqlite) {
+                $lock = $this->pdo->prepare('SELECT id FROM cms_contents WHERE id = ? FOR UPDATE');
+                $lock->execute([$id]);
+            }
+            $existing = $this->find($id);
+            if ($existing === null) {
+                throw new ContentException('Content not found.');
+            }
+            if (array_key_exists('expected_digest', $patch) && (!is_string($patch['expected_digest'])
+                || !hash_equals($this->snapshotDigest($existing, $this->termsForContent($id)), $patch['expected_digest']))) {
+                throw new ContentException('Content revision conflict.');
+            }
+            $before = $existing;
+            $mode = $patch['meta_mode'] ?? 'merge';
+            if (!in_array($mode, ['merge', 'replace'], true)) {
+                throw new ContentException('Invalid meta_mode.');
+            }
+            foreach (['meta', 'categories', 'tags'] as $key) {
+                if (array_key_exists($key, $patch) && !is_array($patch[$key])) {
+                    throw new ContentException($key . ' must be an array.');
+                }
+            }
+            $meta = $existing['meta'];
+            if (array_key_exists('meta', $patch)) {
+                $meta = $mode === 'replace' ? $patch['meta'] : array_replace($meta, $patch['meta']);
+            }
+            $categories = []; $tags = [];
+            foreach ($this->termsForContent($id) as $term) {
+                if ($term['taxonomy'] === 'category') { $categories[] = $term['name']; }
+                if ($term['taxonomy'] === 'tag') { $tags[] = $term['name']; }
+            }
+            $this->update($id,
+                (string) ($patch['type'] ?? $patch['content_type'] ?? $existing['content_type']),
+                (string) ($patch['title'] ?? $existing['title']),
+                (string) ($patch['slug'] ?? $existing['slug']),
+                $patch['blocks'] ?? $existing['blocks'],
+                (string) ($patch['status'] ?? $existing['status']), $meta,
+                $patch['categories'] ?? $categories, $patch['tags'] ?? $tags);
+            $result = $this->find($id);
+            if ($mode === 'merge') {
+                // Preserve opaque existing extension fields without accepting arbitrary new meta.
+                $untouched = array_diff_key($existing['meta'], $patch['meta'] ?? []);
+                $preserved = array_replace($untouched, $result['meta']);
+                if ($preserved !== $result['meta']) {
+                    $this->pdo->prepare('UPDATE cms_contents SET meta_json = ? WHERE id = ?')
+                        ->execute([json_encode($preserved, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE), $id]);
+                    $result = $this->find($id);
+                }
+            }
+            if ($owns) { $sqlite ? $this->pdo->exec('COMMIT') : $this->pdo->commit(); }
+            return $result;
+        } catch (\Throwable $error) {
+            if ($owns) { $sqlite ? $this->pdo->exec('ROLLBACK') : $this->pdo->rollBack(); }
+            throw $error;
+        }
+    }
+
+    /** A content and taxonomy snapshot token; use expected_digest for atomic PATCH. */
+    public function digest(int $id): string
+    {
+        return $this->snapshot($id)['digest'];
+    }
+
+    /** A consistent content/terms snapshot for conditional clients. */
+    public function snapshot(int $id): array
+    {
+        $owns = !$this->pdo->inTransaction();
+        if ($owns) { $this->pdo->beginTransaction(); }
+        try {
+            $content = $this->find($id);
+            if ($content === null) { throw new ContentException('Content not found.'); }
+            $digest = $this->snapshotDigest($content, $this->termsForContent($id));
+            if ($owns) { $this->pdo->commit(); }
+            return ['item' => $content, 'digest' => $digest];
+        } catch (\Throwable $error) {
+            if ($owns && $this->pdo->inTransaction()) { $this->pdo->rollBack(); }
+            throw $error;
+        }
+    }
+
+    private function snapshotDigest(array $content, array $terms): string
+    {
+        $content = array_filter($content, static fn ($key): bool => is_string($key), ARRAY_FILTER_USE_KEY);
+        return hash('sha256', json_encode([$content, $terms], JSON_THROW_ON_ERROR));
+    }
+
+    /** Write audit labels only; never accept request bodies or credentials. */
+    public function auditWrite(int $id, string $actorType, ?int $actorId, string $action, array $context = []): void
+    {
+        $safe = ['content_id' => $id];
+        foreach (['plugin_id', 'task_id'] as $key) {
+            if (isset($context[$key]) && is_string($context[$key]) && preg_match('/^[A-Za-z0-9_.:-]{1,96}$/D', $context[$key])) {
+                $safe[$key] = $context[$key];
+            }
+        }
+        (new \Cms\Core\Audit\AuditLogger($this->pdo))->record($actorType, $actorId, $action, $safe);
     }
 
     public function delete(int $id): void
@@ -829,10 +941,15 @@ final class ContentRepository
     {
         $root = $this->rootPath ?? (defined('CMS_ROOT') ? (string) constant('CMS_ROOT') : '');
         $resolvedRoot = $root !== '' ? realpath($root) : false;
-        if ($resolvedRoot === false || !is_dir($resolvedRoot)) {
+        if ($resolvedRoot === false || !is_dir($resolvedRoot) || is_link(rtrim($root, '/'))) {
             throw new ContentException('A trusted CMS instance root is required for media storage.');
         }
 
+        foreach (['content', 'content/uploads'] as $relative) {
+            if (is_link($resolvedRoot . '/' . $relative)) {
+                throw new ContentException('Symlinked media directories are not allowed.');
+            }
+        }
         return new MediaLibrary($this->pdo, $resolvedRoot . '/content/uploads');
     }
 

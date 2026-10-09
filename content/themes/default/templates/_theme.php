@@ -169,7 +169,10 @@ if (!function_exists('dy_setting')) {
         $siteName = dy_site_name($context);
         $pageTitle = trim((string) ($seo['title'] ?? $title));
         $description = trim((string) ($seo['description'] ?? dy_text($context, 'site_description', '')));
-        $keywords = trim((string) ($seo['keywords'] ?? dy_text($context, 'seo_keywords', '')));
+        $keywords = trim((string) ($seo['keywords'] ?? ''));
+        if ($keywords === '') {
+            $keywords = dy_text($context, 'seo_keywords', '');
+        }
         $canonical = trim((string) ($seo['canonical'] ?? $context->get('canonical', '')));
         $favicon = dy_image_url($context, ['favicon_image', 'favicon_url', 'site_favicon_url'], true);
         ?>

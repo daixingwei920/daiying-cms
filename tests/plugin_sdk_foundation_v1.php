@@ -38,6 +38,8 @@ $check = static function (bool $condition, string $message) use (&$failures): vo
     echo "[PASS] {$message}\n";
 };
 
+$mediaRoot = sys_get_temp_dir() . '/cms-content-test-' . bin2hex(random_bytes(4));
+mkdir($mediaRoot, 0700, true);
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -49,6 +51,7 @@ foreach ([
     '2026_09_08_000004_content_foundation_safety.php',
     '2026_08_29_000001_members_comments_schema.php',
     '2026_09_26_000001_plugin_sdk_foundation_v1.php',
+    '2026_10_03_000001_seo_keyword_system_p1.php',
 ] as $migrationFile) {
     $migration = require __DIR__ . '/../system/migrations/' . $migrationFile;
     $migration->up($pdo);
@@ -69,7 +72,7 @@ $check($jsonRequest->withPath('/rewritten')->rawBody() === '{"ok":true}', 'Reque
 
 $types = ContentTypeRegistry::defaults();
 $contentManifest = new PluginManifest('local.sdkcontent', 'SDK Content', '1.0.0', 'Unit', '1.2.70', '8.3.0', 'plugin.php', 'api', ['content.read', 'content.write'], [], [], 'plugin', false, [], [], '');
-$contentService = new PluginContentService($contentManifest, new ContentRepository($pdo, $types));
+$contentService = new PluginContentService($contentManifest, new ContentRepository($pdo, $types, [], $mediaRoot));
 $created = $contentService->createDraft([
     'type' => 'article',
     'title' => 'Hello SDK',
@@ -83,7 +86,7 @@ $updated = $contentService->update((int) $created['id'], ['title' => 'Updated SD
 $published = $contentService->publish((int) $created['id']);
 $list = $contentService->list(['page' => 1, 'per_page' => 10]);
 $check(($updated['title'] ?? '') === 'Updated SDK' && ($published['status'] ?? '') === 'published' && $contentService->get((int) $created['id']) !== null && $list['total'] >= 2, 'ContentService supports get/list/update/publish.');
-$blockedRead = new PluginContentService(new PluginManifest('local.noread', 'No Read', '1.0.0', 'Unit', '1.2.70', '8.3.0', 'plugin.php', 'api', [], [], [], 'plugin', false, [], [], ''), new ContentRepository($pdo, $types));
+$blockedRead = new PluginContentService(new PluginManifest('local.noread', 'No Read', '1.0.0', 'Unit', '1.2.70', '8.3.0', 'plugin.php', 'api', [], [], [], 'plugin', false, [], [], ''), new ContentRepository($pdo, $types, [], $mediaRoot));
 $blocked = false;
 try {
     $blockedRead->createDraft(['title' => 'Nope']);

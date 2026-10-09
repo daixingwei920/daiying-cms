@@ -20,7 +20,7 @@ use PDO;
 
 final class ApiV1Controller
 {
-    public function __construct(private readonly Settings $settings, private readonly string $rootPath)
+    public function __construct(private readonly Settings $settings, private readonly string $rootPath, private readonly ?\Cms\Core\Events\EventDispatcher $events = null)
     {
     }
 
@@ -75,7 +75,9 @@ final class ApiV1Controller
                 return $this->error('not_found', 'Content not found.', 404);
             }
 
-            return $this->ok(['item' => $this->serializeContent($content)]);
+            $snapshot = $repo->snapshot($id);
+            if ($snapshot['item']['status'] !== 'published' && !$this->authorized($request)) { return $this->error('not_found', 'Content not found.', 404); }
+            return $this->ok(['item' => $this->serializeContent($snapshot['item']), 'revision_digest' => $snapshot['digest']])->withHeaders(['ETag' => '"' . $snapshot['digest'] . '"']);
         }
         $page = $this->positiveInt($request->query['page'] ?? 1, 1, 100000);
         $perPage = $this->positiveInt($request->query['per_page'] ?? 10, 1, 50);
@@ -241,6 +243,8 @@ final class ApiV1Controller
                 $this->stringList($request->body['tags'] ?? []),
             );
 
+            $this->recordWrite($repo, $id, $request, 'content.created');
+
             return Response::json(['ok' => true, 'data' => ['item' => $this->serializeContent($repo->find($id) ?? ['id' => $id])]], 201)
                 ->withHeaders(['Cache-Control' => 'private, no-store']);
         } catch (\Throwable $exception) {
@@ -255,22 +259,39 @@ final class ApiV1Controller
             if ($existing === null) {
                 return $this->error('not_found', 'Content not found.', 404);
             }
-            $repo->update(
-                $id,
-                (string) ($request->body['type'] ?? $request->body['content_type'] ?? $existing['content_type']),
-                (string) ($request->body['title'] ?? $existing['title']),
-                (string) ($request->body['slug'] ?? $existing['slug']),
-                $this->arrayInput($request->body['blocks'] ?? $existing['blocks'] ?? []),
-                (string) ($request->body['status'] ?? $existing['status']),
-                $this->arrayInput($request->body['meta'] ?? $existing['meta'] ?? []),
-                $this->stringList($request->body['categories'] ?? []),
-                $this->stringList($request->body['tags'] ?? []),
-            );
+            $patch = $request->body;
+            if ($request->method === 'PUT') {
+                // Preserve the existing full-replacement contract for PUT.
+                $patch += ['meta' => [], 'categories' => [], 'tags' => [], 'meta_mode' => 'replace'];
+            }
+            foreach (['categories', 'tags'] as $field) {
+                if (array_key_exists($field, $patch)) {
+                    if ($patch[$field] === null) { throw new \InvalidArgumentException($field . ' cannot be null.'); }
+                    $patch[$field] = $this->stringList($patch[$field]);
+                }
+            }
+            $ifMatch = $request->server['HTTP_IF_MATCH'] ?? null;
+            if ($ifMatch !== null) { $patch['expected_digest'] = trim((string) $ifMatch, '"'); }
+            $repo->patch($id, $patch, $existing);
+            $this->recordWrite($repo, $id, $request, 'content.updated', $existing);
 
-            return $this->ok(['item' => $this->serializeContent($repo->find($id) ?? ['id' => $id])]);
+            $snapshot = $repo->snapshot($id);
+            return $this->ok(['item' => $this->serializeContent($snapshot['item']), 'revision_digest' => $snapshot['digest']])->withHeaders(['ETag' => '"' . $snapshot['digest'] . '"']);
         } catch (\Throwable $exception) {
-            return $this->error('invalid_request', $exception->getMessage(), 422);
+            return $this->error($exception->getMessage() === 'Content revision conflict.' ? 'conflict' : 'invalid_request', $exception->getMessage(), $exception->getMessage() === 'Content revision conflict.' ? 409 : 422);
         }
+    }
+
+    private function recordWrite(ContentRepository $repo, int $id, Request $request, string $action, ?array $before = null): void
+    {
+        $user = (new AdminAuthenticator($this->pdo()))->user();
+        $actor = $user === null ? 'api' : 'admin';
+        $actorId = $user === null ? null : (int) $user['id'];
+        $taskId = $request->body['task_id'] ?? null;
+        $repo->auditWrite($id, $actor, $actorId, $action, ['task_id' => $taskId]);
+        if ($before === null && ($request->body['status'] ?? 'draft') !== 'published') { return; }
+        \Cms\Core\Content\ContentPublishedEvent::notify($repo, $id, $this->events, $this->settings,
+            $before === null ? 'created' : 'updated', $before, $actor, $actorId, is_string($taskId) ? $taskId : null);
     }
 
     private function deleteContent(ContentRepository $repo, Request $request, int $id): Response

@@ -165,6 +165,15 @@ final class LocalMediaStorageProvider implements MediaStorageProviderV1Interface
             throw new MediaException('Media storage key is invalid.');
         }
 
-        return rtrim($this->root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $key;
+        $path = rtrim($this->root, DIRECTORY_SEPARATOR);
+        if (is_link($path)) { throw new MediaException('Symlinked media storage is not allowed.'); }
+        foreach (explode('/', $key) as $segment) {
+            if ($segment === '..' || $segment === '.' || str_contains($segment, "\0")) { throw new MediaException('Media storage key is invalid.'); }
+            $path .= DIRECTORY_SEPARATOR . $segment;
+            if (is_link($path) || is_link($path . '.part')) {
+                throw new MediaException('Symlinked media paths are not allowed.');
+            }
+        }
+        return $path;
     }
 }

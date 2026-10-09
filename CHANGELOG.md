@@ -1,3 +1,10 @@
+# 1.2.82-rc1 — local unreleased maintenance candidate
+
+- Bind content media to the trusted instance root; reject symlinked media roots.
+- Preserve omitted taxonomies and non-target meta in REST PATCH and plugin partial updates; keep repository update / REST PUT replacement semantics.
+- Add optional snapshot preconditions, sanitized audit labels and existing publication events for REST/plugin writes.
+- Fix the default theme global keywords fallback. No stable release or production deployment.
+
 # Changelog
 
 ## 1.2.81 - 2026-10-06

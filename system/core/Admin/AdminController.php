@@ -10378,6 +10378,8 @@ JS;
             $slug = (string) ($content['slug'] ?? '');
             $publicPath = $this->contentPublicPath($type, $slug);
             $siteUrl = rtrim((string) $this->settings->get('site.url', ''), '/');
+            $base = \Cms\Core\Routing\BasePath::fromSettings($this->settings);
+            if ($base !== '' && rtrim((string) parse_url($siteUrl, PHP_URL_PATH), '/') === '') { $siteUrl .= $base; }
             if ($publicPath === '' || $siteUrl === '' || filter_var($siteUrl, FILTER_VALIDATE_URL) === false) {
                 return;
             }

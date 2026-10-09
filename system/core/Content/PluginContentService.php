@@ -13,6 +13,8 @@ final class PluginContentService
         private readonly PluginManifest $manifest,
         private readonly ContentRepository $contents,
         private readonly mixed $contentsFactory = null,
+        private readonly ?\Cms\Core\Events\EventDispatcher $events = null,
+        private readonly ?\Cms\Core\Config\Settings $settings = null,
     ) {
     }
 
@@ -31,6 +33,7 @@ final class PluginContentService
             $this->stringList($draft, 'tags'),
         );
 
+        $this->recordWrite($id, 'content.created', null, $draft);
         return $this->getWritten($id);
     }
 
@@ -68,17 +71,14 @@ final class PluginContentService
         if ($existing === null) {
             throw new ContentException('Content not found.');
         }
-        $this->repository()->update(
-            $contentId,
-            (string) ($patch['type'] ?? $patch['content_type'] ?? $existing['content_type']),
-            (string) ($patch['title'] ?? $existing['title']),
-            (string) ($patch['slug'] ?? $existing['slug']),
-            is_array($patch['blocks'] ?? null) ? $patch['blocks'] : (is_array($existing['blocks'] ?? null) ? $existing['blocks'] : []),
-            (string) ($patch['status'] ?? $existing['status']),
-            is_array($patch['meta'] ?? null) ? $patch['meta'] : (is_array($existing['meta'] ?? null) ? $existing['meta'] : []),
-            $this->stringList($patch, 'categories'),
-            $this->stringList($patch, 'tags'),
-        );
+        foreach (['categories', 'tags'] as $field) {
+            if (array_key_exists($field, $patch)) {
+                if ($patch[$field] === null) { throw new ContentException($field . ' cannot be null.'); }
+                $patch[$field] = $this->stringList($patch, $field);
+            }
+        }
+        $this->repository()->patch($contentId, $patch, $existing);
+        $this->recordWrite($contentId, 'content.updated', $existing, $patch);
 
         return $this->getWritten($contentId);
     }
@@ -91,17 +91,21 @@ final class PluginContentService
         if ($existing === null) {
             throw new ContentException('Content not found.');
         }
-        $this->repository()->update(
-            $contentId,
-            (string) $existing['content_type'],
-            (string) $existing['title'],
-            (string) $existing['slug'],
-            is_array($existing['blocks'] ?? null) ? $existing['blocks'] : [],
-            'published',
-            is_array($existing['meta'] ?? null) ? $existing['meta'] : [],
-        );
+        $this->repository()->patch($contentId, ['status' => 'published'], $existing);
+        $this->recordWrite($contentId, 'content.updated', $existing, []);
 
         return $this->getWritten($contentId);
+    }
+
+    private function recordWrite(int $id, string $action, ?array $before, array $input): void
+    {
+        $repo = $this->repository();
+        $repo->auditWrite($id, 'plugin', null, $action, ['plugin_id' => $this->manifest->id, 'task_id' => $input['task_id'] ?? null]);
+        if ($this->settings !== null && $before !== null) {
+            ContentPublishedEvent::notify($repo, $id, $this->events, $this->settings,
+                $before === null ? 'created' : 'updated', $before, 'plugin', null,
+                is_string($input['task_id'] ?? null) ? $input['task_id'] : null);
+        }
     }
 
     private function assertCapability(string $capability): void

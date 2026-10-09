@@ -343,7 +343,7 @@ final class Application
             ]);
         });
 
-        $apiV1 = new ApiV1Controller($settings, $rootPath);
+        $apiV1 = new ApiV1Controller($settings, $rootPath, $events);
         $router->get('/api/v1', [$apiV1, 'index']);
         $router->get('/api/v1/contents', [$apiV1, 'contents']);
         $router->get('/api/v1/contents/{id}', [$apiV1, 'contents']);
