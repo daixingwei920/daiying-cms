@@ -37,6 +37,10 @@ final class InstallController
             return Response::redirect('/admin/login');
         }
 
+        if ($this->hasConfiguredSite()) {
+            return $this->manualRecoveryRequired();
+        }
+
         return Response::html(View::page('安装 PHP CMS', $this->form()));
     }
 
@@ -44,6 +48,10 @@ final class InstallController
     {
         if ($this->isInstalled()) {
             return Response::redirect('/admin/login');
+        }
+
+        if ($this->hasConfiguredSite()) {
+            return $this->manualRecoveryRequired();
         }
 
         if (!CsrfToken::verify($request->input('_csrf'))) {
@@ -88,12 +96,23 @@ final class InstallController
         $siteSecret = $siteSecret !== '' ? $siteSecret : bin2hex(random_bytes(32));
         $lock = $this->acquireInstallLock();
         $wroteConfig = false;
+        $adminCommitted = false;
         $configPath = $this->rootPath . '/config/app.php';
         $configBackup = is_file($configPath) ? (string) file_get_contents($configPath) : null;
         $configBackupMode = is_file($configPath) ? (fileperms($configPath) & 0777) : null;
 
         try {
+            // Recheck under the existing installation lock; never recreate administrators.
+            if ($this->isInstalled()) {
+                return Response::redirect('/admin/login');
+            }
+            if ($this->hasConfiguredSite()) {
+                return $this->manualRecoveryRequired();
+            }
             $pdo = $this->testDatabase($database);
+            if ($this->hasExistingAdmin($pdo)) {
+                return $this->manualRecoveryRequired();
+            }
             $migrations = [];
             foreach (glob($this->rootPath . '/system/migrations/*.php') ?: [] as $file) {
                 $migrations[] = require $file;
@@ -107,24 +126,35 @@ final class InstallController
                 $this->saveCoreSetting($pdo, 'site.url', $siteUrl);
                 $this->saveCoreSetting($pdo, 'site.id', $siteId);
                 $this->saveCoreSetting($pdo, 'site.secret_created_at', gmdate('c'));
-                (new AuditLogger($pdo))->record('system', null, 'install.completed', ['site_name' => $siteName, 'site_id' => $siteId]);
+                // Persist the selected database before committing the administrator.
+                // If completion fails later, this identity keeps the public installer blocked.
+                $this->writeConfig($database, $siteName, $siteUrl, $siteId, $siteSecret);
+                $wroteConfig = true;
                 $pdo->commit();
+                $adminCommitted = true;
             } catch (Throwable $exception) {
                 $pdo->rollBack();
                 throw $exception;
             }
 
-            $this->writeConfig($database, $siteName, $siteUrl, $siteId, $siteSecret);
-            $wroteConfig = true;
             $this->ensureRuntimeDirectories();
             $this->writeInstalledLock($siteId);
+            // A logging failure must not undo an already completed installation.
+            try {
+                (new AuditLogger($pdo))->record('system', null, 'install.completed', ['site_name' => $siteName, 'site_id' => $siteId]);
+            } catch (Throwable $auditError) {
+                $this->logger->error('Install completed audit unavailable', ['source' => 'Core']);
+            }
         } catch (Throwable $exception) {
             $this->cleanupInstalledLock();
-            if ($wroteConfig) {
+            if ($wroteConfig && !$adminCommitted) {
                 $this->restoreConfigBackup($configBackup, $configBackupMode);
             }
             $this->logger->error('Install failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
-            return Response::html(View::page('安装 PHP CMS', $this->form('安装失败：' . $exception->getMessage(), '', $request)), 500);
+            if ($adminCommitted) {
+                return Response::html($this->manualRecoveryRequired()->body(), 500);
+            }
+            return Response::html(View::page('安装 PHP CMS', $this->form('安装未完成。请检查数据库、文件权限及服务器错误日志；若管理员已创建，请停止公开安装并由站点负责人核查配置和安装锁。仅无业务数据的专用新安装资源可在确认、备份后人工清理重装。', '', $request)), 500);
         } finally {
             if (is_resource($lock)) {
                 flock($lock, LOCK_UN);
@@ -139,6 +169,56 @@ final class InstallController
     private function isInstalled(): bool
     {
         return is_file($this->rootPath . '/storage/installed.lock');
+    }
+
+    private function hasConfiguredSite(): bool
+    {
+        // Persistent site identity means configuration has already been installed.
+        // Do not let public request parameters choose a replacement database.
+        if (!is_file($this->rootPath . '/config/app.php')) {
+            return false;
+        }
+        $config = require $this->rootPath . '/config/app.php';
+        if (!is_array($config)) {
+            return true;
+        }
+        if (trim((string) ($config['site']['id'] ?? '')) !== '') {
+            return true;
+        }
+        $database = $config['database'] ?? [];
+        $dsn = (string) ($database['dsn'] ?? '');
+        if (str_starts_with($dsn, 'sqlite:') && !is_file(substr($dsn, 7))) {
+            return false; // Never create a database while inspecting installation state.
+        }
+        $example = require $this->rootPath . '/config/app.example.php';
+        if ($dsn === (string) ($example['database']['dsn'] ?? '')
+            && ($database['username'] ?? '') === ($example['database']['username'] ?? '')
+            && ($database['password'] ?? '') === ($example['database']['password'] ?? '')) {
+            return false; // Unconfigured installer defaults are not a customer database.
+        }
+        try {
+            return $this->hasExistingAdmin(ConnectionFactory::make(Settings::fromArray(['database' => $database])));
+        } catch (Throwable $exception) {
+            return true; // A custom configuration that cannot be inspected requires its owner.
+        }
+    }
+
+    private function hasExistingAdmin(PDO $pdo): bool
+    {
+        $driver = (string) $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($driver === 'mysql') {
+            $exists = $pdo->query("SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='cms_admin_users'")->fetchColumn();
+        } elseif ($driver === 'sqlite') {
+            $exists = $pdo->query("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='cms_admin_users'")->fetchColumn();
+        } else {
+            throw new \RuntimeException('Unsupported installation database.');
+        }
+        return (bool) $exists && (bool) $pdo->query('SELECT COUNT(*) FROM cms_admin_users')->fetchColumn();
+    }
+
+    private function manualRecoveryRequired(): Response
+    {
+        return Response::html(View::page('安装需要人工核查', '<h1>安装已部分完成或站点已配置</h1><p>已存在站点身份或管理员，公开安装入口已阻断。请由站点负责人备份并核查专用数据库、config/app.php、installed.lock 与文件权限。不得通过安装页面重建管理员。正式运行的网站必须使用备份与回滚；仅确认没有业务数据的专用首次安装资源可以人工清理后重装。</p>'), 409);
     }
 
     private function validSiteUrl(string $siteUrl): bool
@@ -182,7 +262,7 @@ final class InstallController
             '<label>MySQL Port<input name="mysql_port" value="' . View::escape($mysqlPort) . '"></label>' .
             '<label>MySQL Database<input name="mysql_database" value="' . View::escape($mysqlDatabase) . '"></label>' .
             '<label>MySQL Username<input name="mysql_username" value="' . View::escape($mysqlUsername) . '"></label>' .
-            '<label>MySQL Password<input name="mysql_password" type="password" value="' . View::escape($this->value($request, 'mysql_password', '')) . '"></label>' .
+            '<label>MySQL Password<input name="mysql_password" type="password" value=""></label>' .
             '<button type="submit" name="install_action" value="test_database">测试数据库连接</button>' .
             '<h2>3. 站点信息</h2>' .
             '<label>站点名称<input name="site_name" value="' . View::escape($this->value($request, 'site_name', 'PHP CMS')) . '" required></label>' .

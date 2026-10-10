@@ -35,7 +35,7 @@ $options = getopt('', [
 
 $commit = resolveCommit($root, trim((string) ($options['commit'] ?? 'HEAD')));
 $channel = trim((string) ($options['channel'] ?? 'stable')) ?: 'stable';
-$minUpgradeFrom = trim((string) ($options['min-upgrade-from'] ?? '1.2.52')) ?: '1.2.52';
+
 $version = trim((string) ($options['version'] ?? ''));
 if ($version === '') {
     $version = detectVersion($root, $commit);
@@ -43,6 +43,14 @@ if ($version === '') {
 if (!preg_match('/^[0-9]+(?:\.[0-9A-Za-z-]+){1,3}$/', $version)) {
     fail('Invalid version: ' . $version);
 }
+// Owner-approved direct upgrade contract for the 1.2.82 release family only.
+$is182 = preg_match('/^1\.2\.82(?:-|$)/', $version) === 1;
+$minUpgradeFrom = trim((string) ($options['min-upgrade-from'] ?? ($is182 ? '1.2.81' : '1.2.52')));
+if (!$is182 && $minUpgradeFrom === '') { $minUpgradeFrom = '1.2.52'; }
+if ($is182 && $minUpgradeFrom !== '1.2.81') {
+    fail('Core 1.2.82 direct upgrades require source version 1.2.81.');
+}
+$sourceVersionMax = $is182 ? '1.2.81' : $version;
 $releaseId = trim((string) ($options['release-id'] ?? 'daiying-cms-core-update-' . $version));
 if (!preg_match('/^[A-Za-z0-9._:-]{2,191}$/', $releaseId)) {
     fail('Invalid release id: ' . $releaseId);
@@ -90,7 +98,7 @@ $update = [
     'release_id' => $releaseId,
     'version' => $version,
     'from_version' => $minUpgradeFrom,
-    'source_versions' => ['min' => $minUpgradeFrom, 'max' => $version],
+    'source_versions' => ['min' => $minUpgradeFrom, 'max' => $sourceVersionMax],
     'min_upgrade_from' => $minUpgradeFrom,
     'hard_min_version' => $minUpgradeFrom,
     'migration_floor' => $minUpgradeFrom,
@@ -149,6 +157,7 @@ $metadata = [
     'exact_commit' => $commit,
     'package_url' => '',
     'package_sha256' => $sha256,
+    'source_versions' => ['min' => $minUpgradeFrom, 'max' => $sourceVersionMax],
     'min_upgrade_from' => $minUpgradeFrom,
     'hard_min_version' => $minUpgradeFrom,
     'migration_floor' => $minUpgradeFrom,
@@ -160,6 +169,10 @@ $metadata = [
     'is_current_candidate' => false,
     'created_at' => gmdate('c'),
 ];
+if ($is182) {
+    $metadata['minimum_core'] = '1.2.81';
+    $metadata['maximum_core'] = '1.2.81';
+}
 $metadataJson = json_encode($metadata, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 if (!is_string($metadataJson)) {
     fail('Unable to encode metadata JSON.');

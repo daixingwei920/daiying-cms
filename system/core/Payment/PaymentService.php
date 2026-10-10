@@ -11,6 +11,8 @@ use Throwable;
 
 final class PaymentService
 {
+    // PHP 8.3 PDO SQLite does not track transactions started with SQL.
+    private bool $sqliteImmediateTransaction = false;
     public function __construct(
         private readonly PDO $pdo,
         private readonly PaymentRepository $payments,
@@ -83,7 +85,7 @@ final class PaymentService
             'currency' => $currency,
             'scenario' => $scenario,
         ]);
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = $this->inTransaction();
         $this->beginImmediate();
         try {
             $existing = $this->payments->paymentByIdempotencyForUpdate($idempotencyKey);
@@ -91,8 +93,8 @@ final class PaymentService
                 if ((string) ($existing['request_hash'] ?? '') !== $requestHash) {
                     throw new PaymentException('Payment idempotency key was reused with different content.');
                 }
-                if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                    $this->pdo->commit();
+                if (!$alreadyInTransaction && $this->inTransaction()) {
+                    $this->commitTransaction();
                 }
 
                 return $existing;
@@ -149,8 +151,8 @@ final class PaymentService
                 'idempotency_key' => $idempotencyKey,
                 'provider_code' => $result->code,
             ]);
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->commit();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->commitTransaction();
             }
 
             $payment = $this->payments->payment($paymentId) ?? [];
@@ -161,8 +163,8 @@ final class PaymentService
 
             return $payment;
         } catch (Throwable $exception) {
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->rollbackTransaction();
             }
             $this->recordProviderCreateFailure(
                 $subjectType,
@@ -229,7 +231,7 @@ final class PaymentService
             throw new PaymentException('Payment provider rejected the capture request.');
         }
 
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = $this->inTransaction();
         $this->beginImmediate();
         try {
             $this->updatePaymentFromProviderResult($payment, $result, ['paid']);
@@ -247,12 +249,12 @@ final class PaymentService
                 'idempotency_key' => $idempotencyKey,
                 'provider_code' => $result->code,
             ]);
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->commit();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->commitTransaction();
             }
         } catch (Throwable $exception) {
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->rollbackTransaction();
             }
             throw $exception;
         }
@@ -309,7 +311,7 @@ final class PaymentService
             throw new PaymentException('Payment provider rejected the cancel request.');
         }
 
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = $this->inTransaction();
         $this->beginImmediate();
         try {
             $this->updatePaymentFromProviderResult($payment, $result, ['cancelled']);
@@ -326,12 +328,12 @@ final class PaymentService
                 'idempotency_key' => $idempotencyKey,
                 'provider_code' => $result->code,
             ]);
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->commit();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->commitTransaction();
             }
         } catch (Throwable $exception) {
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->rollbackTransaction();
             }
             throw $exception;
         }
@@ -361,7 +363,7 @@ final class PaymentService
             throw new PaymentException('Payment provider rejected the status request.');
         }
 
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = $this->inTransaction();
         $this->beginImmediate();
         try {
             $this->updatePaymentFromProviderResult($payment, $result);
@@ -378,12 +380,12 @@ final class PaymentService
                 'expected_status' => $expectedStatus,
                 'provider_code' => $result->code,
             ]);
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->commit();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->commitTransaction();
             }
         } catch (Throwable $exception) {
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->rollbackTransaction();
             }
             throw $exception;
         }
@@ -419,18 +421,18 @@ final class PaymentService
         if ($limit <= 0 || $limit > 1000) {
             throw new PaymentException('Payment authorization expiry limit is invalid.');
         }
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = $this->inTransaction();
         $this->beginImmediate();
         try {
             $count = $this->payments->expireExpiredAuthorizations($limit);
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->commit();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->commitTransaction();
             }
 
             return $count;
         } catch (Throwable $exception) {
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->rollbackTransaction();
             }
             throw $exception;
         }
@@ -441,18 +443,18 @@ final class PaymentService
         if ($limit <= 0 || $limit > 1000) {
             throw new PaymentException('Payment entitlement expiry limit is invalid.');
         }
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = $this->inTransaction();
         $this->beginImmediate();
         try {
             $count = $this->payments->expireExpiredEntitlements($limit);
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->commit();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->commitTransaction();
             }
 
             return $count;
         } catch (Throwable $exception) {
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->rollbackTransaction();
             }
             throw $exception;
         }
@@ -467,7 +469,7 @@ final class PaymentService
         $reason = $this->normalizeRefundReason($reason);
         $idempotencyKey = $this->normalizeIdempotencyKey($idempotencyKey);
         $requestHash = $this->requestHash(['payment_id' => $paymentId, 'amount_minor' => $amountMinor, 'reason' => $reason]);
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = $this->inTransaction();
         $this->beginImmediate();
         try {
             $existing = $this->payments->refundByIdempotencyForUpdate($idempotencyKey);
@@ -475,8 +477,8 @@ final class PaymentService
                 if ((string) ($existing['request_hash'] ?? '') !== $requestHash) {
                     throw new PaymentException('Refund idempotency key was reused with different content.');
                 }
-                if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                    $this->pdo->commit();
+                if (!$alreadyInTransaction && $this->inTransaction()) {
+                    $this->commitTransaction();
                 }
 
                 return $existing;
@@ -557,14 +559,14 @@ final class PaymentService
                 'idempotency_key' => $idempotencyKey,
                 'provider_code' => $result->code,
             ]);
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->commit();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->commitTransaction();
             }
 
             return $refund;
         } catch (Throwable $exception) {
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->rollbackTransaction();
             }
             throw $exception;
         }
@@ -618,7 +620,7 @@ final class PaymentService
         $update = $this->webhookPaymentUpdate($payload);
         $refundUpdate = $this->webhookRefundUpdate($payload);
         if ($update === null && $refundUpdate === null) {
-            $alreadyInTransaction = $this->pdo->inTransaction();
+            $alreadyInTransaction = $this->inTransaction();
             $this->beginImmediate();
             try {
                 if (!$this->payments->updateWebhookReceiptStatus($receiptId, 'ignored')) {
@@ -630,12 +632,12 @@ final class PaymentService
                     'external_event_id' => (string) ($receipt['external_event_id'] ?? ''),
                     'reason' => 'no_payment_or_refund_update',
                 ]);
-                if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                    $this->pdo->commit();
+                if (!$alreadyInTransaction && $this->inTransaction()) {
+                    $this->commitTransaction();
                 }
             } catch (Throwable $exception) {
-                if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                    $this->pdo->rollBack();
+                if (!$alreadyInTransaction && $this->inTransaction()) {
+                    $this->rollbackTransaction();
                 }
                 throw $exception;
             }
@@ -652,7 +654,7 @@ final class PaymentService
             throw new PaymentException('Payment webhook target payment id is invalid.');
         }
 
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = $this->inTransaction();
         $this->beginImmediate();
         try {
             if (!$this->payments->attachWebhookReceiptPayment($receiptId, $paymentId)) {
@@ -683,12 +685,12 @@ final class PaymentService
                 'refund_status' => is_array($refundUpdate) ? (string) ($refundUpdate['status'] ?? '') : '',
                 'refund_amount_minor' => is_array($refundUpdate) ? (int) ($refundUpdate['amount_minor'] ?? 0) : 0,
             ]);
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->commit();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->commitTransaction();
             }
         } catch (Throwable $exception) {
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->rollbackTransaction();
             }
             throw $exception;
         }
@@ -1491,14 +1493,40 @@ final class PaymentService
 
     private function beginImmediate(): void
     {
-        if ($this->pdo->inTransaction()) {
+        if ($this->inTransaction()) {
             return;
         }
         if ($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
             $this->pdo->exec('BEGIN IMMEDIATE');
+            $this->sqliteImmediateTransaction = true;
             return;
         }
         $this->pdo->beginTransaction();
+    }
+
+    private function inTransaction(): bool
+    {
+        return $this->sqliteImmediateTransaction || $this->pdo->inTransaction();
+    }
+
+    private function commitTransaction(): void
+    {
+        if ($this->sqliteImmediateTransaction) {
+            $this->pdo->exec('COMMIT');
+            $this->sqliteImmediateTransaction = false;
+            return;
+        }
+        $this->pdo->commit();
+    }
+
+    private function rollbackTransaction(): void
+    {
+        if ($this->sqliteImmediateTransaction) {
+            $this->pdo->exec('ROLLBACK');
+            $this->sqliteImmediateTransaction = false;
+            return;
+        }
+        $this->pdo->rollBack();
     }
 
     private function normalizeSubjectType(string $subjectType): string
@@ -1751,7 +1779,7 @@ final class PaymentService
     /** @param array<string,mixed> $payment @param array<string,mixed> $auditContext */
     private function persistRejectedProviderResult(array $payment, PaymentResult $result, string $action, array $auditContext): void
     {
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = $this->inTransaction();
         $this->beginImmediate();
         try {
             $this->updatePaymentFromProviderResult($payment, $result);
@@ -1760,12 +1788,12 @@ final class PaymentService
             $this->recordAudit($action, $auditContext + [
                 'persisted_status' => (string) ($updated['status'] ?? $payment['status'] ?? ''),
             ]);
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->commit();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->commitTransaction();
             }
         } catch (Throwable $exception) {
-            if (!$alreadyInTransaction && $this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
+            if (!$alreadyInTransaction && $this->inTransaction()) {
+                $this->rollbackTransaction();
             }
             throw $exception;
         }

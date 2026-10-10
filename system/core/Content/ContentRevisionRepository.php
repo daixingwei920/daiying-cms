@@ -88,7 +88,7 @@ final class ContentRevisionRepository
         $stmt = $this->pdo->prepare(
             'DELETE FROM cms_content_revisions
              WHERE content_id = :content_id
-               AND id NOT IN (SELECT id FROM cms_content_revisions WHERE content_id = :content_id_recent ORDER BY id DESC LIMIT ' . $max . ')'
+               AND id NOT IN (SELECT id FROM (SELECT id FROM cms_content_revisions WHERE content_id = :content_id_recent ORDER BY id DESC LIMIT ' . $max . ') AS recent_revisions)'
         );
         $stmt->execute([':content_id' => $contentId, ':content_id_recent' => $contentId]);
     }

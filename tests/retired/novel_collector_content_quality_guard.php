@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once dirname(__DIR__) . '/content/plugins/official.novel-collector/src/NovelSystem.php';
+require_once dirname(__DIR__, 2) . '/content/plugins/official.novel-collector/src/NovelSystem.php';
 
 use Official\NovelCollector\ContentQualityAnalyzer;
 use Official\NovelCollector\ContentQualityException;

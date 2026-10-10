@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-$root = dirname(__DIR__);
+$root = dirname(__DIR__, 2);
 $manifest = json_decode((string) file_get_contents($root . '/content/plugins/official.novel-collector/plugin.json'), true, 512, JSON_THROW_ON_ERROR);
 $plugin = (string) file_get_contents($root . '/content/plugins/official.novel-collector/plugin.php');
 $system = (string) file_get_contents($root . '/content/plugins/official.novel-collector/src/NovelSystem.php');

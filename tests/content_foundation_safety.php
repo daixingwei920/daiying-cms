@@ -29,6 +29,8 @@ $check = static function (bool $ok, string $message): void {
     echo "[PASS] {$message}\n";
 };
 
+$mediaRoot = sys_get_temp_dir() . '/cms-content-test-' . bin2hex(random_bytes(4));
+mkdir($mediaRoot, 0700, true);
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 foreach ([
@@ -63,12 +65,20 @@ try {
 }
 $check($selectFailed, 'CustomFieldDefinition rejects invalid select values');
 
-$repo = new ContentRepository($pdo, $types);
+$repo = new ContentRepository($pdo, $types, [], $mediaRoot);
 $contentId = $repo->create('article', 'Original', 'original', [['type' => 'paragraph', 'data' => ['text' => 'one']]], 'draft', [], ['News'], ['CMS']);
 $repo->update($contentId, 'article', 'Updated', 'updated', [['type' => 'paragraph', 'data' => ['text' => 'two']]], 'published', []);
 $check($repo->revisionCount($contentId) === 1, 'ContentRepository records a revision before update');
 $revisions = (new ContentRevisionRepository($pdo))->listForContent($contentId);
 $check(($revisions[0]['title'] ?? '') === 'Original', 'Content revisions preserve previous content snapshot');
+$boundedRevisions = new ContentRevisionRepository($pdo, 2);
+foreach (['First retained', 'Second retained', 'Latest retained'] as $revisionTitle) {
+    $snapshot = $repo->find($contentId);
+    $snapshot['title'] = $revisionTitle;
+    $boundedRevisions->recordFromContent($snapshot);
+}
+$bounded = $boundedRevisions->listForContent($contentId);
+$check(count($bounded) === 2 && $bounded[0]['title'] === 'Latest retained' && $bounded[1]['title'] === 'Second retained', 'Revision pruning retains the newest bounded snapshots');
 $repo->delete($contentId);
 $trashed = $repo->find($contentId);
 $check(($trashed['status'] ?? '') === 'trash' && ($trashed['deleted_at'] ?? '') !== '', 'Content delete defaults to trash');

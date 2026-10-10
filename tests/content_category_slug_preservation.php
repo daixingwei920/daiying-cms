@@ -44,7 +44,7 @@ foreach (glob(CMS_SOURCE_ROOT . '/system/migrations/*.php') ?: [] as $file) {
 }
 (new MigrationRunner($pdo, $migrations))->run();
 
-$repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+$repo = new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $root);
 $repo->saveTerm('category', '插件购买', 'plugin-purchase');
 $contentId = $repo->create('article', '微信支付插件授权码购买', '', [['type' => 'paragraph', 'data' => ['text' => '微信支付插件说明']]], 'published', [], ['插件购买'], []);
 $terms = $repo->termsForContent($contentId);

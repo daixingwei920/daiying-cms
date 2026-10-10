@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.82 - 2026-10-10
+
+- Fix media root resolution for independent Releases while preserving instance isolation.
+- Preserve omitted taxonomies and non-target meta in partial content updates; preserve omitted PUT meta and explicit replacement semantics.
+- Retain optional revision preconditions and publication audit/event tracking.
+- Fix SQLite immediate transaction handling and MySQL revision pruning.
+- Support MySQL fresh installation through four checksum-bound historical dialect adapters, without modifying frozen migrations.
+- Block unsafe partial reinstalls and record completion only after configuration and installation locks succeed.
+- Retire novel/video products from new installer requirements while preserving customer history.
+- Direct upgrade validation covers 1.2.81 to 1.2.82. Other source versions are not verified for this release.
+- Existing Commerce installations require a separate plugin update for its MySQL parameter fix; Core updates do not replace installed plugins.
+
 ## 1.2.81 - 2026-10-06
 
 - Fixed Google Search Console manual sync so the save form and sync form are independent, with visible rows/inserted/updated/skipped feedback after sync.
@@ -517,3 +529,14 @@ The local repository also contains previous tags including:
 - `v1.2.4`
 
 Use GitHub Releases for public download artifacts.
+
+## Product retirement — 2026-10-09 (development candidate)
+
+- DAIYING_NOVEL = RETIRED: stop novel theme/collector maintenance and exclude new installer distributions; preserve historical source, installed assets, trust records and licenses.
+- Remove only novel assertions from the shared productization gate; retain video assertions and shared infrastructure tests. Archive product-only novel tests outside the active Core suite.
+
+- Owner also retires `daiying-video` and `official.video-collector`; exclude new installer distributions, archive product-only acceptance tests and preserve legacy trust/source/assets.
+
+## Official mail notification contract — 1.2.82-rc1 testing
+
+- Correct isolated mail test setup to include the existing notification recipient migration; preserve the four original notification assertions. Verify distinct events, encoded local links, safe metadata, failure fallback, route authentication, capabilities and CSRF without live provider calls. No runtime mail/Core changes.

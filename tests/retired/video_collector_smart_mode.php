@@ -9,12 +9,12 @@ use Official\VideoCollector\SafeHttpClient;
 use Official\VideoCollector\SecurityException;
 use Official\VideoCollector\VideoRepository;
 
-require_once __DIR__ . '/../content/plugins/official.video-collector/src/VideoSystem.php';
+require_once dirname(__DIR__, 2) . '/content/plugins/official.video-collector/src/VideoSystem.php';
 
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$migration1 = require __DIR__ . '/../content/plugins/official.video-collector/migrations/001_video_core_and_collector.php';
-$migration2 = require __DIR__ . '/../content/plugins/official.video-collector/migrations/002_video_smart_mode.php';
+$migration1 = require dirname(__DIR__, 2) . '/content/plugins/official.video-collector/migrations/001_video_core_and_collector.php';
+$migration2 = require dirname(__DIR__, 2) . '/content/plugins/official.video-collector/migrations/002_video_smart_mode.php';
 $migration1['up']($pdo);
 $migration2['up']($pdo);
 $migration2['up']($pdo);
@@ -31,7 +31,7 @@ $mapper = new CategoryMapper();
 $detector = new ProviderDetector($parser, $mapper, $http);
 $repo = new VideoRepository($pdo, $http, $mapper);
 
-$jsonPayload = (string) file_get_contents(__DIR__ . '/../content/plugins/official.video-collector/fixtures/maccms.json');
+$jsonPayload = (string) file_get_contents(dirname(__DIR__, 2) . '/content/plugins/official.video-collector/fixtures/maccms.json');
 $detection = $detector->detect('https://example.com/api.php/provide/vod/?ac=detail', $jsonPayload);
 $assert($detection['provider_type'] === 'maccms_json', 'MACCMS JSON provider should be detected.');
 $assert((int) $detection['resource_count'] === 1, 'JSON fixture should expose one video.');

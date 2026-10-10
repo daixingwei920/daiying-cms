@@ -35,12 +35,13 @@ foreach ([
     '2026_08_12_000008_media_release_schema.php',
     '2026_08_12_000011_content_scheduler_schema.php',
     '2026_09_08_000004_content_foundation_safety.php',
+    '2026_10_03_000001_seo_keyword_system_p1.php',
 ] as $migrationFile) {
     $migration = require __DIR__ . '/../system/migrations/' . $migrationFile;
     $migration->up($pdo);
 }
 
-$repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+$repo = new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $root);
 $olderId = $repo->create('article', 'Older Article', 'older-文章', [['type' => 'paragraph', 'data' => ['text' => 'older body']]], 'published', ['seo_description' => 'Older excerpt']);
 $currentId = $repo->create('article', 'Current Article', 'current', [['type' => 'paragraph', 'data' => ['text' => 'current body']]], 'published');
 $tieNewerId = $repo->create('article', 'Tie Newer Article', 'tie-newer', [['type' => 'paragraph', 'data' => ['text' => 'tie body']]], 'published');

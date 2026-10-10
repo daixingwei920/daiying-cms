@@ -468,7 +468,7 @@ final class AdminController
                 ['插件', $this->adminTableCount($pdo, 'cms_plugins'), '已发现扩展'],
                 ['支付', $this->adminTableCount($pdo, 'cms_payments'), 'Core 记录'],
             ];
-            foreach ((new ContentRepository($pdo, ContentTypeRegistry::defaults()))->latest(6) as $item) {
+            foreach ((new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath))->latest(6) as $item) {
                 $recentRows .= '<tr><td>' . View::escape((string) $item['title']) . '</td><td>' . View::escape(AdminUiText::contentType((string) $item['content_type'])) . '</td><td>' . View::escape(AdminUiText::contentStatus((string) $item['status'])) . '</td><td><a class="button admin-button-secondary" href="/admin/content/edit/' . (int) $item['id'] . '">编辑</a></td></tr>';
             }
         } catch (Throwable $exception) {
@@ -1737,7 +1737,7 @@ final class AdminController
             return $guard;
         }
         try {
-            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults(), [], $this->rootPath);
             $page = max(1, (int) ($request->query['page'] ?? 1));
             $perPage = max(1, min(100, (int) ($request->query['per_page'] ?? 50)));
             $total = $repo->adminCount();
@@ -1827,7 +1827,7 @@ final class AdminController
 
         try {
             $pdo = ConnectionFactory::make($this->settings);
-            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath);
             $id = $repo->create($input['type'], $input['title'], $input['slug'], $input['blocks'], $input['status'], $input['meta'], $input['categories'], $input['tags']);
             $user = (new AdminAuthenticator($pdo))->user();
             (new AuditLogger($pdo))->record('admin', $user['id'] ?? null, 'content.created', ['content_id' => $id, 'type' => $input['type']]);
@@ -1849,7 +1849,7 @@ final class AdminController
             return $guard;
         }
         try {
-            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults(), [], $this->rootPath);
             $item = $repo->find((int) basename($request->path));
             if ($item === null) {
                 return Response::text('内容不存在。', 404);
@@ -1877,7 +1877,7 @@ final class AdminController
         }
         try {
             $pdo = ConnectionFactory::make($this->settings);
-            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath);
             $before = $repo->find($id);
             $repo->update($id, $input['type'], $input['title'], $input['slug'], $input['blocks'], $input['status'], $input['meta'], $input['categories'], $input['tags']);
             (new AuditLogger($pdo))->record('admin', $guard['id'] ?? null, 'content.updated', ['content_id' => $id, 'type' => $input['type']]);
@@ -1959,7 +1959,7 @@ final class AdminController
 
         try {
             $pdo = ConnectionFactory::make($this->settings);
-            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath);
             $repo->delete($id);
             (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'content.deleted', ['content_id' => $id]);
         } catch (Throwable $exception) {
@@ -1979,7 +1979,7 @@ final class AdminController
         }
 
         try {
-            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults(), [], $this->rootPath);
             $categories = $repo->terms('category');
         } catch (Throwable $exception) {
             $this->logger->error('Category index failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
@@ -2008,7 +2008,7 @@ final class AdminController
 
         try {
             $pdo = ConnectionFactory::make($this->settings);
-            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath);
             $id = $repo->saveTerm('category', (string) $request->input('name', ''), (string) $request->input('slug', ''), null, $this->termSeoInput($request));
             (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'category.created', ['category_id' => $id]);
         } catch (Throwable $exception) {
@@ -2028,7 +2028,7 @@ final class AdminController
         $id = $this->pathSegmentInt($request->path, 3);
 
         try {
-            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults(), [], $this->rootPath);
             $category = $repo->termById($id);
             if ($category === null || $category['taxonomy'] !== 'category') {
                 return Response::html(View::page('编辑分类', '<h1>编辑分类</h1><p class="error">分类不存在。</p><p><a class="button" href="/admin/categories">返回分类管理</a></p>'), 404);
@@ -2054,7 +2054,7 @@ final class AdminController
 
         try {
             $pdo = ConnectionFactory::make($this->settings);
-            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath);
             $repo->saveTerm('category', (string) $request->input('name', ''), (string) $request->input('slug', ''), $id, $this->termSeoInput($request));
             (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'category.updated', ['category_id' => $id]);
         } catch (Throwable $exception) {
@@ -2075,7 +2075,7 @@ final class AdminController
         }
 
         try {
-            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults(), [], $this->rootPath);
             $tags = $repo->terms('tag');
         } catch (Throwable $exception) {
             $this->logger->error('Tag index failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
@@ -2104,7 +2104,7 @@ final class AdminController
 
         try {
             $pdo = ConnectionFactory::make($this->settings);
-            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath);
             $id = $repo->saveTerm('tag', (string) $request->input('name', ''), (string) $request->input('slug', ''), null, $this->termSeoInput($request));
             (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'tag.created', ['tag_id' => $id]);
         } catch (Throwable $exception) {
@@ -2124,7 +2124,7 @@ final class AdminController
         $id = $this->pathSegmentInt($request->path, 3);
 
         try {
-            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults(), [], $this->rootPath);
             $tag = $repo->termById($id);
             if ($tag === null || $tag['taxonomy'] !== 'tag') {
                 return Response::html(View::page('编辑标签', '<h1>编辑标签</h1><p class="error">标签不存在。</p><p><a class="button" href="/admin/tags">返回标签管理</a></p>'), 404);
@@ -2150,7 +2150,7 @@ final class AdminController
 
         try {
             $pdo = ConnectionFactory::make($this->settings);
-            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath);
             $repo->saveTerm('tag', (string) $request->input('name', ''), (string) $request->input('slug', ''), $id, $this->termSeoInput($request));
             (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'tag.updated', ['tag_id' => $id]);
         } catch (Throwable $exception) {
@@ -2175,7 +2175,7 @@ final class AdminController
 
         try {
             $pdo = ConnectionFactory::make($this->settings);
-            (new ContentRepository($pdo, ContentTypeRegistry::defaults()))->deleteTerm($id, 'tag');
+            (new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath))->deleteTerm($id, 'tag');
             (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'tag.deleted', ['tag_id' => $id]);
         } catch (Throwable $exception) {
             $this->logger->error('Tag delete failed', ['source' => 'Core', 'tag_id' => $id, 'error' => $exception->getMessage()]);
@@ -2195,7 +2195,7 @@ final class AdminController
 
         try {
             $pdo = ConnectionFactory::make($this->settings);
-            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath);
             $filters = [
                 'q' => trim((string) ($request->query['q'] ?? '')),
                 'type' => trim((string) ($request->query['type'] ?? 'all')),
@@ -2227,7 +2227,7 @@ final class AdminController
 
         try {
             $pdo = ConnectionFactory::make($this->settings);
-            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath);
             $detail = (new SeoLifecycleAggregator($pdo, $repo, $this->officialBaiduSubmitBridge(), (string) $this->settings->get('site.url', '')))->detail($keyword);
         } catch (Throwable $exception) {
             $this->logger->error('SEO keyword detail failed', ['source' => 'Core', 'keyword' => $keyword, 'error' => $exception->getMessage()]);
@@ -2250,7 +2250,7 @@ final class AdminController
         $keyword = trim((string) $request->input('keyword', ''));
         try {
             $pdo = ConnectionFactory::make($this->settings);
-            (new ContentRepository($pdo, ContentTypeRegistry::defaults()))->saveSeoKeyword(
+            (new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath))->saveSeoKeyword(
                 $keyword,
                 (string) $request->input('primary_url', ''),
                 (string) $request->input('status', 'draft'),
@@ -2558,7 +2558,7 @@ final class AdminController
 
         try {
             $pdo = ConnectionFactory::make($this->settings);
-            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults());
+            $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath);
             $repo->deleteTerm($id, 'category');
             (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'category.deleted', ['category_id' => $id]);
         } catch (Throwable $exception) {
@@ -4290,7 +4290,7 @@ final class AdminController
         try {
             $pdo = ConnectionFactory::make($this->settings);
             $importer = new ImportService(
-                new ContentRepository($pdo, ContentTypeRegistry::defaults()),
+                new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath),
                 new UrlMappingRepository($pdo),
                 [new WordPressImporter(), new ZBlogImporter()],
             );
@@ -4563,7 +4563,7 @@ final class AdminController
         $pdo = ConnectionFactory::make($this->settings);
         return new ExternalMigrationService(
             $pdo,
-            new ContentRepository($pdo, ContentTypeRegistry::defaults()),
+            new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath),
             new UrlMappingRepository($pdo),
             new MigrationRepository($pdo),
             ExternalMigrationService::defaultAdapters(),
@@ -9657,7 +9657,7 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
     {
         $terms = [];
         try {
-            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults());
+            $repo = new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults(), [], $this->rootPath);
             $terms = $repo->termsForContent((int) $item['id']);
         } catch (Throwable) {
             $terms = [];
@@ -10378,6 +10378,8 @@ JS;
             $slug = (string) ($content['slug'] ?? '');
             $publicPath = $this->contentPublicPath($type, $slug);
             $siteUrl = rtrim((string) $this->settings->get('site.url', ''), '/');
+            $base = \Cms\Core\Routing\BasePath::fromSettings($this->settings);
+            if ($base !== '' && rtrim((string) parse_url($siteUrl, PHP_URL_PATH), '/') === '') { $siteUrl .= $base; }
             if ($publicPath === '' || $siteUrl === '' || filter_var($siteUrl, FILTER_VALIDATE_URL) === false) {
                 return;
             }
@@ -10478,7 +10480,7 @@ JS;
     private function categoryRows(string $taxonomy = 'category'): array
     {
         try {
-            return (new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults()))->terms($taxonomy);
+            return (new ContentRepository(ConnectionFactory::make($this->settings), ContentTypeRegistry::defaults(), [], $this->rootPath))->terms($taxonomy);
         } catch (Throwable) {
             return [];
         }
@@ -10858,7 +10860,7 @@ JS;
     private function historicalArticleSeoBackfillService(): HistoricalArticleSeoBackfillService
     {
         $pdo = ConnectionFactory::make($this->settings);
-        return new HistoricalArticleSeoBackfillService($pdo, new ContentRepository($pdo, ContentTypeRegistry::defaults()), $this->settings, new AiService($pdo, $this->settings));
+        return new HistoricalArticleSeoBackfillService($pdo, new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $this->rootPath), $this->settings, new AiService($pdo, $this->settings));
     }
 
     private function googleSearchConsoleConnections(): GoogleSearchConsoleConnectionRepository

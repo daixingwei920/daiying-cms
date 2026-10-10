@@ -7,9 +7,9 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 ## Current Core Baseline
 
 - Product: Daiying CMS Core
-- Baseline version: `1.2.81`
-- Git tag: `v1.2.81`
-- Baseline commit: pending `v1.2.81` release commit
+- Baseline version: `1.2.82`
+- Git tag: `v1.2.82`
+- Baseline commit: resolve `v1.2.82^{commit}` after official publication
 - Current clean Core worktree:
   `/Users/xingweidai/Documents/Codex/2026-09-03/daiying-cms-core-theme/work/daiying-cms-core-clean-1.2.63`
 - Core closeout report:
@@ -148,3 +148,14 @@ At the start of a Daiying CMS Core task:
 4. Check the current Core version and Git commit.
 5. Refuse to publish from a dirty or legacy/WIP worktree.
 6. Keep plugin/business development in independent plugin threads.
+
+## Retired Product Boundary
+
+Owner decision (2026-10-09): `DAIYING_NOVEL = RETIRED`, `DAIYING_VIDEO = RETIRED`.
+`daiying_novel`, `official.novel-collector`, `daiying-video` and
+`official.video-collector` are no longer maintained,
+planned products, new installer components, or mandatory Core acceptance targets.
+Preserve historical source, frozen migrations, installed customer assets,
+trust records, orders and licenses. Do not revive this product as a Core task.
+Do not remove assertions for other products to make the release gate pass.
+See `docs/retired-products.md`.
