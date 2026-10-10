@@ -1,11 +1,16 @@
-## 1.2.82-rc1 — local unreleased maintenance candidate
-
-- Bind content media to the trusted instance root; reject symlinked media roots.
-- Preserve omitted taxonomies and non-target meta in REST PATCH and plugin partial updates; keep repository update / REST PUT replacement semantics.
-- Add optional snapshot preconditions, sanitized audit labels and existing publication events for REST/plugin writes.
-- Fix the default theme global keywords fallback. No stable release or production deployment.
-
 # Changelog
+
+## 1.2.82 - 2026-10-10
+
+- Fix media root resolution for independent Releases while preserving instance isolation.
+- Preserve omitted taxonomies and non-target meta in partial content updates; preserve omitted PUT meta and explicit replacement semantics.
+- Retain optional revision preconditions and publication audit/event tracking.
+- Fix SQLite immediate transaction handling and MySQL revision pruning.
+- Support MySQL fresh installation through four checksum-bound historical dialect adapters, without modifying frozen migrations.
+- Block unsafe partial reinstalls and record completion only after configuration and installation locks succeed.
+- Retire novel/video products from new installer requirements while preserving customer history.
+- Direct upgrade validation covers 1.2.81 to 1.2.82. Other source versions are not verified for this release.
+- Existing Commerce installations require a separate plugin update for its MySQL parameter fix; Core updates do not replace installed plugins.
 
 ## 1.2.81 - 2026-10-06
 

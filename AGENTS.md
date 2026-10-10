@@ -7,9 +7,9 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 ## Current Core Baseline
 
 - Product: Daiying CMS Core
-- Baseline version: `1.2.81`
-- Git tag: `v1.2.81`
-- Baseline commit: pending `v1.2.81` release commit
+- Baseline version: `1.2.82`
+- Git tag: `v1.2.82`
+- Baseline commit: resolve `v1.2.82^{commit}` after official publication
 - Current clean Core worktree:
   `/Users/xingweidai/Documents/Codex/2026-09-03/daiying-cms-core-theme/work/daiying-cms-core-clean-1.2.63`
 - Core closeout report:
