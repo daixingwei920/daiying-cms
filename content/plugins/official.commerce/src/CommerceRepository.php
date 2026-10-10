@@ -1083,8 +1083,8 @@ final class CommerceRepository
         $table = $variantId !== null ? 'commerce_variants' : 'commerce_products';
         $where = $variantId !== null ? 'id = :id AND product_id = :product_id' : 'id = :id';
         $params = $variantId !== null ? [':id' => $variantId, ':product_id' => $productId] : [':id' => $productId];
-        $sql = "UPDATE $table SET reserved_quantity = CASE WHEN reserved_quantity >= :quantity THEN reserved_quantity - :quantity ELSE 0 END, sold_quantity = sold_quantity + :quantity, updated_at = :updated_at WHERE $where";
-        $this->pdo->prepare($sql)->execute($params + [':quantity' => $quantity, ':updated_at' => gmdate('Y-m-d H:i:s')]);
+        $sql = "UPDATE $table SET reserved_quantity = CASE WHEN reserved_quantity >= :quantity_check THEN reserved_quantity - :quantity_release ELSE 0 END, sold_quantity = sold_quantity + :quantity, updated_at = :updated_at WHERE $where";
+        $this->pdo->prepare($sql)->execute($params + [':quantity_check' => $quantity, ':quantity_release' => $quantity, ':quantity' => $quantity, ':updated_at' => gmdate('Y-m-d H:i:s')]);
         $this->inventoryMovement($productId, $variantId, $orderId, 0, -$quantity, $quantity, 'paid_order');
     }
 
@@ -1093,8 +1093,8 @@ final class CommerceRepository
         $table = $variantId !== null ? 'commerce_variants' : 'commerce_products';
         $where = $variantId !== null ? 'id = :id AND product_id = :product_id' : 'id = :id';
         $params = $variantId !== null ? [':id' => $variantId, ':product_id' => $productId] : [':id' => $productId];
-        $sql = "UPDATE $table SET reserved_quantity = CASE WHEN reserved_quantity >= :quantity THEN reserved_quantity - :quantity ELSE 0 END, updated_at = :updated_at WHERE $where";
-        $this->pdo->prepare($sql)->execute($params + [':quantity' => $quantity, ':updated_at' => gmdate('Y-m-d H:i:s')]);
+        $sql = "UPDATE $table SET reserved_quantity = CASE WHEN reserved_quantity >= :quantity_check THEN reserved_quantity - :quantity_release ELSE 0 END, updated_at = :updated_at WHERE $where";
+        $this->pdo->prepare($sql)->execute($params + [':quantity_check' => $quantity, ':quantity_release' => $quantity, ':updated_at' => gmdate('Y-m-d H:i:s')]);
         $this->inventoryMovement($productId, $variantId, $orderId, 0, -$quantity, 0, 'payment_failed', $note);
     }
 
