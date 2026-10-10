@@ -271,7 +271,7 @@
   "Recovery/RecoveryException.php": "21b564abfd41920f049d9342e78202ac3c45a9f0561a43b91631574a8fa5118a",
   "Recovery/RestorePointService.php": "f2e1ba6b87fe03d5a812af56e6235ba28816db34d76eb834cc75289b886aeedf",
   "Recovery/RunMode.php": "d0613670d3f0f4dfe5837d5d3e4e29f0ac72a4b1301e47716d82794e6df501f3",
-  "Rest/ApiV1Controller.php": "6411bb8a94d3dfc416b218ffb666e9f277e880dec0a297537bb2d8d45c749907",
+  "Rest/ApiV1Controller.php": "1a522f644baab1f5333c3a6793afb50048e8f6d819744259827121422fa6e536",
   "Routing/BasePath.php": "35197f25777a503a68faf337d74ed0b8e926e0f8987d2c1ae169c231740981d6",
   "Routing/Router.php": "fb9b26ea5448f94073808d589ab3fcfcdb36dbd8988c78f83f5faf8986605fd7",
   "Scheduler/ScheduledTask.php": "cecf6b5d78a6e49122c4c8b2253725a6e4f13fbb33f3b8af726a2351f6ff6429",

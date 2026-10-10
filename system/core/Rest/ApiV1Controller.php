@@ -261,8 +261,10 @@ final class ApiV1Controller
             }
             $patch = $request->body;
             if ($request->method === 'PUT') {
-                // Preserve the existing full-replacement contract for PUT.
-                $patch += ['meta' => [], 'categories' => [], 'tags' => [], 'meta_mode' => 'replace'];
+                // Omitted meta stays absent so patch() preserves the current locked snapshot.
+                // Explicit meta uses the legacy replacement contract; taxonomy defaults stay unchanged.
+                $patch += ['categories' => [], 'tags' => []];
+                $patch['meta_mode'] = array_key_exists('meta', $patch) ? 'replace' : 'merge';
             }
             foreach (['categories', 'tags'] as $field) {
                 if (array_key_exists($field, $patch)) {

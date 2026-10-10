@@ -25,6 +25,15 @@ $item=$plugin->createDraft(['title'=>'Plugin','slug'=>'plugin','meta'=>$meta,'ca
 $log=$p->query("SELECT context_json FROM cms_audit_logs WHERE actor_type='plugin' ORDER BY id DESC LIMIT 1")->fetchColumn();check(str_contains($log,'plugin-update')&&str_contains($log,'patch.test')&&!str_contains($log,'synthetic-test-token'),'plugin audit traces task and plugin; no token');
 $snapshot=$r->snapshot($item['id']);check($snapshot['digest']===$r->digest($item['id']),'consistent read snapshot matches precondition token');
 check($api->contents($req('PATCH',$id,['expected_digest'=>null,'title'=>'invalid']))->status()===409,'invalid precondition fails closed');
+$putBefore=$r->find($item['id']);$putBefore['meta']['preview_expires_at']='2030-01-01T00:00:00+00:00';$putBefore['meta']['extension_state']=['owner'=>'keep'];$p->prepare('UPDATE cms_contents SET meta_json=? WHERE id=?')->execute([json_encode($putBefore['meta']),$item['id']]);
+$putBefore=$r->find($item['id']);$putTitle=$api->contents($req('PUT',$item['id'],['title'=>'PUT title only']));
+check($putTitle->status()===200&&$r->find($item['id'])['meta']===$putBefore['meta'],'PUT omitted meta preserves SEO paid preview and opaque fields');
+check($r->termsForContent($item['id'])===[],'PUT omitted taxonomy preserves old clear semantics');
+$stalePut=$r->find($item['id']);$r->patch($item['id'],['meta'=>['seo_description'=>'Latest Owner description']]);
+$r->patch($item['id'],['title'=>'Unconditional legacy edit','meta_mode'=>'merge'], $stalePut);
+check($r->find($item['id'])['meta']['seo_description']==='Latest Owner description','omitted meta uses locked current row rather than caller snapshot');
+$nullBefore=$r->snapshot($item['id']);check($api->contents($req('PUT',$item['id'],['meta'=>null]))->status()===422&&$r->snapshot($item['id'])===$nullBefore,'PUT explicit null rejected rather than treated as omission');
+$emptyPut=$api->contents($req('PUT',$item['id'],['meta'=>[]]));check($emptyPut->status()===200&&!$r->find($item['id'])['meta']['paid_content_enabled']&&!isset($r->find($item['id'])['meta']['extension_state']),'PUT explicit empty meta retains replacement defaults');
 $put=$api->contents($req('PUT',$item['id'],['title'=>'Legacy PUT','meta'=>['seo_title'=>'PUT']]));check($put->status()===200&&!$r->find($item['id'])['meta']['paid_content_enabled']&&$r->termsForContent($item['id'])===[],'legacy PUT retains complete meta and taxonomy replacement');
 $baseSettings=Settings::fromArray(['site'=>['url'=>'https://isolated.example','base_path'=>'/subsite']]);$before=$r->find($id);$before['status']='draft';ContentPublishedEvent::notify($r,$id,$events,$baseSettings,'updated',$before);check(end($seen)->publicUrl==='https://isolated.example/subsite/articles/article','publication event URL honors configured subpath');
 $beforeFailure=$r->snapshot($id);try{$r->patch($id,['categories'=>['should rollback'],'meta'=>['paid_content_currency'=>'INVALID']]);check(false,'invalid currency accepted');}catch(ContentException){check($r->snapshot($id)===$beforeFailure,'failed partial update rolls back all fields');}
