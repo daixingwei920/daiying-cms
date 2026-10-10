@@ -26,11 +26,14 @@ $options = getopt('', [
 ]);
 
 $commit = resolveCommit($root, trim((string) ($options['commit'] ?? 'HEAD')));
-$minUpgradeFrom = trim((string) ($options['min-upgrade-from'] ?? '1.2.52'));
+$minUpgradeFrom = trim((string) ($options['min-upgrade-from'] ?? ''));
 $requireSignature = filter_var((string) ($options['require-signature'] ?? '1'), FILTER_VALIDATE_BOOL);
 $checks = [];
 
 $expected = expectedCommitState($root, $commit);
+$is182 = preg_match('/^1\.2\.82(?:-|$)/', $expected['version']) === 1;
+if ($minUpgradeFrom === '') { $minUpgradeFrom = $is182 ? '1.2.81' : '1.2.52'; }
+$checks[] = check(!$is182 || $minUpgradeFrom === '1.2.81', 'support.owner_approved_floor', '1.2.82 direct upgrades are limited to 1.2.81.');
 $checks[] = pass('commit.resolved', 'Target commit resolved: ' . $commit);
 $checks[] = check($expected['version'] !== '', 'commit.version', 'Config version detected: ' . $expected['version']);
 $checks = array_merge($checks, verifyCommitReleaseSource($root, $commit, $expected));
@@ -268,6 +271,9 @@ function verifyUpdatePackage(string $zipPath, array $expected, string $minUpgrad
     $checks[] = check((string) ($update['version'] ?? $update['to_version'] ?? '') === $expected['version'], 'update.version', 'Update manifest version matches target commit.');
     $checks[] = check((string) ($update['min_upgrade_from'] ?? '') === $minUpgradeFrom, 'update.min_upgrade_from', 'Update min_upgrade_from stays at ' . $minUpgradeFrom . '.');
     $checks[] = check((string) ($update['hard_min_version'] ?? '') === $minUpgradeFrom, 'update.hard_min_version', 'Update hard_min_version stays at ' . $minUpgradeFrom . '.');
+    if (preg_match('/^1\.2\.82(?:-|$)/', $expected['version']) === 1) {
+        $checks[] = check(($update['source_versions'] ?? []) === ['min' => '1.2.81', 'max' => '1.2.81'], 'update.approved_source_range', 'Signed source range is exactly 1.2.81.');
+    }
     $checks[] = check((string) ($update['migration_floor'] ?? '') === $minUpgradeFrom, 'update.migration_floor', 'Update migration_floor stays at ' . $minUpgradeFrom . '.');
     $checks[] = check((string) ($update['package_sha256'] ?? '') === '' || (string) ($update['package_sha256'] ?? '') === hash_file('sha256', $zipPath), 'update.package_sha256', 'Update manifest package_sha256 matches ZIP when present.');
 
@@ -474,6 +480,10 @@ function verifyUpdateMetadata(array $metadata, ?array $update, string $updateZip
     $checks[] = check((string) ($metadata['version'] ?? '') === $expected['version'], 'metadata.version', 'Update metadata version matches target commit.');
     $checks[] = check((string) ($metadata['min_upgrade_from'] ?? '') === $minUpgradeFrom, 'metadata.min_upgrade_from', 'Metadata min_upgrade_from stays at ' . $minUpgradeFrom . '.');
     $checks[] = check((string) ($metadata['hard_min_version'] ?? '') === $minUpgradeFrom, 'metadata.hard_min_version', 'Metadata hard_min_version stays at ' . $minUpgradeFrom . '.');
+    if (preg_match('/^1\.2\.82(?:-|$)/', $expected['version']) === 1) {
+        $checks[] = check(($metadata['source_versions'] ?? []) === ['min' => '1.2.81', 'max' => '1.2.81'], 'metadata.approved_source_range', 'Distribution metadata source range is exactly 1.2.81.');
+        $checks[] = check(($metadata['minimum_core'] ?? '') === '1.2.81' && ($metadata['maximum_core'] ?? '') === '1.2.81', 'metadata.distribution_source_bounds', 'Distribution minimum/maximum Core are both 1.2.81.');
+    }
     $checks[] = check((string) ($metadata['migration_floor'] ?? '') === $minUpgradeFrom, 'metadata.migration_floor', 'Metadata migration_floor stays at ' . $minUpgradeFrom . '.');
     if ($updateZip !== '') {
         $checks[] = check((string) ($metadata['package_sha256'] ?? '') === hash_file('sha256', $updateZip), 'metadata.package_sha256', 'Metadata package_sha256 matches update ZIP.');
