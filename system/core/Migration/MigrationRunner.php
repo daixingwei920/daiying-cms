@@ -76,7 +76,9 @@ final class MigrationRunner
     private function runMigrationUp(MigrationInterface|array $migration): void
     {
         if ($migration instanceof MigrationInterface) {
-            $migration->up($this->pdo);
+            if (!MysqlHistoricalMigrationDialect::run($this->pdo, $migration)) {
+                $migration->up($this->pdo);
+            }
             return;
         }
 

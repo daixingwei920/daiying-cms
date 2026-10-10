@@ -356,7 +356,10 @@ final class UpdateService
                 if (!is_callable($up)) {
                     throw new UpdateException('Core migration must define up().');
                 }
-                $up($pdo);
+                if (!$definition instanceof \Cms\Core\Migration\MigrationInterface
+                    || !\Cms\Core\Migration\MysqlHistoricalMigrationDialect::run($pdo, $definition)) {
+                    $up($pdo);
+                }
                 $this->finishCoreMigration($pdo, $recordId, 'applied');
             } catch (Throwable $exception) {
                 if ($this->isNonCriticalOperationalRegistryMigrationFailure($id, $exception)) {
