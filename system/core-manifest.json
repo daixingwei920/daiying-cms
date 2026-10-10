@@ -117,7 +117,7 @@
   "Import/UnifiedContent.php": "a51ca3c222bd422abf48b8909ad222fce57107a3d25cb442f0fe53a83509f9fa",
   "Import/WordPressImporter.php": "2b8cce3e1f0098dfb84ecbc5e4d1cb4767e93c66e0930ad78b2ae08b6b752363",
   "Import/ZBlogImporter.php": "ee863325dd329a8d70fa5630b0ae49c45ebf6b5448d2e64e7199a6d8d0e9a937",
-  "Install/InstallController.php": "1aaadef3a8509cf696e8ffe16e31b5b06a8b7ef1c4886c9a0c51b41833c08086",
+  "Install/InstallController.php": "15011a38b06abfa54c0fd98ede4c27baf266d08b239945afd7a44be6f3d80323",
   "Integrity/CoreBoundary.php": "946afe1b2c29ac2b0a07835f656be7ef29c4e2812784ff3799c0d996d790a9f3",
   "Integrity/ManifestBuilder.php": "56d7ad87c272462236f2363eedf9d3c200ba356e45e33f28a41c249704c49548",
   "Logging/FileLogger.php": "a8591f20707a6085cc84b5a379bcebdded84b469dc87352c7e8e32ecb87a2a97",
