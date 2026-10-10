@@ -331,12 +331,20 @@ function payment_provider_decoupling_market_regression(callable $check): void
         $payment = $service->createProviderPayment('commerce_order', 'order:100', $providerId, 390, 'USD', 'unknown-provider-ok');
         $check(($payment['provider_id'] ?? '') === $providerId && ($payment['status'] ?? '') === 'pending', 'unknown provider can create a payment through Core PaymentService.');
         $check(str_starts_with((string) ($payment['_provider_checkout_url'] ?? ''), 'https://checkout.decoupled-pay.example/pay/session-'), 'unknown provider redirect URL is accepted by its own redirect policy.');
+        $pdo->beginTransaction();
+        $service->createProviderPayment('commerce_order', 'order:102', $providerId, 390, 'USD', 'caller-owned-transaction');
+        $check($pdo->inTransaction(), 'payment service preserves caller-owned transactions.');
+        $pdo->rollBack();
+        $check((int) $pdo->query("SELECT COUNT(*) FROM cms_payments WHERE idempotency_key = 'caller-owned-transaction'")->fetchColumn() === 0, 'caller rollback removes the payment without service commit.');
 
         try {
             $service->createProviderPayment('commerce_order', 'order:101', $providerId, 390, 'USD', 'unknown-provider-unsafe', 'success', ['redirect_variant' => 'unsafe']);
             $check(false, 'unknown provider redirect policy rejects unsafe provider checkout URL.');
         } catch (PaymentException) {
             $check(true, 'unknown provider redirect policy rejects unsafe provider checkout URL.');
+            $pdo->beginTransaction();
+            $pdo->rollBack();
+            $check((int) $pdo->query("SELECT COUNT(*) FROM cms_payments WHERE idempotency_key = 'unknown-provider-unsafe'")->fetchColumn() === 0, 'failed checkout rolls back and releases the SQLite transaction.');
         }
     } finally {
         foreach (glob(sys_get_temp_dir() . '/daiying-decoupled-pay-*.zip') ?: [] as $zip) {

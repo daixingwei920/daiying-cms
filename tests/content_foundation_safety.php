@@ -71,6 +71,14 @@ $repo->update($contentId, 'article', 'Updated', 'updated', [['type' => 'paragrap
 $check($repo->revisionCount($contentId) === 1, 'ContentRepository records a revision before update');
 $revisions = (new ContentRevisionRepository($pdo))->listForContent($contentId);
 $check(($revisions[0]['title'] ?? '') === 'Original', 'Content revisions preserve previous content snapshot');
+$boundedRevisions = new ContentRevisionRepository($pdo, 2);
+foreach (['First retained', 'Second retained', 'Latest retained'] as $revisionTitle) {
+    $snapshot = $repo->find($contentId);
+    $snapshot['title'] = $revisionTitle;
+    $boundedRevisions->recordFromContent($snapshot);
+}
+$bounded = $boundedRevisions->listForContent($contentId);
+$check(count($bounded) === 2 && $bounded[0]['title'] === 'Latest retained' && $bounded[1]['title'] === 'Second retained', 'Revision pruning retains the newest bounded snapshots');
 $repo->delete($contentId);
 $trashed = $repo->find($contentId);
 $check(($trashed['status'] ?? '') === 'trash' && ($trashed['deleted_at'] ?? '') !== '', 'Content delete defaults to trash');
