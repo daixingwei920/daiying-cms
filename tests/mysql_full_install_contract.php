@@ -68,7 +68,7 @@ try {
     file_put_contents($root . '/storage/mysql-http-test-credentials.json', json_encode(['email' => 'mysql-test@example.invalid', 'password' => $password]));
     chmod($root . '/storage/mysql-http-test-credentials.json', 0600);
     $repo = new ContentRepository($pdo, ContentTypeRegistry::defaults(), [], $root);
-    $id = $repo->create('article', 'MySQL 中文 😀 Integration Test', 'mysql-native', [['type' => 'paragraph', 'text' => '完整 MySQL 原生发布正文 😀']], 'draft', ['seo_title' => 'MySQL 独立 SEO', 'seo_description' => 'MySQL 描述', 'seo_keywords' => 'MySQL,中文', 'canonical_url' => 'http://127.0.0.1:18989/articles/mysql-native', 'paid_content_enabled' => true, 'paid_content_price_minor' => 1234, 'robots_follow' => false], ['分类 😀'], ['标签 😀']);
+    $id = $repo->create('article', 'MySQL 中文 😀 Integration Test', 'mysql-native', [['type' => 'paragraph', 'data' => ['text' => '完整 MySQL 原生发布正文 😀']]], 'draft', ['seo_title' => 'MySQL 独立 SEO', 'seo_description' => 'MySQL 描述', 'seo_keywords' => 'MySQL,中文', 'canonical_url' => 'http://127.0.0.1:18989/articles/mysql-native', 'paid_content_enabled' => true, 'paid_content_price_minor' => 1234, 'paid_content_preview_blocks' => 2, 'robots_follow' => false], ['分类 😀'], ['标签 😀']);
     $terms = $repo->termsForContent($id);
     $previewToken = $repo->find($id)['meta']['preview_token'];
     $repo->patch($id, ['status' => 'published', 'meta' => ['seo_keywords' => 'MySQL,保留'], 'expected_digest' => $repo->digest($id)]);
@@ -80,7 +80,8 @@ try {
     $media = new Cms\Core\Media\MediaLibrary($pdo, $root . '/content/uploads');
     $mid = $media->uploadLocalFile($root . '/storage/test.png', '原生测试.png', 1);
     mysql_check($mid > 0 && is_file($media->fileForResponse($mid)['path']), 'native_media_registered');
-    $repo->patch($id, ['blocks' => [['type' => 'paragraph', 'text' => '完整 MySQL 原生发布正文 😀'], ['type' => 'image', 'media_id' => $mid, 'alt' => 'MySQL 原生图片 ALT']], 'expected_digest' => $repo->digest($id)]);
+    $repo->patch($id, ['blocks' => [['type' => 'paragraph', 'data' => ['text' => '完整 MySQL 原生发布正文 😀']], ['type' => 'image', 'data' => ['media_id' => $mid, 'alt' => 'MySQL 原生图片 ALT']]], 'expected_digest' => $repo->digest($id)]);
+    mysql_check($repo->find($id)['blocks'][0]['data']['text'] === '完整 MySQL 原生发布正文 😀' && $repo->find($id)['blocks'][1]['data']['alt'] === 'MySQL 原生图片 ALT', 'native_body_and_image_alt_saved');
     $themeZip = $root . '/storage/test-theme.zip';
     $zip = new ZipArchive();
     $zip->open($themeZip, ZipArchive::CREATE);
