@@ -182,7 +182,7 @@ final class PaymentRepository
         $this->assertRefundStatusTotals($payment, $status);
         $remoteId = $remoteId !== '' ? $this->normalizedReference($remoteId, 'Payment remote reference is invalid.') : '';
         $reference = $reference !== '' ? $this->normalizedReference($reference, 'Payment reference is invalid.') : '';
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = PaymentTransaction::isActive($this->pdo);
         if (!$alreadyInTransaction) {
             $this->pdo->beginTransaction();
         }
@@ -343,7 +343,7 @@ final class PaymentRepository
             throw new PaymentException('Payment authorization subject does not match source payment.');
         }
         $expiresAt = $this->normalizedFutureTimestamp($this->requiredString($data, 'expires_at', 'Payment authorization expiry is invalid.'), 'Payment authorization expiry is invalid.');
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = PaymentTransaction::isActive($this->pdo);
         if (!$alreadyInTransaction) {
             $this->pdo->beginTransaction();
         }
@@ -416,7 +416,7 @@ final class PaymentRepository
             return false;
         }
 
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = PaymentTransaction::isActive($this->pdo);
         if (!$alreadyInTransaction) {
             $this->pdo->beginTransaction();
         }
@@ -472,7 +472,7 @@ final class PaymentRepository
             return false;
         }
 
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = PaymentTransaction::isActive($this->pdo);
         if (!$alreadyInTransaction) {
             $this->pdo->beginTransaction();
         }
@@ -532,7 +532,7 @@ final class PaymentRepository
             return [];
         }
 
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = PaymentTransaction::isActive($this->pdo);
         if (!$alreadyInTransaction) {
             $this->pdo->beginTransaction();
         }
@@ -591,7 +591,7 @@ final class PaymentRepository
         $stmt->execute([':now' => $now]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $alreadyInTransaction = $this->pdo->inTransaction();
+        $alreadyInTransaction = PaymentTransaction::isActive($this->pdo);
         if (!$alreadyInTransaction) {
             $this->pdo->beginTransaction();
         }

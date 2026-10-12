@@ -11,8 +11,6 @@ use Throwable;
 
 final class PaymentService
 {
-    // PHP 8.3 PDO SQLite does not track transactions started with SQL.
-    private bool $sqliteImmediateTransaction = false;
     public function __construct(
         private readonly PDO $pdo,
         private readonly PaymentRepository $payments,
@@ -1493,40 +1491,22 @@ final class PaymentService
 
     private function beginImmediate(): void
     {
-        if ($this->inTransaction()) {
-            return;
-        }
-        if ($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
-            $this->pdo->exec('BEGIN IMMEDIATE');
-            $this->sqliteImmediateTransaction = true;
-            return;
-        }
-        $this->pdo->beginTransaction();
+        PaymentTransaction::beginImmediate($this->pdo);
     }
 
     private function inTransaction(): bool
     {
-        return $this->sqliteImmediateTransaction || $this->pdo->inTransaction();
+        return PaymentTransaction::isActive($this->pdo);
     }
 
     private function commitTransaction(): void
     {
-        if ($this->sqliteImmediateTransaction) {
-            $this->pdo->exec('COMMIT');
-            $this->sqliteImmediateTransaction = false;
-            return;
-        }
-        $this->pdo->commit();
+        PaymentTransaction::commit($this->pdo);
     }
 
     private function rollbackTransaction(): void
     {
-        if ($this->sqliteImmediateTransaction) {
-            $this->pdo->exec('ROLLBACK');
-            $this->sqliteImmediateTransaction = false;
-            return;
-        }
-        $this->pdo->rollBack();
+        PaymentTransaction::rollback($this->pdo);
     }
 
     private function normalizeSubjectType(string $subjectType): string

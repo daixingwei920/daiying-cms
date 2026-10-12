@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.83-rc1 - 2026-10-12 (takeout sandbox candidate, not published)
+
+- Share SQLite immediate transaction state by PDO connection across payment services and repositories on PHP 8.3.
+- Preserve transaction ownership, atomic webhook/refund processing, and immediate writer locking.
+- Add payment transaction regression coverage. This candidate is authorized only for the isolated takeout sandbox; it is not an official release.
+
 ## 1.2.82 - 2026-10-10
 
 - Fix media root resolution for independent Releases while preserving instance isolation.
