@@ -7,11 +7,11 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 ## Current Core Baseline
 
 - Product: Daiying CMS Core
-- Baseline version: `1.2.82`
-- Git tag: `v1.2.82`
-- Baseline commit: resolve `v1.2.82^{commit}` after official publication
+- Baseline version: `1.2.83` release candidate; published baseline remains `1.2.82` until all gates pass
+- Git tag: `v1.2.83` only after official publication approval
+- Baseline commit: resolve `v1.2.83^{commit}` after official publication
 - Current clean Core worktree:
-  `/Users/xingweidai/Documents/Codex/2026-09-03/daiying-cms-core-theme/work/daiying-cms-core-clean-1.2.63`
+  `/Users/xingweidai/Documents/Codex/2026-10-09/daiying-cms-official-restaurant-daiying-restaurant/work/restaurant-debt-core-release`
 - Core closeout report:
   `/Users/xingweidai/Documents/Codex/2026-09-03/Daiying-CMS-WIP-Archive/core-closeout-1.2.63-20260915-231639/CORE_CLOSED_REPORT.md`
 

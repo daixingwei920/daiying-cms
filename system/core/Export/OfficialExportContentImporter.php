@@ -6,6 +6,7 @@ namespace Cms\Core\Export;
 
 use Cms\Core\Content\ContentRepository;
 use Cms\Core\Content\ContentTypeRegistry;
+use Cms\Core\Content\Slugger;
 use Cms\Core\UrlMapping\UrlMappingRepository;
 use PDO;
 use Throwable;
@@ -646,11 +647,11 @@ final class OfficialExportContentImporter
 
     private function slug(mixed $value): string
     {
-        if (!is_string($value) || preg_match('/^[a-z0-9][a-z0-9-]{0,190}$/', $value) !== 1) {
+        if (!is_string($value) || !Slugger::isPublic($value)) {
             throw new ExportException('Export content slug is invalid.');
         }
 
-        return $value;
+        return Slugger::fromInput($value, '');
     }
 
     /** @return list<array<string,mixed>> */

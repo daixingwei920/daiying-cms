@@ -614,7 +614,7 @@ final class ContentRepository
         if ($name === '') {
             throw new ContentException('Category name is required.');
         }
-        $slug = Slugger::make($slug !== '' ? $slug : $name);
+        $slug = Slugger::fromInput($slug, $name);
         $existing = $this->pdo->prepare('SELECT id FROM cms_terms WHERE taxonomy = :taxonomy AND slug = :slug LIMIT 1');
         $existing->execute([':taxonomy' => $taxonomy, ':slug' => $slug]);
         $existingId = (int) $existing->fetchColumn();
@@ -924,7 +924,7 @@ final class ContentRepository
         if ($mediaErrors !== []) {
             throw new ContentException(implode(' ', $mediaErrors));
         }
-        $slug = Slugger::make($slug !== '' ? $slug : $title);
+        $slug = Slugger::fromInput($slug, $title);
         if (in_array($slug, self::RESERVED_SLUGS, true)) {
             throw new ContentException('Slug is reserved.');
         }
@@ -1038,7 +1038,7 @@ final class ContentRepository
             && !str_contains($slug, '?')
             && !str_contains($slug, '#')
             && preg_match('/[\x00-\x1F\x7F]/', $slug) !== 1
-            && preg_match('/^[\p{L}\p{N}-]+$/u', $slug) === 1;
+            && Slugger::isPublic($slug);
     }
 
     private function safeTaxonomy(string $taxonomy): bool

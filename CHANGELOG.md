@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.83 - 2026-10-12
+
+- Share SQLite immediate transaction state by PDO connection across payment services and repositories on PHP 8.3.
+- Preserve transaction ownership, atomic webhook/refund processing, and immediate writer locking.
+- Add payment transaction regression coverage.
+- Preserve explicitly chosen Chinese book-title marks in content and taxonomy slugs; automatically generated slugs remain concise.
+- Align public lookup, official content import, URL mappings, canonical URLs and sitemaps while rejecting unsafe path characters.
+- Preserve existing customer slugs and redirects; no automatic content rewrites or database migrations.
+
 ## 1.2.82 - 2026-10-10
 
 - Fix media root resolution for independent Releases while preserving instance isolation.
