@@ -266,7 +266,7 @@ final class ContentFrontController
         $meta = is_array($term['meta'] ?? null) ? $term['meta'] : [];
         $title = trim((string) ($meta['seo_title'] ?? '')) !== '' ? (string) $meta['seo_title'] : ucfirst($taxonomy) . ': ' . $term['name'];
         $total = $repo->publicCountByTerm($taxonomy, $slug);
-        $canonicalPath = $this->archiveCanonicalPath('/' . ($taxonomy === 'tag' ? 'tag' : 'category') . '/' . $term['slug'], $page);
+        $canonicalPath = $this->archiveCanonicalPath('/' . ($taxonomy === 'tag' ? 'tag' : 'category') . '/' . rawurlencode($term['slug']), $page);
 
         return Response::html($this->theme()->render('list', [
             'site_name' => (string) $this->settings->get('site.name', 'PHP CMS'),
@@ -313,7 +313,7 @@ final class ContentFrontController
                 $entries[] = $entry;
             }
             foreach ($this->repo()->sitemapTerms() as $term) {
-                $path = '/' . ((string) $term['taxonomy'] === 'tag' ? 'tag' : 'category') . '/' . (string) $term['slug'];
+                $path = '/' . ((string) $term['taxonomy'] === 'tag' ? 'tag' : 'category') . '/' . rawurlencode((string) $term['slug']);
                 $entry = ['loc' => $this->absoluteUrl($path)];
                 $lastmod = $this->sitemapLastmod($term['updated_at'] ?? null);
                 if ($lastmod !== null) {

@@ -49,7 +49,7 @@ final class ImportService
             return '/content/' . $id;
         }
 
-        return $type === 'article' ? '/articles/' . $slug : '/' . $slug;
+        return ($type === 'article' ? '/articles/' : '/') . rawurlencode($slug);
     }
 
     private function recordUrlMappings(string $sourceUrl, string $targetUrl, string $platformId): void
