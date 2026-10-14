@@ -85,7 +85,20 @@ try {
     $readOnly = new MarketInstallLock($path);
     try {
         $readOnly->acquire();
-        echo "[PASS] existing read-only lock file still allows exclusive coordination\n";
+        $code = 'require ' . var_export(dirname(__DIR__) . '/system/core/Bootstrap/autoload.php', true) . '; '
+            . '$lock = new Cms\\Core\\Market\\MarketInstallLock($argv[1]); '
+            . 'try { $lock->acquire(); exit(1); } catch (Cms\\Core\\Market\\MarketException) { exit(0); }';
+        $process = proc_open([PHP_BINARY, '-r', $code, $path], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+        if (!is_resource($process)) {
+            throw new RuntimeException('Cannot create read-only lock contender.');
+        }
+        fclose($pipes[1]);
+        $error = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+        if (proc_close($process) !== 0) {
+            throw new RuntimeException('Read-only lock did not reject an independent contender: ' . $error);
+        }
+        echo "[PASS] existing read-only lock file excludes an independent process\n";
     } finally {
         $readOnly->release();
         chmod($path, 0644);
