@@ -544,6 +544,8 @@ final class Application
         $router->get('/admin/plugins', [$admin, 'pluginIndex']);
         $router->get('/admin/plugins/detail', [$admin, 'pluginDetail']);
         $router->post('/admin/plugins/status', [$admin, 'pluginStatus']);
+        $router->post('/admin/plugins/permissions/grant', [$admin, 'pluginPermissionGrant']);
+        $router->post('/admin/plugins/permissions/revoke', [$admin, 'pluginPermissionRevoke']);
         $router->post('/admin/plugins/local-preview', [$admin, 'pluginLocalPreview']);
         $router->post('/admin/plugins/local-install', [$admin, 'pluginLocalInstall']);
         $router->post('/admin/plugins/uninstall', [$admin, 'pluginUninstall']);

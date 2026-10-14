@@ -85,6 +85,7 @@ final class PluginPaymentService
 
         try {
             PaymentTransaction::beginImmediate($this->pdo);
+            $this->access('payment.checkout', true);
             $existing = $this->bindingByOrder($type, $localSubjectId, true);
             $sameKey = $this->bindingByKey($keyHash, true);
             if ($existing !== null || $sameKey !== null) {
@@ -159,6 +160,7 @@ final class PluginPaymentService
         $buyer = $this->buyer(true);
         try {
             PaymentTransaction::beginImmediate($this->pdo);
+            $this->access('payment.checkout', true);
             $binding = $this->bindingByRef($this->safeId($paymentRef, 64), true);
             if ($binding === null || (int) $binding['buyer_id'] !== $buyer) {
                 throw new PluginException('not_found');
@@ -236,25 +238,14 @@ final class PluginPaymentService
         }
     }
 
-    private function access(string $capability): void
+    private function access(string $capability, bool $lock = false): void
     {
         if (!in_array($capability, $this->manifest->capabilities, true)
             || !in_array('payment.access', $this->manifest->permissions, true)) {
             throw new PluginException('capability_denied');
         }
         try {
-            $stmt = $this->pdo->prepare('SELECT status, permission_grant_status FROM cms_plugins WHERE plugin_id = :plugin LIMIT 1');
-            $stmt->execute([':plugin' => $this->manifest->id]);
-            $plugin = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!is_array($plugin) || (string) $plugin['status'] !== PluginLifecycle::ENABLED || (string) $plugin['permission_grant_status'] !== 'granted') {
-                throw new PluginException('capability_denied');
-            }
-            $stmt = $this->pdo->prepare("SELECT permissions_json FROM cms_plugin_permission_grants WHERE plugin_id = :plugin AND status = 'granted' ORDER BY id DESC LIMIT 1");
-            $stmt->execute([':plugin' => $this->manifest->id]);
-            $permissions = json_decode((string) ($stmt->fetchColumn() ?: '[]'), true);
-            if (!is_array($permissions) || !in_array('payment.access', $permissions, true)) {
-                throw new PluginException('capability_denied');
-            }
+            (new PluginPermissionDecisionService($this->pdo))->assertEffective($this->manifest, $lock);
         } catch (PluginException $exception) {
             throw $exception;
         } catch (Throwable $exception) {
@@ -375,7 +366,7 @@ final class PluginPaymentService
             return $this->publicPayment($binding, $payment);
         }
         if ((string) $binding['state'] !== 'reserved') {
-            throw new PluginException('service_unavailable');
+            throw new PluginException('payment_reconciliation_required');
         }
         return $this->startPayment($binding);
     }
@@ -383,10 +374,20 @@ final class PluginPaymentService
     /** @param array<string,mixed> $binding @return array<string,mixed> */
     private function startPayment(array $binding): array
     {
-        $claim = $this->pdo->prepare("UPDATE cms_plugin_payment_bindings SET state = 'creating', updated_at = :now WHERE id = :id AND state = 'reserved'");
-        $claim->execute([':now' => gmdate('c'), ':id' => $binding['id']]);
-        if ($claim->rowCount() !== 1) {
-            throw new PluginException('service_unavailable');
+        try {
+            PaymentTransaction::beginImmediate($this->pdo);
+            $this->access('payment.checkout', true);
+            $claim = $this->pdo->prepare("UPDATE cms_plugin_payment_bindings SET state = 'creating', updated_at = :now WHERE id = :id AND state = 'reserved'");
+            $claim->execute([':now' => gmdate('c'), ':id' => $binding['id']]);
+            if ($claim->rowCount() !== 1) {
+                throw new PluginException('payment_reconciliation_required');
+            }
+            PaymentTransaction::commit($this->pdo);
+        } catch (Throwable $exception) {
+            if (PaymentTransaction::isActive($this->pdo)) {
+                PaymentTransaction::rollback($this->pdo);
+            }
+            throw $exception;
         }
         try {
             $payment = $this->payments()->createProviderPayment(
@@ -396,7 +397,9 @@ final class PluginPaymentService
             $this->linkPayment($binding, $payment);
             return $this->publicPayment($binding, $payment);
         } catch (Throwable $exception) {
-            throw new PluginException('service_unavailable', 0, $exception);
+            $this->pdo->prepare("UPDATE cms_plugin_payment_bindings SET state = 'reconciliation_required', updated_at = :now WHERE id = :id AND state = 'creating'")
+                ->execute([':now' => gmdate('c'), ':id' => $binding['id']]);
+            throw new PluginException('payment_reconciliation_required', 0, $exception);
         }
     }
 

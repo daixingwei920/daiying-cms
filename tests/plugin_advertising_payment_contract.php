@@ -9,6 +9,8 @@ use Cms\Core\Payment\FixturePaymentProvider;
 use Cms\Core\Payment\PaymentRepository;
 use Cms\Core\Payment\PaymentService;
 use Cms\Core\Payment\PaymentProviderRegistry;
+use Cms\Core\Payment\PaymentProviderInterface;
+use Cms\Core\Payment\PaymentResult;
 use Cms\Core\Payment\PaymentProviderSettingsRepository;
 use Cms\Core\Plugin\PluginAdvertisingService;
 use Cms\Core\Plugin\PluginContext;
@@ -21,7 +23,7 @@ use Cms\Core\Plugin\PluginLifecycle;
 use Cms\Core\Plugin\PluginManifest;
 use Cms\Core\Plugin\PluginPaymentRequestScope;
 use Cms\Core\Plugin\PluginPaymentService;
-use Cms\Core\Plugin\PluginPermissionManifest;
+use Cms\Core\Plugin\PluginPermissionDecisionService;
 
 $checks = 0;
 function verify(bool $condition, string $message): void
@@ -57,6 +59,31 @@ function scoped(string $plugin, string $method, bool $csrf, ?int $buyer, callabl
     }
 }
 
+function testManifest(string $root, PluginManifest $manifest): void
+{
+    $dir = $root . '/' . $manifest->id;
+    if (!is_dir($dir)) {
+        mkdir($dir, 0700, true);
+    }
+    file_put_contents($dir . '/plugin.json', json_encode([
+        'plugin_id' => $manifest->id, 'name' => $manifest->name,
+        'version' => $manifest->version, 'author' => $manifest->author,
+        'core' => ['min' => $manifest->coreMin], 'php' => $manifest->phpMin,
+        'entry' => $manifest->entry, 'trust_level' => $manifest->trustLevel,
+        'capabilities' => $manifest->capabilities, 'permissions' => $manifest->permissions,
+    ], JSON_THROW_ON_ERROR));
+}
+
+$fixtureRoot = sys_get_temp_dir() . '/daiying-plugin-payment-fixture-' . getmypid();
+mkdir($fixtureRoot, 0700, true);
+register_shutdown_function(static function () use ($fixtureRoot): void {
+    foreach (glob($fixtureRoot . '/*/plugin.json') ?: [] as $file) {
+        unlink($file);
+        rmdir(dirname($file));
+    }
+    rmdir($fixtureRoot);
+});
+
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -67,6 +94,7 @@ foreach ([
     '2026_08_29_000001_members_comments_schema.php',
     '2026_08_29_000004_differentiation_platform_schema.php',
     '2026_10_14_000001_plugin_payment_bindings.php',
+    '2026_10_14_000002_plugin_permission_scope.php',
 ] as $file) {
     (require dirname(__DIR__) . '/system/migrations/' . $file)->up($pdo);
 }
@@ -80,7 +108,8 @@ $manifest = new PluginManifest('local.sample', 'Sample', '1.0.0', 'Unit', '1.2.8
     ['ads.read', 'payment.subject.register', 'payment.checkout', 'payment.entitlement.read'], ['payment.access'], [], 'plugin', false, [], [], '');
 $pdo->prepare('INSERT INTO cms_plugins (plugin_id,name,version,author,status,trust_level,capabilities_json,installed_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)')
     ->execute([$manifest->id, 'Sample', '1.0.0', 'Unit', PluginLifecycle::ENABLED, 'api', json_encode($manifest->capabilities), '2026-10-14', '2026-10-14']);
-(new PluginPermissionManifest($pdo))->grant($manifest->id, '1.0.0', ['payment.access'], 1);
+testManifest($fixtureRoot, $manifest);
+(new PluginPermissionDecisionService($pdo, $fixtureRoot))->grant($manifest->id, '1.0.0', 1);
 $pdo->prepare('INSERT INTO cms_ad_slots (slot_key,label,placement,html,enabled,created_at,updated_at) VALUES (?,?,?,?,?,?,?)')
     ->execute(['header', 'Header', 'home', '<a href="https://example.org">Go</a><script>alert(1)</script>', 1, '2026-10-14', '2026-10-14']);
 $ads = new PluginAdvertisingService($manifest, new AdRepository($pdo));
@@ -144,7 +173,8 @@ $otherManifest = new PluginManifest('local.second', 'Second', '1.0.0', 'Unit', '
     ['payment.subject.register', 'payment.checkout', 'payment.entitlement.read'], ['payment.access'], [], 'plugin', false, [], [], '');
 $pdo->prepare('INSERT INTO cms_plugins (plugin_id,name,version,author,status,trust_level,capabilities_json,installed_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?)')
     ->execute([$otherManifest->id, 'Second', '1.0.0', 'Unit', PluginLifecycle::ENABLED, 'api', json_encode($otherManifest->capabilities), '2026-10-14', '2026-10-14']);
-(new PluginPermissionManifest($pdo))->grant($otherManifest->id, '1.0.0', ['payment.access'], 1);
+testManifest($fixtureRoot, $otherManifest);
+(new PluginPermissionDecisionService($pdo, $fixtureRoot))->grant($otherManifest->id, '1.0.0', 1);
 $second = new PluginPaymentService($otherManifest, $pdo);
 $second->registerSubject('recommendation', static fn (string $order, array $context): array => [
     'authorized' => $context['operation'] === 'entitlement_read' || $context['actor_id'] === 1,
@@ -198,6 +228,34 @@ verify(is_string($pdo->query("SELECT trusted_paid_at FROM cms_plugin_payment_bin
 verify($purchase('order-2', 'key-2')['payment_ref'] === $other['payment_ref']
     && (int) $pdo->query("SELECT COUNT(*) FROM cms_payments WHERE subject_type = 'cms_plugin_order'")->fetchColumn() === 3,
     'P06 recover local payment with same key after response/link failure without new provider charge');
+$acceptedCalls = 0;
+$acceptedKeys = [];
+$lostResponseProvider = new class($acceptedCalls, $acceptedKeys) implements PaymentProviderInterface {
+    public function __construct(private int &$calls, private array &$keys) {}
+    public function providerId(): string { return FixturePaymentProvider::PROVIDER_ID; }
+    public function displayName(): string { return 'Lost response fixture'; }
+    public function capabilities(): array { return ['payment.create']; }
+    public function createPayment(object $command): PaymentResult
+    {
+        $this->calls++;
+        $this->keys[] = (string) ($command->idempotency_key ?? '');
+        throw new RuntimeException('Simulated lost response after Provider acceptance');
+    }
+    public function capturePayment(object $command): PaymentResult { throw new LogicException('Not used'); }
+    public function cancelPayment(object $command): PaymentResult { throw new LogicException('Not used'); }
+    public function refundPayment(object $command): PaymentResult { throw new LogicException('Not used'); }
+    public function getPaymentStatus(object $command): PaymentResult { throw new LogicException('Not used'); }
+};
+PaymentProviderRegistry::register(FixturePaymentProvider::PROVIDER_ID, $lostResponseProvider);
+denied(static fn () => $purchase('order-uncertain', 'key-uncertain'), 'payment_reconciliation_required');
+$uncertain = $pdo->query("SELECT state, internal_key, payment_id FROM cms_plugin_payment_bindings WHERE local_subject_id = 'order-uncertain'")->fetch(PDO::FETCH_ASSOC);
+verify($acceptedCalls === 1 && is_array($uncertain) && $uncertain['state'] === 'reconciliation_required'
+    && $uncertain['payment_id'] === null && $acceptedKeys === [$uncertain['internal_key']],
+    'P06 lost Provider response retains one durable key and requires reconciliation');
+denied(static fn () => $purchase('order-uncertain', 'key-uncertain'), 'payment_reconciliation_required');
+verify($acceptedCalls === 1 && $pdo->query("SELECT internal_key FROM cms_plugin_payment_bindings WHERE local_subject_id = 'order-uncertain'")->fetchColumn() === $uncertain['internal_key'],
+    'P06 retry after ambiguous acceptance does not issue a second Provider create');
+PaymentProviderRegistry::register(FixturePaymentProvider::PROVIDER_ID, new FixturePaymentProvider());
 $pdo->exec("CREATE TRIGGER reject_plugin_entitlement BEFORE INSERT ON cms_payment_entitlements BEGIN SELECT RAISE(ABORT, 'injected failure'); END");
 denied(static fn () => $fulfill($other['payment_ref']), 'service_unavailable');
 verify((int) $pdo->query('SELECT COUNT(*) FROM cms_payment_entitlements')->fetchColumn() === 1
@@ -212,9 +270,10 @@ denied(static fn () => $fulfill($expired['payment_ref']), 'payment_not_fulfillab
 verify($pdo->query("SELECT entitlement_id FROM cms_plugin_payment_bindings WHERE local_subject_id = 'order-3'")->fetchColumn() === null,
     'P12 expired first fulfillment grants no entitlement');
 
+$bindingCountBeforeDisable = (int) $pdo->query('SELECT COUNT(*) FROM cms_plugin_payment_bindings')->fetchColumn();
 $pdo->exec("UPDATE cms_plugins SET status = 'Disabled' WHERE plugin_id = 'local.sample'");
 denied(static fn () => $facade->isEntitled('recommendation', 'order-2'), 'capability_denied');
-verify((int) $pdo->query('SELECT COUNT(*) FROM cms_plugin_payment_bindings')->fetchColumn() === 4, 'P13 disable does not delete payment bindings');
+verify((int) $pdo->query('SELECT COUNT(*) FROM cms_plugin_payment_bindings')->fetchColumn() === $bindingCountBeforeDisable, 'P13 disable does not delete payment bindings');
 $pdo->exec("UPDATE cms_plugins SET status = 'Enabled' WHERE plugin_id = 'local.sample'");
 verify($facade->isEntitled('recommendation', 'order-2'), 'P13 re-enable reads existing entitlement');
 denied(static fn () => $facade->create('recommendation', 'order-2', FixturePaymentProvider::PROVIDER_ID, 'key-2'), 'capability_denied');

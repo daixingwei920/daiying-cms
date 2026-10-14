@@ -88,6 +88,7 @@ use Cms\Core\Plugin\OfficialPluginRegistry;
 use Cms\Core\Plugin\PluginSecretStore;
 use Cms\Core\Plugin\PluginLifecycle;
 use Cms\Core\Plugin\PluginManager;
+use Cms\Core\Plugin\PluginPermissionDecisionService;
 use Cms\Core\Support\AdminUiText;
 use Cms\Core\Payment\PaymentAttemptDiagnosticsRepository;
 use Cms\Core\Payment\PaymentException;
@@ -3746,6 +3747,30 @@ final class AdminController
         $settingsLink = $settingsUrl === '' ? '' : '<a class="button" href="' . View::escape($settingsUrl) . '">打开设置</a> ';
         $status = (string) ($row['status'] ?? '');
         $next = $status === PluginLifecycle::ENABLED ? PluginLifecycle::DISABLED : PluginLifecycle::ENABLED;
+        $paymentPermission = '';
+        if ($manifest !== null && in_array('payment.access', $manifest->permissions, true)) {
+            try {
+                $decision = (new PluginPermissionDecisionService($pdo, $root . '/content/plugins'))->inspect($pluginId);
+                $permissionState = (string) $decision['state'];
+            } catch (Throwable) {
+                $permissionState = 'unavailable';
+            }
+            $paymentPermission = '<h3>支付权限</h3><p>payment.access：' . View::escape($permissionState) .
+                '。安装审核与支付权限授权是独立操作，启用支付 Provider 也需单独配置。</p>';
+            if ($permissionState !== 'unavailable' && $this->adminHasCapability('plugins.manage')) {
+                if ((new AdminSessionService($pdo))->hasRecentReauthentication(600)) {
+                    $action = $permissionState === 'granted' ? 'revoke' : 'grant';
+                    $paymentPermission .= '<form method="post" action="' . View::escape($this->adminPath('/admin/plugins/permissions/' . $action)) . '">' .
+                        CsrfToken::field() .
+                        '<input type="hidden" name="plugin_id" value="' . View::escape($pluginId) . '">' .
+                        '<input type="hidden" name="version" value="' . View::escape($manifest->version) . '">' .
+                        '<label>输入插件 ID 确认操作<input name="confirm_plugin_id" required></label>' .
+                        '<button type="submit">' . ($action === 'grant' ? '授予支付权限' : '撤销支付权限') . '</button></form>';
+                } else {
+                    $paymentPermission .= '<p><a href="' . View::escape($this->adminPath('/admin/security')) . '">先完成管理员重新认证</a></p>';
+                }
+            }
+        }
         $body = '<h1>' . View::escape(AdminUiText::pluginName($pluginId, (string) ($row['name'] ?? ''))) . '</h1>' .
             '<p><a class="button" href="' . View::escape($returnTo) . '">' . View::escape($returnLabel) . '</a> ' . $settingsLink . '</p>' .
             '<table><tbody>' .
@@ -3761,7 +3786,7 @@ final class AdminController
             '<tr><th>依赖关系</th><td>' . View::escape($this->pluginDependencySummary($dependencies)) . ($dependencyWarning !== '' ? '<br><span class="error">' . View::escape($dependencyWarning) . '</span>' : '') . '<br><span class="muted">高级信息：<code>' . View::escape((string) ($row['dependencies_json'] ?? '[]')) . '</code></span></td></tr>' .
             '<tr><th>数据状态</th><td>' . View::escape(implode('；', $impact)) . '</td></tr>' .
             '</tbody></table>' .
-            '<h2 id="permissions">权限</h2><table><thead><tr><th>说明</th><th>内部权限 key</th></tr></thead><tbody>' . $permissionRows . '</tbody></table>' .
+            '<h2 id="permissions">权限</h2><table><thead><tr><th>说明</th><th>内部权限 key</th></tr></thead><tbody>' . $permissionRows . '</tbody></table>' . $paymentPermission .
             '<h2>日常操作</h2><p class="muted">停用插件会停止插件运行，但保留插件文件、配置和业务数据，可随时重新启用。</p>' .
             '<form method="post" action="/admin/plugins/status">' . CsrfToken::field() .
             '<input type="hidden" name="plugin_id" value="' . View::escape($pluginId) . '">' .
@@ -3780,6 +3805,58 @@ final class AdminController
             '<button type="submit">永久删除数据</button></form>';
 
         return Response::html(View::page('插件详情', $body));
+    }
+
+    public function pluginPermissionGrant(Request $request): Response
+    {
+        return $this->pluginPermissionDecision($request, true);
+    }
+
+    public function pluginPermissionRevoke(Request $request): Response
+    {
+        return $this->pluginPermissionDecision($request, false);
+    }
+
+    private function pluginPermissionDecision(Request $request, bool $grant): Response
+    {
+        $user = $this->requireAdmin();
+        if ($user instanceof Response) {
+            return $user;
+        }
+        if (!$this->adminHasCapability('plugins.manage')) {
+            return Response::text('Forbidden', 403);
+        }
+        if ($request->method !== 'POST') {
+            return Response::text('Method not allowed', 405);
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::text('Invalid CSRF', 403);
+        }
+        $pdo = ConnectionFactory::make($this->settings);
+        if (!(new AdminSessionService($pdo))->hasRecentReauthentication(600)) {
+            return Response::text('Recent administrator reauthentication required', 403);
+        }
+        $pluginId = (string) $request->input('plugin_id', '');
+        $version = (string) $request->input('version', '');
+        if ($pluginId === '' || $pluginId !== (string) $request->input('confirm_plugin_id', '')) {
+            return Response::text('Plugin identity confirmation required', 400);
+        }
+        try {
+            $decisions = new PluginPermissionDecisionService($pdo, $this->root() . '/content/plugins');
+            if ($grant) {
+                $decisions->grant($pluginId, $version, (int) $user['id']);
+            } else {
+                $decisions->revoke($pluginId, $version, (int) $user['id']);
+            }
+        } catch (Throwable $exception) {
+            $this->logger->error('Plugin payment permission decision failed', [
+                'source' => 'Core', 'plugin_id' => $pluginId, 'exception' => $exception::class,
+            ]);
+            return Response::text('Payment permission was not changed. Check the installed plugin and version.', 400)
+                ->withHeaders(['Cache-Control' => 'private, no-store']);
+        }
+        return Response::redirect($this->adminPath('/admin/plugins/detail') . '?id=' . rawurlencode($pluginId))
+            ->withHeaders(['Cache-Control' => 'private, no-store']);
     }
 
     public function pluginStatus(Request $request): Response
