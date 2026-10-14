@@ -81,6 +81,15 @@ try {
         throw new RuntimeException('Market lock inode changed on subsequent acquisition.');
     }
     echo "[PASS] persistent market lock inode remains stable across release and reacquire\n";
+    chmod($path, 0444);
+    $readOnly = new MarketInstallLock($path);
+    try {
+        $readOnly->acquire();
+        echo "[PASS] existing read-only lock file still allows exclusive coordination\n";
+    } finally {
+        $readOnly->release();
+        chmod($path, 0644);
+    }
     echo "market_install_lock_lifecycle: PASS\n";
 } finally {
     file_put_contents($root . '/finish', '1');

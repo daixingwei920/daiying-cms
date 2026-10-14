@@ -8,6 +8,7 @@ final class MarketInstallLock
 {
     /** @var resource|null */
     private mixed $handle = null;
+    private bool $writable = false;
 
     public function __construct(private readonly string $lockPath)
     {
@@ -21,6 +22,10 @@ final class MarketInstallLock
         }
 
         $handle = @fopen($this->lockPath, 'c');
+        $writable = $handle !== false;
+        if ($handle === false && is_file($this->lockPath)) {
+            $handle = @fopen($this->lockPath, 'r');
+        }
         if ($handle === false) {
             throw new MarketException('Market install lock file is unavailable.');
         }
@@ -29,9 +34,12 @@ final class MarketInstallLock
             throw new MarketException('Another market install is already running.');
         }
 
-        ftruncate($handle, 0);
-        fwrite($handle, (string) getmypid());
+        if ($writable) {
+            ftruncate($handle, 0);
+            fwrite($handle, (string) getmypid());
+        }
         $this->handle = $handle;
+        $this->writable = $writable;
     }
 
     public function release(): void
@@ -40,10 +48,13 @@ final class MarketInstallLock
             return;
         }
 
-        ftruncate($this->handle, 0);
-        fflush($this->handle);
+        if ($this->writable) {
+            ftruncate($this->handle, 0);
+            fflush($this->handle);
+        }
         flock($this->handle, LOCK_UN);
         fclose($this->handle);
         $this->handle = null;
+        $this->writable = false;
     }
 }
