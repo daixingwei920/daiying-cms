@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Cms\Core\Plugin;
 
 use Cms\Core\Audit\AuditLogger;
+use Cms\Core\Market\MarketInstallLock;
+use Cms\Core\Market\MarketInstallRepository;
 use Cms\Core\Update\ActiveReleaseResolver;
 use PDO;
 use RecursiveDirectoryIterator;
@@ -250,19 +252,31 @@ final class LocalPluginPackageInstaller
 
     public function enable(string $pluginId, int $adminId): void
     {
-        $row = $this->pluginRow($pluginId);
-        if ($row === null) {
-            throw new PluginException('Plugin is not installed.');
+        $marketLock = new MarketInstallLock($this->rootPath . '/storage/market/install.lock');
+        $marketLock->acquire();
+        try {
+            $lock = $this->lock();
+            $this->acquireLock($lock);
+            try {
+                $row = $this->pluginRow($pluginId);
+                if ($row === null) {
+                    throw new PluginException('Plugin is not installed.');
+                }
+                if (in_array((string) $row['status'], [PluginLifecycle::INSTALL_FAILED_RECOVERABLE, PluginLifecycle::QUARANTINED], true)) {
+                    throw new PluginException('Plugin cannot be enabled until recovery is completed.');
+                }
+                $deps = json_decode((string) ($row['dependencies_json'] ?? '[]'), true) ?: [];
+                $this->assertDependencyRows($deps, $pluginId);
+                $this->ensureTrustedSourceMigrationsBeforeEnable($pluginId, $row);
+                $this->validateInstalledManifestBeforeEnable($pluginId, $row);
+                $this->setPluginStatus($pluginId, PluginLifecycle::ENABLED);
+                (new AuditLogger($this->pdo))->record('admin', $adminId, 'plugin.enabled', ['plugin_id' => $pluginId]);
+            } finally {
+                $this->releaseLock($lock);
+            }
+        } finally {
+            $marketLock->release();
         }
-        if (in_array((string) $row['status'], [PluginLifecycle::INSTALL_FAILED_RECOVERABLE, PluginLifecycle::QUARANTINED], true)) {
-            throw new PluginException('Plugin cannot be enabled until recovery is completed.');
-        }
-        $deps = json_decode((string) ($row['dependencies_json'] ?? '[]'), true) ?: [];
-        $this->assertDependencyRows($deps, $pluginId);
-        $this->ensureTrustedSourceMigrationsBeforeEnable($pluginId, $row);
-        $this->validateInstalledManifestBeforeEnable($pluginId, $row);
-        $this->setPluginStatus($pluginId, PluginLifecycle::ENABLED);
-        (new AuditLogger($this->pdo))->record('admin', $adminId, 'plugin.enabled', ['plugin_id' => $pluginId]);
     }
 
     public function uninstallCode(string $pluginId, int $adminId): void
@@ -870,9 +884,10 @@ final class LocalPluginPackageInstaller
         if ($trustedMarket && !$trustedOfficial) {
             throw new PluginException('Trusted market plugin migrations require an active official trust grant.');
         }
+        if ($trustedMarket && $this->verifiedMarketMigrationsAlreadyApplied($pluginId, $row, $target, $manifest)) {
+            return;
+        }
         $this->validateMigrations($target, $manifest, $trustedOfficial);
-        $lock = $this->lock();
-        $this->acquireLock($lock);
         try {
             $this->runMigrations($target, $manifest, $trustedOfficial);
         } catch (Throwable $exception) {
@@ -880,9 +895,119 @@ final class LocalPluginPackageInstaller
                 $this->setPluginRecoverable($pluginId, $this->sanitizeError($exception));
             }
             throw $exception;
-        } finally {
-            $this->releaseLock($lock);
         }
+    }
+
+    /** @param array<string,mixed> $pluginRow @param array<string,mixed> $manifest */
+    private function verifiedMarketMigrationsAlreadyApplied(string $pluginId, array $pluginRow, string $target, array $manifest): bool
+    {
+        $type = (string) ($manifest['package_type'] ?? 'plugin');
+        if (!in_array($type, ['plugin', 'payment_provider'], true)) {
+            throw new PluginException('Trusted market plugin package type is invalid.');
+        }
+        $source = (new MarketInstallRepository($this->pdo))->latestSource($pluginId, $type);
+        if ($source === null) {
+            return false; // Legacy installs retain the existing reversible-only enable policy.
+        }
+        $metadata = json_decode((string) ($source['metadata_json'] ?? ''), true);
+        if (!is_array($metadata) || !isset($metadata['files'])) {
+            return false;
+        }
+        $files = $metadata['files'];
+        $snapshot = $metadata['migrations'] ?? null;
+        $grant = (new OfficialExtensionTrustGrantRepository($this->pdo))->activeGrant($pluginId, $type);
+        if ((string) ($source['source'] ?? '') !== 'official_market'
+            || (string) ($source['version'] ?? '') !== (string) ($pluginRow['version'] ?? '')
+            || (string) ($manifest['version'] ?? '') !== (string) ($pluginRow['version'] ?? '')
+            || (string) ($manifest['plugin_id'] ?? '') !== $pluginId
+            || ($metadata['status'] ?? '') !== 'Installed'
+            || (string) ($metadata['review_status'] ?? '') !== (string) ($pluginRow['review_status'] ?? '')
+            || !preg_match('/^[a-f0-9]{64}$/', (string) ($metadata['package_sha256'] ?? ''))
+            || !is_array($files) || $files === []
+            || !is_array($snapshot) || !array_is_list($snapshot)
+            || $grant === null
+            || !hash_equals((string) ($metadata['trust_grant_fingerprint'] ?? ''), $grant->fingerprint)
+        ) {
+            throw new PluginException('Trusted market plugin source or grant no longer matches the installed package.');
+        }
+
+        $prefix = 'content/plugins/' . $pluginId . '/';
+        if (is_link($target) || !is_dir($target)) {
+            throw new PluginException('Trusted market plugin root directory is invalid.');
+        }
+        if (!isset($files[$prefix . 'plugin.json'])) {
+            throw new PluginException('Trusted market plugin file manifest is incomplete.');
+        }
+        $seen = [];
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($target, \FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST,
+        );
+        foreach ($iterator as $item) {
+            if ($item->isLink()) {
+                throw new PluginException('Trusted market plugin contains a symlink.');
+            }
+            if (!$item->isFile()) {
+                continue;
+            }
+            $path = $prefix . str_replace('\\', '/', substr($item->getPathname(), strlen($target) + 1));
+            $expected = $files[$path] ?? null;
+            if (!is_string($expected) || !preg_match('/^[a-f0-9]{64}$/', $expected)
+                || !hash_equals($expected, (string) hash_file('sha256', $item->getPathname()))) {
+                throw new PluginException('Trusted market plugin file differs from its verified install source.');
+            }
+            $seen[$path] = true;
+        }
+        if (count($seen) !== count($files) || array_diff(array_keys($files), array_keys($seen)) !== []) {
+            throw new PluginException('Trusted market plugin files are missing from the installed package.');
+        }
+
+        $migrations = $manifest['migrations'] ?? [];
+        if (!is_array($migrations)) {
+            throw new PluginException('Trusted market plugin migrations are invalid.');
+        }
+        if (!array_is_list($migrations) || count($migrations) !== count($snapshot)) {
+            throw new PluginException('Trusted market plugin migration set differs from the installed source.');
+        }
+        $wanted = [];
+        $ownership = new PluginTableOwnership($this->pdo, new OfficialPluginRegistry($this->rootPath, $this->pdo));
+        $prefixes = $ownership->prefixesFor($manifest, true);
+        foreach ($migrations as $index => $path) {
+            if (!is_string($path) || !preg_match('#^migrations/[A-Za-z0-9_./-]+\.php$#', $path)
+                || str_contains($path, '..') || !isset($files[$prefix . $path])) {
+                throw new PluginException('Trusted market plugin migration is outside the verified package.');
+            }
+            $spec = $snapshot[$index];
+            if (!is_array($spec) || ($spec['path'] ?? '') !== $path
+                || !is_string($spec['id'] ?? null) || !preg_match('/^[A-Za-z0-9_.:-]+$/', $spec['id'])
+                || !hash_equals((string) $files[$prefix . $path], (string) ($spec['checksum'] ?? ''))
+                || !is_array($spec['affected_objects'] ?? null)
+                || isset($wanted[$spec['id']])) {
+                throw new PluginException('Trusted market plugin migration identity differs from the installed source.');
+            }
+            $ownership->assertOwnsObjects($spec['affected_objects'], $prefixes);
+            $wanted[$spec['id']] = $spec['checksum'];
+        }
+        $stmt = $this->pdo->prepare('SELECT migration_id, checksum, status FROM cms_plugin_migrations WHERE plugin_id = :plugin_id');
+        $stmt->execute([':plugin_id' => $pluginId]);
+        $records = [];
+        foreach ($stmt->fetchAll() as $record) {
+            $id = (string) $record['migration_id'];
+            if (isset($records[$id]) || (string) $record['status'] !== 'applied' || !isset($wanted[$id])) {
+                throw new PluginException('Trusted market plugin migration history is conflicting or incomplete.');
+            }
+            if (!hash_equals((string) $wanted[$id], (string) $record['checksum'])) {
+                throw new PluginException('Trusted market plugin migration checksum changed: ' . $id);
+            }
+            $records[$id] = true;
+        }
+        foreach ($wanted as $id => $_) {
+            if (!isset($records[$id])) {
+                return false; // Missing reversible migrations still use the existing guarded backfill path.
+            }
+        }
+
+        return true;
     }
 
     /** @return list<array<string,mixed>> */

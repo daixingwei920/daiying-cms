@@ -106,17 +106,7 @@ final class MarketPackageInstaller
                 'market_id' => $marketReference,
                 'installed_at' => gmdate('c'),
             ];
-            $repo->recordSource($manifest->extensionId, $manifest->type, $manifest->source, $marketReference, $manifest->version, [
-                'package_sha256' => $zipHash,
-                'review_status' => $manifest->reviewStatus,
-                'status' => $result['status'],
-                'dependencies' => array_map(static fn (ExtensionDependency $dependency): array => [
-                    'extension_id' => $dependency->extensionId,
-                    'type' => $dependency->type,
-                    'version' => $dependency->constraint,
-                    'optional' => $dependency->optional,
-                ], $manifest->dependencies),
-            ]);
+            $verifiedMigrations = [];
             if (in_array($manifest->type, ['plugin', 'payment_provider'], true)) {
                 $pluginManifest = $this->registerPluginRecord($pdo, $target, $manifest, $marketReference);
                 $this->assertMarketPluginTrust($pluginManifest, $manifest, $trustedOfficial, $grant);
@@ -126,8 +116,23 @@ final class MarketPackageInstaller
                 }
                 $runner = new PluginMigrationRunner($this->rootPath, $pdo);
                 $runner->validate($target, $pluginManifest, $trustedOfficial);
-                $runner->run($target, $pluginManifest, $trustedOfficial);
+                $verifiedMigrations = $runner->run($target, $pluginManifest, $trustedOfficial);
             }
+
+            $repo->recordSource($manifest->extensionId, $manifest->type, $manifest->source, $marketReference, $manifest->version, [
+                'package_sha256' => $zipHash,
+                'review_status' => $manifest->reviewStatus,
+                'status' => $result['status'],
+                'files' => $manifest->files,
+                'migrations' => $verifiedMigrations,
+                'trust_grant_fingerprint' => $grant?->fingerprint ?? '',
+                'dependencies' => array_map(static fn (ExtensionDependency $dependency): array => [
+                    'extension_id' => $dependency->extensionId,
+                    'type' => $dependency->type,
+                    'version' => $dependency->constraint,
+                    'optional' => $dependency->optional,
+                ], $manifest->dependencies),
+            ]);
 
             if (is_dir($backup)) {
                 $this->removeDirectory($backup);
