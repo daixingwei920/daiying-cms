@@ -37,6 +37,10 @@ final class Capability
         'search.register',
         'seo.extend',
         'blocks.register',
+        'ads.read',
+        'payment.subject.register',
+        'payment.checkout',
+        'payment.entitlement.read',
     ];
 
     public const KNOWN = self::CORE_KNOWN;

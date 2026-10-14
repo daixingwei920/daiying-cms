@@ -66,6 +66,8 @@ final class PluginContext
         private readonly ?PluginContentService $content = null,
         private readonly ?FrontUserService $frontUsers = null,
         private readonly ?PluginLicenseService $license = null,
+        private readonly ?PluginAdvertisingService $advertising = null,
+        private readonly ?PluginPaymentService $payments = null,
     ) {
     }
 
@@ -121,6 +123,19 @@ final class PluginContext
         }
 
         return $this->content;
+    }
+
+    public function advertising(): PluginAdvertisingService
+    {
+        return $this->advertising ?? new PluginAdvertisingService($this->manifest, null);
+    }
+
+    public function payments(): PluginPaymentService
+    {
+        if ($this->payments === null) {
+            throw new PluginException('service_unavailable');
+        }
+        return $this->payments;
     }
 
     public function frontUsers(): FrontUserService

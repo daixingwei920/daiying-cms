@@ -1,6 +1,6 @@
 # Daiying Plugin API Reference V1
 
-Only public APIs implemented in Daiying CMS Core 1.2.70 Plugin SDK Foundation are listed.
+This reference includes the 1.2.70 Plugin SDK and explicitly marked unreleased maintenance APIs. An unreleased API is not available on the published Core until integration and release.
 
 ## PluginContext
 
@@ -14,6 +14,8 @@ registerBlock(string $type, string $label): void
 registerBlockRenderer(string $type, callable $renderer): void // Since Core 1.2.70
 data(): PluginDataStore
 content(): Cms\Core\Content\PluginContentService // Since Core 1.2.70
+advertising(): Cms\Core\Plugin\PluginAdvertisingService // Pending 1.2.84 integration
+payments(): Cms\Core\Plugin\PluginPaymentService // Pending 1.2.84 integration
 frontUsers(): Cms\Core\Auth\FrontUserService // Since Core 1.2.70
 license(): Cms\Core\Plugin\PluginLicenseService // Since Core 1.2.70
 pdo(): PDO
@@ -51,6 +53,30 @@ registerSeoJsonLd(string $id, callable $provider): void
 registerSeoMeta(string $id, callable $provider): void
 registerMailEvent(string $eventId, string $label, array $variables = []): void
 ```
+
+## Advertising and Payment Facades (Unreleased GC03/04 Candidate)
+
+These methods are isolated Core candidate APIs. They are not part of the published Core until a complete Release Gate and release. Ordinary `api` plugins do not receive PDO, payment secrets, Provider administration, capture, refund, or direct entitlement grants.
+
+```php
+$context->advertising()->renderSlots(['header', 'city_sidebar']);
+$context->payments()->registerSubject('recommendation', $serverResolver);
+$context->payments()->enabledProviders('USD');
+$context->payments()->create('recommendation', $localOrderId, $providerId, $idempotencyKey);
+$context->payments()->status($paymentRef);
+$context->payments()->fulfill($paymentRef);
+$context->payments()->isEntitled('recommendation', $localOrderId);
+```
+
+Advertising requires `ads.read`. Slot keys are trimmed, lowercased, validated as `[a-z0-9_-]{1,48}`, and deduplicated. Empty input returns empty output. Results contain only requested active public slots as `slot_key => {label, enabled:true, html}`. HTML is sanitized and tracking is inserted by the existing `AdRenderer` exactly once. An unavailable advertising store raises `service_unavailable`, rather than looking like an empty set. Plugins should catch that error and hide the ad.
+
+Payment requires formal manifest permission `payment.access`, a current granted permission record, and the relevant capability: `payment.subject.register`, `payment.checkout`, or `payment.entitlement.read`. Legacy undeclared plugins do not inherit this access. The resolver signature is `callable(string $localSubjectId, array $context): array`; Core supplies `plugin_id`, nullable `actor_id`, and `operation` (`create`, `status`, `fulfill`, `entitlement_read`). Return `authorized: true` for allowed access. On create, also return server-side `quote_version`, positive `amount_minor`, uppercase supported `currency`, `beneficiary:{type,id}`, and positive `duration_seconds`.
+
+`create()` and `fulfill()` require a Core-dispatched plugin `POST` route with `csrf: true` and an authenticated active front user. `status()` requires that buyer's authenticated route context. `enabledProviders()` and `isEntitled()` do not need a buyer; the latter returns only a boolean for the plugin's own bound order. A plugin should register a distinct local business order ID for each purchase and never derive paid state from a form, redirect or cached response.
+
+Core freezes the buyer and quote at first create. One plugin-local order can have only one payment binding; the same idempotency key and frozen request replay the same reference, while a changed key or quote fails. A Provider call is claimed once. If its outcome is uncertain and no local payment can be recovered with the same internal key, Core returns `service_unavailable` and does not issue a second charge. Only a Core-accepted paid payment for the exact amount and currency with no successful prior refund can receive its first entitlement. The expiry is the immutable first trusted paid UTC time plus the frozen duration. Partial refund after grant retains the original term; full refund, revocation, and expiry make subsequent reads false. Existing `entitlement_ref` and expiry remain stable on replay.
+
+Stable facade errors are `capability_denied`, `service_unavailable`, `invalid_request`, `not_found`, `idempotency_conflict`, and `payment_not_fulfillable`. Errors never return raw Provider payloads or secrets. The plugin should fail closed on availability errors.
 
 ## Request
 

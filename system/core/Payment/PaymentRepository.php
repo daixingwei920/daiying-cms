@@ -57,8 +57,12 @@ final class PaymentRepository
             ':created_at' => $now,
             ':updated_at' => $now,
         ]);
-
-        return (int) $this->pdo->lastInsertId();
+        $id = (int) $this->pdo->lastInsertId();
+        if ($subjectType === 'cms_plugin_order' && $status === 'paid') {
+            $this->pdo->prepare('UPDATE cms_plugin_payment_bindings SET trusted_paid_at = :paid_at, updated_at = :updated_at WHERE internal_key = :key AND trusted_paid_at IS NULL')
+                ->execute([':paid_at' => $now, ':updated_at' => $now, ':key' => $idempotencyKey]);
+        }
+        return $id;
     }
 
     /** @param array<string,mixed> $data */
@@ -127,6 +131,20 @@ final class PaymentRepository
         $stmt->execute([':id' => $paymentId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        return is_array($row) ? $row : null;
+    }
+
+    /** @return array<string,mixed>|null */
+    public function paymentForUpdate(int $paymentId): ?array
+    {
+        $paymentId = $this->positiveInt($paymentId, 'Payment id is invalid.');
+        $sql = 'SELECT * FROM cms_payments WHERE id = :id LIMIT 1';
+        if ($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') {
+            $sql .= ' FOR UPDATE';
+        }
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $paymentId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return is_array($row) ? $row : null;
     }
 
@@ -211,6 +229,10 @@ final class PaymentRepository
                 ':cancelled_at' => $status === 'cancelled' ? $now : null,
                 ':now' => $now,
             ]);
+            if ((string) ($payment['subject_type'] ?? '') === 'cms_plugin_order' && $status === 'paid') {
+                $this->pdo->prepare('UPDATE cms_plugin_payment_bindings SET trusted_paid_at = :paid_at, updated_at = :updated_at WHERE internal_key = :key AND trusted_paid_at IS NULL')
+                    ->execute([':paid_at' => $now, ':updated_at' => $now, ':key' => $payment['idempotency_key']]);
+            }
             if ($status === 'refunded') {
                 $this->revokeActiveAuthorizationsForPayment($paymentId);
                 $this->revokeActiveEntitlementsForPayment($paymentId);

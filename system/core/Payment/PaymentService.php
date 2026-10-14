@@ -470,6 +470,7 @@ final class PaymentService
         $alreadyInTransaction = $this->inTransaction();
         $this->beginImmediate();
         try {
+            $this->payments->paymentForUpdate($paymentId);
             $existing = $this->payments->refundByIdempotencyForUpdate($idempotencyKey);
             if ($existing !== null) {
                 if ((string) ($existing['request_hash'] ?? '') !== $requestHash) {
@@ -655,6 +656,7 @@ final class PaymentService
         $alreadyInTransaction = $this->inTransaction();
         $this->beginImmediate();
         try {
+            $payment = $this->payments->paymentForUpdate($paymentId) ?? throw new PaymentException('Payment webhook target payment was not found.');
             if (!$this->payments->attachWebhookReceiptPayment($receiptId, $paymentId)) {
                 throw new PaymentException('Payment webhook receipt could not be bound to the target payment.');
             }

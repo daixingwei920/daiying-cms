@@ -49,6 +49,8 @@ use Cms\Core\Routing\Router;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Seo\SearchMetrics\SearchMetricsSyncService;
 use Cms\Core\Security\SessionManager;
+use Cms\Core\Plugin\PluginPaymentRequestScope;
+use Cms\Core\Auth\FrontUserAuthenticator;
 use Cms\Core\Support\View;
 use Cms\Core\Theme\ThemeManager;
 use Throwable;
@@ -648,7 +650,14 @@ final class Application
                     if ($route->admin && $route->method === 'POST') {
                         SessionManager::close();
                     }
-                    $response = ($route->handler)($request);
+                    $frontUser = !$route->admin ? (new FrontUserAuthenticator($pdo))->user() : null;
+                    $response = PluginPaymentRequestScope::run(
+                        $route->pluginId,
+                        $request->method,
+                        $route->csrf,
+                        is_array($frontUser) ? (int) $frontUser['id'] : null,
+                        static fn (): mixed => ($route->handler)($request),
+                    );
                     return $response instanceof Response ? $response : Response::text('插件路由返回了无效响应。', 500);
                 } catch (Throwable $exception) {
                     $logger->error('Plugin route failed', ['source' => 'Plugin', 'plugin_id' => $route->pluginId, 'error' => $exception->getMessage()]);

@@ -223,6 +223,22 @@ final class PublicApiRegistry
                 'capabilities' => ['payment.create', 'payment.capture'],
             ],
             [
+                'id' => 'plugin.advertising',
+                'version' => FoundationVersions::PLUGIN_API,
+                'class' => 'Cms\\Core\\Plugin\\PluginAdvertisingService',
+                'stability' => 'stable',
+                'summary' => 'Render requested public ad slots without exposing the advertising repository.',
+                'capabilities' => ['ads.read'],
+            ],
+            [
+                'id' => 'plugin.payments',
+                'version' => FoundationVersions::PLUGIN_API,
+                'class' => 'Cms\\Core\\Plugin\\PluginPaymentService',
+                'stability' => 'stable',
+                'summary' => 'Bind plugin orders to Core-verified payments and read their time-limited entitlements.',
+                'capabilities' => ['payment.subject.register', 'payment.checkout', 'payment.entitlement.read'],
+            ],
+            [
                 'id' => 'plugin.context',
                 'version' => self::CONTRACT_VERSION,
                 'class' => 'Cms\\Core\\Plugin\\PluginContext',

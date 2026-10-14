@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cms\Core\Plugin;
 
 use Cms\Core\Ai\AiService;
+use Cms\Core\Advertising\AdRepository;
 use Cms\Core\Auth\FrontUserAuthenticator;
 use Cms\Core\Auth\FrontUserService;
 use Cms\Core\Cache\FileCache;
@@ -261,6 +262,8 @@ final class PluginManager
             new PluginContentService($manifest, new ContentRepository($this->pdo, $this->contentTypes(), $this->blocks->all(), dirname(dirname($this->pluginsPath))), fn (): ContentRepository => new ContentRepository($this->pdo, $this->contentTypes(), $this->blocks->all(), dirname(dirname($this->pluginsPath))), $this->events, $this->settings),
             new FrontUserService($manifest, $this->pdo, new FrontUserAuthenticator($this->pdo, $this->events), $this->events),
             new PluginLicenseService($manifest, new CommercialLicenseStore($this->pdo), $this->settings),
+            new PluginAdvertisingService($manifest, new AdRepository($this->pdo)),
+            new PluginPaymentService($manifest, $this->pdo, (string) ($this->settings?->get('security.encryption_key', '') ?? '')),
         );
 
         $register = require $entry;
