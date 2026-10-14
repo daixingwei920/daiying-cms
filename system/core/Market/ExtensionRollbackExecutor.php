@@ -15,6 +15,18 @@ final class ExtensionRollbackExecutor
     /** @return array<string, mixed> */
     public function restore(string $id): array
     {
+        $lock = new MarketInstallLock($this->rootPath . '/storage/market/install.lock');
+        $lock->acquire();
+        try {
+            return $this->restoreWithLock($id);
+        } finally {
+            $lock->release();
+        }
+    }
+
+    /** @return array<string, mixed> */
+    private function restoreWithLock(string $id): array
+    {
         $artifact = $this->repository->find($id);
         if ($artifact === null) {
             throw new MarketException('Rollback artifact was not found.');

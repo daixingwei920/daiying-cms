@@ -132,6 +132,12 @@ final class LocalPluginPackageInstaller
     /** @return array<string,mixed> */
     public function installBundled(string $pluginId, int $adminId = 0, bool $enable = false): array
     {
+        return $this->withMarketLock(fn (): array => $this->installBundledLocked($pluginId, $adminId, $enable));
+    }
+
+    /** @return array<string,mixed> */
+    private function installBundledLocked(string $pluginId, int $adminId, bool $enable): array
+    {
         $target = $this->rootPath . '/content/plugins/' . $pluginId;
         if (!is_dir($target)) {
             throw new PluginException('Bundled plugin directory is missing.');
@@ -175,6 +181,12 @@ final class LocalPluginPackageInstaller
 
     /** @return array<string,mixed> */
     public function install(string $token, int $adminId, bool $enable = false, bool $allowReview = false): array
+    {
+        return $this->withMarketLock(fn (): array => $this->installLocked($token, $adminId, $enable, $allowReview));
+    }
+
+    /** @return array<string,mixed> */
+    private function installLocked(string $token, int $adminId, bool $enable, bool $allowReview): array
     {
         $preview = $this->previewRow($token);
         if ($preview === null || strtotime((string) $preview['expires_at']) < time()) {
@@ -235,6 +247,11 @@ final class LocalPluginPackageInstaller
 
     public function disableWithDependents(string $pluginId, int $adminId, bool $confirm = false): array
     {
+        return $this->withMarketLock(fn (): array => $this->disableWithDependentsLocked($pluginId, $adminId, $confirm));
+    }
+
+    private function disableWithDependentsLocked(string $pluginId, int $adminId, bool $confirm): array
+    {
         $dependents = $this->enabledDependents($pluginId);
         if ($dependents !== [] && !$confirm) {
             throw new PluginException('Plugin is required by enabled plugins: ' . implode(', ', $dependents));
@@ -281,6 +298,13 @@ final class LocalPluginPackageInstaller
 
     public function uninstallCode(string $pluginId, int $adminId): void
     {
+        $this->withMarketLock(function () use ($pluginId, $adminId): void {
+            $this->uninstallCodeLocked($pluginId, $adminId);
+        });
+    }
+
+    private function uninstallCodeLocked(string $pluginId, int $adminId): void
+    {
         $dir = $this->rootPath . '/content/plugins/' . $pluginId;
         if (is_dir($dir)) {
             $this->removeDirectory($dir);
@@ -304,6 +328,13 @@ final class LocalPluginPackageInstaller
     }
 
     public function purge(string $pluginId, int $adminId, string $confirmation): void
+    {
+        $this->withMarketLock(function () use ($pluginId, $adminId, $confirmation): void {
+            $this->purgeLocked($pluginId, $adminId, $confirmation);
+        });
+    }
+
+    private function purgeLocked(string $pluginId, int $adminId, string $confirmation): void
     {
         if ($confirmation !== 'PURGE ' . $pluginId) {
             throw new PluginException('Permanent purge requires second confirmation.');
@@ -371,6 +402,12 @@ final class LocalPluginPackageInstaller
 
     /** @return array<string,mixed> */
     public function recoverFailedInstall(string $pluginId, int $adminId = 0): array
+    {
+        return $this->withMarketLock(fn (): array => $this->recoverFailedInstallLocked($pluginId, $adminId));
+    }
+
+    /** @return array<string,mixed> */
+    private function recoverFailedInstallLocked(string $pluginId, int $adminId): array
     {
         $row = $this->pluginRow($pluginId);
         if ($row === null) {
@@ -910,7 +947,13 @@ final class LocalPluginPackageInstaller
             return false; // Legacy installs retain the existing reversible-only enable policy.
         }
         $metadata = json_decode((string) ($source['metadata_json'] ?? ''), true);
-        if (!is_array($metadata) || !isset($metadata['files'])) {
+        if (!is_array($metadata)) {
+            throw new PluginException('Trusted market plugin source metadata is invalid.');
+        }
+        if (!array_key_exists('files', $metadata)) {
+            if (array_key_exists('migrations', $metadata) || array_key_exists('trust_grant_fingerprint', $metadata)) {
+                throw new PluginException('Trusted market plugin source snapshot is incomplete.');
+            }
             return false;
         }
         $files = $metadata['files'];
@@ -1299,6 +1342,17 @@ final class LocalPluginPackageInstaller
     private function lock(): string
     {
         return $this->rootPath . '/storage/plugin-installs/install.lock';
+    }
+
+    private function withMarketLock(callable $operation): mixed
+    {
+        $lock = new MarketInstallLock($this->rootPath . '/storage/market/install.lock');
+        $lock->acquire();
+        try {
+            return $operation();
+        } finally {
+            $lock->release();
+        }
     }
 
     private function config(string $key, mixed $default): mixed
