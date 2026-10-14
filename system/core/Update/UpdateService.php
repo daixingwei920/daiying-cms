@@ -1520,6 +1520,30 @@ final class UpdateService
             $state['data'][$table['TABLE_NAME']] = ['rows' => $count, 'sha256' => hash_final($digest)];
         }
         ksort($state['data'], SORT_STRING);
+        foreach ($state['tables'] as &$table) {
+            if ($table['TABLE_TYPE'] !== 'BASE TABLE') {
+                continue;
+            }
+            $tableName = (string) $table['TABLE_NAME'];
+            foreach ($state['columns'] as $column) {
+                if ($column['TABLE_NAME'] !== $tableName || !str_contains((string) $column['EXTRA'], 'auto_increment')) {
+                    continue;
+                }
+                $name = str_replace('`', '``', $tableName);
+                $definition = $pdo->query('SHOW CREATE TABLE `' . $name . '`')->fetch(PDO::FETCH_ASSOC);
+                if (!is_array($definition) || !is_string($definition['Create Table'] ?? null)) {
+                    throw new UpdateException('Unable to inspect MySQL auto-increment state.');
+                }
+                if (preg_match('/\\n\\)\\s+ENGINE=[^\\n]*/', $definition['Create Table'], $options) !== 1) {
+                    throw new UpdateException('Unable to inspect MySQL table options.');
+                }
+                $tableOptions = preg_split('/\\s+COMMENT=/', $options[0], 2)[0];
+                $table['AUTO_INCREMENT'] = preg_match('/(?:^|\\s)AUTO_INCREMENT=([0-9]+)(?=\\s|$)/', $tableOptions, $match) === 1
+                    ? (int) $match[1] : 1;
+                break;
+            }
+        }
+        unset($table);
         return $state;
     }
 
