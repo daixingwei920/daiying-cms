@@ -75,7 +75,7 @@ final class PublicApiRegistry
                 'version' => FoundationVersions::PLUGIN_API,
                 'class' => 'Cms\\Core\\Content\\PluginContentService',
                 'stability' => 'stable',
-                'summary' => 'Expose safe plugin content create, read, list, update and publish operations without PDO or private repositories.',
+                'summary' => 'Expose safe plugin content create, read, list, update and publish operations with registered block ownership, without PDO or private repositories.',
                 'capabilities' => ['content.read', 'content.write'],
             ],
             [
@@ -283,7 +283,7 @@ final class PublicApiRegistry
                 'version' => FoundationVersions::THEME_API,
                 'class' => 'Cms\\Core\\Theme\\ThemeViewModel',
                 'stability' => 'stable',
-                'summary' => 'Normalize Core content, media, menu and pagination data for themes without exposing private table shapes.',
+                'summary' => 'Normalize Core content, public excerpts, media, menu and pagination data for themes without exposing locked body payloads or private table shapes.',
                 'capabilities' => ['theme.render'],
             ],
             [

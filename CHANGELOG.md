@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.84 - 2026-10-13 (Release Candidate)
+
+- Protect locked paid content at the public theme ViewModel boundary, including list/search/category/tag responses and adjacent article excerpts.
+- Remove editor JSON and preview credentials from public theme data; generate public excerpts only from explicit public SEO descriptions or allowed preview blocks.
+- Preserve authorized body rendering through existing payment verification and return private, no-store responses for payment and editorial previews.
+- Preserve registered custom block ownership through draft creation, updates and direct publication; reject forged owners and unknown executable types.
+- Keep unavailable custom block data in stable, nonexecuting placeholders and restore it on save when its verified registration returns.
+- Preserve stored content and existing public renderer signatures. No database migrations or new advertising/payment plugin APIs.
+
 ## 1.2.83 - 2026-10-12
 
 - Share SQLite immediate transaction state by PDO connection across payment services and repositories on PHP 8.3.

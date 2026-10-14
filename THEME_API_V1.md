@@ -222,6 +222,23 @@ replacement for the site-name fallback.
 
 `ThemeViewModel` normalizes Core data into stable array shapes.
 
+### Public Content Protection (Unreleased Maintenance Contract)
+
+Content detail and list item ViewModels expose `public_excerpt: string` at the
+top level and inside `content`. Explicit public SEO descriptions take priority;
+automatic excerpts use only publicly previewable blocks, even after unlock.
+An empty excerpt is intentional when a paid article allows zero preview blocks.
+
+For locked paid content, `content.blocks` contains only the allowed preview.
+Editor payloads (`blocks_json`, `meta_json`) and preview credentials are not
+public theme data. Themes must use `rendered_blocks` for the current authorized
+body and `public_excerpt` for summaries, without fetching private repositories.
+Authorized payment and editorial-preview responses are private and no-store.
+Adjacent article excerpts follow the same public visibility rules.
+
+This addition is a maintenance candidate based on 1.2.83, not a claim that the
+published 1.2.83 package already implements it.
+
 Article detail view model:
 
 - `previous`

@@ -13,6 +13,7 @@ use Cms\Core\Auth\FrontUserAuthenticator;
 use Cms\Core\Comment\CommentCreatedEvent;
 use Cms\Core\Comment\CommentRepository;
 use Cms\Core\Content\BlockRenderer;
+use Cms\Core\Content\BlockSanitizer;
 use Cms\Core\Content\ContentRepository;
 use Cms\Core\Content\ContentTypeRegistry;
 use Cms\Core\Content\PluginContentService;
@@ -109,6 +110,46 @@ try {
 }
 $check($invalidBlock, 'ContentService rejects invalid blocks.');
 
+$registrations = new BlockRegistry();
+$registrations->register('local.sdkcontent', 'sdk_owned', 'Owned block');
+$registrations->register('local.second', 'sdk_second', 'Second block');
+$customRepo = new ContentRepository($pdo, $types, $registrations->all(), $mediaRoot);
+$customService = new PluginContentService($contentManifest, $customRepo);
+$custom = $customService->createDraft(['title' => 'Custom block', 'blocks' => [
+    ['type' => 'sdk_owned', 'plugin_id' => 'local.sdkcontent', 'data' => ['title' => 'custom payload']],
+    ['type' => 'sdk_second', 'data' => ['title' => 'second payload']],
+]]);
+$publishedCustom = $customService->publish((int) $custom['id']);
+$check($publishedCustom['status'] === 'published' && $publishedCustom['blocks'][0]['plugin_id'] === 'local.sdkcontent'
+    && $publishedCustom['blocks'][1]['plugin_id'] === 'local.second', 'B01/B06 custom draft/get/publish preserves canonical owners without resending blocks.');
+$customService->update((int) $custom['id'], ['title' => 'Updated custom title']);
+$check($customService->publish((int) $custom['id'])['blocks'] === $publishedCustom['blocks']
+    && BlockSanitizer::sanitize(BlockSanitizer::sanitize($custom['blocks'], $registrations->all()), $registrations->all()) === $custom['blocks'],
+    'B02 title-only update/publish and repeated sanitize preserve data and ownership.');
+$legacyBlocks = $custom['blocks'];
+unset($legacyBlocks[0]['plugin_id']);
+$pdo->prepare('UPDATE cms_contents SET blocks_json = ? WHERE id = ?')->execute([json_encode($legacyBlocks), $custom['id']]);
+$check($customService->publish((int) $custom['id'])['blocks'][0]['plugin_id'] === 'local.sdkcontent', 'B03 legacy ownerless registered block is repaired on save.');
+foreach ([['type' => 'sdk_owned', 'plugin_id' => 'local.second', 'data' => []],
+    ['type' => 'sdk_second', 'plugin_id' => 'local.sdkcontent', 'data' => []],
+    ['type' => 'unknown_owned', 'plugin_id' => 'local.sdkcontent', 'data' => []]] as $forgedBlock) {
+    $rejected = false;
+    try { $customService->createDraft(['title' => 'Forged owner', 'blocks' => [$forgedBlock]]); }
+    catch (Throwable) { $rejected = true; }
+    $check($rejected, 'B04 unknown or cross-plugin forged block rejected: ' . $forgedBlock['type']);
+}
+$saved = $customRepo->find((int) $custom['id']);
+$disabledService = new PluginContentService($contentManifest, new ContentRepository($pdo, $types, [], $mediaRoot));
+$disabled = $disabledService->update((int) $custom['id'], ['title' => 'Plugin unavailable']);
+$check($disabled['blocks'][0]['type'] === 'missing-extension' && $disabled['blocks'][0]['original'] === $saved['blocks'][0],
+    'B05 disabled/missing/quarantined registration keeps original data in a nonexecuting placeholder.');
+$again = $disabledService->update((int) $custom['id'], ['title' => 'Plugin still unavailable']);
+$check($again['blocks'] === $disabled['blocks'], 'B05 missing-extension placeholder is stable across repeated saves.');
+$check($customService->publish((int) $custom['id'])['blocks'] === $saved['blocks'], 'B05 restoring registration recovers the original blocks.');
+$duplicateOwner = false;
+try { $registrations->register('local.second', 'sdk_owned', 'Spoofed'); } catch (PluginException) { $duplicateOwner = true; }
+$check($duplicateOwner, 'B06 registration cannot replace another plugin owner.');
+
 $events = new EventDispatcher();
 $loginEvents = [];
 $events->listen(FrontUserLoggedInEvent::class, static function (object $event) use (&$loginEvents): void {
@@ -160,6 +201,7 @@ try {
     $duplicateBlocked = true;
 }
 $check($duplicateBlocked, 'BlockRendererRegistry rejects duplicate renderer ownership.');
+$check((new BlockRenderer())->render([['type' => 'sdk_card', 'plugin_id' => 'local.otherblocks', 'data' => ['title' => 'forged']]]) === '', 'B04 renderer refuses a forged owner even outside storage.');
 $check((new BlockRenderer())->render([['type' => 'missing_sdk_card', 'data' => ['title' => 'x']]]) === '', 'Missing plugin block renderer does not fatal.');
 
 $commentEvents = [];

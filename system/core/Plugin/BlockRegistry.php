@@ -14,6 +14,9 @@ final class BlockRegistry
         if (!preg_match('/^[a-z][a-z0-9_-]{2,63}$/', $type)) {
             throw new PluginException('Invalid block type.');
         }
+        if (isset($this->blocks[$type]) && $this->blocks[$type]['plugin_id'] !== $pluginId) {
+            throw new PluginException('Block already registered by another plugin.');
+        }
 
         $this->blocks[$type] = [
             'plugin_id' => $pluginId,

@@ -7,11 +7,15 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 ## Current Core Baseline
 
 - Product: Daiying CMS Core
-- Baseline version: `1.2.83` release candidate; published baseline remains `1.2.82` until all gates pass
-- Git tag: `v1.2.83` only after official publication approval
-- Baseline commit: resolve `v1.2.83^{commit}` after official publication
-- Current clean Core worktree:
-  `/Users/xingweidai/Documents/Codex/2026-10-09/daiying-cms-official-restaurant-daiying-restaurant/work/restaurant-debt-core-release`
+- Published baseline version: `1.2.83` (verified against official origin/main and tag).
+- Published Git tag: `v1.2.83`.
+- Published baseline commit: `76d4d8ed4b4aa470146c0a0c582061b256d1348b`.
+- Pending maintenance candidate: `1.2.84`, GC 01/02 only; GC 03/04 remain deferred.
+- Current candidate clean Core worktree:
+  `/Users/xingweidai/Documents/Codex/2026-09-03/daiying-cms-core-theme/work/daiying-cms-core-release-1.2.84`
+- Candidate branch: `release/1.2.84`; resolve HEAD for the final candidate commit.
+- Do not treat this candidate as published until Owner reviews the final report
+  and approves the existing official release flow.
 - Core closeout report:
   `/Users/xingweidai/Documents/Codex/2026-09-03/Daiying-CMS-WIP-Archive/core-closeout-1.2.63-20260915-231639/CORE_CLOSED_REPORT.md`
 
@@ -116,6 +120,12 @@ Do not include any of the following in Core commits or release packages:
 - Temporary install smoke directories.
 
 The known archived local test private key under the closeout archive is for local historical testing only and must never be committed or published.
+
+Owner signing boundary: signing private keys may only be generated and used on
+the update server. Do not generate, read, copy or export signing private keys
+on the local workstation, including temporary asymmetric test signing keys.
+Tests that require key generation must run on the authorized update server;
+record them as not run locally. Local candidate artifacts remain unsigned.
 
 ## Version Updates
 

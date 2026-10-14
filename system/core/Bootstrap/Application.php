@@ -279,7 +279,15 @@ final class Application
             $enabledPlugins = [];
             try {
                 $pdo = ConnectionFactory::make($settings);
-                $contents = (new ContentRepository($pdo, ContentTypeRegistry::defaults()))->latest(10);
+                $paid = new \Cms\Core\Payment\PaidContentService($pdo, $settings);
+                $contents = array_map(static function (array $content) use ($paid): array {
+                    $config = $paid->configFor($content);
+                    return \Cms\Core\Content\PublicContentView::from($content, [
+                        'enabled' => $config !== null,
+                        'authorized' => false,
+                        'preview_block_count' => $config['preview_blocks'] ?? 0,
+                    ]);
+                }, (new ContentRepository($pdo, ContentTypeRegistry::defaults()))->latest(10));
                 try {
                     $stmt = $pdo->query("SELECT plugin_id FROM cms_plugins WHERE status = 'Enabled'");
                     foreach ($stmt->fetchAll() as $row) {

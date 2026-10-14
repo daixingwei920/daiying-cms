@@ -99,6 +99,17 @@ publish(int $contentId): array
 
 Capabilities: `content.read`, `content.write`.
 
+Unreleased maintenance correction based on Core 1.2.83: custom blocks registered
+through `registerBlock()` / `registerBlockRenderer()` retain their canonical
+`plugin_id` across `createDraft()` -> `get()` -> `publish()` and title-only updates.
+The owner is resolved from Core registration, not trusted from input. Supplying
+another plugin's owner or an unknown type does not authorize execution and is
+rejected on creation. Historical ownerless blocks are completed only when their
+type has an unambiguous registered owner. Missing registrations preserve saved
+data in a stable, nonexecuting `missing-extension` envelope; restoration of the
+registration permits recovery on the next save. Renderer parameters remain
+`(array $block, array $context)`; no manual owner repair is required.
+
 ## PluginLicenseService
 
 Since Core 1.2.70.
