@@ -91,7 +91,6 @@ function verifyCommitReleaseSource(string $root, string $commit, array $expected
 {
     $checks = [];
     $required = [
-        'config/app.php',
         'config/app.example.php',
         'system/core-manifest.json',
         'system/core/Bootstrap/autoload.php',
@@ -105,6 +104,7 @@ function verifyCommitReleaseSource(string $root, string $commit, array $expected
     foreach ($required as $file) {
         $checks[] = check(isset($expected['package_files'][$file]), 'source.required.' . str_replace(['/', '.'], '_', $file), 'Required release source file exists: ' . $file);
     }
+    $checks[] = check(!isset($expected['package_files']['config/app.php']), 'source.installer_excludes_site_config', 'Full installer does not contain site-specific config/app.php.');
 
     $app = gitBlob($root, $commit, 'config/app.php');
     $example = gitBlob($root, $commit, 'config/app.example.php');
@@ -200,6 +200,7 @@ function verifyInstaller(string $root, string $zipPath, mixed $manifestOption, a
         return $checks;
     }
     $checks[] = check($zipState['files'] === $expected['package_files'], 'installer.exact_commit_files', 'Installer ZIP file list and hashes match target commit.');
+    $checks[] = check(!isset($zipState['files']['config/app.php']), 'installer.no_site_config', 'Installer ZIP excludes site-specific config/app.php.');
     $checks[] = check(isset($zipState['files']['system/core-manifest.json']), 'installer.core_manifest_present', 'Installer contains system/core-manifest.json.');
     if (isset($zipState['files']['system/core-manifest.json'])) {
         $zip = new ZipArchive();
@@ -611,6 +612,9 @@ function gitBlob(string $root, string $commit, string $path): string
 function shouldPackage(string $file): bool
 {
     $file = str_replace('\\', '/', $file);
+    if ($file === 'config/app.php') {
+        return false;
+    }
     if ($file === '' || (str_starts_with($file, '.') && !in_array($file, ['.htaccess'], true))) {
         return false;
     }
