@@ -162,6 +162,10 @@ final class PluginManager
             throw new PluginException('Invalid plugin lifecycle status.');
         }
 
+        // Older installations can boot before this additive migration has run.
+        if (in_array('cms_homepage_selection', $this->tableNames(), true)) {
+            (new \Cms\Core\Homepage\HomepageSelection($this->pdo))->lifecycle($pluginId, $status === PluginLifecycle::ENABLED);
+        }
         $stmt = $this->pdo->prepare('UPDATE cms_plugins SET status = :status, updated_at = :updated_at WHERE plugin_id = :plugin_id');
         $stmt->execute([
             ':plugin_id' => $pluginId,
@@ -197,6 +201,7 @@ final class PluginManager
                 }
                 $count++;
             } catch (\Throwable $exception) {
+                $this->runtime?->removeHomepageProviders($pluginId);
                 $this->logger->error('Plugin boot failed; quarantining plugin', [
                     'source' => 'Plugin',
                     'plugin_id' => $pluginId,
@@ -264,6 +269,7 @@ final class PluginManager
             new PluginLicenseService($manifest, new CommercialLicenseStore($this->pdo), $this->settings),
             new PluginAdvertisingService($manifest, new AdRepository($this->pdo)),
             new PluginPaymentService($manifest, $this->pdo, (string) ($this->settings?->get('security.encryption_key', '') ?? '')),
+            trustedHomepageAccess: $this->officialRegistry !== null && ($this->officialRegistry->isTrustedBundled($manifest->id, dirname($entry)) || $this->officialRegistry->hasActiveTrustGrant($manifest->id)),
         );
 
         $register = require $entry;

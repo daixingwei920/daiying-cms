@@ -771,6 +771,12 @@ final class PaymentService
         );
     }
 
+    /** Trusted, redacted dispute snapshot; callers must still verify their order binding and net payment. */
+    public function disputeSnapshot(int $paymentId): array
+    {
+        return (new PaymentDisputeService($this->pdo, $this->providerSettingsKey))->snapshot($paymentId);
+    }
+
     private function provider(string $providerId, string $capability): PaymentProviderInterface
     {
         $provider = PaymentProviderRegistry::get($providerId);

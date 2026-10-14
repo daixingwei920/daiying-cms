@@ -1,0 +1,11 @@
+# Homepage provider v1 (isolated candidate)
+
+Core owns `/`. Trusted plugins may declare `optional_capabilities: ["frontend.homepage"]`; only Core-supported optional capabilities enter PluginManifest.capabilities. Older Core ignores the optional declaration, allowing the plugin's ordinary routes to work.
+
+`PluginContext::registerHomepageRenderer(key, label, callable(Request): Response)` requires trusted database access, the capability, and an active official trust grant or trusted bundled registration. Providers are keyed as plugin ID + `:` + key. A failing boot removes its homepage registration. Rendering must return HTML/200; absence, exceptions and invalid responses fall back through the saved previous provider, then the existing Core theme path. Safe/recovery modes skip providers. Core still applies its response security handling.
+
+`PluginContext::homepageSelection()` exposes the Core selection service to trusted code. `snapshot()` returns provider, owner, token and monotonic revision. The Core `/admin/settings/homepage` endpoint requires the existing admin session guard, `admin.settings.manage`, CSRF and the submitted revision. It validates providers against the current trusted runtime. `select` saves prior source and an ownership lease; `restore` compares both revision and ownership before restoring.
+
+Lifecycle semantics: disable pauses the lease and restores the previous source. Enable resumes only at the exact pause revision; any later admin write, including selecting the same theme again, supersedes resumption. Uninstall restores only its still-owned selection and removes the lease. Reinstall is opt-in. Normal restarts retain the selection; safe mode temporarily bypasses it without changing the stored choice. Malformed selection fails closed to the theme.
+
+New migration: 2026_10_13_000001_homepage_sources. No prior migration changed. Public mutation methods are server-side trusted-code services, not unauthenticated HTTP endpoints. Plugins do not register reserved routes. The directory maps its default-language home canonical to `/`, other languages to `/?lang=...`; `/directory` uses the same canonical while selected. Core sitemap keeps its existing single root, and the directory sitemap contains only qualifying sites/categories.

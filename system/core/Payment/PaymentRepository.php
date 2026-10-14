@@ -209,8 +209,8 @@ final class PaymentRepository
             $stmt = $this->pdo->prepare(
                 'UPDATE cms_payments SET
                     status = :status,
-                    remote_id = CASE WHEN :remote_id = \'\' THEN remote_id ELSE :remote_id END,
-                    reference = CASE WHEN :reference = \'\' THEN reference ELSE :reference END,
+                    remote_id = CASE WHEN :remote_id_check = \'\' THEN remote_id ELSE :remote_id END,
+                    reference = CASE WHEN :reference_check = \'\' THEN reference ELSE :reference END,
                     authorized_at = COALESCE(:authorized_at, authorized_at),
                     paid_at = COALESCE(:paid_at, paid_at),
                     failed_at = COALESCE(:failed_at, failed_at),
@@ -221,7 +221,9 @@ final class PaymentRepository
             $stmt->execute([
                 ':id' => $paymentId,
                 ':status' => $status,
+                ':remote_id_check' => $remoteId,
                 ':remote_id' => $remoteId,
+                ':reference_check' => $reference,
                 ':reference' => $reference,
                 ':authorized_at' => $status === 'authorized' ? $now : null,
                 ':paid_at' => in_array($status, ['paid', 'partially_refunded', 'refunded'], true) ? $now : null,
@@ -1299,7 +1301,7 @@ final class PaymentRepository
         $stmt = $this->pdo->prepare(
             "UPDATE cms_payment_webhook_receipts
              SET status = :status,
-                 processed_at = CASE WHEN :status IN ('processed','ignored') THEN :processed_at ELSE processed_at END,
+                 processed_at = CASE WHEN :processed_status IN ('processed','ignored') THEN :processed_at ELSE processed_at END,
                  metadata_json = :metadata_json,
                  updated_at = :updated_at
              WHERE id = :id"
@@ -1307,6 +1309,7 @@ final class PaymentRepository
         $stmt->execute([
             ':id' => $receiptId,
             ':status' => $status,
+            ':processed_status' => $status,
             ':processed_at' => $now,
             ':metadata_json' => $this->metadataJson($this->safeMetadata($metadata)),
             ':updated_at' => $now,

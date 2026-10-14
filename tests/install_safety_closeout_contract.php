@@ -70,7 +70,7 @@ try {
     check_closeout($controller->store(new Request('POST','/install',[],$body))->status()===409 && !file_exists($root.'/storage/database/other.sqlite'),'cannot replace configured site with a new DB');
     file_put_contents($root.'/storage/installed.lock','fixture');
     check_closeout($controller->show()->status()===302 && $controller->store(new Request('POST','/install',[],$body))->status()===302,'completed installation rejects repetition');
-    check_closeout((int)$p->query('SELECT COUNT(*) FROM cms_core_migrations')->fetchColumn()===49,'all frozen migrations applied');
+    check_closeout((int)$p->query('SELECT COUNT(*) FROM cms_core_migrations')->fetchColumn()===count(glob(CMS_ROOT.'/system/migrations/*.php')),'all current migrations applied');
 } finally {
     // Remove only this random test directory; do not follow source symlinks.
     $it=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root,FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST);

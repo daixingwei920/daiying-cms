@@ -272,9 +272,18 @@ final class Application
 
     private static function registerCoreRoutes(Router $router, Settings $settings, string $rootPath, FileLogger $logger, string $mode, PluginRuntimeRegistry $pluginRuntime, EventDispatcher $events): void
     {
-        $router->get('/', static function () use ($rootPath, $settings, $logger): Response {
+        $router->get('/', static function (Request $request) use ($rootPath, $settings, $logger, $pluginRuntime): Response {
             if (!is_file($rootPath . '/storage/installed.lock')) {
                 return Response::redirect('/install');
+            }
+
+            if (RunMode::detect($rootPath, (string) $settings->get('app.mode', RunMode::NORMAL)) === RunMode::NORMAL) {
+                try {
+                    $home = (new \Cms\Core\Homepage\HomepageRenderer(new \Cms\Core\Homepage\HomepageSelection(ConnectionFactory::make($settings)), $pluginRuntime, $logger))->render($request);
+                    if ($home !== null) return $home;
+                } catch (Throwable $exception) {
+                    $logger->error('Homepage provider unavailable; using theme', ['source' => 'Core', 'error' => $exception::class]);
+                }
             }
 
             $contents = [];
@@ -415,7 +424,7 @@ final class Application
         $router->get('/paid-content/{content_id}/complete', [$paidContent, 'complete']);
         $tips = new TipController($settings);
         $router->post('/tips/checkout', [$tips, 'checkout']);
-        $paymentWebhooks = new PaymentWebhookController($settings);
+        $paymentWebhooks = new PaymentWebhookController($settings, $events);
         $router->post('/payment/webhooks/{provider_id}', [$paymentWebhooks, 'receive']);
         $cards = new CardDeliveryController($settings);
         $router->post('/card-delivery/{id}/checkout', [$cards, 'checkout']);
@@ -430,7 +439,7 @@ final class Application
         $router->get('/install', [$install, 'show']);
         $router->post('/install', [$install, 'store']);
 
-        $admin = new AdminController($settings, $logger, $rootPath, null, $events);
+        $admin = new AdminController($settings, $logger, $rootPath, null, $events, $pluginRuntime);
         $router->get('/admin/login', [$admin, 'loginForm']);
         $router->post('/admin/login', [$admin, 'login']);
         $router->post('/admin/login/passkey-options', [$admin, 'loginPasskeyOptions']);
@@ -462,6 +471,8 @@ final class Application
         $router->get('/admin/site-vault', [$admin, 'siteVault']);
         $router->post('/admin/site-vault', [$admin, 'siteVault']);
         $router->get('/admin/site-timeline', [$admin, 'siteTimeline']);
+        $router->get('/admin/settings/homepage', [$admin, 'homepageSettings']);
+        $router->post('/admin/settings/homepage', [$admin, 'homepageSettings']);
         $router->get('/admin/settings', [$admin, 'siteSettings']);
         $router->post('/admin/settings', [$admin, 'siteSettingsSave']);
         $router->get('/admin/settings/ai', [$admin, 'aiSettings']);

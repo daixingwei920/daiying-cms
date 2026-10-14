@@ -10,10 +10,10 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 - Published baseline version: `1.2.83` (verified against official origin/main and tag).
 - Published Git tag: `v1.2.83`.
 - Published baseline commit: `76d4d8ed4b4aa470146c0a0c582061b256d1348b`.
-- Pending maintenance candidate: `1.2.84`, GC 01/02 only; GC 03/04 remain deferred.
-- Current candidate clean Core worktree:
-  `/Users/xingweidai/Documents/Codex/2026-09-03/daiying-cms-core-theme/work/daiying-cms-core-release-1.2.84`
-- Candidate branch: `release/1.2.84`; resolve HEAD for the final candidate commit.
+- Pending maintenance candidate: `1.2.84`; retain GC 01/02 and integrate the separately approved homepage, trusted-dispute, payment compatibility, and isolated GC 03/04 facade changes. This candidate is not published.
+- Current unified candidate worktree:
+  `/Users/xingweidai/Documents/Codex/2026-09-03/daiying-cms-core-theme/work/daiying-cms-core-unified-1.2.84`
+- Candidate branch: `codex/core184-unified`; resolve HEAD for the final candidate commit.
 - Do not treat this candidate as published until Owner reviews the final report
   and approves the existing official release flow.
 - Core closeout report:
@@ -169,3 +169,11 @@ Preserve historical source, frozen migrations, installed customer assets,
 trust records, orders and licenses. Do not revive this product as a Core task.
 Do not remove assertions for other products to make the release gate pass.
 See `docs/retired-products.md`.
+
+## Owner-authorized isolated integration (2026-10-14)
+
+- Baseline: clean `f1388e828a3dfa81698dbdfd66351ddb9e0699f3`, Core 1.2.84.
+- Source branches: frozen navigation tree `190797fdc87bfd868516ccb9e145a7afd4e5e47f` and isolated GC 03/04 commit `1ed7e29`, both based on `f1388e8`.
+- Unified branch: `codex/core184-unified`; preserve GC 01/02 while merging the approved generic homepage/dispute contracts, payment fixes, and bounded advertising/payment facades.
+- Any candidate artifacts are unsigned and not official releases. No push, production operation, real merchant charge or Core version increase beyond the existing 1.2.84 candidate.
+- The existing private signing-key boundary above remains in force. Reuse only existing valid public test authorization envelopes through the native verifier; missing signing tests stay NOT VERIFIED.

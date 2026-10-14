@@ -68,6 +68,7 @@ final class PluginContext
         private readonly ?PluginLicenseService $license = null,
         private readonly ?PluginAdvertisingService $advertising = null,
         private readonly ?PluginPaymentService $payments = null,
+        private readonly bool $trustedHomepageAccess = false,
     ) {
     }
 
@@ -109,6 +110,21 @@ final class PluginContext
 
         $this->blocks->register($this->manifest->id, $type, $type);
         BlockRendererRegistry::register($this->manifest->id, $type, $renderer);
+    }
+
+    /** @param callable(\Cms\Core\Http\Request):\Cms\Core\Http\Response $renderer */
+    public function registerHomepageRenderer(string $key, string $label, callable $renderer): string
+    {
+        if (!$this->trustedDatabaseAccess || !$this->trustedHomepageAccess || !$this->hasCapability('frontend.homepage')) {
+            throw new PluginException('Trusted frontend.homepage capability required.');
+        }
+        return $this->runtime()->homepage($this->manifest->id, $key, $label, $renderer);
+    }
+
+    public function homepageSelection(): \Cms\Core\Homepage\HomepageSelection
+    {
+        if (!$this->trustedDatabaseAccess || !$this->trustedHomepageAccess || !$this->hasCapability('frontend.homepage')) throw new PluginException('Homepage capability required.');
+        return new \Cms\Core\Homepage\HomepageSelection($this->pdo());
     }
 
     public function data(): PluginDataStore

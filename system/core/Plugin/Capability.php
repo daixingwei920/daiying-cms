@@ -32,6 +32,7 @@ final class Capability
         'webhook.register',
         'cache.use',
         'frontend.asset',
+        'frontend.homepage',
         'content.type',
         'content.field',
         'search.register',

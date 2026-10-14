@@ -2,6 +2,8 @@
 
 ## 1.2.84 - 2026-10-13 (Release Candidate)
 
+- Isolated unified candidate: preserves GC 01/02 and adds the approved homepage provider, trusted payment dispute, payment compatibility, and bounded plugin advertising/payment facades; unsigned and not published.
+
 - Protect locked paid content at the public theme ViewModel boundary, including list/search/category/tag responses and adjacent article excerpts.
 - Remove editor JSON and preview credentials from public theme data; generate public excerpts only from explicit public SEO descriptions or allowed preview blocks.
 - Preserve authorized body rendering through existing payment verification and return private, no-store responses for payment and editorial previews.

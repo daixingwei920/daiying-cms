@@ -10,6 +10,7 @@ final class PluginRuntimeRegistry
 {
     /** @var array<string,PluginRouteDefinition> */
     private array $routes = [];
+    private array $homepages = [];
     /** @var list<PluginMenuItem> */
     private array $menus = [];
     /** @var list<FrontendExtensionAsset> */
@@ -102,6 +103,22 @@ final class PluginRuntimeRegistry
     public function frontendBodyEndCallbacks(): array
     {
         return $this->frontendBodyEndCallbacks;
+    }
+
+    public function homepage(string $pluginId, string $key, string $label, callable $renderer): string
+    {
+        if (!preg_match('/^[a-z][a-z0-9_-]{0,63}$/D', $key)) throw new PluginException('Invalid homepage provider key.');
+        $id = $pluginId . ':' . $key;
+        if (isset($this->homepages[$id])) throw new PluginException('Duplicate homepage provider.');
+        $this->homepages[$id] = ['owner' => $pluginId, 'label' => $label, 'renderer' => $renderer];
+        return $id;
+    }
+
+    public function homepages(): array { return $this->homepages; }
+
+    public function removeHomepageProviders(string $pluginId): void
+    {
+        foreach ($this->homepages as $id => $p) if ($p['owner'] === $pluginId) unset($this->homepages[$id]);
     }
 
     private function assertRouteAllowed(string $path): void

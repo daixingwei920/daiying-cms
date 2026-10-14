@@ -55,7 +55,7 @@ final class PluginManifest
         }
 
         $core = is_array($data['core']) ? $data['core'] : [];
-        $capabilities = $data['capabilities'] ?? [];
+        $capabilities = array_values(array_unique(array_merge(self::cleanList($data['capabilities'] ?? []), array_values(array_intersect(self::cleanList($data['optional_capabilities'] ?? []), Capability::CORE_KNOWN)))));
         $permissions = $data['permissions'] ?? [];
         if (!is_array($permissions)) {
             $permissions = [];

@@ -114,7 +114,44 @@ final class AdminController
         private readonly ?string $rootPath = null,
         private readonly ?MarketApiClientInterface $marketClient = null,
         private readonly ?EventDispatcher $events = null,
+        private readonly ?\Cms\Core\Plugin\PluginRuntimeRegistry $homepageRuntime = null,
     ) {
+    }
+
+    public function homepageSettings(Request $request): Response
+    {
+        $user = $this->requireAdmin();
+        if ($user instanceof Response) return $user;
+        if (!$this->adminHasCapability('admin.settings.manage')) return Response::text('Forbidden', 403);
+        try {
+            $selection = new \Cms\Core\Homepage\HomepageSelection(ConnectionFactory::make($this->settings));
+            $providers = $this->homepageRuntime?->homepages() ?? [];
+            if ($request->method === 'POST') {
+                if (!CsrfToken::verify($request->input('_csrf'))) return Response::text('Invalid CSRF', 403);
+                $revision = filter_var($request->input('revision'), FILTER_VALIDATE_INT);
+                if ($revision === false || $revision < 0) return Response::text('Invalid revision', 400);
+                $provider = (string) $request->input('provider', '');
+                $action = (string) $request->input('action', 'select');
+                if ($action === 'restore') {
+                    if (!isset($providers[$provider])) return Response::text('Unavailable provider', 400);
+                    if (!$selection->restore($providers[$provider]['owner'], $revision)) return Response::text('Homepage ownership changed', 409);
+                } elseif ($action === 'select') {
+                    if ($provider !== 'core.theme' && !isset($providers[$provider])) return Response::text('Unavailable provider', 400);
+                    $selection->select($provider, $provider === 'core.theme' ? 'core' : $providers[$provider]['owner'], $revision);
+                } else return Response::text('Invalid action', 400);
+                $this->logger->info('Homepage source changed', ['source'=>'Core','admin_id'=>$user['id'],'provider'=>$provider,'action'=>$action,'from_revision'=>$revision]);
+                return Response::redirect('/admin/settings/homepage');
+            }
+            $state = $selection->snapshot();
+            $e = static fn($v) => htmlspecialchars((string)$v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $options = '';
+            foreach (['core.theme'=>['label'=>'原主题首页']] + $providers as $key=>$p) $options .= '<option value="'.$e($key).'"'.($state['provider']===$key?' selected':'').'>'.$e($p['label']).'</option>';
+            $html = '<h1>首页来源 / Homepage source</h1><p>默认保留主题首页。停用时恢复原来源；管理员后来更改的选择不会被覆盖。</p><p>当前来源：'.$e($state['provider']).' · revision '.$state['revision'].'</p><form method="post" action="/admin/settings/homepage">'.CsrfToken::field().'<input type="hidden" name="revision" value="'.$state['revision'].'"><select name="provider">'.$options.'</select><button name="action" value="select">保存首页来源</button><button name="action" value="restore">恢复所选插件接管前的首页</button></form><p><a href="/admin/settings">网站设置</a></p>';
+            return Response::html(View::page('首页来源', $html))->withHeaders(['Cache-Control'=>'no-store']);
+        } catch (Throwable $e) {
+            $this->logger->error('Homepage selection rejected', ['source'=>'Core','error'=>$e::class]);
+            return Response::text('Homepage configuration unavailable or revision changed; reload settings.', 409);
+        }
     }
 
     public function loginForm(): Response
