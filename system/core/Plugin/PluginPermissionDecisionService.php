@@ -122,12 +122,13 @@ final class PluginPermissionDecisionService
                 $now = gmdate('c');
                 $this->pdo->prepare('INSERT INTO cms_plugin_permission_grants
                     (plugin_id, plugin_version, permissions_json, scope_sha256, status, granted_by, granted_at, created_at, updated_at)
-                    VALUES (:plugin, :version, :permissions, :scope, :status, :admin, :at, :at, :at)')
+                    VALUES (:plugin, :version, :permissions, :scope, :status, :admin, :granted_at, :created_at, :updated_at)')
                     ->execute([
                         ':plugin' => $pluginId, ':version' => $expectedVersion,
                         ':permissions' => '["payment.access"]', ':scope' => $digest,
                         ':status' => $target === 'granted' ? self::SCOPED_GRANT : $target,
-                        ':admin' => $adminId, ':at' => $now,
+                        ':admin' => $adminId, ':granted_at' => $now,
+                        ':created_at' => $now, ':updated_at' => $now,
                     ]);
                 $this->pdo->prepare('UPDATE cms_plugins SET declared_permissions_json = :declared, permission_grant_status = :status, updated_at = :at WHERE plugin_id = :plugin AND version = :version')
                     ->execute([

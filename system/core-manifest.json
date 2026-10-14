@@ -262,7 +262,7 @@
   "Plugin/PluginMigrationRunner.php": "12ac4a1d2a4b903e198d0cad5df4b1b4c8daf386084bf5a72d79bb0844f09bc2",
   "Plugin/PluginPaymentRequestScope.php": "a5eb89fdf7627ef6e26b6528d903c901e3d1d7fd0ec6b10c41e8773e99e140ae",
   "Plugin/PluginPaymentService.php": "3fdf295b9ed1cbfd9f6b2fbb69bcde162bc1c48b73474dfbe6ad437eb526f5c6",
-  "Plugin/PluginPermissionDecisionService.php": "c84f8d0cb99ff2ebd0c7952b9735a83536505526ca72a0999036aa4aea5acf70",
+  "Plugin/PluginPermissionDecisionService.php": "62d954df7e6626a149f47a0d14f5f8b1d15819a5fa745bddb8f1efc44b8f34e3",
   "Plugin/PluginPermissionManifest.php": "a4037d730ce468b626fd1bfb0d5d18326d19a4e2aca88cacb28fac8c37b6187f",
   "Plugin/PluginRiskBoundaryPolicy.php": "d824d551e7b5359f73a38045b279409e13c7436389bedead328a1b1ff14d6345",
   "Plugin/PluginRouteDefinition.php": "853da74c40103f2d7e64f50f2b9e608ae7ba71d6e8ec15028eac25f4d194ba9b",
