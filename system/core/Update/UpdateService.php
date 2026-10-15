@@ -1539,7 +1539,7 @@ final class UpdateService
                 }
                 $tableOptions = preg_split('/\\s+COMMENT=/', $options[0], 2)[0];
                 $table['AUTO_INCREMENT'] = preg_match('/(?:^|\\s)AUTO_INCREMENT=([0-9]+)(?=\\s|$)/', $tableOptions, $match) === 1
-                    ? (int) $match[1] : 1;
+                    ? (ltrim($match[1], '0') ?: '0') : '1';
                 break;
             }
         }
