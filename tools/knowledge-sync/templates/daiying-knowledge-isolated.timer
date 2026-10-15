@@ -1,0 +1,10 @@
+[Unit]
+Description=Wake the isolated retry worker; daily and weekly gates are durable
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=30s
+Unit=daiying-knowledge-isolated.service
+
+[Install]
+WantedBy=timers.target

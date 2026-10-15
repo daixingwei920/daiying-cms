@@ -1133,7 +1133,7 @@
       "enabled_for_customer_service": false
     }
   ],
-  "package_revision": "2026-10-14.1",
+  "package_revision": "2026-10-14.2",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
   "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
   "source_tag": "v1.2.83",
@@ -1166,9 +1166,9 @@
     "model_configuration_changed": false
   },
   "integration_status": {
-    "automatic_sync": "DESIGN_ONLY",
-    "legacy_incremental_tool": "PARTIAL_HISTORICAL_IMPLEMENTATION_NOT_CONNECTED",
-    "customer_service_latest_package_import": "NOT_RUN",
+    "automatic_sync": "IMPLEMENTED_ISOLATED",
+    "legacy_incremental_tool": "REUSED_IMMUTABLE_GIT_INCREMENTAL_IMPLEMENTATION",
+    "customer_service_latest_package_import": "ISOLATED_NATIVE_PLUGIN_VALIDATED",
     "core_optimizer_shared_knowledge": "NOT_IMPLEMENTED"
   },
   "original_qa": {
@@ -1188,5 +1188,14 @@
       "path": "docs/release/1.2.82-upgrade-support.md",
       "note": "含旧 testing/rc 发布前措辞，仅引用来源版本约束，不作为当前发布状态。"
     }
-  ]
+  ],
+  "sync_validation": {
+    "environment": "isolated",
+    "report": "docs/knowledge/2026-10-14-auto-sync-report.md",
+    "runner": "tools/knowledge-sync/sync.py",
+    "production_deployed": false,
+    "core_modified": false,
+    "model_calls": false,
+    "source_facts_runtime_status": "NOT_RUN_THIS_TASK"
+  }
 }

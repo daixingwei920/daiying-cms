@@ -2,7 +2,7 @@
 
 Original design: 2026-10-06
 
-Knowledge revision: 2026-10-14.1, pinned to official Core v1.2.83.
+Knowledge revision: 2026-10-14.2, pinned to official Core v1.2.83.
 
 ## Goal
 
@@ -175,7 +175,7 @@ The V1 fact package, Markdown companion and USER-FACING projection are versioned
 
 `scripts/product_knowledge.py` checks provenance and produces the two derived files. It is offline documentation tooling. It neither creates a new retrieval system nor enables automatic synchronization.
 
-Historical plugin Site Knowledge import and keyword Retriever implementations exist outside this Core tree; historical AI-node indexing and Git incremental tools exist separately. Their existence does not prove that this revision was imported or that all policy checks are enforced.
+Historical plugin Site Knowledge import and keyword Retriever implementations remain outside the Core tree. The isolated sync adapter now reuses their locked 1.1.0 Repository and native migrations, without bundling the plugin or changing Core. A fresh isolated database has received the 22 USER-FACING facts and the real plugin Retriever has read them. This does not prove production import or enforcement across all legacy FAQ/chunk paths.
 
 The original Core historical optimizer still uses its private product context and has not been connected to this shared package. Do not alter Core or bypass private methods to claim integration. A missing generic extension requires a separate Owner decision.
 
@@ -187,9 +187,9 @@ Customer service remains on the configured gpt-4.1-mini through Core AiService/A
 
 ## Synchronization Status and Future Work
 
-Automatic release-success triggers, daily checks, weekly issue records, bounded retries and consumer acknowledgements remain DESIGN_ONLY for the unified pipeline. Reuse the existing incremental tooling when implementation is approved; do not infer completion from this specification.
+The unified pipeline is now IMPLEMENTED_ISOLATED: `tools/knowledge-sync/sync.py` implements a durable published-release inbox, immutable Git snapshots, daily checks, weekly issue records, incremental hash reuse, deduplication, bounded retries, consumer acknowledgements and status reports. Tests cover real temporary Git/SQLite data and an actual timed foreground process. The published-release entry was exercised by replaying official release metadata; no production hook, CI schedule, system timer or service was installed. See `docs/knowledge/2026-10-14-auto-sync-report.md`.
 
-The required mechanism is change-triggered synchronization, not a Codex call for every conversation. It must preserve logical source IDs, incrementally skip unchanged hashes, deduplicate, withdraw deleted or unapproved facts, mark component versions, retain provenance, and report failures without advancing successful consumer cursors. Failed batches must retain the previous valid snapshot. Official release, documentation, plugin/theme and schema changes all belong in the source manifest.
+The mechanism is change-triggered synchronization, not a Codex call for every conversation. It preserves logical source IDs, reuses unchanged Git blobs, withdraws deleted or unapproved managed records, marks component versions and retains provenance. Each consumer applies atomically; global success advances only after every acknowledgement. Partial delivery is reported explicitly because separate files/databases do not share a global transaction. Source manifests cover official documentation, release notes, plugin/theme specifications, APIs and schema migrations. Changed source without matching reviewed facts becomes pending_review/needs_review rather than an invented answer.
 
 ## Current Package Use
 
@@ -202,3 +202,10 @@ The required mechanism is change-triggered synchronization, not a Codex call for
 The legacy importer does not enforce all new metadata. Never import the full package there. The public projection reduces internal exposure but does not implement runtime tier ordering, revocation, deduplication or complete leakage defenses. Import and end-to-end acceptance require separate validation.
 
 The original 332-record `daixiaoying-ai-customer-service-qa-v1.jsonl` has not been recovered and is not included. Other QA datasets are not substitutes. See `docs/knowledge/2026-10-14-sync-report.md` for this revision's verified scope and open issues.
+
+
+## Isolated Consumer Integration
+
+The independent file projection and version-required `query` entry are available to authorized article optimization tools. They do not inject context into the existing Core optimizer UI. The existing customer-service Retriever can read synchronized rows; its legacy FAQ bypass, 500-row candidate limit and soft trust ranking remain unchanged. Strict P0/P1/P2 ordering applies to the shared query and admitted synchronization records, not to every historical plugin path.
+
+Runtime task state and indexes are excluded from Git. `templates/` contains uninstalled user service/timer examples. Production installation, the old AI-node RAG index and any Core extension require a later authorized task. The original 332 QA source remains missing; other QA datasets were not substituted.
