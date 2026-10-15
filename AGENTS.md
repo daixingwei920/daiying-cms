@@ -7,9 +7,10 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 ## Current Core Baseline
 
 - Product: Daiying CMS Core
-- Baseline version: `1.2.83` release candidate; published baseline remains `1.2.82` until all gates pass
-- Git tag: `v1.2.83` only after official publication approval
-- Baseline commit: resolve `v1.2.83^{commit}` after official publication
+- Published baseline version: `1.2.83` (official GitHub Release and origin/main checked on 2026-10-14).
+- Published Git tag: `v1.2.83`.
+- Published baseline commit: `76d4d8ed4b4aa470146c0a0c582061b256d1348b`.
+- Local 1.2.84 candidates are not published releases; do not promote them to stable knowledge without official release evidence.
 - Current clean Core worktree:
   `/Users/xingweidai/Documents/Codex/2026-10-09/daiying-cms-official-restaurant-daiying-restaurant/work/restaurant-debt-core-release`
 - Core closeout report:
@@ -159,3 +160,19 @@ Preserve historical source, frozen migrations, installed customer assets,
 trust records, orders and licenses. Do not revive this product as a Core task.
 Do not remove assertions for other products to make the release gate pass.
 See `docs/retired-products.md`.
+
+
+## 长期知识库维护规则
+
+代码与知识库必须同步维护。本节长期适用于参与戴影 CMS 开发的所有 Codex 会话；不改变已批准的架构契约、Core 边界、Owner 决策、发布审批或生产 fail-closed 要求。不得因知识同步擅自修改这些约束。
+
+- 统一产品事实源为根目录 `DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.json`；配套 `.md`、`.user-facing.json` 和架构文档从 `docs/README.md` 进入。沿用 V1 标识，不另建平行知识库。
+- 每次新增功能、改代码、修 Bug、调整 API、数据库结构、插件或主题规范，先检查相关知识、教程、兼容性与版本说明并同步更新；不受影响时记录不更新的具体理由。不得改写已发布迁移或批准契约来迁就文档。
+- 每次开发任务结束前，对照实际 diff、版本与来源逐项核对知识一致性。修改知识包后运行 `python3 scripts/product_knowledge.py --write`，再运行不带参数的检查；这只更新和检查文档派生物，不部署、不重建索引。
+- 每次正式发布，同步版本记录、使用教程、兼容性说明和必要技术文档。按实际已批准的发布版本记录来源完整 commit、路径或 URL 与验证时间；候选版本、提交成功和安装成功均不能代替正式发布或整体验收。
+- 每周至少一次知识一致性检查，在 `docs/knowledge/` 记录检查日期、来源版本、发现的问题、处理状态和遗留事项。自动调度尚未实施时，下一次开发会话先核对本周记录，补查或报告逾期，不能声称已启用定时任务。
+- 严格区分已实现、已测试、待验证与规划。仅源码/文档复核不得标记运行测试 PASS；Git 提交、路径名或旧报告不能自动把功能晋级为已验收。测试证据必须记录实际环境与范围。
+- 检索要求为 P0 官方知识、P1 已审核已发布文章、P2 普通已发布文章；Draft/Pending/C/D、内部资料及状态未知内容默认禁用。待优化原文不因可作为输入而成为可信参考知识。
+- USER-FACING 与 INTERNAL/ADMIN_DEVELOPER 必须分开；普通客服只用 USER-FACING 导出，未知事实明确无法确认。不得向客服暴露内部资料，也不得把类名或方法改写成用户按钮。戴小影客服继续使用站点配置的 gpt-4.1-mini，模型调用复用 Core AiService/AiGateway。
+- 每份交付报告必须包含「知识库同步状态」，列明更新文件、未更新原因、遗留事项，以及构建/导入/索引/消费者应用各自的真实状态。未部署同步服务不得写成已实时同步。
+- Git 只纳管审核过的事实、来源、规范和独立工具；禁止提交运行索引、向量缓存、对话、生产备份或密钥。现有索引不得为同步而擅自清空或重建。

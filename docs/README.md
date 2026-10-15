@@ -8,6 +8,12 @@ This index collects the public-facing documentation currently available in the G
 - [Update System](update-system.md)
 - [Security Policy](../SECURITY.md)
 
+## AI Product Knowledge
+
+- [Unified V1 facts](../DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.md)
+- [Architecture and consumer boundaries](../DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_ARCHITECTURE.md)
+- [Knowledge synchronization report 2026-10-14](knowledge/2026-10-14-sync-report.md)
+
 ## User Guide
 
 - Content management is available through the admin backend after installation.
