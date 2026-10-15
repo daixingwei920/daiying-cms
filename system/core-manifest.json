@@ -335,7 +335,7 @@
   "Update/UpdatePackageReader.php": "90ef2dc8e313b3e0c88bd931a8e710d6cef1d86ada26910096acf5030b6b0fb8",
   "Update/UpdatePlanner.php": "8c19130ceb0a50e321cd19aad2a1a82fb90f6d6b4bf053488ba3ad42401781e3",
   "Update/UpdateServerClient.php": "c33831d1e68a81e0d5c25ed9aa9b00b250f0a6fcf291031e5e6c1f11b97e0646",
-  "Update/UpdateService.php": "185f727c9447f9c290a461fa1e8c6f25f07c44c21ad2ea4ddb8a6168af2eaa15",
+  "Update/UpdateService.php": "678531621fb2f8dd666543930d6d78427b42367be1d6d2cc4c97cda5bc059124",
   "UrlMapping/RedirectManager.php": "f028d248c9b2d94ba65389b3129d562e1894ee8bec7814fb8d29a086d7a17d2a",
   "UrlMapping/UrlMappingRepository.php": "26a5264322234bf1f97ab57f8b86d5f1214f5687728011123fc4f851aa74c306",
   "Webhook/WebhookEndpointRepository.php": "168cfdcf2d1b1ca55296250be6ee313e25a16f962ebc8f67d4d984c2c4e6c156",

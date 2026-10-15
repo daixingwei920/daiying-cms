@@ -901,9 +901,12 @@ final class UpdateService
 
     private function pointerValid(): bool
     {
+        if (!is_file($this->rootPath . self::CURRENT_POINTER)) {
+            return true;
+        }
         $pointer = $this->readPointer();
         if ($pointer === []) {
-            return true;
+            return false;
         }
         $path = (string) ($pointer['path'] ?? '');
         $path = $this->safeActiveReleasePath($path);
