@@ -13,6 +13,8 @@ This index collects the public-facing documentation currently available in the G
 - [Unified V1 facts](../DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.md)
 - [Architecture and consumer boundaries](../DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_ARCHITECTURE.md)
 - [Knowledge synchronization report 2026-10-14](knowledge/2026-10-14-sync-report.md)
+- [Isolated automatic synchronization](../tools/knowledge-sync/README.md)
+- [Automatic synchronization acceptance](knowledge/2026-10-14-auto-sync-report.md)
 
 ## User Guide
 

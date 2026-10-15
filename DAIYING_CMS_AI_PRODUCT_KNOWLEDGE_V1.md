@@ -1,6 +1,6 @@
 # Daiying CMS AI Product Knowledge V1
 
-知识包：`DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1`；修订：`2026-10-14.1`。
+知识包：`DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1`；修订：`2026-10-14.2`。
 
 源码基线：Core **1.2.83**，`v1.2.83`，`76d4d8ed4b4aa470146c0a0c582061b256d1348b`。
 
@@ -12,7 +12,7 @@ JSON 为事实源；本文件与 USER-FACING 导出由 `python3 scripts/product_
 
 要求 P0 官方知识 → P1 已审核已发布文章 → P2 普通已发布文章；Draft/Pending/C/D、内部资料及分类未知内容默认禁用。参考知识与待优化原文分开。
 
-自动同步仍为 DESIGN_ONLY；原 Core 优化器共享知识接入为 NOT_IMPLEMENTED。源码提交不代表已测试、已部署或生产验收通过。
+自动同步状态：IMPLEMENTED_ISOLATED；原 Core 优化器共享知识接入为 NOT_IMPLEMENTED。源码提交不代表已部署或生产验收通过。
 
 ## Web Installer
 
