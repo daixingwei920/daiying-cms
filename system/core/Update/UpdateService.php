@@ -174,6 +174,7 @@ final class UpdateService
             $operation = $pdo->prepare('SELECT status,release_id,to_version FROM cms_core_update_operations WHERE operation_id = :operation_id');
             $operation->execute([':operation_id' => $operationId]);
             $row = $operation->fetch(PDO::FETCH_ASSOC);
+            $operation->closeCursor();
             if (is_array($row) && $row['status'] === 'Completed') {
                 $pointer = $this->readPointer();
                 $releasePath = $this->safeActiveReleasePath((string) ($pointer['path'] ?? ''));
