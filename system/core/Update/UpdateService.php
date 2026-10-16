@@ -17,6 +17,7 @@ use ZipArchive;
 final class UpdateService
 {
     private const LOCK_FILE = '/storage/updates/core-update.lock';
+    private const GUARD_FILE = '/storage/updates/core-update.guard';
     private const MAINTENANCE_FILE = '/storage/maintenance.mode';
     private const CURRENT_POINTER = '/storage/updates/current-release.json';
     private const MAX_HEALTH_SECONDS = 10;
@@ -86,6 +87,7 @@ final class UpdateService
             $this->enterMaintenance($operationId);
             $this->recordStep($pdo, $operationId, 'restore_points');
             $restorePoints = $this->createRestorePoints($operationId, $pdo);
+            $this->writeRestoreDescriptor($operationId, $restorePoints, $previousPointer);
             $this->recordRestorePoints($pdo, $operationId, $restorePoints);
 
             $this->recordStep($pdo, $operationId, 'prepare_release');
@@ -106,9 +108,8 @@ final class UpdateService
             if (($health['status'] ?? '') !== 'ok') {
                 throw new UpdateException('Post-switch health check failed.');
             }
-            $postSwitchOk = true;
-
             $this->recordOperationStatus($pdo, $operationId, 'Completed', 'completed');
+            $postSwitchOk = true;
             $cleanupWarnings = $this->postCommitCleanup($pdo, $adminId, $operationId, $manifest);
 
             return [
@@ -147,19 +148,82 @@ final class UpdateService
     /** @return array<string,mixed> */
     public function recoverInterrupted(): array
     {
-        $state = $this->lockState();
-        if ($state === null) {
-            if (!$this->pointerValid()) {
-                $this->enableRecoveryMode();
-                return ['status' => 'RecoveryMode', 'reason' => 'current pointer is missing or invalid'];
+        $guard = $this->openGuardLock();
+        if (!flock($guard, LOCK_EX | LOCK_NB)) {
+            fclose($guard);
+            return ['status' => 'Running', 'reason' => 'Core update process still owns the update lock'];
+        }
+        try {
+            $state = $this->lockState();
+            if ($state === null) {
+                if (!$this->pointerValid()) {
+                    $this->enableRecoveryMode();
+                    return ['status' => 'RecoveryMode', 'reason' => 'current pointer is missing or invalid'];
+                }
+                return ['status' => 'NoInterruptedUpdate'];
             }
-            return ['status' => 'NoInterruptedUpdate'];
+            $operationId = (string) ($state['operation_id'] ?? '');
+            if ($operationId === '' || preg_match('/^[a-f0-9]{24}$/', $operationId) !== 1) {
+                $this->enableRecoveryMode();
+                return ['status' => 'RecoveryMode', 'reason' => 'untrusted interrupted update state'];
+            }
+            if (in_array((string) ($state['step'] ?? ''), ['package_uploaded', 'unpacked', 'restore_points', 'prepare_release'], true)) {
+                return ['status' => 'ManualRecoveryRequired', 'reason' => 'stale update lock requires administrator review', 'operation_id' => $operationId];
+            }
+            $pdo = ConnectionFactory::make(Settings::load($this->rootPath));
+            $operation = $pdo->prepare('SELECT status,release_id,to_version FROM cms_core_update_operations WHERE operation_id = :operation_id');
+            $operation->execute([':operation_id' => $operationId]);
+            $row = $operation->fetch(PDO::FETCH_ASSOC);
+            $operation->closeCursor();
+            if (is_array($row) && $row['status'] === 'Completed') {
+                $pointer = $this->readPointer();
+                $releasePath = $this->safeActiveReleasePath((string) ($pointer['path'] ?? ''));
+                if ($releasePath === '' || ($pointer['release_id'] ?? '') !== $row['release_id']
+                    || ($pointer['version'] ?? '') !== $row['to_version']
+                    || (new IntegrityChecker())->check($releasePath)['status'] !== 'ok') {
+                    $this->enableRecoveryMode();
+                    return ['status' => 'RecoveryMode', 'reason' => 'completed update pointer or release is not healthy', 'operation_id' => $operationId];
+                }
+                $this->exitMaintenance();
+                $this->disableRecoveryMode();
+                if (!unlink($this->rootPath . self::LOCK_FILE)) {
+                    throw new UpdateException('Unable to clear completed update state.');
+                }
+                return ['status' => 'Completed', 'operation_id' => $operationId, 'reason' => 'durable completed update retained'];
+            }
+            if (is_array($row) && $row['status'] === 'RolledBack') {
+                $descriptor = $this->readRestoreDescriptor($operationId);
+                if ($this->readPointer() !== $descriptor['previous_pointer']) {
+                    $this->enableRecoveryMode();
+                    return ['status' => 'RecoveryMode', 'reason' => 'rolled-back update state cannot be confirmed', 'operation_id' => $operationId];
+                }
+                $this->exitMaintenance();
+                $this->disableRecoveryMode();
+                if (!unlink($this->rootPath . self::LOCK_FILE)) {
+                    throw new UpdateException('Unable to clear rolled-back update state.');
+                }
+                return ['status' => 'RolledBack', 'operation_id' => $operationId, 'reason' => 'durable rollback retained'];
+            }
+            $this->enableRecoveryMode();
+            try {
+                $descriptor = $this->readRestoreDescriptor($operationId);
+                $pdo = ConnectionFactory::make(Settings::load($this->rootPath));
+                $rollback = $this->rollback($pdo, $operationId, $descriptor['previous_pointer'], $descriptor['restore_points'], 'Interrupted Core update');
+                if ($rollback['status'] !== 'RolledBack') {
+                    throw new UpdateException('Interrupted Core update could not be restored.');
+                }
+                if (!unlink($this->rootPath . self::LOCK_FILE)) {
+                    throw new UpdateException('Unable to clear interrupted update state.');
+                }
+                return ['status' => 'RolledBack', 'operation_id' => $operationId, 'health' => $rollback['health']];
+            } catch (Throwable $exception) {
+                $this->enableRecoveryMode();
+                return ['status' => 'RecoveryMode', 'reason' => $this->sanitizeError($exception), 'operation_id' => $operationId];
+            }
+        } finally {
+            flock($guard, LOCK_UN);
+            fclose($guard);
         }
-        if (in_array((string) ($state['step'] ?? ''), ['package_uploaded', 'unpacked', 'restore_points', 'prepare_release'], true)) {
-            return ['status' => 'ManualRecoveryRequired', 'reason' => 'stale update lock requires administrator review', 'operation_id' => $state['operation_id'] ?? ''];
-        }
-        $this->enableRecoveryMode();
-        return ['status' => 'RecoveryMode', 'reason' => 'interrupted during dangerous update step', 'operation_id' => $state['operation_id'] ?? ''];
     }
 
     /** @return array<string,mixed> */
@@ -504,13 +568,16 @@ final class UpdateService
                 $this->restoreDatabase($restorePoints);
                 $this->restoreOperationalSupportFiles($restorePoints);
             }
-            $oldHealth = ['database' => (bool) $pdo->query('SELECT 1')->fetchColumn(), 'pointer' => $this->pointerValid() || $previousPointer === []];
+            $restoredPdo = ConnectionFactory::make(Settings::load($this->rootPath));
+            $oldHealth = ['database' => (bool) $restoredPdo->query('SELECT 1')->fetchColumn(),
+                'pointer' => $this->readPointer() === $previousPointer && ($this->pointerValid() || $previousPointer === [])];
             if (!$oldHealth['database'] || !$oldHealth['pointer']) {
                 throw new UpdateException('Old Core health check failed after rollback.');
             }
+            $this->recordOperationStatus($restoredPdo, $operationId, 'RolledBack', 'rollback', $reason);
+            (new AtomicUpdateState($this->rootPath))->markRollback($operationId, $reason);
             $this->exitMaintenance();
             $this->disableRecoveryMode();
-            (new AtomicUpdateState($this->rootPath))->markRollback($operationId, $reason);
             return ['status' => 'RolledBack', 'health' => $oldHealth];
         } catch (Throwable $exception) {
             $this->enableRecoveryMode();
@@ -531,19 +598,26 @@ final class UpdateService
         $this->zipDirectory($zip, $this->rootPath . '/system/core', 'system/core');
         $this->zipDirectory($zip, $this->rootPath . '/system/migrations', 'system/migrations');
         if (is_file($this->rootPath . '/system/core-manifest.json')) {
-            $zip->addFile($this->rootPath . '/system/core-manifest.json', 'system/core-manifest.json');
+            if (!$zip->addFile($this->rootPath . '/system/core-manifest.json', 'system/core-manifest.json')) {
+                throw new UpdateException('Unable to add Core manifest to restore point.');
+            }
         }
-        $zip->close();
+        if (!$zip->close()) {
+            throw new UpdateException('Unable to finish Core restore point.');
+        }
         if (!is_file($coreZip) || filesize($coreZip) <= 0) {
             throw new UpdateException('Core restore point is empty.');
         }
         $db = $this->createDatabaseRestorePoint($dir, $pdo);
         $pointer = $dir . '/current-release.json';
-        file_put_contents($pointer, json_encode($this->readPointer(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
+        $this->writePrivateJsonFile($pointer, $this->readPointer());
         $migrationState = $dir . '/migration-state.json';
-        file_put_contents($migrationState, json_encode($this->fetchAll($pdo, 'SELECT * FROM cms_core_migrations ORDER BY id'), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
+        $this->writePrivateJsonFile($migrationState, $this->fetchAll($pdo, 'SELECT * FROM cms_core_migrations ORDER BY id'));
         $configSnapshot = $dir . '/app-config.php.snapshot';
-        copy($this->rootPath . '/config/app.php', $configSnapshot);
+        if (!copy($this->rootPath . '/config/app.php', $configSnapshot)
+            || hash_file('sha256', $configSnapshot) !== hash_file('sha256', $this->rootPath . '/config/app.php')) {
+            throw new UpdateException('Core configuration restore point failed.');
+        }
         $supportZip = $dir . '/operational-support.zip';
         $support = $this->createOperationalSupportRestorePoint($supportZip);
 
@@ -558,6 +632,54 @@ final class UpdateService
         ];
     }
 
+    /** @param array<string,mixed> $restorePoints @param array<string,mixed> $previousPointer */
+    private function writeRestoreDescriptor(string $operationId, array $restorePoints, array $previousPointer): void
+    {
+        $this->writePrivateJsonFile($this->restoreDescriptorPath($operationId), [
+            'operation_id' => $operationId,
+            'root' => realpath($this->rootPath),
+            'database_dsn_sha256' => hash('sha256', (string) Settings::load($this->rootPath)->get('database.dsn', '')),
+            'previous_pointer' => $previousPointer,
+            'restore_points' => $restorePoints,
+        ]);
+        $this->readRestoreDescriptor($operationId);
+    }
+
+    private function restoreDescriptorPath(string $operationId): string
+    {
+        if (preg_match('/^[a-f0-9]{24}$/', $operationId) !== 1) {
+            throw new UpdateException('Invalid Core update operation identity.');
+        }
+        return $this->rootPath . '/storage/updates/restore-points/' . $operationId . '/restore-point.json';
+    }
+
+    /** @return array{previous_pointer:array<string,mixed>,restore_points:array<string,mixed>} */
+    private function readRestoreDescriptor(string $operationId): array
+    {
+        $path = $this->restoreDescriptorPath($operationId);
+        $descriptor = is_file($path) ? json_decode((string) file_get_contents($path), true) : null;
+        if (!is_array($descriptor) || ($descriptor['operation_id'] ?? '') !== $operationId
+            || ($descriptor['root'] ?? '') !== realpath($this->rootPath)
+            || ($descriptor['database_dsn_sha256'] ?? '') !== hash('sha256', (string) Settings::load($this->rootPath)->get('database.dsn', ''))
+            || !is_array($descriptor['previous_pointer'] ?? null)
+            || !is_array($descriptor['restore_points'] ?? null)) {
+            throw new UpdateException('Interrupted update restore descriptor is missing or does not match this site.');
+        }
+        $dir = realpath(dirname($path));
+        if ($dir === false) {
+            throw new UpdateException('Interrupted update restore directory is missing.');
+        }
+        foreach (['core', 'database', 'pointer', 'migrations', 'config', 'operational_support'] as $name) {
+            $artifact = $descriptor['restore_points'][$name] ?? null;
+            $artifactPath = is_array($artifact) ? (string) ($artifact['path'] ?? '') : '';
+            if ($artifactPath === '' || !is_file($artifactPath) || realpath(dirname($artifactPath)) !== $dir
+                || hash_file('sha256', $artifactPath) !== (string) ($artifact['sha256'] ?? '')) {
+                throw new UpdateException('Interrupted update restore artifact verification failed.');
+            }
+        }
+        return $descriptor;
+    }
+
     /** @return array<string,mixed> */
     private function createOperationalSupportRestorePoint(string $path): array
     {
@@ -569,14 +691,21 @@ final class UpdateService
         foreach (UpdatePackageManifest::operationalSupportPaths() as $relative) {
             $source = $this->rootPath . '/' . $relative;
             if (is_file($source)) {
-                $zip->addFile($source, $relative);
+                if (!$zip->addFile($source, $relative)) {
+                    throw new UpdateException('Unable to add operational support file to restore point.');
+                }
                 $manifest[$relative] = ['exists' => true, 'sha256' => hash_file('sha256', $source)];
             } else {
                 $manifest[$relative] = ['exists' => false, 'sha256' => ''];
             }
         }
-        $zip->addFromString('operational-support-manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-        $zip->close();
+        if (!$zip->addFromString('operational-support-manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES))
+            || !$zip->close()) {
+            throw new UpdateException('Unable to finish operational support restore point.');
+        }
+        if (!is_file($path) || filesize($path) <= 0 || !is_readable($path)) {
+            throw new UpdateException('Operational support restore point failed.');
+        }
 
         return ['path' => $path, 'sha256' => hash_file('sha256', $path), 'files' => $manifest];
     }
@@ -596,7 +725,7 @@ final class UpdateService
             throw new UpdateException('SQLite database file is missing.');
         }
         $target = $dir . '/database.sqlite';
-        if (!copy($dbFile, $target) || filesize($target) <= 0) {
+        if (!copy($dbFile, $target) || filesize($target) <= 0 || !is_readable($target)) {
             throw new UpdateException('SQLite database restore point failed.');
         }
 
@@ -619,7 +748,7 @@ final class UpdateService
         if ($source === '' || $target === '' || !is_file($source) || hash_file('sha256', $source) !== (string) ($db['sha256'] ?? '')) {
             throw new UpdateException('Database restore point verification failed.');
         }
-        if (!copy($source, $target)) {
+        if (!copy($source, $target) || hash_file('sha256', $target) !== (string) ($db['sha256'] ?? '')) {
             throw new UpdateException('Database restore failed.');
         }
     }
@@ -630,7 +759,7 @@ final class UpdateService
         $restore = $restorePoints['operational_support'] ?? [];
         $path = (string) ($restore['path'] ?? '');
         if ($path === '' || !is_file($path) || hash_file('sha256', $path) !== (string) ($restore['sha256'] ?? '')) {
-            return;
+            throw new UpdateException('Operational support restore point verification failed.');
         }
         $files = is_array($restore['files'] ?? null) ? $restore['files'] : [];
         $zip = new ZipArchive();
@@ -641,7 +770,9 @@ final class UpdateService
             $meta = is_array($files[$relative] ?? null) ? $files[$relative] : [];
             $target = $this->rootPath . '/' . $relative;
             if (($meta['exists'] ?? false) !== true) {
-                @unlink($target);
+                if (is_file($target) && !unlink($target)) {
+                    throw new UpdateException('Unable to remove newly created operational support file.');
+                }
                 continue;
             }
             $content = $zip->getFromName($relative);
@@ -650,21 +781,32 @@ final class UpdateService
                 throw new UpdateException('Operational support restore hash mismatch.');
             }
             $this->ensureDir(dirname($target));
-            file_put_contents($target, $content, LOCK_EX);
+            if (file_put_contents($target, $content, LOCK_EX) !== strlen($content)
+                || hash_file('sha256', $target) !== (string) ($meta['sha256'] ?? '')) {
+                throw new UpdateException('Operational support file restore failed.');
+            }
             @chmod($target, str_ends_with($relative, '.php') ? 0755 : 0644);
         }
         $zip->close();
     }
 
-    private function acquireLock(string $operationId, int $adminId, UpdatePackageManifest $manifest): string
+    /** @return array{path:string,guard:resource} */
+    private function acquireLock(string $operationId, int $adminId, UpdatePackageManifest $manifest): array
     {
         $lock = $this->rootPath . self::LOCK_FILE;
         $this->ensureDir(dirname($lock));
+        $guard = $this->openGuardLock();
+        if (!flock($guard, LOCK_EX | LOCK_NB)) {
+            fclose($guard);
+            throw new UpdateException('Another Core update is already running.');
+        }
         $handle = @fopen($lock, 'x');
         if ($handle === false) {
+            flock($guard, LOCK_UN);
+            fclose($guard);
             throw new UpdateException('Another Core update is already running or needs manual recovery.');
         }
-        fwrite($handle, json_encode([
+        $encoded = json_encode([
             'operation_id' => $operationId,
             'admin_id' => $adminId,
             'target_version' => $manifest->toVersion,
@@ -672,17 +814,39 @@ final class UpdateService
             'step' => 'package_uploaded',
             'started_at' => gmdate('c'),
             'heartbeat_at' => gmdate('c'),
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        if (fwrite($handle, $encoded) !== strlen($encoded)) {
+            fclose($handle);
+            flock($guard, LOCK_UN);
+            fclose($guard);
+            throw new UpdateException('Unable to persist Core update lock.');
+        }
         @chmod($lock, 0600);
         fclose($handle);
-        return $lock;
+        return ['path' => $lock, 'guard' => $guard];
     }
 
-    private function releaseLock(string $lock): void
+    /** @param array{path:string,guard:resource} $lock */
+    private function releaseLock(array $lock): void
     {
-        if (is_file($lock)) {
-            unlink($lock);
+        if (!is_file($this->rootPath . '/storage/recovery.mode') && is_file($lock['path'])) {
+            unlink($lock['path']);
         }
+        flock($lock['guard'], LOCK_UN);
+        fclose($lock['guard']);
+    }
+
+    /** @return resource */
+    private function openGuardLock()
+    {
+        $file = $this->rootPath . self::GUARD_FILE;
+        $this->ensureDir(dirname($file));
+        $handle = fopen($file, 'c+');
+        if ($handle === false) {
+            throw new UpdateException('Unable to open Core update guard.');
+        }
+        @chmod($file, 0600);
+        return $handle;
     }
 
     private function enterMaintenance(string $operationId): void
@@ -738,9 +902,12 @@ final class UpdateService
 
     private function pointerValid(): bool
     {
+        if (!is_file($this->rootPath . self::CURRENT_POINTER)) {
+            return true;
+        }
         $pointer = $this->readPointer();
         if ($pointer === []) {
-            return true;
+            return false;
         }
         $path = (string) ($pointer['path'] ?? '');
         $path = $this->safeActiveReleasePath($path);
@@ -921,7 +1088,10 @@ final class UpdateService
     private function writePrivateJsonFile(string $file, array $payload): void
     {
         $this->ensureDir(dirname($file));
-        file_put_contents($file, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES), LOCK_EX);
+        $content = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+        if (file_put_contents($file, $content, LOCK_EX) !== strlen($content)) {
+            throw new UpdateException('Unable to persist private Core update state.');
+        }
         @chmod($file, 0600);
     }
 
@@ -957,7 +1127,15 @@ final class UpdateService
         if ($sets === []) {
             return;
         }
-        $pdo->prepare('UPDATE cms_core_update_operations SET ' . implode(', ', $sets) . ', updated_at = :updated_at WHERE operation_id = :operation_id')->execute($params);
+        $statement = $pdo->prepare('UPDATE cms_core_update_operations SET ' . implode(', ', $sets) . ', updated_at = :updated_at WHERE operation_id = :operation_id');
+        $statement->execute($params);
+        if ($statement->rowCount() === 0) {
+            $check = $pdo->prepare('SELECT 1 FROM cms_core_update_operations WHERE operation_id = :operation_id');
+            $check->execute([':operation_id' => $operationId]);
+            if (!$check->fetchColumn()) {
+                throw new UpdateException('Core update operation record is missing.');
+            }
+        }
     }
 
     private function startCoreMigration(PDO $pdo, string $operationId, string $id, string $sourceVersion, string $version, string $checksum, mixed $affected): int
@@ -1175,6 +1353,8 @@ final class UpdateService
     {
         $settings = Settings::load($this->rootPath);
         $info = $this->mysqlConnectionInfo($settings);
+        $pdo = ConnectionFactory::make($settings);
+        $state = $this->mysqlState($pdo);
         $target = $dir . '/database.mysql.sql';
         $binary = (string) $settings->get('updates.mysql_dump_binary', 'mysqldump');
         $args = $this->mysqlDumpArgs($binary, $info, $target, true);
@@ -1194,6 +1374,12 @@ final class UpdateService
         if (!str_contains($sample, 'CREATE TABLE') && !str_contains((string) file_get_contents($target), 'INSERT INTO')) {
             throw new UpdateException('MySQL/MariaDB restore point verification failed.');
         }
+        if (!$this->mysqlDumpContainsTables($target, $state['tables'])) {
+            throw new UpdateException('MySQL restore point is missing one or more source tables.');
+        }
+        if ($this->mysqlState($pdo) !== $state) {
+            throw new UpdateException('MySQL database changed while creating the restore point.');
+        }
 
         return [
             'driver' => 'mysql',
@@ -1202,6 +1388,7 @@ final class UpdateService
             'database' => $info['database'],
             'host' => $info['host'],
             'port' => $info['port'],
+            'state' => $state,
             'verified_readable' => is_readable($target),
         ];
     }
@@ -1220,6 +1407,7 @@ final class UpdateService
             '--triggers',
             '--events',
             '--skip-comments',
+            '--skip-dump-date',
             '--add-drop-table',
             '--result-file=' . $target,
             $info['database'],
@@ -1248,6 +1436,34 @@ final class UpdateService
         }
         $settings = Settings::load($this->rootPath);
         $info = $this->mysqlConnectionInfo($settings);
+        if (($db['database'] ?? '') !== $info['database'] || ($db['host'] ?? '') !== $info['host']
+            || (string) ($db['port'] ?? '') !== $info['port'] || !is_array($db['state'] ?? null)) {
+            throw new UpdateException('MySQL restore point does not match the configured database.');
+        }
+        $pdo = ConnectionFactory::make($settings);
+        $original = $db['state'];
+        if (!isset($original['tables'], $original['columns'], $original['indexes'], $original['triggers'], $original['routines'], $original['events'], $original['data'])) {
+            throw new UpdateException('MySQL restore state inventory is incomplete.');
+        }
+        $current = $this->mysqlState($pdo);
+        $originalNames = array_column($original['tables'], 'TABLE_NAME');
+        $extra = array_filter($current['tables'], static fn (array $object): bool => !in_array($object['TABLE_NAME'], $originalNames, true));
+        $originalRoutineNames = array_column($original['routines'], 'ROUTINE_NAME');
+        $originalEventNames = array_column($original['events'], 'EVENT_NAME');
+        if (array_filter($current['routines'], static fn (array $row): bool => !in_array($row['ROUTINE_NAME'], $originalRoutineNames, true)) !== []
+            || array_filter($current['events'], static fn (array $row): bool => !in_array($row['EVENT_NAME'], $originalEventNames, true)) !== []) {
+            throw new UpdateException('MySQL has new routines or events that cannot be safely removed by this restore path.');
+        }
+        $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
+        try {
+            foreach ($extra as $object) {
+                $name = str_replace('`', '``', (string) $object['TABLE_NAME']);
+                $type = ($object['TABLE_TYPE'] ?? '') === 'VIEW' ? 'VIEW' : 'TABLE';
+                $pdo->exec('DROP ' . $type . ' IF EXISTS `' . $name . '`');
+            }
+        } finally {
+            $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
+        }
         $binary = (string) $settings->get('updates.mysql_binary', 'mysql');
         $sql = file_get_contents($source);
         if (!is_string($sql) || $sql === '') {
@@ -1261,6 +1477,103 @@ final class UpdateService
             '--user=' . $info['username'],
             $info['database'],
         ], $info['password'] !== '' ? ['MYSQL_PWD' => $info['password']] : [], $sql);
+        if ($this->mysqlState($pdo) !== $original) {
+            throw new UpdateException('MySQL restore verification failed: schema or data differs from backup.');
+        }
+    }
+
+    /** @return array<string,mixed> */
+    private function mysqlState(PDO $pdo): array
+    {
+        $state = [
+            'tables' => $pdo->query('SELECT TABLE_NAME,TABLE_TYPE,ENGINE,TABLE_COLLATION,AUTO_INCREMENT,CREATE_OPTIONS,TABLE_COMMENT FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() ORDER BY TABLE_NAME')->fetchAll(PDO::FETCH_ASSOC),
+            'columns' => $pdo->query('SELECT TABLE_NAME,COLUMN_NAME,ORDINAL_POSITION,COLUMN_TYPE,IS_NULLABLE,COLUMN_DEFAULT,EXTRA,CHARACTER_SET_NAME,COLLATION_NAME,GENERATION_EXPRESSION FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() ORDER BY TABLE_NAME,ORDINAL_POSITION')->fetchAll(PDO::FETCH_ASSOC),
+            'indexes' => $pdo->query('SELECT TABLE_NAME,INDEX_NAME,SEQ_IN_INDEX,COLUMN_NAME,NON_UNIQUE,INDEX_TYPE,EXPRESSION,IS_VISIBLE FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() ORDER BY TABLE_NAME,INDEX_NAME,SEQ_IN_INDEX')->fetchAll(PDO::FETCH_ASSOC),
+            'table_constraints' => $pdo->query('SELECT TABLE_NAME,CONSTRAINT_NAME,CONSTRAINT_TYPE,ENFORCED FROM information_schema.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA=DATABASE() ORDER BY TABLE_NAME,CONSTRAINT_NAME')->fetchAll(PDO::FETCH_ASSOC),
+            'key_columns' => $pdo->query('SELECT TABLE_NAME,CONSTRAINT_NAME,COLUMN_NAME,ORDINAL_POSITION,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA=DATABASE() ORDER BY TABLE_NAME,CONSTRAINT_NAME,ORDINAL_POSITION')->fetchAll(PDO::FETCH_ASSOC),
+            'foreign_keys' => $pdo->query('SELECT TABLE_NAME,CONSTRAINT_NAME,REFERENCED_TABLE_NAME,UPDATE_RULE,DELETE_RULE FROM information_schema.REFERENTIAL_CONSTRAINTS WHERE CONSTRAINT_SCHEMA=DATABASE() ORDER BY TABLE_NAME,CONSTRAINT_NAME')->fetchAll(PDO::FETCH_ASSOC),
+            'checks' => $pdo->query('SELECT CONSTRAINT_NAME,CHECK_CLAUSE FROM information_schema.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA=DATABASE() ORDER BY CONSTRAINT_NAME')->fetchAll(PDO::FETCH_ASSOC),
+            'partitions' => $pdo->query('SELECT TABLE_NAME,PARTITION_NAME,SUBPARTITION_NAME,PARTITION_METHOD,PARTITION_EXPRESSION,PARTITION_DESCRIPTION FROM information_schema.PARTITIONS WHERE TABLE_SCHEMA=DATABASE() ORDER BY TABLE_NAME,PARTITION_ORDINAL_POSITION,SUBPARTITION_ORDINAL_POSITION')->fetchAll(PDO::FETCH_ASSOC),
+            'views' => $pdo->query('SELECT TABLE_NAME,VIEW_DEFINITION,CHECK_OPTION,SECURITY_TYPE,DEFINER,CHARACTER_SET_CLIENT,COLLATION_CONNECTION FROM information_schema.VIEWS WHERE TABLE_SCHEMA=DATABASE() ORDER BY TABLE_NAME')->fetchAll(PDO::FETCH_ASSOC),
+            'triggers' => $pdo->query('SELECT TRIGGER_NAME,EVENT_OBJECT_TABLE,ACTION_TIMING,EVENT_MANIPULATION,ACTION_ORDER,ACTION_STATEMENT,SQL_MODE,DEFINER,CHARACTER_SET_CLIENT,COLLATION_CONNECTION FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() ORDER BY TRIGGER_NAME')->fetchAll(PDO::FETCH_ASSOC),
+            'routines' => $pdo->query('SELECT ROUTINE_NAME,ROUTINE_TYPE,ROUTINE_DEFINITION,SQL_DATA_ACCESS,SECURITY_TYPE,SQL_MODE,DEFINER,DTD_IDENTIFIER FROM information_schema.ROUTINES WHERE ROUTINE_SCHEMA=DATABASE() ORDER BY ROUTINE_NAME,ROUTINE_TYPE')->fetchAll(PDO::FETCH_ASSOC),
+            'routine_parameters' => $pdo->query('SELECT SPECIFIC_NAME,ORDINAL_POSITION,PARAMETER_MODE,PARAMETER_NAME,DTD_IDENTIFIER FROM information_schema.PARAMETERS WHERE SPECIFIC_SCHEMA=DATABASE() ORDER BY SPECIFIC_NAME,ORDINAL_POSITION')->fetchAll(PDO::FETCH_ASSOC),
+            'events' => $pdo->query('SELECT EVENT_NAME,EVENT_DEFINITION,STATUS,EVENT_TYPE,EXECUTE_AT,INTERVAL_VALUE,INTERVAL_FIELD,STARTS,ENDS,ON_COMPLETION,SQL_MODE,DEFINER FROM information_schema.EVENTS WHERE EVENT_SCHEMA=DATABASE() ORDER BY EVENT_NAME')->fetchAll(PDO::FETCH_ASSOC),
+            'data' => [],
+        ];
+        foreach ($state['tables'] as $table) {
+            if ($table['TABLE_TYPE'] !== 'BASE TABLE') {
+                continue;
+            }
+            $name = str_replace('`', '``', (string) $table['TABLE_NAME']);
+            $columns = array_values(array_filter($state['columns'], static fn (array $column): bool => $column['TABLE_NAME'] === $table['TABLE_NAME']));
+            $pieces = array_map(static function (array $column): string {
+                $identifier = '`' . str_replace('`', '``', (string) $column['COLUMN_NAME']) . '`';
+                return "IF($identifier IS NULL,'N',CONCAT('V',SHA2(CAST($identifier AS BINARY),256)))";
+            }, $columns);
+            $order = $pieces !== [] ? 'SHA2(CONCAT(' . implode(',', $pieces) . '),256)' : '';
+            $query = 'SELECT * FROM `' . $name . '`' . ($order !== '' ? ' ORDER BY ' . $order : '');
+            $rows = $pdo->query($query);
+            $digest = hash_init('sha256');
+            $count = 0;
+            while (($row = $rows->fetch(PDO::FETCH_ASSOC)) !== false) {
+                $bytes = serialize($row);
+                hash_update($digest, pack('N', strlen($bytes)) . $bytes);
+                ++$count;
+            }
+            $state['data'][$table['TABLE_NAME']] = ['rows' => $count, 'sha256' => hash_final($digest)];
+        }
+        ksort($state['data'], SORT_STRING);
+        foreach ($state['tables'] as &$table) {
+            if ($table['TABLE_TYPE'] !== 'BASE TABLE') {
+                continue;
+            }
+            $tableName = (string) $table['TABLE_NAME'];
+            foreach ($state['columns'] as $column) {
+                if ($column['TABLE_NAME'] !== $tableName || !str_contains((string) $column['EXTRA'], 'auto_increment')) {
+                    continue;
+                }
+                $name = str_replace('`', '``', $tableName);
+                $definition = $pdo->query('SHOW CREATE TABLE `' . $name . '`')->fetch(PDO::FETCH_ASSOC);
+                if (!is_array($definition) || !is_string($definition['Create Table'] ?? null)) {
+                    throw new UpdateException('Unable to inspect MySQL auto-increment state.');
+                }
+                if (preg_match('/\\n\\)\\s+ENGINE=[^\\n]*/', $definition['Create Table'], $options) !== 1) {
+                    throw new UpdateException('Unable to inspect MySQL table options.');
+                }
+                $tableOptions = preg_split('/\\s+COMMENT=/', $options[0], 2)[0];
+                $table['AUTO_INCREMENT'] = preg_match('/(?:^|\\s)AUTO_INCREMENT=([0-9]+)(?=\\s|$)/', $tableOptions, $match) === 1
+                    ? (ltrim($match[1], '0') ?: '0') : '1';
+                break;
+            }
+        }
+        unset($table);
+        return $state;
+    }
+
+    /** @param list<array<string,mixed>> $tables */
+    private function mysqlDumpContainsTables(string $path, array $tables): bool
+    {
+        $required = [];
+        foreach ($tables as $table) {
+            if (($table['TABLE_TYPE'] ?? '') === 'BASE TABLE') {
+                $required[(string) $table['TABLE_NAME']] = true;
+            }
+        }
+        $handle = fopen($path, 'rb');
+        if ($handle === false) {
+            return false;
+        }
+        try {
+            while (($line = fgets($handle)) !== false) {
+                if (preg_match('/^CREATE TABLE `((?:``|[^`])+)`/', $line, $match) === 1) {
+                    unset($required[str_replace('``', '`', $match[1])]);
+                }
+            }
+        } finally {
+            fclose($handle);
+        }
+        return $required === [];
     }
 
     private function mysqlToolsAvailable(Settings $settings): bool
@@ -1433,7 +1746,9 @@ final class UpdateService
         $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS));
         foreach ($iterator as $file) {
             if ($file->isFile()) {
-                $zip->addFile((string) $file->getPathname(), $prefix . '/' . substr((string) $file->getPathname(), strlen($source) + 1));
+                if (!$zip->addFile((string) $file->getPathname(), $prefix . '/' . substr((string) $file->getPathname(), strlen($source) + 1))) {
+                    throw new UpdateException('Unable to add Core file to restore point.');
+                }
             }
         }
     }

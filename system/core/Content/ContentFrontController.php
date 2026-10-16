@@ -351,7 +351,7 @@ final class ContentFrontController
         $view = $this->viewModel($content, $preview, $request, true);
         $response = Response::html($this->theme()->render('content', $view));
 
-        return $this->paymentTokenRequested($request)
+        return $preview || $this->paymentTokenRequested($request)
             ? $response->withHeaders(['Cache-Control' => 'private, no-store'])
             : $response;
     }
@@ -381,6 +381,7 @@ final class ContentFrontController
         $paymentToken = $this->paymentTokenFromRequest($request);
         $blocks = is_array($content['blocks'] ?? null) ? $content['blocks'] : [];
         $paidContent = $this->paidContentViewModel($content, $blocks, $paymentToken, $preview);
+        $content = PublicContentView::from($content, $paidContent);
         $renderBlocks = is_array($paidContent['render_blocks'] ?? null) ? $paidContent['render_blocks'] : $blocks;
         $media = $this->mediaViewModels($renderBlocks, (int) $content['id'], $paymentToken);
         $renderedBlocks = (new BlockRenderer(
@@ -416,6 +417,7 @@ final class ContentFrontController
                 'site_favicon_url' => (string) $this->settings->get('site.favicon_url', ''),
             'navigation' => NavigationBuilder::build($this->settings, null, $this->rootPath),
             'content' => $content,
+            'public_excerpt' => $content['public_excerpt'],
             'title' => (string) $content['title'],
             'media' => $media,
             'rendered_blocks' => $renderedBlocks,
@@ -464,6 +466,10 @@ final class ContentFrontController
         }
         $meta = is_array($content['meta'] ?? null) ? $content['meta'] : [];
 
+        $content = PublicContentView::from($content, $this->paidContentViewModel(
+            $content, is_array($content['blocks'] ?? null) ? $content['blocks'] : [], '', false,
+        ));
+
         return [
             'id' => (int) ($content['id'] ?? 0),
             'title' => (string) ($content['title'] ?? ''),
@@ -493,6 +499,9 @@ final class ContentFrontController
     /** @param array<string,mixed> $content @param array<string,mixed> $meta */
     private function contentExcerpt(array $content, array $meta): ?string
     {
+        if (array_key_exists('public_excerpt', $content)) {
+            return $content['public_excerpt'] !== '' ? (string) $content['public_excerpt'] : null;
+        }
         $description = trim(strip_tags((string) ($meta['seo_description'] ?? '')));
         if ($description !== '') {
             return $this->shortText($description, 180);
@@ -587,13 +596,14 @@ final class ContentFrontController
             if ($config === null) {
                 return ['enabled' => false, 'authorized' => true, 'render_blocks' => $blocks];
             }
-            $authorized = $preview || ($paymentToken !== '' && $service->isAuthorized((int) $content['id'], $paymentToken));
             $previewCount = max(0, (int) ($config['preview_blocks'] ?? 1));
             $available = ($config['available'] ?? true) === true;
+            $authorized = $preview || ($available && $paymentToken !== '' && $service->isAuthorized((int) $content['id'], $paymentToken));
 
             return [
                 'enabled' => true,
                 'authorized' => $authorized,
+                'preview_block_count' => $previewCount,
                 'amount_minor' => (int) $config['amount_minor'],
                 'currency' => (string) $config['currency'],
                 'available' => $available,
@@ -605,11 +615,12 @@ final class ContentFrontController
         } catch (Throwable $exception) {
             $this->logger->error('Paid content view model failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
             $meta = is_array($content['meta'] ?? null) ? $content['meta'] : [];
-            if (($meta['paid_content_enabled'] ?? false) === true) {
-                $previewCount = max(0, min(100, (int) ($meta['paid_content_preview_blocks'] ?? 0)));
+            if (!empty($meta['paid_content_enabled']) || ($content['_meta_json_malformed'] ?? false)) {
+                $previewCount = 0;
                 return [
                     'enabled' => true,
                     'authorized' => false,
+                    'preview_block_count' => $previewCount,
                     'amount_minor' => 0,
                     'currency' => 'USD',
                     'available' => false,

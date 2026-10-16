@@ -88,6 +88,7 @@ use Cms\Core\Plugin\OfficialPluginRegistry;
 use Cms\Core\Plugin\PluginSecretStore;
 use Cms\Core\Plugin\PluginLifecycle;
 use Cms\Core\Plugin\PluginManager;
+use Cms\Core\Plugin\PluginPermissionDecisionService;
 use Cms\Core\Support\AdminUiText;
 use Cms\Core\Payment\PaymentAttemptDiagnosticsRepository;
 use Cms\Core\Payment\PaymentException;
@@ -114,7 +115,44 @@ final class AdminController
         private readonly ?string $rootPath = null,
         private readonly ?MarketApiClientInterface $marketClient = null,
         private readonly ?EventDispatcher $events = null,
+        private readonly ?\Cms\Core\Plugin\PluginRuntimeRegistry $homepageRuntime = null,
     ) {
+    }
+
+    public function homepageSettings(Request $request): Response
+    {
+        $user = $this->requireAdmin();
+        if ($user instanceof Response) return $user;
+        if (!$this->adminHasCapability('admin.settings.manage')) return Response::text('Forbidden', 403);
+        try {
+            $selection = new \Cms\Core\Homepage\HomepageSelection(ConnectionFactory::make($this->settings));
+            $providers = $this->homepageRuntime?->homepages() ?? [];
+            if ($request->method === 'POST') {
+                if (!CsrfToken::verify($request->input('_csrf'))) return Response::text('Invalid CSRF', 403);
+                $revision = filter_var($request->input('revision'), FILTER_VALIDATE_INT);
+                if ($revision === false || $revision < 0) return Response::text('Invalid revision', 400);
+                $provider = (string) $request->input('provider', '');
+                $action = (string) $request->input('action', 'select');
+                if ($action === 'restore') {
+                    if (!isset($providers[$provider])) return Response::text('Unavailable provider', 400);
+                    if (!$selection->restore($providers[$provider]['owner'], $revision)) return Response::text('Homepage ownership changed', 409);
+                } elseif ($action === 'select') {
+                    if ($provider !== 'core.theme' && !isset($providers[$provider])) return Response::text('Unavailable provider', 400);
+                    $selection->select($provider, $provider === 'core.theme' ? 'core' : $providers[$provider]['owner'], $revision);
+                } else return Response::text('Invalid action', 400);
+                $this->logger->info('Homepage source changed', ['source'=>'Core','admin_id'=>$user['id'],'provider'=>$provider,'action'=>$action,'from_revision'=>$revision]);
+                return Response::redirect('/admin/settings/homepage');
+            }
+            $state = $selection->snapshot();
+            $e = static fn($v) => htmlspecialchars((string)$v, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $options = '';
+            foreach (['core.theme'=>['label'=>'原主题首页']] + $providers as $key=>$p) $options .= '<option value="'.$e($key).'"'.($state['provider']===$key?' selected':'').'>'.$e($p['label']).'</option>';
+            $html = '<h1>首页来源 / Homepage source</h1><p>默认保留主题首页。停用时恢复原来源；管理员后来更改的选择不会被覆盖。</p><p>当前来源：'.$e($state['provider']).' · revision '.$state['revision'].'</p><form method="post" action="/admin/settings/homepage">'.CsrfToken::field().'<input type="hidden" name="revision" value="'.$state['revision'].'"><select name="provider">'.$options.'</select><button name="action" value="select">保存首页来源</button><button name="action" value="restore">恢复所选插件接管前的首页</button></form><p><a href="/admin/settings">网站设置</a></p>';
+            return Response::html(View::page('首页来源', $html))->withHeaders(['Cache-Control'=>'no-store']);
+        } catch (Throwable $e) {
+            $this->logger->error('Homepage selection rejected', ['source'=>'Core','error'=>$e::class]);
+            return Response::text('Homepage configuration unavailable or revision changed; reload settings.', 409);
+        }
     }
 
     public function loginForm(): Response
@@ -3709,6 +3747,30 @@ final class AdminController
         $settingsLink = $settingsUrl === '' ? '' : '<a class="button" href="' . View::escape($settingsUrl) . '">打开设置</a> ';
         $status = (string) ($row['status'] ?? '');
         $next = $status === PluginLifecycle::ENABLED ? PluginLifecycle::DISABLED : PluginLifecycle::ENABLED;
+        $paymentPermission = '';
+        if ($manifest !== null && in_array('payment.access', $manifest->permissions, true)) {
+            try {
+                $decision = (new PluginPermissionDecisionService($pdo, $root . '/content/plugins'))->inspect($pluginId);
+                $permissionState = (string) $decision['state'];
+            } catch (Throwable) {
+                $permissionState = 'unavailable';
+            }
+            $paymentPermission = '<h3>支付权限</h3><p>payment.access：' . View::escape($permissionState) .
+                '。安装审核与支付权限授权是独立操作，启用支付 Provider 也需单独配置。</p>';
+            if ($permissionState !== 'unavailable' && $this->adminHasCapability('plugins.manage')) {
+                if ((new AdminSessionService($pdo))->hasRecentReauthentication(600)) {
+                    $action = $permissionState === 'granted' ? 'revoke' : 'grant';
+                    $paymentPermission .= '<form method="post" action="' . View::escape($this->adminPath('/admin/plugins/permissions/' . $action)) . '">' .
+                        CsrfToken::field() .
+                        '<input type="hidden" name="plugin_id" value="' . View::escape($pluginId) . '">' .
+                        '<input type="hidden" name="version" value="' . View::escape($manifest->version) . '">' .
+                        '<label>输入插件 ID 确认操作<input name="confirm_plugin_id" required></label>' .
+                        '<button type="submit">' . ($action === 'grant' ? '授予支付权限' : '撤销支付权限') . '</button></form>';
+                } else {
+                    $paymentPermission .= '<p><a href="' . View::escape($this->adminPath('/admin/security')) . '">先完成管理员重新认证</a></p>';
+                }
+            }
+        }
         $body = '<h1>' . View::escape(AdminUiText::pluginName($pluginId, (string) ($row['name'] ?? ''))) . '</h1>' .
             '<p><a class="button" href="' . View::escape($returnTo) . '">' . View::escape($returnLabel) . '</a> ' . $settingsLink . '</p>' .
             '<table><tbody>' .
@@ -3724,7 +3786,7 @@ final class AdminController
             '<tr><th>依赖关系</th><td>' . View::escape($this->pluginDependencySummary($dependencies)) . ($dependencyWarning !== '' ? '<br><span class="error">' . View::escape($dependencyWarning) . '</span>' : '') . '<br><span class="muted">高级信息：<code>' . View::escape((string) ($row['dependencies_json'] ?? '[]')) . '</code></span></td></tr>' .
             '<tr><th>数据状态</th><td>' . View::escape(implode('；', $impact)) . '</td></tr>' .
             '</tbody></table>' .
-            '<h2 id="permissions">权限</h2><table><thead><tr><th>说明</th><th>内部权限 key</th></tr></thead><tbody>' . $permissionRows . '</tbody></table>' .
+            '<h2 id="permissions">权限</h2><table><thead><tr><th>说明</th><th>内部权限 key</th></tr></thead><tbody>' . $permissionRows . '</tbody></table>' . $paymentPermission .
             '<h2>日常操作</h2><p class="muted">停用插件会停止插件运行，但保留插件文件、配置和业务数据，可随时重新启用。</p>' .
             '<form method="post" action="/admin/plugins/status">' . CsrfToken::field() .
             '<input type="hidden" name="plugin_id" value="' . View::escape($pluginId) . '">' .
@@ -3743,6 +3805,58 @@ final class AdminController
             '<button type="submit">永久删除数据</button></form>';
 
         return Response::html(View::page('插件详情', $body));
+    }
+
+    public function pluginPermissionGrant(Request $request): Response
+    {
+        return $this->pluginPermissionDecision($request, true);
+    }
+
+    public function pluginPermissionRevoke(Request $request): Response
+    {
+        return $this->pluginPermissionDecision($request, false);
+    }
+
+    private function pluginPermissionDecision(Request $request, bool $grant): Response
+    {
+        $user = $this->requireAdmin();
+        if ($user instanceof Response) {
+            return $user;
+        }
+        if (!$this->adminHasCapability('plugins.manage')) {
+            return Response::text('Forbidden', 403);
+        }
+        if ($request->method !== 'POST') {
+            return Response::text('Method not allowed', 405);
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::text('Invalid CSRF', 403);
+        }
+        $pdo = ConnectionFactory::make($this->settings);
+        if (!(new AdminSessionService($pdo))->hasRecentReauthentication(600)) {
+            return Response::text('Recent administrator reauthentication required', 403);
+        }
+        $pluginId = (string) $request->input('plugin_id', '');
+        $version = (string) $request->input('version', '');
+        if ($pluginId === '' || $pluginId !== (string) $request->input('confirm_plugin_id', '')) {
+            return Response::text('Plugin identity confirmation required', 400);
+        }
+        try {
+            $decisions = new PluginPermissionDecisionService($pdo, $this->root() . '/content/plugins');
+            if ($grant) {
+                $decisions->grant($pluginId, $version, (int) $user['id']);
+            } else {
+                $decisions->revoke($pluginId, $version, (int) $user['id']);
+            }
+        } catch (Throwable $exception) {
+            $this->logger->error('Plugin payment permission decision failed', [
+                'source' => 'Core', 'plugin_id' => $pluginId, 'exception' => $exception::class,
+            ]);
+            return Response::text('Payment permission was not changed. Check the installed plugin and version.', 400)
+                ->withHeaders(['Cache-Control' => 'private, no-store']);
+        }
+        return Response::redirect($this->adminPath('/admin/plugins/detail') . '?id=' . rawurlencode($pluginId))
+            ->withHeaders(['Cache-Control' => 'private, no-store']);
     }
 
     public function pluginStatus(Request $request): Response

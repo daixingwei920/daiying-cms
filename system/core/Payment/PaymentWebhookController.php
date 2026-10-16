@@ -16,7 +16,7 @@ final class PaymentWebhookController
 {
     private const DEFAULT_MAX_PAYLOAD_BYTES = 262144;
 
-    public function __construct(private readonly Settings $settings)
+    public function __construct(private readonly Settings $settings, private readonly ?\Cms\Core\Events\EventDispatcher $events = null)
     {
     }
 
@@ -61,6 +61,11 @@ final class PaymentWebhookController
             }
 
             $secrets = $settings->secrets($providerId);
+
+            if ($provider instanceof PaymentDisputeProviderInterface && $provider->isDisputeWebhook($rawPayload)) {
+                $result = (new PaymentDisputeService($pdo, (string) $this->settings->get('security.encryption_key', ''), $this->events))->receiveWebhook($providerId, $rawPayload, $request->server);
+                return $this->noStore(Response::json(['ok'=>!$result['verification_pending'], 'dispute'=>$result], $result['verification_pending'] ? 503 : 200));
+            }
 
             $receiptMetadata = [];
             if ($provider instanceof PaymentWebhookAdapterInterface) {
@@ -108,7 +113,7 @@ final class PaymentWebhookController
                 'card_delivery_order_id' => $cardOrderId,
             ]));
         } catch (PaymentException $exception) {
-            return $this->noStore(Response::json(['ok' => false, 'error' => $exception->getMessage()], 400));
+            return $this->noStore(Response::json(['ok' => false, 'error' => $exception->getMessage()], in_array($exception->getCode(), [409,503], true) ? $exception->getCode() : 400));
         } catch (Throwable) {
             return $this->noStore(Response::json(['ok' => false, 'error' => 'Payment webhook is unavailable.'], 500));
         }

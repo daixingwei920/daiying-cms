@@ -106,17 +106,7 @@ final class MarketPackageInstaller
                 'market_id' => $marketReference,
                 'installed_at' => gmdate('c'),
             ];
-            $repo->recordSource($manifest->extensionId, $manifest->type, $manifest->source, $marketReference, $manifest->version, [
-                'package_sha256' => $zipHash,
-                'review_status' => $manifest->reviewStatus,
-                'status' => $result['status'],
-                'dependencies' => array_map(static fn (ExtensionDependency $dependency): array => [
-                    'extension_id' => $dependency->extensionId,
-                    'type' => $dependency->type,
-                    'version' => $dependency->constraint,
-                    'optional' => $dependency->optional,
-                ], $manifest->dependencies),
-            ]);
+            $verifiedMigrations = [];
             if (in_array($manifest->type, ['plugin', 'payment_provider'], true)) {
                 $pluginManifest = $this->registerPluginRecord($pdo, $target, $manifest, $marketReference);
                 $this->assertMarketPluginTrust($pluginManifest, $manifest, $trustedOfficial, $grant);
@@ -126,8 +116,23 @@ final class MarketPackageInstaller
                 }
                 $runner = new PluginMigrationRunner($this->rootPath, $pdo);
                 $runner->validate($target, $pluginManifest, $trustedOfficial);
-                $runner->run($target, $pluginManifest, $trustedOfficial);
+                $verifiedMigrations = $runner->run($target, $pluginManifest, $trustedOfficial);
             }
+
+            $repo->recordSource($manifest->extensionId, $manifest->type, $manifest->source, $marketReference, $manifest->version, [
+                'package_sha256' => $zipHash,
+                'review_status' => $manifest->reviewStatus,
+                'status' => $result['status'],
+                'files' => $manifest->files,
+                'migrations' => $verifiedMigrations,
+                'trust_grant_fingerprint' => $grant?->fingerprint ?? '',
+                'dependencies' => array_map(static fn (ExtensionDependency $dependency): array => [
+                    'extension_id' => $dependency->extensionId,
+                    'type' => $dependency->type,
+                    'version' => $dependency->constraint,
+                    'optional' => $dependency->optional,
+                ], $manifest->dependencies),
+            ]);
 
             if (is_dir($backup)) {
                 $this->removeDirectory($backup);
@@ -569,7 +574,7 @@ final class MarketPackageInstaller
             : ExtensionSource::OFFICIAL_MARKET;
 
         if ($existing !== null) {
-            $stmt = $pdo->prepare('UPDATE cms_plugins SET name = :name, version = :version, author = :author, status = :status, trust_level = :trust_level, capabilities_json = :capabilities_json, dependencies_json = :dependencies_json, optional_dependencies_json = :optional_dependencies_json, data_policy_json = :data_policy_json, data_schema_version = :data_schema_version, source = :source, review_status = :review_status, table_prefixes_json = :table_prefixes_json, last_error = NULL, updated_at = :updated_at WHERE plugin_id = :plugin_id');
+            $stmt = $pdo->prepare("UPDATE cms_plugins SET name = :name, version = :version, author = :author, status = :status, trust_level = :trust_level, capabilities_json = :capabilities_json, dependencies_json = :dependencies_json, optional_dependencies_json = :optional_dependencies_json, data_policy_json = :data_policy_json, data_schema_version = :data_schema_version, source = :source, review_status = :review_status, table_prefixes_json = :table_prefixes_json, permission_grant_status = 'declared', last_error = NULL, updated_at = :updated_at WHERE plugin_id = :plugin_id");
             $params = [];
         } else {
             $stmt = $pdo->prepare('INSERT INTO cms_plugins (plugin_id, name, version, author, status, trust_level, capabilities_json, installed_at, updated_at, source, review_status, dependencies_json, optional_dependencies_json, data_policy_json, data_schema_version, table_prefixes_json) VALUES (:plugin_id, :name, :version, :author, :status, :trust_level, :capabilities_json, :installed_at, :updated_at, :source, :review_status, :dependencies_json, :optional_dependencies_json, :data_policy_json, :data_schema_version, :table_prefixes_json)');

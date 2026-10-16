@@ -34,14 +34,21 @@ final class PluginMigrationRunner
         }
     }
 
-    /** @param array<string,mixed> $manifest */
-    public function run(string $target, array $manifest, bool $trustedOfficial = false): void
+    /** @param array<string,mixed> $manifest @return list<array{id:string,path:string,checksum:string,affected_objects:list<string>}> */
+    public function run(string $target, array $manifest, bool $trustedOfficial = false): array
     {
         $appliedThisBatch = [];
+        $verifiedSpecs = [];
         try {
             foreach (($manifest['migrations'] ?? []) as $migration) {
                 $spec = $this->loadMigrationSpec($target, (string) $migration, $manifest);
                 $this->assertPluginOwnedObjects($manifest, $spec['affected_objects'], $trustedOfficial);
+                $verifiedSpecs[] = [
+                    'id' => $spec['id'],
+                    'path' => (string) $migration,
+                    'checksum' => $spec['checksum'],
+                    'affected_objects' => $spec['affected_objects'],
+                ];
                 $row = $this->migrationRow((string) $manifest['plugin_id'], $spec['id']);
                 if ($row !== null && (string) $row['status'] === 'applied') {
                     if ((string) $row['checksum'] !== $spec['checksum']) {
@@ -68,6 +75,8 @@ final class PluginMigrationRunner
             }
             throw $exception;
         }
+
+        return $verifiedSpecs;
     }
 
     public function hasRecoverableFailure(string $pluginId): bool

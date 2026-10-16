@@ -8,6 +8,8 @@ require CMS_ROOT . '/system/core/Bootstrap/autoload.php';
 use Cms\Core\Market\ExtensionSource;
 use Cms\Core\Market\InstallAuthorization;
 use Cms\Core\Market\MarketException;
+use Cms\Core\Market\ExtensionRollbackExecutor;
+use Cms\Core\Market\ExtensionRollbackRepository;
 use Cms\Core\Market\MarketPackageInstaller;
 use Cms\Core\Plugin\LocalPluginPackageInstaller;
 use Cms\Core\Plugin\OfficialExtensionTrustGrant;
@@ -23,7 +25,7 @@ $check = static function (bool $condition, string $message) use (&$failures): vo
     echo '[FAIL] ' . $message . PHP_EOL;
 };
 
-/** @return array{root:string,pdo:PDO} */
+/** @return array{root:string,pdo:PDO,db_path:string} */
 function market_plugin_migration_fixture_root(): array
 {
     $keys = market_plugin_test_keys();
@@ -34,7 +36,8 @@ function market_plugin_migration_fixture_root(): array
     mkdir($root . '/storage/market/tmp', 0777, true);
     file_put_contents($root . '/config/app.php', "<?php\nreturn ['app' => ['version' => '1.2.48'], 'updates' => ['public_key' => '" . $keys['public'] . "', 'key_id' => 'test-key']];\n");
 
-    $pdo = new PDO('sqlite::memory:');
+    $dbPath = $root . '/storage/market-test.sqlite';
+    $pdo = new PDO('sqlite:' . $dbPath);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->exec('CREATE TABLE cms_plugins (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,6 +59,7 @@ function market_plugin_migration_fixture_root(): array
         dormant_data_json TEXT,
         removed_at TEXT,
         last_error TEXT,
+        permission_grant_status TEXT,
         table_prefixes_json TEXT
     )');
     $pdo->exec('CREATE TABLE cms_extension_sources (
@@ -76,6 +80,33 @@ function market_plugin_migration_fixture_root(): array
         status TEXT NOT NULL,
         plan_json TEXT,
         created_at TEXT NOT NULL
+    )');
+    $pdo->exec('CREATE TABLE cms_plugin_tasks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        plugin_id TEXT NOT NULL,
+        status TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        cancel_requested_at TEXT,
+        cancel_reason TEXT
+    )');
+    $pdo->exec('CREATE TABLE cms_plugin_data (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        plugin_id TEXT NOT NULL,
+        data_type TEXT NOT NULL,
+        data_key TEXT NOT NULL,
+        payload_json TEXT NOT NULL
+    )');
+    $pdo->exec('CREATE TABLE cms_plugin_install_previews (
+        token TEXT PRIMARY KEY,
+        plugin_id TEXT NOT NULL,
+        version TEXT NOT NULL,
+        package_path TEXT NOT NULL,
+        staging_dir TEXT NOT NULL,
+        manifest_json TEXT NOT NULL,
+        scan_json TEXT NOT NULL,
+        source TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        expires_at TEXT NOT NULL
     )');
     $pdo->exec('CREATE TABLE cms_plugin_migrations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -104,7 +135,7 @@ function market_plugin_migration_fixture_root(): array
     $migration = require CMS_ROOT . '/system/migrations/2026_09_10_000001_extension_trust_grants.php';
     $migration['up']($pdo);
 
-    return ['root' => $root, 'pdo' => $pdo];
+    return ['root' => $root, 'pdo' => $pdo, 'db_path' => $dbPath];
 }
 
 /** @return array{public:string,secret:string} */
@@ -454,7 +485,7 @@ try {
 
     [$mailZip, $mailAuth] = market_plugin_migration_package(
         'official.mail',
-        '0.2.0-alpha.1',
+        (string) json_decode((string) file_get_contents(CMS_ROOT . '/content/plugins/official.mail/plugin.json'), true)['version'],
         market_plugin_files_from_directory('official.mail'),
         'plugin',
         market_plugin_trust_grant('official.mail', ['mail', 'notifications'], ['mail_'])
@@ -473,9 +504,294 @@ try {
     (new LocalPluginPackageInstaller($root, $pdo))->enable('official.mail', 1);
     $check($pdo->query("SELECT status FROM cms_plugins WHERE plugin_id = 'official.mail'")->fetchColumn() === PluginLifecycle::ENABLED, 'market plugin enable succeeds after migration backfill.');
     $check(market_plugin_table_exists($pdo, 'mail_accounts'), 'market plugin enable backfills missing declared migrations before enabling.');
+
+    $noDownId = 'official.irreversible';
+    $marker = $root . '/storage/migration-required.marker';
+    $migrationV1 = "<?php\nfile_put_contents(" . var_export($marker, true) . ", 'required');\nreturn ['id' => 'irreversible_001', 'affected_objects' => ['irreversible_items'], 'up' => static function (PDO \$pdo): void { \$pdo->exec('CREATE TABLE IF NOT EXISTS irreversible_items (id INTEGER PRIMARY KEY)'); }];\n";
+    $v1Files = [
+        'content/plugins/' . $noDownId . '/plugin.json' => market_plugin_manifest($noDownId, '1.0.0', ['migrations/001.php'], ['irreversible_']),
+        'content/plugins/' . $noDownId . '/migrations/001.php' => $migrationV1,
+    ];
+    [$noDownZip, $noDownAuth] = market_plugin_migration_package($noDownId, '1.0.0', $v1Files, 'plugin', market_plugin_trust_grant($noDownId, ['irreversible'], ['irreversible_']));
+    $installer->install($noDownZip, $noDownAuth, $pdo);
+    @unlink($marker);
+    $lifecycle = new LocalPluginPackageInstaller($root, $pdo);
+    $lifecycle->enable($noDownId, 1);
+    $check($pdo->query("SELECT status FROM cms_plugins WHERE plugin_id = 'official.irreversible'")->fetchColumn() === PluginLifecycle::ENABLED, 'verified already-applied irreversible market migration can enable.');
+    $check(!is_file($marker), 'no-op enable does not require already-applied migration PHP.');
+    $lifecycle->disableWithDependents($noDownId, 1);
+
+    $migrationPath = $root . '/content/plugins/' . $noDownId . '/migrations/001.php';
+    file_put_contents($migrationPath, $migrationV1 . "\n// tampered\n");
+    try {
+        $lifecycle->enable($noDownId, 1);
+        $check(false, 'modified installed migration file is rejected.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'differs'), 'modified installed migration file is rejected.');
+    }
+    file_put_contents($migrationPath, $migrationV1);
+
+    $localZip = sys_get_temp_dir() . '/daiying-local-market-race-' . bin2hex(random_bytes(5)) . '.zip';
+    $localPackage = new ZipArchive();
+    if ($localPackage->open($localZip, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+        throw new RuntimeException('Unable to create local race plugin fixture.');
+    }
+    $localPackage->addFromString('acme.localrace/plugin.json', market_plugin_manifest('acme.localrace', '1.0.0', [], ['local_race_']));
+    $localPackage->addFromString('acme.localrace/plugin.php', "<?php\nreturn static function (): void {};\n");
+    $localPackage->close();
+    $localInstaller = new LocalPluginPackageInstaller($root, $pdo);
+    $localPreview = $localInstaller->preview($localZip, 1);
+
+    $raceSignal = $root . '/storage/market-upgrade-running';
+    $migrationV2 = "<?php\nreturn ['id' => 'irreversible_002', 'affected_objects' => ['irreversible_more'], 'up' => static function (PDO \$pdo): void { file_put_contents(" . var_export($raceSignal, true) . ", 'running'); usleep(1200000); \$pdo->exec('CREATE TABLE irreversible_more (id INTEGER PRIMARY KEY)'); }];\n";
+    $v2Files = [
+        'content/plugins/' . $noDownId . '/plugin.json' => market_plugin_manifest($noDownId, '2.0.0', ['migrations/001.php', 'migrations/002.php'], ['irreversible_']),
+        'content/plugins/' . $noDownId . '/migrations/001.php' => $migrationV1,
+        'content/plugins/' . $noDownId . '/migrations/002.php' => $migrationV2,
+    ];
+    [$v2Zip, $v2Auth] = market_plugin_migration_package($noDownId, '2.0.0', $v2Files, 'plugin', market_plugin_trust_grant($noDownId, ['irreversible'], ['irreversible_']));
+    $worker = $root . '/market-install-worker.php';
+    file_put_contents($worker, '<?php require ' . var_export(CMS_ROOT . '/system/core/Bootstrap/autoload.php', true) . '; '
+        . '$pdo = new PDO("sqlite:" . $argv[2]); $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); '
+        . '$grant = json_decode(file_get_contents($argv[4]), true); '
+        . '$auth = new Cms\\Core\\Market\\InstallAuthorization("test", "https://updates.daiyingcms.com/test.zip", gmdate("c", time()+3600), hash_file("sha256", $argv[3]), "test-market", $grant); '
+        . '(new Cms\\Core\\Market\\MarketPackageInstaller($argv[1]))->install($argv[3], $auth, $pdo);');
+    $grantPath = $root . '/storage/test-grant.json';
+    file_put_contents($grantPath, json_encode($v2Auth->trustGrant));
+    $pipes = [];
+    $child = proc_open([PHP_BINARY, $worker, $root, $fixture['db_path'], $v2Zip, $grantPath], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    if (!is_resource($child)) {
+        throw new RuntimeException('Unable to start independent market install process.');
+    }
+    for ($i = 0; $i < 100 && !is_file($raceSignal); $i++) {
+        usleep(20000);
+    }
+    $check(is_file($raceSignal), 'independent process reached market upgrade migration while holding its install lock.');
+    try {
+        $lifecycle->enable($noDownId, 1);
+        $check(false, 'enable cannot race with an in-progress market upgrade.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'market install'), 'enable cannot race with an in-progress market upgrade.');
+    }
+    try {
+        $localInstaller->install($localPreview['token'], 1, false, true);
+        $check(false, 'local plugin installation cannot overlap a market replacement.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'market install'), 'local plugin installation cannot overlap a market replacement.');
+    }
+    $workerOutput = stream_get_contents($pipes[1]);
+    $workerError = stream_get_contents($pipes[2]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    $check(proc_close($child) === 0, 'independent market upgrade process completed after enable was refused.' . ($workerError !== '' ? ' ' . $workerError : ''));
+    $lifecycle->enable($noDownId, 1);
+    $check($pdo->query("SELECT version FROM cms_plugins WHERE plugin_id = 'official.irreversible'")->fetchColumn() === '2.0.0'
+        && market_plugin_table_exists($pdo, 'irreversible_more'), 'post-upgrade enable uses the complete verified migration set.');
+    $lifecycle->disableWithDependents($noDownId, 1);
+
+    $enableSignal = $root . '/storage/enable-committing';
+    $enableWorker = $root . '/plugin-enable-worker.php';
+    file_put_contents($enableWorker, '<?php require ' . var_export(CMS_ROOT . '/system/core/Bootstrap/autoload.php', true) . '; '
+        . '$pdo = new PDO("sqlite:" . $argv[2]); $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); '
+        . '$pdo->sqliteCreateFunction("pause_enable", static function () use ($argv): int { file_put_contents($argv[3], "committing"); usleep(1200000); return 1; }); '
+        . '$pdo->exec("CREATE TEMP TRIGGER pause_before_enable BEFORE UPDATE OF status ON cms_plugins WHEN NEW.plugin_id = \'official.irreversible\' AND NEW.status = \'Enabled\' BEGIN SELECT pause_enable(); END"); '
+        . '(new Cms\\Core\\Plugin\\LocalPluginPackageInstaller($argv[1], $pdo))->enable("official.irreversible", 1);');
+    $enablePipes = [];
+    $enableChild = proc_open([PHP_BINARY, $enableWorker, $root, $fixture['db_path'], $enableSignal], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $enablePipes);
+    if (!is_resource($enableChild)) {
+        throw new RuntimeException('Unable to start independent plugin enable process.');
+    }
+    for ($i = 0; $i < 100 && !is_file($enableSignal); $i++) {
+        usleep(20000);
+    }
+    $check(is_file($enableSignal), 'independent enable reached the Enabled status write while holding both install locks.');
+    $check(is_file($root . '/storage/plugin-installs/install.lock'), 'real enable holds the local plugin installer lock through commit.');
+    $rollbackRepo = new ExtensionRollbackRepository($root . '/storage/market/rollback', $root . '/storage/market/rollback-restores');
+    mkdir($root . '/storage/market/rollback', 0777, true);
+    mkdir($root . '/storage/market/rollback-snapshot', 0777, true);
+    file_put_contents($root . '/storage/market/rollback-snapshot/plugin.json', $v2Files['content/plugins/' . $noDownId . '/plugin.json']);
+    file_put_contents($root . '/storage/market/rollback/valid-race.json', json_encode([
+        'previous_snapshot' => $root . '/storage/market/rollback-snapshot',
+        'target_dir' => $root . '/content/plugins/' . $noDownId,
+    ]));
+    try {
+        $lifecycle->enable($noDownId, 1);
+        $check(false, 'a second enable cannot overlap the first enable transaction.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'market install'), 'a second enable cannot overlap the first enable transaction.');
+    }
+    try {
+        $installer->install($v2Zip, $v2Auth, $pdo);
+        $check(false, 'market replacement cannot overlap the enable status write.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'market install'), 'market replacement cannot overlap the enable status write.');
+    }
+    foreach ([
+        'local code uninstall' => static fn () => $lifecycle->uninstallCode($noDownId, 1),
+        'plugin purge' => static fn () => $lifecycle->purge($noDownId, 1, 'PURGE ' . $noDownId),
+        'failed install recovery' => static fn () => $lifecycle->recoverFailedInstall($noDownId, 1),
+        'market rollback restore' => static fn () => (new ExtensionRollbackExecutor($root, $rollbackRepo))->restore('valid-race'),
+    ] as $operation => $attempt) {
+        try {
+            $attempt();
+            $check(false, $operation . ' cannot overlap the enable status write.');
+        } catch (Throwable $exception) {
+            $check(str_contains($exception->getMessage(), 'market install'), $operation . ' cannot overlap the enable status write.');
+        }
+    }
+    $enableOutput = stream_get_contents($enablePipes[1]);
+    $enableError = stream_get_contents($enablePipes[2]);
+    fclose($enablePipes[1]);
+    fclose($enablePipes[2]);
+    $check(proc_close($enableChild) === 0, 'independent enable commits after competing writes are refused.' . ($enableError !== '' ? ' ' . $enableError : ''));
+    $check($pdo->query("SELECT status FROM cms_plugins WHERE plugin_id = 'official.irreversible'")->fetchColumn() === PluginLifecycle::ENABLED, 'first enable remains Enabled after competing requests.');
+    $lifecycle->disableWithDependents($noDownId, 1);
+
+    $localSignal = $root . '/storage/local-install-committing';
+    $localWorker = $root . '/local-install-worker.php';
+    file_put_contents($localWorker, '<?php require ' . var_export(CMS_ROOT . '/system/core/Bootstrap/autoload.php', true) . '; '
+        . '$pdo = new PDO("sqlite:" . $argv[2]); $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); '
+        . '$pdo->sqliteCreateFunction("pause_local_install", static function () use ($argv): int { file_put_contents($argv[4], "committing"); usleep(1200000); return 1; }); '
+        . '$pdo->exec("CREATE TEMP TRIGGER pause_before_local_install BEFORE INSERT ON cms_plugins WHEN NEW.plugin_id = \'acme.localrace\' BEGIN SELECT pause_local_install(); END"); '
+        . '(new Cms\\Core\\Plugin\\LocalPluginPackageInstaller($argv[1], $pdo))->install($argv[3], 1, false, true);');
+    $localPipes = [];
+    $localChild = proc_open([PHP_BINARY, $localWorker, $root, $fixture['db_path'], $localPreview['token'], $localSignal], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $localPipes);
+    if (!is_resource($localChild)) {
+        throw new RuntimeException('Unable to start independent local plugin install process.');
+    }
+    for ($i = 0; $i < 100 && !is_file($localSignal); $i++) {
+        usleep(20000);
+    }
+    $check(is_file($localSignal), 'independent local plugin installation reached its record write while holding market and local locks.');
+    try {
+        $installer->install($v2Zip, $v2Auth, $pdo);
+        $check(false, 'market replacement cannot overlap a local plugin installation.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'market install'), 'market replacement cannot overlap a local plugin installation.');
+    }
+    $localOutput = stream_get_contents($localPipes[1]);
+    $localError = stream_get_contents($localPipes[2]);
+    fclose($localPipes[1]);
+    fclose($localPipes[2]);
+    $check(proc_close($localChild) === 0, 'independent local plugin install commits after market replacement is refused.' . ($localError !== '' ? ' ' . $localError : ''));
+    $check($pdo->query("SELECT status FROM cms_plugins WHERE plugin_id = 'acme.localrace'")->fetchColumn() === PluginLifecycle::INSTALLED, 'local plugin installation remains complete after competing market request.');
+
+    $uninstallSignal = $root . '/storage/local-uninstall-committing';
+    $uninstallWorker = $root . '/local-uninstall-worker.php';
+    file_put_contents($uninstallWorker, '<?php require ' . var_export(CMS_ROOT . '/system/core/Bootstrap/autoload.php', true) . '; '
+        . '$pdo = new PDO("sqlite:" . $argv[2]); $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); '
+        . '$pdo->sqliteCreateFunction("pause_local_uninstall", static function () use ($argv): int { file_put_contents($argv[3], "committing"); usleep(1200000); return 1; }); '
+        . '$pdo->exec("CREATE TEMP TRIGGER pause_before_local_uninstall BEFORE UPDATE OF status ON cms_plugins WHEN NEW.plugin_id = \'acme.localrace\' AND NEW.status = \'Dormant\' BEGIN SELECT pause_local_uninstall(); END"); '
+        . '(new Cms\\Core\\Plugin\\LocalPluginPackageInstaller($argv[1], $pdo))->uninstallCode("acme.localrace", 1);');
+    $uninstallPipes = [];
+    $uninstallChild = proc_open([PHP_BINARY, $uninstallWorker, $root, $fixture['db_path'], $uninstallSignal], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $uninstallPipes);
+    if (!is_resource($uninstallChild)) {
+        throw new RuntimeException('Unable to start independent local plugin uninstall process.');
+    }
+    for ($i = 0; $i < 100 && !is_file($uninstallSignal); $i++) {
+        usleep(20000);
+    }
+    $check(is_file($uninstallSignal), 'independent local uninstall reached its Dormant status write after removing code.');
+    try {
+        $localInstaller->enable('acme.localrace', 1);
+        $check(false, 'enable cannot overlap local code uninstall.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'market install'), 'enable cannot overlap local code uninstall.');
+    }
+    fclose($uninstallPipes[1]);
+    $uninstallError = stream_get_contents($uninstallPipes[2]);
+    fclose($uninstallPipes[2]);
+    $check(proc_close($uninstallChild) === 0, 'independent local code uninstall commits after enable is refused.' . ($uninstallError !== '' ? ' ' . $uninstallError : ''));
+    $check($pdo->query("SELECT status FROM cms_plugins WHERE plugin_id = 'acme.localrace'")->fetchColumn() === PluginLifecycle::DORMANT, 'local code uninstall leaves the plugin Dormant.');
+
+    $pdo->exec("UPDATE cms_plugin_migrations SET status = 'running' WHERE plugin_id = 'official.irreversible' AND migration_id = 'irreversible_002'");
+    try {
+        $lifecycle->enable($noDownId, 1);
+        $check(false, 'running migration history blocks no-op enable.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'history'), 'running migration history blocks no-op enable.');
+    }
+    $pdo->exec("UPDATE cms_plugin_migrations SET status = 'applied' WHERE plugin_id = 'official.irreversible' AND migration_id = 'irreversible_002'");
+    $pdo->exec("INSERT INTO cms_plugin_migrations (plugin_id,plugin_version,migration_id,checksum,status,created_at,updated_at) SELECT plugin_id,plugin_version,migration_id,checksum,status,created_at,updated_at FROM cms_plugin_migrations WHERE plugin_id = 'official.irreversible' AND migration_id = 'irreversible_002'");
+    try {
+        $lifecycle->enable($noDownId, 1);
+        $check(false, 'duplicate migration history blocks no-op enable.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'history'), 'duplicate migration history blocks no-op enable.');
+    }
+    $pdo->exec("DELETE FROM cms_plugin_migrations WHERE plugin_id = 'official.irreversible' AND migration_id = 'irreversible_002' AND id = (SELECT MAX(id) FROM cms_plugin_migrations)");
+    $pdo->exec("UPDATE cms_plugin_migrations SET migration_id = 'irreversible_002_changed' WHERE plugin_id = 'official.irreversible' AND migration_id = 'irreversible_002'");
+    try {
+        $lifecycle->enable($noDownId, 1);
+        $check(false, 'same checksum under a different unique migration ID is rejected.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'history'), 'same checksum under a different unique migration ID is rejected.');
+    }
+    $pdo->exec("UPDATE cms_plugin_migrations SET migration_id = 'irreversible_002' WHERE plugin_id = 'official.irreversible' AND migration_id = 'irreversible_002_changed'");
+    $pdo->exec("INSERT INTO cms_plugin_migrations (plugin_id,plugin_version,migration_id,checksum,status,created_at,updated_at) SELECT plugin_id,plugin_version,'irreversible_extra',checksum,status,created_at,updated_at FROM cms_plugin_migrations WHERE plugin_id = 'official.irreversible' AND migration_id = 'irreversible_002'");
+    try {
+        $lifecycle->enable($noDownId, 1);
+        $check(false, 'unexpected applied migration outside the verified set is rejected.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'history'), 'unexpected applied migration outside the verified set is rejected.');
+    }
+    $pdo->exec("DELETE FROM cms_plugin_migrations WHERE plugin_id = 'official.irreversible' AND migration_id = 'irreversible_extra'");
+
+    $pdo->exec("UPDATE cms_extension_sources SET version = 'different' WHERE extension_id = 'official.irreversible' AND version = '2.0.0'");
+    try {
+        $lifecycle->enable($noDownId, 1);
+        $check(false, 'installed source version drift is rejected.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'source'), 'installed source version drift is rejected.');
+    }
+    $pdo->exec("UPDATE cms_extension_sources SET version = '2.0.0' WHERE extension_id = 'official.irreversible' AND version = 'different'");
+    $sourceRow = $pdo->query("SELECT id, metadata_json FROM cms_extension_sources WHERE extension_id = 'official.irreversible' ORDER BY id DESC LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+    $sourceUpdate = $pdo->prepare('UPDATE cms_extension_sources SET metadata_json = :metadata WHERE id = :id');
+    $sourceUpdate->execute([':metadata' => '{invalid', ':id' => $sourceRow['id']]);
+    try {
+        $lifecycle->enable($noDownId, 1);
+        $check(false, 'invalid modern source metadata cannot fall back to requiring migration PHP.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'metadata is invalid'), 'invalid modern source metadata cannot fall back to requiring migration PHP.');
+    }
+    $partial = json_decode($sourceRow['metadata_json'], true);
+    unset($partial['files']);
+    $sourceUpdate->execute([':metadata' => json_encode($partial), ':id' => $sourceRow['id']]);
+    try {
+        $lifecycle->enable($noDownId, 1);
+        $check(false, 'partial modern source snapshot cannot use legacy fallback.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'snapshot is incomplete'), 'partial modern source snapshot cannot use legacy fallback.');
+    }
+    $sourceUpdate->execute([':metadata' => $sourceRow['metadata_json'], ':id' => $sourceRow['id']]);
+    $pluginRoot = $root . '/content/plugins/' . $noDownId;
+    $savedRoot = $pluginRoot . '.saved';
+    rename($pluginRoot, $savedRoot);
+    symlink($savedRoot, $pluginRoot);
+    try {
+        $lifecycle->enable($noDownId, 1);
+        $check(false, 'symlinked installed plugin root is rejected.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'root directory'), 'symlinked installed plugin root is rejected.');
+    } finally {
+        unlink($pluginRoot);
+        rename($savedRoot, $pluginRoot);
+    }
+
+    $pdo->exec("DELETE FROM cms_plugin_migrations WHERE plugin_id = 'official.irreversible' AND migration_id = 'irreversible_002'");
+    try {
+        $lifecycle->enable($noDownId, 1);
+        $check(false, 'missing irreversible migration history blocks enable.');
+    } catch (Throwable $exception) {
+        $check(str_contains($exception->getMessage(), 'Irreversible'), 'missing irreversible migration history blocks enable.');
+    }
+    $check($pdo->query("SELECT status FROM cms_plugins WHERE plugin_id = 'official.irreversible'")->fetchColumn() === PluginLifecycle::DISABLED, 'negative cases never mark the plugin Enabled.');
 } finally {
     foreach (glob(sys_get_temp_dir() . '/daiying-market-package-*.zip') ?: [] as $zip) {
         @unlink($zip);
+    }
+    if (isset($localZip)) {
+        @unlink($localZip);
     }
     market_plugin_migration_remove_tree($root);
 }

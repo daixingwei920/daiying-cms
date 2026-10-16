@@ -66,6 +66,9 @@ final class PluginContext
         private readonly ?PluginContentService $content = null,
         private readonly ?FrontUserService $frontUsers = null,
         private readonly ?PluginLicenseService $license = null,
+        private readonly ?PluginAdvertisingService $advertising = null,
+        private readonly ?PluginPaymentService $payments = null,
+        private readonly bool $trustedHomepageAccess = false,
     ) {
     }
 
@@ -109,6 +112,21 @@ final class PluginContext
         BlockRendererRegistry::register($this->manifest->id, $type, $renderer);
     }
 
+    /** @param callable(\Cms\Core\Http\Request):\Cms\Core\Http\Response $renderer */
+    public function registerHomepageRenderer(string $key, string $label, callable $renderer): string
+    {
+        if (!$this->trustedDatabaseAccess || !$this->trustedHomepageAccess || !$this->hasCapability('frontend.homepage')) {
+            throw new PluginException('Trusted frontend.homepage capability required.');
+        }
+        return $this->runtime()->homepage($this->manifest->id, $key, $label, $renderer);
+    }
+
+    public function homepageSelection(): \Cms\Core\Homepage\HomepageSelection
+    {
+        if (!$this->trustedDatabaseAccess || !$this->trustedHomepageAccess || !$this->hasCapability('frontend.homepage')) throw new PluginException('Homepage capability required.');
+        return new \Cms\Core\Homepage\HomepageSelection($this->pdo());
+    }
+
     public function data(): PluginDataStore
     {
         return $this->data;
@@ -121,6 +139,19 @@ final class PluginContext
         }
 
         return $this->content;
+    }
+
+    public function advertising(): PluginAdvertisingService
+    {
+        return $this->advertising ?? new PluginAdvertisingService($this->manifest, null);
+    }
+
+    public function payments(): PluginPaymentService
+    {
+        if ($this->payments === null) {
+            throw new PluginException('service_unavailable');
+        }
+        return $this->payments;
     }
 
     public function frontUsers(): FrontUserService

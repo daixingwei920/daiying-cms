@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cms\Core\Plugin;
 
 use Cms\Core\Ai\AiService;
+use Cms\Core\Advertising\AdRepository;
 use Cms\Core\Auth\FrontUserAuthenticator;
 use Cms\Core\Auth\FrontUserService;
 use Cms\Core\Cache\FileCache;
@@ -161,6 +162,10 @@ final class PluginManager
             throw new PluginException('Invalid plugin lifecycle status.');
         }
 
+        // Older installations can boot before this additive migration has run.
+        if (in_array('cms_homepage_selection', $this->tableNames(), true)) {
+            (new \Cms\Core\Homepage\HomepageSelection($this->pdo))->lifecycle($pluginId, $status === PluginLifecycle::ENABLED);
+        }
         $stmt = $this->pdo->prepare('UPDATE cms_plugins SET status = :status, updated_at = :updated_at WHERE plugin_id = :plugin_id');
         $stmt->execute([
             ':plugin_id' => $pluginId,
@@ -196,6 +201,7 @@ final class PluginManager
                 }
                 $count++;
             } catch (\Throwable $exception) {
+                $this->runtime?->removeHomepageProviders($pluginId);
                 $this->logger->error('Plugin boot failed; quarantining plugin', [
                     'source' => 'Plugin',
                     'plugin_id' => $pluginId,
@@ -258,9 +264,12 @@ final class PluginManager
             $this->customFields(),
             new SchedulerService($this->pdo),
             new NotificationService($this->pdo),
-            new PluginContentService($manifest, new ContentRepository($this->pdo, $this->contentTypes(), array_keys($this->blocks->all()), dirname(dirname($this->pluginsPath))), fn (): ContentRepository => new ContentRepository($this->pdo, $this->contentTypes(), array_keys($this->blocks->all()), dirname(dirname($this->pluginsPath))), $this->events, $this->settings),
+            new PluginContentService($manifest, new ContentRepository($this->pdo, $this->contentTypes(), $this->blocks->all(), dirname(dirname($this->pluginsPath))), fn (): ContentRepository => new ContentRepository($this->pdo, $this->contentTypes(), $this->blocks->all(), dirname(dirname($this->pluginsPath))), $this->events, $this->settings),
             new FrontUserService($manifest, $this->pdo, new FrontUserAuthenticator($this->pdo, $this->events), $this->events),
             new PluginLicenseService($manifest, new CommercialLicenseStore($this->pdo), $this->settings),
+            new PluginAdvertisingService($manifest, new AdRepository($this->pdo)),
+            new PluginPaymentService($manifest, $this->pdo, (string) ($this->settings?->get('security.encryption_key', '') ?? '')),
+            trustedHomepageAccess: $this->officialRegistry !== null && ($this->officialRegistry->isTrustedBundled($manifest->id, dirname($entry)) || $this->officialRegistry->hasActiveTrustGrant($manifest->id)),
         );
 
         $register = require $entry;

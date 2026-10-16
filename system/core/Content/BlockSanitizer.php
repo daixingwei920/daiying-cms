@@ -7,6 +7,7 @@ namespace Cms\Core\Content;
 use Cms\Core\ExternalMigration\MigrationHtmlSanitizer;
 use Cms\Core\Support\CurrencyRegistry;
 use Cms\Core\Support\Money;
+use Cms\Core\Plugin\BlockRendererRegistry;
 use InvalidArgumentException;
 
 final class BlockSanitizer
@@ -34,7 +35,7 @@ final class BlockSanitizer
 
     /**
      * @param mixed $blocks
-     * @param list<string> $registeredTypes
+     * @param list<string>|array<string,array<string,string>> $registeredTypes
      * @return list<array<string, mixed>>
      */
     public static function sanitize(mixed $blocks, array $registeredTypes = []): array
@@ -55,7 +56,22 @@ final class BlockSanitizer
             }
 
             $type = (string) ($block['type'] ?? '');
-            if (!in_array($type, self::ALLOWED_TYPES, true) && !in_array($type, $registeredTypes, true)) {
+            if ($type === 'missing-extension') {
+                $original = $block['original'] ?? null;
+                $clean[] = is_array($original) && self::registeredOwner((string) ($original['type'] ?? ''), $registeredTypes) !== null
+                    ? self::sanitize([$original], $registeredTypes)[0]
+                    : $block;
+                continue;
+            }
+            $owner = self::registeredOwner($type, $registeredTypes);
+            if ($owner !== null && !in_array($type, self::ALLOWED_TYPES, true)) {
+                if (!empty($block['plugin_id']) && $block['plugin_id'] !== $owner) {
+                    throw new ContentException('Block owner does not match registered plugin.');
+                }
+                $clean[] = ['type' => $type, 'plugin_id' => $owner, 'data' => self::cleanData($block['data'] ?? [])];
+                continue;
+            }
+            if (!in_array($type, self::ALLOWED_TYPES, true)) {
                 $clean[] = [
                     'type' => 'missing-extension',
                     'plugin_id' => (string) ($block['plugin_id'] ?? 'unknown'),
@@ -64,9 +80,7 @@ final class BlockSanitizer
                 continue;
             }
 
-            $clean[] = in_array($type, $registeredTypes, true) && !in_array($type, self::ALLOWED_TYPES, true)
-                ? ['type' => $type, 'data' => self::cleanData($block['data'] ?? [])]
-                : ['type' => $type, 'data' => self::cleanBuiltin($type, $block['data'] ?? [])];
+            $clean[] = ['type' => $type, 'data' => self::cleanBuiltin($type, $block['data'] ?? [])];
         }
 
         return $clean;
@@ -74,9 +88,11 @@ final class BlockSanitizer
 
     /**
      * @param list<array<string, mixed>> $blocks
+     * @param list<string>|array<string,array<string,string>> $registeredTypes
+     * @param list<array<string,mixed>> $existingBlocks
      * @return list<string>
      */
-    public static function validate(array $blocks): array
+    public static function validate(array $blocks, array $registeredTypes = [], array $existingBlocks = []): array
     {
         $errors = [];
         foreach ($blocks as $index => $block) {
@@ -89,7 +105,14 @@ final class BlockSanitizer
                 continue;
             }
             if (!in_array($type, self::ALLOWED_TYPES, true)) {
-                if (($block['plugin_id'] ?? '') !== '') {
+                $owner = self::registeredOwner($type, $registeredTypes);
+                if ($owner !== null) {
+                    if (!empty($block['plugin_id']) && $block['plugin_id'] !== $owner) {
+                        $errors[] = 'Block ' . $index . ' owner does not match registered plugin.';
+                    }
+                    continue;
+                }
+                if (in_array($block, $existingBlocks, true)) {
                     continue;
                 }
                 $errors[] = 'Block ' . $index . ' has unsupported type: ' . $type;
@@ -111,6 +134,14 @@ final class BlockSanitizer
         }
 
         return $errors;
+    }
+
+    /** @param list<string>|array<string,array<string,string>> $registeredTypes */
+    private static function registeredOwner(string $type, array $registeredTypes): ?string
+    {
+        $registration = $registeredTypes[$type] ?? null;
+        $owner = is_array($registration) ? ($registration['plugin_id'] ?? null) : null;
+        return is_string($owner) && $owner !== '' ? $owner : BlockRendererRegistry::owner($type);
     }
 
     /** @return array<string, mixed> */

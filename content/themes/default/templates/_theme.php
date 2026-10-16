@@ -109,6 +109,9 @@ if (!function_exists('dy_setting')) {
 
     function dy_excerpt(array $content, int $limit = 132): string
     {
+        if (array_key_exists('public_excerpt', $content)) {
+            return dy_trim((string) $content['public_excerpt'], $limit);
+        }
         $meta = is_array($content['meta'] ?? null) ? $content['meta'] : [];
         $seo = trim((string) ($meta['seo_description'] ?? ''));
         if ($seo !== '') {
