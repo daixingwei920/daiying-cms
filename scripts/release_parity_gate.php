@@ -32,8 +32,11 @@ $checks = [];
 
 $expected = expectedCommitState($root, $commit);
 $is182 = preg_match('/^1\.2\.82(?:-|$)/', $expected['version']) === 1;
-if ($minUpgradeFrom === '') { $minUpgradeFrom = $is182 ? '1.2.81' : '1.2.52'; }
+$versionCore = preg_match('/^[0-9]+\.[0-9]+\.[0-9]+/', $expected['version'], $versionMatch) === 1 ? $versionMatch[0] : $expected['version'];
+$requires180Floor = version_compare($versionCore, '1.2.84', '>=');
+if ($minUpgradeFrom === '') { $minUpgradeFrom = $is182 ? '1.2.81' : ($requires180Floor ? '1.2.80' : '1.2.52'); }
 $checks[] = check(!$is182 || $minUpgradeFrom === '1.2.81', 'support.owner_approved_floor', '1.2.82 direct upgrades are limited to 1.2.81.');
+$checks[] = check(!$requires180Floor || $minUpgradeFrom === '1.2.80', 'support.minimum_1_2_80', '1.2.84 and later releases require minimum source version 1.2.80.');
 $checks[] = pass('commit.resolved', 'Target commit resolved: ' . $commit);
 $checks[] = check($expected['version'] !== '', 'commit.version', 'Config version detected: ' . $expected['version']);
 $checks = array_merge($checks, verifyCommitReleaseSource($root, $commit, $expected));
