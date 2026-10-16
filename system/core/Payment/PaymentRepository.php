@@ -57,8 +57,12 @@ final class PaymentRepository
             ':created_at' => $now,
             ':updated_at' => $now,
         ]);
-
-        return (int) $this->pdo->lastInsertId();
+        $id = (int) $this->pdo->lastInsertId();
+        if ($subjectType === 'cms_plugin_order' && $status === 'paid') {
+            $this->pdo->prepare('UPDATE cms_plugin_payment_bindings SET trusted_paid_at = :paid_at, updated_at = :updated_at WHERE internal_key = :key AND trusted_paid_at IS NULL')
+                ->execute([':paid_at' => $now, ':updated_at' => $now, ':key' => $idempotencyKey]);
+        }
+        return $id;
     }
 
     /** @param array<string,mixed> $data */
@@ -131,6 +135,20 @@ final class PaymentRepository
     }
 
     /** @return array<string,mixed>|null */
+    public function paymentForUpdate(int $paymentId): ?array
+    {
+        $paymentId = $this->positiveInt($paymentId, 'Payment id is invalid.');
+        $sql = 'SELECT * FROM cms_payments WHERE id = :id LIMIT 1';
+        if ($this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') {
+            $sql .= ' FOR UPDATE';
+        }
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':id' => $paymentId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return is_array($row) ? $row : null;
+    }
+
+    /** @return array<string,mixed>|null */
     public function paymentByIdempotency(string $idempotencyKey): ?array
     {
         $idempotencyKey = $this->normalizedReference($idempotencyKey, 'Payment idempotency key is invalid.');
@@ -191,8 +209,8 @@ final class PaymentRepository
             $stmt = $this->pdo->prepare(
                 'UPDATE cms_payments SET
                     status = :status,
-                    remote_id = CASE WHEN :remote_id = \'\' THEN remote_id ELSE :remote_id END,
-                    reference = CASE WHEN :reference = \'\' THEN reference ELSE :reference END,
+                    remote_id = CASE WHEN :remote_id_check = \'\' THEN remote_id ELSE :remote_id END,
+                    reference = CASE WHEN :reference_check = \'\' THEN reference ELSE :reference END,
                     authorized_at = COALESCE(:authorized_at, authorized_at),
                     paid_at = COALESCE(:paid_at, paid_at),
                     failed_at = COALESCE(:failed_at, failed_at),
@@ -203,7 +221,9 @@ final class PaymentRepository
             $stmt->execute([
                 ':id' => $paymentId,
                 ':status' => $status,
+                ':remote_id_check' => $remoteId,
                 ':remote_id' => $remoteId,
+                ':reference_check' => $reference,
                 ':reference' => $reference,
                 ':authorized_at' => $status === 'authorized' ? $now : null,
                 ':paid_at' => in_array($status, ['paid', 'partially_refunded', 'refunded'], true) ? $now : null,
@@ -211,6 +231,10 @@ final class PaymentRepository
                 ':cancelled_at' => $status === 'cancelled' ? $now : null,
                 ':now' => $now,
             ]);
+            if ((string) ($payment['subject_type'] ?? '') === 'cms_plugin_order' && $status === 'paid') {
+                $this->pdo->prepare('UPDATE cms_plugin_payment_bindings SET trusted_paid_at = :paid_at, updated_at = :updated_at WHERE internal_key = :key AND trusted_paid_at IS NULL')
+                    ->execute([':paid_at' => $now, ':updated_at' => $now, ':key' => $payment['idempotency_key']]);
+            }
             if ($status === 'refunded') {
                 $this->revokeActiveAuthorizationsForPayment($paymentId);
                 $this->revokeActiveEntitlementsForPayment($paymentId);
@@ -1277,7 +1301,7 @@ final class PaymentRepository
         $stmt = $this->pdo->prepare(
             "UPDATE cms_payment_webhook_receipts
              SET status = :status,
-                 processed_at = CASE WHEN :status IN ('processed','ignored') THEN :processed_at ELSE processed_at END,
+                 processed_at = CASE WHEN :processed_status IN ('processed','ignored') THEN :processed_at ELSE processed_at END,
                  metadata_json = :metadata_json,
                  updated_at = :updated_at
              WHERE id = :id"
@@ -1285,6 +1309,7 @@ final class PaymentRepository
         $stmt->execute([
             ':id' => $receiptId,
             ':status' => $status,
+            ':processed_status' => $status,
             ':processed_at' => $now,
             ':metadata_json' => $this->metadataJson($this->safeMetadata($metadata)),
             ':updated_at' => $now,

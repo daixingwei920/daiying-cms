@@ -569,6 +569,25 @@ if ($command === 'expire-payment-entitlements') {
     }
 }
 
+if ($command === 'recover-update') {
+    if (($argv[2] ?? '') !== 'RECOVER CORE') {
+        throw new InvalidArgumentException('Core recovery requires explicit RECOVER CORE confirmation.');
+    }
+    try {
+        $settings = Settings::load(CMS_ROOT);
+        $result = (new UpdateService(
+            CMS_ROOT,
+            (string) $settings->get('app.version', '0.0.0'),
+            new SignatureVerifier((string) $settings->get('updates.public_key', '')),
+        ))->recoverInterrupted();
+        echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
+        exit(in_array($result['status'] ?? '', ['NoInterruptedUpdate', 'Completed', 'RolledBack'], true) ? 0 : 1);
+    } catch (Throwable $exception) {
+        echo json_encode(['status' => 'RecoveryMode', 'error' => cms_cli_safe_error($exception)], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
+        exit(1);
+    }
+}
+
 if ($command === 'verify-update') {
     $package = $argv[2] ?? '';
     $settings = Settings::load(CMS_ROOT);

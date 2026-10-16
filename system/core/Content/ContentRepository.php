@@ -915,7 +915,8 @@ final class ContentRepository
         if (!in_array($status, self::STATUSES, true)) {
             throw new ContentException('Invalid content status.');
         }
-        $errors = BlockSanitizer::validate($blocks);
+        $existingBlocks = $id !== null ? ($this->find($id)['blocks'] ?? []) : [];
+        $errors = BlockSanitizer::validate($blocks, $this->registeredBlockTypes, $existingBlocks);
         if ($errors !== []) {
             throw new ContentException(implode(' ', $errors));
         }

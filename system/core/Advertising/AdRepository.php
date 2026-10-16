@@ -44,6 +44,27 @@ final class AdRepository
         return $slots;
     }
 
+    /** @param list<string> $keys @return array<string,array{label:string,html:string,enabled:bool}> */
+    public function requestedActiveSlotsForRender(array $keys): array
+    {
+        if ($keys === []) {
+            return [];
+        }
+        $placeholders = implode(', ', array_fill(0, count($keys), '?'));
+        $stmt = $this->pdo->prepare('SELECT slot_key, label, html FROM cms_ad_slots WHERE enabled = 1 AND slot_key IN (' . $placeholders . ')');
+        $stmt->execute($keys);
+        $slots = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $key = (string) $row['slot_key'];
+            $slots[$key] = [
+                'label' => (string) $row['label'],
+                'enabled' => true,
+                'html' => AdRenderer::renderSlot($key, (string) $row['html']),
+            ];
+        }
+        return $slots;
+    }
+
     /** @param list<array<string,mixed>> $slots */
     public function replaceSlots(array $slots): void
     {

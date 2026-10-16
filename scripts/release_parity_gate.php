@@ -32,8 +32,11 @@ $checks = [];
 
 $expected = expectedCommitState($root, $commit);
 $is182 = preg_match('/^1\.2\.82(?:-|$)/', $expected['version']) === 1;
-if ($minUpgradeFrom === '') { $minUpgradeFrom = $is182 ? '1.2.81' : '1.2.52'; }
+$versionCore = preg_match('/^[0-9]+\.[0-9]+\.[0-9]+/', $expected['version'], $versionMatch) === 1 ? $versionMatch[0] : $expected['version'];
+$requires180Floor = version_compare($versionCore, '1.2.84', '>=');
+if ($minUpgradeFrom === '') { $minUpgradeFrom = $is182 ? '1.2.81' : ($requires180Floor ? '1.2.80' : '1.2.52'); }
 $checks[] = check(!$is182 || $minUpgradeFrom === '1.2.81', 'support.owner_approved_floor', '1.2.82 direct upgrades are limited to 1.2.81.');
+$checks[] = check(!$requires180Floor || $minUpgradeFrom === '1.2.80', 'support.minimum_1_2_80', '1.2.84 and later releases require minimum source version 1.2.80.');
 $checks[] = pass('commit.resolved', 'Target commit resolved: ' . $commit);
 $checks[] = check($expected['version'] !== '', 'commit.version', 'Config version detected: ' . $expected['version']);
 $checks = array_merge($checks, verifyCommitReleaseSource($root, $commit, $expected));
@@ -91,7 +94,6 @@ function verifyCommitReleaseSource(string $root, string $commit, array $expected
 {
     $checks = [];
     $required = [
-        'config/app.php',
         'config/app.example.php',
         'system/core-manifest.json',
         'system/core/Bootstrap/autoload.php',
@@ -105,6 +107,7 @@ function verifyCommitReleaseSource(string $root, string $commit, array $expected
     foreach ($required as $file) {
         $checks[] = check(isset($expected['package_files'][$file]), 'source.required.' . str_replace(['/', '.'], '_', $file), 'Required release source file exists: ' . $file);
     }
+    $checks[] = check(!isset($expected['package_files']['config/app.php']), 'source.installer_excludes_site_config', 'Full installer does not contain site-specific config/app.php.');
 
     $app = gitBlob($root, $commit, 'config/app.php');
     $example = gitBlob($root, $commit, 'config/app.example.php');
@@ -200,6 +203,7 @@ function verifyInstaller(string $root, string $zipPath, mixed $manifestOption, a
         return $checks;
     }
     $checks[] = check($zipState['files'] === $expected['package_files'], 'installer.exact_commit_files', 'Installer ZIP file list and hashes match target commit.');
+    $checks[] = check(!isset($zipState['files']['config/app.php']), 'installer.no_site_config', 'Installer ZIP excludes site-specific config/app.php.');
     $checks[] = check(isset($zipState['files']['system/core-manifest.json']), 'installer.core_manifest_present', 'Installer contains system/core-manifest.json.');
     if (isset($zipState['files']['system/core-manifest.json'])) {
         $zip = new ZipArchive();
@@ -611,6 +615,9 @@ function gitBlob(string $root, string $commit, string $path): string
 function shouldPackage(string $file): bool
 {
     $file = str_replace('\\', '/', $file);
+    if ($file === 'config/app.php') {
+        return false;
+    }
     if ($file === '' || (str_starts_with($file, '.') && !in_array($file, ['.htaccess'], true))) {
         return false;
     }

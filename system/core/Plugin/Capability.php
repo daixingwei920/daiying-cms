@@ -32,11 +32,16 @@ final class Capability
         'webhook.register',
         'cache.use',
         'frontend.asset',
+        'frontend.homepage',
         'content.type',
         'content.field',
         'search.register',
         'seo.extend',
         'blocks.register',
+        'ads.read',
+        'payment.subject.register',
+        'payment.checkout',
+        'payment.entitlement.read',
     ];
 
     public const KNOWN = self::CORE_KNOWN;

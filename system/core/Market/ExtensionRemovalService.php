@@ -31,6 +31,10 @@ final class ExtensionRemovalService
             $target = $type === 'plugin'
                 ? $this->rootPath . '/content/plugins/' . $extensionId
                 : $this->rootPath . '/content/themes/' . $extensionId;
+            if ($type === 'plugin') {
+                try { $pdo->query('SELECT id FROM cms_homepage_selection LIMIT 1'); $hasHomepage = true; } catch (\PDOException) { $hasHomepage = false; }
+                if ($hasHomepage) (new \Cms\Core\Homepage\HomepageSelection($pdo))->lifecycle($extensionId, false, true);
+            }
             if (is_dir($target)) {
                 $this->removeDirectory($target);
             }

@@ -10,9 +10,10 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 - Published baseline version: `1.2.83` (official GitHub Release and origin/main checked on 2026-10-14).
 - Published Git tag: `v1.2.83`.
 - Published baseline commit: `76d4d8ed4b4aa470146c0a0c582061b256d1348b`.
-- Local 1.2.84 candidates are not published releases; do not promote them to stable knowledge without official release evidence.
-- Current clean Core worktree:
-  `/Users/xingweidai/Documents/Codex/2026-10-09/daiying-cms-official-restaurant-daiying-restaurant/work/restaurant-debt-core-release`
+- Pending maintenance candidate: `1.2.84`; not published until the official release is verified.
+- Current release integration worktree:
+  `/Users/xingweidai/Documents/Codex/2026-10-14/task/isolated-market-rehearsal/core-enable-fix/approved-prerelease-repair/work/release-1.2.84`
+- Candidate branch: `codex/release-1.2.84`; resolve HEAD for the final release commit.
 - Core closeout report:
   `/Users/xingweidai/Documents/Codex/2026-09-03/Daiying-CMS-WIP-Archive/core-closeout-1.2.63-20260915-231639/CORE_CLOSED_REPORT.md`
 
@@ -118,6 +119,12 @@ Do not include any of the following in Core commits or release packages:
 
 The known archived local test private key under the closeout archive is for local historical testing only and must never be committed or published.
 
+Owner signing boundary: signing private keys may only be generated and used on
+the update server. Do not generate, read, copy or export signing private keys
+on the local workstation, including temporary asymmetric test signing keys.
+Tests that require key generation must run on the authorized update server;
+record them as not run locally. Local candidate artifacts remain unsigned.
+
 ## Version Updates
 
 When the official Core version changes:
@@ -161,7 +168,6 @@ trust records, orders and licenses. Do not revive this product as a Core task.
 Do not remove assertions for other products to make the release gate pass.
 See `docs/retired-products.md`.
 
-
 ## 长期知识库维护规则
 
 代码与知识库必须同步维护。本节长期适用于参与戴影 CMS 开发的所有 Codex 会话；不改变已批准的架构契约、Core 边界、Owner 决策、发布审批或生产 fail-closed 要求。不得因知识同步擅自修改这些约束。
@@ -176,3 +182,11 @@ See `docs/retired-products.md`.
 - USER-FACING 与 INTERNAL/ADMIN_DEVELOPER 必须分开；普通客服只用 USER-FACING 导出，未知事实明确无法确认。不得向客服暴露内部资料，也不得把类名或方法改写成用户按钮。戴小影客服继续使用站点配置的 gpt-4.1-mini，模型调用复用 Core AiService/AiGateway。
 - 每份交付报告必须包含「知识库同步状态」，列明更新文件、未更新原因、遗留事项，以及构建/导入/索引/消费者应用各自的真实状态。未部署同步服务不得写成已实时同步。
 - Git 只纳管审核过的事实、来源、规范和独立工具；禁止提交运行索引、向量缓存、对话、生产备份或密钥。现有索引不得为同步而擅自清空或重建。
+
+## Owner-authorized isolated integration (2026-10-14)
+
+- Baseline: clean `f1388e828a3dfa81698dbdfd66351ddb9e0699f3`, Core 1.2.84.
+- Source branches: frozen navigation tree `190797fdc87bfd868516ccb9e145a7afd4e5e47f` and isolated GC 03/04 commit `1ed7e29`, both based on `f1388e8`.
+- Unified branch: `codex/core184-unified`; preserve GC 01/02 while merging the approved generic homepage/dispute contracts, payment fixes, and bounded advertising/payment facades.
+- Historical scope note: this integration was isolated at the time; publication and production actions require separate Owner authorization.
+- The existing private signing-key boundary above remains in force. Reuse only existing valid public test authorization envelopes through the native verifier; missing signing tests stay NOT VERIFIED.

@@ -49,6 +49,8 @@ use Cms\Core\Routing\Router;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Seo\SearchMetrics\SearchMetricsSyncService;
 use Cms\Core\Security\SessionManager;
+use Cms\Core\Plugin\PluginPaymentRequestScope;
+use Cms\Core\Auth\FrontUserAuthenticator;
 use Cms\Core\Support\View;
 use Cms\Core\Theme\ThemeManager;
 use Throwable;
@@ -270,16 +272,33 @@ final class Application
 
     private static function registerCoreRoutes(Router $router, Settings $settings, string $rootPath, FileLogger $logger, string $mode, PluginRuntimeRegistry $pluginRuntime, EventDispatcher $events): void
     {
-        $router->get('/', static function () use ($rootPath, $settings, $logger): Response {
+        $router->get('/', static function (Request $request) use ($rootPath, $settings, $logger, $pluginRuntime): Response {
             if (!is_file($rootPath . '/storage/installed.lock')) {
                 return Response::redirect('/install');
+            }
+
+            if (RunMode::detect($rootPath, (string) $settings->get('app.mode', RunMode::NORMAL)) === RunMode::NORMAL) {
+                try {
+                    $home = (new \Cms\Core\Homepage\HomepageRenderer(new \Cms\Core\Homepage\HomepageSelection(ConnectionFactory::make($settings)), $pluginRuntime, $logger))->render($request);
+                    if ($home !== null) return $home;
+                } catch (Throwable $exception) {
+                    $logger->error('Homepage provider unavailable; using theme', ['source' => 'Core', 'error' => $exception::class]);
+                }
             }
 
             $contents = [];
             $enabledPlugins = [];
             try {
                 $pdo = ConnectionFactory::make($settings);
-                $contents = (new ContentRepository($pdo, ContentTypeRegistry::defaults()))->latest(10);
+                $paid = new \Cms\Core\Payment\PaidContentService($pdo, $settings);
+                $contents = array_map(static function (array $content) use ($paid): array {
+                    $config = $paid->configFor($content);
+                    return \Cms\Core\Content\PublicContentView::from($content, [
+                        'enabled' => $config !== null,
+                        'authorized' => false,
+                        'preview_block_count' => $config['preview_blocks'] ?? 0,
+                    ]);
+                }, (new ContentRepository($pdo, ContentTypeRegistry::defaults()))->latest(10));
                 try {
                     $stmt = $pdo->query("SELECT plugin_id FROM cms_plugins WHERE status = 'Enabled'");
                     foreach ($stmt->fetchAll() as $row) {
@@ -405,7 +424,7 @@ final class Application
         $router->get('/paid-content/{content_id}/complete', [$paidContent, 'complete']);
         $tips = new TipController($settings);
         $router->post('/tips/checkout', [$tips, 'checkout']);
-        $paymentWebhooks = new PaymentWebhookController($settings);
+        $paymentWebhooks = new PaymentWebhookController($settings, $events);
         $router->post('/payment/webhooks/{provider_id}', [$paymentWebhooks, 'receive']);
         $cards = new CardDeliveryController($settings);
         $router->post('/card-delivery/{id}/checkout', [$cards, 'checkout']);
@@ -420,7 +439,7 @@ final class Application
         $router->get('/install', [$install, 'show']);
         $router->post('/install', [$install, 'store']);
 
-        $admin = new AdminController($settings, $logger, $rootPath, null, $events);
+        $admin = new AdminController($settings, $logger, $rootPath, null, $events, $pluginRuntime);
         $router->get('/admin/login', [$admin, 'loginForm']);
         $router->post('/admin/login', [$admin, 'login']);
         $router->post('/admin/login/passkey-options', [$admin, 'loginPasskeyOptions']);
@@ -452,6 +471,8 @@ final class Application
         $router->get('/admin/site-vault', [$admin, 'siteVault']);
         $router->post('/admin/site-vault', [$admin, 'siteVault']);
         $router->get('/admin/site-timeline', [$admin, 'siteTimeline']);
+        $router->get('/admin/settings/homepage', [$admin, 'homepageSettings']);
+        $router->post('/admin/settings/homepage', [$admin, 'homepageSettings']);
         $router->get('/admin/settings', [$admin, 'siteSettings']);
         $router->post('/admin/settings', [$admin, 'siteSettingsSave']);
         $router->get('/admin/settings/ai', [$admin, 'aiSettings']);
@@ -523,6 +544,8 @@ final class Application
         $router->get('/admin/plugins', [$admin, 'pluginIndex']);
         $router->get('/admin/plugins/detail', [$admin, 'pluginDetail']);
         $router->post('/admin/plugins/status', [$admin, 'pluginStatus']);
+        $router->post('/admin/plugins/permissions/grant', [$admin, 'pluginPermissionGrant']);
+        $router->post('/admin/plugins/permissions/revoke', [$admin, 'pluginPermissionRevoke']);
         $router->post('/admin/plugins/local-preview', [$admin, 'pluginLocalPreview']);
         $router->post('/admin/plugins/local-install', [$admin, 'pluginLocalInstall']);
         $router->post('/admin/plugins/uninstall', [$admin, 'pluginUninstall']);
@@ -640,7 +663,14 @@ final class Application
                     if ($route->admin && $route->method === 'POST') {
                         SessionManager::close();
                     }
-                    $response = ($route->handler)($request);
+                    $frontUser = !$route->admin ? (new FrontUserAuthenticator($pdo))->user() : null;
+                    $response = PluginPaymentRequestScope::run(
+                        $route->pluginId,
+                        $request->method,
+                        $route->csrf,
+                        is_array($frontUser) ? (int) $frontUser['id'] : null,
+                        static fn (): mixed => ($route->handler)($request),
+                    );
                     return $response instanceof Response ? $response : Response::text('插件路由返回了无效响应。', 500);
                 } catch (Throwable $exception) {
                     $logger->error('Plugin route failed', ['source' => 'Plugin', 'plugin_id' => $route->pluginId, 'error' => $exception->getMessage()]);

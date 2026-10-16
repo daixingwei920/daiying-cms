@@ -181,6 +181,9 @@ function gitBlob(string $root, string $commit, string $path): string
 function shouldPackage(string $file): bool
 {
     $file = str_replace('\\', '/', $file);
+    if ($file === 'config/app.php') {
+        return false; // The installer writes site-specific configuration after setup.
+    }
     if ($file === '' || (str_starts_with($file, '.') && !in_array($file, ['.htaccess'], true))) {
         return false;
     }

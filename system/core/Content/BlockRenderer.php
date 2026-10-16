@@ -66,6 +66,9 @@ final class BlockRenderer
         if ($renderer === null) {
             return '';
         }
+        if (isset($block['plugin_id']) && $block['plugin_id'] !== BlockRendererRegistry::owner($type)) {
+            return '';
+        }
 
         try {
             return (string) $renderer($block, [

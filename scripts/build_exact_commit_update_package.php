@@ -45,10 +45,16 @@ if (!preg_match('/^[0-9]+(?:\.[0-9A-Za-z-]+){1,3}$/', $version)) {
 }
 // Owner-approved direct upgrade contract for the 1.2.82 release family only.
 $is182 = preg_match('/^1\.2\.82(?:-|$)/', $version) === 1;
-$minUpgradeFrom = trim((string) ($options['min-upgrade-from'] ?? ($is182 ? '1.2.81' : '1.2.52')));
-if (!$is182 && $minUpgradeFrom === '') { $minUpgradeFrom = '1.2.52'; }
+$versionCore = preg_match('/^[0-9]+\.[0-9]+\.[0-9]+/', $version, $versionMatch) === 1 ? $versionMatch[0] : $version;
+$requires180Floor = version_compare($versionCore, '1.2.84', '>=');
+$defaultFloor = $is182 ? '1.2.81' : ($requires180Floor ? '1.2.80' : '1.2.52');
+$minUpgradeFrom = trim((string) ($options['min-upgrade-from'] ?? $defaultFloor));
+if ($minUpgradeFrom === '') { $minUpgradeFrom = $defaultFloor; }
 if ($is182 && $minUpgradeFrom !== '1.2.81') {
     fail('Core 1.2.82 direct upgrades require source version 1.2.81.');
+}
+if ($requires180Floor && $minUpgradeFrom !== '1.2.80') {
+    fail('Core 1.2.84 and later releases require minimum source version 1.2.80.');
 }
 $sourceVersionMax = $is182 ? '1.2.81' : $version;
 $releaseId = trim((string) ($options['release-id'] ?? 'daiying-cms-core-update-' . $version));
