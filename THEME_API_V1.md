@@ -54,6 +54,16 @@ themes.
 
 ## TemplateContext
 
+### Global ICP registration (Core 1.2.85 candidate, additive)
+
+Core page rendering supplies `site_icp_number` independently of theme settings.
+`siteIcpNumber(): string` reads it; `siteIcpFooter(): string` returns an escaped,
+centered footer linked to `https://beian.miit.gov.cn/`, or an empty string.
+Full HTML documents receive this footer before `</body>` if the helper marker
+`data-cms-site-icp="1"` is absent. Themes may output the helper inside their own
+footer to choose its position. Fragment templates must opt in explicitly.
+Core updates do not rewrite theme files or migrate legacy theme-only `icp_text`.
+
 Stable helpers:
 
 - `get($key, $default = null)`

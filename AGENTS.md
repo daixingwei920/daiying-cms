@@ -6,16 +6,13 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 
 ## Current Core Baseline
 
-- Product: Daiying CMS Core
-- Published baseline version: `1.2.83` (official GitHub Release and origin/main checked on 2026-10-14).
-- Published Git tag: `v1.2.83`.
-- Published baseline commit: `76d4d8ed4b4aa470146c0a0c582061b256d1348b`.
-- Pending maintenance candidate: `1.2.84`; not published until the official release is verified.
-- Current release integration worktree:
-  `/Users/xingweidai/Documents/Codex/2026-10-14/task/isolated-market-rehearsal/core-enable-fix/approved-prerelease-repair/work/release-1.2.84`
-- Candidate branch: `codex/release-1.2.84`; resolve HEAD for the final release commit.
-- Core closeout report:
-  `/Users/xingweidai/Documents/Codex/2026-09-03/Daiying-CMS-WIP-Archive/core-closeout-1.2.63-20260915-231639/CORE_CLOSED_REPORT.md`
+- Product: Daiying CMS Core.
+- Published baseline: `1.2.84`, official tag `v1.2.84`, commit `446eb8e5c0e74e9ec1e3d44d32cad886e4fafa0a` (remote main/tag/release verified 2026-10-17).
+- Pending maintenance candidate: `1.2.85`; not published until server-side signing, release gates and publication are verified.
+- Clean candidate worktree: `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/core-1.2.85`.
+- Candidate branch: `codex/cms-debts-1.2.85`.
+- Candidate scope: global ICP site settings and theme footer, GPT-5 Chat Completions parameter compatibility, revalidation of book-title slug support already released in 1.2.83.
+- All existing signing, approval, maintenance and production boundaries below remain in force.
 
 ## Workspace Rules
 

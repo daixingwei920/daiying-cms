@@ -142,3 +142,12 @@ P2: Health/admin version display still reads pointer metadata directly in some l
 P3: Root launcher active release path validation is implemented separately in Web, CLI, and scheduled publishing scripts; future cleanup could consolidate this helper if a safe shared bootstrap utility exists.
 
 P2: AI Provider technical debt: Core 1.2.81 OpenAI-compatible Adapter does not yet fully support GPT-5 family token budget parameters. `gpt-5-mini` rejects `max_tokens` and requires `max_completion_tokens`, while current compatibility logic only switches this field for Meta Muse-style providers. Current operational workaround: use `gpt-4.1-mini`. Future fix should update the shared OpenAI-compatible Adapter to detect GPT-5 family models, send `max_completion_tokens`, preserve existing Meta Muse/Groq/OpenAI-compatible behavior, and add regression coverage for both test-connection and normal chat requests.
+
+
+## 2026-10-17 scoped maintenance reconciliation (1.2.85 candidate)
+
+- `CMS-DEBT-20261012-01` / explicit book-title slugs: already implemented and published in 1.2.83. Re-ran `tests/content_book_title_slug.php` on the 1.2.85 worktree: 54 assertions PASS. No new slug implementation, content migration or redirect removal. Status: VERIFIED_EXISTING_FIX (isolated tests; production upgrade not performed).
+- GPT-5 AI Provider parameters (P2 entry above): 1.2.85 candidate maps GPT-5-family budgets to `max_completion_tokens`, omits temperature, and gives connection tests a 2048-token budget. New transport contract and existing AI/Meta Muse/Groq/local regressions passed. Status: FIXED_CANDIDATE_NOT_PUBLISHED; live external-provider requests not tested.
+- Global ICP site settings: 1.2.85 candidate adds `site.icp_number`, authenticated settings save/reload/clear, additive theme helpers and a full-page theme footer with the official lookup URL. Existing theme files and `icp_text` settings are preserved. `tests/site_icp_settings.php`: 29 assertions PASS in isolated SQLite. Status: FIXED_CANDIDATE_NOT_PUBLISHED; production and physical-device acceptance not performed.
+
+These are the three Owner-requested maintenance items. The historical P2/P3 cleanup notes above are not expanded into this task. Signed publication and live-site upgrade remain separate gates.
