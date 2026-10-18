@@ -1,7 +1,7 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
   "verified_version": "1.2.85",
-  "last_verified_at": "2026-10-18T03:32:08+00:00",
+  "last_verified_at": "2026-10-18T04:53:32+00:00",
   "records": [
     {
       "id": "install.web_installer",
@@ -32,8 +32,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -70,8 +70,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -108,8 +108,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -146,14 +146,14 @@
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
-          "line_start": 590,
-          "line_end": 590
+          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
+          "line_start": 592,
+          "line_end": 592
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -178,9 +178,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
-          "line_start": 555,
-          "line_end": 555
+          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
+          "line_start": 557,
+          "line_end": 557
         },
         {
           "path": "system/core/Recovery/RecoveryController.php",
@@ -190,8 +190,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -228,8 +228,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -254,9 +254,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
-          "line_start": 504,
-          "line_end": 504
+          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
+          "line_start": 506,
+          "line_end": 506
         },
         {
           "path": "system/core/Seo/Keyword/SeoLifecycleAggregator.php",
@@ -266,8 +266,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -292,9 +292,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
-          "line_start": 514,
-          "line_end": 514
+          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
+          "line_start": 516,
+          "line_end": 516
         },
         {
           "path": "system/core/Seo/Keyword/SeoLifecycleAggregator.php",
@@ -304,8 +304,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -330,7 +330,7 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
+          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
           "line_start": 413,
           "line_end": 413
         },
@@ -348,8 +348,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -386,8 +386,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -412,9 +412,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
-          "line_start": 480,
-          "line_end": 480
+          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
+          "line_start": 482,
+          "line_end": 482
         },
         {
           "path": "system/core/Ai/AiService.php",
@@ -436,8 +436,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -474,8 +474,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -512,8 +512,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -544,14 +544,14 @@
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
-          "line_start": 567,
-          "line_end": 567
+          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
+          "line_start": 569,
+          "line_end": 569
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -594,8 +594,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -631,8 +631,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -663,8 +663,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -701,8 +701,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -739,8 +739,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -783,8 +783,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -821,8 +821,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -865,8 +865,8 @@
         }
       ],
       "verified_version": "1.2.85",
-      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-      "last_verified_at": "2026-10-18T03:32:08+00:00",
+      "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+      "last_verified_at": "2026-10-18T04:53:32+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -876,10 +876,10 @@
       "enabled_for_customer_service": true
     }
   ],
-  "package_revision": "2026-10-17.1-candidate",
+  "package_revision": "2026-10-18.2-candidate",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
-  "source_tag": "candidate/core-1.2.85-code",
+  "source_commit": "b266cf7bf8c925faeea4ad5cbc6304beead2b3d5",
+  "source_tag": "candidate/core-1.2.85-passkey-reauth-code",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "CANDIDATE_NOT_PUBLISHED",
