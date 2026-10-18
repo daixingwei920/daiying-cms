@@ -1,7 +1,7 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
-  "verified_version": "1.2.83",
-  "last_verified_at": "2026-10-15T01:00:56+00:00",
+  "verified_version": "1.2.85",
+  "last_verified_at": "2026-10-18T03:32:08+00:00",
   "records": [
     {
       "id": "install.web_installer",
@@ -11,7 +11,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; system/core/Install/InstallController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -31,9 +31,9 @@
           "line_end": 171
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -49,7 +49,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/RuntimeRequirements.php; system/core/Support/SystemHealthDoctor.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -69,9 +69,9 @@
           "line_end": 151
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -87,7 +87,7 @@
       "audience": "Administrator",
       "source": "docs/themes.md; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/articles/{slug}",
@@ -107,9 +107,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -125,7 +125,7 @@
       "audience": "Administrator",
       "source": "docs/update-system.md; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -146,14 +146,14 @@
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "3481a7fe240bd5356e4456c1e3d7ff312dcf0bb95c8216d2a8b3a75efea38d29",
-          "line_start": 565,
-          "line_end": 565
+          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
+          "line_start": 590,
+          "line_end": 590
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -169,7 +169,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Recovery/RecoveryController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "/admin/recovery",
       "public_route": "",
@@ -178,9 +178,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "3481a7fe240bd5356e4456c1e3d7ff312dcf0bb95c8216d2a8b3a75efea38d29",
-          "line_start": 530,
-          "line_end": 530
+          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
+          "line_start": 555,
+          "line_end": 555
         },
         {
           "path": "system/core/Recovery/RecoveryController.php",
@@ -189,9 +189,9 @@
           "line_end": 50
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -207,7 +207,7 @@
       "audience": "Administrator",
       "source": "SECURITY.md; docs/installation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -227,9 +227,9 @@
           "line_end": 45
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -245,7 +245,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "/admin/seo/keywords",
       "public_route": "",
@@ -254,9 +254,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "3481a7fe240bd5356e4456c1e3d7ff312dcf0bb95c8216d2a8b3a75efea38d29",
-          "line_start": 481,
-          "line_end": 481
+          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
+          "line_start": 504,
+          "line_end": 504
         },
         {
           "path": "system/core/Seo/Keyword/SeoLifecycleAggregator.php",
@@ -265,9 +265,9 @@
           "line_end": 94
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -283,7 +283,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "/admin/seo/search-engines",
       "public_route": "",
@@ -292,9 +292,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "3481a7fe240bd5356e4456c1e3d7ff312dcf0bb95c8216d2a8b3a75efea38d29",
-          "line_start": 491,
-          "line_end": 491
+          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
+          "line_start": 514,
+          "line_end": 514
         },
         {
           "path": "system/core/Seo/Keyword/SeoLifecycleAggregator.php",
@@ -303,9 +303,9 @@
           "line_end": 348
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -321,7 +321,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Content/ContentFrontController.php; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/sitemap.xml",
@@ -330,15 +330,15 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "3481a7fe240bd5356e4456c1e3d7ff312dcf0bb95c8216d2a8b3a75efea38d29",
-          "line_start": 392,
-          "line_end": 392
+          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
+          "line_start": 413,
+          "line_end": 413
         },
         {
           "path": "system/core/Content/ContentFrontController.php",
-          "sha256": "f103c1bf0a8f8ba0f1358e8b8929e1345458cd5a75ca7d057d0728ead863a1af",
-          "line_start": 296,
-          "line_end": 296
+          "sha256": "f10ae1097af31476d34003fda0f416c03df0b677437741d815fcbac4974b1c9c",
+          "line_start": 299,
+          "line_end": 299
         },
         {
           "path": "docs/content-slug-policy.md",
@@ -347,9 +347,9 @@
           "line_end": 7
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -365,7 +365,7 @@
       "audience": "Administrator",
       "source": "docs/commerce.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -385,9 +385,9 @@
           "line_end": 48
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -403,7 +403,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Ai/AiService.php; system/core/Ai/AiProviderPresets.php; system/core/Ai/AiGateway.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -412,9 +412,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "3481a7fe240bd5356e4456c1e3d7ff312dcf0bb95c8216d2a8b3a75efea38d29",
-          "line_start": 457,
-          "line_end": 457
+          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
+          "line_start": 480,
+          "line_end": 480
         },
         {
           "path": "system/core/Ai/AiService.php",
@@ -435,9 +435,9 @@
           "line_end": 25
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -453,7 +453,7 @@
       "audience": "Administrator",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -473,9 +473,9 @@
           "line_end": 628
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -491,7 +491,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -511,9 +511,9 @@
           "line_end": 5
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -529,7 +529,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "/admin/migrations",
       "public_route": "",
@@ -544,14 +544,14 @@
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "3481a7fe240bd5356e4456c1e3d7ff312dcf0bb95c8216d2a8b3a75efea38d29",
-          "line_start": 542,
-          "line_end": 542
+          "sha256": "41445c76b67c36f46ed308a3271cff00f8f5534b1854e0e1ec5bcc298ee3bdd4",
+          "line_start": 567,
+          "line_end": 567
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -567,7 +567,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "user_facing": true,
       "admin_route": "/admin/update;/admin/recovery",
       "public_route": "",
@@ -593,9 +593,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -615,24 +615,24 @@
       "description": "本知识包以正式发布的 Core 1.2.83 为源码基线，对应 v1.2.83 和提交 76d4d8ed4b4aa470146c0a0c582061b256d1348b。1.2.84 当前仅为候选，不能写成已发布；发布状态须以后续官方发布证据重新核对。",
       "source": "config/app.example.php; CHANGELOG.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "source_evidence": [
         {
           "path": "config/app.example.php",
-          "sha256": "5ea391cb5632281eef5b161554a7a486906ca3278079c1c0a45aaab00eae2b5b",
+          "sha256": "c8abf7e6b4dae05bd42bfccc4406642a2bcb6f10989525197e64f5ccc0d4c208",
           "line_start": 8,
           "line_end": 8
         },
         {
           "path": "CHANGELOG.md",
-          "sha256": "d7b26f7c8be22405fb45ea149bf70d4f51a61f7a119f839012d1411d753391f1",
-          "line_start": 3,
-          "line_end": 3
+          "sha256": "1016d90685d72c3c7f7d834d887451718787c2c7940fc6df2d8fb27e5d85eb5b",
+          "line_start": 22,
+          "line_end": 22
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -653,7 +653,7 @@
       "description": "1.2.83 支持显式文章、页面和分类 slug 保留《》。留空时仍自动生成简洁 slug，已有 slug 与重定向不自动迁移。仍拒绝分隔符、路径穿越、控制字符、查询/片段符和预编码百分号输入；填写原始书名号，不粘贴 URL 编码。",
       "source": "docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "source_evidence": [
         {
           "path": "docs/content-slug-policy.md",
@@ -662,9 +662,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -685,13 +685,13 @@
       "description": "1.2.82 增加四个校验绑定的历史 MySQL 迁移方言适配，不修改已发布迁移文件。1.2.83 延续该能力；这不代表任意 MySQL/MariaDB 环境均已验收。选择数据库后仍应在安装器测试连接和实际完成安装。",
       "source": "CHANGELOG.md; system/core/Migration/MysqlHistoricalMigrationDialect.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "d7b26f7c8be22405fb45ea149bf70d4f51a61f7a119f839012d1411d753391f1",
-          "line_start": 18,
-          "line_end": 18
+          "sha256": "1016d90685d72c3c7f7d834d887451718787c2c7940fc6df2d8fb27e5d85eb5b",
+          "line_start": 37,
+          "line_end": 37
         },
         {
           "path": "system/core/Migration/MysqlHistoricalMigrationDialect.php",
@@ -700,9 +700,9 @@
           "line_end": 12
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -723,7 +723,7 @@
       "description": "首次安装失败须保留错误并修复原因。若管理员已创建但完成锁失败，入口会阻断，不能伪造完成锁或重复创建管理员。MySQL DDL 不保证全链事务回滚；只有负责人明确确认专用数据可丢弃后，才可人工清理重装。生产站不得删除数据库来修复升级。",
       "source": "docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "source_evidence": [
         {
           "path": "docs/first-install-failure.md",
@@ -738,9 +738,9 @@
           "line_end": 11
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -761,19 +761,19 @@
       "description": "1.2.82 的直接升级验证范围为 1.2.81 → 1.2.82；不能泛化为任意旧版直升最新。实际领取和安装必须服从目标包的签名版本范围与兼容检查。Core 更新不替换已安装插件；旧 Commerce 的 MySQL 参数修复需要独立插件更新。",
       "source": "CHANGELOG.md; docs/release/1.2.82-upgrade-support.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "d7b26f7c8be22405fb45ea149bf70d4f51a61f7a119f839012d1411d753391f1",
-          "line_start": 21,
-          "line_end": 21
+          "sha256": "1016d90685d72c3c7f7d834d887451718787c2c7940fc6df2d8fb27e5d85eb5b",
+          "line_start": 40,
+          "line_end": 40
         },
         {
           "path": "CHANGELOG.md",
-          "sha256": "d7b26f7c8be22405fb45ea149bf70d4f51a61f7a119f839012d1411d753391f1",
-          "line_start": 22,
-          "line_end": 22
+          "sha256": "1016d90685d72c3c7f7d834d887451718787c2c7940fc6df2d8fb27e5d85eb5b",
+          "line_start": 41,
+          "line_end": 41
         },
         {
           "path": "docs/release/1.2.82-upgrade-support.md",
@@ -782,9 +782,9 @@
           "line_end": 4
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -805,7 +805,7 @@
       "description": "Owner 于 2026-10-09 决定小说和视频产品退役，不再作为新安装分发、维护或规划产品。保留历史源码、已安装客户资产、订单和许可；退役不等于自动卸载、撤销授权或已完成市场下架。",
       "source": "docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "source_evidence": [
         {
           "path": "docs/retired-products.md",
@@ -820,9 +820,9 @@
           "line_end": 11
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -843,7 +843,7 @@
       "description": "历史文章 SEO 补全和内容优化入口为 /admin/seo/historical-backfill 与 /admin/seo/content-quality。AI 针对 B/C 级历史文章生成待审核草稿，经统一站点 AI 调用；不自动发布或修改 URL。原优化器尚未接入本统一知识包；不能声称资料自动更新已生效。",
       "source": "system/core/Support/View.php; system/core/Seo/Historical/HistoricalArticleSeoBackfillService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned v1.2.83 source/document review; not runtime or production acceptance.",
+      "evidence": "Pinned 1.2.85 candidate source/document review. Candidate not published; runtime evidence is recorded separately in docs/release/1.2.85-maintenance.md.",
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
@@ -864,9 +864,9 @@
           "line_end": 827
         }
       ],
-      "verified_version": "1.2.83",
-      "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-      "last_verified_at": "2026-10-15T01:00:56+00:00",
+      "verified_version": "1.2.85",
+      "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+      "last_verified_at": "2026-10-18T03:32:08+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -876,17 +876,17 @@
       "enabled_for_customer_service": true
     }
   ],
-  "package_revision": "2026-10-14.1",
+  "package_revision": "2026-10-17.1-candidate",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "76d4d8ed4b4aa470146c0a0c582061b256d1348b",
-  "source_tag": "v1.2.83",
+  "source_commit": "0e341cf27c2cc602df07383142fdddc63ff2b53a",
+  "source_tag": "candidate/core-1.2.85-code",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
-    "url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.83",
-    "published_at": "2026-10-13T04:27:28Z",
-    "draft": false,
-    "prerelease": false,
-    "checked_at": "2026-10-15T01:00:56+00:00"
+    "status": "CANDIDATE_NOT_PUBLISHED",
+    "previous_stable_version": "1.2.84",
+    "previous_stable_commit": "446eb8e5c0e74e9ec1e3d44d32cad886e4fafa0a",
+    "previous_stable_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.84",
+    "checked_at": "2026-10-18T03:32:08+00:00"
   },
   "runtime_validation": "NOT_RUN_THIS_TASK",
   "retrieval_policy": {
@@ -914,5 +914,6 @@
     "customer_service_latest_package_import": "NOT_RUN",
     "core_optimizer_shared_knowledge": "NOT_IMPLEMENTED"
   },
+  "release_status": "CANDIDATE_NOT_PUBLISHED",
   "export_scope": "USER-FACING_ONLY"
 }
