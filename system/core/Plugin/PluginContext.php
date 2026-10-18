@@ -69,6 +69,7 @@ final class PluginContext
         private readonly ?PluginAdvertisingService $advertising = null,
         private readonly ?PluginPaymentService $payments = null,
         private readonly bool $trustedHomepageAccess = false,
+        private readonly ?PluginAiImageService $images = null,
     ) {
     }
 
@@ -265,6 +266,12 @@ final class PluginContext
         }
 
         return $this->ai;
+    }
+
+    public function images(): PluginAiImageService
+    {
+        if ($this->images === null) throw new PluginException('Image service is not available.');
+        return $this->images;
     }
 
     public function mail(): MailService

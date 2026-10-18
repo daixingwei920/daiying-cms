@@ -1619,6 +1619,11 @@ final class AdminController
             '<label>Model<input id="ai-model" name="model" maxlength="191" value="' . View::escape((string) ($config['model'] ?? '')) . '" placeholder="deepseek-chat"></label>' .
             '<label>Context Window<input name="context_window" type="number" min="0" max="2000000" value="' . View::escape((string) ($config['context_window'] ?? 0)) . '"></label>' .
             '<label>OpenClaw Agent<input name="openclaw_agent" maxlength="191" value="' . View::escape((string) ($config['openclaw_agent'] ?? '')) . '" placeholder="可选 Agent ID"></label>' .
+            '<label>图像模型<select name="image_model"><option value="">关闭图像能力</option><option value="gpt-image-1.5"' . (($config['image_model'] ?? '') === 'gpt-image-1.5' ? ' selected' : '') . '>OpenAI · GPT Image 1.5</option></select></label>' .
+            '<p class="muted">复用本站 Provider、端点和 API Key，仅支持官方 OpenAI 端点；不改变文字模型或 Timeout。模型声明不代表账号已实测。</p>' .
+            '<label>每用户每日图像任务上限<input type="number" name="image_daily_limit" min="1" max="1000" value="' . (int) ($config['image_daily_limit'] ?? 10) . '"></label>' .
+            '<label>每用户每分钟图像任务上限<input type="number" name="image_minute_limit" min="1" max="60" value="' . (int) ($config['image_minute_limit'] ?? 2) . '"></label>' .
+            '<label>单次图像预估成本（百万分之一 USD，留空代表未知）<input type="number" name="image_cost_micro" min="0" max="1000000000" value="' . View::escape((string) ($config['image_cost_micro'] ?? '')) . '"></label>' .
             '<label>Timeout 秒<input name="timeout_seconds" type="number" min="1" max="120" value="' . View::escape((string) ($config['timeout_seconds'] ?? 30)) . '"></label>' .
             '<label>Max Tokens<input name="max_tokens" type="number" min="1" max="200000" value="' . View::escape((string) ($config['max_tokens'] ?? 1024)) . '"></label>' .
             '<label>Temperature<input name="temperature" type="number" min="0" max="2" step="0.1" value="' . View::escape((string) ($config['temperature'] ?? 0.7)) . '"></label>' .
@@ -1710,6 +1715,16 @@ final class AdminController
             throw new \InvalidArgumentException('启用 Cloud Fallback 时必须选择一个云端 Provider。');
         }
 
+        $previousImage = $this->aiService()->getConfig();
+        $imageModel = (string) $request->input('image_model', $previousImage['image_model'] ?? '');
+        $imageDaily = (int) $request->input('image_daily_limit', $previousImage['image_daily_limit'] ?? 10);
+        $imageMinute = (int) $request->input('image_minute_limit', $previousImage['image_minute_limit'] ?? 2);
+        $imageCostRaw = $request->input('image_cost_micro', $previousImage['image_cost_micro'] ?? '');
+        if (!in_array($imageModel, ['', 'gpt-image-1.5'], true) || $imageDaily < 1 || $imageDaily > 1000 || $imageMinute < 1 || $imageMinute > 60
+            || ($imageCostRaw !== '' && $imageCostRaw !== null && (!ctype_digit((string)$imageCostRaw) || (int)$imageCostRaw > 1000000000))) {
+            throw new \InvalidArgumentException('图像模型、配额或预估成本无效。');
+        }
+
         $apiKey = trim((string) $request->input('api_key', ''));
         if ($apiKey !== '' && (strlen($apiKey) > 4096 || preg_match('/[\x00-\x1F\x7F]/', $apiKey) === 1)) {
             throw new \InvalidArgumentException('AI API Key 格式无效。');
@@ -1722,6 +1737,10 @@ final class AdminController
             'adapter' => $adapter,
             'base_url' => $baseUrl,
             'model' => $model,
+            'image_model' => $imageModel,
+            'image_daily_limit' => $imageDaily,
+            'image_minute_limit' => $imageMinute,
+            'image_cost_micro' => $imageCostRaw === '' || $imageCostRaw === null ? null : (int)$imageCostRaw,
             'timeout_seconds' => $timeout,
             'max_tokens' => $maxTokens,
             'temperature' => $temperature,

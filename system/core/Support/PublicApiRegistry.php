@@ -15,6 +15,14 @@ final class PublicApiRegistry
     {
         return [
             [
+                'id' => 'ai.images',
+                'version' => '0.1.0-alpha',
+                'class' => 'Cms\\Core\\Plugin\\PluginAiImageService',
+                'stability' => 'experimental',
+                'summary' => 'Scoped asynchronous image generation/editing through Core site AI configuration, quota and private media.',
+                'capabilities' => ['ai.use', 'ai.image'],
+            ],
+            [
                 'id' => 'ai.gateway',
                 'version' => FoundationVersions::AI_API,
                 'class' => 'Cms\\Core\\Ai\\AiGateway',

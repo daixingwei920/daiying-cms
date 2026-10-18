@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.0-alpha.1 — 开发分支，未发布
+
+- 新增实验性 text.generate / image.generate / image.edit 能力与独立图像适配器契约，文字 API 保持兼容。
+- 图像复用站点凭据与原有 Timeout，新增独立图像模型、用户限额、持久任务和成本审计；未知结果不自动重发。
+- 新增通用私有媒体存储，阻断公开媒体入口访问；修复 PNG 等格式重编码丢失 alpha。
+- 队列增加原子领取与类型过滤。Logo 插件独立交付，不并入 Core 发行包。
+- 仅官方 OpenAI / gpt-image-1.5 图像组合已在指定账号隔离实跑；其他模型未声明支持。1.2.85 签名包保持冻结。
+
+
 ## 1.2.85 - 2026-10-17 (Release Candidate)
 
 - Add a global ICP registration number to Site Settings. Existing full-page themes display a centered registration link without overwriting theme files; the number persists across theme switches and can be cleared.

@@ -14,6 +14,17 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 - Candidate scope: global ICP site settings and theme footer, GPT-5 Chat Completions parameter compatibility, revalidation of book-title slug support already released in 1.2.83.
 - All existing signing, approval, maintenance and production boundaries below remain in force.
 
+## Owner-authorized AI image development (2026-10-18)
+
+- Development branch: `codex/ai-image-logo`, clean base `d578a05dae9742d177167cc4665482cc80cc9ea7`.
+- Development version: `1.3.0-alpha.1`, not Stable and not approved for publication.
+- Workspace: `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/ai-image-logo`.
+- Separate plugin source: sibling `daiying-ai-logo`; never include it in Core-owned payloads.
+- Owner explicitly authorized the generic image AI contract, adapter, queue, private media, quota and audit work despite the default maintenance-only rule.
+- Core 1.2.85 signed artifacts remain frozen and publication paused. Do not rewrite their commit/tag/artifacts.
+- No production writes; existing site AI settings may be read for explicitly requested isolated live tests. Never copy keys to the workstation or into output/logs.
+- Other thread owns LocalPluginPackageInstaller market API enable repair; integrate only its immutable tested commit, not shared dirty files.
+
 ## Workspace Rules
 
 Use the clean Core worktree above, or create a fresh clean clone/worktree from the current official Core branch, for all Core maintenance.

@@ -81,9 +81,9 @@ final class AiProviderRegistry
     private static function defaultCapabilities(string $adapter): array
     {
         return match ($adapter) {
-            'gemini' => ['text', 'chat', 'vision', 'structured_output', 'text_generation', 'streaming'],
-            'openclaw' => ['text', 'chat', 'tools', 'agent', 'text_generation', 'tool_calling', 'streaming'],
-            default => ['text', 'chat', 'structured_output', 'tools', 'text_generation', 'tool_calling', 'streaming'],
+            'gemini' => ['text', 'chat', 'vision', 'structured_output', 'text.generate', 'text_generation', 'streaming'],
+            'openclaw' => ['text', 'chat', 'tools', 'agent', 'text.generate', 'text_generation', 'tool_calling', 'streaming'],
+            default => ['text', 'chat', 'structured_output', 'tools', 'text.generate', 'text_generation', 'tool_calling', 'streaming'],
         };
     }
 }

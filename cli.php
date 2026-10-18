@@ -864,7 +864,19 @@ if ($command === 'retry-commercial-audit-risk-notifications') {
     exit(0);
 }
 
+if ($command === 'run-ai-image-jobs') {
+    $settings = Settings::load(CMS_ROOT);
+    $pdo = ConnectionFactory::make($settings);
+    $images = new \Cms\Core\Ai\AiImageService($pdo, $settings, CMS_ROOT);
+    $images->registerWorker();
+    $recovery = $images->recover();
+    $result = (new \Cms\Core\Queue\QueueService($pdo))->process(cms_cli_positive_limit($argv[2] ?? null, 10), 'ai.image');
+    echo json_encode(['recovery' => $recovery, 'queue' => $result], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT), PHP_EOL;
+    exit(0);
+}
+
 echo "Available commands:" . PHP_EOL;
+echo "  run-ai-image-jobs [limit]  Recover and process Core image tasks; never replay ambiguous provider calls" . PHP_EOL;
 echo "  migrate    Run core database migrations" . PHP_EOL;
 echo "  market:platform:init --yes --email=<owner> --name=<name>  Initialize this server as the official Market Platform and create the first Platform Owner" . PHP_EOL;
 echo "  market:platform-owner:reset-password --email=<owner>  Reset an existing Platform Owner password from the server CLI" . PHP_EOL;

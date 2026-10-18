@@ -65,6 +65,8 @@ final class AiService
     {
         return [
             'chat' => true,
+            'text.generate' => true,
+            'image_models' => array_map(static fn (AiModel $m): array => $m->toArray(), (new OpenAiImageProvider())->models()),
             'test_connection' => true,
             'model_discovery' => true,
             'fallback' => true,
@@ -85,6 +87,12 @@ final class AiService
     private function repository(): SiteAiSettingsRepository
     {
         return new SiteAiSettingsRepository($this->pdo, (string) $this->settings->get('security.encryption_key', ''));
+    }
+
+    /** Core factory; plugins use the identity-scoped PluginContext::images() facade. */
+    public function images(string $rootPath): AiImageService
+    {
+        return new AiImageService($this->pdo, $this->settings, $rootPath);
     }
 
     public function gateway(): AiGateway

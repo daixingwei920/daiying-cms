@@ -35,6 +35,7 @@ final class MediaController
         try {
             $library = new MediaLibrary(ConnectionFactory::make($this->settings), $this->rootPath . '/content/uploads');
             $mediaRow = $library->find($id);
+            if (($mediaRow['storage_provider'] ?? '') === 'private') return $this->mediaNotFoundResponse();
             if (is_array($mediaRow) && $this->isRemoteMedia($mediaRow)) {
                 return $this->remoteMediaResponse($request, $library, $mediaRow);
             }

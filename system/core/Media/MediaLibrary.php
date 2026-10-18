@@ -304,7 +304,7 @@ final class MediaLibrary
     public function viewModel(int $id): array
     {
         $media = $this->find($id);
-        if ($media === null || (string) ($media['status'] ?? '') !== 'Active') {
+        if ($media === null || ($media['storage_provider'] ?? '') === 'private' || (string) ($media['status'] ?? '') !== 'Active') {
             return ['id' => $id, 'available' => false, 'url' => '', 'media_type' => 'missing'];
         }
 
@@ -344,7 +344,7 @@ final class MediaLibrary
     public function fileForResponse(int $id, string $variant = ''): array
     {
         $media = $this->find($id);
-        if ($media === null || (string) ($media['status'] ?? '') !== 'Active') {
+        if ($media === null || (string) ($media['status'] ?? '') !== 'Active' || ($media['storage_provider'] ?? '') !== $this->storage()->id()) {
             throw new MediaException('Media not found.');
         }
         $path = $this->absolutePath($media, $variant);
@@ -471,8 +471,8 @@ final class MediaLibrary
     /** @return array<string, mixed>|null */
     private function byHash(string $hash): ?array
     {
-        $stmt = $this->pdo->prepare('SELECT * FROM cms_media WHERE sha256_hash = :hash LIMIT 1');
-        $stmt->execute([':hash' => $hash]);
+        $stmt = $this->pdo->prepare('SELECT * FROM cms_media WHERE sha256_hash = :hash AND storage_provider = :storage_provider LIMIT 1');
+        $stmt->execute([':hash' => $hash, ':storage_provider' => $this->storage()->id()]);
         $row = $stmt->fetch();
 
         return is_array($row) ? $this->hydrate($row) : null;

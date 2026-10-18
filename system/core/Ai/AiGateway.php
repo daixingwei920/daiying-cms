@@ -24,6 +24,9 @@ final class AiGateway
 
     public function request(AiRequest $request): AiResponse
     {
+        if (array_intersect(['image.generate', 'image.edit'], $request->capabilities) !== []) {
+            throw new AiException('Use the dedicated image service for image operations.', 'capability_unsupported');
+        }
         $request = new AiRequest(
             $this->service->messagesForGateway($request->messages),
             $request->capabilities,
