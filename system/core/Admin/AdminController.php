@@ -1039,6 +1039,48 @@ final class AdminController
         }
     }
 
+    public function adminSecurityPasskeyReauthOptions(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return Response::json(['error' => 'not_authenticated'], 401);
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::json(['error' => 'csrf'], 403);
+        }
+        try {
+            $service = new AdminPasskeyService(ConnectionFactory::make($this->settings), $this->settings);
+            return Response::json($service->authenticationOptions((int) $guard['id'], 'reauth'));
+        } catch (Throwable $exception) {
+            $this->logger->error('Admin passkey reauthentication options failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::json(['error' => 'Passkey 暂不可用，请使用管理员密码。'], 400);
+        }
+    }
+
+    public function adminSecurityPasskeyReauthVerify(Request $request): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) {
+            return Response::json(['error' => 'not_authenticated'], 401);
+        }
+        if (!CsrfToken::verify($request->input('_csrf'))) {
+            return Response::json(['error' => 'csrf'], 403);
+        }
+        try {
+            $pdo = ConnectionFactory::make($this->settings);
+            $adminId = (int) $guard['id'];
+            if (!(new AdminPasskeyService($pdo, $this->settings))->verifyAuthentication($adminId, $request->body, 'reauth')) {
+                (new AuditLogger($pdo))->record('admin', $adminId, 'admin.reauthentication_failed', ['method' => 'passkey']);
+                return Response::json(['error' => 'Passkey 验证失败，请重试或使用管理员密码。'], 401);
+            }
+            (new AdminSessionService($pdo))->markReauthenticated($adminId);
+            return Response::json(['ok' => true]);
+        } catch (Throwable $exception) {
+            $this->logger->error('Admin passkey reauthentication failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
+            return Response::json(['error' => 'Passkey 暂不可用，请使用管理员密码。'], 500);
+        }
+    }
+
     public function adminSecurityLogoutOtherSessions(Request $request): Response
     {
         $guard = $this->requireAdmin();
@@ -3768,7 +3810,9 @@ final class AdminController
             $paymentPermission = '<h3>支付权限</h3><p>payment.access：' . View::escape($permissionState) .
                 '。安装审核与支付权限授权是独立操作，启用支付 Provider 也需单独配置。</p>';
             if ($permissionState !== 'unavailable' && $this->adminHasCapability('plugins.manage')) {
-                if ((new AdminSessionService($pdo))->hasRecentReauthentication(600)) {
+                if ($status !== PluginLifecycle::ENABLED && $permissionState !== 'granted') {
+                    $paymentPermission .= '<p class="muted">请先启用插件，再进行支付权限授权；重新认证不会解决插件启用失败。</p>';
+                } elseif ((new AdminSessionService($pdo))->hasRecentReauthentication(600)) {
                     $action = $permissionState === 'granted' ? 'revoke' : 'grant';
                     $paymentPermission .= '<form method="post" action="' . View::escape($this->adminPath('/admin/plugins/permissions/' . $action)) . '">' .
                         CsrfToken::field() .
@@ -8667,19 +8711,33 @@ final class AdminController
     private function adminReauthenticationHtml(int $adminId): string
     {
         try {
-            $service = new AdminSessionService(ConnectionFactory::make($this->settings));
+            $pdo = ConnectionFactory::make($this->settings);
+            $service = new AdminSessionService($pdo);
             $fresh = $service->hasRecentReauthentication();
+            $hasPasskey = (new AdminPasskeyService($pdo, $this->settings))->hasPasskey($adminId);
         } catch (Throwable) {
             $fresh = false;
+            $hasPasskey = false;
         }
         $badge = $fresh
             ? '<span class="admin-badge admin-badge-success">已重新验证</span>'
             : '<span class="admin-badge admin-badge-muted">需要时重新验证</span>';
         return '<section class="admin-card"><h2>敏感操作重认证</h2><p>' . $badge . '</p>' .
-            '<p class="muted">删除 Passkey、停用 MFA、更新 Core、清理插件等高风险操作前，管理员应先重新输入当前密码完成短时身份确认。</p>' .
+            '<p class="muted">部分敏感操作需要短时身份确认。已添加 Passkey 的管理员可以使用设备的人脸、指纹或 PIN；管理员密码仍可使用。</p>' .
+            ($hasPasskey ? '<button type="button" data-passkey-reauth>使用 Passkey 重新验证</button><p class="muted" data-passkey-reauth-status></p>' . $this->passkeyReauthScript(CsrfToken::get()) : '') .
             '<form method="post" action="/admin/security/reauth">' . CsrfToken::field() .
             '<label>当前管理员密码<input name="password" type="password" autocomplete="current-password" required></label>' .
-            '<button type="submit">重新验证身份</button></form></section>';
+            '<button type="submit">使用密码重新验证</button></form></section>';
+    }
+
+    private function passkeyReauthScript(string $csrf): string
+    {
+        return '<script>
+function dyReauthDecode(v){v=v.replace(/-/g,"+").replace(/_/g,"/");while(v.length%4)v+="=";var s=atob(v),b=new Uint8Array(s.length);for(var i=0;i<s.length;i++)b[i]=s.charCodeAt(i);return b.buffer}
+function dyReauthEncode(v){var s="",b=new Uint8Array(v);for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")}
+var dyReauthButton=document.querySelector("[data-passkey-reauth]");
+if(dyReauthButton){dyReauthButton.addEventListener("click",async function(){var status=document.querySelector("[data-passkey-reauth-status]");dyReauthButton.disabled=true;try{if(!window.PublicKeyCredential)throw new Error("当前浏览器不支持 Passkey");var form=new URLSearchParams();form.set("_csrf","' . View::escape($csrf) . '");var response=await fetch("/admin/security/reauth/passkey-options",{method:"POST",body:form});var opt=await response.json();if(!response.ok||opt.error)throw new Error(opt.error||"请求失败");opt.challenge=dyReauthDecode(opt.challenge);opt.allowCredentials=opt.allowCredentials.map(function(c){return {type:c.type,id:dyReauthDecode(c.id)}});var cred=await navigator.credentials.get({publicKey:opt});var out=new URLSearchParams();out.set("_csrf","' . View::escape($csrf) . '");out.set("id",cred.id);out.set("rawId",dyReauthEncode(cred.rawId));out.set("clientDataJSON",dyReauthEncode(cred.response.clientDataJSON));out.set("authenticatorData",dyReauthEncode(cred.response.authenticatorData));out.set("signature",dyReauthEncode(cred.response.signature));response=await fetch("/admin/security/reauth/passkey-verify",{method:"POST",body:out});var result=await response.json();if(!response.ok||!result.ok)throw new Error(result.error||"验证失败");location.href="/admin/security?reauth=ok"}catch(e){status.textContent="Passkey 验证失败："+e.message;dyReauthButton.disabled=false}})}
+</script>';
     }
 
     private function adminSessionSecurityHtml(int $adminId): string

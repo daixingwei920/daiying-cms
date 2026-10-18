@@ -17,6 +17,7 @@ This index collects the public-facing documentation currently available in the G
 ## User Guide
 
 - Content management is available through the admin backend after installation.
+- [Administrator Passkey reauthentication candidate](admin-passkey-reauth.md) describes the isolated sensitive-action flow and its limits.
 - [Site registration settings](site-registration.md) documents global ICP number configuration in the 1.2.85 candidate.
 - Media library capabilities are part of Core and can be extended by storage plugins.
 - Site-level AI Provider settings are available through [Global AI](ai.md).
