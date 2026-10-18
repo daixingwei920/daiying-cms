@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0-alpha.3 (development, unpublished)
+
+- Add read-only PluginBrandingService::current(), returning only the current site name, URL, Logo and Favicon for reusable plugin storefronts. No credentials or full configuration are exposed; branding writes retain existing admin/CSRF checks.
+
 ## 1.3.0-alpha.2 (development, unpublished)
 
 - 增加原子插件文档与指定类型扩展Worker。

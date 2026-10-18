@@ -256,7 +256,7 @@
   "Plugin/PluginAdminRequestContext.php": "a52515d1002c5b7468751c5c927824db8d434ae3f52a56dd8d6655299b9d6cad",
   "Plugin/PluginAdvertisingService.php": "898dfc089028addcb677a483ec01ea8090e90651d87f027cc69457f30c1c6c91",
   "Plugin/PluginAiImageService.php": "07524601752172cb99c06ef96ea9a0471df9e24fc6970359c9f1e467c6f9378f",
-  "Plugin/PluginBrandingService.php": "c3ee7f8f54a58e2e4b1bf7e046497e027fc0484a6768b8352123cc9790fc8461",
+  "Plugin/PluginBrandingService.php": "f85d1eefdf72fafbc5a6533900c422280837c44ab864bd9545584b14424633a5",
   "Plugin/PluginCircuitBreaker.php": "f855fdedfbfe0320224e3c1a27704a9a623bde79665bd942b459c6d481612759",
   "Plugin/PluginContext.php": "bc05470eedf984864d158824c7ed20aca209a5db693e2571fbf296c00bfd540c",
   "Plugin/PluginDataStore.php": "d0cdaa1c49e9bf5ff6a8f404b387091923a3f6523a5c493fdcfdf6284d02679a",
