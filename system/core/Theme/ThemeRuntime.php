@@ -31,11 +31,21 @@ final class ThemeRuntime
         ob_start();
         try {
             require $templateFile;
-            return (string) ob_get_clean();
+            $html = (string) ob_get_clean();
         } catch (\Throwable $exception) {
             ob_end_clean();
             throw $exception;
         }
+
+        // Core updates preserve theme files. Supply the global footer for existing
+        // full-page themes; themes may place the public helper themselves.
+        $footer = $context->siteIcpFooter();
+        $bodyEnd = strripos($html, '</body>');
+        if ($footer !== '' && $bodyEnd !== false && !str_contains($html, 'data-cms-site-icp="1"')) {
+            $html = substr_replace($html, $footer . "\n", $bodyEnd, 0);
+        }
+
+        return $html;
     }
 
     private function templateFile(string $template): string

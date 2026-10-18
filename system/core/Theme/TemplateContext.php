@@ -30,6 +30,22 @@ final class TemplateContext
         return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
     }
 
+    public function siteIcpNumber(): string
+    {
+        return trim((string) $this->get('site_icp_number', ''));
+    }
+
+    public function siteIcpFooter(): string
+    {
+        $number = $this->siteIcpNumber();
+        if ($number === '') {
+            return '';
+        }
+
+        return '<footer data-cms-site-icp="1" style="padding:16px;text-align:center;overflow-wrap:anywhere">'
+            . '<a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">' . $this->e($number) . '</a></footer>';
+    }
+
     public function apiVersion(): string
     {
         return FoundationVersions::THEME_API;

@@ -1,5 +1,20 @@
 # Global AI
 
+## GPT-5 parameter compatibility (1.2.85 candidate)
+
+The shared Chat Completions adapter maps the configured token budget to
+`max_completion_tokens` for `gpt-5` and `gpt-5-*` / `gpt-5.*` model IDs, including
+dated variants. It omits sampling temperature for these reasoning models and
+uses a 2048-token connection-test budget instead of 64. Existing provider and
+model selections are not changed. Meta Muse keeps its existing completion-token
+mapping; other compatible providers keep their prior payload behavior.
+
+Sources: [Chat Completions parameters](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create)
+and [GPT-5 guide](https://developers.openai.com/api/docs/guides/latest-model?model=gpt-5).
+Verification: `php tests/core_ai_gpt5_parameters.php` and
+`php tests/core_ai_local_openclaw.php` exercise request construction and parsing
+with isolated transports. They do not prove live-provider or paid-request acceptance.
+
 Daiying CMS Core provides a site-level AI configuration and service layer that CMS features and installed plugins can reuse.
 
 Core AI is infrastructure only. It stores configuration, creates Provider requests, normalizes responses, and returns safe errors. Business features such as product descriptions, article summaries, SEO suggestions, or distribution formatting should be implemented by Core features or plugins on top of this API.

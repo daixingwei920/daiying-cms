@@ -86,7 +86,7 @@ final class OpenAiCompatibleProvider implements AiProviderInterface, AiModelDisc
     /** @param array<string,mixed> $config */
     private function testConnectionMaxTokens(array $config): int
     {
-        if ($this->isMetaMuseProvider($config)) {
+        if ($this->isMetaMuseProvider($config) || preg_match('/^gpt-5(?:[.-]|$)/i', (string) ($config['model'] ?? '')) === 1) {
             return 2048;
         }
 

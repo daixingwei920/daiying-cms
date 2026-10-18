@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
     'app' => [
         'name' => 'PHP CMS',
-        'version' => '1.2.84',
+        'version' => '1.2.85',
         'debug' => false,
         'mode' => 'NORMAL',
         'secure_cookies' => false,
@@ -14,6 +14,7 @@ return [
         'name' => 'PHP CMS',
         'url' => '',
         'base_path' => '',
+        'icp_number' => '',
     ],
     'seo' => [
         'robots_index' => true,

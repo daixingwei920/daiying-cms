@@ -42,7 +42,8 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
             $tokenBudgetField = $this->usesMaxCompletionTokens($provider, $baseUrl, $model) ? 'max_completion_tokens' : 'max_tokens';
             $payload[$tokenBudgetField] = min($maxTokens, 200000);
         }
-        if (array_key_exists('temperature', $config)) {
+        // GPT-5 reasoning models reject a non-default sampling temperature.
+        if (array_key_exists('temperature', $config) && !$this->isGpt5Model($model)) {
             $temperature = (float) $config['temperature'];
             if ($temperature >= 0.0 && $temperature <= 2.0) {
                 $payload['temperature'] = $temperature;
@@ -373,7 +374,12 @@ final class OpenAiCompatibleProviderClient implements AiProviderClientInterface,
 
     private function usesMaxCompletionTokens(string $provider, string $baseUrl, string $model): bool
     {
-        return $this->isMetaMuseEndpoint($provider, $baseUrl, $model);
+        return $this->isGpt5Model($model) || $this->isMetaMuseEndpoint($provider, $baseUrl, $model);
+    }
+
+    private function isGpt5Model(string $model): bool
+    {
+        return preg_match('/^gpt-5(?:[.-]|$)/i', $model) === 1;
     }
 
     private function isMetaMuseEndpoint(string $provider, string $baseUrl, string $model): bool

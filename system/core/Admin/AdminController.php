@@ -1305,6 +1305,7 @@ final class AdminController
                 $config['site'] = is_array($config['site'] ?? null) ? $config['site'] : [];
                 $config['site']['name'] = $input['site_name'];
                 $config['site']['url'] = $input['site_url'];
+                $config['site']['icp_number'] = $input['site_icp_number'];
                 $config['site']['logo_url'] = $input['site_logo_url'];
                 $config['site']['favicon_url'] = $input['site_favicon_url'];
                 $config['payment'] = is_array($config['payment'] ?? null) ? $config['payment'] : [];
@@ -1341,6 +1342,7 @@ final class AdminController
     {
         $siteName = (string) $this->settings->get('site.name', 'PHP CMS');
         $siteUrl = (string) $this->settings->get('site.url', '');
+        $siteIcpNumber = (string) $this->settings->get('site.icp_number', '');
         $siteLogoUrl = (string) $this->settings->get('site.logo_url', '');
         $siteFaviconUrl = (string) $this->settings->get('site.favicon_url', '');
         $robotsIndex = (bool) $this->settings->get('seo.robots_index', true);
@@ -1357,6 +1359,8 @@ final class AdminController
             '<label>站点名称<input name="site_name" maxlength="120" value="' . View::escape($siteName) . '" required></label>' .
             '<label>站点 URL<input name="site_url" value="' . View::escape($siteUrl) . '" placeholder="https://example.com"></label>' .
             '<p class="muted">站点 URL 用于 canonical、robots.txt 和 sitemap.xml。留空时前台会回退到本地基准地址。</p>' .
+            '<label>ICP 备案号<input name="site_icp_number" maxlength="120" value="' . View::escape($siteIcpNumber) . '" placeholder="例如：京ICP备12345678号-1"></label>' .
+            '<p class="muted">填写后在主题页面底部显示，并链接工信部备案查询系统。此设置全站通用，切换主题仍保留；没有备案号时请留空。</p>' .
             '<section class="card"><h2>站点品牌</h2>' .
             '<p class="muted">Logo 和 Favicon 是 CMS 全局基础设置。主题可以留空并自动使用这里的地址，也可以在主题设置里单独覆盖。</p>' .
             ($siteLogoUrl !== '' ? '<p><img src="' . View::escape($siteLogoUrl) . '" alt="" style="max-width:180px;max-height:72px;border:1px solid #d8dee4;border-radius:8px;background:#fff;padding:8px"></p>' : '') .
@@ -1381,7 +1385,7 @@ final class AdminController
             '<p><a class="button" href="/admin">返回后台首页</a></p>';
     }
 
-    /** @return array{site_name:string,site_url:string,site_logo_url:string,site_favicon_url:string,default_currency:string,robots_index:bool,market_enabled:bool,developer_mode:bool,market_server_url:string,market_site_token:string} */
+    /** @return array{site_name:string,site_url:string,site_icp_number:string,site_logo_url:string,site_favicon_url:string,default_currency:string,robots_index:bool,market_enabled:bool,developer_mode:bool,market_server_url:string,market_site_token:string} */
     private function siteSettingsInput(Request $request): array
     {
         $siteName = trim((string) $request->input('site_name', ''));
@@ -1400,6 +1404,11 @@ final class AdminController
             if (!in_array($scheme, ['http', 'https'], true) || $host === '') {
                 throw new \InvalidArgumentException('站点 URL 只允许 http 或 https 完整地址。');
             }
+        }
+
+        $siteIcpNumber = trim((string) $request->input('site_icp_number', (string) $this->settings->get('site.icp_number', '')));
+        if (strlen($siteIcpNumber) > 120 || preg_match('//u', $siteIcpNumber) !== 1 || preg_match('/[\x00-\x1F\x7F<>]/', $siteIcpNumber) === 1) {
+            throw new \InvalidArgumentException('ICP 备案号不能超过 120 字节，且不能包含 HTML 或控制字符。');
         }
 
         $siteLogoUrl = $this->siteBrandUrl((string) $request->input('site_logo_url', ''), false);
@@ -1426,6 +1435,7 @@ final class AdminController
         return [
             'site_name' => $siteName,
             'site_url' => $siteUrl,
+            'site_icp_number' => $siteIcpNumber,
             'site_logo_url' => $siteLogoUrl,
             'site_favicon_url' => $siteFaviconUrl,
             'default_currency' => $this->normalizeAdminCurrency((string) $request->input('default_currency', 'USD')),
