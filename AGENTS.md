@@ -7,21 +7,19 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 ## Current Core Baseline
 
 - Product: Daiying CMS Core.
-- Published baseline: `1.2.84`, official tag `v1.2.84`, commit `446eb8e5c0e74e9ec1e3d44d32cad886e4fafa0a` (remote main/tag/release verified 2026-10-17).
-- Pending maintenance candidate: `1.2.85`; not published until server-side signing, release gates and publication are verified.
-- Clean candidate worktree: `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/core-1.2.85`.
-- Candidate branch: `codex/cms-debts-1.2.85`.
-- Candidate scope: global ICP site settings and theme footer, GPT-5 Chat Completions parameter compatibility, revalidation of book-title slug support already released in 1.2.83.
+- Published stable baseline: `1.2.86`, tag `v1.2.86`, commit `d311446607124fff21d76f524a4a11968ad4cd58` (verified 2026-10-18). This development branch does not modify that release.
+- Stable runtime fixes #46 and #47 were integrated via PR #51; AI development remains separately based on `d578a05` and requires future reconciliation before any Stable release.
 - All existing signing, approval, maintenance and production boundaries below remain in force.
 
 ## Owner-authorized AI image development (2026-10-18)
 
 - Development branch: `codex/ai-image-logo`, clean base `d578a05dae9742d177167cc4665482cc80cc9ea7`.
-- Development version: `1.3.0-alpha.1`, not Stable and not approved for publication.
+- Development version: `1.3.0-alpha.3`, not Stable and not approved for publication.
+- Current isolated branch: `codex/public-site-branding`, worktree `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/core-public-site-branding`; additive public site identity read contract only. Stable 1.2.86 remains a separate frozen release.
 - Workspace: `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/ai-image-logo`.
 - Separate plugin source: sibling `daiying-ai-logo`; never include it in Core-owned payloads.
 - Owner explicitly authorized the generic image AI contract, adapter, queue, private media, quota and audit work despite the default maintenance-only rule.
-- Core 1.2.85 signed artifacts remain frozen and publication paused. Do not rewrite their commit/tag/artifacts.
+- Stable 1.2.85 and 1.2.86 artifacts are published and frozen. Do not rewrite their commit/tag/artifacts.
 - No production writes; existing site AI settings may be read for explicitly requested isolated live tests. Never copy keys to the workstation or into output/logs.
 - Other thread owns LocalPluginPackageInstaller market API enable repair; integrate only its immutable tested commit, not shared dirty files.
 

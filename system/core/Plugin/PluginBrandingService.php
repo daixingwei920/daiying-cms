@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Cms\Core\Plugin;
 
 use Cms\Core\Audit\AuditLogger;
+use Cms\Core\Config\Settings;
 use Cms\Core\Media\MediaLibrary;
 use PDO;
 
@@ -11,6 +12,17 @@ use PDO;
 final class PluginBrandingService
 {
     public function __construct(private readonly PluginManifest $manifest,private readonly PDO $pdo,private readonly string $root) {}
+    /** Public site identity only. No credentials, model settings, or full config projection. */
+    public function current(): array
+    {
+        $settings = Settings::load($this->root);
+        $public = [];
+        foreach (['name', 'url', 'logo_url', 'favicon_url'] as $key) {
+            $value = $settings->get('site.' . $key, '');
+            $public[$key] = is_string($value) ? $value : '';
+        }
+        return $public;
+    }
     public function apply(string $logoPng,string $iconPng,string $name,string $key): array
     {
         $scope=PluginPaymentRequestScope::current();$admin=(int)($scope['admin_id']??0);
