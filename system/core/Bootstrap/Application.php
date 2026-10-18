@@ -672,6 +672,7 @@ final class Application
                         $route->csrf,
                         is_array($frontUser) ? (int) $frontUser['id'] : null,
                         static fn (): mixed => ($route->handler)($request),
+                        adminId: $context?->authenticatedAdminId,
                     );
                     return $response instanceof Response ? $response : Response::text('插件路由返回了无效响应。', 500);
                 } catch (Throwable $exception) {

@@ -70,6 +70,7 @@ final class PluginContext
         private readonly ?PluginPaymentService $payments = null,
         private readonly bool $trustedHomepageAccess = false,
         private readonly ?PluginAiImageService $images = null,
+        private readonly ?PluginBrandingService $branding = null,
     ) {
     }
 
@@ -126,6 +127,11 @@ final class PluginContext
     {
         if (!$this->trustedDatabaseAccess || !$this->trustedHomepageAccess || !$this->hasCapability('frontend.homepage')) throw new PluginException('Homepage capability required.');
         return new \Cms\Core\Homepage\HomepageSelection($this->pdo());
+    }
+
+    public function branding(): PluginBrandingService
+    {
+        return $this->branding ?? throw new PluginException('service_unavailable');
     }
 
     public function data(): PluginDataStore
