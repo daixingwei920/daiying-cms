@@ -43,6 +43,12 @@ final class AiService
         return $this->gateway()->chat($messages, $options);
     }
 
+    public function meteredRequest(AiRequest $request): AiResponse
+    {
+        $ledger=new AiUsageLedger($this->pdo);
+        return (new AiGateway($this, usage:$ledger, quota:new AiQuotaService($this->pdo,$ledger), aiAudit:new AiAuditLogger($this->pdo)))->request($request);
+    }
+
     public function request(AiRequest $request): AiResponse
     {
         return $this->gateway()->request($request);

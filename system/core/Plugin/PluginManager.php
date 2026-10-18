@@ -269,6 +269,7 @@ final class PluginManager
             new PluginLicenseService($manifest, new CommercialLicenseStore($this->pdo), $this->settings),
             new PluginAdvertisingService($manifest, new AdRepository($this->pdo)),
             new PluginPaymentService($manifest, $this->pdo, (string) ($this->settings?->get('security.encryption_key', '') ?? '')),
+            branding: new PluginBrandingService($manifest, $this->pdo, dirname(dirname($this->pluginsPath))),
             images: $this->settings !== null ? new PluginAiImageService($manifest, $this->pdo, (new AiService($this->pdo, $this->settings))->images(dirname(dirname($this->pluginsPath)))) : null,
             trustedHomepageAccess: $this->officialRegistry !== null && ($this->officialRegistry->isTrustedBundled($manifest->id, dirname($entry)) || $this->officialRegistry->hasActiveTrustGrant($manifest->id)),
         );

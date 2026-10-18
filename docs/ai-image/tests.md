@@ -1,3 +1,5 @@
+> 历史 alpha.1 验证记录。Owner 后续已恢复完整 Logo 插件任务；alpha.2 新增范围见 brand-plugin-contracts.md 和独立插件交付报告。本页原型与本轮完整插件测试不得混淆。
+
 # AI 图像 / Logo 实际验证范围
 
 日期：2026-10-18。开发版 Core 1.3.0-alpha.1 / 插件0.1.0-alpha。未发布、未部署生产、无真实支付扣款。

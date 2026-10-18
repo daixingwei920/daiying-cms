@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0-alpha.2 (development, unpublished)
+
+- 增加原子插件文档与指定类型扩展Worker。
+- 增加私有旧图导入和显式计量文字调用，保留现有AI契约及Timeout。
+- 增加受管理员权限、POST/CSRF、备份和幂等保护的站点品牌应用公共接口。
+
+
 ## 1.3.0-alpha.1 — 开发分支，未发布
 
 - 新增实验性 text.generate / image.generate / image.edit 能力与独立图像适配器契约，文字 API 保持兼容。

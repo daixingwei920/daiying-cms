@@ -864,6 +864,18 @@ if ($command === 'retry-commercial-audit-risk-notifications') {
     exit(0);
 }
 
+if ($command === 'run-extension-jobs') {
+    $settings = Settings::load(CMS_ROOT);
+    $pdo = ConnectionFactory::make($settings);
+    $type = (string) ($argv[2] ?? '');
+    if (!preg_match('/^[a-z][a-z0-9_.-]{0,95}$/D', $type)) throw new \RuntimeException('Specify an extension job type.');
+    $manager = new \Cms\Core\Plugin\PluginManager(CMS_ROOT.'/content/plugins', $pdo, new \Cms\Core\Logging\FileLogger(CMS_ROOT.'/storage/logs/plugins.log'), new \Cms\Core\Events\EventDispatcher(), new \Cms\Core\Plugin\BlockRegistry(), new \Cms\Core\Plugin\PluginRuntimeRegistry(), new \Cms\Core\Plugin\OfficialPluginRegistry(CMS_ROOT,$pdo), new \Cms\Core\Plugin\PluginSecretStore($pdo,(string)$settings->get('security.encryption_key','')), settings: $settings);
+    $manager->bootEnabled();
+    if (\Cms\Core\Queue\QueueHandlerRegistry::get($type) === null) throw new \RuntimeException('No enabled extension registered this job type.');
+    echo json_encode((new \Cms\Core\Queue\QueueService($pdo))->process(cms_cli_positive_limit($argv[3] ?? null,10),$type),JSON_PRETTY_PRINT), PHP_EOL;
+    exit(0);
+}
+
 if ($command === 'run-ai-image-jobs') {
     $settings = Settings::load(CMS_ROOT);
     $pdo = ConnectionFactory::make($settings);
@@ -876,6 +888,7 @@ if ($command === 'run-ai-image-jobs') {
 }
 
 echo "Available commands:" . PHP_EOL;
+echo "  run-extension-jobs <job-type> [limit]  Process only a registered extension job type" . PHP_EOL;
 echo "  run-ai-image-jobs [limit]  Recover and process Core image tasks; never replay ambiguous provider calls" . PHP_EOL;
 echo "  migrate    Run core database migrations" . PHP_EOL;
 echo "  market:platform:init --yes --email=<owner> --name=<name>  Initialize this server as the official Market Platform and create the first Platform Owner" . PHP_EOL;

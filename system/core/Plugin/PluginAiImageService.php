@@ -12,6 +12,7 @@ final class PluginAiImageService
     public function __construct(private readonly PluginManifest $manifest,private readonly PDO $pdo,private readonly AiImageService $images) {}
     public function models(): array { $this->actor(false); return $this->images->models(); }
     public function submit(string $idempotencyKey,array $request): array { return $this->images->submit($this->manifest->id,$this->actor(true),$idempotencyKey,$request,$this->manifest->version); }
+    public function importReference(string $bytes): array { return $this->images->importReference($this->manifest->id,$this->actor(true),$bytes,$this->manifest->version); }
     public function find(string $id): array { return $this->images->find($id,$this->manifest->id,$this->actor(false)); }
     public function history(): array { return $this->images->history($this->manifest->id,$this->actor(false)); }
     public function imageBytes(string $id): string { return $this->images->imageBytes($id,$this->manifest->id,$this->actor(false)); }

@@ -58,6 +58,33 @@ final class AiImageService
         } catch (\Throwable $e) { if(PaymentTransaction::isActive($this->pdo)) PaymentTransaction::rollback($this->pdo); throw $e; }
     }
 
+    /** Import a bounded private edit reference. No provider call or billing. */
+    public function importReference(string $plugin,int $user,string $bytes,string $version=''): array
+    {
+        $size=@getimagesizefromstring($bytes);
+        if($user<1||strlen($bytes)>8388608||!$size||!in_array($size['mime']??'',['image/png','image/jpeg','image/webp'],true)||$size[0]*$size[1]>4000000)throw new AiException('旧Logo需为8MB以内、400万像素以内的PNG/JPEG/WebP。','image_input_invalid');
+        $im=@imagecreatefromstring($bytes);if(!$im)throw new AiException('旧Logo无法解码。','image_input_invalid');
+        imagealphablending($im,false);imagesavealpha($im,true);ob_start();imagepng($im);$png=(string)ob_get_clean();unset($im);
+        $id=AiRequest::newRequestId();$now=gmdate('c');$request=['operation'=>'image.reference','plugin_version'=>$version];
+        PaymentTransaction::beginImmediate($this->pdo);
+        try{
+            $this->pdo->exec('UPDATE cms_ai_image_locks SET marker=marker WHERE lock_id=1');
+            $q=$this->pdo->prepare("SELECT COUNT(*) FROM cms_ai_image_jobs WHERE user_id=? AND provider='upload' AND created_at>=?");
+            $q->execute([$user,gmdate('Y-m-d\\T00:00:00+00:00')]);if((int)$q->fetchColumn()>=20)throw new AiException('今日参考图配额已用完。','quota_exceeded');
+            $q->execute([$user,gmdate('c',time()-60)]);if((int)$q->fetchColumn()>=2)throw new AiException('参考图上传过快。','rate_limited');
+            $this->pdo->prepare('INSERT INTO cms_ai_image_jobs(job_id,plugin_id,user_id,key_hash,request_hash,request_json,provider,model,config_hash,timeout_seconds,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)')->execute([$id,$plugin,$user,hash('sha256',$id),hash('sha256',$png),json_encode($request),'upload','reference','',0,'importing',$now,$now]);
+            PaymentTransaction::commit($this->pdo);
+        }catch(\Throwable $e){if(PaymentTransaction::isActive($this->pdo))PaymentTransaction::rollback($this->pdo);throw $e;}
+        $tmp=$this->spool().'/'.$id.'.upload.png';
+        try{
+            if(file_put_contents($tmp,$png)===false)throw new AiException('参考图存储失败。','storage_failed');chmod($tmp,0600);
+            $media=$this->library()->registerLocalFile($tmp,'reference.png');
+            $this->pdo->prepare("UPDATE cms_ai_image_jobs SET status='completed',media_id=?,updated_at=? WHERE job_id=?")->execute([$media,gmdate('c'),$id]);
+        }catch(\Throwable $e){$this->pdo->prepare("UPDATE cms_ai_image_jobs SET status='failed',updated_at=? WHERE job_id=?")->execute([gmdate('c'),$id]);throw $e;}
+        finally{if(is_file($tmp))unlink($tmp);}
+        $this->audit($id,$plugin,$user,'reference_imported');return $this->find($id,$plugin,$user);
+    }
+
     public function find(string $id, string $plugin, int $user): array
     {
         $q=$this->pdo->prepare('SELECT * FROM cms_ai_image_jobs WHERE job_id=? AND plugin_id=? AND user_id=?');
