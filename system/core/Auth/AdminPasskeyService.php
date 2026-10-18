@@ -92,7 +92,7 @@ final class AdminPasskeyService
     }
 
     /** @return array<string,mixed> */
-    public function authenticationOptions(int $adminId): array
+    public function authenticationOptions(int $adminId, string $purpose = 'login'): array
     {
         $stmt = $this->pdo->prepare('SELECT credential_id FROM cms_admin_passkeys WHERE admin_id = :admin_id ORDER BY id DESC');
         $stmt->execute([':admin_id' => $adminId]);
@@ -101,7 +101,7 @@ final class AdminPasskeyService
             throw new \RuntimeException('当前管理员没有可用 Passkey。');
         }
         $challenge = $this->randomB64();
-        $_SESSION['admin_passkey_authentication'] = ['admin_id' => $adminId, 'challenge' => $challenge, 'issued_at' => time()];
+        $_SESSION['admin_passkey_authentication'] = ['admin_id' => $adminId, 'purpose' => $purpose, 'challenge' => $challenge, 'issued_at' => time()];
 
         return [
             'challenge' => $challenge,
@@ -113,10 +113,10 @@ final class AdminPasskeyService
     }
 
     /** @param array<string,mixed> $data */
-    public function verifyAuthentication(int $adminId, array $data): bool
+    public function verifyAuthentication(int $adminId, array $data, string $purpose = 'login'): bool
     {
         $session = $_SESSION['admin_passkey_authentication'] ?? null;
-        if (!is_array($session) || (int) ($session['admin_id'] ?? 0) !== $adminId || (int) ($session['issued_at'] ?? 0) < time() - 600) {
+        if (!is_array($session) || (int) ($session['admin_id'] ?? 0) !== $adminId || (string) ($session['purpose'] ?? '') !== $purpose || (int) ($session['issued_at'] ?? 0) < time() - 600) {
             return false;
         }
         $credentialId = (string) ($data['id'] ?? '');
@@ -132,7 +132,7 @@ final class AdminPasskeyService
             return false;
         }
         $authData = $this->b64d((string) ($data['authenticatorData'] ?? ''));
-        if (strlen($authData) < 37 || !hash_equals(hash('sha256', $this->rpId(), true), substr($authData, 0, 32)) || ((ord($authData[32]) & 0x01) !== 0x01)) {
+        if (strlen($authData) < 37 || !hash_equals(hash('sha256', $this->rpId(), true), substr($authData, 0, 32)) || ((ord($authData[32]) & 0x05) !== 0x05)) {
             return false;
         }
         $pem = $this->coseToPem($this->b64d((string) $row['public_key_cose']));
