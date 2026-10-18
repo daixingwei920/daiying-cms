@@ -1,12 +1,20 @@
 # Changelog
 
-## 1.2.85 - 2026-10-17 (Release Candidate)
+## 1.2.86 - 2026-10-18
+
+- Fix enablement of published, migration-free ordinary API market plugins. Preserve official trust-grant checks for trusted PHP, reserved official identities and migrations.
+- Allow registered Passkeys for short-lived sensitive administrator reauthentication; bind challenges to the administrator and purpose, require user verification, and preserve password authentication.
+- Explain that disabled plugins must be enabled before payment permission authorization; reauthentication does not repair plugin enablement errors.
+- Regenerate the four changed Core integrity hashes. Keep the minimum upgrade source at 1.2.80, PHP 8.3+, and existing database migrations unchanged.
+- Exclude experimental image AI and Logo plugin work. Publishing this release does not upgrade production sites.
+
+## 1.2.85 - 2026-10-18
 
 - Add a global ICP registration number to Site Settings. Existing full-page themes display a centered registration link without overwriting theme files; the number persists across theme switches and can be cleared.
 - Expose additive `site_icp_number`, `TemplateContext::siteIcpNumber()` and `siteIcpFooter()` theme interfaces. Themes may place the footer themselves; empty settings leave existing output unchanged.
 - Fix GPT-5-family Chat Completions token budgets in the shared OpenAI-compatible adapter; omit sampling temperature for reasoning compatibility and use a 2048-token connection-test budget. Preserve existing Meta Muse, Groq, DeepSeek and local-provider behavior.
 - Reverify the book-title slug compatibility already shipped in 1.2.83. Preserve existing URLs and redirects; no database migration or automatic content rewrite.
-- Keep the minimum upgrade source at 1.2.80. Candidate code and local checks do not constitute signed publication or production-site acceptance.
+- Keep the minimum upgrade source at 1.2.80. Official publication is recorded in docs/CORE_1.2.85_PUBLICATION_REPORT.md; production-site upgrades are separate.
 
 ## 1.2.84 - 2026-10-13 (Release Candidate)
 

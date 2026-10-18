@@ -1,6 +1,6 @@
 # 官方市场 API 插件启用兼容修复候选
 
-状态：隔离 Core 分支，未合并、未签名、未部署。基线为官方主线的 1.2.85 候选提交 `d578a05dae9742d177167cc4665482cc80cc9ea7`；已发布基线仍为 1.2.84。
+状态更新：修复已通过 PR #51 合并到 main `30cc9f741ac4a420248a4d9fd617f91b04f76962`，目标发布版本为 1.2.86。已发布的 1.2.85 不包含该修复；本记录不代表生产站点已升级。以下保留原始排查和隔离测试范围。
 
 2026-10-18 对目标站只读核对：`daiying_global_city` 0.1.1 的安装记录为 `Installed / api / official_market / published`；插件清单声明 `migrations: []`。启用日志报 `Trusted market plugin migrations require an active official trust grant.`。Core 对所有已发布市场插件执行启用前可信迁移授权检查，导致没有迁移的普通 API 插件也被拦截。
 

@@ -4,7 +4,7 @@
 
 A modular PHP CMS for building content websites, media workflows, commerce foundations, and in-development external distribution workflows.
 
-Daiying CMS Core is a self-hosted PHP CMS with themes, plugins, media management, commerce foundations, signed online updates, global AI settings, Passkey-capable admin login, and recovery tooling. The current public release is **1.2.82 stable**.
+Daiying CMS Core is a self-hosted PHP CMS with themes, plugins, media management, commerce foundations, signed online updates, global AI settings, Passkey-capable admin login, and recovery tooling. This source tree targets **1.2.86 stable**; the published download is available through GitHub Releases.
 
 ![Daiying CMS admin dashboard](.github/assets/screenshots/admin-dashboard.png)
 
@@ -44,10 +44,10 @@ Daiying CMS is organized as a Core platform with optional product layers:
 
 Download the latest stable package from [GitHub Releases](https://github.com/daixingwei920/daiying-cms/releases/latest).
 
-Current checked release:
+Release artifacts for this source:
 
-- Tag: `v1.2.82`
-- Package: `daiying-cms-1.2.82-stable.zip`
+- Tag: `v1.2.86`
+- Package: `daiying-cms-1.2.86-stable.zip`
 - SHA-256: see the `.sha256` sidecar attached to the release.
 
 ### 3. Install

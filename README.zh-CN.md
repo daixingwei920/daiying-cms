@@ -4,7 +4,7 @@
 
 Daiying CMS 是一套模块化 PHP CMS，用于构建内容网站、媒体流程、交易基础能力，以及正在开发中的外部渠道分发能力。
 
-当前公开稳定版本：**1.2.69 stable**。
+此源码版本：**1.2.86 stable**。已正式发布的安装包以 GitHub Releases 为准。
 
 ![Daiying CMS 后台总览](.github/assets/screenshots/admin-dashboard.png)
 
