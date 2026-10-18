@@ -4,6 +4,6 @@ Owner最新范围：先完成Core图像公共接口，完整Logo商业插件暂�
 
 来源固定到开发代码/集成提交 e2bd07ab67306986b58397484bc8ae26685a6230，候选标签 candidate/core-ai-image-1.3.0-alpha.1。统一V1知识新增配置、SDK、队列配额成本、私有媒体、验证范围5条管理员/开发者事实。修正先前遗留的1.2.83/1.2.84发布状态描述，版本事实暂不用于普通客服。保留文字接口与旧事实契约。
 
-已更新：AI架构、Provider契约、Plugin SDK、docs/ai.md、docs/ai-image审计/API/测试、CHANGELOG、AGENTS和统一V1 JSON/Markdown/公开派生文件。离线一致性：34条事实，21条公开事实，35个固定来源文件。
+已更新：AI架构、Provider契约、Plugin SDK、docs/ai.md、docs/ai-image审计/API/测试、CHANGELOG、AGENTS和统一V1 JSON/Markdown/公开派生文件。离线一致性：34条事实，21条公开事实，34个固定来源文件。
 
 测试记录见 docs/ai-image/tests.md；知识包仅承载源码复核，不把隔离实跑混成生产验收。构建和离线校验已做；生产导入、索引重建、消费者应用与自动同步部署均未做。
