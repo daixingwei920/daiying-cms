@@ -13,6 +13,7 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 - Released scope: global ICP site settings and theme footer, GPT-5 Chat Completions parameter compatibility, revalidation of book-title slug support already released in 1.2.83.
 - Publication evidence: `docs/CORE_1.2.85_PUBLICATION_REPORT.md`. Publishing this release did not upgrade the official website runtime, which remained 1.2.84 at verification.
 - Image AI Core extensions and Logo plugin work are separate development candidates and are not included in stable 1.2.85.
+- Pending approved release: `1.2.86`, branch `maintenance/release-1.2.86`, clean worktree `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/core-1.2.86`. Scope: merged PR #46 Passkey reauthentication and #47 migration-free API market plugin enablement (integration PR #51). Owner authorized formal publication on 2026-10-18; publication remains pending exact-commit gates and server-side signing.
 - All existing signing, approval, maintenance and production boundaries below remain in force.
 
 ## Workspace Rules
