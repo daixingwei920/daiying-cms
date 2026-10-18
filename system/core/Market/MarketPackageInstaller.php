@@ -379,6 +379,7 @@ final class MarketPackageInstaller
         }
 
         $manifest = $located['manifest'];
+        $php = trim((string) ($manifest['php'] ?? ''));
         return MarketPackageManifest::fromArray([
             'extension_id' => $extension,
             'type' => $type,
@@ -386,7 +387,7 @@ final class MarketPackageInstaller
             'source' => ExtensionSource::OFFICIAL_MARKET,
             'review_status' => 'published',
             'core' => $this->coreConstraint($manifest),
-            'php' => (string) ($manifest['php'] ?? ''),
+            'php' => $php !== '' && in_array($type, ['plugin', 'payment_provider'], true) ? '>=' . $php : $php,
             'dependencies' => is_array($manifest['dependencies'] ?? null) ? $manifest['dependencies'] : [],
             'files' => $files,
         ]);

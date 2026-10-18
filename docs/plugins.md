@@ -4,6 +4,8 @@ Daiying CMS supports plugin packages for extending Core capabilities.
 
 For Core 1.2.70+ public plugin development, use [Plugin SDK V1](plugin-sdk/README.md). The SDK defines the stable API Reference, Event Registry, Capability Registry, commercial license boundary, and official skeleton.
 
+In `plugin.json`, `php` is a **minimum** PHP version such as `8.3.0`. The native installer and the market installer both accept that version and newer runtimes. Keep the numeric minimum in the plugin manifest; a separate explicit `market-package.json` may use a version constraint such as `>=8.3.0`.
+
 ## Current Bundled Plugins
 
 The following plugin manifests are present in this repository:
