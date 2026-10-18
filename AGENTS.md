@@ -7,13 +7,12 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 ## Current Core Baseline
 
 - Product: Daiying CMS Core.
-- Published baseline: `1.2.85`, official tag `v1.2.85`, commit `d578a05dae9742d177167cc4665482cc80cc9ea7` (GitHub release, tag and official update service verified 2026-10-18).
-- Frozen clean release worktree: `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/core-1.2.85`.
-- Release branch: `codex/cms-debts-1.2.85`, merged through PR #45.
-- Released scope: global ICP site settings and theme footer, GPT-5 Chat Completions parameter compatibility, revalidation of book-title slug support already released in 1.2.83.
-- Publication evidence: `docs/CORE_1.2.85_PUBLICATION_REPORT.md`. Publishing this release did not upgrade the official website runtime, which remained 1.2.84 at verification.
-- Image AI Core extensions and Logo plugin work are separate development candidates and are not included in stable 1.2.85.
-- Pending approved release: `1.2.86`, branch `maintenance/release-1.2.86`, clean worktree `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/core-1.2.86`. Scope: merged PR #46 Passkey reauthentication and #47 migration-free API market plugin enablement (integration PR #51). Owner authorized formal publication on 2026-10-18; publication remains pending exact-commit gates and server-side signing.
+- Published baseline: `1.2.86`, official tag `v1.2.86`, commit `d311446607124fff21d76f524a4a11968ad4cd58` (GitHub Latest, tag, official update service and actual downloads verified 2026-10-18).
+- Frozen clean release clone: `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/core-1.2.86-final`.
+- Release branch: `maintenance/release-1.2.86`, merged through PR #52. Included runtime fixes: PR #46 and #47, integrated via PR #51.
+- Released scope: migration-free API market plugin enablement and Passkey sensitive admin reauthentication; inherits 1.2.85 ICP and text AI compatibility fixes.
+- Publication evidence: `docs/CORE_1.2.86_PUBLICATION_REPORT.md`. The official website runtime remained 1.2.84 / NORMAL; publication did not upgrade it.
+- Image AI Core extensions and Logo plugin work remain separate development candidates and are not included in stable 1.2.86.
 - All existing signing, approval, maintenance and production boundaries below remain in force.
 
 ## Workspace Rules
