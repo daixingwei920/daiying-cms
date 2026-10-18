@@ -7,11 +7,12 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 ## Current Core Baseline
 
 - Product: Daiying CMS Core.
-- Published baseline: `1.2.84`, official tag `v1.2.84`, commit `446eb8e5c0e74e9ec1e3d44d32cad886e4fafa0a` (remote main/tag/release verified 2026-10-17).
-- Pending maintenance candidate: `1.2.85`; not published until server-side signing, release gates and publication are verified.
-- Clean candidate worktree: `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/core-1.2.85`.
-- Candidate branch: `codex/cms-debts-1.2.85`.
-- Candidate scope: global ICP site settings and theme footer, GPT-5 Chat Completions parameter compatibility, revalidation of book-title slug support already released in 1.2.83.
+- Published baseline: `1.2.85`, official tag `v1.2.85`, commit `d578a05dae9742d177167cc4665482cc80cc9ea7` (GitHub release, tag and official update service verified 2026-10-18).
+- Frozen clean release worktree: `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/core-1.2.85`.
+- Release branch: `codex/cms-debts-1.2.85`, merged through PR #45.
+- Released scope: global ICP site settings and theme footer, GPT-5 Chat Completions parameter compatibility, revalidation of book-title slug support already released in 1.2.83.
+- Publication evidence: `docs/CORE_1.2.85_PUBLICATION_REPORT.md`. Publishing this release did not upgrade the official website runtime, which remained 1.2.84 at verification.
+- Image AI Core extensions and Logo plugin work are separate development candidates and are not included in stable 1.2.85.
 - All existing signing, approval, maintenance and production boundaries below remain in force.
 
 ## Workspace Rules
