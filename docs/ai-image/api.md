@@ -43,7 +43,7 @@ queued → dispatching → response_ready → completed。明确拒绝进入 fai
 
 成功响应先以0600文件暂存到受保护 storage/ai-images，媒体入库失败可恢复，不再发起模型调用。只有未开始 dispatch 的 queued 任务可以安全重新排队。站点配置变化在调度前检测并拒绝。任务中不持久化 API Key。
 
-用户日配额与每分钟上限对所有插件合计，事务内锁定后原子预占，重复键不多占额。配额统计任务尝试，包含失败/结果未知任务，避免无限消耗服务商。配额不是扣款。
+用户UTC日配额与每分钟上限对所有插件合计，事务内锁定后原子预占，重复键不多占额。配额统计任务尝试，包含失败/结果未知任务，避免无限消耗服务商。配额不是扣款。
 
 cms_ai_image_jobs 保存 usage、成本状态和管理员预估值（百万分之一 USD）；未知成本为 NULL，不冒充免费。成功调用复用 cms_ai_usage_ledger；结果不是服务商最终账单，供应商费用由其账单确认。cms_ai_audit_events 记录生命周期与用户，不记录 Key、原图或完整提示词。
 
@@ -52,3 +52,5 @@ cms_ai_image_jobs 保存 usage、成本状态和管理员预估值（百万分�
 PrivateMediaStorageProvider 使用 storage/private-media（必须沿用站点 storage 的禁止直接访问规则），复用 MediaLibrary 的验证、去重、元数据与派生图。公共媒体控制器拒绝 private；普通媒体 VM 不返回私有 URL。默认公开 uploads 行为保留。PNG/WebP/AVIF 重编码明确保存 alpha，修复透明度丢失。
 
 当前仅一个文档明确支持的模型组合；未实现其他 Provider、任意用户上传编辑、多输入/蒙版、原生矢量模型或真实支付网关新能力。SVG 由插件进行真实单色路径描摹，不嵌入位图，不冒充原生彩色 SVG。中文书法不能保证所有字准确，需逐字人工核对。私有媒体暂不纳入通用公开媒体导出恢复流程；站点备份应同时覆盖数据库和受保护 storage。
+
+部署假设：单站Core数据库和受保护storage可由其worker访问。多节点需共享可靠的响应/私有媒体存储；本任务未验证分布式文件系统或多节点故障。
