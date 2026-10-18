@@ -464,6 +464,8 @@ final class Application
         $router->post('/admin/security/mfa-enable', [$admin, 'adminSecurityEnableMfa']);
         $router->post('/admin/security/mfa-disable', [$admin, 'adminSecurityDisableMfa']);
         $router->post('/admin/security/reauth', [$admin, 'adminSecurityReauthenticate']);
+        $router->post('/admin/security/reauth/passkey-options', [$admin, 'adminSecurityPasskeyReauthOptions']);
+        $router->post('/admin/security/reauth/passkey-verify', [$admin, 'adminSecurityPasskeyReauthVerify']);
         $router->post('/admin/security/logout-other-sessions', [$admin, 'adminSecurityLogoutOtherSessions']);
         $router->post('/admin/security/passkey-options', [$admin, 'adminPasskeyOptions']);
         $router->post('/admin/security/passkey-register', [$admin, 'adminPasskeyRegister']);

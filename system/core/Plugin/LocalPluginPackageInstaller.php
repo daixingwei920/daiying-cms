@@ -917,6 +917,17 @@ final class LocalPluginPackageInstaller
         if ($trustedBundled && !$official->isTrustedBundled($pluginId, $target)) {
             throw new PluginException('Bundled plugin is not in the official trusted source registry.');
         }
+        // Ordinary API plugins with no migrations have nothing to backfill at enable time.
+        // Preserve the official grant boundary for trusted PHP and reserved identities.
+        if ($trustedMarket
+            && (string) ($row['trust_level'] ?? '') === 'api'
+            && (string) ($manifest['trust_level'] ?? '') === 'api'
+            && (!array_key_exists('migrations', $manifest) || $manifest['migrations'] === [])
+            && !$official->isReservedOfficialId($pluginId)
+            && $official->tablePrefixes($pluginId) === []
+        ) {
+            return;
+        }
         $trustedOfficial = $trustedBundled || ($trustedMarket && $official->tablePrefixes($pluginId) !== []);
         if ($trustedMarket && !$trustedOfficial) {
             throw new PluginException('Trusted market plugin migrations require an active official trust grant.');
