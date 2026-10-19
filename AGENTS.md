@@ -9,6 +9,7 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 - Latest direct Owner instruction: fix and test the article #41 save failure; do not publish CMS. This overrides prior release authorization below.
 - Isolated repair branch: `fix/admin-block-utf8`, clean worktree `work/core-article41-utf8`, base `4a553fa` from the unpublished 1.2.87 candidate.
 - No formal signing, release tags, GitHub/update-service publication, production upgrades, production database writes, payment-setting changes or refunds.
+- Owner subsequently authorized clearing all three readiness blockers, rebuilding candidate packages, and completing real image and Stripe Test payment acceptance. Article repair is merged into `maintenance/release-1.2.87`; only isolated instances and temporary server-side test signing are permitted. CMS publication remains on hold.
 
 ## Earlier 1.2.87 release candidate scope (publication on hold)
 

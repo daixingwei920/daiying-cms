@@ -1361,11 +1361,12 @@ final class PaymentRepository
         $stmt = $this->pdo->prepare(
             'UPDATE cms_payment_webhook_receipts
              SET payment_id = :payment_id, updated_at = :updated_at
-             WHERE id = :id AND (payment_id IS NULL OR payment_id = :payment_id)'
+             WHERE id = :id AND (payment_id IS NULL OR payment_id = :existing_payment_id)'
         );
         $stmt->execute([
             ':id' => $receiptId,
             ':payment_id' => $paymentId,
+            ':existing_payment_id' => $paymentId,
             ':updated_at' => gmdate('c'),
         ]);
 
