@@ -81,6 +81,8 @@ The following must not be mixed into Core commits, Core release packages, or Cor
 
 If a plugin appears to require a Core change, first verify whether the missing capability is truly a generic public Core API. Do not add plugin ID hard-coding or one-off plugin special cases to Core.
 
+All plugins and themes must obtain visitor-facing site branding from documented site settings or per-site configuration. Never hard-code the developer, product, or demo site's name as the installing site's brand. Manifest and marketplace product names remain fixed identities. Plugins must not read private Core settings for branding; see `DAIYING_PLUGIN_DEVELOPMENT_SPEC_V1.md` and `DAIYING_THEME_DEVELOPMENT_SPEC_V1.md`.
+
 ## Release Source Rules
 
 Never build a Core release package from:
