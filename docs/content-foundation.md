@@ -79,6 +79,12 @@ Plugins need `search.register`.
 
 Plugins need `seo.extend`.
 
+## UTF-8 editor line handling (unpublished maintenance candidate)
+
+Editor list text, table rows, and gallery captions split Unicode newline characters in UTF-8 mode. Repository list strings use the same newline semantics. A continuation byte inside a Chinese character (for example, `包`) must never become a newline. Invalid UTF-8 remains intact for the existing repository JSON validation to reject, instead of silently saving empty content. Full HTTP/HTTPS Canonical URLs remain required.
+
+Regression: `php tests/content_editor_utf8_save.php` uses a disposable SQLite instance, a native administrator session, CSRF checks, and an isolated article with ID 41. It does not edit production article #41. See [repair evidence](CONTENT_EDITOR_UTF8_FIX.md).
+
 ## Redirects
 
 `RedirectManager` records redirects through `UrlMappingRepository`, supports hit counters when the schema is available, and blocks redirect loops.

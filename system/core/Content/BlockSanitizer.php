@@ -404,7 +404,8 @@ final class BlockSanitizer
     private static function plainList(mixed $items): array
     {
         if (is_string($items)) {
-            $items = preg_split('/\R/', $items) ?: [];
+            // Preserve invalid bytes for repository JSON validation; never erase the input.
+            $items = preg_split('/\R/u', $items) ?: [$items];
         }
         if (!is_array($items)) {
             return [];

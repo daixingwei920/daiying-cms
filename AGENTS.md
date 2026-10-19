@@ -4,7 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
-## Owner-authorized 1.2.87 release candidate (2026-10-18)
+## Owner publication hold and article-save repair (2026-10-18)
+
+- Latest direct Owner instruction: fix and test the article #41 save failure; do not publish CMS. This overrides prior release authorization below.
+- Isolated repair branch: `fix/admin-block-utf8`, clean worktree `work/core-article41-utf8`, base `4a553fa` from the unpublished 1.2.87 candidate.
+- No formal signing, release tags, GitHub/update-service publication, production upgrades, production database writes, payment-setting changes or refunds.
+
+## Earlier 1.2.87 release candidate scope (publication on hold)
 
 - Owner requests 1.2.87 instead of the unpublished 1.3.0 development version; resolve remaining release blockers, test, then sign and publish Core, Stripe fix and Logo plugin.
 - Clean release worktree: `work/core-1.2.87-final`, branch `maintenance/release-1.2.87`, based on main 42ca4ffb3a44.

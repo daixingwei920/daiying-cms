@@ -2,6 +2,7 @@
 
 ## 1.2.87
 
+- Unpublished repair: preserve UTF-8 when splitting editor list, table and gallery-caption lines and repository string lists; retain invalid-encoding rejection and existing Canonical validation.
 - Release the additive shared image AI, private media, quota/audit, atomic plugin documents, scoped workers and public site branding contracts on the 1.2.x stable line. Preserve existing text AI and configured Timeout.
 - Include the tested payment callback idempotency repair; recover pending checkout links securely across sessions and accept server-resolved product/return metadata.
 - Retain 1.2.86 compatibility, security and integrity protections; never initiate refunds automatically.

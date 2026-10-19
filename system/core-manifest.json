@@ -1,5 +1,5 @@
 {
-  "Admin/AdminController.php": "c6b15e238d36720082188b3456969e2a58d6e555e38d73b6f78dddb3b18b4892",
+  "Admin/AdminController.php": "8b909127237e34484f8bb2e6baf5fcb858a277d01673bbf99c9c37613425c894",
   "Advertising/AdController.php": "4ab8107c99746c87b0a05d07dd2c7ac55071d8300fe81fa480f0af4849f4c862",
   "Advertising/AdRenderer.php": "22b7649d8b53804f32d6da361551c4e98f7e43e0c44fa7381748b6f98d70379c",
   "Advertising/AdRepository.php": "2fe44131cf74da45449f7c521f662c51645d06ff88e6a1a6b40c7a7387017c12",
@@ -69,7 +69,7 @@
   "Comment/CommentRepository.php": "d8170d345a52f7241fe08d183f213c1a197a43483bd5f856b834435e108b77c6",
   "Config/Settings.php": "c1d8cfcd5096c52e0696c94a96c1cdb4a1f003be8329006eafefaf20ae2c4125",
   "Content/BlockRenderer.php": "cf44942c58fac5d2af6268c082794112c1b661ec177e20eddb902957d068c10c",
-  "Content/BlockSanitizer.php": "03c44a532fff0e40cda085f4b575cac728d26d11c6e200d23005aebdedeea4e6",
+  "Content/BlockSanitizer.php": "9c45dd91d392f7637696dd27efa2832b1decb11f093f425cf9f3dbfed2c814a6",
   "Content/ContentAutosaveRepository.php": "0c666982567237cecfc3ce7de785eb8079c1b1fe89d0e84b4e1e8fde0c5b0522",
   "Content/ContentException.php": "8ab8565f8f55b80337042039605be9a2653bb24a59b2679cec6fffffb9223f4a",
   "Content/ContentFrontController.php": "f10ae1097af31476d34003fda0f416c03df0b677437741d815fcbac4974b1c9c",

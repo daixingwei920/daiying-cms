@@ -9890,11 +9890,12 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
             $type = (string) ($block['type'] ?? 'paragraph');
             $data = is_array($block['data'] ?? null) ? $block['data'] : [];
             if (isset($data['items_text'])) {
-                $data['items'] = preg_split('/\R/', (string) $data['items_text']) ?: [];
+                // Keep invalid UTF-8 intact so repository JSON validation rejects it.
+                $data['items'] = preg_split('/\R/u', (string) $data['items_text']) ?: [(string) $data['items_text']];
             }
             if (isset($data['rows_text'])) {
                 $rows = [];
-                foreach (preg_split('/\R/', (string) $data['rows_text']) ?: [] as $line) {
+                foreach (preg_split('/\R/u', (string) $data['rows_text']) ?: [(string) $data['rows_text']] as $line) {
                     $rows[] = array_map('trim', explode('|', $line));
                 }
                 $data['rows'] = $rows;
@@ -9904,7 +9905,7 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
             }
             if ($type === 'gallery' && isset($data['gallery_captions_text'])) {
                 $items = [];
-                foreach (preg_split('/\R/', (string) $data['gallery_captions_text']) ?: [] as $line) {
+                foreach (preg_split('/\R/u', (string) $data['gallery_captions_text']) ?: [(string) $data['gallery_captions_text']] as $line) {
                     [$mediaId, $caption] = array_pad(preg_split('/\s*\|\s*/', trim($line), 2) ?: [], 2, '');
                     $mediaId = (int) $mediaId;
                     if ($mediaId > 0) {
