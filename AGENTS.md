@@ -15,6 +15,13 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 - Stable 1.2.86 does not include image AI. Owner authorized merging the generic Core extensions on 2026-10-18; the integrated candidate below is not a Stable release. The Logo plugin remains a separate package.
 - All existing signing, approval, maintenance and production boundaries below remain in force.
 
+## Owner-authorized payment callback repair (2026-10-18)
+
+- Current clean branch: `fix/payment-refund-webhook-idempotency`, worktree `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/core-payment-callback-fix`, base `e2643fa516b2f42c0d9cd7de3f9104b5f95503f5` (PR #55 merged).
+- Development version `1.3.0-alpha.5`; not a Stable release or production deployment.
+- Repair remote refund identity deduplication and pending callback settlement in Core. Stripe mapping is a separate payment-provider source/package, never part of Core payloads.
+- No production writes, real payment/refund creation, formal signing or publication. Logo plugin proactive refunds remain disabled. Synthetic signed callbacks and local ledger fixtures are authorized for this repair.
+
 ## Owner-authorized AI image development (2026-10-18)
 
 - Development branch: `codex/core-logo-integration-1.2.86`, clean base `6cdeee4c0ff67d2a0643317915b2331cd1638ed1` (published 1.2.86 plus publication documents).

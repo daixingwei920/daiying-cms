@@ -1322,7 +1322,7 @@ final class PaymentService
         }
         $remoteId = $this->normalizeRemoteReference($remoteId, 'payment');
         $refundRemoteId = $this->normalizeRemoteReference($refundRemoteId, 'refund');
-        if (!in_array($status, ['completed', 'failed', 'cancelled'], true)) {
+        if (!in_array($status, ['pending', 'completed', 'failed', 'cancelled'], true)) {
             throw new PaymentException('Payment webhook refund status is invalid.');
         }
 
@@ -1406,7 +1406,22 @@ final class PaymentService
         }
         $existingRemote = $this->payments->refundByRemote((string) ($payment['provider_id'] ?? ''), $refund['refund_remote_id']);
         if ($existingRemote !== null) {
-            throw new PaymentException('Payment webhook refund returned a duplicate remote refund reference.');
+            // API responses and several webhook events can describe one refund.
+            // The remote identity is reusable only for the same economic record.
+            if (
+                (int) ($existingRemote['payment_id'] ?? 0) !== $paymentId
+                || (int) ($existingRemote['amount_minor'] ?? 0) !== $refund['amount_minor']
+                || (string) ($existingRemote['currency'] ?? '') !== $this->existingPaymentCurrency($payment)
+            ) {
+                throw new PaymentException('Payment webhook refund remote reference conflicts with the recorded refund.');
+            }
+            $existingStatus = $this->normalizeRefundStatus((string) ($existingRemote['status'] ?? ''));
+            if ($existingStatus === $status || $status === 'pending') {
+                return;
+            }
+            if ($existingStatus !== 'pending') {
+                throw new PaymentException('Payment webhook refund conflicts with the recorded terminal status.');
+            }
         }
 
         if (!in_array((string) ($payment['status'] ?? ''), ['paid', 'partially_refunded', 'refunded'], true)) {
@@ -1421,22 +1436,29 @@ final class PaymentService
             }
         }
 
-        $refundId = $this->payments->insertRefund([
-            'payment_id' => $paymentId,
-            'provider_id' => (string) ($payment['provider_id'] ?? ''),
-            'remote_id' => $refund['refund_remote_id'],
-            'status' => $status,
-            'amount_minor' => $refund['amount_minor'],
-            'currency' => $currency,
-            'reason' => $refund['reason'],
-            'idempotency_key' => $idempotencyKey,
-            'request_hash' => $requestHash,
-            'metadata' => $this->safeMetadata([
-                'provider_code' => 'webhook_refund',
-                'webhook_receipt_id' => $receiptId,
-                'provider_refund_id' => $refund['refund_remote_id'],
-            ]),
-        ]);
+        if ($existingRemote !== null) {
+            $refundId = (int) $existingRemote['id'];
+            if (!$this->payments->updatePendingRefundStatus($refundId, $status)) {
+                throw new PaymentException('Payment webhook refund could not update its pending record.');
+            }
+        } else {
+            $refundId = $this->payments->insertRefund([
+                'payment_id' => $paymentId,
+                'provider_id' => (string) ($payment['provider_id'] ?? ''),
+                'remote_id' => $refund['refund_remote_id'],
+                'status' => $status,
+                'amount_minor' => $refund['amount_minor'],
+                'currency' => $currency,
+                'reason' => $refund['reason'],
+                'idempotency_key' => $idempotencyKey,
+                'request_hash' => $requestHash,
+                'metadata' => $this->safeMetadata([
+                    'provider_code' => 'webhook_refund',
+                    'webhook_receipt_id' => $receiptId,
+                    'provider_refund_id' => $refund['refund_remote_id'],
+                ]),
+            ]);
+        }
 
         if ($refundId > 0 && $status === 'completed') {
             $refunded = $this->payments->refundedMinorForPayment($paymentId);

@@ -1,7 +1,7 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
-  "verified_version": "1.3.0-alpha.4",
-  "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+  "verified_version": "1.3.0-alpha.5",
+  "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
   "records": [
     {
       "id": "install.web_installer",
@@ -11,7 +11,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; system/core/Install/InstallController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -31,9 +31,9 @@
           "line_end": 171
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -49,7 +49,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/RuntimeRequirements.php; system/core/Support/SystemHealthDoctor.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -69,9 +69,9 @@
           "line_end": 151
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -87,7 +87,7 @@
       "audience": "Administrator",
       "source": "docs/themes.md; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/articles/{slug}",
@@ -107,9 +107,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -125,7 +125,7 @@
       "audience": "Administrator",
       "source": "docs/update-system.md; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -151,9 +151,9 @@
           "line_end": 592
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -169,7 +169,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Recovery/RecoveryController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "/admin/recovery",
       "public_route": "",
@@ -189,9 +189,9 @@
           "line_end": 50
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -207,7 +207,7 @@
       "audience": "Administrator",
       "source": "SECURITY.md; docs/installation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -227,9 +227,9 @@
           "line_end": 45
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -245,7 +245,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "/admin/seo/keywords",
       "public_route": "",
@@ -265,9 +265,9 @@
           "line_end": 94
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -283,7 +283,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "/admin/seo/search-engines",
       "public_route": "",
@@ -303,9 +303,9 @@
           "line_end": 348
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -321,7 +321,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Content/ContentFrontController.php; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/sitemap.xml",
@@ -347,9 +347,9 @@
           "line_end": 7
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -365,7 +365,7 @@
       "audience": "Administrator",
       "source": "docs/commerce.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -385,9 +385,9 @@
           "line_end": 48
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -403,7 +403,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Ai/AiService.php; system/core/Ai/AiProviderPresets.php; system/core/Ai/AiGateway.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -435,9 +435,9 @@
           "line_end": 25
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -453,7 +453,7 @@
       "audience": "Administrator",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -473,9 +473,9 @@
           "line_end": 628
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -491,7 +491,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -511,9 +511,9 @@
           "line_end": 5
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -529,7 +529,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "/admin/migrations",
       "public_route": "",
@@ -549,9 +549,9 @@
           "line_end": 569
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -567,7 +567,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "user_facing": true,
       "admin_route": "/admin/update;/admin/recovery",
       "public_route": "",
@@ -593,9 +593,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -612,21 +612,27 @@
       "admin_route": "",
       "public_route": "",
       "cli_command": "",
-      "description": "当前已发布稳定版仍为 Core 1.2.86（v1.2.86，d311446607124fff21d76f524a4a11968ad4cd58）。本包为基于该版本整合图像AI公共契约的1.3.0-alpha.4开发候选，不代表正式发布或生产部署。",
-      "source": "docs/ai-image/integration-1.2.86.md",
+      "description": "当前已发布稳定版仍为 Core 1.2.86（v1.2.86，d311446607124fff21d76f524a4a11968ad4cd58）。本包复核已整合图像公共能力并修复支付回调的1.3.0-alpha.5开发候选，不代表正式发布或生产部署。",
+      "source": "docs/ai-image/integration-1.2.86.md; docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "source_evidence": [
         {
           "path": "docs/ai-image/integration-1.2.86.md",
           "line_start": 3,
           "line_end": 3,
           "sha256": "a4acc63a504db84bc5c328d028e6d2fe4617b81e5dd27df136be4083b7ad2ca4"
+        },
+        {
+          "path": "docs/payment-refund-webhooks.md",
+          "sha256": "fe05bbdbe8663e35c63ba14ef0fabae6ab45454698bb058c77bfe2f49f414d12",
+          "line_start": 3,
+          "line_end": 3
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -647,7 +653,7 @@
       "description": "1.2.83 支持显式文章、页面和分类 slug 保留《》。留空时仍自动生成简洁 slug，已有 slug 与重定向不自动迁移。仍拒绝分隔符、路径穿越、控制字符、查询/片段符和预编码百分号输入；填写原始书名号，不粘贴 URL 编码。",
       "source": "docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "source_evidence": [
         {
           "path": "docs/content-slug-policy.md",
@@ -656,9 +662,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -679,13 +685,13 @@
       "description": "1.2.82 增加四个校验绑定的历史 MySQL 迁移方言适配，不修改已发布迁移文件。1.2.83 延续该能力；这不代表任意 MySQL/MariaDB 环境均已验收。选择数据库后仍应在安装器测试连接和实际完成安装。",
       "source": "CHANGELOG.md; system/core/Migration/MysqlHistoricalMigrationDialect.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "b4f091456e9e020aa637cc0837ad19133d738f38a4ee973d130b0e9b86d93236",
-          "line_start": 70,
-          "line_end": 70
+          "sha256": "e2c02f1070c12c912065d875e716f5a15515dbe199f83a7fd3adbca4cbc8b9b7",
+          "line_start": 76,
+          "line_end": 76
         },
         {
           "path": "system/core/Migration/MysqlHistoricalMigrationDialect.php",
@@ -694,9 +700,9 @@
           "line_end": 12
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -717,7 +723,7 @@
       "description": "首次安装失败须保留错误并修复原因。若管理员已创建但完成锁失败，入口会阻断，不能伪造完成锁或重复创建管理员。MySQL DDL 不保证全链事务回滚；只有负责人明确确认专用数据可丢弃后，才可人工清理重装。生产站不得删除数据库来修复升级。",
       "source": "docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "source_evidence": [
         {
           "path": "docs/first-install-failure.md",
@@ -732,9 +738,9 @@
           "line_end": 11
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -755,19 +761,19 @@
       "description": "1.2.82 的直接升级验证范围为 1.2.81 → 1.2.82；不能泛化为任意旧版直升最新。实际领取和安装必须服从目标包的签名版本范围与兼容检查。Core 更新不替换已安装插件；旧 Commerce 的 MySQL 参数修复需要独立插件更新。",
       "source": "CHANGELOG.md; docs/release/1.2.82-upgrade-support.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "b4f091456e9e020aa637cc0837ad19133d738f38a4ee973d130b0e9b86d93236",
-          "line_start": 73,
-          "line_end": 73
+          "sha256": "e2c02f1070c12c912065d875e716f5a15515dbe199f83a7fd3adbca4cbc8b9b7",
+          "line_start": 79,
+          "line_end": 79
         },
         {
           "path": "CHANGELOG.md",
-          "sha256": "b4f091456e9e020aa637cc0837ad19133d738f38a4ee973d130b0e9b86d93236",
-          "line_start": 74,
-          "line_end": 74
+          "sha256": "e2c02f1070c12c912065d875e716f5a15515dbe199f83a7fd3adbca4cbc8b9b7",
+          "line_start": 80,
+          "line_end": 80
         },
         {
           "path": "docs/release/1.2.82-upgrade-support.md",
@@ -776,9 +782,9 @@
           "line_end": 4
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -799,7 +805,7 @@
       "description": "Owner 于 2026-10-09 决定小说和视频产品退役，不再作为新安装分发、维护或规划产品。保留历史源码、已安装客户资产、订单和许可；退役不等于自动卸载、撤销授权或已完成市场下架。",
       "source": "docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "source_evidence": [
         {
           "path": "docs/retired-products.md",
@@ -814,9 +820,9 @@
           "line_end": 11
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -837,7 +843,7 @@
       "description": "历史文章 SEO 补全和内容优化入口为 /admin/seo/historical-backfill 与 /admin/seo/content-quality。AI 针对 B/C 级历史文章生成待审核草稿，经统一站点 AI 调用；不自动发布或修改 URL。原优化器尚未接入本统一知识包；不能声称资料自动更新已生效。",
       "source": "system/core/Support/View.php; system/core/Seo/Historical/HistoricalArticleSeoBackfillService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
@@ -858,9 +864,9 @@
           "line_end": 827
         }
       ],
-      "verified_version": "1.3.0-alpha.4",
-      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
+      "verified_version": "1.3.0-alpha.5",
+      "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+      "last_verified_at": "2026-10-19T00:59:54.356828+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -870,10 +876,10 @@
       "enabled_for_customer_service": true
     }
   ],
-  "package_revision": "2026-10-18-core-logo-integration-candidate",
+  "package_revision": "2026-10-18-payment-callback-fix-candidate",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
-  "source_tag": "d67113ffa72b885dfd206fb04d366be3577ad065",
+  "source_commit": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
+  "source_tag": "f2fcc7ca2705347ab7ea7f703b35456ce1539de1",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "DEVELOPMENT_NOT_PUBLISHED",
@@ -889,7 +895,7 @@
       "checked_at": "2026-10-18T17:51:49.285151+00:00",
       "production_site_upgraded": false
     },
-    "checked_at": "2026-10-19T00:27:19.447559+00:00"
+    "checked_at": "2026-10-19T00:59:54.356828+00:00"
   },
   "runtime_validation": "NOT_RUN_THIS_TASK",
   "retrieval_policy": {
