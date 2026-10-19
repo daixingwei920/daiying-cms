@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized main merge and formal signing (2026-10-19)
+
+- Owner authorized merging the verified 1.2.87 candidate into main, formal server-side signing and Release Gate acceptance. Publication remains on hold.
+- Accepted runtime source: `fe4a8843a5132d0162cde3f1d09f2902d563ef68`; matching installer/update parity and isolated SQLite/MySQL upgrade, retention, rollback and retry acceptance passed.
+- Freeze the merged main commit for formal artifacts. Use the existing official signer only on the update server; do not export private keys or change the signing trust root.
+- Do not create a release tag, GitHub Release, public update-service entry or production upgrade. Production payment settings and refunds remain prohibited. Earlier no-formal-signing notes below are superseded only for this explicit preparation task.
+
 ## Owner-authorized navigation takeover (2026-10-19)
 
 - Owner asked this chat to take over the side-panel navigation repair: generic admin-configured grouping, parent selection and ordering, compatible with existing themes and saved menus.
