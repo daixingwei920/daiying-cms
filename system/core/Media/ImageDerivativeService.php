@@ -102,6 +102,10 @@ final class ImageDerivativeService
 
     private function write(mixed $image, string $path, string $extension): bool
     {
+        if (in_array($extension, ['png', 'webp', 'avif'], true)) {
+            imagealphablending($image, false);
+            imagesavealpha($image, true);
+        }
         return match ($extension) {
             'jpg', 'jpeg' => function_exists('imagejpeg') && imagejpeg($image, $path, 86),
             'png' => function_exists('imagepng') && imagepng($image, $path, 6),

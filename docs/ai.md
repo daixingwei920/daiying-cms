@@ -152,3 +152,13 @@ Plugins must treat the Core AI API as the compatibility contract and avoid depen
 The official update server and official market AI review system do not use this site AI configuration.
 
 They must keep separate Provider settings, API Keys, database tables, and runtime logic. The site-level AI API must not be used to read or control `updates.daiyingcms.com` AI Review behavior.
+
+
+## 图像生成与编辑（开发版）
+
+Core `1.3.0-alpha.1` 新增实验性图像能力，保留文字契约与站点 Timeout。详见 [图像公共契约](ai-image/api.md)，测试范围见 [测试报告](ai-image/tests.md)。尚未 Stable 发布。
+
+
+## 1.3.0-alpha.2 品牌公共契约补充
+
+见 [原子文档、扩展Worker、旧图导入及管理员品牌应用](ai-image/brand-plugin-contracts.md)。开发版能力，未发布生产。

@@ -12,8 +12,20 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 - Release branch: `maintenance/release-1.2.86`, merged through PR #52. Included runtime fixes: PR #46 and #47, integrated via PR #51.
 - Released scope: migration-free API market plugin enablement and Passkey sensitive admin reauthentication; inherits 1.2.85 ICP and text AI compatibility fixes.
 - Publication evidence: `docs/CORE_1.2.86_PUBLICATION_REPORT.md`. The official website runtime remained 1.2.84 / NORMAL; publication did not upgrade it.
-- Image AI Core extensions and Logo plugin work remain separate development candidates and are not included in stable 1.2.86.
+- Stable 1.2.86 does not include image AI. Owner authorized merging the generic Core extensions on 2026-10-18; the integrated candidate below is not a Stable release. The Logo plugin remains a separate package.
 - All existing signing, approval, maintenance and production boundaries below remain in force.
+
+## Owner-authorized AI image development (2026-10-18)
+
+- Development branch: `codex/core-logo-integration-1.2.86`, clean base `6cdeee4c0ff67d2a0643317915b2331cd1638ed1` (published 1.2.86 plus publication documents).
+- Development version: `1.3.0-alpha.4`, not Stable and not approved for publication.
+- Current isolated branch: `codex/core-logo-integration-1.2.86`, worktree `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/core-logo-integration-1.2.86`; merges all generic image AI, atomic document, metering and branding contracts from b5e9d52 with the published 1.2.86 baseline. Stable 1.2.86 remains a separate frozen release.
+- Workspace: `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/core-logo-integration-1.2.86`.
+- Separate plugin source: sibling `daiying-ai-logo`; never include it in Core-owned payloads.
+- Owner explicitly authorized the generic image AI contract, adapter, queue, private media, quota and audit work despite the default maintenance-only rule.
+- Stable 1.2.85 and 1.2.86 artifacts are published and frozen. Do not rewrite their commit/tag/artifacts.
+- No production writes; existing site AI settings may be read for explicitly requested isolated live tests. Never copy keys to the workstation or into output/logs.
+- Other thread owns LocalPluginPackageInstaller market API enable repair; integrate only its immutable tested commit, not shared dirty files.
 
 ## Workspace Rules
 

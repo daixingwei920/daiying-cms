@@ -47,3 +47,8 @@ New OpenAI-compatible vendors should be added as presets or plugin-registered pr
 AI Foundation public APIs are versioned through `FoundationVersions::AI_API = 1.0`. Minor releases may add methods or contracts, but must not remove or change published signatures without a major API version and compatibility layer.
 
 Existing DeepSeek/OpenAI-compatible settings migrate forward without rewriting encrypted API keys. New tables are additive and idempotent.
+
+
+## 图像服务架构
+
+Core `1.3.0-alpha.1` 新增实验性图像能力，保留文字契约与站点 Timeout。详见 [图像公共契约](docs/ai-image/api.md)，测试范围见 [测试报告](docs/ai-image/tests.md)。尚未 Stable 发布。

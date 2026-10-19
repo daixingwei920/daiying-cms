@@ -1,6 +1,6 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
-  "verified_version": "1.2.86",
+  "verified_version": "1.3.0-alpha.4",
   "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
   "records": [
     {
@@ -814,24 +814,17 @@
       "admin_route": "",
       "public_route": "",
       "cli_command": "",
-      "description": "本知识包以正式发布的 Core 1.2.86 为源码基线，对应 v1.2.86 和提交 d311446607124fff21d76f524a4a11968ad4cd58。GitHub Latest、官方更新服务和实际下载已核验；正式网站运行实例升级需独立执行。",
-      "source": "config/app.example.php; CHANGELOG.md",
+      "description": "当前已发布稳定版仍为 Core 1.2.86（v1.2.86，d311446607124fff21d76f524a4a11968ad4cd58）。本包为基于该版本整合图像AI公共契约的1.3.0-alpha.4开发候选，不代表正式发布或生产部署。",
+      "source": "docs/ai-image/integration-1.2.86.md",
       "source_type": "official_docs+source_review",
       "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
       "source_evidence": [
         {
-          "path": "config/app.example.php",
-          "sha256": "2c95b6a5b9109641c1a6e86b3841ec764033215a3abf81d49c4ca5072e73bfef",
-          "line_start": 8,
-          "line_end": 8,
-          "anchor": "'version' => '1.2.86',"
-        },
-        {
-          "path": "CHANGELOG.md",
-          "sha256": "530a5ded1e78a652995a417b80632bf50f8b012d488943700c6236f88713518b",
-          "line_start": 30,
-          "line_end": 30,
-          "anchor": "## 1.2.83 - 2026-10-12"
+          "path": "docs/ai-image/integration-1.2.86.md",
+          "anchor": "当前正式版仍为 Core 1.2.86",
+          "line_start": 1,
+          "line_end": 1,
+          "sha256": ""
         }
       ],
       "verified_version": "1.2.86",
@@ -1244,24 +1237,291 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false
+    },
+    {
+      "id": "ai.image_config",
+      "topic": "AI Image Development",
+      "capability": "Core Image AI Settings",
+      "description": "图像能力复用全站Provider、加密API Key与管理员Timeout；独立image_model默认为关闭，不修改文字模型。开发版仅声明官方OpenAI端点的gpt-image-1.5生成与编辑，其他组合明确拒绝。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/api.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Fixed development commit source review only. Runtime evidence is independently scoped in docs/ai-image/tests.md. Not Stable.",
+      "user_facing": false,
+      "admin_route": "/admin/settings/ai",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/api.md",
+          "anchor": "## 架构与配置",
+          "sha256": "cfeadaa682f429b08fc6729d48fc21c263aa8cdf9eb6f631558fa4efb5d2cd26",
+          "line_start": 5,
+          "line_end": 5
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.3",
+      "source_commit": "db07230c6a7205546e1ae760ff0c3104b1cc35b4",
+      "last_verified_at": "2026-10-18T19:39:10.243338+00:00"
+    },
+    {
+      "id": "ai.image_sdk",
+      "topic": "AI Image Development",
+      "capability": "Image Plugin SDK",
+      "description": "实验性PluginContext::images()提供同插件、同会员、CSRF保护的异步提交、状态、历史与服务端图像读取；AiRequest/AiResponse文字契约保留。插件不保存Key、不直接调用服务商。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/api.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Fixed development commit source review only. Runtime evidence is independently scoped in docs/ai-image/tests.md. Not Stable.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/api.md",
+          "anchor": "## 插件 SDK",
+          "sha256": "cfeadaa682f429b08fc6729d48fc21c263aa8cdf9eb6f631558fa4efb5d2cd26",
+          "line_start": 17,
+          "line_end": 17
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.3",
+      "source_commit": "db07230c6a7205546e1ae760ff0c3104b1cc35b4",
+      "last_verified_at": "2026-10-18T19:39:10.243338+00:00"
+    },
+    {
+      "id": "ai.image_queue_cost",
+      "topic": "AI Image Development",
+      "capability": "Image Queue Quota and Cost",
+      "description": "图像任务使用原子预占、幂等键与队列CAS。已落盘响应可恢复入库；超时或远端结果未知不自动重发。用户UTC日/分钟限额、usage、管理员预估成本与审计分开记录，成本未知为NULL，不冒充实际账单。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/api.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Fixed development commit source review only. Runtime evidence is independently scoped in docs/ai-image/tests.md. Not Stable.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "php cli.php run-ai-image-jobs 10",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/api.md",
+          "anchor": "## 任务队列、恢复、成本",
+          "sha256": "cfeadaa682f429b08fc6729d48fc21c263aa8cdf9eb6f631558fa4efb5d2cd26",
+          "line_start": 38,
+          "line_end": 38
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.3",
+      "source_commit": "db07230c6a7205546e1ae760ff0c3104b1cc35b4",
+      "last_verified_at": "2026-10-18T19:39:10.243338+00:00"
+    },
+    {
+      "id": "ai.image_private_media",
+      "topic": "AI Image Development",
+      "capability": "Private Image Media",
+      "description": "图像原图存入CMS私有媒体，公共媒体入口与公开媒体VM拒绝访问。PNG重编码保留alpha。单色真实SVG描摹属于独立插件，不代表Core原生矢量模型。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/api.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Fixed development commit source review only. Runtime evidence is independently scoped in docs/ai-image/tests.md. Not Stable.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/api.md",
+          "anchor": "## 媒体与限制",
+          "sha256": "cfeadaa682f429b08fc6729d48fc21c263aa8cdf9eb6f631558fa4efb5d2cd26",
+          "line_start": 50,
+          "line_end": 50
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.3",
+      "source_commit": "db07230c6a7205546e1ae760ff0c3104b1cc35b4",
+      "last_verified_at": "2026-10-18T19:39:10.243338+00:00"
+    },
+    {
+      "id": "ai.image_validation_scope",
+      "topic": "AI Image Development",
+      "capability": "Image Validation Scope",
+      "description": "此前开发分支已有隔离图像/文字/并发/恢复、120秒真实cURL超时及指定账号真实OpenAI生成编辑证据。1.2.86整合候选的回归结果另列；历史实跑不等同新候选真实调用验收。中文仅样例观察，MySQL与实体设备未测；Logo插件独立开发，Core未Stable发布。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/tests.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Fixed development commit source review only. Runtime evidence is independently scoped in docs/ai-image/tests.md. Not Stable.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/tests.md",
+          "anchor": "## 真实服务商调用",
+          "sha256": "ad5be99be804533cfdb14a135c9963232159d418312e1f422cee92d0b156e7c4",
+          "line_start": 18,
+          "line_end": 18
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.3",
+      "source_commit": "db07230c6a7205546e1ae760ff0c3104b1cc35b4",
+      "last_verified_at": "2026-10-18T19:39:10.243338+00:00"
+    },
+    {
+      "id": "plugin.atomic_documents",
+      "topic": "Plugin SDK Development",
+      "capability": "Atomic Plugin Documents and Worker",
+      "description": "开发版增加插件命名空间原子文档和指定类型扩展Worker，供作品、幂等账本与缓存使用，不赋予普通插件PDO；已持久化响应可恢复，未知模型结果不自动重放。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/brand-plugin-contracts.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned development source review only. Independent runtime scope is recorded in the plugin delivery report; not Stable.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "php cli.php run-extension-jobs <job-type> [limit]",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/brand-plugin-contracts.md",
+          "anchor": "## 原子插件文档",
+          "sha256": "cdb58ee2bb31b0be7735c9e50500e7a4391888cba0f07300d2df5d231b08f364",
+          "line_start": 11,
+          "line_end": 11
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.3",
+      "source_commit": "db07230c6a7205546e1ae760ff0c3104b1cc35b4",
+      "last_verified_at": "2026-10-18T19:39:10.243338+00:00"
+    },
+    {
+      "id": "plugin.branding_admin",
+      "topic": "Plugin SDK Development",
+      "capability": "Administrator Site Branding API",
+      "description": "开发版提供管理员站点品牌应用公共契约；验证权限、插件版本及POST/CSRF，先备份配置，再原子更新站点名称/Logo/Favicon，并记录幂等收据；会员调用拒绝。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/brand-plugin-contracts.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned development source review only. Independent runtime scope is recorded in the plugin delivery report; not Stable.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/brand-plugin-contracts.md",
+          "anchor": "## 管理员应用站点品牌",
+          "sha256": "cdb58ee2bb31b0be7735c9e50500e7a4391888cba0f07300d2df5d231b08f364",
+          "line_start": 28,
+          "line_end": 28
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.3",
+      "source_commit": "db07230c6a7205546e1ae760ff0c3104b1cc35b4",
+      "last_verified_at": "2026-10-18T19:39:10.243338+00:00"
+    },
+    {
+      "id": "plugin.public_site_identity",
+      "topic": "Plugin SDK Development",
+      "capability": "Public Site Identity",
+      "description": "开发版提供 branding()->current() 公开只读站点身份：仅名称、网址、Logo、Favicon，不返回任何配置密钥。经营页面读取当前实例身份；客户明确输入的设计品牌独立保留。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/brand-plugin-contracts.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned development source review only. Independent runtime scope is recorded in the plugin delivery report; not Stable.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/brand-plugin-contracts.md",
+          "anchor": "## 公开站点品牌读取",
+          "line_start": 40,
+          "line_end": 40,
+          "sha256": "cdb58ee2bb31b0be7735c9e50500e7a4391888cba0f07300d2df5d231b08f364"
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.3",
+      "source_commit": "db07230c6a7205546e1ae760ff0c3104b1cc35b4",
+      "last_verified_at": "2026-10-18T19:39:10.243338+00:00"
     }
   ],
-  "package_revision": "2026-10-18.4-published",
+  "package_revision": "2026-10-18-core-logo-integration-candidate",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
   "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
   "source_tag": "v1.2.86",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
-    "status": "PUBLISHED",
-    "version": "1.2.86",
-    "commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-    "tag": "v1.2.86",
-    "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.86",
-    "update_service": "https://updates.daiyingcms.com",
-    "installer_sha256": "954e18b12221bbe12f178b81258ca6eee23b3bbc1dc2607efd176ef1e56587fe",
-    "update_sha256": "28e6f9f837b3ca5fa76e91fee0d5a00bdbd7c6482360acb518085599bdb0d127",
-    "checked_at": "2026-10-18T17:51:49.285151+00:00",
-    "production_site_upgraded": false
+    "status": "DEVELOPMENT_NOT_PUBLISHED",
+    "previous_stable": {
+      "status": "PUBLISHED",
+      "version": "1.2.86",
+      "commit": "d311446607124fff21d76f524a4a11968ad4cd58",
+      "tag": "v1.2.86",
+      "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.86",
+      "update_service": "https://updates.daiyingcms.com",
+      "installer_sha256": "954e18b12221bbe12f178b81258ca6eee23b3bbc1dc2607efd176ef1e56587fe",
+      "update_sha256": "28e6f9f837b3ca5fa76e91fee0d5a00bdbd7c6482360acb518085599bdb0d127",
+      "checked_at": "2026-10-18T17:51:49.285151+00:00",
+      "production_site_upgraded": false
+    }
   },
   "runtime_validation": "NOT_RUN_THIS_TASK",
   "retrieval_policy": {
@@ -1307,5 +1567,5 @@
       "note": "含旧 testing/rc 发布前措辞，仅引用来源版本约束，不作为当前发布状态。"
     }
   ],
-  "release_status": "PUBLISHED"
+  "release_status": "CANDIDATE_NOT_PUBLISHED"
 }

@@ -27,6 +27,7 @@ final class AiModel
     public function supports(array $required): bool
     {
         foreach ($required as $capability) {
+            if ($capability === 'text.generate') $capability = 'text_generation';
             if (!in_array($capability, $this->capabilities, true)) {
                 return false;
             }

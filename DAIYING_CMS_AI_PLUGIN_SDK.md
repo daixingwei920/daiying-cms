@@ -83,3 +83,8 @@ The plugin must declare `ai.prompt`.
 ## Compatibility Rules
 
 Plugins must depend on public AI API v1 classes and `PluginContext`. They must not read AI tables, decrypt secrets, call vendor APIs directly for common chat, or assume a specific provider.
+
+
+## 图像插件 SDK
+
+Core `1.3.0-alpha.1` 新增实验性图像能力，保留文字契约与站点 Timeout。详见 [图像公共契约](docs/ai-image/api.md)，测试范围见 [测试报告](docs/ai-image/tests.md)。尚未 Stable 发布。

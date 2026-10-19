@@ -61,3 +61,8 @@ Provider and gateway errors use `AiException::reason()` values such as:
 - `capability_unsupported`
 
 Messages must be safe for admin display and must not include full API keys or tokens.
+
+
+## 图像适配器契约
+
+Core `1.3.0-alpha.1` 新增实验性图像能力，保留文字契约与站点 Timeout。详见 [图像公共契约](docs/ai-image/api.md)，测试范围见 [测试报告](docs/ai-image/tests.md)。尚未 Stable 发布。
