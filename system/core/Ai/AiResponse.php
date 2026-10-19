@@ -49,8 +49,8 @@ final class AiResponse
     private static function normalizeUsage(array $raw): array
     {
         $usage = is_array($raw['usage'] ?? null) ? $raw['usage'] : $raw;
-        $input = (int) ($usage['prompt_tokens'] ?? $usage['promptTokenCount'] ?? 0);
-        $output = (int) ($usage['completion_tokens'] ?? $usage['candidatesTokenCount'] ?? 0);
+        $input = (int) ($usage['input_tokens'] ?? $usage['prompt_tokens'] ?? $usage['promptTokenCount'] ?? 0);
+        $output = (int) ($usage['output_tokens'] ?? $usage['completion_tokens'] ?? $usage['candidatesTokenCount'] ?? 0);
         $total = (int) ($usage['total_tokens'] ?? $usage['totalTokenCount'] ?? ($input + $output));
 
         return ['input_tokens' => $input, 'output_tokens' => $output, 'total_tokens' => $total];

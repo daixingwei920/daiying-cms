@@ -27,6 +27,7 @@ final class Capability
         'ai.agent',
         'ai.prompt',
         'ai.use',
+        'ai.image', 'site.brand.write',
         'queue.register',
         'scheduler.register',
         'webhook.register',

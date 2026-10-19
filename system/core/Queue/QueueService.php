@@ -34,15 +34,18 @@ final class QueueService
     }
 
     /** @return array{processed:int,succeeded:int,failed:int,dead:int} */
-    public function process(int $limit = 10): array
+    public function process(int $limit = 10, ?string $jobType = null): array
     {
         $processed = 0;
         $succeeded = 0;
         $failed = 0;
         $dead = 0;
-        foreach ($this->claimable($limit) as $row) {
-            $processed++;
+        foreach ($this->claimable($limit, $jobType) as $row) {
             $id = (int) $row['id'];
+            $claim = $this->pdo->prepare("UPDATE cms_core_queue_jobs SET status='running',updated_at=? WHERE id=? AND status IN ('pending','retry')");
+            $claim->execute([gmdate('c'), $id]);
+            if ($claim->rowCount() !== 1) continue;
+            $processed++;
             $type = (string) $row['job_type'];
             $handler = QueueHandlerRegistry::get($type);
             if ($handler === null) {
@@ -50,7 +53,6 @@ final class QueueService
                 $dead++;
                 continue;
             }
-            $this->mark($id, 'running');
             try {
                 $payload = json_decode((string) $row['payload_json'], true, 512, JSON_THROW_ON_ERROR);
                 $handler(is_array($payload) ? $payload : []);
@@ -81,9 +83,10 @@ final class QueueService
     }
 
     /** @return list<array<string,mixed>> */
-    private function claimable(int $limit): array
+    private function claimable(int $limit, ?string $jobType = null): array
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM cms_core_queue_jobs WHERE status IN ('pending', 'retry') AND not_before <= :now ORDER BY id ASC LIMIT :limit");
+        $stmt = $this->pdo->prepare("SELECT * FROM cms_core_queue_jobs WHERE status IN ('pending', 'retry') AND not_before <= :now" . ($jobType !== null ? " AND job_type = :job_type" : "") . " ORDER BY id ASC LIMIT :limit");
+        if ($jobType !== null) $stmt->bindValue(':job_type', $jobType);
         $stmt->bindValue(':now', gmdate('c'));
         $stmt->bindValue(':limit', max(1, min(100, $limit)), PDO::PARAM_INT);
         $stmt->execute();

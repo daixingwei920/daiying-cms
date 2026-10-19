@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.3.0-alpha.4 (integration candidate, unpublished)
+
+- Integrate the generic image AI, atomic plugin document, metered text and site branding contracts onto published Core 1.2.86, retaining its Passkey reauthentication and migration-free API market enablement fixes.
+- Add the two development migrations for image jobs/usage and plugin documents; preserve all published migration files. No Stable release, production upgrade or payment changes are authorized by this merge.
+
+## 1.3.0-alpha.3 (development, unpublished)
+
+- Add read-only PluginBrandingService::current(), returning only the current site name, URL, Logo and Favicon for reusable plugin storefronts. No credentials or full configuration are exposed; branding writes retain existing admin/CSRF checks.
+
+## 1.3.0-alpha.2 (development, unpublished)
+
+- 增加原子插件文档与指定类型扩展Worker。
+- 增加私有旧图导入和显式计量文字调用，保留现有AI契约及Timeout。
+- 增加受管理员权限、POST/CSRF、备份和幂等保护的站点品牌应用公共接口。
+
+
+## 1.3.0-alpha.1 — 开发分支，未发布
+
+- 新增实验性 text.generate / image.generate / image.edit 能力与独立图像适配器契约，文字 API 保持兼容。
+- 图像复用站点凭据与原有 Timeout，新增独立图像模型、用户限额、持久任务和成本审计；未知结果不自动重发。
+- 新增通用私有媒体存储，阻断公开媒体入口访问；修复 PNG 等格式重编码丢失 alpha。
+- 队列增加原子领取与类型过滤。Logo 插件独立交付，不并入 Core 发行包。
+- 仅官方 OpenAI / gpt-image-1.5 图像组合已在指定账号隔离实跑；其他模型未声明支持。1.2.85 签名包保持冻结。
+
+
 ## 1.2.86 - 2026-10-18
 
 - Fix enablement of published, migration-free ordinary API market plugins. Preserve official trust-grant checks for trusted PHP, reserved official identities and migrations.

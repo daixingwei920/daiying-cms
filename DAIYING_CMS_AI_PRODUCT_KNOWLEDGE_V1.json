@@ -1,7 +1,7 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
-  "verified_version": "1.2.86",
-  "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+  "verified_version": "1.3.0-alpha.4",
+  "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
   "records": [
     {
       "id": "install.web_installer",
@@ -11,7 +11,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; system/core/Install/InstallController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -33,9 +33,9 @@
           "anchor": "return is_file($this->rootPath . '/storage/installed.lock');"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -51,7 +51,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/RuntimeRequirements.php; system/core/Support/SystemHealthDoctor.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -73,9 +73,9 @@
           "anchor": "foreach (['pdo', 'openssl', 'curl', 'fileinfo', 'zip', 'mbstring'] as $extension) {"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -91,7 +91,7 @@
       "audience": "Administrator",
       "source": "docs/themes.md; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/articles/{slug}",
@@ -113,9 +113,9 @@
           "anchor": "Core 1.2.83 支持在文章、页面和分类的显式 slug 中保留 `《》`。留空时仍按标题自动生成字母、数字和连字符组成的简洁 slug。已有文章和重定向不自动迁移；文章 #75 的现有新网址及 301 无须撤销。"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -131,7 +131,7 @@
       "audience": "Internal",
       "source": "docs/content-foundation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -153,9 +153,9 @@
           "anchor": "## Trash"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -171,7 +171,7 @@
       "audience": "Internal",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -193,9 +193,9 @@
           "anchor": "public function retryFailedFile(int $jobId, string $path, string $sourceHint = ''): array"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -211,7 +211,7 @@
       "audience": "Administrator",
       "source": "docs/update-system.md; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -234,15 +234,15 @@
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
+          "sha256": "e449a70b578ca8e0e84b2f3c07743783a13f135b4cf3bad0c92a783b2b889d9e",
           "line_start": 592,
           "line_end": 592,
           "anchor": "$router->get('/admin/update', [$admin, 'updateIndex']);"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -258,7 +258,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Recovery/RecoveryController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "/admin/recovery",
       "public_route": "",
@@ -267,7 +267,7 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
+          "sha256": "e449a70b578ca8e0e84b2f3c07743783a13f135b4cf3bad0c92a783b2b889d9e",
           "line_start": 557,
           "line_end": 557,
           "anchor": "$router->get('/admin/recovery', [$recovery, 'index']);"
@@ -280,9 +280,9 @@
           "anchor": "'<button name=\"action\" value=\"restore_core_database\" type=\"submit\">恢复Core+数据库</button></form></li>';"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -298,7 +298,7 @@
       "audience": "Internal",
       "source": "system/core/SiteVault/SiteVaultService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -320,9 +320,9 @@
           "anchor": "public function restore(string $packagePath, ?int $actorId = null): array"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -338,7 +338,7 @@
       "audience": "Administrator",
       "source": "SECURITY.md; docs/installation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -360,9 +360,9 @@
           "anchor": "php scripts/validate_production_readiness.php --strict"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -378,7 +378,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "/admin/seo/keywords",
       "public_route": "",
@@ -387,7 +387,7 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
+          "sha256": "e449a70b578ca8e0e84b2f3c07743783a13f135b4cf3bad0c92a783b2b889d9e",
           "line_start": 506,
           "line_end": 506,
           "anchor": "$router->get('/admin/seo/keywords', [$admin, 'seoKeywordIndex']);"
@@ -400,9 +400,9 @@
           "anchor": "'observed_search_data' => $primaryMetrics !== [] ? 'yes' : 'not_available',"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -418,7 +418,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "/admin/seo/search-engines",
       "public_route": "",
@@ -427,7 +427,7 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
+          "sha256": "e449a70b578ca8e0e84b2f3c07743783a13f135b4cf3bad0c92a783b2b889d9e",
           "line_start": 516,
           "line_end": 516,
           "anchor": "$router->post('/admin/seo/search-engines/google/sync', [$admin, 'seoSearchEngineGoogleSync']);"
@@ -440,9 +440,9 @@
           "anchor": "return ['status' => 'submitted', 'evidence' => 'Accepted by submission channel; Submitted is not Indexed', 'last_checked' => (string) ($submission['created_at'] ?? '')];"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -458,7 +458,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Content/ContentFrontController.php; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/sitemap.xml",
@@ -467,7 +467,7 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
+          "sha256": "e449a70b578ca8e0e84b2f3c07743783a13f135b4cf3bad0c92a783b2b889d9e",
           "line_start": 413,
           "line_end": 413,
           "anchor": "$router->get('/sitemap.xml', [$front, 'sitemap']);"
@@ -487,9 +487,9 @@
           "anchor": "前端只解码一次路径段。链接、canonical、站点地图及新导入的 URL Mapping 对 slug 进行百分号编码，禁止双重解码绕过校验。官方导出/导入保留书名号；不改历史数据库迁移。"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -505,7 +505,7 @@
       "audience": "Developer",
       "source": "docs/plugins.md; docs/themes.md; docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -534,9 +534,9 @@
           "anchor": "Decision date: 2026-10-09. Owner decision: **DAIYING_NOVEL = RETIRED**, **DAIYING_VIDEO = RETIRED**."
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -552,7 +552,7 @@
       "audience": "Administrator",
       "source": "docs/commerce.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -574,9 +574,9 @@
           "anchor": "The first workflow does not fetch or scrape external product URLs. If a source URL is entered, it is treated only as administrator-provided context for the prompt and as a future extension point."
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -592,7 +592,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Ai/AiService.php; system/core/Ai/AiProviderPresets.php; system/core/Ai/AiGateway.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -601,14 +601,14 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
+          "sha256": "e449a70b578ca8e0e84b2f3c07743783a13f135b4cf3bad0c92a783b2b889d9e",
           "line_start": 482,
           "line_end": 482,
           "anchor": "$router->get('/admin/settings/ai', [$admin, 'aiSettings']);"
         },
         {
           "path": "system/core/Ai/AiService.php",
-          "sha256": "ad0b7bcb812a8a934ba55eca2c462c748e6cc1ce5581dd6748abdaf4e99b2c16",
+          "sha256": "a52e40432be62c1be21b4f0dc1f09a871b77c20008e6622c6bfb93b837e8de81",
           "line_start": 41,
           "line_end": 41,
           "anchor": "public function chat(array $messages, array $options = []): array"
@@ -622,15 +622,15 @@
         },
         {
           "path": "system/core/Ai/AiGateway.php",
-          "sha256": "d537673cc6288a4d16556330b4fd4d3640070c489013fc335f039530c4d32f34",
+          "sha256": "b8e088dc6a0f45b0158667ff657f56385109e7e0bd895f36b1241e58080d2b07",
           "line_start": 25,
           "line_end": 25,
           "anchor": "public function request(AiRequest $request): AiResponse"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -646,7 +646,7 @@
       "audience": "Administrator",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -668,9 +668,9 @@
           "anchor": "$this->repo->record($jobId, $system, $siteId, 'comment', $sourceId, 'PendingFeature', null, null, null, null, $metadata, 'pending_feature', 'Core 暂无评论模块，暂不写入前台评论。');"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -686,7 +686,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -708,9 +708,9 @@
           "anchor": "1. 保留错误提示和服务器日志，先修复数据库连接、扩展、目录权限或其他实际失败原因。安装失败不是安装成功。"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -726,7 +726,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "/admin/migrations",
       "public_route": "",
@@ -742,15 +742,15 @@
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "58e741387b8e6abd5322bad8c0e5d14419865b219860696ab776a43e8194116c",
+          "sha256": "e449a70b578ca8e0e84b2f3c07743783a13f135b4cf3bad0c92a783b2b889d9e",
           "line_start": 569,
           "line_end": 569,
           "anchor": "$router->post('/admin/migrations/scan', [$admin, 'externalMigrationScan']);"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -766,7 +766,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": true,
       "admin_route": "/admin/update;/admin/recovery",
       "public_route": "",
@@ -795,9 +795,9 @@
           "anchor": "适用于首次安装、尚未正式运行的网站。已正式运行的网站必须使用官方备份、升级及回滚流程，不能删除数据库来解决升级问题。"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -814,29 +814,22 @@
       "admin_route": "",
       "public_route": "",
       "cli_command": "",
-      "description": "本知识包以正式发布的 Core 1.2.86 为源码基线，对应 v1.2.86 和提交 d311446607124fff21d76f524a4a11968ad4cd58。GitHub Latest、官方更新服务和实际下载已核验；正式网站运行实例升级需独立执行。",
-      "source": "config/app.example.php; CHANGELOG.md",
+      "description": "当前已发布稳定版仍为 Core 1.2.86（v1.2.86，d311446607124fff21d76f524a4a11968ad4cd58）。本包为基于该版本整合图像AI公共契约的1.3.0-alpha.4开发候选，不代表正式发布或生产部署。",
+      "source": "docs/ai-image/integration-1.2.86.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "source_evidence": [
         {
-          "path": "config/app.example.php",
-          "sha256": "2c95b6a5b9109641c1a6e86b3841ec764033215a3abf81d49c4ca5072e73bfef",
-          "line_start": 8,
-          "line_end": 8,
-          "anchor": "'version' => '1.2.86',"
-        },
-        {
-          "path": "CHANGELOG.md",
-          "sha256": "530a5ded1e78a652995a417b80632bf50f8b012d488943700c6236f88713518b",
-          "line_start": 30,
-          "line_end": 30,
-          "anchor": "## 1.2.83 - 2026-10-12"
+          "path": "docs/ai-image/integration-1.2.86.md",
+          "anchor": "当前正式版仍为 Core 1.2.86",
+          "line_start": 3,
+          "line_end": 3,
+          "sha256": "a4acc63a504db84bc5c328d028e6d2fe4617b81e5dd27df136be4083b7ad2ca4"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -857,7 +850,7 @@
       "description": "1.2.83 支持显式文章、页面和分类 slug 保留《》。留空时仍自动生成简洁 slug，已有 slug 与重定向不自动迁移。仍拒绝分隔符、路径穿越、控制字符、查询/片段符和预编码百分号输入；填写原始书名号，不粘贴 URL 编码。",
       "source": "docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "source_evidence": [
         {
           "path": "docs/content-slug-policy.md",
@@ -867,9 +860,9 @@
           "anchor": "Core 1.2.83 支持在文章、页面和分类的显式 slug 中保留 `《》`。留空时仍按标题自动生成字母、数字和连字符组成的简洁 slug。已有文章和重定向不自动迁移；文章 #75 的现有新网址及 301 无须撤销。"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -890,13 +883,13 @@
       "description": "1.2.82 增加四个校验绑定的历史 MySQL 迁移方言适配，不修改已发布迁移文件。1.2.83 延续该能力；这不代表任意 MySQL/MariaDB 环境均已验收。选择数据库后仍应在安装器测试连接和实际完成安装。",
       "source": "CHANGELOG.md; system/core/Migration/MysqlHistoricalMigrationDialect.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "530a5ded1e78a652995a417b80632bf50f8b012d488943700c6236f88713518b",
-          "line_start": 45,
-          "line_end": 45,
+          "sha256": "b4f091456e9e020aa637cc0837ad19133d738f38a4ee973d130b0e9b86d93236",
+          "line_start": 70,
+          "line_end": 70,
           "anchor": "- Support MySQL fresh installation through four checksum-bound historical dialect adapters, without modifying frozen migrations."
         },
         {
@@ -907,9 +900,9 @@
           "anchor": "final class MysqlHistoricalMigrationDialect"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -930,7 +923,7 @@
       "description": "首次安装失败须保留错误并修复原因。若管理员已创建但完成锁失败，入口会阻断，不能伪造完成锁或重复创建管理员。MySQL DDL 不保证全链事务回滚；只有负责人明确确认专用数据可丢弃后，才可人工清理重装。生产站不得删除数据库来修复升级。",
       "source": "docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "source_evidence": [
         {
           "path": "docs/first-install-failure.md",
@@ -947,9 +940,9 @@
           "anchor": "MySQL 的 DDL 不具备 SQLite 式的全链事务回滚保证。部分表、失败索引或安装中断不能默认当作可直接重试；需要负责人核查或按上述条件人工重新安装。产品不提供自动数据库清理或自动恢复状态机。"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -970,20 +963,20 @@
       "description": "1.2.82 的直接升级验证范围为 1.2.81 → 1.2.82；不能泛化为任意旧版直升最新。实际领取和安装必须服从目标包的签名版本范围与兼容检查。Core 更新不替换已安装插件；旧 Commerce 的 MySQL 参数修复需要独立插件更新。",
       "source": "CHANGELOG.md; docs/release/1.2.82-upgrade-support.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "530a5ded1e78a652995a417b80632bf50f8b012d488943700c6236f88713518b",
-          "line_start": 48,
-          "line_end": 48,
+          "sha256": "b4f091456e9e020aa637cc0837ad19133d738f38a4ee973d130b0e9b86d93236",
+          "line_start": 73,
+          "line_end": 73,
           "anchor": "- Direct upgrade validation covers 1.2.81 to 1.2.82. Other source versions are not verified for this release."
         },
         {
           "path": "CHANGELOG.md",
-          "sha256": "530a5ded1e78a652995a417b80632bf50f8b012d488943700c6236f88713518b",
-          "line_start": 49,
-          "line_end": 49,
+          "sha256": "b4f091456e9e020aa637cc0837ad19133d738f38a4ee973d130b0e9b86d93236",
+          "line_start": 74,
+          "line_end": 74,
           "anchor": "- Existing Commerce installations require a separate plugin update for its MySQL parameter fix; Core updates do not replace installed plugins."
         },
         {
@@ -994,9 +987,9 @@
           "anchor": "签名 update.json 与外部 metadata 的 source_versions 均为 min=max=1.2.81；min_upgrade_from、hard_min_version、migration_floor 均为1.2.81。构建及 parity 拒绝覆盖这一正式契约。此调整不改变旧发布包或49份历史迁移。"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1017,7 +1010,7 @@
       "description": "Owner 于 2026-10-09 决定小说和视频产品退役，不再作为新安装分发、维护或规划产品。保留历史源码、已安装客户资产、订单和许可；退役不等于自动卸载、撤销授权或已完成市场下架。",
       "source": "docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "source_evidence": [
         {
           "path": "docs/retired-products.md",
@@ -1034,9 +1027,9 @@
           "anchor": "Legacy official plugin registry trust, capability/table namespaces and frozen migrations remain unchanged to protect already-installed customer sites. Retirement does not disable or uninstall existing copies, remove stored content, revoke licenses or alter paid orders. Historical releases and source history are retained."
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1057,7 +1050,7 @@
       "description": "历史文章 SEO 补全和内容优化入口为 /admin/seo/historical-backfill 与 /admin/seo/content-quality。AI 针对 B/C 级历史文章生成待审核草稿，经统一站点 AI 调用；不自动发布或修改 URL。原优化器尚未接入本统一知识包；不能声称资料自动更新已生效。",
       "source": "system/core/Support/View.php; system/core/Seo/Historical/HistoricalArticleSeoBackfillService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
@@ -1081,9 +1074,9 @@
           "anchor": "private function productContext(): array"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1104,13 +1097,13 @@
       "description": "1.2.83 按 PDO 连接共享 SQLite immediate transaction 状态，保留事务所有权、支付回调/退款原子性与写锁。属于内部维护修复；不证明真实支付通道、退款或商户交易已验收。",
       "source": "CHANGELOG.md; system/core/Payment/PaymentTransaction.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "530a5ded1e78a652995a417b80632bf50f8b012d488943700c6236f88713518b",
-          "line_start": 32,
-          "line_end": 32,
+          "sha256": "b4f091456e9e020aa637cc0837ad19133d738f38a4ee973d130b0e9b86d93236",
+          "line_start": 57,
+          "line_end": 57,
           "anchor": "- Share SQLite immediate transaction state by PDO connection across payment services and repositories on PHP 8.3."
         },
         {
@@ -1121,9 +1114,9 @@
           "anchor": "use WeakMap;"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1140,7 +1133,7 @@
       "audience": "Developer",
       "source": "docs/site-registration.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": false,
       "admin_route": "/admin/settings",
       "public_route": "",
@@ -1155,9 +1148,9 @@
           "anchor": "在后台「平台 → 站点设置」（`/admin/settings`）的站点 URL 下方填写「ICP 备案号」，点击「保存站点设置」。填写真实备案文本，例如 `京ICP备12345678号-1`；没有备案号时留空。本设置只负责展示，不能代办备案或证明备案有效。"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1173,7 +1166,7 @@
       "audience": "Developer",
       "source": "docs/ai.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": false,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -1182,15 +1175,15 @@
       "source_evidence": [
         {
           "path": "docs/ai.md",
-          "sha256": "a57ecab0f18504c66d525285498bb0c2750b0ed7c0a9b00bf0251ee18be18ea0",
+          "sha256": "4b7fc4f7b0c2f1a6b190a045235687d1d8c2e1090e60f13ebb8437e1e142dfad",
           "line_start": 5,
           "line_end": 5,
           "anchor": "The shared Chat Completions adapter maps the configured token budget to"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1206,7 +1199,7 @@
       "audience": "Administrator",
       "source": "docs/admin-passkey-reauth.md; system/core/Admin/AdminController.php; system/core/Auth/AdminPasskeyService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned 1.2.86 published source/document review. GitHub release/tag and official update downloads verified separately; runtime evidence is recorded in docs/CORE_1.2.86_PUBLICATION_REPORT.md.",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
       "user_facing": false,
       "admin_route": "/admin/security",
       "public_route": "",
@@ -1222,7 +1215,7 @@
         },
         {
           "path": "system/core/Admin/AdminController.php",
-          "sha256": "2876e89cbf38860997a829d5ddb3102ad55f7d86deee18c39992c9e596c40845",
+          "sha256": "c6b15e238d36720082188b3456969e2a58d6e555e38d73b6f78dddb3b18b4892",
           "line_start": 1060,
           "line_end": 1060,
           "anchor": "public function adminSecurityPasskeyReauthVerify(Request $request): Response"
@@ -1235,33 +1228,301 @@
           "anchor": "(string) ($session['purpose'] ?? '') !== $purpose"
         }
       ],
-      "verified_version": "1.2.86",
-      "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-      "last_verified_at": "2026-10-18T17:51:49.285151+00:00",
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false
+    },
+    {
+      "id": "ai.image_config",
+      "topic": "AI Image Development",
+      "capability": "Core Image AI Settings",
+      "description": "图像能力复用全站Provider、加密API Key与管理员Timeout；独立image_model默认为关闭，不修改文字模型。开发版仅声明官方OpenAI端点的gpt-image-1.5生成与编辑，其他组合明确拒绝。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/api.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "user_facing": false,
+      "admin_route": "/admin/settings/ai",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/api.md",
+          "anchor": "## 架构与配置",
+          "sha256": "cfeadaa682f429b08fc6729d48fc21c263aa8cdf9eb6f631558fa4efb5d2cd26",
+          "line_start": 5,
+          "line_end": 5
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00"
+    },
+    {
+      "id": "ai.image_sdk",
+      "topic": "AI Image Development",
+      "capability": "Image Plugin SDK",
+      "description": "实验性PluginContext::images()提供同插件、同会员、CSRF保护的异步提交、状态、历史与服务端图像读取；AiRequest/AiResponse文字契约保留。插件不保存Key、不直接调用服务商。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/api.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/api.md",
+          "anchor": "## 插件 SDK",
+          "sha256": "cfeadaa682f429b08fc6729d48fc21c263aa8cdf9eb6f631558fa4efb5d2cd26",
+          "line_start": 17,
+          "line_end": 17
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00"
+    },
+    {
+      "id": "ai.image_queue_cost",
+      "topic": "AI Image Development",
+      "capability": "Image Queue Quota and Cost",
+      "description": "图像任务使用原子预占、幂等键与队列CAS。已落盘响应可恢复入库；超时或远端结果未知不自动重发。用户UTC日/分钟限额、usage、管理员预估成本与审计分开记录，成本未知为NULL，不冒充实际账单。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/api.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "php cli.php run-ai-image-jobs 10",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/api.md",
+          "anchor": "## 任务队列、恢复、成本",
+          "sha256": "cfeadaa682f429b08fc6729d48fc21c263aa8cdf9eb6f631558fa4efb5d2cd26",
+          "line_start": 38,
+          "line_end": 38
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00"
+    },
+    {
+      "id": "ai.image_private_media",
+      "topic": "AI Image Development",
+      "capability": "Private Image Media",
+      "description": "图像原图存入CMS私有媒体，公共媒体入口与公开媒体VM拒绝访问。PNG重编码保留alpha。单色真实SVG描摹属于独立插件，不代表Core原生矢量模型。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/api.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/api.md",
+          "anchor": "## 媒体与限制",
+          "sha256": "cfeadaa682f429b08fc6729d48fc21c263aa8cdf9eb6f631558fa4efb5d2cd26",
+          "line_start": 50,
+          "line_end": 50
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00"
+    },
+    {
+      "id": "ai.image_validation_scope",
+      "topic": "AI Image Development",
+      "capability": "Image Validation Scope",
+      "description": "此前开发分支已有隔离图像/文字/并发/恢复、120秒真实cURL超时及指定账号真实OpenAI生成编辑证据。1.2.86整合候选的回归结果另列；历史实跑不等同新候选真实调用验收。中文仅样例观察，MySQL与实体设备未测；Logo插件独立开发，Core未Stable发布。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/tests.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/tests.md",
+          "anchor": "## 真实服务商调用",
+          "sha256": "ad5be99be804533cfdb14a135c9963232159d418312e1f422cee92d0b156e7c4",
+          "line_start": 18,
+          "line_end": 18
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00"
+    },
+    {
+      "id": "plugin.atomic_documents",
+      "topic": "Plugin SDK Development",
+      "capability": "Atomic Plugin Documents and Worker",
+      "description": "开发版增加插件命名空间原子文档和指定类型扩展Worker，供作品、幂等账本与缓存使用，不赋予普通插件PDO；已持久化响应可恢复，未知模型结果不自动重放。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/brand-plugin-contracts.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "php cli.php run-extension-jobs <job-type> [limit]",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/brand-plugin-contracts.md",
+          "anchor": "## 原子插件文档",
+          "sha256": "cdb58ee2bb31b0be7735c9e50500e7a4391888cba0f07300d2df5d231b08f364",
+          "line_start": 11,
+          "line_end": 11
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00"
+    },
+    {
+      "id": "plugin.branding_admin",
+      "topic": "Plugin SDK Development",
+      "capability": "Administrator Site Branding API",
+      "description": "开发版提供管理员站点品牌应用公共契约；验证权限、插件版本及POST/CSRF，先备份配置，再原子更新站点名称/Logo/Favicon，并记录幂等收据；会员调用拒绝。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/brand-plugin-contracts.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/brand-plugin-contracts.md",
+          "anchor": "## 管理员应用站点品牌",
+          "sha256": "cdb58ee2bb31b0be7735c9e50500e7a4391888cba0f07300d2df5d231b08f364",
+          "line_start": 28,
+          "line_end": 28
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00"
+    },
+    {
+      "id": "plugin.public_site_identity",
+      "topic": "Plugin SDK Development",
+      "capability": "Public Site Identity",
+      "description": "开发版提供 branding()->current() 公开只读站点身份：仅名称、网址、Logo、Favicon，不返回任何配置密钥。经营页面读取当前实例身份；客户明确输入的设计品牌独立保留。",
+      "audience": "Administrator and Developer",
+      "source": "docs/ai-image/brand-plugin-contracts.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned integrated development source/document review. Stable 1.2.86 remains published unchanged; isolated runtime checks are recorded separately in the integration delivery report.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/ai-image/brand-plugin-contracts.md",
+          "anchor": "## 公开站点品牌读取",
+          "line_start": 40,
+          "line_end": 40,
+          "sha256": "cdb58ee2bb31b0be7735c9e50500e7a4391888cba0f07300d2df5d231b08f364"
+        }
+      ],
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.3.0-alpha.4",
+      "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+      "last_verified_at": "2026-10-19T00:27:19.447559+00:00"
     }
   ],
-  "package_revision": "2026-10-18.4-published",
+  "package_revision": "2026-10-18-core-logo-integration-candidate",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-  "source_tag": "v1.2.86",
+  "source_commit": "d67113ffa72b885dfd206fb04d366be3577ad065",
+  "source_tag": "d67113ffa72b885dfd206fb04d366be3577ad065",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
-    "status": "PUBLISHED",
-    "version": "1.2.86",
-    "commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-    "tag": "v1.2.86",
-    "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.86",
-    "update_service": "https://updates.daiyingcms.com",
-    "installer_sha256": "954e18b12221bbe12f178b81258ca6eee23b3bbc1dc2607efd176ef1e56587fe",
-    "update_sha256": "28e6f9f837b3ca5fa76e91fee0d5a00bdbd7c6482360acb518085599bdb0d127",
-    "checked_at": "2026-10-18T17:51:49.285151+00:00",
-    "production_site_upgraded": false
+    "status": "DEVELOPMENT_NOT_PUBLISHED",
+    "previous_stable": {
+      "status": "PUBLISHED",
+      "version": "1.2.86",
+      "commit": "d311446607124fff21d76f524a4a11968ad4cd58",
+      "tag": "v1.2.86",
+      "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.86",
+      "update_service": "https://updates.daiyingcms.com",
+      "installer_sha256": "954e18b12221bbe12f178b81258ca6eee23b3bbc1dc2607efd176ef1e56587fe",
+      "update_sha256": "28e6f9f837b3ca5fa76e91fee0d5a00bdbd7c6482360acb518085599bdb0d127",
+      "checked_at": "2026-10-18T17:51:49.285151+00:00",
+      "production_site_upgraded": false
+    },
+    "checked_at": "2026-10-19T00:27:19.447559+00:00"
   },
   "runtime_validation": "NOT_RUN_THIS_TASK",
   "retrieval_policy": {
@@ -1307,5 +1568,5 @@
       "note": "含旧 testing/rc 发布前措辞，仅引用来源版本约束，不作为当前发布状态。"
     }
   ],
-  "release_status": "PUBLISHED"
+  "release_status": "CANDIDATE_NOT_PUBLISHED"
 }
