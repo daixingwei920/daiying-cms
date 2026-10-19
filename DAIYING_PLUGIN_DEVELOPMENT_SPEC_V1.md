@@ -49,6 +49,10 @@ Important optional keys:
 
 Core discovers `plugin.json`, validates the manifest, creates a `PluginContext`, and executes the plugin entry callable. Plugins register behavior during boot. Existing installed content and data must remain readable after a plugin is disabled.
 
+## Site Branding
+
+Plugins must not hard-code the developer's brand, product name, or demo site's name as the installing site's name in frontend pages, administration headings, page titles, SEO metadata, or footers. Use a documented public Core site-name API when one is available. Where the Plugin API does not expose one, provide a per-site display-name setting and fall back to the configured site address's host or a neutral feature label. Escape the resulting value when rendering HTML. Do not read private Core settings, tables, or configuration files for this purpose. Fixed product identity in `plugin.json` and marketplace metadata is separate from each site's branding.
+
 ## Trust Levels
 
 - `api`: default. Uses public SDK services. No direct PDO/session mutation.
