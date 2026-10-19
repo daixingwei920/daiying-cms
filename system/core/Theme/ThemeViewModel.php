@@ -101,7 +101,7 @@ final class ThemeViewModel
         foreach ($items as $item) {
             $label = trim((string) ($item['label'] ?? $item['title'] ?? $item['name'] ?? ''));
             $url = trim((string) ($item['url'] ?? $item['href'] ?? '#'));
-            if ($label === '') {
+            if ($label === '' || ($item['type'] ?? '') === 'group') {
                 continue;
             }
             $rawUrl = $url !== '' ? $url : '#';
@@ -113,6 +113,46 @@ final class ThemeViewModel
         }
 
         return $menu;
+    }
+
+    /** @return list<array<string,mixed>> Additive hierarchy contract; no raw config access needed. */
+    public static function menuTree(array $items, string $currentPath = ''): array
+    {
+        $input = [];
+        foreach ($items as $index => $item) {
+            if (!is_array($item)) { continue; }
+            $item['label'] ??= $item['title'] ?? $item['name'] ?? '';
+            $item['url'] ??= $item['href'] ?? '';
+            $item['id'] = (string) ($item['id'] ?? ('menu-' . $index));
+            $children = is_array($item['children'] ?? null) ? $item['children'] : [];
+            unset($item['children']);
+            $input[] = $item;
+            foreach ($children as $child) {
+                if (!is_array($child)) { continue; }
+                $child['label'] ??= $child['title'] ?? $child['name'] ?? '';
+                $child['url'] ??= $child['href'] ?? '';
+                $child['parent_id'] = $item['id'];
+                $input[] = $child;
+            }
+        }
+        try { $flat = \Cms\Core\Navigation\NavigationBuilder::sanitizeForSave($input); }
+        catch (\InvalidArgumentException) { return []; }
+        $enabled = array_column($flat, 'enabled', 'id');
+        $flat = array_values(array_filter($flat, static fn(array $item): bool => $item['enabled'] && ($item['parent_id'] === '' || ($enabled[$item['parent_id']] ?? false))));
+        $tree = \Cms\Core\Navigation\NavigationBuilder::tree($flat);
+        $map = static function(array $item) use ($currentPath): array {
+            $url = (string) $item['url'];
+            return ['id' => $item['id'], 'label' => $item['label'], 'url' => $url === '' ? '' : BasePath::prefixCurrent($url),
+                'current' => $url !== '' && $currentPath !== '' && BasePath::stripCurrent($url) === $currentPath,
+                'presentation' => $item['presentation'], 'children' => []];
+        };
+        foreach ($tree as &$root) {
+            $children = array_map($map, $root['children']);
+            $root = $map($root);
+            $root['children'] = $children;
+            $root['active'] = $root['current'] || in_array(true, array_column($children, 'current'), true);
+        }
+        return $tree;
     }
 
     public static function assetUrl(string $themeId, string $assetPath): string

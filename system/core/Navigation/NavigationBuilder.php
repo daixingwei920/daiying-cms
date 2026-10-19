@@ -7,6 +7,7 @@ namespace Cms\Core\Navigation;
 use Cms\Core\Config\Settings;
 use Cms\Core\Database\ConnectionFactory;
 use PDO;
+use InvalidArgumentException;
 use Throwable;
 
 final class NavigationBuilder
@@ -14,20 +15,28 @@ final class NavigationBuilder
     /** @return list<array{label:string,url:string,type:string,enabled:bool,requires_plugin:string}> */
     public static function build(Settings $settings, ?PDO $pdo = null, string $rootPath = ''): array
     {
+        return array_values(array_filter(self::items($settings, $pdo, $rootPath), static fn(array $item): bool => $item['type'] !== 'group'));
+    }
+
+    public static function buildTree(Settings $settings, ?PDO $pdo = null, string $rootPath = ''): array
+    {
+        return self::tree(self::items($settings, $pdo, $rootPath));
+    }
+
+    private static function items(Settings $settings, ?PDO $pdo, string $rootPath): array
+    {
         $enabledPlugins = self::enabledPlugins($settings, $pdo);
         $configured = $settings->get('navigation.primary', null);
         if (is_array($configured)) {
             $items = self::sanitizeItems($configured, $enabledPlugins);
-            if ($items !== []) {
-                return $items;
-            }
+            return $items;
         }
 
         $items = [
             ['label' => '首页', 'url' => '/', 'type' => 'home', 'enabled' => true, 'requires_plugin' => ''],
             ['label' => '文章', 'url' => '/articles', 'type' => 'articles', 'enabled' => true, 'requires_plugin' => ''],
         ];
-        return array_merge($items, self::pluginNavigationDefaults($rootPath, $enabledPlugins));
+        return self::sanitizeItems(array_merge($items, self::pluginNavigationDefaults($rootPath, $enabledPlugins)), $enabledPlugins);
     }
 
     /** @return list<array{label:string,url:string,type:string,enabled:bool,requires_plugin:string,available:bool}> */
@@ -35,14 +44,14 @@ final class NavigationBuilder
     {
         $enabledPlugins = self::enabledPlugins($settings, $pdo);
         $installedPlugins = self::installedPlugins($settings, $pdo);
-        $configured = $settings->get('navigation.primary', []);
+        $configured = $settings->get('navigation.primary', null);
         $items = is_array($configured) ? self::sanitizeItems($configured, $enabledPlugins, false) : [];
-        if ($items === []) {
+        if (!is_array($configured)) {
             $items = [
                 ['label' => '首页', 'url' => '/', 'type' => 'home', 'enabled' => true, 'requires_plugin' => ''],
                 ['label' => '文章', 'url' => '/articles', 'type' => 'articles', 'enabled' => true, 'requires_plugin' => ''],
             ];
-            $items = array_merge($items, self::pluginNavigationDefaults($rootPath, $installedPlugins));
+            $items = self::sanitizeItems(array_merge($items, self::pluginNavigationDefaults($rootPath, $installedPlugins)), $enabledPlugins, false);
         }
 
         return array_map(static function (array $item) use ($enabledPlugins): array {
@@ -55,7 +64,10 @@ final class NavigationBuilder
     /** @return list<array{label:string,url:string,type:string,enabled:bool,requires_plugin:string}> */
     public static function sanitizeForSave(mixed $input): array
     {
-        return self::sanitizeItems(is_array($input) ? $input : [], [], false);
+        if (!is_array($input) || count($input) > 200) {
+            throw new InvalidArgumentException('导航必须为数组，且不能超过 200 项。');
+        }
+        return self::sanitizeItems($input, [], false, true);
     }
 
     /** @return list<array{label:string,url:string,type:string,enabled:bool,requires_plugin:string}> */
@@ -66,40 +78,81 @@ final class NavigationBuilder
         return self::pluginNavigationDefaults($rootPath, $pluginIds);
     }
 
-    /** @param list<string> $enabledPlugins @return list<array{label:string,url:string,type:string,enabled:bool,requires_plugin:string}> */
-    private static function sanitizeItems(array $items, array $enabledPlugins, bool $publicOnly = true): array
+    /** Normalize the persisted flat list; hierarchy is additive metadata. */
+    private static function sanitizeItems(array $items, array $enabledPlugins, bool $publicOnly = true, bool $strict = false): array
     {
         $clean = [];
-        foreach ($items as $item) {
+        foreach ($items as $index => $item) {
             if (!is_array($item)) {
+                if ($strict) { throw new InvalidArgumentException('菜单项目格式无效。'); }
                 continue;
             }
             $label = trim((string) ($item['label'] ?? ''));
-            $url = self::safeUrl((string) ($item['url'] ?? ''));
             $type = preg_replace('/[^a-z0-9_.-]/', '', strtolower((string) ($item['type'] ?? 'custom'))) ?: 'custom';
-            $enabled = in_array(($item['enabled'] ?? true), [true, 1, '1', 'on', 'true'], true);
-            $requires = preg_replace('/[^a-z0-9_.-]/', '', strtolower((string) ($item['requires_plugin'] ?? ''))) ?: '';
-            if ($label === '' || $url === '') {
+            $url = $type === 'group' ? '' : self::safeUrl((string) ($item['url'] ?? ''));
+            if ($label === '' || ($type !== 'group' && $url === '')) {
+                if ($strict) { throw new InvalidArgumentException('请填写菜单名称和有效的链接地址。'); }
                 continue;
             }
-            if ($publicOnly && (!$enabled || ($requires !== '' && !in_array($requires, $enabledPlugins, true)))) {
+            $id = trim((string) ($item['id'] ?? ''));
+            if ($id === '') { $id = 'nav-' . substr(hash('sha256', $index . "\0" . $label . "\0" . $url), 0, 16); }
+            if (!preg_match('/^[a-zA-Z0-9_-]{1,64}$/D', $id) || isset($clean[$id])) {
+                if ($strict) { throw new InvalidArgumentException('菜单标识无效或重复，请刷新页面。'); }
                 continue;
             }
-            $clean[] = [
+            $clean[$id] = [
                 'label' => function_exists('mb_substr') ? mb_substr($label, 0, 60, 'UTF-8') : substr($label, 0, 60),
-                'url' => $url,
-                'type' => $type,
-                'enabled' => $enabled,
-                'requires_plugin' => $requires,
+                'url' => $url, 'type' => $type,
+                'enabled' => in_array(($item['enabled'] ?? true), [true, 1, '1', 'on', 'true'], true),
+                'requires_plugin' => preg_replace('/[^a-z0-9_.-]/', '', strtolower((string) ($item['requires_plugin'] ?? ''))) ?: '',
+                'id' => $id, 'parent_id' => trim((string) ($item['parent_id'] ?? '')),
+                'sort_order' => max(-100000, min(100000, (int) ($item['sort_order'] ?? $index))),
+                'presentation' => ($item['presentation'] ?? '') === 'button' ? 'button' : 'link',
             ];
         }
+        foreach ($clean as $id => &$item) {
+            $parent = $item['parent_id'];
+            if ($parent !== '' && (!isset($clean[$parent]) || $parent === $id || $clean[$parent]['parent_id'] !== '')) {
+                if ($strict) { throw new InvalidArgumentException('上级菜单必须是另一个一级菜单；不允许循环或超过二级。'); }
+                $item['parent_id'] = '';
+            }
+            if ($parent !== '' && $item['type'] === 'group') {
+                if ($strict) { throw new InvalidArgumentException('分组只能放在一级菜单。'); }
+                $item['parent_id'] = '';
+            }
+        }
+        unset($item);
+        uasort($clean, static fn(array $a, array $b): int => $a['sort_order'] <=> $b['sort_order']);
+        if (!$publicOnly) { return array_values($clean); }
+        $available = static fn(array $item): bool => $item['enabled'] && ($item['requires_plugin'] === '' || in_array($item['requires_plugin'], $enabledPlugins, true));
+        $visible = [];
+        foreach ($clean as $id => $item) {
+            if ($available($item) && ($item['parent_id'] === '' || $available($clean[$item['parent_id']]))) { $visible[$id] = $item; }
+        }
+        foreach ($visible as $id => $item) {
+            if ($item['type'] === 'group' && !array_filter($visible, static fn(array $child): bool => $child['parent_id'] === $id)) { unset($visible[$id]); }
+        }
+        return array_values($visible);
+    }
 
-        return $clean;
+    /** Two-level public tree. The original build() remains a flat list for old consumers. */
+    public static function tree(array $items): array
+    {
+        $roots = [];
+        foreach ($items as $item) {
+            if (($item['parent_id'] ?? '') === '') { $roots[(string) $item['id']] = $item + ['children' => []]; }
+        }
+        foreach ($items as $item) {
+            $parent = (string) ($item['parent_id'] ?? '');
+            if ($parent !== '' && isset($roots[$parent])) { $roots[$parent]['children'][] = $item + ['children' => []]; }
+        }
+        return array_values($roots);
     }
 
     private static function safeUrl(string $url): string
     {
         $url = trim($url);
+        if (preg_match('/[\\\\\x00-\x20\x7f]/', $url)) { return ''; }
         if ($url === '') {
             return '';
         }
@@ -107,7 +160,7 @@ final class NavigationBuilder
             return '/' . ltrim(preg_replace('#/{2,}#', '/', $url) ?: '', '/');
         }
         $parts = parse_url($url);
-        if (!is_array($parts) || !in_array(strtolower((string) ($parts['scheme'] ?? '')), ['http', 'https'], true)) {
+        if (!is_array($parts) || (!in_array(strtolower((string) ($parts['scheme'] ?? '')), ['http', 'https'], true) || empty($parts['host']))) {
             return '';
         }
 

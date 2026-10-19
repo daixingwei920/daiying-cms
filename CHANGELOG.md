@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.87
+
+- Add configurable navigation grouping, parent selection and ordering to the shared CMS navigation manager. Preserve legacy flat menu links and theme APIs while exposing an additive tree interface.
+- Fix duplicate named SQL parameters when linking webhook receipts on native MySQL PDO prepares. Preserve webhook replay and accounting idempotency; no gateway refund is initiated.
+- Unpublished repair: preserve UTF-8 when splitting editor list, table and gallery-caption lines and repository string lists; retain invalid-encoding rejection and existing Canonical validation.
+- Release the additive shared image AI, private media, quota/audit, atomic plugin documents, scoped workers and public site branding contracts on the 1.2.x stable line. Preserve existing text AI and configured Timeout.
+- Include the tested payment callback idempotency repair; recover pending checkout links securely across sessions and accept server-resolved product/return metadata.
+- Retain 1.2.86 compatibility, security and integrity protections; never initiate refunds automatically.
+
 ## 1.3.0-alpha.5 (payment callback repair, unpublished)
 
 - Acknowledge duplicate notifications for the same remote refund only when payment, amount and currency match the existing ledger record.

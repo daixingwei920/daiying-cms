@@ -4,6 +4,32 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized main merge and formal signing (2026-10-19)
+
+- Owner authorized merging the verified 1.2.87 candidate into main, formal server-side signing and Release Gate acceptance. Publication remains on hold.
+- Accepted runtime source: `fe4a8843a5132d0162cde3f1d09f2902d563ef68`; matching installer/update parity and isolated SQLite/MySQL upgrade, retention, rollback and retry acceptance passed.
+- Freeze the merged main commit for formal artifacts. Use the existing official signer only on the update server; do not export private keys or change the signing trust root.
+- Do not create a release tag, GitHub Release, public update-service entry or production upgrade. Production payment settings and refunds remain prohibited. Earlier no-formal-signing notes below are superseded only for this explicit preparation task.
+
+## Owner-authorized navigation takeover (2026-10-19)
+
+- Owner asked this chat to take over the side-panel navigation repair: generic admin-configured grouping, parent selection and ordering, compatible with existing themes and saved menus.
+- Clean takeover worktree `work/core-navigation-takeover`, branch `fix/navigation-groups-takeover-1.2.87`, based on `4c117437834a699be47cb91e963592fa27020d7a`. Earlier uncommitted worktree and official-theme snapshot are preserved.
+- Official theme is a separate 1.0.7 candidate, never part of the Core payload. Preserve all 11 live navigation destinations. Isolated development/tests only; no production data changes, signing/publication, payment changes or refunds.
+
+## Owner publication hold and article-save repair (2026-10-18)
+
+- Latest direct Owner instruction: fix and test the article #41 save failure; do not publish CMS. This overrides prior release authorization below.
+- Isolated repair branch: `fix/admin-block-utf8`, clean worktree `work/core-article41-utf8`, base `4a553fa` from the unpublished 1.2.87 candidate.
+- No formal signing, release tags, GitHub/update-service publication, production upgrades, production database writes, payment-setting changes or refunds.
+- Owner subsequently authorized clearing all three readiness blockers, rebuilding candidate packages, and completing real image and Stripe Test payment acceptance. Article repair is merged into `maintenance/release-1.2.87`; only isolated instances and temporary server-side test signing are permitted. CMS publication remains on hold.
+
+## Earlier 1.2.87 release candidate scope (publication on hold)
+
+- Owner requests 1.2.87 instead of the unpublished 1.3.0 development version; resolve remaining release blockers, test, then sign and publish Core, Stripe fix and Logo plugin.
+- Clean release worktree: `work/core-1.2.87-final`, branch `maintenance/release-1.2.87`, based on main 42ca4ffb3a44.
+- Published baseline remains 1.2.86 until verified publication. Production website runtime and collection settings must remain unchanged; real refunds are prohibited.
+
 ## Current Core Baseline
 
 - Product: Daiying CMS Core.
