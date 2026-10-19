@@ -4,6 +4,12 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized 1.2.87 release candidate (2026-10-18)
+
+- Owner requests 1.2.87 instead of the unpublished 1.3.0 development version; resolve remaining release blockers, test, then sign and publish Core, Stripe fix and Logo plugin.
+- Clean release worktree: `work/core-1.2.87-final`, branch `maintenance/release-1.2.87`, based on main 42ca4ffb3a44.
+- Published baseline remains 1.2.86 until verified publication. Production website runtime and collection settings must remain unchanged; real refunds are prohibited.
+
 ## Current Core Baseline
 
 - Product: Daiying CMS Core.

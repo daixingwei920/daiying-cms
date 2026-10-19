@@ -14,6 +14,8 @@ if (!is_array($config) || !preg_match('/^cms_mysql_[a-z0-9_]+$/', $config['datab
     throw new RuntimeException('Only an explicit disposable loopback MySQL fixture is allowed.');
 }
 $root = $config['root'];
+$port = (int) ($config['port'] ?? 3306);
+if ($port < 1024 || $port > 65535) throw new RuntimeException('Invalid explicit test port.');
 define('CMS_ROOT', $root);
 require dirname(__DIR__) . '/system/core/Bootstrap/autoload.php';
 
@@ -30,7 +32,7 @@ use Cms\Core\Plugin\LocalPluginPackageInstaller;
 use Cms\Core\Theme\LocalThemePackageInstaller;
 use Cms\Core\Theme\ThemeManager;
 
-$pdo = new PDO('mysql:host=127.0.0.1;dbname=' . $config['database'] . ';charset=utf8mb4', $config['user'], $config['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, PDO::ATTR_EMULATE_PREPARES => false]);
+$pdo = new PDO('mysql:host=127.0.0.1;port=' . $port . ';dbname=' . $config['database'] . ';charset=utf8mb4', $config['user'], $config['password'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, PDO::ATTR_EMULATE_PREPARES => false]);
 if ((int) $pdo->query('SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE()')->fetchColumn() !== 0) {
     throw new RuntimeException('Fresh install test requires an empty database; it never drops existing tables.');
 }
@@ -48,7 +50,7 @@ $settings = Settings::load($root);
 $logger = new FileLogger($root . '/storage/logs/mysql-test.log');
 $installer = new InstallController($root, $settings, $logger);
 $password = bin2hex(random_bytes(16));
-$body = ['_csrf' => CsrfToken::get(), 'db_driver' => 'mysql', 'mysql_host' => '127.0.0.1', 'mysql_port' => '3306', 'mysql_database' => $config['database'], 'mysql_username' => $config['user'], 'mysql_password' => $config['password'], 'site_name' => 'MySQL 中文 😀 Integration Test', 'site_url' => 'http://127.0.0.1:18989', 'email' => 'mysql-test@example.invalid', 'password' => $password, 'display_name' => '隔离管理员', 'install_action' => 'install'];
+$body = ['_csrf' => CsrfToken::get(), 'db_driver' => 'mysql', 'mysql_host' => '127.0.0.1', 'mysql_port' => (string) $port, 'mysql_database' => $config['database'], 'mysql_username' => $config['user'], 'mysql_password' => $config['password'], 'site_name' => 'MySQL 中文 😀 Integration Test', 'site_url' => 'http://127.0.0.1:18989', 'email' => 'mysql-test@example.invalid', 'password' => $password, 'display_name' => '隔离管理员', 'install_action' => 'install'];
 try {
     $bad = $body;
     $bad['_csrf'] = 'invalid';

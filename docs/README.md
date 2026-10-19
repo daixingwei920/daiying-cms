@@ -84,5 +84,5 @@ Current alpha Distribution work is implemented under the `official.commerce` plu
 
 Several historical implementation reports still live at the repository root. They are preserved to avoid breaking references, but new public documentation should link from this index.
 
-- [AI 图像接口、队列与费用规则](ai-image/api.md)（1.3.0-alpha.1 开发版）
+- [AI 图像接口、队列与费用规则](ai-image/api.md)（1.2.87）
 - [AI 图像与 Logo 测试范围](ai-image/tests.md)

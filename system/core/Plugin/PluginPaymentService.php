@@ -390,9 +390,22 @@ final class PluginPaymentService
             throw $exception;
         }
         try {
+            $quote = $this->resolve((string) $binding['subject_type'], (string) $binding['local_subject_id'], 'create', (int) $binding['buyer_id']);
+            $metadata = [];
+            foreach (['success_url', 'cancel_url', 'product_name'] as $field) {
+                $value = $quote[$field] ?? null;
+                if ($value === null || $value === '') continue;
+                if (!is_string($value) || strlen($value) > 2048 || preg_match('/[\x00-\x1f\x7f\\\\]/', $value)) throw new PluginException('invalid_request');
+                if ($field !== 'product_name') {
+                    $parts = parse_url($value);
+                    if (!is_array($parts) || isset($parts['user']) || isset($parts['pass']) || isset($parts['fragment'])
+                        || (!str_starts_with($value, 'https://') && !(str_starts_with($value, 'http://') && in_array($parts['host'] ?? '', ['127.0.0.1', 'localhost', '[::1]'], true)))) throw new PluginException('invalid_request');
+                }
+                $metadata[$field] = $value;
+            }
             $payment = $this->payments()->createProviderPayment(
                 'cms_plugin_order', (string) $binding['core_subject_id'], (string) $binding['provider_id'],
-                (int) $binding['amount_minor'], (string) $binding['currency'], (string) $binding['internal_key'],
+                (int) $binding['amount_minor'], (string) $binding['currency'], (string) $binding['internal_key'], metadata: $metadata,
             );
             $this->linkPayment($binding, $payment);
             return $this->publicPayment($binding, $payment);
@@ -448,6 +461,8 @@ final class PluginPaymentService
         ];
         if (isset($payment['_provider_checkout_url']) && is_string($payment['_provider_checkout_url'])) {
             $result['checkout_url'] = $payment['_provider_checkout_url'];
+        } elseif (($url = $this->payments()->checkoutUrl($payment)) !== '') {
+            $result['checkout_url'] = $url;
         }
         return $result;
     }

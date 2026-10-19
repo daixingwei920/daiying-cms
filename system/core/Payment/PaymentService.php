@@ -124,6 +124,16 @@ final class PaymentService
                 throw new PaymentException('Payment provider returned a duplicate remote payment reference.');
             }
 
+            $paymentMetadata = $this->safeMetadata($metadata + $result->data + ['provider_code' => $result->code]);
+            unset($paymentMetadata['checkout_resume']);
+            $checkoutUrl = $this->providerCheckoutUrlFromResultData($providerId, $result->data);
+            if ($checkoutUrl !== '' && $this->providerSettingsKey !== '') {
+                $nonce = random_bytes(12);
+                $tag = '';
+                $cipher = openssl_encrypt($checkoutUrl, 'aes-256-gcm', hash('sha256', $this->providerSettingsKey, true), OPENSSL_RAW_DATA, $nonce, $tag, $requestHash);
+                if (!is_string($cipher)) throw new PaymentException('Unable to preserve checkout URL.');
+                $paymentMetadata['checkout_resume'] = base64_encode($nonce . $tag . $cipher);
+            }
             $paymentId = $this->payments->insertPayment([
                 'subject_type' => $subjectType,
                 'subject_id' => $subjectId,
@@ -135,7 +145,7 @@ final class PaymentService
                 'currency' => $currency,
                 'idempotency_key' => $idempotencyKey,
                 'request_hash' => $requestHash,
-                'metadata' => $this->safeMetadata($metadata + $result->data + ['provider_code' => $result->code]),
+                'metadata' => $paymentMetadata,
             ]);
             $this->recordAudit('payment.provider.created', [
                 'payment_id' => $paymentId,
@@ -1922,6 +1932,24 @@ final class PaymentService
         }
 
         return '';
+    }
+
+    /** Restore only a validated pending checkout URL from the redacted server record. */
+    public function checkoutUrl(array $payment): string
+    {
+        if (($payment['status'] ?? '') !== 'pending') {
+            return '';
+        }
+        $metadata = $this->storedPaymentMetadata($payment);
+        if (isset($metadata['checkout_resume'])) {
+            $raw = base64_decode((string) $metadata['checkout_resume'], true);
+            if ($this->providerSettingsKey === '' || !is_string($raw) || strlen($raw) < 28) throw new PaymentException('Checkout recovery data is invalid.');
+            $url = openssl_decrypt(substr($raw, 28), 'aes-256-gcm', hash('sha256', $this->providerSettingsKey, true), OPENSSL_RAW_DATA, substr($raw, 0, 12), substr($raw, 12, 16), (string) ($payment['request_hash'] ?? ''));
+            if (!is_string($url) || !$this->isSafeProviderRedirectUrlForProvider((string) $payment['provider_id'], $url)) throw new PaymentException('Checkout recovery data is invalid.');
+            return $url;
+        }
+        $url = $this->providerCheckoutUrlFromResultData((string) ($payment['provider_id'] ?? ''), $metadata);
+        return stripos(rawurldecode($url), '[redacted]') === false ? $url : '';
     }
 
     private function providerResultRequiresBuyerAction(PaymentResult $result): bool
