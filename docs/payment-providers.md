@@ -103,3 +103,6 @@ Payment plugins should not:
 - store secrets in public config JSON;
 - require Core to hardcode their provider ID for settings UI or redirect safety;
 - bypass `PaymentProviderRegistry` or the encrypted provider settings repository.
+# Development callback repair
+
+Core 1.3.0-alpha.5 adds compatible remote-refund deduplication and pending settlement; provider adapters must preserve the economic refund identity and status. See [退款回调幂等与状态同步](payment-refund-webhooks.md) for exact behavior, test boundaries and the separate Stripe mapping update. This is not a Stable release or production acceptance.

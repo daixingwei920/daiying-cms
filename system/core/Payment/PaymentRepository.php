@@ -316,6 +316,31 @@ final class PaymentRepository
         return is_array($row) ? $row : null;
     }
 
+    /** Called under the source payment's transaction/row lock. Never changes refund identity or amount. */
+    public function updatePendingRefundStatus(int $refundId, string $status): bool
+    {
+        $refundId = $this->positiveInt($refundId, 'Payment refund id is invalid.');
+        if (!in_array($status, ['completed', 'failed', 'cancelled'], true)) {
+            throw new PaymentException('Payment refund terminal status is invalid.');
+        }
+        $now = gmdate('c');
+        $stmt = $this->pdo->prepare(
+            "UPDATE cms_payment_refunds SET status = :status, completed_at = :completed_at,
+                failed_at = :failed_at, cancelled_at = :cancelled_at, updated_at = :updated_at
+             WHERE id = :id AND status = 'pending'"
+        );
+        $stmt->execute([
+            ':status' => $status,
+            ':completed_at' => $status === 'completed' ? $now : null,
+            ':failed_at' => $status === 'failed' ? $now : null,
+            ':cancelled_at' => $status === 'cancelled' ? $now : null,
+            ':updated_at' => $now,
+            ':id' => $refundId,
+        ]);
+
+        return $stmt->rowCount() === 1;
+    }
+
     public function refundedMinorForPayment(int $paymentId): int
     {
         $paymentId = $this->positiveInt($paymentId, 'Payment refund payment id is invalid.');

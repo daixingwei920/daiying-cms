@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0-alpha.5 (payment callback repair, unpublished)
+
+- Acknowledge duplicate notifications for the same remote refund only when payment, amount and currency match the existing ledger record.
+- Accept pending refund callbacks and settle the same record atomically; retain captured-amount checks, access revocation and transaction ownership. Reject contradictory terminal states for manual reconciliation.
+- No new migration, refund initiation, payment gateway or production change. Stripe Checkout mapping is delivered separately in the payment-provider plugin.
+
 ## 1.3.0-alpha.4 (integration candidate, unpublished)
 
 - Integrate the generic image AI, atomic plugin document, metered text and site branding contracts onto published Core 1.2.86, retaining its Passkey reauthentication and migration-free API market enablement fixes.
