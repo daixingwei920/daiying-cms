@@ -141,6 +141,7 @@ Public `TemplateContext` helpers:
 - `pagination(int $current, int $total, string $basePath, array $query = [], int $perPage = 20, ?int $totalItems = null): array`
 - `breadcrumb(array $items): array`
 - `menu(string $name = 'primary'): array`
+- `menuTree(string $name = 'primary'): array` (additive two-level helper in the unpublished 1.2.87 candidate; see [navigation contract](docs/navigation-groups.md))
 - `seo(array $overrides = []): array`
 
 ## View Data

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Cms\Core\Theme;
 
+use Cms\Core\Routing\BasePath;
+
 use Cms\Core\Foundation\FoundationVersions;
 
 final class TemplateContext
@@ -109,7 +111,27 @@ final class TemplateContext
             $items = $this->get('menu');
         }
 
-        return ThemeViewModel::menu(is_array($items) ? $items : [], (string) $this->get('current_path', ''));
+        if ($items === [] && $name === 'primary' && !is_array($menus[$name] ?? null) && !is_array($this->get('menu', null))) {
+            $items = $this->get('navigation', []);
+        }
+        return ThemeViewModel::menu(is_array($items) ? $items : [], $this->menuCurrentPath());
+    }
+
+    /** Structured menu for themes that opt into two-level navigation. */
+    public function menuTree(string $name = 'primary'): array
+    {
+        $menus = $this->get('menus', []);
+        $menus = is_array($menus) ? $menus : [];
+        $items = $menus[$name] ?? ($name === 'primary' ? $this->get('navigation_tree', $this->get('menu', $this->get('navigation', []))) : []);
+        return ThemeViewModel::menuTree(is_array($items) ? $items : [], $this->menuCurrentPath());
+    }
+
+    private function menuCurrentPath(): string
+    {
+        $explicit = $this->get('current_path', null);
+        if (is_string($explicit)) { return BasePath::stripCurrent($explicit); }
+        $path = parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH);
+        return is_string($path) ? BasePath::stripCurrent($path) : '';
     }
 
     /** @param array<string,mixed> $overrides @return array<string,mixed> */

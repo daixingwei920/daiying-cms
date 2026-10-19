@@ -4,6 +4,12 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized navigation takeover (2026-10-19)
+
+- Owner asked this chat to take over the side-panel navigation repair: generic admin-configured grouping, parent selection and ordering, compatible with existing themes and saved menus.
+- Clean takeover worktree `work/core-navigation-takeover`, branch `fix/navigation-groups-takeover-1.2.87`, based on `4c117437834a699be47cb91e963592fa27020d7a`. Earlier uncommitted worktree and official-theme snapshot are preserved.
+- Official theme is a separate 1.0.7 candidate, never part of the Core payload. Preserve all 11 live navigation destinations. Isolated development/tests only; no production data changes, signing/publication, payment changes or refunds.
+
 ## Owner publication hold and article-save repair (2026-10-18)
 
 - Latest direct Owner instruction: fix and test the article #41 save failure; do not publish CMS. This overrides prior release authorization below.

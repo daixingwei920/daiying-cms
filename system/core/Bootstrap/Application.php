@@ -325,6 +325,7 @@ final class Application
                     'site_icp_number' => (string) $settings->get('site.icp_number', ''),
                     'contents' => $contents,
                     'navigation' => NavigationBuilder::build($settings, null, $rootPath),
+                    'navigation_tree' => NavigationBuilder::buildTree($settings, null, $rootPath),
                     'seo' => $siteUrl !== '' ? ['canonical' => $siteUrl] : [],
                     'ad_slots' => self::adSlots($settings),
                 ]));
@@ -338,6 +339,7 @@ final class Application
                     'site_icp_number' => (string) $settings->get('site.icp_number', ''),
                     'contents' => [],
                     'navigation' => NavigationBuilder::build($settings, null, $rootPath),
+                    'navigation_tree' => NavigationBuilder::buildTree($settings, null, $rootPath),
                     'ad_slots' => self::adSlots($settings),
                 ]));
             }

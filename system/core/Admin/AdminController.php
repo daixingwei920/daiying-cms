@@ -3336,16 +3336,22 @@ final class AdminController
         }
 
         try {
-            $items = NavigationBuilder::sanitizeForSave($request->input('navigation', []));
-            $delete = $request->input('nav_delete', null);
-            if ($delete !== null && ctype_digit((string) $delete)) {
-                unset($items[(int) $delete]);
-                $items = array_values($items);
+            $input = $request->input('navigation', []);
+            if (!is_array($input)) { throw new \InvalidArgumentException('导航格式无效。'); }
+            if ($request->input('navigation_count') !== null && ((int) $request->input('navigation_count') !== count($input) || $request->input('navigation_complete') !== '1')) {
+                throw new \InvalidArgumentException('导航提交不完整，原设置未更改；请检查服务器表单字段数量限制。');
+            }
+            $delete = (string) $request->input('nav_delete', '');
+            if ($delete !== '') {
+                $input = array_values(array_filter($input, static fn($item): bool => is_array($item) && ($item['id'] ?? '') !== $delete));
+                foreach ($input as &$item) {
+                    if (($item['parent_id'] ?? '') === $delete) { $item['parent_id'] = ''; }
+                }
+                unset($item);
             }
             $quick = $this->navigationQuickItem($request);
-            if ($quick !== null) {
-                $items[] = $quick;
-            }
+            if ($quick !== null) { $input[] = $quick; }
+            $items = NavigationBuilder::sanitizeForSave($input);
             $this->writeConfig($this->root(), static function (array $config) use ($items): array {
                 $config['navigation'] = is_array($config['navigation'] ?? null) ? $config['navigation'] : [];
                 $config['navigation']['primary'] = $items;
@@ -3355,7 +3361,7 @@ final class AdminController
             (new AuditLogger($pdo))->record('admin', $this->adminActorId(), 'navigation.update', ['items' => count($items)]);
         } catch (Throwable $exception) {
             $this->logger->error('Navigation save failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
-            return Response::html(View::page('导航菜单', $this->navigationForm('导航保存失败，请稍后重试。')), 400);
+            return Response::html(View::page('导航菜单', $this->navigationForm($exception instanceof \InvalidArgumentException ? $exception->getMessage() : '导航保存失败，请稍后重试。')), 400);
         }
 
         return Response::redirect('/admin/navigation?saved=1');
@@ -11216,12 +11222,22 @@ JS;
         $rows = '';
         foreach ($items as $i => $item) {
             $disabledNote = ($item['available'] ?? true) ? '' : '<p class="muted">依赖插件未启用，前台将自动隐藏。</p>';
-            $rows .= '<tr><td><input name="navigation[' . $i . '][label]" value="' . View::escape((string) $item['label']) . '" required></td>' .
-                '<td><input name="navigation[' . $i . '][url]" value="' . View::escape((string) $item['url']) . '" required>' . $disabledNote . '</td>' .
-                '<td><label><input type="checkbox" name="navigation[' . $i . '][enabled]" value="1"' . (($item['enabled'] ?? false) ? ' checked' : '') . '> 显示</label></td>' .
-                '<td><button type="submit" name="nav_delete" value="' . $i . '">删除</button>' .
-                '<input type="hidden" name="navigation[' . $i . '][type]" value="' . View::escape((string) $item['type']) . '">' .
-                '<input type="hidden" name="navigation[' . $i . '][requires_plugin]" value="' . View::escape((string) $item['requires_plugin']) . '"></td></tr>';
+            $prefix = 'navigation[' . $i . ']';
+            $parentOptions = '<option value="">一级菜单</option>';
+            foreach ($items as $candidate) {
+                if ($candidate['id'] === $item['id'] || $candidate['parent_id'] !== '') { continue; }
+                $parentOptions .= '<option value="' . View::escape($candidate['id']) . '"' . ($item['parent_id'] === $candidate['id'] ? ' selected' : '') . '>' . View::escape($candidate['label']) . '</option>';
+            }
+            $rows .= '<tr><td><input aria-label="菜单名称" name="' . $prefix . '[label]" value="' . View::escape($item['label']) . '" required></td>' .
+                '<td><input aria-label="链接地址" name="' . $prefix . '[url]" value="' . View::escape($item['url']) . '"' . ($item['type'] === 'group' ? ' readonly placeholder="分组无需链接"' : ' required') . '>' . $disabledNote . '</td>' .
+                '<td><select aria-label="上级菜单" name="' . $prefix . '[parent_id]">' . $parentOptions . '</select></td>' .
+                '<td><input aria-label="排序" type="number" min="-100000" max="100000" name="' . $prefix . '[sort_order]" value="' . $item['sort_order'] . '"></td>' .
+                '<td><select aria-label="显示样式" name="' . $prefix . '[presentation]"><option value="link">普通链接</option><option value="button"' . ($item['presentation'] === 'button' ? ' selected' : '') . '>独立按钮</option></select></td>' .
+                '<td><input type="hidden" name="' . $prefix . '[enabled]" value="0"><label><input type="checkbox" name="' . $prefix . '[enabled]" value="1"' . ($item['enabled'] ? ' checked' : '') . '> 显示</label></td>' .
+                '<td><button type="submit" name="nav_delete" value="' . View::escape($item['id']) . '">删除</button>' .
+                '<input type="hidden" name="' . $prefix . '[id]" value="' . View::escape($item['id']) . '">' .
+                '<input type="hidden" name="' . $prefix . '[type]" value="' . View::escape($item['type']) . '">' .
+                '<input type="hidden" name="' . $prefix . '[requires_plugin]" value="' . View::escape($item['requires_plugin']) . '"></td></tr>';
         }
         $pageButtons = '';
         foreach ($this->navigationPages() as $page) {
@@ -11230,9 +11246,9 @@ JS;
         $pageButtons = $pageButtons !== '' ? '<p>添加页面：' . $pageButtons . '</p>' : '<p class="muted">暂无可添加的已发布页面。</p>';
 
         return '<h1>导航菜单</h1>' . $errorHtml .
-            '<p class="muted">这里设置网站前台主导航。内部插件 ID 和路由保持不变，前台只显示中文菜单名称。</p>' .
+            '<p class="muted">设置全站主导航，支持两级。排序数值小的优先，同值保持原顺序。隐藏上级会隐藏整组；删除上级会将子项提升为一级。旧主题继续显示平铺链接。</p>' .
             '<form method="post" action="/admin/navigation">' . CsrfToken::field() .
-            '<table><thead><tr><th>菜单名称</th><th>链接地址</th><th>状态</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>' .
+            '<input type="hidden" name="navigation_count" value="' . count($items) . '"><div style="overflow-x:auto"><table><thead><tr><th>菜单名称</th><th>链接地址</th><th>上级菜单</th><th>排序</th><th>显示样式</th><th>状态</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table></div>' .
             '<p><button type="submit">保存导航</button></p>' .
             '<h2>快速添加</h2>' .
             '<p><button type="submit" name="quick_add" value="home">首页</button> <button type="submit" name="quick_add" value="articles">文章列表</button></p>' .
@@ -11241,7 +11257,7 @@ JS;
             '<h2>添加自定义链接</h2>' .
             '<label>名称<input name="new_label" placeholder="例如：关于我们"></label>' .
             '<label>链接<input name="new_url" placeholder="/about 或 https://example.com"></label>' .
-            '<button type="submit" name="quick_add" value="custom">添加自定义链接</button></form>';
+            '<button type="submit" name="quick_add" value="custom">添加自定义链接</button> <button type="submit" name="quick_add" value="group">添加无链接分组</button><input type="hidden" name="navigation_complete" value="1"></form>';
     }
 
     /** @return array{label:string,url:string,type:string,enabled:bool,requires_plugin:string}|null */
@@ -11260,6 +11276,11 @@ JS;
         }
         if (str_starts_with($quick, 'page:')) {
             return $this->navigationPageItem((int) substr($quick, 5));
+        }
+        if ($quick === 'group') {
+            $label = trim((string) $request->input('new_label', ''));
+            if ($label === '') { throw new \InvalidArgumentException('请填写分组名称。'); }
+            return ['label' => $label, 'url' => '', 'type' => 'group', 'enabled' => true, 'requires_plugin' => ''];
         }
         if ($quick === 'custom') {
             $label = trim((string) $request->input('new_label', ''));
