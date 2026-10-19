@@ -4,6 +4,14 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-approved Core 1.2.87 publication (2026-10-19)
+
+- Owner explicitly approved publication to GitHub and the official update service after formal signing/Gate acceptance. Both are now published and verified as 1.2.87 at tag `v1.2.87`, commit `a5031178b4b30d1bf50c289953ac9a76a0c3832b`.
+- GitHub public attachments and official update downloads match the frozen signed artifacts. Do not rewrite the tag, signature or published archives.
+- The official website was not upgraded: before/after health remains Core 1.2.86, NORMAL, maintenance=false. Payment settings were not changed; no payment or refund requests were made.
+- Earlier publication holds below are historical and superseded for this release only. Production website upgrades, other products/market releases and future releases still require explicit Owner authorization.
+- See `docs/CORE_1.2.87_PUBLICATION_REPORT.md`. This publication-record commit does not alter the released runtime or rebuild its signed artifacts.
+
 ## Owner-authorized main merge and formal signing (2026-10-19)
 
 - Owner authorized merging the verified 1.2.87 candidate into main, formal server-side signing and Release Gate acceptance. Publication remains on hold.
@@ -33,13 +41,12 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 ## Current Core Baseline
 
 - Product: Daiying CMS Core.
-- Published baseline: `1.2.86`, official tag `v1.2.86`, commit `d311446607124fff21d76f524a4a11968ad4cd58` (GitHub Latest, tag, official update service and actual downloads verified 2026-10-18).
-- Frozen clean release clone: `/Users/xingweidai/Documents/Codex/2026-10-17/cns-cms/work/core-1.2.86-final`.
-- Release branch: `maintenance/release-1.2.86`, merged through PR #52. Included runtime fixes: PR #46 and #47, integrated via PR #51.
-- Released scope: migration-free API market plugin enablement and Passkey sensitive admin reauthentication; inherits 1.2.85 ICP and text AI compatibility fixes.
-- Publication evidence: `docs/CORE_1.2.86_PUBLICATION_REPORT.md`. The official website runtime remained 1.2.84 / NORMAL; publication did not upgrade it.
-- Stable 1.2.86 does not include image AI. Owner authorized merging the generic Core extensions on 2026-10-18; the integrated candidate below is not a Stable release. The Logo plugin remains a separate package.
-- All existing signing, approval, maintenance and production boundaries below remain in force.
+- Published baseline: `1.2.87`, official tag `v1.2.87`, frozen commit `a5031178b4b30d1bf50c289953ac9a76a0c3832b`; GitHub Latest, official update service and actual downloads verified 2026-10-19.
+- Frozen clean signing clone: `/root/daiying-core-signing-1.2.87-20261019-NO3kDH/work`. Release source is main merged through PR #59; runtime matches the accepted `fe4a884` candidate. Documentation-only publication records follow separately.
+- Released scope: shared image AI/private media/quota/audit, atomic plugin documents, scoped workers and branding contracts; article UTF-8 save, payment callback/checkout reliability and generic navigation grouping. Preserve text AI, configured Timeout, published migrations and existing public interfaces.
+- Publication evidence: `docs/CORE_1.2.87_PUBLICATION_REPORT.md`. Official website runtime remains 1.2.86 / NORMAL; publication did not upgrade it or change payment settings.
+- Logo/Stripe plugins and official theme remain separate packages; their publication is not implied by the Core release. Historical Stable 1.2.86 lacked image AI; Stable 1.2.87 includes the generic contracts.
+- All existing clean-source, signing-key, approval, maintenance and production boundaries below remain in force.
 
 ## Owner-authorized payment callback repair (2026-10-18)
 

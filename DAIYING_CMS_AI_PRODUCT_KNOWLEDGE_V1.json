@@ -1,7 +1,7 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
   "verified_version": "1.2.87",
-  "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+  "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
   "records": [
     {
       "id": "install.web_installer",
@@ -11,7 +11,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; system/core/Install/InstallController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -34,8 +34,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -51,7 +51,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/RuntimeRequirements.php; system/core/Support/SystemHealthDoctor.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -74,8 +74,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -91,7 +91,7 @@
       "audience": "Administrator",
       "source": "docs/themes.md; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/articles/{slug}",
@@ -114,8 +114,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -131,7 +131,7 @@
       "audience": "Internal",
       "source": "docs/content-foundation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -154,8 +154,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -171,7 +171,7 @@
       "audience": "Internal",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -194,8 +194,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -211,7 +211,7 @@
       "audience": "Administrator",
       "source": "docs/update-system.md; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -241,8 +241,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -258,7 +258,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Recovery/RecoveryController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "/admin/recovery",
       "public_route": "",
@@ -281,8 +281,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -298,7 +298,7 @@
       "audience": "Internal",
       "source": "system/core/SiteVault/SiteVaultService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -321,8 +321,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -338,7 +338,7 @@
       "audience": "Administrator",
       "source": "SECURITY.md; docs/installation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -361,8 +361,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -378,7 +378,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "/admin/seo/keywords",
       "public_route": "",
@@ -401,8 +401,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -418,7 +418,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "/admin/seo/search-engines",
       "public_route": "",
@@ -441,8 +441,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -458,7 +458,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Content/ContentFrontController.php; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/sitemap.xml",
@@ -488,8 +488,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -505,7 +505,7 @@
       "audience": "Developer",
       "source": "docs/plugins.md; docs/themes.md; docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -535,8 +535,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -552,7 +552,7 @@
       "audience": "Administrator",
       "source": "docs/commerce.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -575,8 +575,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -592,7 +592,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Ai/AiService.php; system/core/Ai/AiProviderPresets.php; system/core/Ai/AiGateway.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -629,8 +629,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -646,7 +646,7 @@
       "audience": "Administrator",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -669,8 +669,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -686,7 +686,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -709,8 +709,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -726,7 +726,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "/admin/migrations",
       "public_route": "",
@@ -749,8 +749,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -766,7 +766,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": true,
       "admin_route": "/admin/update;/admin/recovery",
       "public_route": "",
@@ -796,8 +796,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -817,7 +817,7 @@
       "description": "当前已发布稳定版仍为 Core 1.2.86（v1.2.86，d311446607124fff21d76f524a4a11968ad4cd58）。本包复核已整合图像公共能力并修复支付回调的1.3.0-alpha.5开发候选，不代表正式发布或生产部署。",
       "source": "docs/ai-image/integration-1.2.86.md; docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "source_evidence": [
         {
           "path": "docs/ai-image/integration-1.2.86.md",
@@ -835,8 +835,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -857,7 +857,7 @@
       "description": "1.2.83 支持显式文章、页面和分类 slug 保留《》。留空时仍自动生成简洁 slug，已有 slug 与重定向不自动迁移。仍拒绝分隔符、路径穿越、控制字符、查询/片段符和预编码百分号输入；填写原始书名号，不粘贴 URL 编码。",
       "source": "docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "source_evidence": [
         {
           "path": "docs/content-slug-policy.md",
@@ -868,8 +868,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -890,7 +890,7 @@
       "description": "1.2.82 增加四个校验绑定的历史 MySQL 迁移方言适配，不修改已发布迁移文件。1.2.83 延续该能力；这不代表任意 MySQL/MariaDB 环境均已验收。选择数据库后仍应在安装器测试连接和实际完成安装。",
       "source": "CHANGELOG.md; system/core/Migration/MysqlHistoricalMigrationDialect.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
@@ -908,8 +908,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -930,7 +930,7 @@
       "description": "首次安装失败须保留错误并修复原因。若管理员已创建但完成锁失败，入口会阻断，不能伪造完成锁或重复创建管理员。MySQL DDL 不保证全链事务回滚；只有负责人明确确认专用数据可丢弃后，才可人工清理重装。生产站不得删除数据库来修复升级。",
       "source": "docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "source_evidence": [
         {
           "path": "docs/first-install-failure.md",
@@ -948,8 +948,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -970,7 +970,7 @@
       "description": "1.2.82 的直接升级验证范围为 1.2.81 → 1.2.82；不能泛化为任意旧版直升最新。实际领取和安装必须服从目标包的签名版本范围与兼容检查。Core 更新不替换已安装插件；旧 Commerce 的 MySQL 参数修复需要独立插件更新。",
       "source": "CHANGELOG.md; docs/release/1.2.82-upgrade-support.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
@@ -995,8 +995,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1017,7 +1017,7 @@
       "description": "Owner 于 2026-10-09 决定小说和视频产品退役，不再作为新安装分发、维护或规划产品。保留历史源码、已安装客户资产、订单和许可；退役不等于自动卸载、撤销授权或已完成市场下架。",
       "source": "docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "source_evidence": [
         {
           "path": "docs/retired-products.md",
@@ -1035,8 +1035,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1057,7 +1057,7 @@
       "description": "历史文章 SEO 补全和内容优化入口为 /admin/seo/historical-backfill 与 /admin/seo/content-quality。AI 针对 B/C 级历史文章生成待审核草稿，经统一站点 AI 调用；不自动发布或修改 URL。原优化器尚未接入本统一知识包；不能声称资料自动更新已生效。",
       "source": "system/core/Support/View.php; system/core/Seo/Historical/HistoricalArticleSeoBackfillService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
@@ -1082,8 +1082,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1104,7 +1104,7 @@
       "description": "1.2.83 按 PDO 连接共享 SQLite immediate transaction 状态，保留事务所有权、支付回调/退款原子性与写锁。属于内部维护修复；不证明真实支付通道、退款或商户交易已验收。",
       "source": "CHANGELOG.md; system/core/Payment/PaymentTransaction.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
@@ -1122,8 +1122,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1140,7 +1140,7 @@
       "audience": "Developer",
       "source": "docs/site-registration.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "/admin/settings",
       "public_route": "",
@@ -1156,8 +1156,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1173,7 +1173,7 @@
       "audience": "Developer",
       "source": "docs/ai.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -1189,8 +1189,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1206,7 +1206,7 @@
       "audience": "Administrator",
       "source": "docs/admin-passkey-reauth.md; system/core/Admin/AdminController.php; system/core/Auth/AdminPasskeyService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "/admin/security",
       "public_route": "",
@@ -1236,8 +1236,8 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00",
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1253,7 +1253,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -1275,8 +1275,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00"
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00"
     },
     {
       "id": "ai.image_sdk",
@@ -1286,7 +1286,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1308,8 +1308,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00"
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00"
     },
     {
       "id": "ai.image_queue_cost",
@@ -1319,7 +1319,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1341,8 +1341,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00"
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00"
     },
     {
       "id": "ai.image_private_media",
@@ -1352,7 +1352,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1374,8 +1374,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00"
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00"
     },
     {
       "id": "ai.image_validation_scope",
@@ -1385,7 +1385,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/tests.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1407,8 +1407,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00"
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00"
     },
     {
       "id": "plugin.atomic_documents",
@@ -1418,7 +1418,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1440,8 +1440,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00"
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00"
     },
     {
       "id": "plugin.branding_admin",
@@ -1451,7 +1451,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1473,8 +1473,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00"
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00"
     },
     {
       "id": "plugin.public_site_identity",
@@ -1484,7 +1484,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1506,8 +1506,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00"
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00"
     },
     {
       "id": "payment.refund_callback_idempotency",
@@ -1517,7 +1517,7 @@
       "audience": "Developer",
       "source": "docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned payment callback development source/document review; runtime regression evidence is recorded separately. Stable release and production state are unchanged.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1539,8 +1539,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00"
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00"
     },
     {
       "id": "payment.checkout_recovery",
@@ -1550,7 +1550,7 @@
       "audience": "Developer",
       "source": "docs/plugin-checkout-recovery.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned candidate source review; final native, MySQL and payment results are reported separately.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1572,8 +1572,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00"
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00"
     },
     {
       "id": "theme.navigation_groups",
@@ -1583,7 +1583,7 @@
       "audience": "Developer",
       "source": "docs/navigation-groups.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Candidate source/document review only. Native controller, HTTP, browser and server tests are recorded separately.",
+      "evidence": "Pinned official Core 1.2.87 release source/document review; runtime and publication evidence are recorded separately in CORE_1.2.87_PUBLICATION_REPORT.md. The production website was not upgraded.",
       "user_facing": false,
       "admin_route": "/admin/navigation",
       "public_route": "",
@@ -1605,17 +1605,27 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-      "last_verified_at": "2026-10-19T05:17:21.897467+00:00"
+      "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+      "last_verified_at": "2026-10-19T05:30:05.466909+00:00"
     }
   ],
-  "package_revision": "2026-10-18-core-1.2.87-final-candidate-navigation-candidate",
+  "package_revision": "2026-10-19-core-1.2.87-published",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
-  "source_tag": "793ca8af6978c58c44c3e158251c5dd2b82e58a6",
+  "source_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+  "source_tag": "v1.2.87",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
-    "status": "CANDIDATE_NOT_PUBLISHED",
+    "status": "PUBLISHED",
+    "version": "1.2.87",
+    "commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+    "tag": "v1.2.87",
+    "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.87",
+    "update_service": "https://updates.daiyingcms.com",
+    "installer_sha256": "48f1257824abe9d88b61cd169c4405e64a857d68ea74090e42044f12b74e8e37",
+    "update_sha256": "a5352d9d507bb56a58b57d94b0e5061fa830beed8d8666a1b7a211cd5d225405",
+    "checked_at": "2026-10-19T05:30:05.466909+00:00",
+    "production_site_upgraded": false,
+    "production_site_version": "1.2.86",
     "previous_stable": {
       "status": "PUBLISHED",
       "version": "1.2.86",
@@ -1627,8 +1637,7 @@
       "update_sha256": "28e6f9f837b3ca5fa76e91fee0d5a00bdbd7c6482360acb518085599bdb0d127",
       "checked_at": "2026-10-18T17:51:49.285151+00:00",
       "production_site_upgraded": false
-    },
-    "checked_at": "2026-10-19T03:03:01.206959+00:00"
+    }
   },
   "runtime_validation": "NOT_RUN_THIS_TASK",
   "retrieval_policy": {
@@ -1674,5 +1683,5 @@
       "note": "含旧 testing/rc 发布前措辞，仅引用来源版本约束，不作为当前发布状态。"
     }
   ],
-  "release_status": "CANDIDATE_NOT_PUBLISHED"
+  "release_status": "PUBLISHED"
 }
