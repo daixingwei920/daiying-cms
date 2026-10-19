@@ -34,7 +34,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -74,7 +74,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -114,7 +114,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -154,7 +154,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -194,7 +194,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -241,7 +241,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -281,7 +281,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -321,7 +321,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -361,7 +361,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -401,7 +401,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -441,7 +441,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -488,7 +488,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -535,7 +535,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -575,7 +575,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -629,7 +629,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -669,7 +669,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -709,7 +709,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -749,7 +749,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -796,7 +796,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -835,7 +835,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -868,7 +868,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -908,7 +908,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -948,7 +948,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -995,7 +995,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -1035,7 +1035,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -1082,7 +1082,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -1122,7 +1122,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -1156,7 +1156,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1189,7 +1189,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1236,7 +1236,7 @@
         }
       ],
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1275,7 +1275,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00"
     },
     {
@@ -1308,7 +1308,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00"
     },
     {
@@ -1341,7 +1341,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00"
     },
     {
@@ -1374,7 +1374,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00"
     },
     {
@@ -1407,7 +1407,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00"
     },
     {
@@ -1440,7 +1440,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00"
     },
     {
@@ -1473,7 +1473,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00"
     },
     {
@@ -1506,7 +1506,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00"
     },
     {
@@ -1539,7 +1539,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00"
     },
     {
@@ -1572,14 +1572,14 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.87",
-      "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+      "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
       "last_verified_at": "2026-10-19T03:03:01.206959+00:00"
     }
   ],
   "package_revision": "2026-10-18-core-1.2.87-candidate",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
-  "source_tag": "d8eeaa6b9a4863996d4d7a2ee8345c0ca9d2e2e0",
+  "source_commit": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
+  "source_tag": "013af590dec2c4fa06f606fb3a96a1d0c681ee97",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "CANDIDATE_NOT_PUBLISHED",
