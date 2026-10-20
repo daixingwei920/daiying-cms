@@ -12,6 +12,7 @@ use Cms\Core\Error\ErrorHandler;
 use Cms\Core\Extension\ExtensionAssetController;
 use Cms\Core\Admin\AdminController;
 use Cms\Core\Auth\AdminAuthenticator;
+use Cms\Core\Auth\MemberAccessController;
 use Cms\Core\Database\ConnectionFactory;
 use Cms\Core\Content\ContentRepository;
 use Cms\Core\Content\ContentTypeRegistry;
@@ -444,6 +445,7 @@ final class Application
         $router->post('/install', [$install, 'store']);
 
         $admin = new AdminController($settings, $logger, $rootPath, null, $events, $pluginRuntime);
+        $memberAccess = new MemberAccessController($settings, $rootPath);
         $router->get('/admin/login', [$admin, 'loginForm']);
         $router->post('/admin/login', [$admin, 'login']);
         $router->post('/admin/login/passkey-options', [$admin, 'loginPasskeyOptions']);
@@ -457,6 +459,14 @@ final class Application
         $router->post('/admin/mfa/passkey-options', [$admin, 'mfaPasskeyOptions']);
         $router->post('/admin/mfa/passkey-verify', [$admin, 'mfaPasskeyVerify']);
         $router->post('/admin/logout', [$admin, 'logout']);
+        $router->get('/admin/member-access', [$memberAccess, 'assignments']);
+        $router->post('/admin/member-access', [$memberAccess, 'assign']);
+        $router->get('/workspace', [$memberAccess, 'workspace']);
+        $router->get('/workspace/drafts/new', [$memberAccess, 'newDraft']);
+        $router->post('/workspace/drafts', [$memberAccess, 'saveDraft']);
+        $router->get('/workspace/drafts/{id}', [$memberAccess, 'editDraft']);
+        $router->post('/workspace/drafts/{id}', [$memberAccess, 'saveDraft']);
+        $router->get('/workspace/seo', [$memberAccess, 'seo']);
         $router->get('/admin', [$admin, 'dashboard']);
         $router->get('/admin/notifications', [$admin, 'notificationsIndex']);
         $router->post('/admin/notifications/read/{id}', [$admin, 'notificationMarkRead']);

@@ -109,6 +109,7 @@ final class View
             ],
             '平台' => [
                 ['/admin/settings', '站点设置', 'sliders'],
+                ['/admin/member-access', '会员协作权限', 'shield'],
                 ['/admin/settings/ai', 'AI 设置', 'spark'],
                 ['/admin/transfer', '导入导出', 'transfer'],
                 ['/admin/migrations', '旧站迁移', 'transfer'],

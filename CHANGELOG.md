@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.88-dev.2 (unpublished integration candidate)
+
+- Integrate Owner-managed limited editorial roles with shared Core membership: own draft editing and read-only SEO. Preserve existing administrator and AI service boundaries.
+- Include request-driven AI execution from dev.1. No publication, production changes, payment setting changes or refunds.
+
 ## 1.2.88-dev.1 (unpublished)
 
 - Add authenticated, member-scoped direct image execution and exact queued-task execution. Preserve asynchronous/CLI contracts, configured Timeout, quotas, media and usage audit; never replay uncertain dispatches. No production, payment or refund changes.

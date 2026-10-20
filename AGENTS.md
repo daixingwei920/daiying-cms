@@ -4,6 +4,14 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized 1.2.88 integration (2026-10-20)
+
+- Owner authorized merging member editorial access with request-driven AI into the unpublished 1.2.88 candidate and completing MySQL migration, browser and combined integration acceptance.
+- Clean integration worktree `work/core-1.2.88-integration`, branch `maintenance/release-1.2.88`, starts at `99663614c6d4cc9bc2462b5b7a6671907657be51`. Development identity is `1.2.88-dev.2`.
+- Member source was frozen from ten scoped files in the separate uncommitted `daiying-cms-access` checkout based on `a503117`; preserve that checkout. Record file hashes and provenance in the isolated handoff evidence.
+- Reuse Core member registration and sessions; operator access grants only own-draft editing and SEO read. Test revocation, administrator separation and normal Logo membership together.
+- No release, production deployment, formal signing, collection-setting changes or refunds. This hold supersedes earlier publication intentions; keep main and published artifacts unchanged.
+
 ## Owner-authorized request-driven AI execution (2026-10-19)
 
 - Owner chose “先实现免 Worker，再发布”: implement a minimal public Core execution contract so the Logo plugin can execute a member-owned durable task directly after submission, without site Cron configuration.
