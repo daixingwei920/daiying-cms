@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized 1.2.88 release preparation (2026-10-20)
+
+- Owner authorizes final Stable-version preparation, official server-side signing, Release Gate, isolated market authorization/install/in-place-upgrade acceptance, real AI generation and Stripe sandbox testing.
+- Do not merge main before telling Owner and obtaining confirmation. Do not publish a tag/release/catalog entry or deploy production. Preserve production collection settings and do not initiate refunds.
+- Freeze the final tested candidate before requesting main integration. Official build/preflight still requires the exact origin/main commit; never bypass this requirement.
+- This preparation authorization supersedes the older no-formal-signing hold below only; publication and deployment remain held.
+
 ## Owner-authorized 1.2.88 integration (2026-10-20)
 
 - Owner authorized merging member editorial access with request-driven AI into the unpublished 1.2.88 candidate and completing MySQL migration, browser and combined integration acceptance.
