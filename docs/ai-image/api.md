@@ -63,3 +63,11 @@ PrivateMediaStorageProvider 使用 storage/private-media（必须沿用站点 st
 ## alpha.2 补充
 
 见 [品牌插件公共契约](brand-plugin-contracts.md)：旧图私有导入、计量文字调用、原子插件文档、按类型Worker、管理员品牌应用。
+
+## 1.2.88-dev.1：按请求直接执行（未发布）
+
+会员提交后，可通过 Core 已验证的会员 POST + CSRF 范围调用 `$context->images()->execute($jobId)`，直接处理同插件、同会员的已有任务。不必安装 Cron / Worker；`submit/find/history` 和原 CLI Worker 契约继续兼容。插件必须先返回作品编号，再由单独 POST 执行，页面可并行查询状态。长请求应在认证后释放 PHP session 写锁。
+
+直接执行沿用原任务的锁、CAS、模型能力检查、120秒等管理员 Timeout、私有媒体、配额和审计。重复调用已完成/失败/uncertain 的任务不再请求模型。`response_ready` 从持久响应保存媒体；过期 dispatch 在锁下核对当前状态后转 uncertain，不能自动重发。状态可返回 `recovery_after`，允许页面在到期后通过经过认证的 POST 确认中断状态；GET 查询不执行模型。
+
+这是请求驱动执行，不保证关闭浏览器后任意主机仍能完成长请求。PHP/FPM/反向代理的请求期限需容纳站点模型 Timeout；传输中断时保留作品编号并查询状态，不能承诺远端 exactly-once。已有 Worker 可作为可选后台调度，安装 Logo 插件无需配置它。

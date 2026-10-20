@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.2.88 (release preparation; not published)
+
+- Prepare the tested member editorial access and request-driven AI contracts for the 1.2.88 Stable artifact. Preserve shared membership, own-draft/SEO restrictions, provider Timeout and uncertain-result non-replay.
+- Formal signing and Release Gate preparation are authorized; main merge requires Owner confirmation. No publication, production deployment, payment-setting changes or refunds.
+
+## 1.2.88-dev.2 (unpublished integration candidate)
+
+- Integrate Owner-managed limited editorial roles with shared Core membership: own draft editing and read-only SEO. Preserve existing administrator and AI service boundaries.
+- Include request-driven AI execution from dev.1. No publication, production changes, payment setting changes or refunds.
+
+## 1.2.88-dev.1 (unpublished)
+
+- Add authenticated, member-scoped direct image execution and exact queued-task execution. Preserve asynchronous/CLI contracts, configured Timeout, quotas, media and usage audit; never replay uncertain dispatches. No production, payment or refund changes.
+
 ## 1.2.87
 
 - Add configurable navigation grouping, parent selection and ordering to the shared CMS navigation manager. Preserve legacy flat menu links and theme APIs while exposing an additive tree interface.

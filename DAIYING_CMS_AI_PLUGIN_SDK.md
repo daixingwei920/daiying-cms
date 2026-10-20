@@ -88,3 +88,8 @@ Plugins must depend on public AI API v1 classes and `PluginContext`. They must n
 ## 图像插件 SDK
 
 Core `1.3.0-alpha.1` 新增实验性图像能力，保留文字契约与站点 Timeout。详见 [图像公共契约](docs/ai-image/api.md)，测试范围见 [测试报告](docs/ai-image/tests.md)。尚未 Stable 发布。
+
+
+## 请求驱动执行（1.2.88-dev.1，未发布）
+
+`$context->images()->execute($jobId)` 在已验证的会员 POST/CSRF 范围内直接执行当前会员、当前插件的持久图像任务，不需要安装 Worker。`$context->queue()->processMatching($serverOwnedQueueJob)` 可定向执行插件已入队的单个匹配任务；先验证作品所有权再构造任务身份。终态不重放，uncertain 不自动重试；管理员 Timeout、计量和配额保持。详情与主机请求限制见图像公共契约。

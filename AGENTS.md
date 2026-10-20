@@ -4,6 +4,29 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized 1.2.88 release preparation (2026-10-20)
+
+- Owner authorizes final Stable-version preparation, official server-side signing, Release Gate, isolated market authorization/install/in-place-upgrade acceptance, real AI generation and Stripe sandbox testing.
+- Do not merge main before telling Owner and obtaining confirmation. Do not publish a tag/release/catalog entry or deploy production. Preserve production collection settings and do not initiate refunds.
+- Freeze the final tested candidate before requesting main integration. Official build/preflight still requires the exact origin/main commit; never bypass this requirement.
+- This preparation authorization supersedes the older no-formal-signing hold below only; publication and deployment remain held.
+
+## Owner-authorized 1.2.88 integration (2026-10-20)
+
+- Owner authorized merging member editorial access with request-driven AI into the unpublished 1.2.88 candidate and completing MySQL migration, browser and combined integration acceptance.
+- Clean integration worktree `work/core-1.2.88-integration`, branch `maintenance/release-1.2.88`, starts at `99663614c6d4cc9bc2462b5b7a6671907657be51`. Development identity is `1.2.88-dev.2`.
+- Member source was frozen from ten scoped files in the separate uncommitted `daiying-cms-access` checkout based on `a503117`; preserve that checkout. Record file hashes and provenance in the isolated handoff evidence.
+- Reuse Core member registration and sessions; operator access grants only own-draft editing and SEO read. Test revocation, administrator separation and normal Logo membership together.
+- No release, production deployment, formal signing, collection-setting changes or refunds. This hold supersedes earlier publication intentions; keep main and published artifacts unchanged.
+
+## Owner-authorized request-driven AI execution (2026-10-19)
+
+- Owner chose “先实现免 Worker，再发布”: implement a minimal public Core execution contract so the Logo plugin can execute a member-owned durable task directly after submission, without site Cron configuration.
+- Clean worktree `work/core-direct-ai`, branch `feat/core-ai-direct-execution`, base `4acf2d8` from current remote main. Plugin changes remain in the separate `work/logo-direct-execution` checkout.
+- Development package identity: `1.2.88-dev.1`, unpublished; do not overwrite signed 1.2.87 archives or advertise this as Stable.
+- Preserve existing asynchronous submission/CLI contracts, site AI credentials and configured Timeout. Never replay uncertain provider dispatches; retain media, quota, audit and idempotency rules.
+- Isolated development and tests are authorized. Existing production Workers, payment configuration and refunds remain untouched. This does not authorize a new Core Stable publication or production upgrade; prepare a verified candidate before seeking that approval.
+
 ## Owner-approved Core 1.2.87 publication (2026-10-19)
 
 - Owner explicitly approved publication to GitHub and the official update service after formal signing/Gate acceptance. Both are now published and verified as 1.2.87 at tag `v1.2.87`, commit `a5031178b4b30d1bf50c289953ac9a76a0c3832b`.

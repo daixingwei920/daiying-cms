@@ -10,12 +10,14 @@ final class CapabilityRegistry
     private static array $capabilities = [
         'content.create' => 'Create content',
         'content.edit' => 'Edit content',
+        'content.own_draft' => 'Create and edit own drafts',
         'content.publish' => 'Publish content',
         'content.delete' => 'Delete content',
         'media.manage' => 'Manage media',
         'plugins.manage' => 'Manage plugins',
         'themes.manage' => 'Manage themes',
         'settings.manage' => 'Manage settings',
+        'seo.read' => 'Read SEO keyword data',
         'users.manage' => 'Manage users',
     ];
 
