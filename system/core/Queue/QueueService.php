@@ -36,11 +36,31 @@ final class QueueService
     /** @return array{processed:int,succeeded:int,failed:int,dead:int} */
     public function process(int $limit = 10, ?string $jobType = null): array
     {
+        return $this->processRows($this->claimable($limit, $jobType));
+    }
+
+    /** Execute at most one already-enqueued task with an exact server-owned identity.
+     * Callers must validate member ownership before constructing the matching job.
+     * This never creates a task, consumes a different payload, or replays a terminal task.
+     * @return array{processed:int,succeeded:int,failed:int,dead:int}
+     */
+    public function processMatching(QueueJob $job): array
+    {
+        $q = $this->pdo->prepare("SELECT * FROM cms_core_queue_jobs WHERE job_type=? AND owner=? AND payload_json=? AND status IN ('pending','retry') AND not_before<=? ORDER BY id ASC LIMIT 1");
+        $q->execute([$job->type, $job->owner, $this->json($job->payload), gmdate('c')]);
+        $row = $q->fetch(PDO::FETCH_ASSOC);
+        $q->closeCursor(); // Do not retain an SQLite read transaction during network I/O.
+        return $this->processRows($row === false ? [] : [$row]);
+    }
+
+    /** @param list<array<string,mixed>> $rows */
+    private function processRows(array $rows): array
+    {
         $processed = 0;
         $succeeded = 0;
         $failed = 0;
         $dead = 0;
-        foreach ($this->claimable($limit, $jobType) as $row) {
+        foreach ($rows as $row) {
             $id = (int) $row['id'];
             $claim = $this->pdo->prepare("UPDATE cms_core_queue_jobs SET status='running',updated_at=? WHERE id=? AND status IN ('pending','retry')");
             $claim->execute([gmdate('c'), $id]);

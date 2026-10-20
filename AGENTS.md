@@ -4,6 +4,14 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized request-driven AI execution (2026-10-19)
+
+- Owner chose “先实现免 Worker，再发布”: implement a minimal public Core execution contract so the Logo plugin can execute a member-owned durable task directly after submission, without site Cron configuration.
+- Clean worktree `work/core-direct-ai`, branch `feat/core-ai-direct-execution`, base `4acf2d8` from current remote main. Plugin changes remain in the separate `work/logo-direct-execution` checkout.
+- Development package identity: `1.2.88-dev.1`, unpublished; do not overwrite signed 1.2.87 archives or advertise this as Stable.
+- Preserve existing asynchronous submission/CLI contracts, site AI credentials and configured Timeout. Never replay uncertain provider dispatches; retain media, quota, audit and idempotency rules.
+- Isolated development and tests are authorized. Existing production Workers, payment configuration and refunds remain untouched. This does not authorize a new Core Stable publication or production upgrade; prepare a verified candidate before seeking that approval.
+
 ## Owner-approved Core 1.2.87 publication (2026-10-19)
 
 - Owner explicitly approved publication to GitHub and the official update service after formal signing/Gate acceptance. Both are now published and verified as 1.2.87 at tag `v1.2.87`, commit `a5031178b4b30d1bf50c289953ac9a76a0c3832b`.

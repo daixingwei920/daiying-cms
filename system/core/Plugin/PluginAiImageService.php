@@ -14,6 +14,14 @@ final class PluginAiImageService
     public function submit(string $idempotencyKey,array $request): array { return $this->images->submit($this->manifest->id,$this->actor(true),$idempotencyKey,$request,$this->manifest->version); }
     public function importReference(string $bytes): array { return $this->images->importReference($this->manifest->id,$this->actor(true),$bytes,$this->manifest->version); }
     public function find(string $id): array { return $this->images->find($id,$this->manifest->id,$this->actor(false)); }
+    /** Opt-in request-driven execution, after Core has verified the POST member scope. */
+    public function execute(string $id): array {
+        $user = $this->actor(true);
+        $job = $this->images->recoverOne($id,$this->manifest->id,$user);
+        if (!in_array($job['status'], ['queued','response_ready'], true)) return $job;
+        $this->images->work($id);
+        return $this->images->find($id,$this->manifest->id,$user);
+    }
     public function history(): array { return $this->images->history($this->manifest->id,$this->actor(false)); }
     public function imageBytes(string $id): string { return $this->images->imageBytes($id,$this->manifest->id,$this->actor(false)); }
     private function actor(bool $write): int {

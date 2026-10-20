@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.88-dev.1 (unpublished)
+
+- Add authenticated, member-scoped direct image execution and exact queued-task execution. Preserve asynchronous/CLI contracts, configured Timeout, quotas, media and usage audit; never replay uncertain dispatches. No production, payment or refund changes.
+
 ## 1.2.87
 
 - Add configurable navigation grouping, parent selection and ordering to the shared CMS navigation manager. Preserve legacy flat menu links and theme APIs while exposing an additive tree interface.

@@ -149,22 +149,41 @@ final class AiImageService
         } finally { flock($lock,LOCK_UN); fclose($lock); }
     }
 
+    /** Recover only an already-owned job; never dispatch a fresh provider request. */
+    public function recoverOne(string $id,string $plugin,int $user): array
+    {
+        $this->find($id,$plugin,$user);
+        $row=$this->row($id);
+        if($row!==null&&in_array($row['status'],['queued','dispatching','response_ready'],true))$this->recoverRow($row);
+        return $this->find($id,$plugin,$user);
+    }
+
     /** Called by worker startup/Cron. Terminal ambiguity retains quota, never re-dispatches. */
     public function recover(): array
     {
         $rows=$this->pdo->query("SELECT * FROM cms_ai_image_jobs WHERE status IN ('queued','dispatching','response_ready') ORDER BY created_at ASC LIMIT 50")->fetchAll(PDO::FETCH_ASSOC);
         $counts=['resumed'=>0,'uncertain'=>0];
-        foreach($rows as $row) {
-            if(is_file($this->spool().'/'.$row['job_id'].'.json')) { $this->work($row['job_id']); $counts['resumed']++; continue; }
-            if($row['status']==='dispatching' && strtotime($row['updated_at'])+(int)$row['timeout_seconds']+30<time()) {
-                $lock=fopen($this->spool().'/'.$row['job_id'].'.lock','c');
-                if(is_resource($lock) && flock($lock,LOCK_EX|LOCK_NB)) { $this->fail($row,'image_result_unknown',true); $counts['uncertain']++; flock($lock,LOCK_UN); }
-                if(is_resource($lock)) fclose($lock);
-            } elseif($row['status']==='queued') {
-                // Crash after queue claim, before dispatch; no billable request has started.
-                $this->pdo->prepare("UPDATE cms_core_queue_jobs SET status='pending',updated_at=? WHERE job_type='ai.image' AND status='running' AND payload_json=?")
-                    ->execute([gmdate('c'),json_encode(['job_id'=>$row['job_id']],JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)]);
+        foreach($rows as $row){$result=$this->recoverRow($row);foreach($counts as$key=>$_)$counts[$key]+=$result[$key];}
+        return $counts;
+    }
+
+    private function recoverRow(array $row): array
+    {
+        $counts=['resumed'=>0,'uncertain'=>0];
+        if(is_file($this->spool().'/'.$row['job_id'].'.json')){$this->work($row['job_id']);$counts['resumed']++;return $counts;}
+        if($row['status']==='dispatching'&&strtotime($row['updated_at'])+(int)$row['timeout_seconds']+30<time()){
+            $lock=fopen($this->spool().'/'.$row['job_id'].'.lock','c');
+            if(is_resource($lock)&&flock($lock,LOCK_EX|LOCK_NB)){
+                $current=$this->row($row['job_id']);
+                if($current!==null&&$current['status']==='dispatching'&&strtotime($current['updated_at'])+(int)$current['timeout_seconds']+30<time()){
+                    $this->fail($current,'image_result_unknown',true);$counts['uncertain']++;
+                }
+                flock($lock,LOCK_UN);
             }
+            if(is_resource($lock))fclose($lock);
+        }elseif($row['status']==='queued'){
+            $this->pdo->prepare("UPDATE cms_core_queue_jobs SET status='pending',updated_at=? WHERE job_type='ai.image' AND status='running' AND payload_json=?")
+                ->execute([gmdate('c'),json_encode(['job_id'=>$row['job_id']],JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE)]);
         }
         return $counts;
     }
@@ -232,6 +251,7 @@ final class AiImageService
     private function publicJob(array $row): array {
         $public = array_intersect_key($row,array_flip(['job_id','status','media_id','model','provider','estimated_cost_micro','currency','usage_json','error_reason','created_at','updated_at']));
         $public['cost_status'] = $row['estimated_cost_micro'] === null ? 'unknown' : 'admin_estimate';
+        if($row['status']==='dispatching')$public['recovery_after']=gmdate('c',strtotime($row['updated_at'])+(int)$row['timeout_seconds']+31);
         return $public;
     }
     private function normalize(array $r): array {

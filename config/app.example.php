@@ -5,7 +5,7 @@ declare(strict_types=1);
 return [
     'app' => [
         'name' => 'PHP CMS',
-        'version' => '1.2.87',
+        'version' => '1.2.88-dev.1',
         'debug' => false,
         'mode' => 'NORMAL',
         'secure_cookies' => true,
