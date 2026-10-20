@@ -88,4 +88,6 @@ Several historical implementation reports still live at the repository root. The
 - [AI 图像接口、队列与费用规则](ai-image/api.md)（1.2.87）
 - [AI 图像与 Logo 测试范围](ai-image/tests.md)
 
-- [通用两级导航及旧主题兼容](navigation-groups.md)（1.2.87 未发布候选）
+- [通用两级导航及旧主题兼容](navigation-groups.md)（1.2.87 起已发布）
+
+- [Core 1.2.88 与 Logo / Stripe 正式发布记录](CORE_1.2.88_PUBLICATION_REPORT.md)

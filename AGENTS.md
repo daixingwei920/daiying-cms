@@ -4,6 +4,15 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-approved Core / Logo / Stripe publication (2026-10-20)
+
+- Owner approved Core 1.2.88, Stripe 1.2.9 and Logo 1.0.1 publication in dependency order, with public download and market consistency acceptance. This supersedes prior publication holds for these exact frozen packages only.
+- Core 1.2.88 is published at `v1.2.88`, exact commit `d64732de86ab70c09af0655c66d99da3f57f9220`. GitHub Latest and official update service select this release; public downloads match the formally signed archives.
+- Stripe 1.2.9 (`ea732d39a9805bda25c4bac0f6a7a9710f489953`) and Logo 1.0.1 (`cfd88bd0ac1e15850b93f57d6a6cb9abd0d5d0a2`) are separately published to the official market; Logo requires Core >=1.2.88. Keep existing prices and licenses: Logo CNY360 / single site / lifetime and Stripe CNY39 / lifetime.
+- Production website remains Core 1.2.87, NORMAL, maintenance=false. No production upgrade, collection-setting change or refund is authorized. Existing Workers and customer licenses remain untouched.
+- Distribution database was consistently backed up at `/root/daiying-publication188-20261020-3uPxkI/backup`. Post-publication documentation is a separate commit; never move the release tag or rebuild its frozen artifacts.
+- See `docs/CORE_1.2.88_PUBLICATION_REPORT.md`; raw evidence stays outside the repository at `outputs/publication-1.2.88/`.
+
 ## Owner-authorized 1.2.88 release preparation (2026-10-20)
 
 - Owner authorizes final Stable-version preparation, official server-side signing, Release Gate, isolated market authorization/install/in-place-upgrade acceptance, real AI generation and Stripe sandbox testing.
@@ -64,11 +73,11 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 ## Current Core Baseline
 
 - Product: Daiying CMS Core.
-- Published baseline: `1.2.87`, official tag `v1.2.87`, frozen commit `a5031178b4b30d1bf50c289953ac9a76a0c3832b`; GitHub Latest, official update service and actual downloads verified 2026-10-19.
-- Frozen clean signing clone: `/root/daiying-core-signing-1.2.87-20261019-NO3kDH/work`. Release source is main merged through PR #59; runtime matches the accepted `fe4a884` candidate. Documentation-only publication records follow separately.
-- Released scope: shared image AI/private media/quota/audit, atomic plugin documents, scoped workers and branding contracts; article UTF-8 save, payment callback/checkout reliability and generic navigation grouping. Preserve text AI, configured Timeout, published migrations and existing public interfaces.
-- Publication evidence: `docs/CORE_1.2.87_PUBLICATION_REPORT.md`. Official website runtime remains 1.2.86 / NORMAL; publication did not upgrade it or change payment settings.
-- Logo/Stripe plugins and official theme remain separate packages; their publication is not implied by the Core release. Historical Stable 1.2.86 lacked image AI; Stable 1.2.87 includes the generic contracts.
+- Published baseline: `1.2.88`, official tag `v1.2.88`, frozen commit `d64732de86ab70c09af0655c66d99da3f57f9220`; PR #61. Official GitHub/update-service publication and actual downloads verified 2026-10-20.
+- Clean formal signing source: `/root/daiying-release188-preparation-20261020-d6c865/final-core`; release artifacts were frozen before documentation follow-ups. Never release from dirty or legacy checkouts.
+- Added Owner-assigned own-draft / SEO-read-only member access, shared registration/session identity and request-driven durable AI execution. Preserve original text AI, image queue, configured Timeout, quotas/audit and public interfaces; uncertain remote results must not auto-replay.
+- Core full package/update package and separate Logo1.0.1/Stripe1.2.9 market packages are published. Logo requires1.2.88; theme packages remain separate. Publication does not upgrade any site.
+- Production official website remains1.2.87/NORMAL; merchant settings, payments, refunds and existing customer licenses are unchanged. See `docs/CORE_1.2.88_PUBLICATION_REPORT.md`.
 - All existing clean-source, signing-key, approval, maintenance and production boundaries below remain in force.
 
 ## Owner-authorized payment callback repair (2026-10-18)
