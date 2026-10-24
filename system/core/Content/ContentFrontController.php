@@ -287,6 +287,7 @@ final class ContentFrontController
             'pagination' => ['page' => $page, 'per_page' => 10, 'total' => $total],
             'archive' => ['type' => $taxonomy, 'slug' => $term['slug'], 'name' => $term['name']],
             'seo' => $this->seo([
+                'explicit_meta' => $meta,
                 'title' => $title,
                 'description' => (string) ($meta['seo_description'] ?? ''),
                 'keywords' => (string) ($meta['seo_keywords'] ?? ''),
@@ -346,9 +347,52 @@ final class ContentFrontController
         $body .= 'Disallow: ' . $this->url('/recovery') . "\n";
         $body .= 'Disallow: ' . $this->url('/preview/') . "\n";
         $body .= "Allow: /\n";
+        foreach (['ai_search_policy' => ['OAI-SearchBot', 'Claude-SearchBot'], 'ai_training_policy' => ['GPTBot', 'ClaudeBot']] as $key => $agents) {
+            $policy = $this->settings->get('seo.' . $key, 'inherit');
+            if (!in_array($policy, ['allow', 'disallow'], true)) { continue; }
+            $body .= "\n";
+            foreach ($agents as $agent) { $body .= 'User-agent: ' . $agent . "\n"; }
+            if ($policy === 'disallow') { $body .= "Disallow: /\n"; }
+            else {
+                foreach (['/admin', '/install', '/recovery', '/preview/', '/api', '/workspace', '/login', '/register'] as $private) {
+                    $body .= 'Disallow: ' . $this->url($private) . "\n";
+                }
+                $body .= 'Allow: ' . $this->url('/') . "\n";
+            }
+        }
         $body .= 'Sitemap: ' . $this->absoluteUrl($this->url('/sitemap.xml')) . "\n";
 
         return Response::text($body);
+    }
+
+    public function llms(): Response
+    {
+        if (!(bool) $this->settings->get('seo.llms_enabled', false)) {
+            return Response::text('页面不存在。', 404);
+        }
+        $text = static function (string $value): string {
+            $value = trim(preg_replace('/[\x00-\x1F\x7F]/u', ' ', strip_tags($value)) ?? '');
+            $value = function_exists('mb_substr') ? mb_substr($value, 0, 300, 'UTF-8') : substr($value, 0, 300);
+            return str_replace(['\\', '[', ']', '(', ')', '#', '*', '_', '`', '<', '>'], ['\\\\', '\\[', '\\]', '\\(', '\\)', '\\#', '\\*', '\\_', '\\`', '', ''], $value);
+        };
+        $body = '# ' . $text((string) $this->settings->get('site.name', 'PHP CMS')) . "\n\n> Public content directory; inclusion and AI recommendations are not guaranteed.\n\n## Public pages\n\n";
+        if ($this->siteAllowsRobotsIndex()) {
+            // A bounded Core query, no body projection or plugin/private data export.
+            $pdo = ConnectionFactory::make($this->settings);
+            $rows = $pdo->query("SELECT content_type,title,slug,meta_json FROM cms_contents WHERE status = 'published' AND content_type IN ('article','page') ORDER BY updated_at DESC,id DESC LIMIT 200")->fetchAll(\PDO::FETCH_ASSOC);
+            foreach ($rows as $row) {
+                $meta = json_decode((string) $row['meta_json'], true);
+                if (!is_array($meta) || ($meta['robots_index'] ?? true) !== true || !empty($meta['paid_content_enabled'])) { continue; }
+                $path = $this->publicContentUrl((string) $row['content_type'], (string) $row['slug']);
+                $base = $this->siteBaseUrl();
+                $basePath = rtrim((string) parse_url($base, PHP_URL_PATH), '/');
+                $url = $base . ($basePath !== '' && str_starts_with($path, $basePath . '/') ? substr($path, strlen($basePath)) : '/' . ltrim($path, '/'));
+                if (trim((string) ($meta['canonical_url'] ?? '')) !== '' && (string) $meta['canonical_url'] !== $url) { continue; }
+                if (!filter_var($url, FILTER_VALIDATE_URL) || preg_match('/[\x00-\x20<>]/', $url)) { continue; }
+                $body .= '- [' . $text((string) $row['title']) . '](<' . $url . ">)\n";
+            }
+        }
+        return Response::text($body)->withHeaders(['Cache-Control' => 'public, max-age=300']);
     }
 
     /** @param array<string, mixed> $content */
@@ -370,6 +414,8 @@ final class ContentFrontController
         $meta = is_array($content['meta'] ?? null) ? $content['meta'] : [];
         $url = $this->publicContentUrl((string) $content['content_type'], (string) $content['slug']);
         $seo = $this->seo([
+            'content_title' => (string) $content['title'],
+            'explicit_meta' => $meta,
             'title' => (string) ($meta['seo_title'] ?? $content['title']),
             'description' => (string) ($meta['seo_description'] ?? ''),
             'keywords' => (string) ($meta['seo_keywords'] ?? ''),
@@ -710,14 +756,14 @@ final class ContentFrontController
         $robotsFollow = $this->siteAllowsRobotsIndex() && (($input['robots_follow'] ?? true) ? true : false);
         $robots = ($robotsIndex ? 'index' : 'noindex') . ',' . ($robotsFollow ? 'follow' : 'nofollow');
 
-        return [
+        return (new \Cms\Core\Seo\SeoPresentation($this->settings))->metadata([
             'title' => $title !== '' ? $title : (string) $this->settings->get('site.name', 'PHP CMS'),
             'description' => $description !== '' ? $description : $title,
             'canonical' => $canonical,
             'keywords' => trim((string) ($input['keywords'] ?? '')),
             'robots' => $robots,
             'og_type' => ($input['type'] ?? '') === 'article' ? 'article' : 'website',
-        ];
+        ], $input);
     }
 
     private function archiveCanonicalPath(string $basePath, int $page): string

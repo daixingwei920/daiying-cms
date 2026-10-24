@@ -12,7 +12,6 @@ use Cms\Core\Error\ErrorHandler;
 use Cms\Core\Extension\ExtensionAssetController;
 use Cms\Core\Admin\AdminController;
 use Cms\Core\Auth\AdminAuthenticator;
-use Cms\Core\Auth\MemberAccessController;
 use Cms\Core\Database\ConnectionFactory;
 use Cms\Core\Content\ContentRepository;
 use Cms\Core\Content\ContentTypeRegistry;
@@ -134,6 +133,14 @@ final class Application
     public function handle(Request $request): Response
     {
         $request = $this->withBasePathStripped($request);
+        // Retired in Issue #9. Guard all methods and descendants before plugin or
+        // catch-all routes, including requests using previously granted sessions.
+        $path = Request::normalizePath($request->path);
+        if ($path === '/admin/member-access' || str_starts_with($path, '/admin/member-access/')
+            || $path === '/workspace' || str_starts_with($path, '/workspace/')) {
+            return $this->withConfiguredSecurityHeaders(Response::text('会员协作已退役。', 410)
+                ->withHeaders(['Cache-Control' => 'private, no-store']));
+        }
         $themeAssetResponse = $this->maybeServeThemeAsset($request);
         if ($themeAssetResponse !== null) {
             return $this->withConfiguredSecurityHeaders($themeAssetResponse);
@@ -157,6 +164,10 @@ final class Application
         }
 
         $response = (new FrontendExtensionRenderer($this->pluginRuntime, $this->logger))->inject($request, $response);
+
+        if ($this->installed) {
+            try { (new \Cms\Core\Seo\CrawlerLog($this->rootPath, $this->settings))->record($request, $response); } catch (Throwable) { /* Telemetry never fails a public response. */ }
+        }
 
         return $this->withConfiguredSecurityHeaders($response);
     }
@@ -327,7 +338,12 @@ final class Application
                     'contents' => $contents,
                     'navigation' => NavigationBuilder::build($settings, null, $rootPath),
                     'navigation_tree' => NavigationBuilder::buildTree($settings, null, $rootPath),
-                    'seo' => $siteUrl !== '' ? ['canonical' => $siteUrl] : [],
+                    'seo' => (new \Cms\Core\Seo\SeoPresentation($settings))->metadata([
+                        'title' => (string) $settings->get('site.name', 'PHP CMS'),
+                        'description' => (string) $settings->get('site.name', 'PHP CMS'),
+                        'canonical' => $siteUrl,
+                        'robots' => $settings->get('seo.robots_index', true) ? 'index,follow' : 'noindex,nofollow',
+                    ], []),
                     'ad_slots' => self::adSlots($settings),
                 ]));
             } catch (Throwable $exception) {
@@ -415,6 +431,7 @@ final class Application
         $router->get('/preview/{id}', [$front, 'preview']);
         $router->get('/sitemap.xml', [$front, 'sitemap']);
         $router->get('/robots.txt', [$front, 'robots']);
+        $router->get('/llms.txt', [$front, 'llms']);
         $ads = new AdController($settings, $logger);
         $router->get('/ads.txt', [$ads, 'adsTxt']);
         $router->get('/ads/track/{slot}/{event}', [$ads, 'track']);
@@ -445,7 +462,6 @@ final class Application
         $router->post('/install', [$install, 'store']);
 
         $admin = new AdminController($settings, $logger, $rootPath, null, $events, $pluginRuntime);
-        $memberAccess = new MemberAccessController($settings, $rootPath);
         $router->get('/admin/login', [$admin, 'loginForm']);
         $router->post('/admin/login', [$admin, 'login']);
         $router->post('/admin/login/passkey-options', [$admin, 'loginPasskeyOptions']);
@@ -459,14 +475,6 @@ final class Application
         $router->post('/admin/mfa/passkey-options', [$admin, 'mfaPasskeyOptions']);
         $router->post('/admin/mfa/passkey-verify', [$admin, 'mfaPasskeyVerify']);
         $router->post('/admin/logout', [$admin, 'logout']);
-        $router->get('/admin/member-access', [$memberAccess, 'assignments']);
-        $router->post('/admin/member-access', [$memberAccess, 'assign']);
-        $router->get('/workspace', [$memberAccess, 'workspace']);
-        $router->get('/workspace/drafts/new', [$memberAccess, 'newDraft']);
-        $router->post('/workspace/drafts', [$memberAccess, 'saveDraft']);
-        $router->get('/workspace/drafts/{id}', [$memberAccess, 'editDraft']);
-        $router->post('/workspace/drafts/{id}', [$memberAccess, 'saveDraft']);
-        $router->get('/workspace/seo', [$memberAccess, 'seo']);
         $router->get('/admin', [$admin, 'dashboard']);
         $router->get('/admin/notifications', [$admin, 'notificationsIndex']);
         $router->post('/admin/notifications/read/{id}', [$admin, 'notificationMarkRead']);
@@ -515,6 +523,7 @@ final class Application
         $router->get('/admin/tags/edit/{id}', [$admin, 'tagEdit']);
         $router->post('/admin/tags/edit/{id}', [$admin, 'tagUpdate']);
         $router->post('/admin/tags/delete/{id}', [$admin, 'tagDelete']);
+        $router->get('/admin/seo/crawlers', [$admin, 'seoCrawlers']);
         $router->get('/admin/seo/keywords', [$admin, 'seoKeywordIndex']);
         $router->get('/admin/seo/keywords/detail', [$admin, 'seoKeywordDetail']);
         $router->post('/admin/seo/keywords/save', [$admin, 'seoKeywordSave']);

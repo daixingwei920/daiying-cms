@@ -4,6 +4,19 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized 1.2.89 merge and signing preparation (2026-10-24)
+
+- Owner explicitly approves merging PR #65 and preparing the next version, 1.2.89, with formal signing and Release Gate on the update server. This supersedes the earlier no-merge/no-formal-signing holds for this candidate only.
+- Freeze a clean exact origin/main commit; use the existing official signer only on the update server. Preserve the 1.2.80 upgrade floor, published migrations, existing prices/licenses and all production settings/data.
+- Stop after submitting the signed-candidate acceptance report. No tag/GitHub Release, official update/market publication or production deployment is authorized. Never overwrite v1.2.88 or its artifacts.
+
+## Issue #9 isolated development (2026-10-23)
+
+- Owner approved batch A member collaboration retirement and batch B SEO/GEO integration after baseline audit. Branch `feat/issue-9-seo-geo-retirement`, clean base `a7f99ffdd61eace1b997516a2d91376f5f72f602`. Preserve published migrations and historical identity/grant/content data.
+- No merge, release, production deployment or destructive migration. Sitemap fault not reproduced; do not change sitemap without evidence. Keep ordinary membership, admin roles, AI services and public plugin/theme contracts.
+- Owner subsequently authorized isolated server acceptance. Runtime `aa1fde0bfcbef7e98098021ffd3e7501829aa99c`: Release Gate V1/Phase0 and test-signed parity (635 checks), native SQLite upgrade/automatic rollback/retry (25 checks), real customer AI/image Logo HTTP flow (19 checks) passed. See `docs/issue9-pr65-acceptance.md` and `.json`. Formal protected-main build/sign/publish, same-version Stable update, payments, mobile devices and production remain outside this acceptance.
+- Public read-only health during audit reports production 1.2.88/NORMAL; earlier 1.2.87 production snapshots below are historical. Do not infer upgrade authorization from this observation.
+
 ## Owner-approved Core / Logo / Stripe publication (2026-10-20)
 
 - Owner approved Core 1.2.88, Stripe 1.2.9 and Logo 1.0.1 publication in dependency order, with public download and market consistency acceptance. This supersedes prior publication holds for these exact frozen packages only.

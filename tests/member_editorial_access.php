@@ -6,11 +6,8 @@ require dirname(__DIR__) . '/system/core/Bootstrap/autoload.php';
 
 use Cms\Core\Auth\AdminAuthenticator;
 use Cms\Core\Auth\FrontUserAuthenticator;
-use Cms\Core\Auth\MemberAccessController;
-use Cms\Core\Auth\MemberRoleService;
 use Cms\Core\Admin\AdminController;
 use Cms\Core\Config\Settings;
-use Cms\Core\Content\MemberDraftService;
 use Cms\Core\Http\Request;
 use Cms\Core\Migration\MigrationRunner;
 use Cms\Core\Logging\FileLogger;
@@ -58,53 +55,37 @@ $adminAuth = new AdminAuthenticator($pdo);
 $adminAuth->createAdmin('owner@example.invalid', 'owner-test-password', 'Owner');
 $adminAuth->createAdmin('other-admin@example.invalid', 'admin-test-password', 'Other Admin');
 $admin = $pdo->query('SELECT id FROM cms_admin_users ORDER BY id ASC LIMIT 1')->fetchColumn();
-$settings = Settings::fromArray(['database' => $database]);
-$controller = new MemberAccessController($settings, $root);
-$roles = new MemberRoleService($pdo);
-$drafts = new MemberDraftService($pdo, $root);
-$csrf = CsrfToken::get();
-$request = static fn (array $body): Request => new Request('POST', '/admin/member-access', [], $body);
-
-$check(!$roles->has($firstMember, 'content.own_draft'), 'Registration grants no operator permission');
-$check($controller->assignments()->status() === 302, 'Anonymous member cannot manage roles');
-$_SESSION['admin_user'] = ['id' => (int) $admin + 1, 'email' => 'other-admin@example.invalid', 'display_name' => 'Other Admin'];
-$check($controller->assignments()->status() === 403, 'Non-owner administrator cannot manage roles');
-$_SESSION['admin_user'] = ['id' => (int) $admin, 'email' => 'owner@example.invalid', 'display_name' => 'Owner'];
-$check(str_contains($controller->assignments()->body(), '自有草稿编辑与 SEO 只读权限'), 'Owner sees exact grant scope before submission');
-$check($controller->assign($request(['_csrf' => $csrf, 'member_id' => (string) $firstMember, 'enabled' => '1']))->status() === 403, 'Role grant requires recent reauthentication');
-$_SESSION['admin_reauthenticated_at'] = time();
-$check($controller->assign($request(['_csrf' => $csrf, 'member_id' => (string) $firstMember, 'enabled' => '1']))->status() === 302, 'Owner can assign limited role');
-$check((int) $pdo->query("SELECT COUNT(*) FROM cms_audit_logs WHERE action = 'member.role_assigned'")->fetchColumn() === 1, 'Role assignment is audited');
-$check($roles->has($firstMember, 'content.own_draft') && $roles->has($firstMember, 'seo.read'), 'Operator has both allowed capabilities');
-$check(!$roles->has($firstMember, 'content.publish') && !$roles->has($firstMember, 'admin.super'), 'Operator cannot gain publishing or administrator capability');
-$check(!$roles->has($secondMember, 'seo.read'), 'Other member stays unprivileged');
-$denied = false;
-try {
-    $roles->assignOperator($secondMember, (int) $admin + 1, true);
-} catch (InvalidArgumentException) {
-    $denied = true;
+$pdo->prepare("INSERT INTO cms_member_roles(member_id,role_id,assigned_by,assigned_at) VALUES (?, 'ai_operator', ?, 'historical')")->execute([$firstMember,$admin]);
+$pdo->exec("INSERT INTO cms_contents(content_type,title,slug,status,blocks_json,meta_json,owner_member_id,created_at,updated_at) VALUES ('article','Historical draft','historical-draft','draft','[]','{}',1,'historical','historical')");
+$tables = ['cms_front_users','cms_admin_users','cms_member_roles','cms_contents','cms_roles','cms_role_capabilities','cms_core_migrations'];
+$snapshot = static function () use ($pdo,$tables): array { $rows=[]; foreach($tables as $table) $rows[$table]=$pdo->query('SELECT * FROM '.$table.' ORDER BY 1')->fetchAll(); return $rows; };
+$before=$snapshot();
+$settings = Settings::fromArray(['database'=>$database]);
+$appClass=new ReflectionClass(Cms\Core\Bootstrap\Application::class);
+$app=$appClass->newInstanceWithoutConstructor();
+foreach(['rootPath'=>$root,'settings'=>$settings,'logger'=>new FileLogger($root.'/app.log'),'router'=>new Cms\Core\Routing\Router(),'installed'=>true,'pluginRuntime'=>new Cms\Core\Plugin\PluginRuntimeRegistry()] as $name=>$value) $appClass->getProperty($name)->setValue($app,$value);
+foreach(['', '/cms'] as $base) {
+    Cms\Core\Routing\BasePath::setCurrent($base);
+    foreach(['anonymous','member','historical-operator','admin'] as $identity) {
+        $_SESSION=[];
+        if(in_array($identity,['member','historical-operator'],true)) $_SESSION['front_user']=['id'=>$firstMember,'email'=>'operator@example.invalid','display_name'=>'Operator'];
+        if($identity==='admin') $_SESSION['admin_user']=['id'=>(int)$admin,'email'=>'owner@example.invalid','display_name'=>'Owner'];
+        foreach(['/admin/member-access','/admin/member-access/assign','/workspace','/workspace/drafts/new','/workspace/drafts','/workspace/drafts/1','/workspace/seo'] as $path) {
+            foreach(['GET','POST','HEAD','PATCH','DELETE'] as $method) {
+                $response=$app->handle(new Request($method,$base.$path,[],['_csrf'=>CsrfToken::get(),'member_id'=>$secondMember,'enabled'=>'1','title'=>'forged','body'=>'overwrite']));
+                $check($response->status()===410 && ($response->headers()['Cache-Control']??'')==='private, no-store', "$base $identity $method $path retired");
+            }
+        }
+    }
 }
-$check($denied, 'Non-owner cannot grant a role through the service');
-
-unset($_SESSION['admin_user']);
-$_SESSION['front_user'] = ['id' => $firstMember, 'email' => 'operator@example.invalid', 'display_name' => 'Operator'];
-$adminContent = (new AdminController($settings, new FileLogger($root . '/app.log'), $root))
-    ->contentStore(new Request('POST', '/admin/content', [], ['_csrf' => $csrf, 'title' => 'Denied']));
-$check(($adminContent->headers()['Location'] ?? '') === '/admin/login', 'Member identity cannot enter administrator content route');
-$check($controller->workspace()->status() === 200 && $controller->seo()->status() === 200, 'Operator can view draft workspace and read-only SEO');
-$check($controller->saveDraft(new Request('POST', '/workspace/drafts', [], ['title' => 'No CSRF']))->status() === 403, 'Draft save requires CSRF');
-$check($controller->saveDraft(new Request('POST', '/workspace/drafts/invalid', [], ['_csrf' => $csrf, 'title' => 'Invalid path']))->status() === 404, 'Invalid edit path never creates content');
-$check($controller->saveDraft(new Request('POST', '/workspace/drafts', [], ['_csrf' => $csrf, 'title' => 'From form', 'body' => 'Draft body']))->status() === 302, 'Operator can save through the member route');
-$contentId = $drafts->create($firstMember, 'Own draft', 'Body text');
-$check($drafts->draft($firstMember, $contentId) !== null, 'Operator owns new draft');
-$check($drafts->draft($secondMember, $contentId) === null && !$drafts->update($secondMember, $contentId, 'Other edit', 'Body'), 'Other member cannot read or edit draft');
-$check($drafts->update($firstMember, $contentId, 'Edited draft', 'Updated body'), 'Operator can edit own draft');
-$complexId = $drafts->create($firstMember, 'Owner review', 'Original body');
-$complexBlocks = json_encode([['type' => 'paragraph', 'data' => ['text' => 'Original body']], ['type' => 'paragraph', 'data' => ['text' => 'Owner addition']]], JSON_THROW_ON_ERROR);
-$pdo->prepare('UPDATE cms_contents SET blocks_json = :blocks WHERE id = :id')->execute([':blocks' => $complexBlocks, ':id' => $complexId]);
-$check(!$drafts->update($firstMember, $complexId, 'Overwritten', 'New body'), 'Operator cannot overwrite a draft expanded during Owner review');
-$pdo->prepare("UPDATE cms_contents SET status = 'published' WHERE id = :id")->execute([':id' => $contentId]);
-$check(!$drafts->update($firstMember, $contentId, 'Changed', 'Body'), 'Published content is locked from operator edits');
-$_SESSION['admin_user'] = ['id' => (int) $admin, 'email' => 'owner@example.invalid', 'display_name' => 'Owner'];
-$check($controller->assign($request(['_csrf' => $csrf, 'member_id' => (string) $firstMember, 'enabled' => '0']))->status() === 302, 'Owner can revoke role');
-$check($controller->workspace()->status() === 403 && $controller->seo()->status() === 403, 'Role revocation takes effect on existing session');
+Cms\Core\Routing\BasePath::setCurrent('');
+$check($snapshot()===$before,'Historical identities, grants, drafts and migration records unchanged by all retired requests');
+$check(!class_exists(Cms\Core\Auth\MemberAccessController::class) && !class_exists(Cms\Core\Auth\MemberRoleService::class) && !class_exists(Cms\Core\Content\MemberDraftService::class),'Retired services no longer autoload');
+$caps=Cms\Core\Auth\CapabilityRegistry::all();
+$check(!isset($caps['content.own_draft']) && !isset($caps['seo.read']) && isset($caps['content.publish'],$caps['users.manage']),'Retired capabilities removed; administrator capability registry retained');
+$_SESSION=[];
+$check($front->attempt('operator@example.invalid','member-test-password','127.0.0.1') && $front->user()['id']===$firstMember,'Normal member login retained with same identity');
+$front->logout(); $check($front->user()===null,'Normal member logout retained');
+$check($adminAuth->attempt('owner@example.invalid','owner-test-password','127.0.0.1') && (int)$adminAuth->user()['id']===(int)$admin,'Administrator login retained');
+$check(!str_contains(Cms\Core\Support\View::page('Admin','test'),'/admin/member-access'),'Retired menu absent');
+echo "Member retirement tests PASS\n";

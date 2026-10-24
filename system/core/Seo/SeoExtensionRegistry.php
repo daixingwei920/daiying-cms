@@ -31,7 +31,7 @@ final class SeoExtensionRegistry
     {
         $items = [];
         foreach (self::$jsonLdProviders as $provider) {
-            $value = $provider($context);
+            try { $value = $provider($context); } catch (\Throwable) { continue; }
             if ($value !== []) {
                 $items[] = $value;
             }
@@ -45,7 +45,8 @@ final class SeoExtensionRegistry
     {
         $meta = [];
         foreach (self::$metaProviders as $provider) {
-            foreach ($provider($context) as $key => $value) {
+            try { $values = $provider($context); } catch (\Throwable) { continue; }
+            foreach ($values as $key => $value) {
                 $meta[$key] = $value;
             }
         }

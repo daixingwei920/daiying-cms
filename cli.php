@@ -172,6 +172,13 @@ function cms_cli_run_migrations(Settings $settings): void
     (new MigrationRunner($pdo, $migrations))->run();
 }
 
+// Delivered by the existing operational-support update path, including old sites.
+if ($command === 'seo:crawlers:prune') {
+    (new \Cms\Core\Seo\CrawlerLog(CMS_ROOT, Settings::load(CMS_ROOT)))->prune();
+    echo "Crawler retention cleanup attempted; locked/unavailable storage is skipped.\n";
+    exit(0);
+}
+
 if ($command === 'migrate') {
     $settings = Settings::load(CMS_ROOT);
     $pdo = ConnectionFactory::make($settings);

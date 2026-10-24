@@ -1,3 +1,5 @@
+> Issue #9 candidate: this feature is retired. See [retirement and retention](member-editorial-retirement.md). The following is historical 1.2.88 documentation.
+
 # Core member registration and editorial access candidate
 
 Core already provides `/register`, `/login`, and a shared member identity in `cms_front_users`. This isolated candidate reuses that identity for a limited editorial workspace. It does not create a second member password store or turn members into backend administrators.

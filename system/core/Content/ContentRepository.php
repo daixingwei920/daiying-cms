@@ -10,7 +10,7 @@ use Cms\Core\Media\MediaLibrary;
 final class ContentRepository
 {
     private const STATUSES = ['draft', 'published', 'scheduled', 'archived', 'trash'];
-    private const RESERVED_SLUGS = ['install', 'admin', 'login', 'register', 'logout', 'comments', 'health', 'recovery', 'api', 'articles', 'category', 'tag', 'search', 'sitemap.xml', 'robots.txt'];
+    private const RESERVED_SLUGS = ['install', 'admin', 'login', 'register', 'logout', 'comments', 'health', 'recovery', 'api', 'articles', 'category', 'tag', 'search', 'sitemap.xml', 'robots.txt', 'llms.txt'];
 
     public function __construct(
         private readonly PDO $pdo,

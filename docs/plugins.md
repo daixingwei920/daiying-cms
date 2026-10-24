@@ -64,3 +64,8 @@ Use plugin-specific capabilities instead of changing Core directly when the exte
 Plugins should not read private Core code, touch PDO directly, mutate `$_SESSION`, or guess event names when a published SDK service or event registry entry exists.
 
 When Core changes are unavoidable, document the missing extension point and coordinate the change separately from plugin packaging.
+
+
+## Issue #9 candidate compatibility
+
+Unpublished, based on Core 1.2.88. See [SEO/GEO contract](seo-geo-contract.md) and [member collaboration retirement](member-editorial-retirement.md). Existing theme/SDK/REST signatures and SEO settings keys remain. Core may enhance full theme HTML heads when optional SEO settings are enabled; homepage providers bypassing ThemeRuntime own their output. The retired member workspace is not a machine publishing API. No changes to REST content/media write scope are included.
