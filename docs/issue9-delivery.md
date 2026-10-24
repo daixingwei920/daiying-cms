@@ -44,7 +44,7 @@ Owner 指令：2026-10-23 Issue #9 评论6378848739。本报告是候选代码�
 | tests/phase1_passkey_ai_writing.php | 17 PASS | 不适用 | 原Passkey/AI写作入口及源码契约检查 |
 | PHP lint / git diff --check / manifest / published migration comparison | PASS | 不适用 | 当前改动范围；不替代正式Release Gate |
 
-源码往返三阶段的数据摘要：351f86656142da982286e9c028bb4b103eea049161457e41722b5c02f9d4e842。可运行测试脚本复现；该结果不是签名更新包/Updater回滚验收。
+源码往返三阶段的数据摘要：3efc4d1dd59e932500fff5e44ab6724c97e92db7680318ff0ecfee0fb376a882。可运行测试脚本复现；该结果不是签名更新包/Updater回滚验收。
 
 桌面 IAB 浏览器原生测试：合成管理员密码登录→后台菜单无会员协作→保存TDK→重新读取配置→实际文章浏览器标题改变；蜘蛛统计显示“来源未验证”；旧工作区显示退役；普通会员原登录表单仍可登录，文章评论区确认“当前以 Member 身份评论”。设置区、文章和统计截图保存在本任务 outputs/issue-9-evidence，未发布到生产。测试服务器已停止。
 
@@ -59,4 +59,4 @@ Owner 指令：2026-10-23 Issue #9 评论6378848739。本报告是候选代码�
 
 更新架构、API/SEO/主题/插件规范、退役说明、决策、版本及测试记录。沿用V1知识包，固定本候选源码提交，标明UNPUBLISHED；原release_evidence为历史发布证据。新增/退役候选事实仅ADMIN_DEVELOPER，源码复核记录保持NOT_RUN_THIS_TASK；运行证据在本报告单列。
 
-本轮运行 `python3 scripts/product_knowledge.py --write` 与无参数校验。是否通过以最终命令输出为准。导入/索引重建/客服消费者应用/自动同步均未执行。
+本轮运行 `python3 scripts/product_knowledge.py --write` 与无参数校验。构建及无参数校验均 PASS：44 条事实、22 条公开事实、45 个固定来源文件；运行测试状态不混入源码复核。导入/索引重建/客服消费者应用/自动同步均未执行。

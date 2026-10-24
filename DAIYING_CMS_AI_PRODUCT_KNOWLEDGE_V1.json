@@ -1,7 +1,7 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
   "verified_version": "1.2.88",
-  "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+  "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
   "records": [
     {
       "id": "install.web_installer",
@@ -11,7 +11,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; system/core/Install/InstallController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -34,8 +34,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -51,7 +51,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/RuntimeRequirements.php; system/core/Support/SystemHealthDoctor.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -74,8 +74,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -91,7 +91,7 @@
       "audience": "Administrator",
       "source": "docs/themes.md; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/articles/{slug}",
@@ -114,8 +114,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -131,7 +131,7 @@
       "audience": "Internal",
       "source": "docs/content-foundation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -154,8 +154,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -171,7 +171,7 @@
       "audience": "Internal",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -194,8 +194,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -211,7 +211,7 @@
       "audience": "Administrator",
       "source": "docs/update-system.md; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -234,15 +234,15 @@
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "0d70c4333ab96946ed465abbd0bfcdd23299876544fdf0d5de740dd85caf1421",
-          "line_start": 604,
-          "line_end": 604,
+          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
+          "line_start": 613,
+          "line_end": 613,
           "anchor": "$router->get('/admin/update', [$admin, 'updateIndex']);"
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -258,7 +258,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Recovery/RecoveryController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "/admin/recovery",
       "public_route": "",
@@ -267,9 +267,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "0d70c4333ab96946ed465abbd0bfcdd23299876544fdf0d5de740dd85caf1421",
-          "line_start": 569,
-          "line_end": 569,
+          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
+          "line_start": 578,
+          "line_end": 578,
           "anchor": "$router->get('/admin/recovery', [$recovery, 'index']);"
         },
         {
@@ -281,8 +281,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -298,7 +298,7 @@
       "audience": "Internal",
       "source": "system/core/SiteVault/SiteVaultService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -321,8 +321,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -338,7 +338,7 @@
       "audience": "Administrator",
       "source": "SECURITY.md; docs/installation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -361,8 +361,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -378,7 +378,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "/admin/seo/keywords",
       "public_route": "",
@@ -387,9 +387,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "0d70c4333ab96946ed465abbd0bfcdd23299876544fdf0d5de740dd85caf1421",
-          "line_start": 518,
-          "line_end": 518,
+          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
+          "line_start": 527,
+          "line_end": 527,
           "anchor": "$router->get('/admin/seo/keywords', [$admin, 'seoKeywordIndex']);"
         },
         {
@@ -401,8 +401,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -418,7 +418,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "/admin/seo/search-engines",
       "public_route": "",
@@ -427,9 +427,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "0d70c4333ab96946ed465abbd0bfcdd23299876544fdf0d5de740dd85caf1421",
-          "line_start": 528,
-          "line_end": 528,
+          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
+          "line_start": 537,
+          "line_end": 537,
           "anchor": "$router->post('/admin/seo/search-engines/google/sync', [$admin, 'seoSearchEngineGoogleSync']);"
         },
         {
@@ -441,8 +441,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -458,7 +458,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Content/ContentFrontController.php; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/sitemap.xml",
@@ -467,16 +467,16 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "0d70c4333ab96946ed465abbd0bfcdd23299876544fdf0d5de740dd85caf1421",
-          "line_start": 416,
-          "line_end": 416,
+          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
+          "line_start": 432,
+          "line_end": 432,
           "anchor": "$router->get('/sitemap.xml', [$front, 'sitemap']);"
         },
         {
           "path": "system/core/Content/ContentFrontController.php",
-          "sha256": "fd8d464dbb57f0ff9f280386f41bbe4869a3404f3907e12becf905571f4afa85",
-          "line_start": 302,
-          "line_end": 302,
+          "sha256": "600346066e6e1932425dc5a9ae7f55b568341700828425147ff6ce48ae2a2531",
+          "line_start": 303,
+          "line_end": 303,
           "anchor": "public function sitemap(): Response"
         },
         {
@@ -488,8 +488,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -505,7 +505,7 @@
       "audience": "Developer",
       "source": "docs/plugins.md; docs/themes.md; docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -514,7 +514,7 @@
       "source_evidence": [
         {
           "path": "docs/plugins.md",
-          "sha256": "c7836023c7660d70f9607f77d217f8f55c245bc7f44d61232c10d089bd0dd9d1",
+          "sha256": "ca873577f3741013a599db02ff3e6dd7bf025211f5dfd4bd33a338002374b94d",
           "line_start": 25,
           "line_end": 25,
           "anchor": "Plugin packages use `plugin.json`. Current manifests commonly include:"
@@ -535,8 +535,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -552,7 +552,7 @@
       "audience": "Administrator",
       "source": "docs/commerce.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -575,8 +575,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -592,7 +592,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Ai/AiService.php; system/core/Ai/AiProviderPresets.php; system/core/Ai/AiGateway.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -601,9 +601,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "0d70c4333ab96946ed465abbd0bfcdd23299876544fdf0d5de740dd85caf1421",
-          "line_start": 494,
-          "line_end": 494,
+          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
+          "line_start": 502,
+          "line_end": 502,
           "anchor": "$router->get('/admin/settings/ai', [$admin, 'aiSettings']);"
         },
         {
@@ -629,8 +629,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -646,7 +646,7 @@
       "audience": "Administrator",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -669,8 +669,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -686,7 +686,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -709,8 +709,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -726,7 +726,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "/admin/migrations",
       "public_route": "",
@@ -735,22 +735,22 @@
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
-          "sha256": "bd895e970cdb440a710406cd6a88725dbc54e2e7f5587a95df4e7f79f723a5f7",
-          "line_start": 115,
-          "line_end": 115,
+          "sha256": "bd5ed47b3cb231d7bb8bfdf0158e253647b4a3ede8f70ee6ed92c69bc17ce127",
+          "line_start": 114,
+          "line_end": 114,
           "anchor": "['/admin/migrations', '旧站迁移', 'transfer'],"
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "0d70c4333ab96946ed465abbd0bfcdd23299876544fdf0d5de740dd85caf1421",
-          "line_start": 581,
-          "line_end": 581,
+          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
+          "line_start": 590,
+          "line_end": 590,
           "anchor": "$router->post('/admin/migrations/scan', [$admin, 'externalMigrationScan']);"
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -766,7 +766,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": true,
       "admin_route": "/admin/update;/admin/recovery",
       "public_route": "",
@@ -775,16 +775,16 @@
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
-          "sha256": "bd895e970cdb440a710406cd6a88725dbc54e2e7f5587a95df4e7f79f723a5f7",
-          "line_start": 116,
-          "line_end": 116,
+          "sha256": "bd5ed47b3cb231d7bb8bfdf0158e253647b4a3ede8f70ee6ed92c69bc17ce127",
+          "line_start": 115,
+          "line_end": 115,
           "anchor": "['/admin/update', '系统更新', 'refresh'],"
         },
         {
           "path": "system/core/Support/View.php",
-          "sha256": "bd895e970cdb440a710406cd6a88725dbc54e2e7f5587a95df4e7f79f723a5f7",
-          "line_start": 117,
-          "line_end": 117,
+          "sha256": "bd5ed47b3cb231d7bb8bfdf0158e253647b4a3ede8f70ee6ed92c69bc17ce127",
+          "line_start": 116,
+          "line_end": 116,
           "anchor": "['/admin/recovery', '恢复诊断', 'activity'],"
         },
         {
@@ -796,8 +796,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -817,7 +817,7 @@
       "description": "当前已发布稳定版仍为 Core 1.2.86（v1.2.86，d311446607124fff21d76f524a4a11968ad4cd58）。本包复核已整合图像公共能力并修复支付回调的1.3.0-alpha.5开发候选，不代表正式发布或生产部署。",
       "source": "docs/ai-image/integration-1.2.86.md; docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "source_evidence": [
         {
           "path": "docs/ai-image/integration-1.2.86.md",
@@ -835,8 +835,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -857,7 +857,7 @@
       "description": "1.2.83 支持显式文章、页面和分类 slug 保留《》。留空时仍自动生成简洁 slug，已有 slug 与重定向不自动迁移。仍拒绝分隔符、路径穿越、控制字符、查询/片段符和预编码百分号输入；填写原始书名号，不粘贴 URL 编码。",
       "source": "docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "source_evidence": [
         {
           "path": "docs/content-slug-policy.md",
@@ -868,8 +868,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -890,13 +890,13 @@
       "description": "1.2.82 增加四个校验绑定的历史 MySQL 迁移方言适配，不修改已发布迁移文件。1.2.83 延续该能力；这不代表任意 MySQL/MariaDB 环境均已验收。选择数据库后仍应在安装器测试连接和实际完成安装。",
       "source": "CHANGELOG.md; system/core/Migration/MysqlHistoricalMigrationDialect.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "2b509d4727c83d5c352bc28a9f77b3f2a5b82e899008f96e54977026ae6e7383",
-          "line_start": 99,
-          "line_end": 99,
+          "sha256": "8d65d4dc00873b21e03ee0f43a671d26f5dfd46fdb3ffc601fc16d4a44b3c25a",
+          "line_start": 106,
+          "line_end": 106,
           "anchor": "- Support MySQL fresh installation through four checksum-bound historical dialect adapters, without modifying frozen migrations."
         },
         {
@@ -908,8 +908,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -930,7 +930,7 @@
       "description": "首次安装失败须保留错误并修复原因。若管理员已创建但完成锁失败，入口会阻断，不能伪造完成锁或重复创建管理员。MySQL DDL 不保证全链事务回滚；只有负责人明确确认专用数据可丢弃后，才可人工清理重装。生产站不得删除数据库来修复升级。",
       "source": "docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "source_evidence": [
         {
           "path": "docs/first-install-failure.md",
@@ -948,8 +948,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -970,20 +970,20 @@
       "description": "1.2.82 的直接升级验证范围为 1.2.81 → 1.2.82；不能泛化为任意旧版直升最新。实际领取和安装必须服从目标包的签名版本范围与兼容检查。Core 更新不替换已安装插件；旧 Commerce 的 MySQL 参数修复需要独立插件更新。",
       "source": "CHANGELOG.md; docs/release/1.2.82-upgrade-support.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "2b509d4727c83d5c352bc28a9f77b3f2a5b82e899008f96e54977026ae6e7383",
-          "line_start": 102,
-          "line_end": 102,
+          "sha256": "8d65d4dc00873b21e03ee0f43a671d26f5dfd46fdb3ffc601fc16d4a44b3c25a",
+          "line_start": 109,
+          "line_end": 109,
           "anchor": "- Direct upgrade validation covers 1.2.81 to 1.2.82. Other source versions are not verified for this release."
         },
         {
           "path": "CHANGELOG.md",
-          "sha256": "2b509d4727c83d5c352bc28a9f77b3f2a5b82e899008f96e54977026ae6e7383",
-          "line_start": 103,
-          "line_end": 103,
+          "sha256": "8d65d4dc00873b21e03ee0f43a671d26f5dfd46fdb3ffc601fc16d4a44b3c25a",
+          "line_start": 110,
+          "line_end": 110,
           "anchor": "- Existing Commerce installations require a separate plugin update for its MySQL parameter fix; Core updates do not replace installed plugins."
         },
         {
@@ -995,8 +995,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1017,7 +1017,7 @@
       "description": "Owner 于 2026-10-09 决定小说和视频产品退役，不再作为新安装分发、维护或规划产品。保留历史源码、已安装客户资产、订单和许可；退役不等于自动卸载、撤销授权或已完成市场下架。",
       "source": "docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "source_evidence": [
         {
           "path": "docs/retired-products.md",
@@ -1035,8 +1035,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1057,11 +1057,11 @@
       "description": "历史文章 SEO 补全和内容优化入口为 /admin/seo/historical-backfill 与 /admin/seo/content-quality。AI 针对 B/C 级历史文章生成待审核草稿，经统一站点 AI 调用；不自动发布或修改 URL。原优化器尚未接入本统一知识包；不能声称资料自动更新已生效。",
       "source": "system/core/Support/View.php; system/core/Seo/Historical/HistoricalArticleSeoBackfillService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
-          "sha256": "bd895e970cdb440a710406cd6a88725dbc54e2e7f5587a95df4e7f79f723a5f7",
+          "sha256": "bd5ed47b3cb231d7bb8bfdf0158e253647b4a3ede8f70ee6ed92c69bc17ce127",
           "line_start": 96,
           "line_end": 96,
           "anchor": "['/admin/seo/content-quality', '历史内容优化', 'chart'],"
@@ -1082,8 +1082,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1104,13 +1104,13 @@
       "description": "1.2.83 按 PDO 连接共享 SQLite immediate transaction 状态，保留事务所有权、支付回调/退款原子性与写锁。属于内部维护修复；不证明真实支付通道、退款或商户交易已验收。",
       "source": "CHANGELOG.md; system/core/Payment/PaymentTransaction.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "2b509d4727c83d5c352bc28a9f77b3f2a5b82e899008f96e54977026ae6e7383",
-          "line_start": 86,
-          "line_end": 86,
+          "sha256": "8d65d4dc00873b21e03ee0f43a671d26f5dfd46fdb3ffc601fc16d4a44b3c25a",
+          "line_start": 93,
+          "line_end": 93,
           "anchor": "- Share SQLite immediate transaction state by PDO connection across payment services and repositories on PHP 8.3."
         },
         {
@@ -1122,8 +1122,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1140,7 +1140,7 @@
       "audience": "Developer",
       "source": "docs/site-registration.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "/admin/settings",
       "public_route": "",
@@ -1156,8 +1156,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1173,7 +1173,7 @@
       "audience": "Developer",
       "source": "docs/ai.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -1189,8 +1189,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1206,7 +1206,7 @@
       "audience": "Administrator",
       "source": "docs/admin-passkey-reauth.md; system/core/Admin/AdminController.php; system/core/Auth/AdminPasskeyService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "/admin/security",
       "public_route": "",
@@ -1222,9 +1222,9 @@
         },
         {
           "path": "system/core/Admin/AdminController.php",
-          "sha256": "5b9027df88c780a229fc8cc8229a0aaa12cadcce7a839d6fb757cf7330df428b",
-          "line_start": 1060,
-          "line_end": 1060,
+          "sha256": "b3617dd0f252edb0ea54d6dd1de1e7773d1465c6aef83dd46139984225e32bc3",
+          "line_start": 1061,
+          "line_end": 1061,
           "anchor": "public function adminSecurityPasskeyReauthVerify(Request $request): Response"
         },
         {
@@ -1236,8 +1236,8 @@
         }
       ],
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1253,7 +1253,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -1275,8 +1275,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00"
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
     },
     {
       "id": "ai.image_sdk",
@@ -1286,7 +1286,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1308,8 +1308,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00"
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
     },
     {
       "id": "ai.image_queue_cost",
@@ -1319,7 +1319,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1341,8 +1341,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00"
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
     },
     {
       "id": "ai.image_private_media",
@@ -1352,7 +1352,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1374,8 +1374,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00"
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
     },
     {
       "id": "ai.image_validation_scope",
@@ -1385,7 +1385,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/tests.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1407,8 +1407,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00"
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
     },
     {
       "id": "plugin.atomic_documents",
@@ -1418,7 +1418,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1440,8 +1440,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00"
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
     },
     {
       "id": "plugin.branding_admin",
@@ -1451,7 +1451,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1473,8 +1473,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00"
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
     },
     {
       "id": "plugin.public_site_identity",
@@ -1484,7 +1484,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1506,8 +1506,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00"
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
     },
     {
       "id": "payment.refund_callback_idempotency",
@@ -1517,7 +1517,7 @@
       "audience": "Developer",
       "source": "docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1539,8 +1539,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00"
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
     },
     {
       "id": "payment.checkout_recovery",
@@ -1550,7 +1550,7 @@
       "audience": "Developer",
       "source": "docs/plugin-checkout-recovery.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1572,8 +1572,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00"
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
     },
     {
       "id": "theme.navigation_groups",
@@ -1583,7 +1583,7 @@
       "audience": "Developer",
       "source": "docs/navigation-groups.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "/admin/navigation",
       "public_route": "",
@@ -1605,41 +1605,41 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00"
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
     },
     {
       "id": "auth.member_editorial_access",
       "topic": "Core public contracts",
-      "capability": "Owner assigned member collaboration",
-      "description": "Core 1.2.88 复用会员注册、登录和会话。Owner 在重新认证后可授予或撤销 AI 运营角色；仅允许本人仍为草稿的文章编辑和 SEO 只读，不允许发布、访问管理员后台或修改他人内容。普通注册不自动授予协作权限，撤销即时作用于原会话。",
+      "capability": "Member collaboration retired in Issue 9 candidate",
+      "description": "此未发布候选退役会员协作：/admin/member-access 与 /workspace 及后代路径对所有方法返回 410，专属服务及运行能力移除；历史迁移、会员、角色授权及草稿数据保留。普通会员、管理员与共享 AI 身份继续保留。正式 1.2.88 的历史能力不代表此候选仍开放，也不代表生产已部署退役。",
       "audience": "Administrator and Developer",
-      "source": "docs/member-editorial-access.md",
+      "source": "docs/member-editorial-retirement.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
-      "admin_route": "/admin/member-access",
+      "admin_route": "",
       "public_route": "",
       "cli_command": "",
       "confidence": "high",
       "source_evidence": [
         {
-          "path": "docs/member-editorial-access.md",
-          "anchor": "The role grants exactly",
-          "sha256": "eeb31d30510dc078cb95049137642e542ccd2bafbb9a335f56a7117e27770c50",
-          "line_start": 12,
-          "line_end": 12
+          "path": "docs/member-editorial-retirement.md",
+          "anchor": "`/admin/member-access` and `/workspace`",
+          "sha256": "45bf926c1aa75902edba63c8f13af24a9173ebe79f4ba51dc241527ad7d24f83",
+          "line_start": 5,
+          "line_end": 5
         }
       ],
-      "implementation_status": "implemented",
+      "implementation_status": "retired_in_unpublished_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00"
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
     },
     {
       "id": "ai.request_execution",
@@ -1649,7 +1649,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned official Core 1.2.88 release source/document review; runtime and public distribution evidence are recorded separately in CORE_1.2.88_PUBLICATION_REPORT.md. The production website was not upgraded.",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1671,14 +1671,61 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.88",
-      "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-      "last_verified_at": "2026-10-20T13:35:27.327572+00:00"
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
+    },
+    {
+      "id": "seo.geo_basics",
+      "topic": "Core public contracts",
+      "capability": "Optional SEO GEO outputs and bounded crawler aggregates",
+      "description": "未发布候选在既有站点设置中增加可选 TDK 模板、公开 Schema/插件元数据实际输出、公开内容目录 llms.txt、分别配置 AI 搜索和训练 robots 声明、来源未验证的有界蜘蛛聚合。保留旧配置/路由/接口；不保证收录或推荐，不提供机器发布 API。详情与已知限制见本次冻结契约。",
+      "audience": "Administrator and Developer",
+      "source": "docs/seo-geo-contract.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned unpublished Issue #9 candidate source/document review only. Runtime evidence is separately recorded in docs/issue9-delivery.md; historical release_evidence does not publish or deploy this candidate.",
+      "user_facing": false,
+      "admin_route": "/admin/settings",
+      "public_route": "/llms.txt",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/seo-geo-contract.md",
+          "anchor": "# Issue #9 batch B",
+          "sha256": "5ccb78f67a741b294141bec67f6005191035ee918073e54e2ce1981fba7c3b81",
+          "line_start": 1,
+          "line_end": 1
+        },
+        {
+          "path": "system/core/Seo/SeoPresentation.php",
+          "anchor": "final class SeoPresentation",
+          "sha256": "4c14de5e12dcf2a98554f6bfa4a67a55afa9c0457238b8aa6f2aa6d2abfef46d",
+          "line_start": 12,
+          "line_end": 12
+        },
+        {
+          "path": "system/core/Seo/CrawlerLog.php",
+          "anchor": "final class CrawlerLog",
+          "sha256": "ed38d728f4a612419f33f4a3bb3b47c189f031ae2df39830c0f5752971d323ec",
+          "line_start": 12,
+          "line_end": 12
+        }
+      ],
+      "implementation_status": "implemented_unpublished_candidate",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false,
+      "verified_version": "1.2.88",
+      "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+      "last_verified_at": "2026-10-24T02:57:26.286785+00:00"
     }
   ],
-  "package_revision": "2026-10-20-core-1.2.88-published",
+  "package_revision": "2026-10-23-issue9-unpublished-candidate",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-  "source_tag": "v1.2.88",
+  "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+  "source_tag": "6b51d42946fc4e603ce48c8942232249b38274b2",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "PUBLISHED",
@@ -1762,5 +1809,15 @@
       "note": "含旧 testing/rc 发布前措辞，仅引用来源版本约束，不作为当前发布状态。"
     }
   ],
-  "release_status": "PUBLISHED"
+  "release_status": "PUBLISHED",
+  "candidate_evidence": {
+    "status": "UNPUBLISHED",
+    "base_version": "1.2.88",
+    "source_commit": "6b51d42946fc4e603ce48c8942232249b38274b2",
+    "source_ref_type": "immutable_commit",
+    "owner_decision": "https://github.com/daixingwei920/daiying-task-runner/issues/9#issuecomment-6378848739",
+    "runtime_report": "docs/issue9-delivery.md",
+    "production_deployed": false,
+    "consumer_imported": false
+  }
 }
