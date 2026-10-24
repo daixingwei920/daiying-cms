@@ -1,0 +1,360 @@
+{
+  "schema": "core-1.2.89-publication-v1",
+  "recorded_at": "2026-10-24T04:30:07.543998+00:00",
+  "status": "PUBLISHED_AND_PUBLICLY_VERIFIED",
+  "publication": {
+    "status": "PUBLISHED",
+    "at": "2026-10-24T04:25:38+00:00",
+    "version": "1.2.89",
+    "package_id": "daiying.cms:1.2.89:stable",
+    "commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+    "sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+    "official_signature_verified": true,
+    "backup": "/root/daiying-publication189-20261024-fHeMWO/backup",
+    "production_deployed": false,
+    "verification": {
+      "public_api_visible": true,
+      "latest_version": "1.2.89",
+      "package_exists": true,
+      "sha256_valid": true,
+      "manifest_valid": true,
+      "manifest_product_id": "daiying.cms",
+      "manifest_package_type": "core",
+      "cms_compatibility_valid": true
+    }
+  },
+  "github_and_official_public_acceptance": {
+    "status": "PASS",
+    "checks": [
+      "Anonymous GitHub release and Latest identify frozen 1.2.89",
+      "Public tag points to exact approved commit",
+      "GitHub contains exactly seven expected release attachments",
+      "Anonymous GitHub download matches frozen bytes and API digest: daiying-cms-1.2.89-stable.manifest.json",
+      "Anonymous GitHub download matches frozen bytes and API digest: daiying-cms-1.2.89-stable.zip",
+      "Anonymous GitHub download matches frozen bytes and API digest: daiying-cms-1.2.89-stable.zip.sha256",
+      "Anonymous GitHub download matches frozen bytes and API digest: daiying-cms-1.2.89-stable.zip.signature.json",
+      "Anonymous GitHub download matches frozen bytes and API digest: daiying-cms-core-update-1.2.89.zip",
+      "Anonymous GitHub download matches frozen bytes and API digest: daiying-cms-core-update-1.2.89.zip.sha256",
+      "Anonymous GitHub download matches frozen bytes and API digest: daiying-cms-core-update-1.2.89.zip.signature.json",
+      "Public official latest selects exact signed 1.2.89 for test source 1.2.88",
+      "Anonymous official update download equals GitHub update byte for byte",
+      "Downloaded signed update declares expected version, 420 files and 55 required migrations",
+      "Downloaded update full file list and every payload hash match signed manifest",
+      "Published compatibility floors remain Core 1.2.80 and PHP 8.3.0",
+      "Source below 1.2.80 never selects 1.2.89",
+      "Fresh test site 1.2.80 selects signed 1.2.89",
+      "Fresh test site 1.2.81 selects signed 1.2.89",
+      "Fresh test site 1.2.82 selects signed 1.2.89",
+      "Fresh test site 1.2.83 selects signed 1.2.89",
+      "Fresh test site 1.2.84 selects signed 1.2.89",
+      "Fresh test site 1.2.85 selects signed 1.2.89",
+      "Fresh test site 1.2.86 selects signed 1.2.89",
+      "Fresh test site 1.2.87 selects signed 1.2.89",
+      "Fresh test site 1.2.88 selects signed 1.2.89",
+      "Current 1.2.89 offers no duplicate update",
+      "PHP 8.2 test site cannot select 1.2.89",
+      "Production HTTP remains 1.2.88 NORMAL without maintenance"
+    ],
+    "anonymous_http": true,
+    "authorization_header_used": false,
+    "github_release": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.89",
+    "github_latest": "v1.2.89",
+    "tag_commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+    "assets": [
+      {
+        "name": "daiying-cms-1.2.89-stable.manifest.json",
+        "url": "https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.89/daiying-cms-1.2.89-stable.manifest.json",
+        "http_status": 200,
+        "bytes": 116304,
+        "sha256": "3f40b75223453a3d2f9daab6428ad4d5632ba2663823721f6d00d262de861e25",
+        "api_digest": "sha256:3f40b75223453a3d2f9daab6428ad4d5632ba2663823721f6d00d262de861e25"
+      },
+      {
+        "name": "daiying-cms-1.2.89-stable.zip",
+        "url": "https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.89/daiying-cms-1.2.89-stable.zip",
+        "http_status": 200,
+        "bytes": 1576793,
+        "sha256": "7831edfee8c8d3161aa8ca92f026019b99355ba764e6a98dfe002373cd7f052a",
+        "api_digest": "sha256:7831edfee8c8d3161aa8ca92f026019b99355ba764e6a98dfe002373cd7f052a"
+      },
+      {
+        "name": "daiying-cms-1.2.89-stable.zip.sha256",
+        "url": "https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.89/daiying-cms-1.2.89-stable.zip.sha256",
+        "http_status": 200,
+        "bytes": 96,
+        "sha256": "90fbe973def3ed4de4c20fb3ec0833f4c097e8f9d9d432de83614a6cdc4cff19",
+        "api_digest": "sha256:90fbe973def3ed4de4c20fb3ec0833f4c097e8f9d9d432de83614a6cdc4cff19"
+      },
+      {
+        "name": "daiying-cms-1.2.89-stable.zip.signature.json",
+        "url": "https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.89/daiying-cms-1.2.89-stable.zip.signature.json",
+        "http_status": 200,
+        "bytes": 634,
+        "sha256": "cef6ada1508b97aa15b0375e549c0dc36c9b5b9324b5e7c7f106b459c97cf2d4",
+        "api_digest": "sha256:cef6ada1508b97aa15b0375e549c0dc36c9b5b9324b5e7c7f106b459c97cf2d4"
+      },
+      {
+        "name": "daiying-cms-core-update-1.2.89.zip",
+        "url": "https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.89/daiying-cms-core-update-1.2.89.zip",
+        "http_status": 200,
+        "bytes": 919240,
+        "sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+        "api_digest": "sha256:23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1"
+      },
+      {
+        "name": "daiying-cms-core-update-1.2.89.zip.sha256",
+        "url": "https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.89/daiying-cms-core-update-1.2.89.zip.sha256",
+        "http_status": 200,
+        "bytes": 101,
+        "sha256": "2148d058266696e5416db5d4e16c17e59b2cbebe589f1d7efe5beeb28258dbeb",
+        "api_digest": "sha256:2148d058266696e5416db5d4e16c17e59b2cbebe589f1d7efe5beeb28258dbeb"
+      },
+      {
+        "name": "daiying-cms-core-update-1.2.89.zip.signature.json",
+        "url": "https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.89/daiying-cms-core-update-1.2.89.zip.signature.json",
+        "http_status": 200,
+        "bytes": 638,
+        "sha256": "3680e931210d6be4ec3e9f579fc2deee62cea38afac341d2efedd7c810b6a455",
+        "api_digest": "sha256:3680e931210d6be4ec3e9f579fc2deee62cea38afac341d2efedd7c810b6a455"
+      }
+    ],
+    "official_url": "https://updates.daiyingcms.com/api/v1/packages/daiying.cms%3A1.2.89%3Astable?source_version=1.2.88&site_id=core189-public-20261024-first&php_version=8.3.0&expected_product=daiying.cms&expected_channel=stable&expected_sha256=23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+    "official_sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+    "version_selection": [
+      {
+        "source": "1.2.79",
+        "update_available": true,
+        "selected": "1.2.81",
+        "sha256": "747ba92f842c2109cf2e4607c4592306bfdcd3deaf46c79f53a3afb64c1d9332",
+        "direct_upgrade_supported": true
+      },
+      {
+        "source": "1.2.80",
+        "update_available": true,
+        "selected": "1.2.89",
+        "sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+        "direct_upgrade_supported": true
+      },
+      {
+        "source": "1.2.81",
+        "update_available": true,
+        "selected": "1.2.89",
+        "sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+        "direct_upgrade_supported": true
+      },
+      {
+        "source": "1.2.82",
+        "update_available": true,
+        "selected": "1.2.89",
+        "sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+        "direct_upgrade_supported": true
+      },
+      {
+        "source": "1.2.83",
+        "update_available": true,
+        "selected": "1.2.89",
+        "sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+        "direct_upgrade_supported": true
+      },
+      {
+        "source": "1.2.84",
+        "update_available": true,
+        "selected": "1.2.89",
+        "sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+        "direct_upgrade_supported": true
+      },
+      {
+        "source": "1.2.85",
+        "update_available": true,
+        "selected": "1.2.89",
+        "sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+        "direct_upgrade_supported": true
+      },
+      {
+        "source": "1.2.86",
+        "update_available": true,
+        "selected": "1.2.89",
+        "sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+        "direct_upgrade_supported": true
+      },
+      {
+        "source": "1.2.87",
+        "update_available": true,
+        "selected": "1.2.89",
+        "sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+        "direct_upgrade_supported": true
+      },
+      {
+        "source": "1.2.88",
+        "update_available": true,
+        "selected": "1.2.89",
+        "sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+        "direct_upgrade_supported": true
+      },
+      {
+        "source": "1.2.89",
+        "update_available": false,
+        "selected": null,
+        "sha256": null,
+        "direct_upgrade_supported": false
+      }
+    ],
+    "php82_does_not_select_189": true,
+    "production_health": {
+      "status": "ok",
+      "mode": "NORMAL",
+      "version": "1.2.88",
+      "release_id": "daiying-cms-core-update-1.2.88",
+      "maintenance": false,
+      "installed": true
+    },
+    "production_deployed": false,
+    "scope": "Version selection tests use fresh synthetic site IDs; not actual upgrades of every historical version."
+  },
+  "public_signature_verification": {
+    "status": "PASS",
+    "checks": [
+      "Anonymous downloaded official sidecar verifies against pinned trust root: daiying-cms-1.2.89-stable.zip",
+      "Anonymous downloaded official sidecar verifies against pinned trust root: daiying-cms-core-update-1.2.89.zip",
+      "Public registry metadata signature and payload digest verify against official trust root",
+      "Public response binds signed registry field: version",
+      "Public response binds signed registry field: product_id",
+      "Public response binds signed registry field: package_id",
+      "Public response binds signed registry field: channel",
+      "Public response binds signed registry field: minimum_core",
+      "Public response binds signed registry field: maximum_core",
+      "Public response binds signed registry field: minimum_php",
+      "Public response binds signed registry field: min_upgrade_from",
+      "Public response binds signed registry field: hard_min_version",
+      "Public response binds signed registry field: migration_floor",
+      "Public response binds signed registry field: required_migrations",
+      "Public response binds signed registry field: changed_files",
+      "Registry signature binds actual public package hash",
+      "Native Core verifies downloaded update.json/signature.bin: daiying-cms-core-update-1.2.89.zip",
+      "Native Core verifies downloaded update.json/signature.bin: official-update.zip",
+      "Public installer manifest binds frozen commit and archive hash"
+    ],
+    "public_key_sha256": "8ee3baa72f432a925d18df9d9f03b2a02b4702d78a56fbc937b82c3ae4303f00",
+    "private_key_used": false,
+    "production_deployed": false
+  },
+  "production_protection": {
+    "before": {
+      "version": "1.2.88",
+      "site_url": "https://www.daiyingcms.com",
+      "config": "ea0041c7dfaf7fa737000e26871162a8b7d421e36bc925de54a3c04c6c2672eb",
+      "distribution_config": "3291d9ee98bb61998b61c90dcadd9bcf4639d6f2983035656c1062a037fd57c6",
+      "distribution_source": "6971aed3e47189bba12f0e359bc43ce7344f348de8a9f238e421eea243257150",
+      "root_cron_sha256": "07dccde850d0f3a1d63a8ddf7fa13601500bb9423ed37ce2598280710f1383f3",
+      "tables": {
+        "cms_core_ai_settings": {
+          "count": 1,
+          "sha256": "9669097a6ec6eaba20733592b2ba62970360312196a274e980c89d99cf0e1041"
+        },
+        "cms_payment_provider_settings": {
+          "count": 2,
+          "sha256": "a0758ba5e2c67dbd54e078f1c0651ac8434ba95fb917c146bff065cdb884f20b"
+        },
+        "cms_payments": {
+          "count": 37,
+          "sha256": "71e76689518365f82188ab561e100c0e16b3aa7fd31f545f31cf517f27d49d77"
+        },
+        "cms_payment_refunds": {
+          "count": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "cms_ai_image_jobs": {
+          "count": 4,
+          "sha256": "0d4855877142a83234f7bc34b87974859f44bc2fa1ca1dded8738b94b1866bf5"
+        },
+        "cms_ai_usage_ledger": {
+          "count": 5,
+          "sha256": "c20452ec055f6f9255092a06349ee8b73c50dc6a1f67c9f4d0ab563586e9e64f"
+        },
+        "cms_plugin_documents": {
+          "count": 12,
+          "sha256": "4c9fc4ccd9dea2c238cda9e448180250e80bc188f1bfbf14cb43ad9dfb3cae97"
+        },
+        "cms_card_products": {
+          "count": 12,
+          "sha256": "426cf0352d850bfbc8a94d2a9fbd1260f12b4eb98443195137ef866f7cd7e25a"
+        }
+      },
+      "files": {
+        "storage/updates/current-release.json": "8a6e32086582ad688e864d9d154b2a5b37a76d3c95e16c26b8b9af34669cb0d0",
+        "content/plugins/daiying.ai-logo/src/BrandDesignService.php": "5588f167f5287d8f1a7bec81a0f33c21a41f65c2f5a98d69d4f9247aa069a591",
+        "content/plugins/official.ai-customer-service/plugin.php": "277d14f6f036444078efc5dc3a15c8200dcce1cbc75c1a868d201a521dc0a3c0",
+        "content/plugins/official.payment.stripe/plugin.php": "c19e4b948536a446ad1d46b14abfe2b6aaed6624db054e7451b6fbfbbb0f32b9"
+      }
+    },
+    "after": {
+      "version": "1.2.88",
+      "site_url": "https://www.daiyingcms.com",
+      "config": "ea0041c7dfaf7fa737000e26871162a8b7d421e36bc925de54a3c04c6c2672eb",
+      "distribution_config": "3291d9ee98bb61998b61c90dcadd9bcf4639d6f2983035656c1062a037fd57c6",
+      "distribution_source": "6971aed3e47189bba12f0e359bc43ce7344f348de8a9f238e421eea243257150",
+      "root_cron_sha256": "07dccde850d0f3a1d63a8ddf7fa13601500bb9423ed37ce2598280710f1383f3",
+      "tables": {
+        "cms_core_ai_settings": {
+          "count": 1,
+          "sha256": "9669097a6ec6eaba20733592b2ba62970360312196a274e980c89d99cf0e1041"
+        },
+        "cms_payment_provider_settings": {
+          "count": 2,
+          "sha256": "a0758ba5e2c67dbd54e078f1c0651ac8434ba95fb917c146bff065cdb884f20b"
+        },
+        "cms_payments": {
+          "count": 37,
+          "sha256": "71e76689518365f82188ab561e100c0e16b3aa7fd31f545f31cf517f27d49d77"
+        },
+        "cms_payment_refunds": {
+          "count": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        },
+        "cms_ai_image_jobs": {
+          "count": 4,
+          "sha256": "0d4855877142a83234f7bc34b87974859f44bc2fa1ca1dded8738b94b1866bf5"
+        },
+        "cms_ai_usage_ledger": {
+          "count": 5,
+          "sha256": "c20452ec055f6f9255092a06349ee8b73c50dc6a1f67c9f4d0ab563586e9e64f"
+        },
+        "cms_plugin_documents": {
+          "count": 12,
+          "sha256": "4c9fc4ccd9dea2c238cda9e448180250e80bc188f1bfbf14cb43ad9dfb3cae97"
+        },
+        "cms_card_products": {
+          "count": 12,
+          "sha256": "426cf0352d850bfbc8a94d2a9fbd1260f12b4eb98443195137ef866f7cd7e25a"
+        }
+      },
+      "files": {
+        "storage/updates/current-release.json": "8a6e32086582ad688e864d9d154b2a5b37a76d3c95e16c26b8b9af34669cb0d0",
+        "content/plugins/daiying.ai-logo/src/BrandDesignService.php": "5588f167f5287d8f1a7bec81a0f33c21a41f65c2f5a98d69d4f9247aa069a591",
+        "content/plugins/official.ai-customer-service/plugin.php": "277d14f6f036444078efc5dc3a15c8200dcce1cbc75c1a868d201a521dc0a3c0",
+        "content/plugins/official.payment.stripe/plugin.php": "c19e4b948536a446ad1d46b14abfe2b6aaed6624db054e7451b6fbfbbb0f32b9"
+      }
+    },
+    "equal": true,
+    "verification": {
+      "status": "PASS",
+      "production_core": "1.2.88",
+      "production_deployed": false,
+      "production_protected_equal": true,
+      "existing_licenses_unchanged": true,
+      "unrelated_products_unchanged": true,
+      "commercial_fields_unchanged": true,
+      "payment_or_ai_requests": 0,
+      "refunds": 0
+    }
+  },
+  "frozen_signing_report": "docs/CORE_1.2.89_PREPARATION_REPORT.md",
+  "source_artifacts_rebuilt": false,
+  "production_deployed": false,
+  "new_ai_or_payment_requests": 0,
+  "refund_requests": 0,
+  "known_limits": [
+    "Version-selection checks do not replace all historical-version native upgrades",
+    "No new mobile device, real payment, arbitrary-theme or consumer knowledge-import acceptance"
+  ]
+}
