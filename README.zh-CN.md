@@ -1,10 +1,14 @@
-# Daiying CMS
+# 戴影CMS（Daiying CMS）
 
 [English](README.md)
 
-Daiying CMS 是一套模块化 PHP CMS，用于构建内容网站、媒体流程、交易基础能力，以及正在开发中的外部渠道分发能力。
+**官方网站：<https://www.daiyingcms.com/>**
 
-此源码版本：**1.2.86 stable**。已正式发布的安装包以 GitHub Releases 为准。
+戴影CMS（Daiying CMS）是一款部署在自有服务器上的 PHP 内容管理系统，面向个人站长、开发者和需要自主维护网站的团队。你可以发布文章和页面、管理图片与文件，选择主题调整外观，通过插件扩展网站功能。
+
+“戴影CMS”“戴影 CMS”和“Daiying CMS”均指本项目。交易基础能力及开发中的外部渠道分发能力，按下文各自的状态与配置要求使用。
+
+已发布基线：**1.2.89 stable**。正式安装包以 GitHub Releases 为准；本次文档修改不重新构建或替换已冻结的发布包。
 
 ![Daiying CMS 后台总览](.github/assets/screenshots/admin-dashboard.png)
 
@@ -45,8 +49,8 @@ Daiying CMS 不是单一功能脚本，而是按产品层级组织：
 
 当前检查到的发行信息：
 
-- Tag：`v1.2.69`
-- 安装包：`daiying-cms-1.2.69-stable.zip`
+- Tag：`v1.2.89`
+- 安装包：`daiying-cms-1.2.89-stable.zip`
 - SHA-256：见 Release 附带的 `.sha256` 校验文件。
 
 ### 3. 安装
