@@ -45,7 +45,7 @@ final class ThemeRuntime
             $html = substr_replace($html, $footer . "\n", $bodyEnd, 0);
         }
 
-        return $html;
+        return \Cms\Core\Seo\SeoHeadRenderer::render($html, $template, $data);
     }
 
     private function templateFile(string $template): string

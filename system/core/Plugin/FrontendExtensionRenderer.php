@@ -67,7 +67,7 @@ final class FrontendExtensionRenderer
         if ($path === '/extension-assets' || str_starts_with($path, '/extension-assets/')) {
             return false;
         }
-        if (in_array($path, ['/health', '/sitemap.xml', '/robots.txt', '/ads.txt'], true)) {
+        if (in_array($path, ['/health', '/sitemap.xml', '/robots.txt', '/llms.txt', '/ads.txt'], true)) {
             return false;
         }
 

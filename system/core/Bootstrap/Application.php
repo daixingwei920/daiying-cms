@@ -165,6 +165,10 @@ final class Application
 
         $response = (new FrontendExtensionRenderer($this->pluginRuntime, $this->logger))->inject($request, $response);
 
+        if ($this->installed) {
+            try { (new \Cms\Core\Seo\CrawlerLog($this->rootPath, $this->settings))->record($request, $response); } catch (Throwable) { /* Telemetry never fails a public response. */ }
+        }
+
         return $this->withConfiguredSecurityHeaders($response);
     }
 
@@ -334,7 +338,12 @@ final class Application
                     'contents' => $contents,
                     'navigation' => NavigationBuilder::build($settings, null, $rootPath),
                     'navigation_tree' => NavigationBuilder::buildTree($settings, null, $rootPath),
-                    'seo' => $siteUrl !== '' ? ['canonical' => $siteUrl] : [],
+                    'seo' => (new \Cms\Core\Seo\SeoPresentation($settings))->metadata([
+                        'title' => (string) $settings->get('site.name', 'PHP CMS'),
+                        'description' => (string) $settings->get('site.name', 'PHP CMS'),
+                        'canonical' => $siteUrl,
+                        'robots' => $settings->get('seo.robots_index', true) ? 'index,follow' : 'noindex,nofollow',
+                    ], []),
                     'ad_slots' => self::adSlots($settings),
                 ]));
             } catch (Throwable $exception) {
@@ -422,6 +431,7 @@ final class Application
         $router->get('/preview/{id}', [$front, 'preview']);
         $router->get('/sitemap.xml', [$front, 'sitemap']);
         $router->get('/robots.txt', [$front, 'robots']);
+        $router->get('/llms.txt', [$front, 'llms']);
         $ads = new AdController($settings, $logger);
         $router->get('/ads.txt', [$ads, 'adsTxt']);
         $router->get('/ads/track/{slot}/{event}', [$ads, 'track']);
@@ -513,6 +523,7 @@ final class Application
         $router->get('/admin/tags/edit/{id}', [$admin, 'tagEdit']);
         $router->post('/admin/tags/edit/{id}', [$admin, 'tagUpdate']);
         $router->post('/admin/tags/delete/{id}', [$admin, 'tagDelete']);
+        $router->get('/admin/seo/crawlers', [$admin, 'seoCrawlers']);
         $router->get('/admin/seo/keywords', [$admin, 'seoKeywordIndex']);
         $router->get('/admin/seo/keywords/detail', [$admin, 'seoKeywordDetail']);
         $router->post('/admin/seo/keywords/save', [$admin, 'seoKeywordSave']);

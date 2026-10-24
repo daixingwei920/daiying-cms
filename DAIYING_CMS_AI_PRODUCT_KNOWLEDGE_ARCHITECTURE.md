@@ -202,3 +202,8 @@ The required mechanism is change-triggered synchronization, not a Codex call for
 The legacy importer does not enforce all new metadata. Never import the full package there. The public projection reduces internal exposure but does not implement runtime tier ordering, revocation, deduplication or complete leakage defenses. Import and end-to-end acceptance require separate validation.
 
 The original 332-record `daixiaoying-ai-customer-service-qa-v1.jsonl` has not been recovered and is not included. Other QA datasets are not substitutes. See `docs/knowledge/2026-10-14-sync-report.md` for this revision's verified scope and open issues.
+
+
+## Issue #9 candidate knowledge boundary
+
+The V1 package on this branch will pin the immutable Issue #9 implementation commit, with candidate_evidence.status=UNPUBLISHED and release_evidence retained as the historical 1.2.88 release. source_tag may hold that exact Git commit as an immutable ref; no release tag is created. Collaboration retirement and SEO/GEO are ADMIN_DEVELOPER facts, not production availability claims. Runtime evidence stays in the Issue #9 delivery report; source-review records retain NOT_RUN_THIS_TASK. No knowledge import, index rebuild, consumer deployment or automatic synchronization is implied.

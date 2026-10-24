@@ -784,6 +784,7 @@ final class AdminController
         if ($guard instanceof Response) {
             return $guard;
         }
+        if (!$this->adminHasCapability('settings.manage')) { return Response::text('权限不足。', 403); }
 
         $notice = '';
         if (($request->query['saved'] ?? '') === '1') {
@@ -1326,6 +1327,7 @@ final class AdminController
         if ($guard instanceof Response) {
             return $guard;
         }
+        if (!$this->adminHasCapability('settings.manage')) { return Response::text('权限不足。', 403); }
         if ($request->method !== 'POST') {
             return Response::html(View::page('站点设置', $this->siteSettingsForm('<p class="error">站点设置保存必须通过 POST 请求提交。</p>')), 405)
                 ->withHeaders(['Allow' => 'POST']);
@@ -1336,6 +1338,7 @@ final class AdminController
 
         try {
             $input = $this->siteSettingsInput($request);
+            $seoOptions = \Cms\Core\Seo\SeoPresentation::input($request);
             $brandUploads = $this->siteBrandUploads((int) ($guard['id'] ?? 0));
             if ($brandUploads['site_logo_url'] !== '') {
                 $input['site_logo_url'] = $brandUploads['site_logo_url'];
@@ -1343,7 +1346,7 @@ final class AdminController
             if ($brandUploads['site_favicon_url'] !== '') {
                 $input['site_favicon_url'] = $brandUploads['site_favicon_url'];
             }
-            $this->writeConfig($this->root(), static function (array $config) use ($input): array {
+            $this->writeConfig($this->root(), static function (array $config) use ($input, $seoOptions): array {
                 $config['site'] = is_array($config['site'] ?? null) ? $config['site'] : [];
                 $config['site']['name'] = $input['site_name'];
                 $config['site']['url'] = $input['site_url'];
@@ -1354,6 +1357,7 @@ final class AdminController
                 $config['payment']['default_currency'] = $input['default_currency'];
                 $config['seo'] = is_array($config['seo'] ?? null) ? $config['seo'] : [];
                 $config['seo']['robots_index'] = $input['robots_index'];
+                $config['seo'] = array_replace($config['seo'], $seoOptions);
                 $config['market'] = is_array($config['market'] ?? null) ? $config['market'] : [];
                 $config['market']['enabled'] = $input['market_enabled'];
                 $config['market']['developer_mode'] = $input['developer_mode'] && $input['market_enabled'];
@@ -1378,6 +1382,22 @@ final class AdminController
             $this->logger->error('Site settings save failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
             return Response::html(View::page('站点设置', $this->siteSettingsForm('<p class="error">站点设置保存失败，请检查配置目录权限后重试。</p>')), 500);
         }
+    }
+
+    public function seoCrawlers(): Response
+    {
+        $guard = $this->requireAdmin();
+        if ($guard instanceof Response) { return $guard; }
+        if (!$this->adminHasCapability('settings.manage')) { return Response::text('权限不足。', 403); }
+        $rows = (new \Cms\Core\Seo\CrawlerLog($this->root(), $this->settings))->rows();
+        $html = '<h1>蜘蛛记录与统计</h1><p>UA 自称，来源未验证；不能据此判断官方蜘蛛或搜索收录。不记录 IP、原始 UA 或查询串。按 UTC 日期、公开路由类别和响应状态聚合。</p><p><a href="/admin/settings">SEO / GEO 设置</a></p><table><thead><tr><th>UTC 日期</th><th>蜘蛛声明</th><th>公开路由类别</th><th>HTTP 状态</th><th>次数</th><th>来源</th></tr></thead><tbody>';
+        foreach (array_reverse($rows) as $row) {
+            $html .= '<tr>';
+            foreach (['day', 'agent', 'route', 'status', 'hits'] as $key) { $html .= '<td>' . View::escape((string) ($row[$key] ?? '')) . '</td>'; }
+            $html .= '<td>未验证</td></tr>';
+        }
+        return Response::html(View::page('蜘蛛记录与统计', $html . '</tbody></table>'))
+            ->withHeaders(['Cache-Control' => 'private, no-store']);
     }
 
     private function siteSettingsForm(string $message = ''): string
@@ -1415,6 +1435,7 @@ final class AdminController
             $this->currencySelect('default_currency', $defaultCurrency, '默认币种') .
             '<p class="muted">新建发卡商品、付费内容和扩展商品默认使用该币种，单个商品仍可单独修改。</p>' .
             '<label><input type="checkbox" name="robots_index" value="1"' . ($robotsIndex ? ' checked' : '') . '> 允许搜索引擎索引本站</label>' .
+            (new \Cms\Core\Seo\SeoPresentation($this->settings))->form() .
             '<section class="card"><h2>官方市场</h2>' .
             '<p class="muted">这里连接 Daiying 官方更新服务器。CMS 只负责查看市场、安装插件、激活授权和提交审核。</p>' .
             '<label class="checkbox-row"><input type="checkbox" name="market_enabled" value="1"' . ($marketEnabled ? ' checked' : '') . '> 启用插件市场和主题市场</label>' .

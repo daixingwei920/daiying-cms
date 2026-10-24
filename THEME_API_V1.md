@@ -364,3 +364,8 @@ Themes render presentation. Business workflows stay in plugins.
 
 Themes must not depend on private database schemas or private Core controller
 methods.
+
+
+## Issue #9 candidate compatibility
+
+Unpublished, based on Core 1.2.88. See [SEO/GEO contract](docs/seo-geo-contract.md) and [member collaboration retirement](docs/member-editorial-retirement.md). Existing theme/SDK/REST signatures and SEO settings keys remain. Core may enhance full theme HTML heads when optional SEO settings are enabled; homepage providers bypassing ThemeRuntime own their output. The retired member workspace is not a machine publishing API. No changes to REST content/media write scope are included.

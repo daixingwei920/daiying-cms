@@ -2,9 +2,12 @@
 
 ## Issue #9 candidate (unpublished, based on 1.2.88)
 
+- Add optional SEO/GEO settings: safe TDK templates, actual public Schema/plugin metadata output, bounded public llms.txt, separate AI search/training robots policies and privacy-limited crawler aggregates. Existing settings and theme/plugin/REST signatures remain. No sitemap fix or database migration.
 - Retire member collaboration routes, runtime services and dedicated capabilities; preserve normal membership, administrator/AI services, frozen migrations and historical data.
 
-## 1.2.88 (release preparation; not published)
+## 1.2.88 (published 2026-10-20)
+
+- Publication is recorded in docs/CORE_1.2.88_PUBLICATION_REPORT.md. Preparation notes below are historical; published artifacts remain frozen.
 
 - Prepare the tested member editorial access and request-driven AI contracts for the 1.2.88 Stable artifact. Preserve shared membership, own-draft/SEO restrictions, provider Timeout and uncertain-result non-replay.
 - Formal signing and Release Gate preparation are authorized; main merge requires Owner confirmation. No publication, production deployment, payment-setting changes or refunds.

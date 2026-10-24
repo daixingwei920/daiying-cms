@@ -14,6 +14,8 @@ This index collects the public-facing documentation currently available in the G
 - [Architecture and consumer boundaries](../DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_ARCHITECTURE.md)
 - [Knowledge synchronization report 2026-10-14](knowledge/2026-10-14-sync-report.md)
 
+- [Issue #9 SEO/GEO configuration and output contract](seo-geo-contract.md) documents the unpublished optional settings, rendering, privacy and rollback behavior.
+
 ## User Guide
 
 - [戴影影视插件 0.8.0 安装与配置图文教程](media-sources-0.8.0-guide.zh-CN.md) covers independent movie, short-drama, TV and custom-video setup.

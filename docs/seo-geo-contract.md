@@ -18,7 +18,7 @@ Existing `seo.robots_index`, site fields and SEO routes retain meaning. Add only
 | crawler_log_enabled | false | boolean |
 | crawler_retention_days | 7 | integer 1..30 |
 
-Templates support only {title}, {site_name}, {description}, {keywords}; no evaluation, HTML, controls or unknown variables. Explicit content/taxonomy SEO fields win, then a configured template, then existing fallback. Unconfigured templates preserve old output. Partial old settings submissions preserve added options unless the new section marker is present. Mutation requires administrator session, settings.manage capability and CSRF; statistics use the same permission.
+Templates support only {title}, {site_name}, {description}, {keywords}; no evaluation, HTML, controls or unknown variables. Explicit content/taxonomy SEO fields win, then a configured template, then existing fallback. Historical Core automatically stored the article title as seo_title. An identical value is treated as the legacy fallback when a title template is enabled; a distinct SEO title remains an explicit override. Unconfigured templates preserve old output. Partial old settings submissions preserve added options unless the new section marker is present. Mutation requires administrator session, settings.manage capability and CSRF; statistics use the same permission.
 
 ## Theme/plugin output
 
