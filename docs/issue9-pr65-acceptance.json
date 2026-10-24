@@ -1,0 +1,230 @@
+{
+  "schema": "pr65-isolated-acceptance-v1",
+  "recorded_at": "2026-10-24T04:01:28.551621+00:00",
+  "runtime_commit": "aa1fde0bfcbef7e98098021ffd3e7501829aa99c",
+  "pr": "https://github.com/daixingwei920/daiying-cms/pull/65",
+  "isolation": {
+    "database": "SQLite",
+    "listener": "127.0.0.1 only; stopped",
+    "test_signing_location": "official update server, private isolated stage",
+    "test_signing_secret_removed": true,
+    "formal_signed": false,
+    "published": false,
+    "merged": false,
+    "production_deployed": false
+  },
+  "release_gate": {
+    "v1_contract": "PASS",
+    "phase0": "PASS",
+    "frozen_migrations": "PASS",
+    "signed_package_parity": {
+      "status": "PASS",
+      "checks": 635,
+      "failures": [],
+      "raw_evidence_sha256": "d0d15941adec43ae9a1f6be271d460dafb89eadfb7f3c53ab83d5d57e9608c54"
+    },
+    "formal_protected_main_pipeline": "NOT_RUN: PR intentionally unmerged; no guard bypass"
+  },
+  "packages": {
+    "installer_sha256": "d880e72cc88f996390e23a7dfcbd04903a9bc0ddaf3e27150535cc6e91f4e6b3",
+    "native_update": {
+      "zip": "candidate.zip",
+      "sha256": "ae34bcf77114061c127760d2e5bb44db7d59606d31df89a9b25d3aab709de10e",
+      "public_key": "RlBszXu7MUMvUm8b6twGa7c6A7k6ORRlcoUoBRnzYe0=",
+      "commit": "aa1fde0bfcbef7e98098021ffd3e7501829aa99c",
+      "test_signature_only": true,
+      "published": false
+    }
+  },
+  "native_updater": {
+    "status": "PASS",
+    "checks": [
+      "Actual HTTP health uses 1.2.87",
+      "Dry run does not switch version or mutate retained data",
+      "Actual HTTP health uses 1.2.88",
+      "Upgrade preserves exact config, articles, users, media, plugin files/data and synthetic payment ledger",
+      "Active Core matches every frozen PR65 manifest hash",
+      "Actual upgraded workspace GET is retired",
+      "Actual upgraded workspace POST is retired",
+      "Updated existing CLI physically prunes expired crawler rows",
+      "Existing published Chinese article remains accessible",
+      "Preserved administrator can log in",
+      "Upgraded native admin retains all 11 legacy menu links and exposes new parent field",
+      "New parent grouping saves after real version upgrade",
+      "Grouping roundtrip retains every original destination",
+      "Preserved original theme renders after new menu grouping",
+      "Successful upgrade leaves maintenance and recovery modes off",
+      "Actual HTTP health uses 1.2.87",
+      "Dry run does not switch version or mutate retained data",
+      "Actual HTTP health uses 1.2.87",
+      "Native automatic rollback preserves all pre-upgrade business data and config",
+      "Rollback restores exact original web/CLI/registry operational files",
+      "Rollback restores the original root Core pointer state",
+      "Rollback exits maintenance and recovery modes",
+      "Preserved administrator can log in",
+      "Actual HTTP health uses 1.2.88",
+      "Same valid signed package can retry after rollback with retained data"
+    ],
+    "source_commit": "aa1fde0bfcbef7e98098021ffd3e7501829aa99c",
+    "source_version": "1.2.87",
+    "source_installer_commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+    "target_version": "1.2.88",
+    "database": "SQLite",
+    "failure_injection": "Synthetic SQLite trigger rejects native current_step=health after actual pointer switch; no Core code or integrity bypass",
+    "test_sites_only": true,
+    "gateway_orders": 0,
+    "refund_requests": 0,
+    "production_writes": 0,
+    "test_signed_on_update_server": true,
+    "formal_signed": false,
+    "published": false
+  },
+  "real_ai": {
+    "status": "PASS",
+    "source_commit": "aa1fde0bfcbef7e98098021ffd3e7501829aa99c",
+    "checks": [
+      "Real HTTP runs upgraded PR65 Core 1.2.88",
+      "Retained administrator signs in over HTTP",
+      "Native signed customer service plugin is enabled",
+      "Customer service model configured through native admin form",
+      "Synthetic customer knowledge saved through native admin form",
+      "Native signed Logo plugin enabled after package upgrade",
+      "Logo free test policy saved through native owner form",
+      "Anonymous Logo work access requires shared Core member login",
+      "New shared Core member registers and returns to Logo feature",
+      "Logo recognizes shared Core registered member session",
+      "Real AI customer response uses synthetic knowledge, not FAQ or fallback",
+      "Native Logo submit durably queues one image job",
+      "Real image provider completes Logo generation through native HTTP execute",
+      "Native Logo PNG download succeeds",
+      "Native Logo SVG download succeeds",
+      "Repeated execution returns completed work without resubmission",
+      "Member history contains exactly one generated job",
+      "Member retained across update can still sign in",
+      "Another shared Core member cannot read generated work"
+    ],
+    "customer_real_provider": true,
+    "customer_model": "gpt-4.1-mini",
+    "image_model": "gpt-image-1.5",
+    "source_site": "native upgraded isolated SQLite site",
+    "gateway_requests": 0,
+    "production_writes": 0,
+    "mock": false
+  },
+  "customer_actual_response": {
+    "http_status": 200,
+    "elapsed_seconds": 1.773,
+    "response": {
+      "ok": true,
+      "answer": "星桥实验室开放时间为每周二下午14:10至16:40，预约代号是蓝鲸47。",
+      "sources": [
+        {
+          "title": "星桥实验室体验时间（隔离测试资料）",
+          "url": "",
+          "source_type": "manual",
+          "trust_level": "trusted"
+        }
+      ],
+      "grounded": true,
+      "session_id": "pr65-real-provider-20261023"
+    }
+  },
+  "provider_and_artifact_evidence": {
+    "status": "PASS",
+    "image_jobs": [
+      {
+        "job_id": "ai_52e0d9c76730e51f369fc1f5",
+        "status": "completed",
+        "provider": "openai",
+        "model": "gpt-image-1.5",
+        "usage_json": "{\"input_tokens\":486,\"input_tokens_details\":{\"image_tokens\":0,\"text_tokens\":486},\"output_tokens\":1393,\"output_tokens_details\":{\"image_tokens\":1056,\"text_tokens\":337},\"total_tokens\":1879}",
+        "media_id": 2,
+        "error_reason": ""
+      }
+    ],
+    "image_usage_ledger": [
+      {
+        "request_id": "ai_52e0d9c76730e51f369fc1f5",
+        "provider": "openai",
+        "model": "gpt-image-1.5",
+        "plugin_id": "daiying.ai-logo",
+        "operation": "image.generate",
+        "input_tokens": 486,
+        "output_tokens": 1393,
+        "request_count": 1,
+        "status": "success",
+        "error_reason": ""
+      }
+    ],
+    "image_dispatch_success_records": 1,
+    "customer_gateway": "unmodified CoreAiProviderGateway -> AiService::chat -> OpenAI compatible HTTP provider; no injected client; successful grounded non-FAQ response and native knowledge.retrieve log",
+    "customer_model": "gpt-4.1-mini",
+    "customer_usage_ledger": "NOT_AVAILABLE: existing plugin calls unmetered AiService::chat; do not claim token metering",
+    "customer_retrieve_events": [
+      {
+        "event_type": "knowledge.retrieve",
+        "severity": "info",
+        "summary": "Knowledge used for customer service answer.",
+        "metadata_json": "{\"question_hash\":\"c43e789b02efd2ba87b0b55da7368d44d8f0cf3ed475e6ba6ce92bfac7abc1e2\",\"sources\":[{\"title\":\"星桥实验室体验时间（隔离测试资料）\",\"url\":\"\",\"source_type\":\"manual\",\"trust_level\":\"trusted\"}]}",
+        "created_at": "2026-10-24T03:57:03+00:00"
+      }
+    ],
+    "png": {
+      "width": 1024,
+      "height": 1024,
+      "bytes": 1282577,
+      "sha256": "20f723c2f15f5cb14a34b1ff2804a9c0670d8d98e4e879e712cd2eabe3655501"
+    },
+    "svg": {
+      "bytes": 86300,
+      "sha256": "6653a0e5b4384c15fce9abae6cc37388a00a66a3e88db90f69850efbc219c429",
+      "native_vector": false,
+      "origin": "native plugin raster trace export"
+    },
+    "production_protected_equal": true
+  },
+  "production_protection": {
+    "before": {
+      "config": "ea0041c7dfaf7fa737000e26871162a8b7d421e36bc925de54a3c04c6c2672eb",
+      "pointer": "8a6e32086582ad688e864d9d154b2a5b37a76d3c95e16c26b8b9af34669cb0d0",
+      "cms_core_ai_settings": "9669097a6ec6eaba20733592b2ba62970360312196a274e980c89d99cf0e1041",
+      "cms_payment_provider_settings": "a0758ba5e2c67dbd54e078f1c0651ac8434ba95fb917c146bff065cdb884f20b",
+      "daiying.ai-logo": "b23997a76d7da0c46d32da8900c47dad86f65a47cde2661713b2784dc04ba934",
+      "official.ai-customer-service": "c3453a20e562407c3e983cd36b40522ddf507909bac719f75e246998a316342c"
+    },
+    "after": {
+      "config": "ea0041c7dfaf7fa737000e26871162a8b7d421e36bc925de54a3c04c6c2672eb",
+      "pointer": "8a6e32086582ad688e864d9d154b2a5b37a76d3c95e16c26b8b9af34669cb0d0",
+      "cms_core_ai_settings": "9669097a6ec6eaba20733592b2ba62970360312196a274e980c89d99cf0e1041",
+      "cms_payment_provider_settings": "a0758ba5e2c67dbd54e078f1c0651ac8434ba95fb917c146bff065cdb884f20b",
+      "daiying.ai-logo": "b23997a76d7da0c46d32da8900c47dad86f65a47cde2661713b2784dc04ba934",
+      "official.ai-customer-service": "c3453a20e562407c3e983cd36b40522ddf507909bac719f75e246998a316342c"
+    },
+    "equal": true
+  },
+  "cleanup": {
+    "status": "PASS",
+    "isolated_ai_disabled": true,
+    "isolated_encrypted_provider_credential_removed": true,
+    "production_key_reference_removed": true,
+    "temporary_signing_secret_removed": true,
+    "synthetic_authorization_envelopes_removed": true,
+    "deleted": [
+      "test-signing.secret",
+      "daiying.ai-logo.authorization.json",
+      "official.ai-customer-service.authorization.json"
+    ],
+    "production_writes": 0
+  },
+  "evidence_bundle": {
+    "relative_path": "outputs/pr65-acceptance/safe-evidence.tar.gz",
+    "sha256": "f4804025cd742f9f7a4fbcf4a0ad23120e71a7cfd48b4bcc83a59beb20b824c2",
+    "contents": "25 explicitly selected safe evidence files; no database, config, session, authorization envelope or private signing key"
+  },
+  "limitations": [
+    "Isolated candidate still has version 1.2.88; tested 1.2.87 -> PR65 candidate, not published 1.2.88 -> new release",
+    "Customer uses existing unmetered chat facade; no customer token-ledger assertion",
+    "Logo art_text raster generation and native PNG/SVG trace export only; not native vector or all modes",
+    "No new V1 knowledge import, real payments, mobile device or arbitrary-theme acceptance"
+  ]
+}

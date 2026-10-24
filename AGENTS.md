@@ -8,6 +8,7 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 
 - Owner approved batch A member collaboration retirement and batch B SEO/GEO integration after baseline audit. Branch `feat/issue-9-seo-geo-retirement`, clean base `a7f99ffdd61eace1b997516a2d91376f5f72f602`. Preserve published migrations and historical identity/grant/content data.
 - No merge, release, production deployment or destructive migration. Sitemap fault not reproduced; do not change sitemap without evidence. Keep ordinary membership, admin roles, AI services and public plugin/theme contracts.
+- Owner subsequently authorized isolated server acceptance. Runtime `aa1fde0bfcbef7e98098021ffd3e7501829aa99c`: Release Gate V1/Phase0 and test-signed parity (635 checks), native SQLite upgrade/automatic rollback/retry (25 checks), real customer AI/image Logo HTTP flow (19 checks) passed. See `docs/issue9-pr65-acceptance.md` and `.json`. Formal protected-main build/sign/publish, same-version Stable update, payments, mobile devices and production remain outside this acceptance.
 - Public read-only health during audit reports production 1.2.88/NORMAL; earlier 1.2.87 production snapshots below are historical. Do not infer upgrade authorization from this observation.
 
 ## Owner-approved Core / Logo / Stripe publication (2026-10-20)
