@@ -1,5 +1,9 @@
 # Changelog
 
+## Issue #9 candidate (unpublished, based on 1.2.88)
+
+- Retire member collaboration routes, runtime services and dedicated capabilities; preserve normal membership, administrator/AI services, frozen migrations and historical data.
+
 ## 1.2.88 (release preparation; not published)
 
 - Prepare the tested member editorial access and request-driven AI contracts for the 1.2.88 Stable artifact. Preserve shared membership, own-draft/SEO restrictions, provider Timeout and uncertain-result non-replay.

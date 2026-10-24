@@ -12,7 +12,6 @@ use Cms\Core\Error\ErrorHandler;
 use Cms\Core\Extension\ExtensionAssetController;
 use Cms\Core\Admin\AdminController;
 use Cms\Core\Auth\AdminAuthenticator;
-use Cms\Core\Auth\MemberAccessController;
 use Cms\Core\Database\ConnectionFactory;
 use Cms\Core\Content\ContentRepository;
 use Cms\Core\Content\ContentTypeRegistry;
@@ -134,6 +133,14 @@ final class Application
     public function handle(Request $request): Response
     {
         $request = $this->withBasePathStripped($request);
+        // Retired in Issue #9. Guard all methods and descendants before plugin or
+        // catch-all routes, including requests using previously granted sessions.
+        $path = Request::normalizePath($request->path);
+        if ($path === '/admin/member-access' || str_starts_with($path, '/admin/member-access/')
+            || $path === '/workspace' || str_starts_with($path, '/workspace/')) {
+            return $this->withConfiguredSecurityHeaders(Response::text('会员协作已退役。', 410)
+                ->withHeaders(['Cache-Control' => 'private, no-store']));
+        }
         $themeAssetResponse = $this->maybeServeThemeAsset($request);
         if ($themeAssetResponse !== null) {
             return $this->withConfiguredSecurityHeaders($themeAssetResponse);
@@ -445,7 +452,6 @@ final class Application
         $router->post('/install', [$install, 'store']);
 
         $admin = new AdminController($settings, $logger, $rootPath, null, $events, $pluginRuntime);
-        $memberAccess = new MemberAccessController($settings, $rootPath);
         $router->get('/admin/login', [$admin, 'loginForm']);
         $router->post('/admin/login', [$admin, 'login']);
         $router->post('/admin/login/passkey-options', [$admin, 'loginPasskeyOptions']);
@@ -459,14 +465,6 @@ final class Application
         $router->post('/admin/mfa/passkey-options', [$admin, 'mfaPasskeyOptions']);
         $router->post('/admin/mfa/passkey-verify', [$admin, 'mfaPasskeyVerify']);
         $router->post('/admin/logout', [$admin, 'logout']);
-        $router->get('/admin/member-access', [$memberAccess, 'assignments']);
-        $router->post('/admin/member-access', [$memberAccess, 'assign']);
-        $router->get('/workspace', [$memberAccess, 'workspace']);
-        $router->get('/workspace/drafts/new', [$memberAccess, 'newDraft']);
-        $router->post('/workspace/drafts', [$memberAccess, 'saveDraft']);
-        $router->get('/workspace/drafts/{id}', [$memberAccess, 'editDraft']);
-        $router->post('/workspace/drafts/{id}', [$memberAccess, 'saveDraft']);
-        $router->get('/workspace/seo', [$memberAccess, 'seo']);
         $router->get('/admin', [$admin, 'dashboard']);
         $router->get('/admin/notifications', [$admin, 'notificationsIndex']);
         $router->post('/admin/notifications/read/{id}', [$admin, 'notificationMarkRead']);

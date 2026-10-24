@@ -20,7 +20,8 @@ This index collects the public-facing documentation currently available in the G
 - Content management is available through the admin backend after installation.
 - [Administrator Passkey reauthentication candidate](admin-passkey-reauth.md) describes the isolated sensitive-action flow and its limits.
 - [Site registration settings](site-registration.md) documents global ICP number configuration in the 1.2.85 candidate.
-- [Core member editorial access candidate](member-editorial-access.md) documents member registration reuse and limited role assignment.
+- [Member collaboration retirement](member-editorial-retirement.md) records the unpublished Issue #9 decision and data retention.
+- [Historical Core member editorial access](member-editorial-access.md) documents member registration reuse and limited role assignment.
 - Media library capabilities are part of Core and can be extended by storage plugins.
 - Site-level AI Provider settings are available through [Global AI](ai.md).
 - Site-level mail delivery and notification foundations are available through [Mail Infrastructure](mail-infrastructure.md).
