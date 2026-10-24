@@ -9,6 +9,7 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 - Owner explicitly approves merging PR #65 and preparing the next version, 1.2.89, with formal signing and Release Gate on the update server. This supersedes the earlier no-merge/no-formal-signing holds for this candidate only.
 - Freeze a clean exact origin/main commit; use the existing official signer only on the update server. Preserve the 1.2.80 upgrade floor, published migrations, existing prices/licenses and all production settings/data.
 - Stop after submitting the signed-candidate acceptance report. No tag/GitHub Release, official update/market publication or production deployment is authorized. Never overwrite v1.2.88 or its artifacts.
+- Completed: PR #65 merged at frozen main `3dcc700174abd1b9a7d2959a09881f247026de1c`; formal 1.2.89 signing, original preflight/build/verify and 635-check signed parity passed. Native SQLite 1.2.88→1.2.89 upgrade/automatic rollback/retry (25 checks) and fresh HTTP install passed. See `docs/CORE_1.2.89_PREPARATION_REPORT.md`. Public latest stays1.2.88; 1.2.89 is signed but unpublished. Keep this runtime commit and signed artifacts frozen.
 
 ## Issue #9 isolated development (2026-10-23)
 

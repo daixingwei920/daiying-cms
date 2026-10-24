@@ -1819,6 +1819,16 @@
     "runtime_report": "docs/issue9-delivery.md",
     "production_deployed": false,
     "consumer_imported": false,
-    "target_version": "1.2.89"
+    "target_version": "1.2.89",
+    "signed_preparation": {
+      "status": "SIGNED_NOT_PUBLISHED",
+      "version": "1.2.89",
+      "runtime_commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+      "report": "docs/CORE_1.2.89_PREPARATION_REPORT.md",
+      "installer_sha256": "7831edfee8c8d3161aa8ca92f026019b99355ba764e6a98dfe002373cd7f052a",
+      "update_sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+      "release_gate": "PASS",
+      "production_deployed": false
+    }
   }
 }
