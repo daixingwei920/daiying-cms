@@ -1,9 +1,11 @@
 # Changelog
 
-## Issue #9 candidate (unpublished, based on 1.2.88)
+## 1.2.89 (signed candidate preparation; unpublished)
 
 - Add optional SEO/GEO settings: safe TDK templates, actual public Schema/plugin metadata output, bounded public llms.txt, separate AI search/training robots policies and privacy-limited crawler aggregates. Existing settings and theme/plugin/REST signatures remain. No sitemap fix or database migration.
 - Retire member collaboration routes, runtime services and dedicated capabilities; preserve normal membership, administrator/AI services, frozen migrations and historical data.
+- Deliver crawler retention cleanup through the existing update-safe `php cli.php seo:crawlers:prune` entry point. Preserve the 1.2.80 upgrade floor and all signed-update integrity checks.
+- Owner authorized PR #65 merge and formal server-side signing/Release Gate preparation on 2026-10-24. No tag, formal publication, official catalog change, production deployment or payment/refund action is authorized.
 
 ## 1.2.88 (published 2026-10-20)
 
