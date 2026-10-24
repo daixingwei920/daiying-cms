@@ -4,6 +4,12 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized domestic crawler statistics (2026-10-24)
+
+- Owner requests domestic crawler recognition and the statistics interface. Clean feature branch `feat/domestic-crawler-statistics`, base published1.2.89 / `3dcc700174abd1b9a7d2959a09881f247026de1c`. Earlier1.2.88 baseline notes below are historical.
+- Scope: finite UA aliases, local bounded aggregate statistics, filters/trends/ranking/pagination and the existing admin entry. Preserve privacy/retention/caps, admin capability checks, public interfaces and all published migrations. UA identification is never source verification or IP geography.
+- Development, isolated testing and PR review only. No merge, next-version preparation, formal signing/publication or production change. Release Gate V1 contract key generation runs only on the already-authorized update server. See `docs/domestic-crawlers.md`.
+
 ## Owner-authorized 1.2.89 merge and signing preparation (2026-10-24)
 
 - Owner explicitly approves merging PR #65 and preparing the next version, 1.2.89, with formal signing and Release Gate on the update server. This supersedes the earlier no-merge/no-formal-signing holds for this candidate only.

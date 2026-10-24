@@ -1384,19 +1384,19 @@ final class AdminController
         }
     }
 
-    public function seoCrawlers(): Response
+    public function seoCrawlers(?Request $request = null): Response
     {
         $guard = $this->requireAdmin();
         if ($guard instanceof Response) { return $guard; }
         if (!$this->adminHasCapability('settings.manage')) { return Response::text('权限不足。', 403); }
         $rows = (new \Cms\Core\Seo\CrawlerLog($this->root(), $this->settings))->rows();
-        $html = '<h1>蜘蛛记录与统计</h1><p>UA 自称，来源未验证；不能据此判断官方蜘蛛或搜索收录。不记录 IP、原始 UA 或查询串。按 UTC 日期、公开路由类别和响应状态聚合。</p><p><a href="/admin/settings">SEO / GEO 设置</a></p><table><thead><tr><th>UTC 日期</th><th>蜘蛛声明</th><th>公开路由类别</th><th>HTTP 状态</th><th>次数</th><th>来源</th></tr></thead><tbody>';
-        foreach (array_reverse($rows) as $row) {
-            $html .= '<tr>';
-            foreach (['day', 'agent', 'route', 'status', 'hits'] as $key) { $html .= '<td>' . View::escape((string) ($row[$key] ?? '')) . '</td>'; }
-            $html .= '<td>未验证</td></tr>';
+        try {
+            $html = (new \Cms\Core\Seo\CrawlerStatistics($this->settings))->render($rows, $request ?? new Request('GET', '/admin/seo/crawlers'));
+        } catch (\InvalidArgumentException $exception) {
+            return Response::html(View::page('蜘蛛统计筛选无效', '<h1>筛选参数无效</h1><p>' . View::escape($exception->getMessage()) . '</p><a href="' . View::escape(\Cms\Core\Routing\BasePath::prefixCurrent('/admin/seo/crawlers')) . '">重置筛选</a>'), 400)
+                ->withHeaders(['Cache-Control' => 'private, no-store']);
         }
-        return Response::html(View::page('蜘蛛记录与统计', $html . '</tbody></table>'))
+        return Response::html(View::page('蜘蛛记录与统计', $html))
             ->withHeaders(['Cache-Control' => 'private, no-store']);
     }
 
