@@ -100,6 +100,8 @@ def derived(package):
         "要求 P0 官方知识 → P1 已审核已发布文章 → P2 普通已发布文章；Draft/Pending/C/D、内部资料及分类未知内容默认禁用。参考知识与待优化原文分开。", "",
         "自动同步仍为 DESIGN_ONLY；原 Core 优化器共享知识接入为 NOT_IMPLEMENTED。源码提交不代表已测试、已部署或生产验收通过。", "",
     ]
+    if package.get("candidate_evidence", {}).get("status") == "UNPUBLISHED":
+        lines.extend(["**当前分支知识源是未发布候选；不代表生产可用。** 正式发布事实保留在 release_evidence；候选运行证据见 docs/issue9-delivery.md。禁止自动导入生产客服或索引。", ""])
     for record in package["records"]:
         lines.extend([
             f"## {record['capability']}", "",
