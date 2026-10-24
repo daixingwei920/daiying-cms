@@ -1,0 +1,290 @@
+{
+  "schema": "core-1.2.89-signed-preparation-v1",
+  "recorded_at": "2026-10-24T04:18:19.725335+00:00",
+  "status": "SIGNED_CANDIDATE_ACCEPTANCE_PASSED_NOT_PUBLISHED",
+  "pr65_merged": true,
+  "frozen_main_commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+  "signing": {
+    "status": "PASS",
+    "commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+    "version": "1.2.89",
+    "installer_sha256": "7831edfee8c8d3161aa8ca92f026019b99355ba764e6a98dfe002373cd7f052a",
+    "update_sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+    "file_count": 420,
+    "required_migrations": 55,
+    "minimum_core": "1.2.80",
+    "minimum_php": "8.3.0",
+    "public_key": "h5vP/I/pAXWIz4GQ8h2LryHvyP+GW0Fc8AFEUHu0jms=",
+    "public_key_fingerprint": "8ee3baa72f432a925d18df9d9f03b2a02b4702d78a56fbc937b82c3ae4303f00",
+    "native_official_signature": "PASS",
+    "formal_signed": true,
+    "published": false,
+    "production_deployed": false,
+    "private_key_exported": false
+  },
+  "formal_release_gate": {
+    "preflight": "PASS",
+    "build": "PASS",
+    "signed_parity": "PASS",
+    "signed_parity_checks": 635,
+    "verify": "PASS",
+    "previous_api_baseline": "v1.2.88",
+    "published_migrations": "ALL_BYTE_IDENTICAL_TO_v1.2.88"
+  },
+  "native_upgrade_rollback_retry": {
+    "status": "PASS",
+    "checks": [
+      "Actual HTTP health uses 1.2.88",
+      "Dry run does not switch version or mutate retained data",
+      "Actual HTTP health uses 1.2.89",
+      "Upgrade preserves exact config, articles, users, media, plugin files/data and synthetic payment ledger",
+      "Active Core matches every frozen PR65 manifest hash",
+      "Actual upgraded workspace GET is retired",
+      "Actual upgraded workspace POST is retired",
+      "Updated existing CLI physically prunes expired crawler rows",
+      "Existing published Chinese article remains accessible",
+      "Preserved administrator can log in",
+      "Upgraded native admin retains all 11 legacy menu links and exposes new parent field",
+      "New parent grouping saves after real version upgrade",
+      "Grouping roundtrip retains every original destination",
+      "Preserved original theme renders after new menu grouping",
+      "Successful upgrade leaves maintenance and recovery modes off",
+      "Actual HTTP health uses 1.2.88",
+      "Dry run does not switch version or mutate retained data",
+      "Actual HTTP health uses 1.2.88",
+      "Native automatic rollback preserves all pre-upgrade business data and config",
+      "Rollback restores exact original web/CLI/registry operational files",
+      "Rollback restores the original root Core pointer state",
+      "Rollback exits maintenance and recovery modes",
+      "Preserved administrator can log in",
+      "Actual HTTP health uses 1.2.89",
+      "Same valid signed package can retry after rollback with retained data"
+    ],
+    "source_commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+    "source_version": "1.2.88",
+    "source_installer_commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
+    "target_version": "1.2.89",
+    "database": "SQLite",
+    "failure_injection": "Synthetic SQLite trigger rejects native current_step=health after actual pointer switch; no Core code or integrity bypass",
+    "test_sites_only": true,
+    "gateway_orders": 0,
+    "refund_requests": 0,
+    "production_writes": 0,
+    "test_signed_on_update_server": false,
+    "formal_signed": true,
+    "published": false
+  },
+  "fresh_native_http_install": {
+    "status": "PASS",
+    "source_commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+    "installer_sha256": "7831edfee8c8d3161aa8ca92f026019b99355ba764e6a98dfe002373cd7f052a",
+    "native_http_install": 302,
+    "health": {
+      "status": "ok",
+      "mode": "NORMAL",
+      "version": "1.2.89",
+      "release_id": "",
+      "maintenance": false,
+      "installed": true
+    },
+    "retired_workspace": 410,
+    "database": "SQLite",
+    "synthetic_accounts_only": true,
+    "published": false,
+    "production_deployed": false
+  },
+  "production_protection": {
+    "equal": true,
+    "before": {
+      "site_config_sha256": "ea0041c7dfaf7fa737000e26871162a8b7d421e36bc925de54a3c04c6c2672eb",
+      "site_pointer_sha256": "8a6e32086582ad688e864d9d154b2a5b37a76d3c95e16c26b8b9af34669cb0d0",
+      "site_tables": {
+        "cms_core_ai_settings": {
+          "count": 1,
+          "sha256": "9669097a6ec6eaba20733592b2ba62970360312196a274e980c89d99cf0e1041"
+        },
+        "cms_payment_provider_settings": {
+          "count": 2,
+          "sha256": "a0758ba5e2c67dbd54e078f1c0651ac8434ba95fb917c146bff065cdb884f20b"
+        },
+        "cms_payment_refunds": {
+          "count": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      },
+      "distribution_config_sha256": "3291d9ee98bb61998b61c90dcadd9bcf4639d6f2983035656c1062a037fd57c6",
+      "distribution_tables": {
+        "admin_passkeys": {
+          "count": 2,
+          "sha256": "c6725f31b746f87698af4ba7e990335f8a8a9eabdb541807821e22da95acbfd7"
+        },
+        "admins": {
+          "count": 1,
+          "sha256": "1f4746fcfdd4448d5ff71e5198bad5d9d927162f81f820928ecab9544fad2604"
+        },
+        "audit_logs": {
+          "count": 948,
+          "sha256": "3b6c6587de1783d84a310bc871b16bcbb377babef4865eaaf9d74766e8a632b8"
+        },
+        "core_selection_leases": {
+          "count": 56,
+          "sha256": "6c5c842b2422a88f42134246c6f4bf1c1f8fe8165c25cbffee10e50f22ed6cd1"
+        },
+        "download_audits": {
+          "count": 655,
+          "sha256": "84d134256ace90b3e2a08bd142e186ec5c14d685f152313278b8b27b104492ca"
+        },
+        "download_tokens": {
+          "count": 74,
+          "sha256": "485f59165d362085f0fcd8b2b72e24ff44f9b7f90b85f4c93c84b37e34a9de6a"
+        },
+        "license_batches": {
+          "count": 35,
+          "sha256": "e3ab235f94b5db431ccdbc57e0ec75b83f1d258d4cb7ea1ed4b38d4afd4e0c10"
+        },
+        "licenses": {
+          "count": 1752,
+          "sha256": "b5be99c0bd8bf22323c2cd223a66ba19f75b41f673f354d2fe40f17d559eccd5"
+        },
+        "products": {
+          "count": 37,
+          "sha256": "57c9d69c61ededd0f2e4b6a76b5fd2208b69f3881796d49e0b4bb7e7809b086f"
+        },
+        "rate_limits": {
+          "count": 4,
+          "sha256": "d0327d7604740ff13bd96908f1525414e278128857bde7e825f13af98a019f07"
+        },
+        "releases": {
+          "count": 260,
+          "sha256": "95cdc9926ef636fe191d3008ff19f6c3e49b94a7f818cd9b333ea73cd421f562"
+        },
+        "review_submissions": {
+          "count": 33,
+          "sha256": "5b5f61388ba9465aa2e4842567887b6b3600ae9786a451fbf4536fbb28513d25"
+        }
+      }
+    },
+    "after": {
+      "site_config_sha256": "ea0041c7dfaf7fa737000e26871162a8b7d421e36bc925de54a3c04c6c2672eb",
+      "site_pointer_sha256": "8a6e32086582ad688e864d9d154b2a5b37a76d3c95e16c26b8b9af34669cb0d0",
+      "site_tables": {
+        "cms_core_ai_settings": {
+          "count": 1,
+          "sha256": "9669097a6ec6eaba20733592b2ba62970360312196a274e980c89d99cf0e1041"
+        },
+        "cms_payment_provider_settings": {
+          "count": 2,
+          "sha256": "a0758ba5e2c67dbd54e078f1c0651ac8434ba95fb917c146bff065cdb884f20b"
+        },
+        "cms_payment_refunds": {
+          "count": 0,
+          "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        }
+      },
+      "distribution_config_sha256": "3291d9ee98bb61998b61c90dcadd9bcf4639d6f2983035656c1062a037fd57c6",
+      "distribution_tables": {
+        "admin_passkeys": {
+          "count": 2,
+          "sha256": "c6725f31b746f87698af4ba7e990335f8a8a9eabdb541807821e22da95acbfd7"
+        },
+        "admins": {
+          "count": 1,
+          "sha256": "1f4746fcfdd4448d5ff71e5198bad5d9d927162f81f820928ecab9544fad2604"
+        },
+        "audit_logs": {
+          "count": 948,
+          "sha256": "3b6c6587de1783d84a310bc871b16bcbb377babef4865eaaf9d74766e8a632b8"
+        },
+        "core_selection_leases": {
+          "count": 56,
+          "sha256": "6c5c842b2422a88f42134246c6f4bf1c1f8fe8165c25cbffee10e50f22ed6cd1"
+        },
+        "download_audits": {
+          "count": 655,
+          "sha256": "84d134256ace90b3e2a08bd142e186ec5c14d685f152313278b8b27b104492ca"
+        },
+        "download_tokens": {
+          "count": 74,
+          "sha256": "485f59165d362085f0fcd8b2b72e24ff44f9b7f90b85f4c93c84b37e34a9de6a"
+        },
+        "license_batches": {
+          "count": 35,
+          "sha256": "e3ab235f94b5db431ccdbc57e0ec75b83f1d258d4cb7ea1ed4b38d4afd4e0c10"
+        },
+        "licenses": {
+          "count": 1752,
+          "sha256": "b5be99c0bd8bf22323c2cd223a66ba19f75b41f673f354d2fe40f17d559eccd5"
+        },
+        "products": {
+          "count": 37,
+          "sha256": "57c9d69c61ededd0f2e4b6a76b5fd2208b69f3881796d49e0b4bb7e7809b086f"
+        },
+        "rate_limits": {
+          "count": 4,
+          "sha256": "d0327d7604740ff13bd96908f1525414e278128857bde7e825f13af98a019f07"
+        },
+        "releases": {
+          "count": 260,
+          "sha256": "95cdc9926ef636fe191d3008ff19f6c3e49b94a7f818cd9b333ea73cd421f562"
+        },
+        "review_submissions": {
+          "count": 33,
+          "sha256": "5b5f61388ba9465aa2e4842567887b6b3600ae9786a451fbf4536fbb28513d25"
+        }
+      }
+    }
+  },
+  "public_state": {
+    "official_latest": "1.2.88",
+    "candidate_catalog_absent": true,
+    "published": false,
+    "production_deployed": false
+  },
+  "github_release_state": {
+    "checked_at": "2026-10-24T04:17:19.104884+00:00",
+    "github_latest": {
+      "publishedAt": "2026-10-20T13:29:39Z",
+      "tagName": "v1.2.88",
+      "targetCommitish": "d64732de86ab70c09af0655c66d99da3f57f9220"
+    },
+    "v1_2_89_tag_absent": true
+  },
+  "cleanup": {
+    "status": "PASS",
+    "isolated_ports_closed": [
+      19288,
+      19289,
+      19290
+    ],
+    "server_clone_clean": true,
+    "temporary_catalog_copies_removed": true,
+    "private_signing_key_exported": false,
+    "production_writes": 0
+  },
+  "reused_actual_ai_evidence": {
+    "runtime_commit": "aa1fde0bfcbef7e98098021ffd3e7501829aa99c",
+    "report": "docs/issue9-pr65-acceptance.md",
+    "actual_checks": 19,
+    "core_migrations_manifest_cli_public_runtime_files_identical": true,
+    "new_billable_calls_this_preparation": 0,
+    "scope": "prior real AI evidence reused after exact runtime comparison; not rerun under 1.2.89"
+  },
+  "knowledge_validation": {
+    "status": "PASS",
+    "facts": 44,
+    "public_facts": 22,
+    "source_files": 45,
+    "production_consumer_imported": false
+  },
+  "evidence_bundle": {
+    "name": "signed-candidate-evidence.tar.gz",
+    "files": 23,
+    "sha256": "013c15a69352db9931c84f753df258dd9de46a7d301eb40d3cd16b02004cce44"
+  },
+  "limitations": [
+    "Native full signed update roundtrip is SQLite; no new MySQL package-roundtrip acceptance in this preparation",
+    "Previous scoped SQLite/MySQL and real AI acceptance retained separately; not relabelled as fresh 1.2.89 runs",
+    "No mobile device, real payment or third-party theme acceptance",
+    "No tag, GitHub Release, official catalog entry, production deployment or refund authorized or executed"
+  ]
+}

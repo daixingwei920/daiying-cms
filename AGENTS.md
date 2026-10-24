@@ -4,11 +4,19 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-approved Core 1.2.89 publication (2026-10-24)
+
+- Owner accepted the frozen signed candidate and approved publication to GitHub and the official update service. This supersedes the earlier publication hold for these exact Core artifacts only; production deployment remains prohibited.
+- Published `v1.2.89` / `3dcc700174abd1b9a7d2959a09881f247026de1c`. Public GitHub Latest, seven anonymous attachment downloads, official update download, fixed-key signatures and version compatibility checks passed. Never rebuild the frozen artifacts or move this tag.
+- Production remains Core1.2.88/NORMAL/maintenance=false; protected settings/data, Cron, existing licenses and non-Core products remain unchanged. No production upgrade, plugin/theme release, payment or refund action was performed.
+- Distribution backup: `/root/daiying-publication189-20261024-fHeMWO/backup`. See `docs/CORE_1.2.89_PUBLICATION_REPORT.md`; raw evidence stays outside Git. Documentation follow-ups must not alter frozen runtime artifacts.
+
 ## Owner-authorized 1.2.89 merge and signing preparation (2026-10-24)
 
 - Owner explicitly approves merging PR #65 and preparing the next version, 1.2.89, with formal signing and Release Gate on the update server. This supersedes the earlier no-merge/no-formal-signing holds for this candidate only.
 - Freeze a clean exact origin/main commit; use the existing official signer only on the update server. Preserve the 1.2.80 upgrade floor, published migrations, existing prices/licenses and all production settings/data.
 - Stop after submitting the signed-candidate acceptance report. No tag/GitHub Release, official update/market publication or production deployment is authorized. Never overwrite v1.2.88 or its artifacts.
+- Completed: PR #65 merged at frozen main `3dcc700174abd1b9a7d2959a09881f247026de1c`; formal 1.2.89 signing, original preflight/build/verify and 635-check signed parity passed. Native SQLite 1.2.88→1.2.89 upgrade/automatic rollback/retry (25 checks) and fresh HTTP install passed. See `docs/CORE_1.2.89_PREPARATION_REPORT.md`. Public latest stays1.2.88; 1.2.89 is signed but unpublished. Keep this runtime commit and signed artifacts frozen.
 
 ## Issue #9 isolated development (2026-10-23)
 
@@ -86,12 +94,12 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 ## Current Core Baseline
 
 - Product: Daiying CMS Core.
-- Published baseline: `1.2.88`, official tag `v1.2.88`, frozen commit `d64732de86ab70c09af0655c66d99da3f57f9220`; PR #61. Official GitHub/update-service publication and actual downloads verified 2026-10-20.
-- Clean formal signing source: `/root/daiying-release188-preparation-20261020-d6c865/final-core`; release artifacts were frozen before documentation follow-ups. Never release from dirty or legacy checkouts.
-- Added Owner-assigned own-draft / SEO-read-only member access, shared registration/session identity and request-driven durable AI execution. Preserve original text AI, image queue, configured Timeout, quotas/audit and public interfaces; uncertain remote results must not auto-replay.
-- Core full package/update package and separate Logo1.0.1/Stripe1.2.9 market packages are published. Logo requires1.2.88; theme packages remain separate. Publication does not upgrade any site.
-- Production official website remains1.2.87/NORMAL; merchant settings, payments, refunds and existing customer licenses are unchanged. See `docs/CORE_1.2.88_PUBLICATION_REPORT.md`.
-- All existing clean-source, signing-key, approval, maintenance and production boundaries below remain in force.
+- Published baseline: `1.2.89`, official tag `v1.2.89`, frozen commit `3dcc700174abd1b9a7d2959a09881f247026de1c`; PR #65. Official GitHub/update-service publication and actual anonymous downloads verified2026-10-24.
+- Clean signing source: `/root/daiying-release189-preparation-20261024-aXsImp/core`; signed installer/update archives remain frozen. Never release from dirty or legacy checkouts.
+- Member collaboration is retired; shared normal membership, administrators and AI remain. Optional SEO/GEO and crawler retention use existing contracts; published migrations and historical identity/content data remain intact. Uncertain AI results must not auto-replay.
+- Only Core was published in this task. Logo1.0.1 and Stripe1.2.9 retain their existing separate releases/prices/licenses; no theme/plugin package was deployed.
+- Production website remains1.2.88/NORMAL/maintenance=false; payment/AI settings, data, Cron and existing licenses unchanged. See `docs/CORE_1.2.89_PUBLICATION_REPORT.md`.
+- Existing clean-source, signing-key, approval, maintenance and production boundaries below remain in force.
 
 ## Owner-authorized payment callback repair (2026-10-18)
 
