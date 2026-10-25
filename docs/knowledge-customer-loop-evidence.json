@@ -1,0 +1,195 @@
+{
+  "status": "ISOLATED_ACCEPTANCE_PASSED_OWNER_REVIEW_PENDING",
+  "date": "2026-10-25",
+  "core_base": "c09b5ea10f31cf0203a5cf4b73df1d628c8cf546",
+  "runtime_gate_commit": "6cb82a85f4560f9f8ef6b86e850a202b75208a53",
+  "plugin_candidate": {
+    "status": "PASS",
+    "candidate": "1.1.1-dev.1",
+    "baseline_commit": "bfa64c5d45e5f157b6a3a0c97a986202ebe122f9",
+    "implementation_commit": "5680a5dc8a34e3390627083e1d1c37fb3e04f42a",
+    "source_commit": "3bf071e141970b18a1717376d3fc100dddac1209",
+    "locked_runtime_files": 13,
+    "formally_signed": false,
+    "production_deployed": false,
+    "source_archive_is_install_package": false,
+    "sha256": {
+      "customer-service-1.1.1-dev.1.patch": "a65aaa6b32912b348fa88111b1451214f43ee8dc7ee6265eb2a37fbf40a661cd",
+      "customer-service-1.1.1-dev.1-source.zip": "de586235ae22875c250297de0420bbadc2f9a83333497f6f34493c88cab45eae"
+    }
+  },
+  "knowledge": {
+    "facts": 47,
+    "public_facts": 22,
+    "pinned_files": 51,
+    "consumer_tests": 21,
+    "negative_checks": 6,
+    "production_import": false,
+    "index_rebuilt": false,
+    "core_optimizer": "NOT_IMPLEMENTED"
+  },
+  "native_customer_http": {
+    "status": "PASS",
+    "checks": [
+      "Native site runs published189; frozen190 package not installed",
+      "Reproduce old FAQ fast return before managed activation",
+      "Actual published189 knowledge event acknowledged by native customer",
+      "Actual HTTP answer uses admitted public knowledge, not conflicting old FAQ",
+      "HTTP citations bind P0,189 and exact active receipt",
+      "Exactly22 public records imported; internal records excluded",
+      "Replay leaves the same active customer knowledge batch",
+      "Unknown query returns insufficient information without a provider call",
+      "Reviewed synthetic article reaches actual HTTP customer response",
+      "Polling updates actual response and revision",
+      "Failed import preserves last active batch and actual customer answer",
+      "Retry recovers the same pending snapshot into actual customer response",
+      "Withdrawn knowledge no longer enters answer or provider context",
+      "Unpublished190 knowledge is rejected for the released189 customer",
+      "Rejected candidate does not replace current customer knowledge",
+      "No conflicting legacy or INTERNAL fixture data reached provider context"
+    ],
+    "model": "deterministic loopback protocol fixture, not a real paid model",
+    "representative_actual_response": {
+      "answer": "[隔离合成提供方] 新站安装入口为 /install。支持 SQLite 和 MySQL/MariaDB；安装器执行迁移、创建运行目录、写入 config/app.php 和 storage/installed.lock。安装完成后使用 /admin/login。",
+      "sources": [
+        {
+          "title": "Web Installer",
+          "url": "https://github.com/daixingwei920/daiying-cms/blob/3dcc700174abd1b9a7d2959a09881f247026de1c/DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.json",
+          "source_type": "knowledge_sync",
+          "trust_level": "official",
+          "priority": "P0",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+          "knowledge_id": "install.web_installer",
+          "receipt_sha256": "615a5126d04a3c18cd88e388ebd2c19a56f4f7a47ea591deb61e46ab1d8348f5"
+        },
+        {
+          "title": "Daiying CMS 安装入口和步骤",
+          "url": "https://github.com/daixingwei920/daiying-cms/blob/3dcc700174abd1b9a7d2959a09881f247026de1c/DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.json",
+          "source_type": "knowledge_sync",
+          "trust_level": "official",
+          "priority": "P0",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+          "knowledge_id": "install.cn_steps",
+          "receipt_sha256": "615a5126d04a3c18cd88e388ebd2c19a56f4f7a47ea591deb61e46ab1d8348f5"
+        },
+        {
+          "title": "首次安装失败处理",
+          "url": "https://github.com/daixingwei920/daiying-cms/blob/3dcc700174abd1b9a7d2959a09881f247026de1c/DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.json",
+          "source_type": "knowledge_sync",
+          "trust_level": "official",
+          "priority": "P0",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+          "knowledge_id": "install.failure_guard",
+          "receipt_sha256": "615a5126d04a3c18cd88e388ebd2c19a56f4f7a47ea591deb61e46ab1d8348f5"
+        },
+        {
+          "title": "Runtime Requirements",
+          "url": "https://github.com/daixingwei920/daiying-cms/blob/3dcc700174abd1b9a7d2959a09881f247026de1c/DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.json",
+          "source_type": "knowledge_sync",
+          "trust_level": "official",
+          "priority": "P0",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+          "knowledge_id": "install.runtime_requirements",
+          "receipt_sha256": "615a5126d04a3c18cd88e388ebd2c19a56f4f7a47ea591deb61e46ab1d8348f5"
+        },
+        {
+          "title": "MySQL 安装兼容",
+          "url": "https://github.com/daixingwei920/daiying-cms/blob/3dcc700174abd1b9a7d2959a09881f247026de1c/DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.json",
+          "source_type": "knowledge_sync",
+          "trust_level": "official",
+          "priority": "P0",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+          "knowledge_id": "install.mysql_compatibility",
+          "receipt_sha256": "615a5126d04a3c18cd88e388ebd2c19a56f4f7a47ea591deb61e46ab1d8348f5"
+        }
+      ],
+      "grounded": true
+    },
+    "published_release": {
+      "tag": "v1.2.89",
+      "commit": "3dcc700174abd1b9a7d2959a09881f247026de1c"
+    }
+  },
+  "crawler_observation": {
+    "checks": 23,
+    "actual_concurrent_fixture": {
+      "attempted": 400,
+      "primary_recorded": 251,
+      "actually_missing_in_fixture": 149,
+      "observed": {
+        "stored": 251,
+        "lock_busy": 149,
+        "row_limit": 0,
+        "byte_limit": 0,
+        "invalid_ledger": 0,
+        "io_error": 0,
+        "unsafe_path": 0,
+        "hit_cap": 0
+      },
+      "observation_missing_in_fixture": 0,
+      "exact": false
+    },
+    "http_checks": [
+      "Unauthenticated HTTP cannot read observation UI",
+      "Native administrator login succeeds",
+      "Synthetic supported-UA public request succeeds",
+      "Synthetic supported-UA public request succeeds",
+      "Synthetic supported-UA public request succeeds",
+      "Held primary lock does not fail public HTTP response",
+      "Authorized native HTTP route renders new private/no-store observation section",
+      "Filtered page keeps site-wide lower-bound warnings",
+      "Actual HTTP outcomes appear even when ordinary filters exclude Baidu",
+      "Malformed filters still fail with private HTTP400",
+      "Admin requests do not inflate primary crawler counters"
+    ],
+    "real_device_acceptance": false,
+    "raw_observation_log": "PASS Serial requests agree with stored outcome counters\nPASS Held primary lock drops ten samples without waiting, with separate lock-busy evidence\nPASS Observation contention never blocks primary recording and visibly undercounts\nPASS Admin reads and pruning do not invent request outcomes\nPASS Counters persist no IP, UA, query, slug or per-request details\nPASS Primary failure observed: invalid_ledger\nPASS Primary failure observed: byte_limit\nPASS Row capacity is distinguished from contention\nPASS Saturated aggregate does not claim another stored request\nPASS Non-file primary ledger fails closed with I/O observation\nPASS Symlink ledger is rejected without touching its target\nPASS Disabled collection, private routes, POST and unknown UA create no observation\nPASS Existing scheduled prune also physically expires observation days\nPASS Corrupt observer cannot break the primary write and is flagged unavailable\nPASS Oversized observer is not expanded or silently reset\nPASS Per-shard daily counters saturate and stay bounded\nPASS Four real workers preserve bounded lower-bound counters without claiming complete accounting\nPASS Concurrent observation shard bounded\nPASS Concurrent observation shard bounded\nPASS Concurrent observation shard bounded\nPASS Concurrent observation shard bounded\n{\"attempted\":400,\"primary_recorded\":251,\"actually_missing_in_fixture\":149,\"observed\":{\"stored\":251,\"lock_busy\":149,\"row_limit\":0,\"byte_limit\":0,\"invalid_ledger\":0,\"io_error\":0,\"unsafe_path\":0,\"hit_cap\":0},\"observation_missing_in_fixture\":0,\"exact\":false}\nPASS UI explains site-wide scope, lower bounds and no traffic/drop-rate inference\nPASS Observation display follows effective UTC time window\nPASS 23 observation checks; isolated synthetic fixture only\n"
+  },
+  "gate": {
+    "release_v1": "[PASS] created partial update regression package\n[PASS] UpdatePackageReader rejects a partial modern Core snapshot\n[PASS] release gate rejects a partial Core update package before publication\n[PASS] release gate failure explains update package parity or full snapshot violation\nRelease Gate V1 contract tests passed.\n",
+    "phase0": "Release Phase 0 gate tests PASS\n",
+    "formal_core_signing": false
+  },
+  "frozen190": {
+    "status": "PASS",
+    "unchanged": true,
+    "sha256": {
+      "daiying-cms-1.2.90-stable.zip": "cd81ba0073d41f8c8a0599541f8d0e29eb9bac9feefca061fe5c74eaf475e61d",
+      "daiying-cms-core-update-1.2.90.zip": "7086c8e734d40cef3e9756450b4c6edf6c58508213956a58660f7f0874d94903",
+      "signed-candidate-evidence.tar.gz": "96ad3a521cfb5f4c66ac89960dedd920829aa47ee5174a094763a6644ffdf0ca"
+    }
+  },
+  "raw_consumer_test_log": "test_bounded_source_check_retries_and_manual_recovery (__main__.Pipeline.test_bounded_source_check_retries_and_manual_recovery) ... ok\ntest_capacity_and_visibility_rejection_preserve_active_batch (__main__.Pipeline.test_capacity_and_visibility_rejection_preserve_active_batch) ... ok\ntest_consumer_drift_detected_and_repaired (__main__.Pipeline.test_consumer_drift_detected_and_repaired) ... ok\ntest_daily_detects_update_and_withdrawal (__main__.Pipeline.test_daily_detects_update_and_withdrawal) ... ok\ntest_independent_component_source (__main__.Pipeline.test_independent_component_source) ... ok\ntest_ineligible_events_and_production_rejected (__main__.Pipeline.test_ineligible_events_and_production_rejected) ... ok\ntest_managed_receipt_priority_crowding_and_runtime_version (__main__.Pipeline.test_managed_receipt_priority_crowding_and_runtime_version) ... ok\ntest_native_failed_import_keeps_receipt_and_answer_then_recovers (__main__.Pipeline.test_native_failed_import_keeps_receipt_and_answer_then_recovers) ... ok\ntest_native_plugin_repository_retriever_idempotence_and_rollback (__main__.Pipeline.test_native_plugin_repository_retriever_idempotence_and_rollback) ... ok\ntest_new_consumer_and_immutable_contract (__main__.Pipeline.test_new_consumer_and_immutable_contract) ... ok\ntest_no_worktree_promotion_lock_and_integrity (__main__.Pipeline.test_no_worktree_promotion_lock_and_integrity) ... ok\ntest_one_offline_source_does_not_recheck_healthy_source_and_change_hook (__main__.Pipeline.test_one_offline_source_does_not_recheck_healthy_source_and_change_hook) ... ok\ntest_other_consumer_failure_cannot_activate_customer_batch (__main__.Pipeline.test_other_consumer_failure_cannot_activate_customer_batch) ... ok\ntest_planned_public_fact_is_not_promoted (__main__.Pipeline.test_planned_public_fact_is_not_promoted) ... ok\ntest_policy_dedupe_priority_and_unknown (__main__.Pipeline.test_policy_dedupe_priority_and_unknown) ... ok\ntest_real_timer_process_and_restart (__main__.Pipeline.test_real_timer_process_and_restart) ... ok\ntest_release_cli_and_replay_dedupe (__main__.Pipeline.test_release_cli_and_replay_dedupe) ... ok\ntest_release_inbox_survives_busy_worker_and_source_outage (__main__.Pipeline.test_release_inbox_survives_busy_worker_and_source_outage) ... ok\ntest_retry_backoff_partial_ack_and_recovery (__main__.Pipeline.test_retry_backoff_partial_ack_and_recovery) ... ok\ntest_retry_limit_and_crash_reclaim (__main__.Pipeline.test_retry_limit_and_crash_reclaim) ... ok\ntest_version_change_review_gate_and_source_deletion (__main__.Pipeline.test_version_change_review_gate_and_source_deletion) ... ok\n\n----------------------------------------------------------------------\nRan 21 tests in 12.571s\n\nOK\n",
+  "evidence_files_sha256": {
+    "outputs/knowledge-customer-loop/reused-baseline-tests.log": "34e17db29dc7219ccb55d754a2b803872f3ee167935cb47577324f840281b0e5",
+    "outputs/knowledge-customer-loop/expanded-consumer-tests.log": "d6f57adfa605dd2b4a6a29d7a6225f471cb58e9bcd687b1465a9581a9b62601a",
+    "outputs/knowledge-customer-loop/final-consumer-tests.log": "c3a2f2490b28a09f744348e1d7f4d4206867809c8cf55b4316d3af5b076b3985",
+    "outputs/knowledge-customer-loop/native-http.log": "2c67ec1a9b0b5e6cdd4b79e82ae4c032e8e56afe7c3d6c831d415689bc3e149f",
+    "outputs/knowledge-customer-loop/knowledge-check.log": "a9ccbf0b443b2b0d79b3b67b2214b18139c068e1f5693b24739d1dde03b6d3bd",
+    "outputs/knowledge-customer-loop/knowledge-negative-checks.log": "64bcda0c98e8de486fa7c89a29475b011e8ac0f707fdf74f2d92aa203a458095",
+    "outputs/knowledge-customer-loop/frozen190-after.json": "1b07885ce5bb3eed88a0610b56c73805997324c333e5066fe3586c92251f9f29",
+    "outputs/crawler-observation/observation.log": "482e269cdebb0aeffdeb02a1383c2bad7a06224dcbd9371af5a993089b5a9a53",
+    "outputs/crawler-observation/statistics.log": "9ae9d916c7db7c43fe5f6bc9996eac689ea11205bb7647f7c4b4fbc6c487bd5d",
+    "outputs/crawler-observation/seo-geo.log": "4f0ffd410cdd39e754d012328591b0bfc8696057d4ab16a463b89eb9229cce8e",
+    "outputs/crawler-observation/navigation.log": "53f0f340aaaad8982d720aa3c0f6183a64964ff3cf6bd5804408e60d93652820",
+    "outputs/crawler-observation/concurrency.log": "6045956531d7d8f05727acdd5b5542a2a1690afc81be5e8aba412128ed056e60",
+    "outputs/crawler-observation/sampling.log": "57539dd0de30605f1f037a01da9f153a9b7c28dc8319dd0839fa5d1e8f81c642",
+    "outputs/crawler-observation/native-http.log": "f0407f8595ee24108722d68a4cb7c3db12e2b640b4d2de7df68625218ce02a22",
+    "outputs/crawler-observation/development-release-gate-v1.log": "260dfbc6635e8ad70122ec171cc7de9a7fcdfa09e7aaac3a2098a49d59543996",
+    "outputs/crawler-observation/development-release-phase0.log": "b076a144b434efe952c16ff22fe3894a1eb6dfe98533e3c2f881d7ba680a01b1",
+    "outputs/crawler-observation/integrity.json": "18a6dec40a56ea8ea74862d4efdccf9ee821143117a8a33f541afe398797e0f4"
+  },
+  "limits": [
+    "SQLite isolation only",
+    "No live paid-model acceptance",
+    "No production import, scheduler or deployment",
+    "Observer counters are lower bounds, no true drop rate",
+    "No physical-device or browser visual acceptance",
+    "No merge or publication"
+  ]
+}

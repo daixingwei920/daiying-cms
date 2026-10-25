@@ -329,7 +329,7 @@ class Pipeline(unittest.TestCase):
         self.engine.tick(now=101,force=True);self.engine.work()
         self.assertNotIn('article.reviewed',{r['id'] for r in self.engine.query('cms','1.2.83','安装')['matches']})
 
-    @unittest.skipUnless(PLUGIN, "set KNOWLEDGE_PLUGIN_ROOT to the locked 1.1.0 plugin for native integration")
+    @unittest.skipUnless(PLUGIN, "set KNOWLEDGE_PLUGIN_ROOT to the locked candidate plugin for native integration")
     def test_native_plugin_repository_retriever_idempotence_and_rollback(self):
         database = self.root / "site.sqlite3"
         marker = {"environment": "isolated", "site_id": "test-site"}
