@@ -1,0 +1,372 @@
+{
+  "status": "SIGNED_CANDIDATE_ACCEPTANCE_PASSED_NOT_PUBLISHED",
+  "version": "1.2.90",
+  "source_commit": "c09b5ea10f31cf0203a5cf4b73df1d628c8cf546",
+  "merged_pr": 67,
+  "owner_physical_mobile": "DEFERRED",
+  "signing": {
+    "status": "PASS",
+    "commit": "c09b5ea10f31cf0203a5cf4b73df1d628c8cf546",
+    "version": "1.2.90",
+    "installer_sha256": "cd81ba0073d41f8c8a0599541f8d0e29eb9bac9feefca061fe5c74eaf475e61d",
+    "update_sha256": "7086c8e734d40cef3e9756450b4c6edf6c58508213956a58660f7f0874d94903",
+    "file_count": 422,
+    "required_migrations": 55,
+    "minimum_core": "1.2.80",
+    "minimum_php": "8.3.0",
+    "public_key": "h5vP/I/pAXWIz4GQ8h2LryHvyP+GW0Fc8AFEUHu0jms=",
+    "public_key_fingerprint": "8ee3baa72f432a925d18df9d9f03b2a02b4702d78a56fbc937b82c3ae4303f00",
+    "native_official_signature": "PASS",
+    "formal_signed": true,
+    "published": false,
+    "production_deployed": false,
+    "private_key_exported": false
+  },
+  "formal_parity": {
+    "status": "PASS",
+    "checks": 637,
+    "min_upgrade_from": "1.2.80"
+  },
+  "updater": {
+    "status": "PASS",
+    "checks": [
+      "Actual HTTP health uses 1.2.89",
+      "Dry run does not switch version or mutate retained data",
+      "Actual HTTP health uses 1.2.90",
+      "Upgrade preserves exact config, articles, users, media, plugin files/data and synthetic payment ledger",
+      "Active Core matches every frozen PR67 manifest hash",
+      "Actual upgraded workspace GET is retired",
+      "Actual upgraded workspace POST is retired",
+      "Updated existing CLI physically prunes expired crawler rows",
+      "Existing published Chinese article remains accessible",
+      "Preserved administrator can log in",
+      "Upgraded native admin retains all 11 legacy menu links and exposes new parent field",
+      "New parent grouping saves after real version upgrade",
+      "Grouping roundtrip retains every original destination",
+      "Preserved original theme renders after new menu grouping",
+      "Successful upgrade leaves maintenance and recovery modes off",
+      "Upgraded HTTP recognizes supported UA Baiduspider-render",
+      "Upgraded HTTP recognizes supported UA Sogou-inst-spider",
+      "Upgraded HTTP recognizes supported UA 360Spider-Image",
+      "Upgraded HTTP recognizes supported UA YisouSpider",
+      "Upgraded HTTP recognizes supported UA Bytespider",
+      "Upgraded HTTP recognizes supported UA ToutiaoSpider",
+      "Upgraded HTTP recognizes supported UA PetalBot",
+      "Upgraded candidate persists seven canonical aggregates",
+      "Upgraded collector preserves query and concrete path privacy",
+      "New statistics route renders through actual upgraded Core",
+      "Actual HTTP health uses 1.2.89",
+      "Dry run does not switch version or mutate retained data",
+      "Actual HTTP health uses 1.2.89",
+      "Native automatic rollback preserves all pre-upgrade business data and config",
+      "Rollback restores exact original web/CLI/registry operational files",
+      "Rollback restores the original root Core pointer state",
+      "Rollback exits maintenance and recovery modes",
+      "Preserved administrator can log in",
+      "Actual HTTP health uses 1.2.90",
+      "Same valid signed package can retry after rollback with retained data"
+    ],
+    "source_commit": "c09b5ea10f31cf0203a5cf4b73df1d628c8cf546",
+    "source_version": "1.2.89",
+    "source_installer_commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+    "target_version": "1.2.90",
+    "database": "SQLite",
+    "failure_injection": "Synthetic SQLite trigger rejects native current_step=health after actual pointer switch; no Core code or integrity bypass",
+    "test_sites_only": true,
+    "gateway_orders": 0,
+    "refund_requests": 0,
+    "production_writes": 0,
+    "test_signed_on_update_server": false,
+    "formal_signed": true,
+    "published": false
+  },
+  "fresh_install": {
+    "status": "PASS",
+    "checks": [
+      "Native HTTP install form200",
+      "Native HTTP install POST302",
+      "Fresh installed HTTP health190 NORMAL maintenance=false",
+      "Retired member workspace stays410",
+      "All355 installed Core files match frozen manifest",
+      "Fresh default-theme homepage200"
+    ],
+    "health": {
+      "status": "ok",
+      "mode": "NORMAL",
+      "version": "1.2.90",
+      "release_id": "",
+      "maintenance": false,
+      "installed": true
+    },
+    "official_signed_installer": true,
+    "installer_sha256": "cd81ba0073d41f8c8a0599541f8d0e29eb9bac9feefca061fe5c74eaf475e61d",
+    "source_commit": "c09b5ea10f31cf0203a5cf4b73df1d628c8cf546",
+    "database": "SQLite",
+    "production_writes": 0,
+    "gateway_requests": 0,
+    "model_requests": 0
+  },
+  "downloaded_verification": {
+    "status": "PASS",
+    "checks": [
+      "Downloaded artifact hash: daiying-cms-1.2.90-stable.zip",
+      "Official pinned public-key signature: daiying-cms-1.2.90-stable.zip",
+      "Downloaded artifact hash: daiying-cms-core-update-1.2.90.zip",
+      "Official pinned public-key signature: daiying-cms-core-update-1.2.90.zip",
+      "Native UpdatePackageReader validates official190 signature and422 files",
+      "Installer manifest binds frozen main and actual archive hash"
+    ],
+    "private_key_used": false,
+    "official_public_key_fingerprint": "8ee3baa72f432a925d18df9d9f03b2a02b4702d78a56fbc937b82c3ae4303f00"
+  },
+  "runtime_parity": {
+    "status": "PASS",
+    "source": "c09b5ea10f31cf0203a5cf4b73df1d628c8cf546",
+    "prior_tested_runtime": "7ef7704e89a9c5d1ac60581aa611e8920582f0e5",
+    "paths_byte_identical": [
+      "system/core",
+      "system/core-manifest.json",
+      "system/migrations",
+      "public/assets/admin",
+      "cli.php",
+      "public/index.php"
+    ],
+    "prior_evidence": "outputs/pr67-supplement",
+    "physical_mobile": "DEFERRED_BY_OWNER"
+  },
+  "protected_before": {
+    "site_config_sha256": "118582f03b58effc5a0956ba579d6123e395544133a2a4986fc151b74774c80e",
+    "site_pointer_sha256": "10a739836533304d0be9ff5c29a764972d7053dfda576870f7eb40e83dacf9f1",
+    "site_tables": {
+      "cms_core_ai_settings": {
+        "count": 1,
+        "sha256": "9669097a6ec6eaba20733592b2ba62970360312196a274e980c89d99cf0e1041"
+      },
+      "cms_payment_provider_settings": {
+        "count": 2,
+        "sha256": "a0758ba5e2c67dbd54e078f1c0651ac8434ba95fb917c146bff065cdb884f20b"
+      },
+      "cms_payment_refunds": {
+        "count": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      }
+    },
+    "distribution_config_sha256": "3291d9ee98bb61998b61c90dcadd9bcf4639d6f2983035656c1062a037fd57c6",
+    "distribution_tables": {
+      "admin_passkeys": {
+        "count": 2,
+        "sha256": "c6725f31b746f87698af4ba7e990335f8a8a9eabdb541807821e22da95acbfd7"
+      },
+      "admins": {
+        "count": 1,
+        "sha256": "1f4746fcfdd4448d5ff71e5198bad5d9d927162f81f820928ecab9544fad2604"
+      },
+      "audit_logs": {
+        "count": 950,
+        "sha256": "ce89141ff96cef5f50c8b66f143571e980ce4030a499a92ec542673cdfe550c9"
+      },
+      "core_selection_leases": {
+        "count": 71,
+        "sha256": "62d68cc9f9eceeb2c5aac0a1ec8735da19f2be13b4475f1b590b6fd453cc12aa"
+      },
+      "download_audits": {
+        "count": 663,
+        "sha256": "5391d1f60e018b6d225858b4b3b13c8ec4d30b1ce3206d48009f5545edf3d7eb"
+      },
+      "download_tokens": {
+        "count": 74,
+        "sha256": "485f59165d362085f0fcd8b2b72e24ff44f9b7f90b85f4c93c84b37e34a9de6a"
+      },
+      "license_batches": {
+        "count": 35,
+        "sha256": "e3ab235f94b5db431ccdbc57e0ec75b83f1d258d4cb7ea1ed4b38d4afd4e0c10"
+      },
+      "licenses": {
+        "count": 1752,
+        "sha256": "b5be99c0bd8bf22323c2cd223a66ba19f75b41f673f354d2fe40f17d559eccd5"
+      },
+      "products": {
+        "count": 37,
+        "sha256": "5195f62ea321a97bfd9a2603dc653a5ae3d8c54b838705044bbaa8c879992bd5"
+      },
+      "rate_limits": {
+        "count": 4,
+        "sha256": "d0327d7604740ff13bd96908f1525414e278128857bde7e825f13af98a019f07"
+      },
+      "releases": {
+        "count": 261,
+        "sha256": "7c42aa9068b6615d4d32aebc4f4007643352e579640e3a76e1a31ca11f40a8e2"
+      },
+      "review_submissions": {
+        "count": 33,
+        "sha256": "5b5f61388ba9465aa2e4842567887b6b3600ae9786a451fbf4536fbb28513d25"
+      }
+    }
+  },
+  "protected_after": {
+    "site_config_sha256": "118582f03b58effc5a0956ba579d6123e395544133a2a4986fc151b74774c80e",
+    "site_pointer_sha256": "10a739836533304d0be9ff5c29a764972d7053dfda576870f7eb40e83dacf9f1",
+    "site_tables": {
+      "cms_core_ai_settings": {
+        "count": 1,
+        "sha256": "9669097a6ec6eaba20733592b2ba62970360312196a274e980c89d99cf0e1041"
+      },
+      "cms_payment_provider_settings": {
+        "count": 2,
+        "sha256": "a0758ba5e2c67dbd54e078f1c0651ac8434ba95fb917c146bff065cdb884f20b"
+      },
+      "cms_payment_refunds": {
+        "count": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      }
+    },
+    "distribution_config_sha256": "3291d9ee98bb61998b61c90dcadd9bcf4639d6f2983035656c1062a037fd57c6",
+    "distribution_tables": {
+      "admin_passkeys": {
+        "count": 2,
+        "sha256": "c6725f31b746f87698af4ba7e990335f8a8a9eabdb541807821e22da95acbfd7"
+      },
+      "admins": {
+        "count": 1,
+        "sha256": "1f4746fcfdd4448d5ff71e5198bad5d9d927162f81f820928ecab9544fad2604"
+      },
+      "audit_logs": {
+        "count": 950,
+        "sha256": "ce89141ff96cef5f50c8b66f143571e980ce4030a499a92ec542673cdfe550c9"
+      },
+      "core_selection_leases": {
+        "count": 71,
+        "sha256": "62d68cc9f9eceeb2c5aac0a1ec8735da19f2be13b4475f1b590b6fd453cc12aa"
+      },
+      "download_audits": {
+        "count": 663,
+        "sha256": "5391d1f60e018b6d225858b4b3b13c8ec4d30b1ce3206d48009f5545edf3d7eb"
+      },
+      "download_tokens": {
+        "count": 74,
+        "sha256": "485f59165d362085f0fcd8b2b72e24ff44f9b7f90b85f4c93c84b37e34a9de6a"
+      },
+      "license_batches": {
+        "count": 35,
+        "sha256": "e3ab235f94b5db431ccdbc57e0ec75b83f1d258d4cb7ea1ed4b38d4afd4e0c10"
+      },
+      "licenses": {
+        "count": 1752,
+        "sha256": "b5be99c0bd8bf22323c2cd223a66ba19f75b41f673f354d2fe40f17d559eccd5"
+      },
+      "products": {
+        "count": 37,
+        "sha256": "5195f62ea321a97bfd9a2603dc653a5ae3d8c54b838705044bbaa8c879992bd5"
+      },
+      "rate_limits": {
+        "count": 4,
+        "sha256": "d0327d7604740ff13bd96908f1525414e278128857bde7e825f13af98a019f07"
+      },
+      "releases": {
+        "count": 261,
+        "sha256": "7c42aa9068b6615d4d32aebc4f4007643352e579640e3a76e1a31ca11f40a8e2"
+      },
+      "review_submissions": {
+        "count": 33,
+        "sha256": "5b5f61388ba9465aa2e4842567887b6b3600ae9786a451fbf4536fbb28513d25"
+      }
+    }
+  },
+  "cleanup": {
+    "status": "PASS",
+    "source_commit": "c09b5ea10f31cf0203a5cf4b73df1d628c8cf546",
+    "source_clean": true,
+    "frozen_artifacts": [
+      {
+        "name": "daiying-cms-core-update-1.2.90.zip.sha256",
+        "mode": "0o444",
+        "sha256": "a50fadc063b0bb9488e995cd74d950c5568ca3350bac269479ce0de4685a7d5b"
+      },
+      {
+        "name": "daiying-cms-1.2.90-stable.zip.signature.json",
+        "mode": "0o444",
+        "sha256": "157749ca4d9592d4834b47af5cc0c6a6cbb106e0cf43696265ce693d05283121"
+      },
+      {
+        "name": "daiying-cms-core-update-1.2.90.zip",
+        "mode": "0o444",
+        "sha256": "7086c8e734d40cef3e9756450b4c6edf6c58508213956a58660f7f0874d94903"
+      },
+      {
+        "name": "daiying-cms-1.2.90-stable.zip.sha256",
+        "mode": "0o444",
+        "sha256": "fb21e029eb5513404f80c2b7f455083d2352869ce58e7bea33a201060fa5deb5"
+      },
+      {
+        "name": "daiying-cms-1.2.90-stable.zip",
+        "mode": "0o444",
+        "sha256": "cd81ba0073d41f8c8a0599541f8d0e29eb9bac9feefca061fe5c74eaf475e61d"
+      },
+      {
+        "name": "daiying-cms-1.2.90-stable.manifest.json",
+        "mode": "0o444",
+        "sha256": "5a99cd3623b8636ff12800d1f43da233d904562ffcd1166f4c79e44839947a31"
+      },
+      {
+        "name": "daiying-cms-core-update-1.2.90.zip.signature.json",
+        "mode": "0o444",
+        "sha256": "2f0a20d48d9fbea06cca96b3809758cea4548702da8af6a605b360c8b81832d2"
+      }
+    ],
+    "test_ports_closed": {
+      "19408": true,
+      "19409": true,
+      "19410": true
+    },
+    "private_distribution_copies_removed": true,
+    "official_private_key_exported": false,
+    "new_official_key_generated": false,
+    "production_and_distribution_unchanged": true,
+    "published": false,
+    "production_deployed": false
+  },
+  "public_state_after": {
+    "checked_at": "2026-10-25T03:40:08.244705+00:00",
+    "publication_authorized": false,
+    "production_upgrade_authorized": false,
+    "production_health": {
+      "url": "https://www.daiyingcms.com/health",
+      "http": 200,
+      "version": "1.2.89",
+      "status": "ok",
+      "mode": "NORMAL",
+      "maintenance": false,
+      "package_sha256": null
+    },
+    "official_latest": {
+      "url": "https://updates.daiyingcms.com/api/v1/products/daiying.cms/latest?channel=stable&current_version=1.2.88&site_id=core190-preparation-readonly&php_version=8.5.9",
+      "http": 200,
+      "version": "1.2.89",
+      "status": "Published",
+      "mode": null,
+      "maintenance": null,
+      "package_sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1"
+    }
+  },
+  "github_latest_after": {
+    "html_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.89",
+    "tag_name": "v1.2.89",
+    "target_commitish": "3dcc700174abd1b9a7d2959a09881f247026de1c"
+  },
+  "archive": {
+    "status": "PASS",
+    "files": 42,
+    "sha256": "96ad3a521cfb5f4c66ac89960dedd920829aa47ee5174a094763a6644ffdf0ca",
+    "version": "1.2.90",
+    "source_commit": "c09b5ea10f31cf0203a5cf4b73df1d628c8cf546",
+    "private_keys_included": false,
+    "databases_included": false,
+    "published": false
+  },
+  "publication_authorized": false,
+  "production_deployment_authorized": false,
+  "published": false,
+  "production_deployed": false,
+  "knowledge_consumers_imported": false,
+  "knowledge_index_rebuilt": false
+}

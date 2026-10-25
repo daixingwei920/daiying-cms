@@ -4,6 +4,12 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Completed Core1.2.90 signed candidate (not published)
+
+- PR67 is merged at exact main `c09b5ea10f31cf0203a5cf4b73df1d628c8cf546`. Formal preflight/build/official signing,637-check signed parity,35-check native189→190 update/rollback/retry and6-check fresh HTTP install passed. See `docs/CORE_1.2.90_PREPARATION_REPORT.md`.
+- Frozen private artifacts: `/root/daiying-release190-preparation-20261024-F0Gk9Q`; preserve their hashes/read-only status. Reporting commits must not rebuild them or move release refs. Published/production baseline remains1.2.89, with protected state unchanged.
+- Stop after the report. No1.2.90 tag/GitHub Release/catalog publication or production change is authorized. Physical-device acceptance is deferred by Owner, not PASS. Documentation is submitted separately so main stays at the frozen signing source.
+
 ## Owner-authorized PR67 merge and Core1.2.90 signed preparation (2026-10-24)
 
 - Owner explicitly approves merging PR67 and preparing the next version with formal signing and Release Gate, while deferring physical mobile acceptance. This supersedes earlier PR67 Draft/no-merge/no-signing holds only for this preparation.
