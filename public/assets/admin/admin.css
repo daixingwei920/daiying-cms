@@ -730,6 +730,12 @@ body {
   gap: 12px;
 }
 
+.crawler-table-wrap { max-width: 100%; overflow-x: auto; }
+.admin-main .crawler-stat-table { display: table; width: 100%; min-width: 540px; }
+.crawler-stat-table code { overflow-wrap: anywhere; }
+.crawler-trend-track { display: block; min-width: 100px; height: 10px; background: #e8eef5; border-radius: 5px; overflow: hidden; }
+.crawler-trend-track > span { display: block; height: 100%; background: var(--admin-primary, #2563eb); border-radius: inherit; }
+
 .admin-media-grid,
 .admin-extension-grid,
 .admin-theme-grid {

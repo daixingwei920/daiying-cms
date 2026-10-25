@@ -20,11 +20,7 @@ final class CrawlerLog
         if (!in_array($request->method, ['GET', 'HEAD'], true)) { return; }
         $route = $this->route($request->path);
         if ($route === null) { return; }
-        $agent = null;
-        $ua = substr((string) ($request->server['HTTP_USER_AGENT'] ?? ''), 0, 512);
-        foreach (['OAI-SearchBot', 'GPTBot', 'ChatGPT-User', 'Claude-SearchBot', 'ClaudeBot', 'Claude-User', 'Googlebot', 'bingbot', 'Baiduspider'] as $token) {
-            if (preg_match('/(?<![a-z0-9_-])' . preg_quote($token, '/') . '(?![a-z0-9_-])/i', $ua)) { $agent = $token; break; }
-        }
+        $agent = CrawlerRegistry::identify((string) ($request->server['HTTP_USER_AGENT'] ?? ''));
         if ($agent === null) { return; }
         $add = (bool) $this->settings->get('seo.crawler_log_enabled', false);
         $this->update($add ? ['day' => gmdate('Y-m-d'), 'agent' => $agent, 'route' => $route,

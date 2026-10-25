@@ -1,6 +1,12 @@
 # Changelog
 
-## 1.2.89 (signed candidate preparation; unpublished)
+## 1.2.90 (signed candidate preparation; unpublished)
+
+- Extend finite domestic crawler UA aliases and add filtered collected-sample statistics, UTC trends, rankings and pagination. UA claims remain unverified; collected samples are not complete visits or indexing evidence.
+- Preserve bounded private nonblocking aggregation, existing routes/capabilities, public APIs, published migrations and the1.2.80 upgrade floor.
+- Owner authorizes PR67 merge, formal server signing and Release Gate preparation; physical-device acceptance is deferred. No tag/publication/catalog update/production deployment.
+
+## 1.2.89 (published 2026-10-24)
 
 - Add optional SEO/GEO settings: safe TDK templates, actual public Schema/plugin metadata output, bounded public llms.txt, separate AI search/training robots policies and privacy-limited crawler aggregates. Existing settings and theme/plugin/REST signatures remain. No sitemap fix or database migration.
 - Retire member collaboration routes, runtime services and dedicated capabilities; preserve normal membership, administrator/AI services, frozen migrations and historical data.

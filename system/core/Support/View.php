@@ -91,6 +91,7 @@ final class View
             ],
             'SEO' => [
                 ['/admin/seo/keywords', '关键词中心', 'chart'],
+                ['/admin/seo/crawlers', '蜘蛛记录与统计', 'activity'],
                 ['/admin/seo/search-engines', '搜索引擎连接', 'settings'],
                 ['/admin/seo/historical-backfill', '历史文章 SEO 补全', 'content'],
                 ['/admin/seo/content-quality', '历史内容优化', 'chart'],
@@ -298,7 +299,7 @@ final class View
 
     private static function assetVersion(): string
     {
-        return '1.2.45-admin-nav-groups-20260910';
+        return '20261024-crawler-statistics';
     }
 
     private static function adminNavGroupScript(): string

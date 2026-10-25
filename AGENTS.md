@@ -4,12 +4,31 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized PR67 merge and Core1.2.90 signed preparation (2026-10-24)
+
+- Owner explicitly approves merging PR67 and preparing the next version with formal signing and Release Gate, while deferring physical mobile acceptance. This supersedes earlier PR67 Draft/no-merge/no-signing holds only for this preparation.
+- Next candidate is1.2.90; published/production baseline remains1.2.89. Freeze a clean exact origin/main commit after normal PR merge. Reuse the existing official signer on the update server; no private-key export, trust-root changes or integrity bypass.
+- Preserve published migrations, minimum upgrade floor1.2.80, prices/licenses and production data/settings. Reuse the actual runtime acceptance of7ef7704 where byte-identical; validate new formally signed artifacts and real isolated native upgrade/rollback.
+- Stop after the signed-candidate acceptance report. No release tag, GitHub Release, public update/market catalog writes or production deployment/upgrade. Physical mobile remains DEFERRED_BY_OWNER, not PASS.
+
+## PR67 supplemental acceptance authorization (2026-10-24)
+
+- Owner authorizes conflict resolution, isolated update/rollback acceptance, read-only domestic crawler investigation, sampling analysis and PR67 evidence/knowledge updates. Preserve Draft; no PR merge, formal publication, production deployment or destructive migration.
+- Real-device acceptance is BLOCKED: Owner chose to defer until a physical-device path exists. Responsive browser evidence must remain separately labelled.
+- Formal candidate signing is requested, but exact-origin/main and unused-version gates remain mandatory. PR67 is unmerged and still declares the published1.2.89 baseline; do not bypass these gates or overwrite frozen artifacts. Test-only server signing/isolated updater evidence does not satisfy formal signing.
+
 ## Current verified baseline and approved website branding (2026-10-24)
 
 - Published Core: `1.2.89`, frozen tag `v1.2.89`, commit `3dcc700174abd1b9a7d2959a09881f247026de1c`. Production `/health` independently confirms Core1.2.89 / NORMAL / maintenance=false. Earlier production1.2.88 and older baseline notes below are historical.
 - Owner approved “没问题就更新官网” after reviewing the homepage/definition-page candidate. Official site theme `daiying_official_clean`1.0.9 is deployed from frozen runtime `28c2a940477f89cfd7e193e27f2aa1f44641b4bc`: five theme files, seven public brand settings and one native page `/what-is-daiying-cms` (ID92). This did not upgrade/downgrade Core or rebuild the signed1.2.89 packages.
 - Private server backup: `/root/daiying-brand-update-20261024-X0AVaZ/backup`, consistent SQLite integrity=ok. Public HTTP28 checks and actual desktop/390px simulated-mobile browser flows passed; protected configuration/data and original navigation checks passed. See `docs/brand-website-publication.md`.
 - Core documentation checkout is `work/core-brand-presentation`; official theme source is the independent `work/official-theme-brand-presentation`. Keep theme code outside Core packages. Website application does not mean market publication, search indexing or AI citation acceptance.
+
+## Owner-authorized domestic crawler statistics (2026-10-24)
+
+- Owner requests domestic crawler recognition and the statistics interface. Clean feature branch `feat/domestic-crawler-statistics`, base published1.2.89 / `3dcc700174abd1b9a7d2959a09881f247026de1c`. Earlier1.2.88 baseline notes below are historical.
+- Scope: finite UA aliases, local bounded aggregate statistics, filters/trends/ranking/pagination and the existing admin entry. Preserve privacy/retention/caps, admin capability checks, public interfaces and all published migrations. UA identification is never source verification or IP geography.
+- Development, isolated testing and PR review only. No merge, next-version preparation, formal signing/publication or production change. Release Gate V1 contract key generation runs only on the already-authorized update server. See `docs/domestic-crawlers.md`.
 
 ## Owner-authorized 1.2.89 merge and signing preparation (2026-10-24)
 

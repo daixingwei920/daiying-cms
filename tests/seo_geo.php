@@ -146,6 +146,10 @@ $frontAuth->loginUser(['id' => $member, 'email' => 'member@test.invalid', 'displ
 $check($admin->seoCrawlers()->status() === 302, 'Normal member statistics denied');
 $adminAuth->attempt('owner@test.invalid', 'synthetic-password', '127.0.0.1');
 $check($admin->seoCrawlers()->status() === 200 && str_contains($admin->seoCrawlers()->body(), '来源未验证'), 'Founder can view truthful crawler statistics');
+$filtered = $app->handle(new Request('GET', '/admin/seo/crawlers', ['platform' => 'domestic', 'agent' => '360Spider', 'status' => '4']));
+$check($filtered->status() === 200 && str_contains($filtered->body(), '360搜索') && str_contains($filtered->body(), 'value="domestic" selected'), 'Native admin route receives domestic crawler query filters');
+$invalidFilter = $app->handle(new Request('GET', '/admin/seo/crawlers', ['agent' => ['nested' => 'bad']]));
+$check($invalidFilter->status() === 400 && ($invalidFilter->headers()['Cache-Control'] ?? '') === 'private, no-store', 'Malformed native statistics query fails privately without a server error');
 $_SESSION['admin_user']['capabilities'] = ['content.create'];
 $check($admin->siteSettings()->status() === 403 && $admin->seoCrawlers()->status() === 403, 'Limited administrator settings and statistics denied');
 $check($admin->siteSettingsSave(new Request('POST', '/admin/settings'))->status() === 403, 'Limited administrator cannot save settings');

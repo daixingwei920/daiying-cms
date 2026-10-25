@@ -29,6 +29,8 @@ This index collects the public-facing documentation currently available in the G
 - Site-level mail delivery and notification foundations are available through [Mail Infrastructure](mail-infrastructure.md).
 - Scheduled publishing can be run with `php scripts/publish_scheduled_content.php`.
 
+- [国内蜘蛛识别与统计界面（未发布候选）](domestic-crawlers.md)
+
 ## Developer Guide
 
 - [Developers](developers.md)
