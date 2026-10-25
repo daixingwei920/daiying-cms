@@ -46,6 +46,7 @@ try{
  $sub=(new CrawlerStatistics(Settings::fromArray(['site'=>['base_path'=>'/cms'],'seo'=>['crawler_retention_days'=>7]])))->render($many,$request());
  ck(str_contains($sub,'action="/cms/admin/seo/crawlers"')&&str_contains($sub,'href="/cms/admin/seo/crawlers?')&&str_contains($sub,'href="/cms/admin/settings"')&&!str_contains($sub,'/cms/cms/'),'Subdirectory filters, settings, reset and pagination URLs remain scoped');
  ck(str_contains($html,'UA 自称，来源未验证')&&str_contains($html,'不是请求所在地')&&str_contains($html,'并发可能丢样'),'Interface preserves source, geography and sampling limitations');
+ ck(str_contains($html,'已采集请求数')&&str_contains($html,'丢样数量未知')&&str_contains($html,'不能推算完整访问总量、采集率'),'UI labels distinguish collected samples from complete traffic and unknown loss');
  $off=new CrawlerStatistics(Settings::fromArray([]));$empty=$off->render([],$request());ck(str_contains($empty,'采集已关闭')&&str_contains($empty,'暂无记录'),'Disabled collection and empty data have actionable native states');
  ck(!str_contains($empty,'IP地址')&&!str_contains($html,'来源已验证'),'No fabricated source verification or IP detail');
  echo 'Checks: '.$checks.'; network/model requests: 0; production writes: 0',PHP_EOL;

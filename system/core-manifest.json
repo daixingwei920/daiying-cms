@@ -302,7 +302,7 @@
   "Security/SessionManager.php": "a06fda4403e2ba37ac0fe61c255c96b2aa2a79622f5b390bf98cf01e76b22c55",
   "Seo/CrawlerLog.php": "cc5d549aaedef59f52653bce437367547538be4d4f0ade6a21ae8ee6ec685804",
   "Seo/CrawlerRegistry.php": "842b1247fc07319d9868c40e788e6ed71e726b57d38582a91e8120ebe7001286",
-  "Seo/CrawlerStatistics.php": "a5b03d3150cf51f241a5abb79a67805937a65f0f2cff5fa555f1a1d7c8ae5c66",
+  "Seo/CrawlerStatistics.php": "49c7ec33fce33f25590ebd99575b2f0bbf47d101474d68e2ca50ceaccc7338e2",
   "Seo/Historical/HistoricalArticleSeoBackfillService.php": "2bff00498bf8d85452fa45eff2f65d0851ffc73d5b2715b9baa3b42e22714439",
   "Seo/Keyword/SeoLifecycleAggregator.php": "d6c1a35a91a47a595b4f95b2f539459e1d57a7dfa796d681ff17482147bbb884",
   "Seo/SearchEngine/OfficialBaiduSubmitBridge.php": "314d85b9e2f424de882cf775019b30f2726e2adca98fb8a7b2b947763117dcfb",
