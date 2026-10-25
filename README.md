@@ -1,10 +1,14 @@
-# Daiying CMS
+# 戴影CMS（Daiying CMS）
 
 [简体中文](README.zh-CN.md)
 
-A modular PHP CMS for building content websites, media workflows, commerce foundations, and in-development external distribution workflows.
+**Official website: <https://www.daiyingcms.com/>**
 
-Daiying CMS Core is a self-hosted PHP CMS with themes, plugins, media management, commerce foundations, signed online updates, global AI settings, Passkey-capable admin login, and recovery tooling. This source tree targets **1.2.86 stable**; the published download is available through GitHub Releases.
+Daiying CMS (戴影CMS) is a self-hosted PHP content management system for personal publishers, developers, and teams building content websites. Publish articles and pages, manage media, customize the design with themes, and extend the site with plugins.
+
+“戴影CMS”, “戴影 CMS”, and “Daiying CMS” refer to this project. Core also provides signed online updates, global AI settings, Passkey-capable admin login, and recovery tooling. Commerce foundations and in-development external distribution workflows have their own status and configuration requirements below.
+
+Published baseline: **1.2.89 stable**. Download the current official package from GitHub Releases; this documentation update does not rebuild the frozen release archives.
 
 ![Daiying CMS admin dashboard](.github/assets/screenshots/admin-dashboard.png)
 
@@ -46,8 +50,8 @@ Download the latest stable package from [GitHub Releases](https://github.com/dai
 
 Release artifacts for this source:
 
-- Tag: `v1.2.86`
-- Package: `daiying-cms-1.2.86-stable.zip`
+- Tag: `v1.2.89`
+- Package: `daiying-cms-1.2.89-stable.zip`
 - SHA-256: see the `.sha256` sidecar attached to the release.
 
 ### 3. Install
