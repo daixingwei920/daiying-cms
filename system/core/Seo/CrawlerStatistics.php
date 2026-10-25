@@ -110,4 +110,30 @@ final class CrawlerStatistics
         foreach ([$s['page'] - 1 => '上一页', $s['page'] + 1 => '下一页'] as $page => $label) { if ($page >= 1 && $page <= $s['pages']) { $html .= '<a href="' . $url('/admin/seo/crawlers?' . http_build_query(array_replace($f, ['page' => (string) $page]))) . '">' . $label . '</a>'; } }
         return $html . '</nav><p class="muted">国内平台标记包括百度、搜狗、360、神马、字节 Bytespider、头条、Petal。分类来自公开 UA 规则，不验证运营方或用途，不表示 AI 搜索/训练策略已覆盖这些蜘蛛。</p>';
     }
+
+    /** Site-wide best-effort counters: only the time window applies, never UA/status filters. */
+    public function renderObservation(array $observation, Request $request): string
+    {
+        $range = $this->snapshot([], $request);
+        $counts = array_fill_keys(CrawlerObservation::REASONS, 0);
+        foreach (($observation['days'] ?? []) as $day => $values) {
+            if (!isset($range['daily'][$day]) || !is_array($values)) { continue; }
+            foreach ($counts as $reason => $unused) {
+                $n = $values[$reason] ?? 0;
+                if (is_int($n) && $n >= 0) { $counts[$reason] += $n; }
+            }
+        }
+        $stored = $counts['stored']; unset($counts['stored']);
+        $unavailable = max(0, (int) ($observation['unavailable_shards'] ?? 0));
+        $html = '<h2>全站采集丢样观测（UTC）</h2><p>仅跟随上方时间窗口，不受平台、蜘蛛或 HTTP 状态筛选影响；不能与上方筛选结果相减或直接比较。只观测采集开启时、已识别 UA 对受支持公开路由的 GET / HEAD 尝试。</p>';
+        $html .= '<p>观测本身也可能因争锁、写入失败或计数上限而漏记，以下均为观测下界。不能计算真实访问量、完整丢样数或丢样率；来源仍未验证。旧记录不会补算。</p><div class="admin-dashboard-grid">';
+        foreach (['观测到的写入成功' => $stored, '观测到的未记入次数' => array_sum($counts), '当前不可读取的观测分片' => $unavailable] as $label => $number) {
+            $html .= '<section class="card admin-dashboard-card"><span>' . $label . '</span><strong>' . number_format($number) . '</strong></section>';
+        }
+        $html .= '</div><p class="muted">固定8个分片，每片最多8 KiB、最多30天、每原因每日最多10,000,000次；与采集日志使用同一保留天数。不可读分片是当前状态，不是丢失请求数。</p><div class="crawler-table-wrap"><table class="crawler-stat-table"><thead><tr><th>未记入原因</th><th>观测次数下界</th></tr></thead><tbody>';
+        foreach (['lock_busy' => '日志锁忙（非阻塞跳过）', 'row_limit' => '聚合条数上限', 'byte_limit' => '日志字节上限', 'invalid_ledger' => '日志结构无效', 'io_error' => '日志读写失败', 'unsafe_path' => '不安全的符号链接路径', 'hit_cap' => '聚合计数上限'] as $reason => $label) {
+            $html .= '<tr><td>' . $label . '</td><td>' . number_format($counts[$reason]) . '</td></tr>';
+        }
+        return $html . '</tbody></table></div>';
+    }
 }
