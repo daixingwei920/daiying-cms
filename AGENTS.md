@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized PR67 merge and Core1.2.90 signed preparation (2026-10-24)
+
+- Owner explicitly approves merging PR67 and preparing the next version with formal signing and Release Gate, while deferring physical mobile acceptance. This supersedes earlier PR67 Draft/no-merge/no-signing holds only for this preparation.
+- Next candidate is1.2.90; published/production baseline remains1.2.89. Freeze a clean exact origin/main commit after normal PR merge. Reuse the existing official signer on the update server; no private-key export, trust-root changes or integrity bypass.
+- Preserve published migrations, minimum upgrade floor1.2.80, prices/licenses and production data/settings. Reuse the actual runtime acceptance of7ef7704 where byte-identical; validate new formally signed artifacts and real isolated native upgrade/rollback.
+- Stop after the signed-candidate acceptance report. No release tag, GitHub Release, public update/market catalog writes or production deployment/upgrade. Physical mobile remains DEFERRED_BY_OWNER, not PASS.
+
 ## PR67 supplemental acceptance authorization (2026-10-24)
 
 - Owner authorizes conflict resolution, isolated update/rollback acceptance, read-only domestic crawler investigation, sampling analysis and PR67 evidence/knowledge updates. Preserve Draft; no PR merge, formal publication, production deployment or destructive migration.
