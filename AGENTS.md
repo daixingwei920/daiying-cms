@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized isolated knowledge/customer loop and crawler loss observation (2026-10-25)
+
+- Owner requests knowledge-to-customer closure first, then crawler loss observation, with isolated development/tests and acceptance delivery. No merge, release, production deployment or mutation of frozen1.2.90 artifacts; do not change version or signing trust.
+- Reuse unmerged PR41 tooling by immutable source7eb324e, independently locked official customer-service1.1.0 snapshot and native Core AI services. Plugin changes remain in an independent checkout, never Core payloads.
+- Accept only reviewed USER-FACING knowledge for actual published releases;1.2.90 remains unpublished. Separate importer/HTTP retrieval/model-protocol fixture evidence from live paid-provider or production acceptance.
+- Preserve bounded nonblocking crawler collection and privacy; loss-observation limits must remain visible and cannot imply exact traffic or exact drop rates.
+
 ## Owner-authorized PR67 merge and Core1.2.90 signed preparation (2026-10-24)
 
 - Owner explicitly approves merging PR67 and preparing the next version with formal signing and Release Gate, while deferring physical mobile acceptance. This supersedes earlier PR67 Draft/no-merge/no-signing holds only for this preparation.

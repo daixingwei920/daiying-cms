@@ -1,0 +1,138 @@
+<?php
+
+declare(strict_types=1);
+
+// Standalone isolated adapter. Reuse the installed plugin repository; no Core
+// schema changes, provider calls, migration rewrites or production bootstrap.
+try {
+    $verify = ($argv[1] ?? '') === '--verify';
+    $parameters = array_slice($argv, $verify ? 2 : 1);
+    if (!in_array(count($parameters), [3, 4], true)) {
+        throw new RuntimeException('Expected isolated database, plugin root and site id.');
+    }
+    [$database, $pluginRoot, $siteId] = $parameters;
+    $runtimeVersion = $parameters[3] ?? '';
+    $marker = json_decode((string) file_get_contents($database . '.isolated.json'), true, 512, JSON_THROW_ON_ERROR);
+    if (!is_file($database) || $marker !== ['environment' => 'isolated', 'site_id' => $siteId]) {
+        throw new RuntimeException('Isolated database marker mismatch.');
+    }
+    $lock = json_decode((string) file_get_contents(__DIR__ . '/reuse-lock.json'), true, 512, JSON_THROW_ON_ERROR);
+    foreach ($lock['sha256'] as $relative => $hash) {
+        if (!hash_equals($hash, (string) hash_file('sha256', $pluginRoot . '/' . $relative))) {
+            throw new RuntimeException('Plugin baseline mismatch.');
+        }
+    }
+    require_once $pluginRoot . '/src/Repository/AiCustomerServiceRepository.php';
+    require_once $pluginRoot . '/src/Support/SafeText.php';
+    require_once $pluginRoot . '/src/Service/KnowledgeRetriever.php';
+    $raw = stream_get_contents(STDIN);
+    $snapshot = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+    if (($snapshot['environment'] ?? '') !== 'isolated' || !preg_match('/^[A-Za-z0-9._-]{1,64}$/', $snapshot['source'] ?? '')) {
+        throw new RuntimeException('Invalid isolated snapshot.');
+    }
+    if (!is_array($snapshot['records'] ?? null) || count($snapshot['records']) > 256
+        || !preg_match('/^[0-9]+\.[0-9]+\.[0-9]+$/D', $snapshot['version'] ?? '')
+        || !in_array($snapshot['tag'] ?? '', [$snapshot['version'], 'v' . $snapshot['version']], true)
+        || !preg_match('/^[a-f0-9]{40}$/D', $snapshot['commit'] ?? '')
+        || !preg_match('/^[a-f0-9]{40}$/D', $snapshot['knowledge_commit'] ?? '')
+        || ($snapshot['source'] === 'cms' && $runtimeVersion !== '' && $snapshot['version'] !== $runtimeVersion)) {
+        throw new RuntimeException('Published batch/version binding rejected.');
+    }
+    $snapshotHash = hash('sha256', $raw);
+    $hashes = [];
+    $pdo = new PDO('sqlite:' . $database, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]);
+    $pdo->exec('PRAGMA busy_timeout = 3000');
+    $repo = new Official\AiCustomerService\Repository\AiCustomerServiceRepository($pdo);
+    if ($repo->siteId() !== $siteId) {
+        throw new RuntimeException('Site scope mismatch.');
+    }
+    $pdo->beginTransaction();
+    $stmt = $pdo->prepare("SELECT * FROM ai_customer_service_knowledge_items WHERE site_id=:site AND source_type='knowledge_sync'");
+    $stmt->execute([':site' => $siteId]);
+    $existing = [];
+    foreach ($stmt->fetchAll() as $row) {
+        $meta = json_decode((string) ($row['metadata_json'] ?? '{}'), true, 512, JSON_THROW_ON_ERROR);
+        if (($meta['managed_source'] ?? '') === $snapshot['source']) {
+            if (isset($existing[$row['source_id']])) {
+                throw new RuntimeException('Existing managed logical ids are not unique.');
+            }
+            $existing[$row['source_id']] = $row;
+        }
+    }
+    $seen = [];
+    $counts = ['added' => 0, 'updated' => 0, 'unchanged' => 0, 'withdrawn' => 0];
+    foreach ($snapshot['records'] as $record) {
+        if (($record['visibility'] ?? '') !== 'USER-FACING' || !in_array($record['priority'] ?? '', ['P0', 'P1', 'P2'], true)) {
+            throw new RuntimeException('Non-public record rejected.');
+        }
+        if (trim($record['title']) === '' || trim($record['content']) === '' || mb_strlen($record['title']) > 255 || mb_strlen($record['topic']) > 191) {
+            throw new RuntimeException('Invalid knowledge text.');
+        }
+        $sourceId = hash('sha256', $snapshot['source'] . ':' . $record['id']);
+        if (isset($seen[$sourceId])) {
+            throw new RuntimeException('Duplicate logical id.');
+        }
+        $seen[$sourceId] = true;
+        $old = $existing[$sourceId] ?? null;
+        $metadata = [
+            'managed_source' => $snapshot['source'],
+            'knowledge_id' => $record['id'],
+            'content_hash' => $record['content_hash'],
+            'version' => $snapshot['version'],
+            'source_commit' => $snapshot['commit'],
+            'knowledge_commit' => $snapshot['knowledge_commit'],
+            'visibility' => 'USER-FACING',
+            'priority' => $record['priority'],
+            'source_path' => $record['source_path'],
+            'url' => $record['url'] ?? '',
+            'evidence' => $record['evidence'] ?? [],
+            'publication_state' => 'published',
+            'snapshot_sha256' => $snapshotHash,
+            'row_hash' => Official\AiCustomerService\Service\KnowledgeSyncReader::rowHash($record['title'], $record['content'], $record['topic'], $record['priority']),
+        ];
+        $trust = ['P0' => 'official', 'P1' => 'trusted', 'P2' => 'normal'][$record['priority']];
+        $hashes[$sourceId] = $metadata['row_hash'];
+        $oldMetadata = $old ? json_decode((string) $old['metadata_json'], true, 512, JSON_THROW_ON_ERROR) : [];
+        if ($old && (int) $old['enabled'] === 1 && $oldMetadata === $metadata
+            && $old['title'] === $record['title'] && $old['content'] === $record['content']
+            && $old['topic'] === $record['topic'] && $old['trust_level'] === $trust) {
+            $counts['unchanged']++;
+            continue;
+        }
+        if ($verify) {
+            throw new RuntimeException('Consumer knowledge drift.');
+        }
+        $repo->saveKnowledgeItem('knowledge_sync', $sourceId, $record['title'], $record['content'],
+            $record['priority'], $record['topic'], $trust, true, $metadata, $old ? (int) $old['id'] : null);
+        $counts[$old ? 'updated' : 'added']++;
+    }
+    foreach ($existing as $sourceId => $old) {
+        if (!isset($seen[$sourceId]) && (int) $old['enabled'] === 1) {
+            if ($verify) {
+                throw new RuntimeException('Unwithdrawn consumer knowledge.');
+            }
+            $repo->setKnowledgeEnabled((int) $old['id'], false);
+            $counts['withdrawn']++;
+        }
+    }
+    $receipt = ['state'=>'active','publication_state'=>'published','source'=>$snapshot['source'], 'site_id'=>$siteId,
+        'version'=>$snapshot['version'],'source_commit'=>$snapshot['commit'],'knowledge_commit'=>$snapshot['knowledge_commit'],
+        'snapshot_sha256'=>$snapshotHash,'record_hashes'=>$hashes];
+    if ($verify) {
+        if ($repo->knowledgeSyncReceipt($snapshot['source']) !== $receipt || !$repo->managedKnowledgeMode()) { throw new RuntimeException('Receipt drift.'); }
+    } else {
+        $repo->saveKnowledgeSyncReceipt($snapshot['source'], $receipt);
+    }
+    $eligible = array_filter((new Official\AiCustomerService\Service\KnowledgeSyncReader($repo, $runtimeVersion))->rows(),
+        static fn(array $row):bool=>($row['_sync']['managed_source']??'')===$snapshot['source']);
+    if (count($eligible) !== count($seen)) { throw new RuntimeException('Customer retrieval acknowledgement failed.'); }
+    $pdo->commit();
+    echo json_encode(['site_id' => $siteId, 'sha256' => hash('sha256', $raw), 'records' => count($seen), 'counts' => $counts, 'version'=>$snapshot['version'], 'knowledge_commit'=>$snapshot['knowledge_commit'], 'retrieval_ready'=>true, 'receipt_sha256'=>$snapshotHash], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+} catch (Throwable $error) {
+    if (isset($pdo) && $pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    // Never relay database details, input text or provider secrets to the runner.
+    fwrite(STDERR, "Isolated customer-service synchronization failed.\n");
+    exit(1);
+}
