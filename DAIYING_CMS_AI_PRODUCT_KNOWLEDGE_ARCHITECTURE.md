@@ -187,7 +187,7 @@ Customer service remains on the configured gpt-4.1-mini through Core AiService/A
 
 ## Synchronization Status and Future Work
 
-Automatic release-success triggers, daily checks, weekly issue records, bounded retries and consumer acknowledgements remain DESIGN_ONLY for the unified pipeline. Reuse the existing incremental tooling when implementation is approved; do not infer completion from this specification.
+The unified pipeline is IMPLEMENTED_ISOLATED as of 2026-10-25: release-event files, persistent inbox/queue, daily/weekly checks, bounded retries, transactional consumer receipts and native customer HTTP retrieval are tested in disposable environments. Reuse is pinned to PR41 tooling and the separately locked customer plugin candidate. This is not a deployed webhook, scheduler, production import or live paid-model acceptance. The Core optimizer integration remains NOT_IMPLEMENTED. See [isolated acceptance](docs/knowledge-customer-loop-acceptance.md).
 
 The required mechanism is change-triggered synchronization, not a Codex call for every conversation. It must preserve logical source IDs, incrementally skip unchanged hashes, deduplicate, withdraw deleted or unapproved facts, mark component versions, retain provenance, and report failures without advancing successful consumer cursors. Failed batches must retain the previous valid snapshot. Official release, documentation, plugin/theme and schema changes all belong in the source manifest.
 

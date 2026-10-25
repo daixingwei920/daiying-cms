@@ -1,6 +1,6 @@
 # 统一知识库隔离自动同步
 
-沿用 `DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1`。本工具复用 Phase 7.1 的来源分类与 PHP 符号抽取、main 的产品知识校验器，以及客服 1.1.0 的真实 Repository/迁移/Retriever。原文件哈希见 `reuse-lock.json`。它不调用 Codex 或模型、不修改 Core、不连接生产和原 AI 笔记本索引，也不重建现有知识库。
+沿用 `DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1`。本工具从未合并 PR41 的 `7eb324e86cbc067528dd222a4564738f4ecebc3c` 复用，沿用来源分类、PHP 符号抽取、产品知识校验器和客服原 Repository/迁移。本次独立客服候选为 `1.1.1-dev.1`，从已验收1.1.0完整快照派生；基线及候选哈希见 `reuse-lock.json`。同步工具不调用模型、不连接生产和原 AI 笔记本索引，也不重建现有索引。整个变更还包含独立的 Core 蜘蛛观测，不属于冻结1.2.90包。
 
 ## 当前能力
 
@@ -10,7 +10,7 @@
 - 变化源码、API、迁移、插件/主题规范进入 INTERNAL 待复核清单；提交或路径名含 fix/security 均不能自动晋级。发布后的官方知识仍须版本和来源哈希一致，否则任务为 `needs_review`，保留原成功版本。
 - 每日检查、每周问题记录与消费者实物一致性检查。发现消费者文件或本工具管理的插件知识行漂移时，记录问题并排队修复；发布和消费者各有成功游标。
 - 同来源逻辑 ID 幂等更新；正文重复按 P0/P1/P2 保留较高优先记录；撤回时仅停用本工具管理的同站点、同来源知识，不清空历史表或无关知识。
-- 原生客服 SQLite 隔离适配器，以及供文章优化工具复用的 USER-FACING 上下文文件和 `query` 入口。原 Core 优化器 UI 尚未接入，原插件的全部 FAQ/旧 chunks 路径也未改写。
+- 原生客服 SQLite 隔离适配器，事务化激活回执及严格消费者检索；另提供 USER-FACING 上下文文件和 `query` 入口。原 Core 优化器 UI 尚未接入。
 
 ## 创建全新隔离环境
 
@@ -85,6 +85,8 @@ python3 -B tools/knowledge-sync/sync.py --config /tmp/daiying-knowledge-isolated
 
 `needs_review` 不能人工重试跳过证据校验，需提交修正后的知识并重新触发。每个消费者独立原子写入；多个数据库/文件不存在跨消费者全局事务。一个成功另一个失败时，报告保留部分应用状态，全局成功游标不前进，重试会幂等执行，不能报告全部消费者已同步。
 
+客服消费者最后交付。其他文件消费者失败时不会提前激活新客服批次；客服导入、撤回及回执在同一数据库事务中完成。失败保留上一活动批次；成功后还要通过原生检索可见性与逐行哈希复核，才前移客服游标。每来源快照最多256条，超限拒收，不静默截断。这里只实现 SQLite 隔离适配器，不能外推为 MySQL 或生产通过。
+
 ## 来源注册与文章格式
 
 配置 `sources` 可注册独立的插件、主题、官方教程仓库；每项需唯一 `id`、Git 仓库路径、`github_repository`、`initial_tag`、`version_file`、`knowledge_ref`、`watch_ref` 和明确 `include` 范围。组件 `version_file` 可为 `plugin.json` / `theme.json`，Core 则为 `config/app.example.php`。
@@ -108,7 +110,11 @@ python3 -B tools/knowledge-sync/sync.py --config /tmp/daiying-knowledge-isolated
 
 只查询全部消费者确认成功的版本；要求调用方传入实际适用版本。按 P0/P1/P2 排序，返回来源和版本；无匹配返回 `grounded=false`，不调用模型补全。此接口及文件可供独立文章优化工具复用，未替代或改动原 Core 优化器。
 
-客服适配器复用原 Repository，并以 `knowledge_sync` 来源类型和站点 ID 隔离管理记录，保留版本、来源 commit、知识 commit、证据路径和哈希。已安装插件的原 Retriever 可读到结果；其旧 FAQ 快捷返回、500 条候选上限及 soft trust 加权仍存在。本工具对同步数据和共享 query 强制执行策略，不声称旧客服全部入口已实现严格 P0/P1/P2。模型配置仍由 Core AiService/AiGateway 所有；本轮不更改 gpt-4.1-mini 或发起付费调用。
+客服适配器以 `knowledge_sync` 来源类型和站点 ID 隔离记录，保留版本、来源 commit、知识 commit、快照及正文哈希。候选插件新增独立同步检索通道，避免旧知识列表挤占；检索要求活动回执、逐行哈希和已发布状态一致，Core知识还必须匹配实际运行Core版本。
+
+首次成功激活后进入站点级严格托管模式：先取有匹配的最高优先级P0/P1/P2，再在该级内排序；旧 FAQ 快捷返回和旧 chunks 不再绕过准入。旧行不删除，但不自动当作可信参考。无匹配、撤回、版本不符或损坏均返回资料不足，不回退到旧 FAQ。未激活的站点保持旧行为；不能将该候选的通过推广到未升级插件。
+
+原生同步通道检索最多500条；多来源大量知识可能被这个总上限遮挡，需要在未来扩大资料规模前另行验收。回答来源包含版本、知识修订和活动回执摘要。模型仍复用 Core AiService/AiGateway；本轮HTTP验收使用确定性本地协议提供方，不调用付费模型，不修改生产 gpt-4.1-mini。
 
 ## 验证与状态报告
 
@@ -122,4 +128,4 @@ python3 -B scripts/product_knowledge.py
 
 `state/status.json` 与 `status` 命令记录发布收件箱、队列状态、尝试次数、下次重试、来源/知识 commit、增改删/跳过数量、变化文件、消费者成功游标、漂移与周检问题。快照包含哈希并在使用前检查；状态报告不包含原始源码正文或模型密钥。
 
-本轮验收结果与知识库同步状态见 [自动同步隔离验收记录](../../docs/knowledge/2026-10-14-auto-sync-report.md)。
+原生安装站点的HTTP闭环测试由 `tests/native_site.php` 与 `tests/http_consumer.py` 执行，输入必须是全新隔离根、固定公开1.2.89安装包及服务器生成的临时测试授权。它通过原生市场安装器安装独立插件候选，不提供生产配置或信任绕过入口。完整范围、真实通过项和限制见 [2026-10-25验收报告](../../docs/knowledge-customer-loop-acceptance.md)。模板仍未安装；不表示已启用生产实时同步。
