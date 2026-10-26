@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized frozen Core1.2.90 publication (2026-10-26)
+
+- Owner now authorizes merging the preparation/report work and formally publishing Core1.2.90 to GitHub and the official update service through the supported publication flow. This supersedes prior no-publication holds for this Core artifact only.
+- Publish only the new PR70 candidate at449f92a: installer62501532a9b73327d35535d6a52c895408393546cdfb984e3c55d5d7965d5b4d, update0ad3dabdf064894733a88ca3c497075dcdf0fa6e6bd285caf11a85e1bfe1c427. Preserve original c09b5ea frozen1.2.90 artifacts. Do not rebuild/re-sign packages or move an existing tag.
+- Back up the official distribution database before its mutation. Preserve prices, license rules/batches/codes and production settings. Verify anonymous downloads, pinned signatures, package/metadata/tag parity, public version selection and pre/post production protection.
+- No production website deployment/upgrade, destructive migration, real payment/refund/model operation or independent plugin publication is authorized. Keep package freeze separate from later publication documentation commits.
+
 ## Owner-approved PR70 merge into Core1.2.90 (2026-10-26)
 
 - Owner accepts the isolated relevance/business acceptance and authorizes PR70 merge, formal server signing and Release Gate preparation. Owner corrects the target to **1.2.90**, not1.2.91; no version bump.
