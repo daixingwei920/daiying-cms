@@ -8,6 +8,7 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 
 - Owner accepts the isolated relevance/business acceptance and authorizes PR70 merge, formal server signing and Release Gate preparation. Owner corrects the target to **1.2.90**, not1.2.91; no version bump.
 - Preserve the original frozen1.2.90 package/signature/evidence bytes at source c09b5ea. Prepare the newly merged1.2.90 candidate in a separate private directory, bound to its own exact clean origin/main and hashes. Never overwrite or silently confuse the two candidates.
+- New signed candidate source449f92a passed formal Gate/parity638, native upgrade/rollback35, HTTP fresh install6 and downloaded signature checks6. Original c09b5ea artifacts remain unchanged; see docs/CORE_1.2.90_PR70_PREPARATION_REPORT.md. Reporting commits do not move the signed source.
 - The independent customer-service1.1.1-dev.2 source remains outside Core artifacts; PR70 Core packages contain the generic crawler observation only. Do not claim the Core update alone installs the plugin retrieval fix.
 - Reuse accepted runtime tests only where bytes match; rerun native signed-artifact upgrade/rollback and formal Release Gate for the new exact source. No release tag, GitHub Release, public catalog publication, production deployment/upgrade or destructive migration. Physical-device acceptance remains deferred.
 
