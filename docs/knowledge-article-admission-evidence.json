@@ -1126,6 +1126,15 @@
     "admission-test-initial.log": "a4ab3d5eba9d700c36771f0901c3778338b1659fdefa306cbbf057f46deb73b9",
     "protection-final.json": "aac1b1b316c2cbd6d264b42909dc6faed9868cc2ac4507c0d9153389c4234a77",
     "stop-state.json": "0b41796b01f5bfc5c761f714a7e5baa8ede2bc07cff1636e2ba31a9e121b7a87",
-    "auxiliary-path-correction.json": "d457a2dd4216aea36286c57f70bb1585a83daf1f9eeed43d29e39acaa0dabac1"
-  }
+    "auxiliary-path-correction.json": "d457a2dd4216aea36286c57f70bb1585a83daf1f9eeed43d29e39acaa0dabac1",
+    "acceptance-gate.json": "3d11d8976e77379b81485e07d3ae08563612021bdf39d0d1a4bef15ccf351e46"
+  },
+  "recorded_result_gate": {
+    "status": "FAILED_AS_EXPECTED",
+    "exit_code": 1,
+    "mode": "gate over actual recorded native acceptance result; no model/test replay",
+    "source_sha256": "ea7a9688ffbbe902f7664879bf9feaf0962b482bea2b225e7a5f7886e8ac1bd2",
+    "harness_exit_guard_added_after_initial_collection": true
+  },
+  "executed_harness_sha256": "37a70496c8f1126502c00f71e6c4ebf18f9cc1fa6b20897ad5eeb0a315e65287"
 }
