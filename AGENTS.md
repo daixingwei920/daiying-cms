@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Current published Core1.2.90 and Owner-upgraded production (2026-10-26)
+
+- Core1.2.90 is published on GitHub/official stable from immutable tag v1.2.90 at449f92a258f2d02f78cb19f590c308ec268a1d43. Installer62501532a9b73327d35535d6a52c895408393546cdfb984e3c55d5d7965d5b4d; update0ad3dabdf064894733a88ca3c497075dcdf0fa6e6bd285caf11a85e1bfe1c427. No rebuild/re-sign/tag move. Original c09b5ea1.2.90 artifacts remain private historical freezes.
+- Public anonymous checks29 and independent signature checks19 passed. Only one backed-up public GitHub-release cache was expired so homepage/download links refresh; no site code/config deployment. See docs/CORE_1.2.90_PUBLICATION_REPORT.md.
+- Owner confirms personally updating production1.2.89→1.2.90 at2026-10-26T04:46:07+00:00. Native operationCompleted, health190/NORMAL and356 source hashes verified read-only. Codex did not execute production Updater. Strict protection detected the version/pointer delta; retain the failed check and original baseline, and record the Owner-confirmed delta separately. Other protected settings/licenses/inventory remain unchanged.
+- Customer-service1.1.1-dev.2 remains independent and unpublished; Core release does not install the plugin or import knowledge. Production knowledge synchronization/index/optimizer and physical-device acceptance remain unaccepted. Later documentation commits do not change the published tag/artifacts.
+
 ## Owner-authorized frozen Core1.2.90 publication (2026-10-26)
 
 - Owner now authorizes merging the preparation/report work and formally publishing Core1.2.90 to GitHub and the official update service through the supported publication flow. This supersedes prior no-publication holds for this Core artifact only.

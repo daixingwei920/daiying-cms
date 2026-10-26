@@ -8,7 +8,7 @@
 
 “戴影CMS”“戴影 CMS”和“Daiying CMS”均指本项目。交易基础能力及开发中的外部渠道分发能力，按下文各自的状态与配置要求使用。
 
-已发布基线：**1.2.89 stable**。正式安装包以 GitHub Releases 为准；本次文档修改不重新构建或替换已冻结的发布包。
+已发布基线：**1.2.90 stable**。正式安装包以 GitHub Releases 为准；本次文档修改不重新构建或替换已冻结的发布包。
 
 ![Daiying CMS 后台总览](.github/assets/screenshots/admin-dashboard.png)
 
@@ -49,8 +49,8 @@ Daiying CMS 不是单一功能脚本，而是按产品层级组织：
 
 当前检查到的发行信息：
 
-- Tag：`v1.2.89`
-- 安装包：`daiying-cms-1.2.89-stable.zip`
+- Tag：`v1.2.90`
+- 安装包：`daiying-cms-1.2.90-stable.zip`
 - SHA-256：见 Release 附带的 `.sha256` 校验文件。
 
 ### 3. 安装
