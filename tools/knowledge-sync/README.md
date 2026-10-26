@@ -133,3 +133,5 @@ python3 -B scripts/product_knowledge.py
 真实模型路径另需 `--live-provider --expected-model APPROVED_MODEL`，并由授权服务器执行器在隔离根创建短期 `live-provider-approved.json`，明确isolated/model/max_live_requests=5/expires_at。标记缺失、过期、模型或预算不匹配时，在数据库和HTTP服务启动前拒绝。CLI开关本身不授予凭证读取或生产权限。四项拒收回归：`python3 -B tools/knowledge-sync/tests/test_live_guard.py`。凭证只在服务器隔离库重加密，测试后停用并清除；完整回执与边界见[真实模型补测和旧资料承接建议](../../docs/knowledge-customer-loop-live-acceptance.md)。
 
 后续真实业务资料验收未通过：五篇来源的7条B级限定摘录可事务化迁入/撤回，但7个自然问法均被泛化P0匹配屏蔽。`retrieval_ready`不代表业务问答召回通过，仍需独立问题矩阵。该批次最终已撤回；此工具及候选不能视为生产就绪。见[失败验收与修复定位](../../docs/knowledge-article-admission-acceptance.md)。
+
+Owner随后批准最小修复，独立候选1.1.1-dev.2先限定字面主题相关候选，再维持相关知识内P0优先；同一7题现7/7通过。9项相关性专项、21项同步回归、原生签名升级及41项真实模型HTTP检查通过；撤回后同题旧FAQ不复活。新候选哈希锁定，旧候选哈希仅保留为历史来源，不能用旧版本通过当前锁校验。资料仍是审核快照，语义改写/多实体及500条候选限制未被本轮完全解决；生产部署仍未执行。见[修复验收](../../docs/knowledge-relevance-fix-acceptance.md)。

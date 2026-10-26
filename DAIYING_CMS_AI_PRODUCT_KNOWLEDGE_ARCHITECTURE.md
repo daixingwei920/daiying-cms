@@ -191,6 +191,8 @@ The unified pipeline is IMPLEMENTED_ISOLATED as of 2026-10-25: release-event fil
 
 Subsequent real-business article admission exposes a blocking relevance defect: generic P0 n-gram matches suppress all relevant P1 candidates in seven natural questions. Transactional admission/withdrawal passes while business retrieval fails. Consumer acknowledgements and the earlier synthetic/installation model tests do not establish business readiness. Keep the batch withdrawn and do not deploy until scoped relevance/authority handling is fixed and retested. See [failed business acceptance](docs/knowledge-article-admission-acceptance.md).
 
+The Owner-authorized minimal repair in independent plugin1.1.1-dev.2 filters lexical relevance before authority ordering, preserving concise related P0 evidence. The same seven questions, conflict, unknown and withdrawal checks now pass in isolation; 9 focused tests, 21 consumer regressions and 41 live-provider HTTP checks passed. This supersedes the preceding blocker for the tested corpus, not the historical evidence, deployment gate, large-corpus limit or general semantic-quality limitations. See [repair acceptance](docs/knowledge-relevance-fix-acceptance.md).
+
 The required mechanism is change-triggered synchronization, not a Codex call for every conversation. It must preserve logical source IDs, incrementally skip unchanged hashes, deduplicate, withdraw deleted or unapproved facts, mark component versions, retain provenance, and report failures without advancing successful consumer cursors. Failed batches must retain the previous valid snapshot. Official release, documentation, plugin/theme and schema changes all belong in the source manifest.
 
 ## Current Package Use

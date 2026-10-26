@@ -1,0 +1,522 @@
+{
+  "status": "PASS_ISOLATED_OWNER_REVIEW_PENDING",
+  "verification_date": "2026-10-25",
+  "timezone": "America/New_York",
+  "scope": "Minimal independent-plugin relevance repair and isolated business acceptance; no production or release authorization",
+  "previous_failure": {
+    "report": "docs/knowledge-article-admission-acceptance.md",
+    "business_passes": 0,
+    "business_cases": 7,
+    "retained_as_history": true
+  },
+  "candidate": {
+    "plugin_id": "official.ai-customer-service",
+    "version": "1.1.1-dev.2",
+    "implementation_commit": "694b00b4864aa109a75d28f40fadbfa2c2ba4854",
+    "delivery_source_commit": "025d5315fdb6682133d0b3011e8dfd395488c7ee",
+    "runtime_changes": [
+      "src/Service/KnowledgeRetriever.php",
+      "plugin.json"
+    ],
+    "core_runtime_modified": false,
+    "schema_modified": false,
+    "source_delivery": "Local acceptance archive; plugin runtime is not in Core Git or a Core package"
+  },
+  "checks": {
+    "local_relevance_methods": 9,
+    "consumer_regression_tests": 21,
+    "native_upgrade": {
+      "status": "PASS",
+      "core": "1.2.89",
+      "previous_plugin": "1.1.1-dev.1",
+      "plugin": "1.1.1-dev.2",
+      "native_market_upgrade": true,
+      "schema_unchanged": true,
+      "test_trust_only": true,
+      "production_writes": 0
+    },
+    "business_cases": 7,
+    "business_passes": 7,
+    "http_assertions": 41,
+    "http_assertion_matrix": [
+      "Reviewed unchanged corpus acknowledged after native candidate upgrade",
+      "Seven reviewed P1 excerpts active with bound receipt",
+      "Native business retrieval: 15.thirdparty",
+      "Native business retrieval: 85.install",
+      "Native business retrieval: 85.menu",
+      "Native business retrieval: 82.sale",
+      "Native business retrieval: 82.compat",
+      "Native business retrieval: 86.sale",
+      "Native business retrieval: 88.sale",
+      "Core SQLite still uses related official P0",
+      "Unknown native query has no matches: ZXQ9384 frostwombat",
+      "Unknown native query has no matches: 是否可以支持星际飞船量子保险",
+      "Explicit eight-call live provider approval valid",
+      "Native HTTP site remains published Core189",
+      "Live answer source and receipt: 15.thirdparty",
+      "Live answer source and receipt: 85.install",
+      "Restaurant installation version limits retained",
+      "Live answer source and receipt: 85.menu",
+      "Menu draft remains subject to review",
+      "Live answer source and receipt: 82.sale",
+      "Expected dated USD price: 82.sale",
+      "Live answer source and receipt: 82.compat",
+      "Holy City exact Core bound retained",
+      "Live answer source and receipt: 86.sale",
+      "Expected dated USD price: 86.sale",
+      "Restaurant is not unlimited-site licensing",
+      "Live answer source and receipt: 88.sale",
+      "Directory price and stricter official minimum retained",
+      "Related P0 wins real-model conflict against related P1",
+      "Unknown HTTP returns insufficient information without generation",
+      "Unknown HTTP returns insufficient information without generation",
+      "Withdrawn receipt has no active website records",
+      "Withdrawn business query has no generic-P0 or legacy fallback: 15.thirdparty",
+      "Withdrawn business query has no generic-P0 or legacy fallback: 85.install",
+      "Withdrawn business query has no generic-P0 or legacy fallback: 85.menu",
+      "Withdrawn business query has no generic-P0 or legacy fallback: 82.sale",
+      "Withdrawn business query has no generic-P0 or legacy fallback: 82.compat",
+      "Withdrawn business query has no generic-P0 or legacy fallback: 86.sale",
+      "Withdrawn business query has no generic-P0 or legacy fallback: 88.sale",
+      "Unrelated Core official batch and P0 retrieval preserved",
+      "Exactly eight model-success events for eight intended generation requests"
+    ],
+    "intended_generation_requests": 8,
+    "provider_success_event_delta": 8,
+    "actual_configured_model": "gpt-5.6-terra",
+    "model_billing_acceptance": false,
+    "unknown_http_cases": 2,
+    "withdrawn_business_http_cases": 7,
+    "extra_exact_old_faq_after_withdrawal": {
+      "status": "PASS",
+      "model_success_event_delta": 0,
+      "provider_disabled_with_no_credential": true
+    },
+    "manual_answer_comparison": {
+      "actor": "Codex",
+      "status": "SOURCE_COMPARISON_COMPLETED",
+      "owner_approval": "PENDING",
+      "scope": "Eight actual answers compared against approved excerpts or explicit synthetic conflict; no invented price, unlimited-site, free-lifetime-update or SLA promise identified",
+      "wording_note": "One restaurant answer abbreviates support scope; purchase agreement governs. No conclusion of no aftersales or no refund may be inferred."
+    }
+  },
+  "business_and_conflict_matrix": [
+    {
+      "case": "15.thirdparty",
+      "question": "服务条款是否保证百度网盘永久可用",
+      "status": "PASS",
+      "http": 200,
+      "elapsed_ms": 2141,
+      "answer_sha256": "b265eab29651bcf0f05c09f86d0d6562bdee6a8add70735f140c890eb7d577e7",
+      "grounded": true,
+      "sources": [
+        {
+          "title": "服务条款：第三方服务与数据备份",
+          "url": "https://www.daiyingcms.com/terms",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.15.thirdparty",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        }
+      ],
+      "native_retrieved_ids": [
+        "article.15.thirdparty"
+      ]
+    },
+    {
+      "case": "85.install",
+      "question": "餐厅外卖插件怎么安装",
+      "status": "PASS",
+      "http": 200,
+      "elapsed_ms": 2748,
+      "answer_sha256": "0a9eb47c8194116695aa45fb792a788b9244ab3def1617afe9307dfb8368bb61",
+      "grounded": true,
+      "sources": [
+        {
+          "title": "餐厅外卖插件授权价格和单站范围",
+          "url": "https://www.daiyingcms.com/articles/%E6%88%B4%E5%BD%B1-cms-%E9%A4%90%E5%8E%85%E5%A4%96%E5%8D%96%E6%8F%92%E4%BB%B6%E6%8E%88%E6%9D%83%E7%A0%81",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.86.sale",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        },
+        {
+          "title": "餐厅外卖安装教程：版本与官方入口",
+          "url": "https://www.daiyingcms.com/articles/restaurant-takeout-installation-and-use-guide",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.85.install",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        },
+        {
+          "title": "餐厅外卖菜单识别：先核对草稿",
+          "url": "https://www.daiyingcms.com/articles/restaurant-takeout-installation-and-use-guide",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.85.menu",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        }
+      ],
+      "native_retrieved_ids": [
+        "article.86.sale",
+        "article.85.install",
+        "article.85.menu"
+      ]
+    },
+    {
+      "case": "85.menu",
+      "question": "餐厅菜单识别能自动上架吗",
+      "status": "PASS",
+      "http": 200,
+      "elapsed_ms": 1050,
+      "answer_sha256": "3bfcd8acdfdc0df104c9e2c8f64bcfce3c77e2bed5d5d23c400e644d8eee8897",
+      "grounded": true,
+      "sources": [
+        {
+          "title": "餐厅外卖菜单识别：先核对草稿",
+          "url": "https://www.daiyingcms.com/articles/restaurant-takeout-installation-and-use-guide",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.85.menu",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        },
+        {
+          "title": "餐厅外卖插件授权价格和单站范围",
+          "url": "https://www.daiyingcms.com/articles/%E6%88%B4%E5%BD%B1-cms-%E9%A4%90%E5%8E%85%E5%A4%96%E5%8D%96%E6%8F%92%E4%BB%B6%E6%8E%88%E6%9D%83%E7%A0%81",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.86.sale",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        },
+        {
+          "title": "餐厅外卖安装教程：版本与官方入口",
+          "url": "https://www.daiyingcms.com/articles/restaurant-takeout-installation-and-use-guide",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.85.install",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        }
+      ],
+      "native_retrieved_ids": [
+        "article.85.menu",
+        "article.86.sale",
+        "article.85.install"
+      ]
+    },
+    {
+      "case": "82.sale",
+      "question": "圣城授权多少钱，包含终身免费更新吗",
+      "status": "PASS",
+      "http": 200,
+      "elapsed_ms": 1475,
+      "answer_sha256": "46a586a1033db1c499ee58c9a408058c39e945d697493fb1827cc91588de05e6",
+      "grounded": true,
+      "sources": [
+        {
+          "title": "Holy City 圣城终身授权价格与交付",
+          "url": "https://www.daiyingcms.com/articles/the-way-holy-city-%E5%9C%A3%E5%9F%8E%E4%B8%BB%E9%A2%98-%E7%BB%88%E8%BA%AB%E5%95%86%E4%B8%9A%E6%8E%88%E6%9D%83%E7%A0%81",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.82.sale",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        },
+        {
+          "title": "Holy City 圣城3.3.9与Core兼容范围",
+          "url": "https://www.daiyingcms.com/articles/the-way-holy-city-%E5%9C%A3%E5%9F%8E%E4%B8%BB%E9%A2%98-%E7%BB%88%E8%BA%AB%E5%95%86%E4%B8%9A%E6%8E%88%E6%9D%83%E7%A0%81",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.82.compat",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        }
+      ],
+      "native_retrieved_ids": [
+        "article.82.sale",
+        "article.82.compat"
+      ]
+    },
+    {
+      "case": "82.compat",
+      "question": "圣城3.3.9能安装到Core1.2.89吗",
+      "status": "PASS",
+      "http": 200,
+      "elapsed_ms": 1855,
+      "answer_sha256": "6584de2036b0b0e58d85771cd3424d94014d367e7b6004cd42c878e19c0e2beb",
+      "grounded": true,
+      "sources": [
+        {
+          "title": "Holy City 圣城3.3.9与Core兼容范围",
+          "url": "https://www.daiyingcms.com/articles/the-way-holy-city-%E5%9C%A3%E5%9F%8E%E4%B8%BB%E9%A2%98-%E7%BB%88%E8%BA%AB%E5%95%86%E4%B8%9A%E6%8E%88%E6%9D%83%E7%A0%81",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.82.compat",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        },
+        {
+          "title": "Holy City 圣城终身授权价格与交付",
+          "url": "https://www.daiyingcms.com/articles/the-way-holy-city-%E5%9C%A3%E5%9F%8E%E4%B8%BB%E9%A2%98-%E7%BB%88%E8%BA%AB%E5%95%86%E4%B8%9A%E6%8E%88%E6%9D%83%E7%A0%81",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.82.sale",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        }
+      ],
+      "native_retrieved_ids": [
+        "article.82.compat",
+        "article.82.sale"
+      ]
+    },
+    {
+      "case": "86.sale",
+      "question": "餐厅外卖授权多少钱，是无限站点吗",
+      "status": "PASS",
+      "http": 200,
+      "elapsed_ms": 1459,
+      "answer_sha256": "5a589dee36e531053fec45d5c7e5c44d24d4809552a57aa553a105bbb6f308b0",
+      "grounded": true,
+      "sources": [
+        {
+          "title": "餐厅外卖插件授权价格和单站范围",
+          "url": "https://www.daiyingcms.com/articles/%E6%88%B4%E5%BD%B1-cms-%E9%A4%90%E5%8E%85%E5%A4%96%E5%8D%96%E6%8F%92%E4%BB%B6%E6%8E%88%E6%9D%83%E7%A0%81",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.86.sale",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        },
+        {
+          "title": "餐厅外卖安装教程：版本与官方入口",
+          "url": "https://www.daiyingcms.com/articles/restaurant-takeout-installation-and-use-guide",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.85.install",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        },
+        {
+          "title": "餐厅外卖菜单识别：先核对草稿",
+          "url": "https://www.daiyingcms.com/articles/restaurant-takeout-installation-and-use-guide",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.85.menu",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        }
+      ],
+      "native_retrieved_ids": [
+        "article.86.sale",
+        "article.85.install",
+        "article.85.menu"
+      ]
+    },
+    {
+      "case": "88.sale",
+      "question": "来访自动收录授权多少钱，需要什么Core版本",
+      "status": "PASS",
+      "http": 200,
+      "elapsed_ms": 1458,
+      "answer_sha256": "f3973ecbfd2efec7693c4a745a950a399a104f6f0e8ff3808f4812338b26b8fe",
+      "grounded": true,
+      "sources": [
+        {
+          "title": "来访自动收录插件授权价格与兼容",
+          "url": "https://www.daiyingcms.com/articles/%E6%9D%A5%E8%AE%BF%E8%87%AA%E5%8A%A8%E6%94%B6%E5%BD%95%E6%8F%92%E4%BB%B6%E6%8E%88%E6%9D%83%E7%A0%81-%E6%8A%8A-cms-%E5%8F%98%E6%88%90%E5%8F%AF%E7%BB%8F%E8%90%A5%E7%9A%84%E7%BD%91%E5%9D%80%E5%AF%BC%E8%88%AA%E7%AB%99",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "article.88.sale",
+          "receipt_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95"
+        }
+      ],
+      "native_retrieved_ids": [
+        "article.88.sale"
+      ]
+    },
+    {
+      "case": "synthetic_related_P0_P1_conflict",
+      "question": "圣城隔离冲突验证值是什么",
+      "status": "PASS",
+      "http": 200,
+      "elapsed_ms": 1196,
+      "answer_sha256": "657db2a94dba04bc98ac9d8e9492122884fe789ffd8e7541b676ecfee3fa8b61",
+      "grounded": true,
+      "sources": [
+        {
+          "title": "圣城隔离冲突验证",
+          "url": "https://fixture.invalid/conflict",
+          "source_type": "knowledge_sync",
+          "trust_level": "official",
+          "priority": "P0",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "a90033b3306b39f61590953e6691104714adc785",
+          "knowledge_id": "conflict.P0",
+          "receipt_sha256": "516222c954f644114113ce560849ef3e5d1998fe103e82f76bf38f087d2ee004"
+        }
+      ]
+    }
+  ],
+  "website_receipt_before_withdrawal": {
+    "state": "active",
+    "publication_state": "published",
+    "source": "reviewed-website",
+    "site_id": "5e2dc36f-7aba-4b36-acc7-aa519650fc17",
+    "version": "1.2.89",
+    "source_commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+    "knowledge_commit": "a90033b3306b39f61590953e6691104714adc785",
+    "snapshot_sha256": "98ec0b4d83b7a015046c7076135e91713196d6672af78bbacec7ede987779e95",
+    "record_hashes": {
+      "db91080e3b587c8a88b01c3f3a1e92a2d0968f31f986c6da159dd67b49012c9d": "35a59ba17f9620e6bf220ab47c238cff84d7a2d803c0fe74550b58f643013512",
+      "1a33bb89b8a8284d2d12f493c944917459b7b2629f6fcabe0ff006e483749029": "08b3db5744d9d81da279426aa4fab2b4df0f9d8edd1038ddc4d1637a81dbced1",
+      "761d1ea1aa088b0a8d9644127187fcf046569dc886e523846720d7b0246c9468": "cb8bf355bd8cc20e03ea27bf14f5bb077bbce6074f1c6c1fda6b015480c68a80",
+      "9bb3b20812ff09b86e5543480907833c62bd51ca8ae4ba0cb8c9181eb53df6f0": "b897a8d723740a68178b138bcf0239188568adbf889c9da398349cb6ddb022e5",
+      "44fd6e06818bab0fcc3151756553bf1879dcd272d4aa9aea402c60d6cc564052": "0e2cd06f827daeedec081e7a9dc2deb01f6e4329fc3b97f35566918d2b46e9f2",
+      "e84fa0ac4398361e5c3f173706e4c5f7c6e5da34d731dbdf482e34ca067adac1": "4ee7452d75941cfed0c4a4e1db785cd1d82e5c650097fca5ac110d150b9bb80e",
+      "af925a14cab51b6d7c3fadd186c07d8755914dba1303e6e55fd439c5a6952eb9": "39a3ad8b08727d469fe580198d28e4279e6a5174a08a87dcccbd8183531403bc"
+    }
+  },
+  "website_receipt_after_withdrawal": {
+    "state": "active",
+    "publication_state": "published",
+    "source": "reviewed-website",
+    "site_id": "5e2dc36f-7aba-4b36-acc7-aa519650fc17",
+    "version": "1.2.89",
+    "source_commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+    "knowledge_commit": "52eaabef28b3ea9fc2144bba7e2633121be65717",
+    "snapshot_sha256": "06d4c295f8a0b355d5634567eb98877ec57badc4f600c05cd76dc0babdd1d376",
+    "record_hashes": []
+  },
+  "final_cleanup": {
+    "status": "PASS",
+    "protected_equal": true,
+    "isolated_ai_disabled": true,
+    "isolated_credential_removed": true,
+    "production_key_reference_written": false,
+    "synthetic_authorization_removed": true,
+    "production_writes": 0
+  },
+  "final_stop_proof": {
+    "status": "PASS",
+    "installed_plugin_version": "1.1.1-dev.2",
+    "matches_lock": true,
+    "ai_disabled": true,
+    "credential_removed": true,
+    "service_stopped": true,
+    "approval_removed": true,
+    "authorization_removed": true,
+    "http_harness_sha256": "62959ce99d3931ddba36fa68ac9127f7ec116218f57a4c0bbead215cdc031f3d",
+    "production_writes": 0
+  },
+  "preservation": {
+    "status": "PASS",
+    "plugin_source_commit": "025d5315fdb6682133d0b3011e8dfd395488c7ee",
+    "plugin_implementation_commit": "694b00b4864aa109a75d28f40fadbfa2c2ba4854",
+    "plugin_baseline_commit": "bfa64c5d45e5f157b6a3a0c97a986202ebe122f9",
+    "core_runtime_unchanged_since": "022d9682a7658950ed60335a295764ea08458602",
+    "prior_core_gate_runtime_commit": "6cb82a85f4560f9f8ef6b86e850a202b75208a53",
+    "frozen190_unchanged": true,
+    "frozen190_sha256": {
+      "daiying-cms-1.2.90-stable.zip": "cd81ba0073d41f8c8a0599541f8d0e29eb9bac9feefca061fe5c74eaf475e61d",
+      "daiying-cms-core-update-1.2.90.zip": "7086c8e734d40cef3e9756450b4c6edf6c58508213956a58660f7f0874d94903",
+      "signed-candidate-evidence.tar.gz": "96ad3a521cfb5f4c66ac89960dedd920829aa47ee5174a094763a6644ffdf0ca"
+    },
+    "plugin_runtime_matches_lock": true,
+    "installed_server_runtime_matches_local": true,
+    "plugin_source_zip_sha256": "44a7753dcd94158bd8e68488d2bacd71f22c9108847829facab2c215ad9dddc1",
+    "plugin_patch_sha256": "c5cae2c16c46e3aee8a364b4cb3be735d7f2c28a3eca1ef82d4af3c40d5be7cd",
+    "minimal_patch_sha256": "bd3a8f1930be4d209e0e55436b18e7983f14a4e036ced95f65fba750278f1d5e",
+    "http_harness_sha256": "62959ce99d3931ddba36fa68ac9127f7ec116218f57a4c0bbead215cdc031f3d",
+    "core_runtime_modified": false,
+    "production_deployed": false,
+    "formal_publication": false
+  },
+  "artifact_sha256": {
+    "relevance-tests.log": "b2ba8556829bad69c4df5499dbc9d348482f96c7f81ab31fe33c6835f13dc1db",
+    "consumer-regressions.log": "1bcb2c5435bbfb6ebaaaaa635ef9113166007786198e6c583dc2bc0a9dfa4e70",
+    "http-relevance-result.json": "f9fc9d29254fe951f6c125e4ce330a36241a5b397d990462a96dd070ccec1201",
+    "http-relevance.log": "eedd88e7a0605fad19b95db9d360c20f0fc0fa9232602b386f99f5ad411cc461",
+    "native-query-matrix.json": "db567b1d4fa749c49e8719cf5a0d32e1d6c14c4f97eca188ade4a6466a2db011",
+    "native-upgrade.json": "3ec063c2315be587d8d198bfc4cf1e33b082d3b8569547d58609ed1b3cc93dd0",
+    "cleanup.json": "4fd5dfae9287a8ce3faf10c4624bc07467efa4d53912b6416da24343cb01ff8a",
+    "protected-before.json": "aceaec3ed1252a4e2dd5b1f1acf9e9c16cf3d8c0b03704b8a4c22392ee5dcc9e",
+    "protected-after.json": "aceaec3ed1252a4e2dd5b1f1acf9e9c16cf3d8c0b03704b8a4c22392ee5dcc9e",
+    "provider-preflight.json": "0776c2bbf095529871068ddd07f9d466972a047b17afca919c2b977097c751f4",
+    "live-configured.json": "e28dac49f5ea3562815a3c89f368656be7d445ecdadf487c117baabdac3375f2",
+    "legacy-withdrawal.json": "f76da3ac488563a988b06c8dde31a9fc46ed2d080c9542ae65f97c4ac086b6f1",
+    "legacy-withdrawal.log": "5b68a80752fb47dd294a1fb102c4b1275ec8fcc68f6bc997fa59b2f8a72fb599",
+    "final-stop-proof.json": "fb0d095cb8bc7d9b3ad949e3ceb92364b21710dfd2bef06b0c3de21c4944bda3",
+    "final-provenance.json": "61620907dd3c56fdf413c24b5ff9362fdf14b788ce70b477f2e221b88487936b",
+    "test-signing-result.json": "51474f1aa21ad670a2216238135d7bb0793dc50fd7b55714742b4bd173b9fe2d",
+    "tool-layout-initial-failure.log": "33864038cfcedea64a65cf71aafabe1ba378d1eb11c058f6933fc7106dfa445a",
+    "scope-bound-initial-failure.log": "d17cc624283e1606de9749acca44b900656e5a33e9cb318d6afa7b5257204ef1",
+    "scope-bound-diagnostic.json": "94298d284cae3a525bd50d20d3bd5b2690965af1c2be3e621358f97d5fb1b991",
+    "customer-service-1.1.1-dev.2-source.zip": "44a7753dcd94158bd8e68488d2bacd71f22c9108847829facab2c215ad9dddc1",
+    "customer-service-from-1.1.0.patch": "c5cae2c16c46e3aee8a364b4cb3be735d7f2c28a3eca1ef82d4af3c40d5be7cd",
+    "customer-service-relevance-only.patch": "bd3a8f1930be4d209e0e55436b18e7983f14a4e036ced95f65fba750278f1d5e"
+  },
+  "published_corpus_sha256": "6e213807682acc35dd0ec526f2195fcea7e30bbbed1e8b461ba9f393ec6a79b7",
+  "http_harness_sha256": "62959ce99d3931ddba36fa68ac9127f7ec116218f57a4c0bbead215cdc031f3d",
+  "scope_diagnostic": {
+    "status": "DIAGNOSTIC_ONLY_NOT_PERFORMANCE_ACCEPTANCE",
+    "iterations": 500,
+    "elapsed_ms": 441,
+    "initial_failure_retained": true
+  },
+  "not_verified": [
+    "Production import/deployment/index integration",
+    "MySQL",
+    "Physical mobile device",
+    "Semantic paraphrase/multiple-entity coverage",
+    "Large corpus beyond existing 500 candidate limit",
+    "Real-time prices/inventory",
+    "Token billing"
+  ],
+  "stop_gate": {
+    "pr70": "DRAFT_OWNER_REVIEW_PENDING",
+    "merge": false,
+    "formal_release": false,
+    "production_deployment": false,
+    "frozen190_modified": false,
+    "final_reviewed_business_active_rows": 0,
+    "synthetic_conflict_active_rows": 0
+  }
+}
