@@ -23,4 +23,5 @@ $repo->saveSettings(['enabled'=>'1','provider_id'=>'local_model','model'=>'fixtu
 $repo->saveFaq('SQLite 安装','旧FAQ错误反例：只能用Oracle，不能用SQLite。');
 $database=$root.'/storage/database/cms.sqlite';
 file_put_contents($database.'.isolated.json',json_encode(['environment'=>'isolated','site_id'=>$repo->siteId()]));
-echo json_encode(['status'=>'PASS','root'=>$root,'database'=>$database,'site_id'=>$repo->siteId(),'version'=>'1.2.89','plugin_version'=>'1.1.1-dev.1','native_market_installer'=>true,'isolated_test_authority_only'=>true,'production_writes'=>0],JSON_UNESCAPED_SLASHES),PHP_EOL;
+$pluginManifest=json_decode(file_get_contents($root.'/content/plugins/official.ai-customer-service/plugin.json'),true,512,JSON_THROW_ON_ERROR);
+echo json_encode(['status'=>'PASS','root'=>$root,'database'=>$database,'site_id'=>$repo->siteId(),'version'=>'1.2.89','plugin_version'=>$pluginManifest['version'],'native_market_installer'=>true,'isolated_test_authority_only'=>true,'production_writes'=>0],JSON_UNESCAPED_SLASHES),PHP_EOL;
