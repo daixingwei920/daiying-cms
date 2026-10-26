@@ -11,6 +11,7 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 - Accept only reviewed USER-FACING knowledge for actual published releases;1.2.90 remains unpublished. Separate importer/HTTP retrieval/model-protocol fixture evidence from live paid-provider or production acceptance.
 - Preserve bounded nonblocking crawler collection and privacy; loss-observation limits must remain visible and cannot imply exact traffic or exact drop rates.
 - Owner subsequently authorizes the proposed next isolated real-model acceptance and legacy-FAQ carryover review. The actual configured customer model is observed as gpt-5.6-terra, not the historical gpt-4.1-mini preset. Use current configuration in isolation; do not modify production settings. Keep PR70 Draft and preserve the no-merge/no-publication/no-production boundary. See docs/knowledge-customer-loop-live-acceptance.md.
+- Owner then authorizes source/tutorial/terms/commercial-rule review and isolated admission/withdrawal checks. Five sources yield seven limited B-grade excerpts; eight transfer/withdrawal checks pass, but native business retrieval fails all seven natural questions because generic P0 matches suppress relevant P1. Keep the batch withdrawn, PR70 Draft and production unmodified; report the failed acceptance before broadening to a retrieval-algorithm change. See docs/knowledge-article-admission-acceptance.md.
 
 ## Owner-authorized PR67 merge and Core1.2.90 signed preparation (2026-10-24)
 

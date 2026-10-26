@@ -131,3 +131,5 @@ python3 -B scripts/product_knowledge.py
 原生安装站点的HTTP闭环测试由 `tests/native_site.php` 与 `tests/http_consumer.py` 执行，输入必须是全新隔离根、固定公开1.2.89安装包及服务器生成的临时测试授权。它通过原生市场安装器安装独立插件候选，不提供生产配置或信任绕过入口。完整范围、真实通过项和限制见 [2026-10-25验收报告](../../docs/knowledge-customer-loop-acceptance.md)。模板仍未安装；不表示已启用生产实时同步。
 
 真实模型路径另需 `--live-provider --expected-model APPROVED_MODEL`，并由授权服务器执行器在隔离根创建短期 `live-provider-approved.json`，明确isolated/model/max_live_requests=5/expires_at。标记缺失、过期、模型或预算不匹配时，在数据库和HTTP服务启动前拒绝。CLI开关本身不授予凭证读取或生产权限。四项拒收回归：`python3 -B tools/knowledge-sync/tests/test_live_guard.py`。凭证只在服务器隔离库重加密，测试后停用并清除；完整回执与边界见[真实模型补测和旧资料承接建议](../../docs/knowledge-customer-loop-live-acceptance.md)。
+
+后续真实业务资料验收未通过：五篇来源的7条B级限定摘录可事务化迁入/撤回，但7个自然问法均被泛化P0匹配屏蔽。`retrieval_ready`不代表业务问答召回通过，仍需独立问题矩阵。该批次最终已撤回；此工具及候选不能视为生产就绪。见[失败验收与修复定位](../../docs/knowledge-article-admission-acceptance.md)。

@@ -1,0 +1,1131 @@
+{
+  "status": "BUSINESS_ACCEPTANCE_FAILED",
+  "date": "2026-10-25",
+  "source_count": 5,
+  "limited_review_grade": "B",
+  "reviewed_excerpts": 7,
+  "whole_page_admission": false,
+  "structural_checks": [
+    "Actual published189 event and reviewed website knowledge revision acknowledged",
+    "Seven reviewed excerpts activated transactionally with record hashes",
+    "Core SQLite query still uses P0 official knowledge",
+    "Event replay is idempotent",
+    "All seven withdrawn source excerpts are removed from active receipt",
+    "Withdrawn sources no longer appear in actual native retrieval",
+    "Unrelated Core official batch preserved",
+    "Withdrawal disables only owned website rows without deleting history"
+  ],
+  "business_cases": 7,
+  "business_passes": 0,
+  "business_queries": [
+    {
+      "case": "terms",
+      "question": "服务条款是否保证百度网盘永久可用",
+      "reviewed_source_retrieved": false,
+      "matches": [
+        {
+          "title": "Search Engine connections",
+          "priority": "P0",
+          "knowledge_id": "seo.search_engines",
+          "source_id": "15c882faeaf832cd81d3d2aeb3928bb71246540c195479a5c4575659d1834cf2",
+          "score": 2
+        },
+        {
+          "title": "首次安装失败处理",
+          "priority": "P0",
+          "knowledge_id": "install.failure_guard",
+          "source_id": "5d237ebf1a9a03c4b019179d2a88effd871523b49652520f679daf0ca454ddd0",
+          "score": 2
+        },
+        {
+          "title": "Site AI Provider",
+          "priority": "P0",
+          "knowledge_id": "ai.provider_settings",
+          "source_id": "ac11784ec296e8cffcf602959c559397e637d56012403393070306ba5b107ef7",
+          "score": 2
+        },
+        {
+          "title": "旧站迁移后台入口",
+          "priority": "P0",
+          "knowledge_id": "migration.admin_route",
+          "source_id": "da2e6286f692c7f2e3d21c92e30501b6b2f4a780cd2aa32f1815125b78c36056",
+          "score": 2
+        },
+        {
+          "title": "Signed Core update flow",
+          "priority": "P0",
+          "knowledge_id": "update.official_flow",
+          "source_id": "fac8398861646bff426c17c44b6440344302e868e4c21feb3c51c4aeb2d0220a",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "case": "install",
+      "question": "餐厅外卖插件怎么安装",
+      "reviewed_source_retrieved": false,
+      "matches": [
+        {
+          "title": "升级与插件兼容边界",
+          "priority": "P0",
+          "knowledge_id": "update.compatibility_boundaries",
+          "source_id": "f6e34a14dfac32129184720dfe5b6192845dbed20155cd9b810379660d66fe36",
+          "score": 4
+        },
+        {
+          "title": "Commerce foundation",
+          "priority": "P0",
+          "knowledge_id": "commerce.foundation_beta",
+          "source_id": "44d88fa5140d7be10a7373d939861963f9c3d67d6441db15ce3d6c7277198d91",
+          "score": 2
+        },
+        {
+          "title": "首次安装失败处理",
+          "priority": "P0",
+          "knowledge_id": "install.failure_guard",
+          "source_id": "5d237ebf1a9a03c4b019179d2a88effd871523b49652520f679daf0ca454ddd0",
+          "score": 2
+        },
+        {
+          "title": "Runtime Requirements",
+          "priority": "P0",
+          "knowledge_id": "install.runtime_requirements",
+          "source_id": "819de8071413c46478eaa4a0993fae9d66328f53e22abe88d90ac0a6b6dbe04e",
+          "score": 2
+        },
+        {
+          "title": "Web Installer",
+          "priority": "P0",
+          "knowledge_id": "install.web_installer",
+          "source_id": "ac0e8233e9f53e98e7a3e8fde36578d0931cf3c83bf5f37a39d8d49efee77063",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "case": "menu",
+      "question": "餐厅菜单识别能自动上架吗",
+      "reviewed_source_retrieved": false,
+      "matches": [
+        {
+          "title": "历史文章 AI 优化",
+          "priority": "P0",
+          "knowledge_id": "ai.historical_optimizer",
+          "source_id": "064569fa36d7c109a69c01291f645ba87a5be31668f419a64dec063db1bf9cad",
+          "score": 2
+        },
+        {
+          "title": "WordPress comments migration guard",
+          "priority": "P0",
+          "knowledge_id": "migration.wordpress_comments_guard",
+          "source_id": "8fcbdf615188bffd0349f508a25702374562c7afdda4bb0b574ecf0f62a6b8fe",
+          "score": 2
+        },
+        {
+          "title": "书名号固定链接",
+          "priority": "P0",
+          "knowledge_id": "content.explicit_book_title_slug",
+          "source_id": "bf1d4a3d6c4d2a7500bde32a76452b28d3fc20a9a975b3ef3c42cca956b256ed",
+          "score": 2
+        },
+        {
+          "title": "小说与视频产品退役",
+          "priority": "P0",
+          "knowledge_id": "product.novel_video_retired",
+          "source_id": "f60bdc63b35ee0dc88777d94755cf343fea28e57ec0ddd23e288c1f5816e0a72",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "case": "holy-price",
+      "question": "圣城授权多少钱，包含终身免费更新吗",
+      "reviewed_source_retrieved": false,
+      "matches": [
+        {
+          "title": "历史文章 AI 优化",
+          "priority": "P0",
+          "knowledge_id": "ai.historical_optimizer",
+          "source_id": "064569fa36d7c109a69c01291f645ba87a5be31668f419a64dec063db1bf9cad",
+          "score": 2
+        },
+        {
+          "title": "Search Engine connections",
+          "priority": "P0",
+          "knowledge_id": "seo.search_engines",
+          "source_id": "15c882faeaf832cd81d3d2aeb3928bb71246540c195479a5c4575659d1834cf2",
+          "score": 2
+        },
+        {
+          "title": "Commerce foundation",
+          "priority": "P0",
+          "knowledge_id": "commerce.foundation_beta",
+          "source_id": "44d88fa5140d7be10a7373d939861963f9c3d67d6441db15ce3d6c7277198d91",
+          "score": 2
+        },
+        {
+          "title": "Sitemap",
+          "priority": "P0",
+          "knowledge_id": "seo.sitemap",
+          "source_id": "5a1b4968aec538bac5e1df223a4d391ee5c70aa65319ec0e7daa5d5be5a89f68",
+          "score": 2
+        },
+        {
+          "title": "系统更新与恢复入口",
+          "priority": "P0",
+          "knowledge_id": "update.recovery_cn",
+          "source_id": "a75c25dfbef2a12826b50ef8e5d6c859bdb8ffe3ee1db054e0bde048f6c121f1",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "case": "holy-core",
+      "question": "圣城3.3.9能安装到Core1.2.89吗",
+      "reviewed_source_retrieved": false,
+      "matches": [
+        {
+          "title": "首次安装失败处理",
+          "priority": "P0",
+          "knowledge_id": "install.failure_guard",
+          "source_id": "5d237ebf1a9a03c4b019179d2a88effd871523b49652520f679daf0ca454ddd0",
+          "score": 2
+        },
+        {
+          "title": "Runtime Requirements",
+          "priority": "P0",
+          "knowledge_id": "install.runtime_requirements",
+          "source_id": "819de8071413c46478eaa4a0993fae9d66328f53e22abe88d90ac0a6b6dbe04e",
+          "score": 2
+        },
+        {
+          "title": "Web Installer",
+          "priority": "P0",
+          "knowledge_id": "install.web_installer",
+          "source_id": "ac0e8233e9f53e98e7a3e8fde36578d0931cf3c83bf5f37a39d8d49efee77063",
+          "score": 2
+        },
+        {
+          "title": "MySQL 安装兼容",
+          "priority": "P0",
+          "knowledge_id": "install.mysql_compatibility",
+          "source_id": "be40fd0de4e329656bdfdf4b2caaa0952ebd2f525fb81112d241f2f1c8c834df",
+          "score": 2
+        },
+        {
+          "title": "Daiying CMS 安装入口和步骤",
+          "priority": "P0",
+          "knowledge_id": "install.cn_steps",
+          "source_id": "dcb7985b21471376dbdddda3834b2032a4d775ee5e87ad05f71481532107f375",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "case": "restaurant-price",
+      "question": "餐厅外卖授权多少钱，是无限站点吗",
+      "reviewed_source_retrieved": false,
+      "matches": [
+        {
+          "title": "Search Engine connections",
+          "priority": "P0",
+          "knowledge_id": "seo.search_engines",
+          "source_id": "15c882faeaf832cd81d3d2aeb3928bb71246540c195479a5c4575659d1834cf2",
+          "score": 4
+        },
+        {
+          "title": "历史文章 AI 优化",
+          "priority": "P0",
+          "knowledge_id": "ai.historical_optimizer",
+          "source_id": "064569fa36d7c109a69c01291f645ba87a5be31668f419a64dec063db1bf9cad",
+          "score": 2
+        },
+        {
+          "title": "Recovery diagnostics",
+          "priority": "P0",
+          "knowledge_id": "backup.recovery_admin",
+          "source_id": "4a07faa342799d074f0e7ab493b64cdc9400eaed78bca5eac4b1f33bb3b36ef5",
+          "score": 2
+        },
+        {
+          "title": "Sitemap",
+          "priority": "P0",
+          "knowledge_id": "seo.sitemap",
+          "source_id": "5a1b4968aec538bac5e1df223a4d391ee5c70aa65319ec0e7daa5d5be5a89f68",
+          "score": 2
+        },
+        {
+          "title": "Site AI Provider",
+          "priority": "P0",
+          "knowledge_id": "ai.provider_settings",
+          "source_id": "ac11784ec296e8cffcf602959c559397e637d56012403393070306ba5b107ef7",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "case": "directory-price",
+      "question": "来访自动收录授权多少钱，需要什么Core版本",
+      "reviewed_source_retrieved": false,
+      "matches": [
+        {
+          "title": "升级与插件兼容边界",
+          "priority": "P0",
+          "knowledge_id": "update.compatibility_boundaries",
+          "source_id": "f6e34a14dfac32129184720dfe5b6192845dbed20155cd9b810379660d66fe36",
+          "score": 8
+        },
+        {
+          "title": "当前正式版本",
+          "priority": "P0",
+          "knowledge_id": "release.stable_baseline",
+          "source_id": "691618f043b0fa4f8876c1bee9f4a2481e869937c35565151f131aa88713db3c",
+          "score": 6
+        },
+        {
+          "title": "系统更新与恢复入口",
+          "priority": "P0",
+          "knowledge_id": "update.recovery_cn",
+          "source_id": "a75c25dfbef2a12826b50ef8e5d6c859bdb8ffe3ee1db054e0bde048f6c121f1",
+          "score": 6
+        },
+        {
+          "title": "Search Engine connections",
+          "priority": "P0",
+          "knowledge_id": "seo.search_engines",
+          "source_id": "15c882faeaf832cd81d3d2aeb3928bb71246540c195479a5c4575659d1834cf2",
+          "score": 4
+        },
+        {
+          "title": "Recovery diagnostics",
+          "priority": "P0",
+          "knowledge_id": "backup.recovery_admin",
+          "source_id": "4a07faa342799d074f0e7ab493b64cdc9400eaed78bca5eac4b1f33bb3b36ef5",
+          "score": 4
+        }
+      ]
+    }
+  ],
+  "diagnosis": {
+    "scope": "read-only diagnostic scoring of preserved withdrawn rows; not retrieval or answer injection",
+    "rows_reenabled": 0,
+    "model_calls": 0,
+    "cases": [
+      {
+        "case": "terms",
+        "original_returned_p0_top_score": 2,
+        "reviewed_p1_top_score": 12,
+        "reviewed_p1_title": "服务条款：第三方服务与数据备份"
+      },
+      {
+        "case": "install",
+        "original_returned_p0_top_score": 4,
+        "reviewed_p1_top_score": 12,
+        "reviewed_p1_title": "餐厅外卖插件授权价格和单站范围"
+      },
+      {
+        "case": "menu",
+        "original_returned_p0_top_score": 2,
+        "reviewed_p1_top_score": 14,
+        "reviewed_p1_title": "餐厅外卖菜单识别：先核对草稿"
+      },
+      {
+        "case": "holy-price",
+        "original_returned_p0_top_score": 2,
+        "reviewed_p1_top_score": 16,
+        "reviewed_p1_title": "Holy City 圣城终身授权价格与交付"
+      },
+      {
+        "case": "holy-core",
+        "original_returned_p0_top_score": 2,
+        "reviewed_p1_top_score": 11,
+        "reviewed_p1_title": "Holy City 圣城3.3.9与Core兼容范围"
+      },
+      {
+        "case": "restaurant-price",
+        "original_returned_p0_top_score": 4,
+        "reviewed_p1_top_score": 10,
+        "reviewed_p1_title": "餐厅外卖插件授权价格和单站范围"
+      },
+      {
+        "case": "directory-price",
+        "original_returned_p0_top_score": 8,
+        "reviewed_p1_top_score": 20,
+        "reviewed_p1_title": "来访自动收录插件授权价格与兼容"
+      }
+    ]
+  },
+  "approval_receipt": {
+    "state": "active",
+    "publication_state": "published",
+    "source": "reviewed-website",
+    "site_id": "5e2dc36f-7aba-4b36-acc7-aa519650fc17",
+    "version": "1.2.89",
+    "source_commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+    "knowledge_commit": "ff49f42f544b33dbb3dd9b09c1f0a250d7613371",
+    "snapshot_sha256": "591cd8b941e8c47d64da12f7f2b19a370da2a9f424c3238be03921f038bb4314",
+    "record_hashes": {
+      "db91080e3b587c8a88b01c3f3a1e92a2d0968f31f986c6da159dd67b49012c9d": "35a59ba17f9620e6bf220ab47c238cff84d7a2d803c0fe74550b58f643013512",
+      "1a33bb89b8a8284d2d12f493c944917459b7b2629f6fcabe0ff006e483749029": "08b3db5744d9d81da279426aa4fab2b4df0f9d8edd1038ddc4d1637a81dbced1",
+      "761d1ea1aa088b0a8d9644127187fcf046569dc886e523846720d7b0246c9468": "cb8bf355bd8cc20e03ea27bf14f5bb077bbce6074f1c6c1fda6b015480c68a80",
+      "9bb3b20812ff09b86e5543480907833c62bd51ca8ae4ba0cb8c9181eb53df6f0": "b897a8d723740a68178b138bcf0239188568adbf889c9da398349cb6ddb022e5",
+      "44fd6e06818bab0fcc3151756553bf1879dcd272d4aa9aea402c60d6cc564052": "0e2cd06f827daeedec081e7a9dc2deb01f6e4329fc3b97f35566918d2b46e9f2",
+      "e84fa0ac4398361e5c3f173706e4c5f7c6e5da34d731dbdf482e34ca067adac1": "4ee7452d75941cfed0c4a4e1db785cd1d82e5c650097fca5ac110d150b9bb80e",
+      "af925a14cab51b6d7c3fadd186c07d8755914dba1303e6e55fd439c5a6952eb9": "39a3ad8b08727d469fe580198d28e4279e6a5174a08a87dcccbd8183531403bc"
+    }
+  },
+  "withdrawal_receipt": {
+    "state": "active",
+    "publication_state": "published",
+    "source": "reviewed-website",
+    "site_id": "5e2dc36f-7aba-4b36-acc7-aa519650fc17",
+    "version": "1.2.89",
+    "source_commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+    "knowledge_commit": "b27f9a2161c7fa7c80b604fbd5dea5e869747239",
+    "snapshot_sha256": "f9cd2bd71713b80bb91ff453f8a6ffa582a9750a9d120605d6f6a9c2629e1e26",
+    "record_hashes": []
+  },
+  "commercial_audit": {
+    "status": "PASS_READ_ONLY",
+    "read_only": [
+      true,
+      true
+    ],
+    "production_writes": 0,
+    "private_inventory_or_customer_records_read": false,
+    "snapshot": {
+      "sources": [
+        {
+          "id": 15,
+          "title": "服务条款",
+          "slug": "terms",
+          "status": "published",
+          "content_type": "page",
+          "updated_at": "2026-09-08T03:32:59+00:00",
+          "content_sha256": "f88f5f0cc43166232010a5da5b40a1375bea079f8005e1bfad3ba86878e755b6",
+          "block_types": [
+            "paragraph",
+            "paragraph",
+            "heading",
+            "paragraph",
+            "paragraph",
+            "unordered_list",
+            "paragraph",
+            "heading",
+            "paragraph",
+            "unordered_list",
+            "paragraph",
+            "heading",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "unordered_list",
+            "paragraph",
+            "heading",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "heading",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "unordered_list",
+            "heading",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "heading",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "heading",
+            "paragraph",
+            "unordered_list",
+            "paragraph",
+            "heading",
+            "paragraph",
+            "paragraph",
+            "heading",
+            "paragraph",
+            "paragraph",
+            "paragraph",
+            "heading",
+            "paragraph",
+            "paragraph",
+            "paragraph"
+          ],
+          "card_product_ids": []
+        },
+        {
+          "id": 82,
+          "title": "THE WAY · Holy City 圣城主题｜终身商业授权码",
+          "slug": "the-way-holy-city-圣城主题-终身商业授权码",
+          "status": "published",
+          "content_type": "article",
+          "updated_at": "2026-10-08T23:33:41+00:00",
+          "content_sha256": "96a5233f9951bdda70fdb098ebeee02bca63830987e29bbb6f57231d59881455",
+          "block_types": [
+            "paragraph",
+            "card_delivery"
+          ],
+          "card_product_ids": [
+            8
+          ]
+        },
+        {
+          "id": 85,
+          "title": "戴影 CMS 餐厅外卖插件安装与使用图文教程：菜单识别、加料、支付与接单",
+          "slug": "restaurant-takeout-installation-and-use-guide",
+          "status": "published",
+          "content_type": "article",
+          "updated_at": "2026-10-13T14:55:32+00:00",
+          "content_sha256": "92b48ab80713ec408655d6322f37b9931cd7fa0364d99ffac4f18754cc1b3fa9",
+          "block_types": [
+            "html",
+            "image",
+            "html",
+            "image",
+            "html",
+            "image",
+            "html",
+            "image",
+            "html",
+            "image",
+            "html",
+            "image",
+            "html",
+            "image",
+            "html",
+            "image",
+            "html",
+            "image",
+            "html",
+            "image",
+            "html"
+          ],
+          "card_product_ids": []
+        },
+        {
+          "id": 86,
+          "title": "戴影 CMS 餐厅外卖插件授权码",
+          "slug": "戴影-cms-餐厅外卖插件授权码",
+          "status": "published",
+          "content_type": "article",
+          "updated_at": "2026-10-13T22:53:18+00:00",
+          "content_sha256": "3477e90a4c5e030b9ecf5e7d6d1a521d2696f84dca128947aa45ec8cf5df0662",
+          "block_types": [
+            "paragraph"
+          ],
+          "card_product_ids": []
+        },
+        {
+          "id": 88,
+          "title": "来访自动收录插件授权码｜把 CMS 变成可经营的网址导航站",
+          "slug": "来访自动收录插件授权码-把-cms-变成可经营的网址导航站",
+          "status": "published",
+          "content_type": "article",
+          "updated_at": "2026-10-17T11:53:15+00:00",
+          "content_sha256": "3ef7a86a75254ad0b2c3489e1531c4e6e18a795617ac95b6c036d283d1073d0d",
+          "block_types": [
+            "paragraph",
+            "card_delivery"
+          ],
+          "card_product_ids": [
+            10
+          ]
+        }
+      ],
+      "card_products": [
+        {
+          "id": 8,
+          "name": "《圣城·信仰之礼》主题授权码",
+          "description": "",
+          "price_minor": 200000,
+          "currency": "USD",
+          "status": "active",
+          "max_quantity_per_order": 1,
+          "commerce_product_id": null,
+          "updated_at": "2026-10-08T05:58:41+00:00"
+        },
+        {
+          "id": 10,
+          "name": "来访自动收录插件授权码",
+          "description": "",
+          "price_minor": 36000,
+          "currency": "CNY",
+          "status": "active",
+          "max_quantity_per_order": 1,
+          "commerce_product_id": null,
+          "updated_at": "2026-10-17T03:19:20+00:00"
+        }
+      ],
+      "market_products": [
+        {
+          "product_id": "official.restaurant",
+          "package_type": "plugin",
+          "name": "餐厅外卖",
+          "license_mode": "LICENSE_REQUIRED",
+          "price_label": "USD 2,000／终身使用／每站",
+          "current_version": "1.0.0",
+          "status": "active",
+          "compatibility_json": "{\"minimum_core\":\"1.2.83\",\"maximum_core\":\"2.0.0\",\"min_upgrade_from\":\"1.2.83\",\"hard_min_version\":\"1.2.83\",\"migration_floor\":\"1.2.83\"}"
+        },
+        {
+          "product_id": "official.site-directory",
+          "package_type": "plugin",
+          "name": "戴影来访自动收录",
+          "license_mode": "LICENSE_REQUIRED",
+          "price_label": "需授权码 · 售价由销售方公布",
+          "current_version": "0.1.15",
+          "status": "active",
+          "compatibility_json": "{\"minimum_core\":\"1.2.84\",\"maximum_core\":\"2.0.0\",\"min_upgrade_from\":\"1.2.84\",\"hard_min_version\":\"1.2.84\",\"migration_floor\":\"1.2.84\"}"
+        },
+        {
+          "product_id": "the_way_holy_city",
+          "package_type": "theme",
+          "name": "THE WAY · Holy City",
+          "license_mode": "LICENSE_REQUIRED",
+          "price_label": "USD 2,000 / 终身使用",
+          "current_version": "3.3.9",
+          "status": "active",
+          "compatibility_json": "{\"minimum_core\":\"1.2.81\",\"maximum_core\":\"1.2.81\",\"min_upgrade_from\":\"1.2.81\",\"hard_min_version\":\"1.2.81\",\"migration_floor\":\"1.2.81\"}"
+        }
+      ],
+      "releases": {
+        "official.restaurant": [
+          {
+            "product_id": "official.restaurant",
+            "version": "1.0.0",
+            "channel": "stable",
+            "status": "Published",
+            "artifact_sha256": "4ccf8c011365308410741accaf0c369bb55f870a96c289abc27f9fa096bf97ae",
+            "minimum_core": "1.2.83",
+            "minimum_php": "8.3.33",
+            "dependencies_json": "[]",
+            "published_at": "2026-10-13T19:24:43+00:00"
+          }
+        ],
+        "official.site-directory": [
+          {
+            "product_id": "official.site-directory",
+            "version": "0.1.15",
+            "channel": "stable",
+            "status": "Published",
+            "artifact_sha256": "2ee842a86893a1ec4cd5a68a37c7f71023161c752258d130bc02530a888b22b3",
+            "minimum_core": "1.2.84",
+            "minimum_php": "8.3.0",
+            "dependencies_json": "[]",
+            "published_at": "2026-10-19T02:59:32+00:00"
+          },
+          {
+            "product_id": "official.site-directory",
+            "version": "0.1.14",
+            "channel": "stable",
+            "status": "Published",
+            "artifact_sha256": "3a77927c0f75e0f66fd356c0f649e2d9d8f61dd01e399f5904c30a954637c6a4",
+            "minimum_core": "1.2.84",
+            "minimum_php": "8.3.0",
+            "dependencies_json": "[]",
+            "published_at": "2026-10-17T06:08:20+00:00"
+          },
+          {
+            "product_id": "official.site-directory",
+            "version": "0.1.13",
+            "channel": "stable",
+            "status": "Published",
+            "artifact_sha256": "5f485bff9b2c51712f9e007b228de727cd7e713e350806c9c2c2a216b08fca88",
+            "minimum_core": "1.2.84",
+            "minimum_php": "8.3.0",
+            "dependencies_json": "[]",
+            "published_at": "2026-10-17T05:14:24+00:00"
+          },
+          {
+            "product_id": "official.site-directory",
+            "version": "0.1.12",
+            "channel": "stable",
+            "status": "Published",
+            "artifact_sha256": "68d8377a08a89d6c19f6313b13cdc05c9d3a5fa71c4af72892f73bb43fa1dba2",
+            "minimum_core": "1.2.84",
+            "minimum_php": "8.3.0",
+            "dependencies_json": "[]",
+            "published_at": "2026-10-17T03:09:19+00:00"
+          },
+          {
+            "product_id": "official.site-directory",
+            "version": "0.1.11",
+            "channel": "stable",
+            "status": "Published",
+            "artifact_sha256": "68228bdea9adf2fb9a1b80da8c6fb3007404a738304b8e9c11a96d35a21de49d",
+            "minimum_core": "1.2.84",
+            "minimum_php": "8.3.0",
+            "dependencies_json": "[]",
+            "published_at": "2026-10-16T20:07:58+00:00"
+          }
+        ],
+        "the_way_holy_city": [
+          {
+            "product_id": "the_way_holy_city",
+            "version": "3.3.9",
+            "channel": "stable",
+            "status": "Published",
+            "artifact_sha256": "bc41d695e4c0fff1c296cfb5d45ac0aae233c38f513da002e3669fe4792e7884",
+            "minimum_core": "1.2.81",
+            "minimum_php": "8.3.0",
+            "dependencies_json": "[]",
+            "published_at": "2026-10-08T22:03:24+00:00"
+          },
+          {
+            "product_id": "the_way_holy_city",
+            "version": "3.3.8",
+            "channel": "stable",
+            "status": "Published",
+            "artifact_sha256": "dfb278328d1a8450797c7fa45dc4da12a8980b1ec468d9232d3e1bc59c633016",
+            "minimum_core": "1.2.81",
+            "minimum_php": "8.3.0",
+            "dependencies_json": "[]",
+            "published_at": "2026-10-08T05:13:22+00:00"
+          },
+          {
+            "product_id": "the_way_holy_city",
+            "version": "3.3.7",
+            "channel": "stable",
+            "status": "Published",
+            "artifact_sha256": "650e26b5550705731ed94a1c52ccb7c3c5d8c3ad994f85f64f40e280a2bc7877",
+            "minimum_core": "1.2.81",
+            "minimum_php": "8.3.0",
+            "dependencies_json": "[]",
+            "published_at": "2026-10-08T05:03:21+00:00"
+          }
+        ]
+      },
+      "batch_rule_groups": {
+        "official.restaurant": [
+          {
+            "site_limit": 1,
+            "update_days": 0,
+            "term_starts_on_activation": 1,
+            "batch_count": 1
+          }
+        ],
+        "official.site-directory": [
+          {
+            "site_limit": 1,
+            "update_days": 0,
+            "term_starts_on_activation": 1,
+            "batch_count": 1
+          }
+        ],
+        "the_way_holy_city": [
+          {
+            "site_limit": 1,
+            "update_days": 0,
+            "term_starts_on_activation": 1,
+            "batch_count": 1
+          }
+        ]
+      },
+      "published_packages": {
+        "official.restaurant": {
+          "sha256": "4ccf8c011365308410741accaf0c369bb55f870a96c289abc27f9fa096bf97ae",
+          "manifest": {
+            "content/plugins/official.restaurant/plugin.json": {
+              "plugin_id": "official.restaurant",
+              "name": "餐厅外卖",
+              "description": "面向餐厅自取、预约与指定区域送餐的菜单、厨房票据和订单看板插件；实体打印需单独验收。",
+              "version": "1.0.0",
+              "author": "Daiying CMS",
+              "type": "plugin",
+              "package_type": "plugin",
+              "entry": "plugin.php",
+              "core": {
+                "min": "1.2.83",
+                "max": "2.0.0"
+              },
+              "php": ">=8.3.0",
+              "trust_level": "trusted_php",
+              "official": true,
+              "capabilities": [
+                "commerce.read",
+                "commerce.orders",
+                "restaurant.manage",
+                "restaurant.orders",
+                "restaurant.print"
+              ],
+              "capability_namespaces": [
+                "commerce",
+                "restaurant"
+              ],
+              "admin_routes": [
+                {
+                  "label": "餐厅外卖",
+                  "path": "/admin/restaurant",
+                  "method": "GET"
+                },
+                {
+                  "label": "菜单管理",
+                  "path": "/admin/restaurant/menu",
+                  "method": "GET"
+                },
+                {
+                  "label": "识别菜单",
+                  "path": "/admin/restaurant/menu/import",
+                  "method": "GET"
+                },
+                {
+                  "label": "菜单识别草稿",
+                  "path": "/admin/restaurant/menu/recognize",
+                  "method": "POST"
+                },
+                {
+                  "label": "核对导入菜单",
+                  "path": "/admin/restaurant/menu/import",
+                  "method": "POST"
+                },
+                {
+                  "label": "分类管理",
+                  "path": "/admin/restaurant/categories",
+                  "method": "GET"
+                },
+                {
+                  "label": "保存分类",
+                  "path": "/admin/restaurant/categories/save",
+                  "method": "POST"
+                },
+                {
+                  "label": "店面设置",
+                  "path": "/admin/restaurant/storefront",
+                  "method": "GET"
+                },
+                {
+                  "label": "厨房岗位",
+                  "path": "/admin/restaurant/stations",
+                  "method": "GET"
+                },
+                {
+                  "label": "打印机",
+                  "path": "/admin/restaurant/printers",
+                  "method": "GET"
+                },
+                {
+                  "label": "设备测试票",
+                  "path": "/admin/restaurant/printers/test",
+                  "method": "POST"
+                },
+                {
+                  "label": "现场确认打印",
+                  "path": "/admin/restaurant/print-jobs/confirm",
+                  "method": "POST"
+                },
+                {
+                  "label": "打印任务",
+                  "path": "/admin/restaurant/print-jobs",
+                  "method": "GET"
+                },
+                {
+                  "label": "同步已支付餐厅订单",
+                  "path": "/admin/restaurant/orders/sync-paid",
+                  "method": "POST"
+                }
+              ],
+              "public_routes": [
+                {
+                  "label": "餐厅菜单",
+                  "path": "/restaurant",
+                  "method": "GET"
+                },
+                {
+                  "label": "餐厅店面数据",
+                  "path": "/restaurant/api/storefront",
+                  "method": "GET"
+                },
+                {
+                  "label": "餐厅菜单数据",
+                  "path": "/restaurant/api/menu",
+                  "method": "GET"
+                },
+                {
+                  "label": "餐厅菜单搜索",
+                  "path": "/restaurant/api/menu/search",
+                  "method": "GET"
+                },
+                {
+                  "label": "餐车数据",
+                  "path": "/restaurant/api/cart",
+                  "method": "GET"
+                },
+                {
+                  "label": "加入餐车",
+                  "path": "/restaurant/api/cart/add",
+                  "method": "POST"
+                },
+                {
+                  "label": "移除餐车商品",
+                  "path": "/restaurant/api/cart/remove",
+                  "method": "POST"
+                },
+                {
+                  "label": "修改餐车商品",
+                  "path": "/restaurant/api/cart/update",
+                  "method": "POST"
+                },
+                {
+                  "label": "餐厅支付",
+                  "path": "/restaurant/checkout",
+                  "method": "POST"
+                },
+                {
+                  "label": "餐厅支付完成",
+                  "path": "/restaurant/checkout/complete",
+                  "method": "GET"
+                },
+                {
+                  "label": "打印助手取任务",
+                  "path": "/restaurant/agent/jobs",
+                  "method": "GET"
+                },
+                {
+                  "label": "打印助手回执（已停用）",
+                  "path": "/restaurant/agent/jobs/report",
+                  "method": "POST"
+                },
+                {
+                  "label": "打印桥设备绑定",
+                  "path": "/restaurant/bridge/bindings",
+                  "method": "GET"
+                },
+                {
+                  "label": "打印桥领取任务",
+                  "path": "/restaurant/bridge/jobs/claim",
+                  "method": "POST"
+                },
+                {
+                  "label": "打印桥输出前确认",
+                  "path": "/restaurant/bridge/jobs/start",
+                  "method": "POST"
+                },
+                {
+                  "label": "打印桥状态回传",
+                  "path": "/restaurant/bridge/jobs/report",
+                  "method": "POST"
+                }
+              ],
+              "dependencies": [],
+              "required_plugins": [
+                "official.commerce"
+              ],
+              "migrations": [
+                "migrations/001_restaurant_core.php",
+                "migrations/002_restaurant_checkout.php",
+                "migrations/003_agent_claims.php",
+                "migrations/004_print_bridge.php"
+              ],
+              "table_prefixes": [
+                "restaurant_"
+              ],
+              "data_policy": {
+                "uninstall": "retain_orders_tickets_and_print_history",
+                "purge": "separate_confirmation_only"
+              },
+              "data_schema_version": "0.1.0-alpha.15"
+            }
+          },
+          "targeted_source_paths": [
+            "content/plugins/official.restaurant/bin/reconcile-print-jobs.php",
+            "content/plugins/official.restaurant/migrations/001_restaurant_core.php",
+            "content/plugins/official.restaurant/migrations/002_restaurant_checkout.php",
+            "content/plugins/official.restaurant/migrations/003_agent_claims.php",
+            "content/plugins/official.restaurant/migrations/004_print_bridge.php",
+            "content/plugins/official.restaurant/plugin.php",
+            "content/plugins/official.restaurant/src/RestaurantCheckoutService.php",
+            "content/plugins/official.restaurant/src/RestaurantController.php",
+            "content/plugins/official.restaurant/src/RestaurantMenuImportService.php",
+            "content/plugins/official.restaurant/src/RestaurantPrintService.php",
+            "content/plugins/official.restaurant/src/RestaurantRepository.php",
+            "content/plugins/official.restaurant/src/RestaurantTicketService.php"
+          ]
+        },
+        "official.site-directory": {
+          "sha256": "2ee842a86893a1ec4cd5a68a37c7f71023161c752258d130bc02530a888b22b3",
+          "manifest": {
+            "content/plugins/official.site-directory/plugin.json": {
+              "plugin_id": "official.site-directory",
+              "name": "戴影来访自动收录",
+              "description": "独立网址导航、来访发现、可选 AI 自动通过、Commerce 推荐位适配。",
+              "version": "0.1.15",
+              "author": "Daiying CMS",
+              "type": "plugin",
+              "package_type": "plugin",
+              "entry": "plugin.php",
+              "core": {
+                "min": "1.2.82",
+                "max": "2.0.0"
+              },
+              "php": ">=8.3.0",
+              "official": true,
+              "trust_level": "trusted_php",
+              "capabilities": [
+                "site_directory.manage",
+                "network.external",
+                "scheduler.register",
+                "frontend.asset",
+                "blocks.register"
+              ],
+              "permissions": [
+                "database.create_table",
+                "database.read_plugin_data",
+                "database.write_plugin_data",
+                "network.outbound",
+                "admin.menu",
+                "admin.page",
+                "cron.register",
+                "block.register",
+                "route.register",
+                "commerce.access"
+              ],
+              "capability_namespaces": [
+                "site_directory"
+              ],
+              "table_prefixes": [
+                "site_directory_"
+              ],
+              "dependencies": [],
+              "optional_dependencies": [
+                "official.commerce"
+              ],
+              "migrations": [
+                "migrations/001_directory.php",
+                "migrations/002_settings.php",
+                "migrations/003_review_fixes.php",
+                "migrations/004_ai_review.php",
+                "migrations/005_disputes.php"
+              ],
+              "data_schema_version": "0.1.5",
+              "data_policy": {
+                "uninstall": "retain_customer_data",
+                "purge": "separate_confirmation_only"
+              },
+              "navigation_items": [
+                {
+                  "label": "网址导航",
+                  "url": "/directory",
+                  "type": "plugin_route",
+                  "location": "primary",
+                  "sort_order": 60
+                }
+              ],
+              "optional_capabilities": [
+                "frontend.homepage"
+              ]
+            }
+          },
+          "targeted_source_paths": []
+        },
+        "the_way_holy_city": {
+          "sha256": "bc41d695e4c0fff1c296cfb5d45ac0aae233c38f513da002e3669fe4792e7884",
+          "manifest": {
+            "the_way_holy_city/theme.json": {
+              "theme_id": "the_way_holy_city",
+              "name": "THE WAY · Holy City",
+              "version": "3.3.9",
+              "author": "Daiying CMS",
+              "description": "沉浸式圣城主题：独立人物与场景、本地完整圣经及脚注、点烛祷告、文章阅读与原生评论、静态十字架与柔光。",
+              "core": {
+                "min": "1.2.81",
+                "max": "1.2.81"
+              },
+              "content_types": [
+                "article",
+                "page"
+              ],
+              "recommended_plugins": [],
+              "required_plugins": [],
+              "settings_schema": {
+                "church_name": {
+                  "type": "string",
+                  "default": "THE WAY · HOLY CITY"
+                },
+                "city_subtitle": {
+                  "type": "string",
+                  "default": "进入圣城 · 安静你的心"
+                },
+                "christ_gate_label": {
+                  "type": "string",
+                  "default": "在基督里进入圣言世界"
+                },
+                "enable_memory": {
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            }
+          },
+          "targeted_source_paths": []
+        }
+      },
+      "config_sha256": "118582f03b58effc5a0956ba579d6123e395544133a2a4986fc151b74774c80e",
+      "pointer_sha256": "10a739836533304d0be9ff5c29a764972d7053dfda576870f7eb40e83dacf9f1"
+    },
+    "snapshot_sha256": "5d62e1df047f2f8550f551c90ba79e4080daca02769591cef7da4e9d1abe8ae9",
+    "unchanged_during_read": true
+  },
+  "commercial_supplement": {
+    "query_only": true,
+    "production_writes": 0,
+    "public_product_configuration_only": [
+      {
+        "product_id": "daiying-restaurant-storefront",
+        "package_type": "theme",
+        "name": "戴影餐厅外卖主题",
+        "license_mode": "FREE",
+        "price_label": "免费",
+        "current_version": "1.0.0",
+        "status": "active",
+        "compatibility_json": "{\"minimum_core\":\"1.2.83\",\"maximum_core\":\"2.0.0\",\"min_upgrade_from\":\"1.2.83\",\"hard_min_version\":\"1.2.83\",\"migration_floor\":\"1.2.83\"}"
+      }
+    ]
+  },
+  "protection": {
+    "production_snapshot_equal": true,
+    "frozen190_unchanged": true,
+    "frozen190_sha256": {
+      "daiying-cms-1.2.90-stable.zip": "cd81ba0073d41f8c8a0599541f8d0e29eb9bac9feefca061fe5c74eaf475e61d",
+      "daiying-cms-core-update-1.2.90.zip": "7086c8e734d40cef3e9756450b4c6edf6c58508213956a58660f7f0874d94903",
+      "signed-candidate-evidence.tar.gz": "96ad3a521cfb5f4c66ac89960dedd920829aa47ee5174a094763a6644ffdf0ca"
+    },
+    "query_only_connections": [
+      true,
+      true
+    ],
+    "no_orders_licenses_or_card_secrets_read": true
+  },
+  "stop_state": {
+    "status": "PASS",
+    "isolated_ai_disabled": true,
+    "isolated_credential_absent": true,
+    "reviewed_source_active_rows": 0,
+    "model_calls": 0,
+    "production_writes": 0,
+    "runtime_code_modified": false
+  },
+  "model_calls": 0,
+  "production_import": false,
+  "algorithm_changed": false,
+  "runtime_plugin_sha256": "e3a13889fb8648c720dc977d1604b112bb8da74f7754398f31bda1c58a9257ed",
+  "evidence_sha256": {
+    "commercial-source.json": "624dfc98a2282407a7904290e8e39e6725bf33088fc596fc7ae426d432e1fdc0",
+    "commercial-after.json": "624dfc98a2282407a7904290e8e39e6725bf33088fc596fc7ae426d432e1fdc0",
+    "commercial-supplement.json": "f278b96c4ebdc91e6566e780f43711e86401bbad9f9b1e938c760065b2e0f390",
+    "public-fetch.json": "fe667de29c577a6a9067a64673fb3dc903c140e564b98a5089e5ad338dfd25e8",
+    "reviewed-articles.json": "6e213807682acc35dd0ec526f2195fcea7e30bbbed1e8b461ba9f393ec6a79b7",
+    "review-decisions.json": "186d7f8e81ec04bd589d554d32393f52e13714955090eca33aca96819a40c3e0",
+    "admission-result.json": "ea7a9688ffbbe902f7664879bf9feaf0962b482bea2b225e7a5f7886e8ac1bd2",
+    "business-query-matrix.json": "03c07c5b8d41f0bbea7feb838825f5efc64867a3a4f63e3f31a2b25aac490221",
+    "ranking-diagnosis.json": "674a63c500a836adc5009e025c18388a13e23e32bc19a79d322d7b836779727d",
+    "admission-test.log": "c8372774503ab4ec4bf46dcb63ca73c04a94def968ec88639fbe023c31943e8d",
+    "admission-test-initial.log": "a4ab3d5eba9d700c36771f0901c3778338b1659fdefa306cbbf057f46deb73b9",
+    "protection-final.json": "aac1b1b316c2cbd6d264b42909dc6faed9868cc2ac4507c0d9153389c4234a77",
+    "stop-state.json": "0b41796b01f5bfc5c761f714a7e5baa8ede2bc07cff1636e2ba31a9e121b7a87",
+    "auxiliary-path-correction.json": "d457a2dd4216aea36286c57f70bb1585a83daf1f9eeed43d29e39acaa0dabac1"
+  }
+}
