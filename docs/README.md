@@ -101,3 +101,5 @@ Several historical implementation reports still live at the repository root. The
 - [通用两级导航及旧主题兼容](navigation-groups.md)（1.2.87 起已发布）
 
 - [Core 1.2.88 与 Logo / Stripe 正式发布记录](CORE_1.2.88_PUBLICATION_REPORT.md)
+
+- [Core1.2.90 PR70合入后的正式签名候选验收](CORE_1.2.90_PR70_PREPARATION_REPORT.md)：新来源449f92a，原冻结包保留，未发布/部署。
