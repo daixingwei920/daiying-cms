@@ -14,6 +14,7 @@ This index collects the public-facing documentation currently available in the G
 - [Architecture and consumer boundaries](../DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_ARCHITECTURE.md)
 - [Knowledge synchronization report 2026-10-14](knowledge/2026-10-14-sync-report.md)
 - [知识库到客服闭环及蜘蛛丢样观测隔离验收](knowledge-customer-loop-acceptance.md)
+- [客服真实模型补测与旧资料承接建议](knowledge-customer-loop-live-acceptance.md)
 
 - [Issue #9 SEO/GEO configuration and output contract](seo-geo-contract.md) documents the unpublished optional settings, rendering, privacy and rollback behavior.
 

@@ -10,6 +10,7 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 - Reuse unmerged PR41 tooling by immutable source7eb324e, independently locked official customer-service1.1.0 snapshot and native Core AI services. Plugin changes remain in an independent checkout, never Core payloads.
 - Accept only reviewed USER-FACING knowledge for actual published releases;1.2.90 remains unpublished. Separate importer/HTTP retrieval/model-protocol fixture evidence from live paid-provider or production acceptance.
 - Preserve bounded nonblocking crawler collection and privacy; loss-observation limits must remain visible and cannot imply exact traffic or exact drop rates.
+- Owner subsequently authorizes the proposed next isolated real-model acceptance and legacy-FAQ carryover review. The actual configured customer model is observed as gpt-5.6-terra, not the historical gpt-4.1-mini preset. Use current configuration in isolation; do not modify production settings. Keep PR70 Draft and preserve the no-merge/no-publication/no-production boundary. See docs/knowledge-customer-loop-live-acceptance.md.
 
 ## Owner-authorized PR67 merge and Core1.2.90 signed preparation (2026-10-24)
 
@@ -307,7 +308,7 @@ See `docs/retired-products.md`.
 - 每周至少一次知识一致性检查，在 `docs/knowledge/` 记录检查日期、来源版本、发现的问题、处理状态和遗留事项。自动调度尚未实施时，下一次开发会话先核对本周记录，补查或报告逾期，不能声称已启用定时任务。
 - 严格区分已实现、已测试、待验证与规划。仅源码/文档复核不得标记运行测试 PASS；Git 提交、路径名或旧报告不能自动把功能晋级为已验收。测试证据必须记录实际环境与范围。
 - 检索要求为 P0 官方知识、P1 已审核已发布文章、P2 普通已发布文章；Draft/Pending/C/D、内部资料及状态未知内容默认禁用。待优化原文不因可作为输入而成为可信参考知识。
-- USER-FACING 与 INTERNAL/ADMIN_DEVELOPER 必须分开；普通客服只用 USER-FACING 导出，未知事实明确无法确认。不得向客服暴露内部资料，也不得把类名或方法改写成用户按钮。戴小影客服继续使用站点配置的 gpt-4.1-mini，模型调用复用 Core AiService/AiGateway。
+- USER-FACING 与 INTERNAL/ADMIN_DEVELOPER 必须分开；普通客服只用 USER-FACING 导出，未知事实明确无法确认。不得向客服暴露内部资料，也不得把类名或方法改写成用户按钮。客服模型以实际站点/插件配置为准，历史gpt-4.1-mini预设不是当前站点固定事实；知识同步不改变生产模型，调用复用 Core AiService/AiGateway。
 - 每份交付报告必须包含「知识库同步状态」，列明更新文件、未更新原因、遗留事项，以及构建/导入/索引/消费者应用各自的真实状态。未部署同步服务不得写成已实时同步。
 - Git 只纳管审核过的事实、来源、规范和独立工具；禁止提交运行索引、向量缓存、对话、生产备份或密钥。现有索引不得为同步而擅自清空或重建。
 

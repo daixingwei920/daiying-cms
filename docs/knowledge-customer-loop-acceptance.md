@@ -2,6 +2,8 @@
 
 日期：2026-10-25。状态：**ISOLATED_ACCEPTANCE_PASSED / OWNER_REVIEW_PENDING**。Owner要求先完成知识进入客服闭环，再补蜘蛛丢样观测；没有授权合并、发布或生产部署。
 
+本页记录首轮隔离验收。后续已完成实际配置模型的补测及旧资料只读盘点，见[补充验收与承接建议](knowledge-customer-loop-live-acceptance.md)；两轮证据分开，首轮本地协议模型的结论不被改写成真实模型结果。
+
 ## 来源与交付边界
 
 - Core clean checkout从冻结main `c09b5ea10f31cf0203a5cf4b73df1d628c8cf546` 建立。第一阶段提交 `dc1ddf5dca18e9d406bd0876aebc9ec2f4bbc0c5`；第二阶段 `6cb82a8`。新代码是独立未发布开发分支，未进入已冻结1.2.90签名包，版本配置和55个历史迁移没有变化。

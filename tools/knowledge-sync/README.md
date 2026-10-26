@@ -114,7 +114,7 @@ python3 -B tools/knowledge-sync/sync.py --config /tmp/daiying-knowledge-isolated
 
 首次成功激活后进入站点级严格托管模式：先取有匹配的最高优先级P0/P1/P2，再在该级内排序；旧 FAQ 快捷返回和旧 chunks 不再绕过准入。旧行不删除，但不自动当作可信参考。无匹配、撤回、版本不符或损坏均返回资料不足，不回退到旧 FAQ。未激活的站点保持旧行为；不能将该候选的通过推广到未升级插件。
 
-原生同步通道检索最多500条；多来源大量知识可能被这个总上限遮挡，需要在未来扩大资料规模前另行验收。回答来源包含版本、知识修订和活动回执摘要。模型仍复用 Core AiService/AiGateway；本轮HTTP验收使用确定性本地协议提供方，不调用付费模型，不修改生产 gpt-4.1-mini。
+原生同步通道检索最多500条；多来源大量知识可能被这个总上限遮挡，需要在未来扩大资料规模前另行验收。回答来源包含版本、知识修订和活动回执摘要。模型仍复用 Core AiService/AiGateway；首轮HTTP验收使用确定性本地协议提供方。后续按Owner授权，在服务器隔离站通过实际配置的gpt-5.6-terra补测17项、5次真实回答；未改生产模型。历史gpt-4.1-mini预设不是站点当前配置的证明。
 
 ## 验证与状态报告
 
@@ -129,3 +129,5 @@ python3 -B scripts/product_knowledge.py
 `state/status.json` 与 `status` 命令记录发布收件箱、队列状态、尝试次数、下次重试、来源/知识 commit、增改删/跳过数量、变化文件、消费者成功游标、漂移与周检问题。快照包含哈希并在使用前检查；状态报告不包含原始源码正文或模型密钥。
 
 原生安装站点的HTTP闭环测试由 `tests/native_site.php` 与 `tests/http_consumer.py` 执行，输入必须是全新隔离根、固定公开1.2.89安装包及服务器生成的临时测试授权。它通过原生市场安装器安装独立插件候选，不提供生产配置或信任绕过入口。完整范围、真实通过项和限制见 [2026-10-25验收报告](../../docs/knowledge-customer-loop-acceptance.md)。模板仍未安装；不表示已启用生产实时同步。
+
+真实模型路径另需 `--live-provider --expected-model APPROVED_MODEL`，并由授权服务器执行器在隔离根创建短期 `live-provider-approved.json`，明确isolated/model/max_live_requests=5/expires_at。标记缺失、过期、模型或预算不匹配时，在数据库和HTTP服务启动前拒绝。CLI开关本身不授予凭证读取或生产权限。四项拒收回归：`python3 -B tools/knowledge-sync/tests/test_live_guard.py`。凭证只在服务器隔离库重加密，测试后停用并清除；完整回执与边界见[真实模型补测和旧资料承接建议](../../docs/knowledge-customer-loop-live-acceptance.md)。
