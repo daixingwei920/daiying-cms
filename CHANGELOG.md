@@ -1,13 +1,11 @@
 # Changelog
 
-## 1.2.90 (signed candidate preparation; unpublished)
+## 1.2.90 (published 2026-10-26)
 
-- Integrate Owner-accepted PR70 bounded crawler-loss observations and isolated knowledge tooling into1.2.90. Customer-service retrieval/priority repair remains a separate plugin candidate, not Core payload.
-- Keep the previously frozen1.2.90 artifacts byte-for-byte; prepare this exact-source candidate separately. No formal publication or production deployment.
-
-- Extend finite domestic crawler UA aliases and add filtered collected-sample statistics, UTC trends, rankings and pagination. UA claims remain unverified; collected samples are not complete visits or indexing evidence.
-- Preserve bounded private nonblocking aggregation, existing routes/capabilities, public APIs, published migrations and the1.2.80 upgrade floor.
-- Owner authorizes PR67 merge, formal server signing and Release Gate preparation; physical-device acceptance is deferred. No tag/publication/catalog update/production deployment.
+- Publish the frozen PR70 candidate449f92a unchanged; the original c09b5ea1.2.90 signed candidate remains a separate private archive. See docs/CORE_1.2.90_PUBLICATION_REPORT.md.
+- Extend finite domestic crawler UA aliases and filtered collected-sample statistics, UTC trends, rankings and pagination. Add bounded nonblocking write/lock/capacity/error observations; numbers are sample lower bounds, not complete traffic, drop rates or indexing evidence.
+- Preserve published migrations, public APIs, privacy and the1.2.80 upgrade/PHP8.3 floors. Customer-service retrieval repair is a separate unpublished plugin, outside Core packages.
+- Official GitHub/update-service anonymous download and signature checks passed. Website code/config was not deployed by Codex; Owner separately confirms manually upgrading production to1.2.90. Physical-device acceptance remains deferred.
 
 ## 1.2.89 (published 2026-10-24)
 

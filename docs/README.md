@@ -103,3 +103,5 @@ Several historical implementation reports still live at the repository root. The
 - [Core 1.2.88 与 Logo / Stripe 正式发布记录](CORE_1.2.88_PUBLICATION_REPORT.md)
 
 - [Core1.2.90 PR70合入后的正式签名候选验收](CORE_1.2.90_PR70_PREPARATION_REPORT.md)：新来源449f92a，原冻结包保留，未发布/部署。
+
+- [Core1.2.90正式发布与公开验收](CORE_1.2.90_PUBLICATION_REPORT.md)：GitHub/官方更新、29项匿名检查/19项验签、官网缓存刷新及Owner手动升级分别记录。
