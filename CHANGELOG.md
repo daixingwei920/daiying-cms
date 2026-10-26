@@ -2,6 +2,9 @@
 
 ## 1.2.90 (signed candidate preparation; unpublished)
 
+- Integrate Owner-accepted PR70 bounded crawler-loss observations and isolated knowledge tooling into1.2.90. Customer-service retrieval/priority repair remains a separate plugin candidate, not Core payload.
+- Keep the previously frozen1.2.90 artifacts byte-for-byte; prepare this exact-source candidate separately. No formal publication or production deployment.
+
 - Extend finite domestic crawler UA aliases and add filtered collected-sample statistics, UTC trends, rankings and pagination. UA claims remain unverified; collected samples are not complete visits or indexing evidence.
 - Preserve bounded private nonblocking aggregation, existing routes/capabilities, public APIs, published migrations and the1.2.80 upgrade floor.
 - Owner authorizes PR67 merge, formal server signing and Release Gate preparation; physical-device acceptance is deferred. No tag/publication/catalog update/production deployment.

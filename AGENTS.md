@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-approved PR70 merge into Core1.2.90 (2026-10-26)
+
+- Owner accepts the isolated relevance/business acceptance and authorizes PR70 merge, formal server signing and Release Gate preparation. Owner corrects the target to **1.2.90**, not1.2.91; no version bump.
+- Preserve the original frozen1.2.90 package/signature/evidence bytes at source c09b5ea. Prepare the newly merged1.2.90 candidate in a separate private directory, bound to its own exact clean origin/main and hashes. Never overwrite or silently confuse the two candidates.
+- The independent customer-service1.1.1-dev.2 source remains outside Core artifacts; PR70 Core packages contain the generic crawler observation only. Do not claim the Core update alone installs the plugin retrieval fix.
+- Reuse accepted runtime tests only where bytes match; rerun native signed-artifact upgrade/rollback and formal Release Gate for the new exact source. No release tag, GitHub Release, public catalog publication, production deployment/upgrade or destructive migration. Physical-device acceptance remains deferred.
+
 ## Owner-authorized isolated knowledge/customer loop and crawler loss observation (2026-10-25)
 
 - Owner requests knowledge-to-customer closure first, then crawler loss observation, with isolated development/tests and acceptance delivery. No merge, release, production deployment or mutation of frozen1.2.90 artifacts; do not change version or signing trust.
