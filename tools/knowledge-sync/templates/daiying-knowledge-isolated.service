@@ -1,0 +1,11 @@
+[Unit]
+Description=Daiying isolated knowledge consistency and retry worker
+ConditionPathExists=%h/daiying-knowledge-isolated/.daiying-knowledge-isolated
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/daiying-cms
+ExecStart=/usr/bin/python3 -B tools/knowledge-sync/sync.py --config %h/daiying-knowledge-isolated/config.json tick
+ExecStart=/usr/bin/python3 -B tools/knowledge-sync/sync.py --config %h/daiying-knowledge-isolated/config.json work
+NoNewPrivileges=true
+PrivateTmp=true

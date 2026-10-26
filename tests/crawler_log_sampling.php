@@ -48,5 +48,6 @@ try{
         'interpretation'=>'Controlled fixture demonstrates LOCK_NB contention loss. Historical 109/400 is one run, not a fixed sample rate. No traffic extrapolation.',
         'production_writes'=>0],JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES),PHP_EOL;
 }finally{
+    foreach(glob($root.'/storage/logs/seo-crawler-observation-*.json')?:[]as$observation)unlink($observation);
     unlink($path);unlink($root.'/.sampling-test');rmdir($root.'/storage/logs');rmdir($root.'/storage');rmdir($root);
 }

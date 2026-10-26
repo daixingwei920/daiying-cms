@@ -1,7 +1,7 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
   "verified_version": "1.2.90",
-  "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+  "last_verified_at": "2026-10-26",
   "records": [
     {
       "id": "install.web_installer",
@@ -34,8 +34,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -74,8 +74,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -114,8 +114,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -154,8 +154,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -194,8 +194,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -241,8 +241,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -281,8 +281,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -321,8 +321,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -361,8 +361,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -401,8 +401,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -441,8 +441,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -488,8 +488,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -535,8 +535,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -575,8 +575,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -588,7 +588,7 @@
       "id": "ai.provider_settings",
       "topic": "AI Provider",
       "capability": "Site AI Provider",
-      "description": "站点 AI 设置入口为 /admin/settings/ai，Core 提供站点统一 AI 服务和调用网关。源码包含 OpenAI-compatible、Gemini 和 OpenClaw 适配；插件应复用公开服务而非读取密钥表。戴小影客服继续使用站点配置的 gpt-4.1-mini，本知识包不改变模型或站点配置。",
+      "description": "站点 AI 设置入口为 /admin/settings/ai，Core 提供站点统一 AI 服务和调用网关。源码包含 OpenAI-compatible、Gemini 和 OpenClaw 适配；插件应复用公开服务而非读取密钥表。客服模型取决于实际站点与插件配置，本知识包不改变模型或站点配置。",
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Ai/AiService.php; system/core/Ai/AiProviderPresets.php; system/core/Ai/AiGateway.php",
       "source_type": "official_docs+source_review",
@@ -629,8 +629,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -669,8 +669,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -709,8 +709,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -749,8 +749,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -796,8 +796,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -835,8 +835,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -868,8 +868,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -894,9 +894,9 @@
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "b58cca915f403e8b009555c509ee5c692e8c00e4b470aeb21e2cf5f3b67990b0",
-          "line_start": 114,
-          "line_end": 114,
+          "sha256": "b265b5e447725dfc138a6d3f834cb646cefcd42570acaa7d5fde41d3de539bdc",
+          "line_start": 117,
+          "line_end": 117,
           "anchor": "- Support MySQL fresh installation through four checksum-bound historical dialect adapters, without modifying frozen migrations."
         },
         {
@@ -908,8 +908,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -948,8 +948,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -974,16 +974,16 @@
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "b58cca915f403e8b009555c509ee5c692e8c00e4b470aeb21e2cf5f3b67990b0",
-          "line_start": 117,
-          "line_end": 117,
+          "sha256": "b265b5e447725dfc138a6d3f834cb646cefcd42570acaa7d5fde41d3de539bdc",
+          "line_start": 120,
+          "line_end": 120,
           "anchor": "- Direct upgrade validation covers 1.2.81 to 1.2.82. Other source versions are not verified for this release."
         },
         {
           "path": "CHANGELOG.md",
-          "sha256": "b58cca915f403e8b009555c509ee5c692e8c00e4b470aeb21e2cf5f3b67990b0",
-          "line_start": 118,
-          "line_end": 118,
+          "sha256": "b265b5e447725dfc138a6d3f834cb646cefcd42570acaa7d5fde41d3de539bdc",
+          "line_start": 121,
+          "line_end": 121,
           "anchor": "- Existing Commerce installations require a separate plugin update for its MySQL parameter fix; Core updates do not replace installed plugins."
         },
         {
@@ -995,8 +995,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1035,8 +1035,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1082,8 +1082,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1108,9 +1108,9 @@
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "b58cca915f403e8b009555c509ee5c692e8c00e4b470aeb21e2cf5f3b67990b0",
-          "line_start": 101,
-          "line_end": 101,
+          "sha256": "b265b5e447725dfc138a6d3f834cb646cefcd42570acaa7d5fde41d3de539bdc",
+          "line_start": 104,
+          "line_end": 104,
           "anchor": "- Share SQLite immediate transaction state by PDO connection across payment services and repositories on PHP 8.3."
         },
         {
@@ -1122,8 +1122,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1156,8 +1156,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1189,8 +1189,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1222,7 +1222,7 @@
         },
         {
           "path": "system/core/Admin/AdminController.php",
-          "sha256": "4a19efee078e7a44930a1715a3858d10a2b3aedeb86cc25b8de8cb20c360dbdf",
+          "sha256": "e831489b1cb0efd233a8fda5e9e5942922544b047ccfd7e3b502e69c94398ead",
           "line_start": 1061,
           "line_end": 1061,
           "anchor": "public function adminSecurityPasskeyReauthVerify(Request $request): Response"
@@ -1236,8 +1236,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1275,8 +1275,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "ai.image_sdk",
@@ -1308,8 +1308,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "ai.image_queue_cost",
@@ -1341,8 +1341,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "ai.image_private_media",
@@ -1374,8 +1374,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "ai.image_validation_scope",
@@ -1407,8 +1407,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "plugin.atomic_documents",
@@ -1440,8 +1440,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "plugin.branding_admin",
@@ -1473,8 +1473,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "plugin.public_site_identity",
@@ -1506,8 +1506,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "payment.refund_callback_idempotency",
@@ -1539,8 +1539,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "payment.checkout_recovery",
@@ -1572,8 +1572,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "theme.navigation_groups",
@@ -1605,8 +1605,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "auth.member_editorial_access",
@@ -1638,8 +1638,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "ai.request_execution",
@@ -1671,8 +1671,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "seo.geo_basics",
@@ -1706,7 +1706,7 @@
         {
           "path": "system/core/Seo/CrawlerLog.php",
           "anchor": "final class CrawlerLog",
-          "sha256": "cc5d549aaedef59f52653bce437367547538be4d4f0ade6a21ae8ee6ec685804",
+          "sha256": "450ae351d9327e7c2efe913948e05bcdfdb57002341c393ff2ff3d9309723e24",
           "line_start": 12,
           "line_end": 12
         }
@@ -1718,8 +1718,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
     },
     {
       "id": "seo.domestic_crawler_statistics",
@@ -1746,7 +1746,7 @@
         {
           "path": "system/core/Seo/CrawlerStatistics.php",
           "anchor": "public function snapshot(",
-          "sha256": "49c7ec33fce33f25590ebd99575b2f0bbf47d101474d68e2ca50ceaccc7338e2",
+          "sha256": "b62ca4a2cbfaa4fcd79a7ae5f4b8b7a015402e52b65d25893e42415fff29a440",
           "line_start": 21,
           "line_end": 21
         },
@@ -1772,14 +1772,101 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-      "last_verified_at": "2026-10-25T03:32:08.678081+00:00"
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26"
+    },
+    {
+      "id": "knowledge.customer_consumer_loop",
+      "topic": "Knowledge Governance",
+      "capability": "Isolated Customer Knowledge Closure",
+      "description": "知识同步工具及独立客服1.1.1-dev.2候选已实现隔离发布事件、事务导入回执、失败保旧、重试及撤回。此前泛化P0屏蔽相关P1的同一组业务问题0/7；最小相关性修复后先筛选主题再按相关P0/P1/P2排序，新隔离原生升级、9项专项、21项回归、41项真实模型HTTP检查及撤回后同题旧FAQ检查通过，业务7/7。仍为未发布候选，测试批次已撤回；多实体和500候选上限限制保留，未生产导入、部署或接入Core优化器。 Owner已于2026-10-26接受本轮隔离验收并授权合入1.2.90、另行签名/Gate准备；原冻结包保留，未授权正式发布或生产部署。",
+      "audience": "Developer",
+      "source": "docs/knowledge-customer-loop-acceptance.md; docs/knowledge-customer-loop-live-acceptance.md; docs/knowledge-article-admission-acceptance.md; docs/knowledge-relevance-fix-acceptance.md",
+      "source_type": "official_docs+source_review",
+      "evidence": "Source/document review only. Separate isolated runtime acceptance and its scope are recorded in docs/knowledge-relevance-fix-acceptance.md; no Owner/production/publication acceptance claim.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/knowledge-customer-loop-acceptance.md",
+          "sha256": "b0b59ccd8d49c5cc6543bcd554e73f7b7e4676ce165e7d64e2b861bd3e3e83be",
+          "line_start": 16,
+          "line_end": 16,
+          "anchor": "正式发布事件 →"
+        },
+        {
+          "path": "docs/knowledge-customer-loop-live-acceptance.md",
+          "sha256": "18cfee1f527d32c805f9139711bb171d4f5297bad50e1071f8e337c9f52db68e",
+          "line_start": 13,
+          "line_end": 13,
+          "anchor": "## 17项原生HTTP检查"
+        },
+        {
+          "path": "docs/knowledge-article-admission-acceptance.md",
+          "sha256": "1ea64fab3fd6a3669c0d81923ab8698f9b5aae72cd9a9fb569b02e100410e586",
+          "line_start": 47,
+          "line_end": 47,
+          "anchor": "## 阻塞：P0泛化匹配屏蔽业务P1"
+        },
+        {
+          "path": "docs/knowledge-relevance-fix-acceptance.md",
+          "sha256": "f0648d06796deae1d7b8d7fec36fec174c36ba41928371e00b9b47f686935136",
+          "line_start": 30,
+          "line_end": 30,
+          "anchor": "## 原生升级与真实模型HTTP"
+        }
+      ],
+      "verified_version": "1.2.90",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
+      "implementation_status": "implemented_unpublished_candidate",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false
+    },
+    {
+      "id": "seo.crawler_loss_observation",
+      "topic": "SEO/GEO",
+      "capability": "Crawler Collection Loss Observation Candidate",
+      "description": "未发布开发分支补充开启采集后的结果观测：写入成功、锁忙、容量、损坏和读写失败等。固定8个非阻塞分片、每片8KiB，复用保留期且不保存IP/UA/查询串/具体slug。后台只跟随时间窗口并明确下界口径；不能计算真实访问量或完整丢样率，不属于已冻结1.2.90包。",
+      "audience": "Developer",
+      "source": "system/core/Seo/CrawlerObservation.php",
+      "source_type": "official_docs+source_review",
+      "evidence": "Source/document review only. Actual isolated runtime evidence is separate in docs/knowledge-customer-loop-acceptance.md; no production or publication claim.",
+      "user_facing": false,
+      "admin_route": "/admin/seo/crawlers",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "system/core/Seo/CrawlerObservation.php",
+          "sha256": "84884eb6dddf1dc338010d9fd66dca2721d685922b15ac43e01b5d76d4b0ffe7",
+          "line_start": 10,
+          "line_end": 10,
+          "anchor": "public const REASONS"
+        }
+      ],
+      "verified_version": "1.2.90",
+      "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+      "last_verified_at": "2026-10-26",
+      "implementation_status": "implemented_unpublished_candidate",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false
     }
   ],
-  "package_revision": "2026-10-24-core190-signed-preparation-unpublished",
+  "package_revision": "2026-10-26-owner-accepted-pr70-core190-preparation",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-  "source_tag": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
+  "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+  "source_tag": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "PUBLISHED",
@@ -1849,13 +1936,13 @@
       "unknown review or classification status"
     ],
     "unknown_answer": "资料不足时明确无法确认，不得猜测。",
-    "customer_model": "gpt-4.1-mini",
+    "customer_model": "site_and_plugin_configured_model",
     "model_configuration_changed": false
   },
   "integration_status": {
-    "automatic_sync": "DESIGN_ONLY",
-    "legacy_incremental_tool": "PARTIAL_HISTORICAL_IMPLEMENTATION_NOT_CONNECTED",
-    "customer_service_latest_package_import": "NOT_RUN",
+    "automatic_sync": "IMPLEMENTED_ISOLATED",
+    "legacy_incremental_tool": "REUSED_PINNED_PR41_IMPLEMENTED_ISOLATED",
+    "customer_service_latest_package_import": "ISOLATED_RELEVANCE_BUSINESS_7_OF_7_PASS_PRODUCTION_NOT_RUN",
     "core_optimizer_shared_knowledge": "NOT_IMPLEMENTED"
   },
   "original_qa": {
@@ -1878,13 +1965,76 @@
   ],
   "release_status": "UNPUBLISHED",
   "candidate_evidence": {
-    "status": "UNPUBLISHED_SIGNING_PREPARATION",
+    "status": "SIGNED_NOT_PUBLISHED_FROZEN",
     "base_version": "1.2.89",
     "candidate_version": "1.2.90",
-    "source_commit": "9a15b24981f9cf826708daa64fe996b9a1aafb41",
-    "owner_decision": "Owner authorizes PR67 merge and formal signing/Release Gate; physical mobile deferred; no publication or production deployment",
-    "runtime_report": "docs/pr67-supplemental-acceptance.md",
+    "source_commit": "c09b5ea10f31cf0203a5cf4b73df1d628c8cf546",
+    "owner_decision": "Original signed1.2.90 candidate preserved unchanged. Owner accepts PR70 and authorizes separate new1.2.90 exact-main signing/Gate preparation; no publication or production.",
+    "runtime_report": "https://github.com/daixingwei920/daiying-cms/pull/69",
     "production_deployed": false,
     "consumer_imported": false
+  },
+  "sync_validation": {
+    "environment": "isolated",
+    "report": "docs/knowledge-relevance-fix-acceptance.md",
+    "native_customer_http_checks": 16,
+    "consumer_regression_tests": 21,
+    "model": "protocol_fixture_and_separate_actual_configured_provider",
+    "production_import": "NOT_RUN",
+    "scheduler_deployed": false,
+    "index_rebuilt": false,
+    "live_provider_validation": {
+      "report": "docs/knowledge-customer-loop-live-acceptance.md",
+      "http_checks": 17,
+      "successful_generations": 5,
+      "model_selection": "actual_site_and_plugin_configuration",
+      "production_import": "NOT_RUN",
+      "legacy_admission": "PENDING_OWNER_REVIEW"
+    },
+    "production_ready": false,
+    "article_admission_validation": {
+      "report": "docs/knowledge-article-admission-acceptance.md",
+      "source_count": 5,
+      "reviewed_excerpts": 7,
+      "structural_checks": 8,
+      "business_cases": 7,
+      "business_passes": 7,
+      "status": "ISOLATED_RELEVANCE_REPAIR_PASS",
+      "final_active_reviewed_rows": 0,
+      "model_calls": 8,
+      "historical_status": "BUSINESS_ACCEPTANCE_FAILED",
+      "historical_business_passes": 0,
+      "retest_report": "docs/knowledge-relevance-fix-acceptance.md"
+    },
+    "relevance_validation": {
+      "report": "docs/knowledge-relevance-fix-acceptance.md",
+      "evidence": "docs/knowledge-relevance-fix-evidence.json",
+      "plugin_version": "1.1.1-dev.2",
+      "plugin_implementation_commit": "694b00b4864aa109a75d28f40fadbfa2c2ba4854",
+      "status": "PASS_ISOLATED_OWNER_ACCEPTED",
+      "local_relevance_methods": 9,
+      "consumer_regression_tests": 21,
+      "real_provider_http_assertions": 41,
+      "business_cases": 7,
+      "business_passes": 7,
+      "intended_generations": 8,
+      "model_success_event_delta": 8,
+      "extra_exact_legacy_faq_withdrawal": "PASS_NO_GENERATION",
+      "related_p0_priority": "PASS",
+      "unknown": "PASS_NO_GENERATION",
+      "all_seven_withdrawn": "PASS_NO_GENERATION",
+      "final_reviewed_active_rows": 0,
+      "native_test_signed_upgrade": "PASS_DEV1_TO_DEV2_SCHEMA_UNCHANGED",
+      "production_import": "NOT_RUN",
+      "frozen190_changed": false,
+      "owner_accepted_at": "2026-10-26"
+    }
+  },
+  "development_candidate": {
+    "source_commit": "3ead3e7050cf31785ebf94c52905fce21afd1e31",
+    "status": "OWNER_ACCEPTED_ISOLATED_PREPARING_CORE190_UNPUBLISHED",
+    "included_in_frozen_1_2_90": false,
+    "report": "docs/knowledge-relevance-fix-acceptance.md",
+    "production_deployed": false
   }
 }

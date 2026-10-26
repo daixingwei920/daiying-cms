@@ -1,0 +1,50 @@
+{
+  "plugin_id": "official.ai-customer-service",
+  "version": "1.1.1-dev.2",
+  "source": "Isolated relevance repair candidate; no schema/Core runtime changes; prior candidate hashes retained for provenance only.",
+  "sha256": {
+    "migrations/001_foundation.php": "db2b60f2306be7a03e779bdb6af27522990367419c03ef000be2b055ac5a79c8",
+    "migrations/002_site_knowledge.php": "cc8b92547e6b7ff99175c994afe28708cd3411b22eea308f11deb9363dbbdaf7",
+    "plugin.json": "2e049b44ee655dfcfe2958c3aaab22287220eb2c3b524e9a6ca1961206111bbd",
+    "plugin.php": "4f7d77be097a8af67eca40241ca6ec931b1aff286da36cf98f9b1c75104eaa9a",
+    "src/Admin/AiCustomerServiceAdminController.php": "4a3c7e84f4b8e88e1c9f191ad4d179768a46ec4f50c2863f471b26b3d76d6331",
+    "src/Api/AiCustomerServiceApiController.php": "821d65361375405ab31a3f6273656854594204fea74d8ee7e019c7b6fcac5371",
+    "src/Repository/AiCustomerServiceRepository.php": "ba2e5ececa92b34a7760e03a5dc383c090cf8b471fd78a37e5387436e10d188a",
+    "src/Service/AiCustomerServiceResponder.php": "ebbe30c796b26189f96ed4b9b01fee152c5b5e7717db53fb9463262b94fa62b6",
+    "src/Service/CoreAiProviderGateway.php": "4594a63103f8c7472c84ff2827ba0c6775d6914771fa2edee05315c52388fe8b",
+    "src/Service/KnowledgeIndexer.php": "bd3589afea923ab20a2018af5b77ac7f8fb1740836bb8913313a03baeca326fb",
+    "src/Service/KnowledgeRetriever.php": "ca7c52ea05aa0fee2bdd908bb7d48889b20eeeeafd64b470b40470b0318c0886",
+    "src/Service/KnowledgeSyncReader.php": "f799b1832bcc0de09ff95dc0be35ee3f66865520bd901388fdc8196129e91c33",
+    "src/Support/SafeText.php": "af68830bc575481bb92321f38ec8168dedf24a2e23cc47c4fc921d7f0b4ac189"
+  },
+  "legacy_generator_sha256": "8ece50bd58573d9d2f485a8a0dad32646bbeab2bb686ee803fc20b50d27279d4",
+  "baseline_version": "1.1.0",
+  "baseline_sha256": {
+    "plugin.json": "c3453a20e562407c3e983cd36b40522ddf507909bac719f75e246998a316342c",
+    "migrations/001_foundation.php": "db2b60f2306be7a03e779bdb6af27522990367419c03ef000be2b055ac5a79c8",
+    "migrations/002_site_knowledge.php": "cc8b92547e6b7ff99175c994afe28708cd3411b22eea308f11deb9363dbbdaf7",
+    "src/Repository/AiCustomerServiceRepository.php": "8e507aaef420b20a7beed27cbb50e795126c2e22aeda1e54c20e7da2c8c4690a",
+    "src/Service/KnowledgeRetriever.php": "e323c83d4475bdd256149d5b9f423b301bed36d0342065d2baf89ab5187b9bed",
+    "src/Support/SafeText.php": "af68830bc575481bb92321f38ec8168dedf24a2e23cc47c4fc921d7f0b4ac189"
+  },
+  "prior_candidates": [
+    {
+      "version": "1.1.1-dev.1",
+      "sha256": {
+        "migrations/001_foundation.php": "db2b60f2306be7a03e779bdb6af27522990367419c03ef000be2b055ac5a79c8",
+        "migrations/002_site_knowledge.php": "cc8b92547e6b7ff99175c994afe28708cd3411b22eea308f11deb9363dbbdaf7",
+        "plugin.json": "2e049b44ee655dfcfe2958c3aaab22287220eb2c3b524e9a6ca1961206111bbd",
+        "plugin.php": "4f7d77be097a8af67eca40241ca6ec931b1aff286da36cf98f9b1c75104eaa9a",
+        "src/Admin/AiCustomerServiceAdminController.php": "4a3c7e84f4b8e88e1c9f191ad4d179768a46ec4f50c2863f471b26b3d76d6331",
+        "src/Api/AiCustomerServiceApiController.php": "821d65361375405ab31a3f6273656854594204fea74d8ee7e019c7b6fcac5371",
+        "src/Repository/AiCustomerServiceRepository.php": "ba2e5ececa92b34a7760e03a5dc383c090cf8b471fd78a37e5387436e10d188a",
+        "src/Service/AiCustomerServiceResponder.php": "ebbe30c796b26189f96ed4b9b01fee152c5b5e7717db53fb9463262b94fa62b6",
+        "src/Service/CoreAiProviderGateway.php": "4594a63103f8c7472c84ff2827ba0c6775d6914771fa2edee05315c52388fe8b",
+        "src/Service/KnowledgeIndexer.php": "bd3589afea923ab20a2018af5b77ac7f8fb1740836bb8913313a03baeca326fb",
+        "src/Service/KnowledgeRetriever.php": "49ae8f040b1162ddb99107e4e3098ef5e52f5ceb708c834d90bcbe12010a8c62",
+        "src/Service/KnowledgeSyncReader.php": "f799b1832bcc0de09ff95dc0be35ee3f66865520bd901388fdc8196129e91c33",
+        "src/Support/SafeText.php": "af68830bc575481bb92321f38ec8168dedf24a2e23cc47c4fc921d7f0b4ac189"
+      }
+    }
+  ]
+}

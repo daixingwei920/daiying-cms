@@ -24,7 +24,7 @@ def public_records(package):
     return [r for r in package["records"] if r["enabled_for_customer_service"]]
 
 
-def validate(package, root=ROOT):
+def validate(package, root=ROOT, check_worktree=True):
     def require(condition, message):
         if not condition:
             raise ValueError(message)
@@ -43,7 +43,8 @@ def validate(package, root=ROOT):
         require(path != "config/app.php", "private config forbidden")
         if path not in blobs:
             blobs[path] = subprocess.check_output(["git", "show", f"{commit}:{path}"], cwd=root)
-            require((root / path).read_bytes() == blobs[path], f"source drift: {path}")
+            if check_worktree:
+                require((root / path).read_bytes() == blobs[path], f"source drift: {path}")
         return blobs[path]
 
     version = package["verified_version"]
@@ -61,7 +62,8 @@ def validate(package, root=ROOT):
         require(record["last_verified_at"] == package["last_verified_at"], f"review date: {rid}")
         require(record["priority"] == "P0", f"official package tier: {rid}")
         require(record["visibility"] in {"USER-FACING", "INTERNAL", "ADMIN_DEVELOPER"}, f"visibility: {rid}")
-        public = record["visibility"] == "USER-FACING" and record["user_facing"] is True
+        public = (record["visibility"] == "USER-FACING" and record["user_facing"] is True
+                  and record["implementation_status"] == "implemented")
         require(record["enabled_for_customer_service"] is public, f"public eligibility: {rid}")
         if record["audience"] in {"Internal", "Developer"}:
             require(not public, f"internal/developer leak: {rid}")
@@ -73,7 +75,10 @@ def validate(package, root=ROOT):
             lines = raw.decode().splitlines()
             require(1 <= start <= end <= len(lines), f"source lines: {rid}")
             require(evidence["anchor"] in "\n".join(lines[start - 1:end]), f"source anchor: {rid}")
-    require(package["integration_status"]["automatic_sync"] == "DESIGN_ONLY", "sync completion lacks validation")
+    require(package["integration_status"]["automatic_sync"] in {"DESIGN_ONLY", "IMPLEMENTED_ISOLATED"}, "unknown sync state")
+    if package["integration_status"]["automatic_sync"] == "IMPLEMENTED_ISOLATED":
+        require(package.get("sync_validation", {}).get("environment") == "isolated", "isolated validation evidence required")
+        require(bool(package["sync_validation"].get("report")), "isolated sync report required")
     require(package["integration_status"]["core_optimizer_shared_knowledge"] == "NOT_IMPLEMENTED", "optimizer integration lacks validation")
     return len(blobs)
 
@@ -98,7 +103,7 @@ def derived(package):
         "JSON 为事实源；本文件与 USER-FACING 导出由 `python3 scripts/product_knowledge.py --write` 生成。", "",
         "客服仅使用 USER-FACING 导出；完整包包含 INTERNAL/ADMIN_DEVELOPER，禁止直接送入普通客服上下文。现有旧插件不能被假定已执行这些过滤。", "",
         "要求 P0 官方知识 → P1 已审核已发布文章 → P2 普通已发布文章；Draft/Pending/C/D、内部资料及分类未知内容默认禁用。参考知识与待优化原文分开。", "",
-        "自动同步仍为 DESIGN_ONLY；原 Core 优化器共享知识接入为 NOT_IMPLEMENTED。源码提交不代表已测试、已部署或生产验收通过。", "",
+        f"自动同步状态为 {package['integration_status']['automatic_sync']}；原 Core 优化器共享知识接入为 NOT_IMPLEMENTED。隔离验收不代表已部署或生产验收通过。", "",
     ]
     if package.get("candidate_evidence", {}).get("status") == "UNPUBLISHED":
         lines.extend(["**当前分支知识源是未发布候选；不代表生产可用。** 正式发布事实保留在 release_evidence；候选运行证据见 docs/issue9-delivery.md。禁止自动导入生产客服或索引。", ""])

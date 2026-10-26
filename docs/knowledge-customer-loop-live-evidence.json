@@ -1,0 +1,412 @@
+{
+  "status": "LIVE_PROVIDER_ISOLATED_PASS_LEGACY_ADMISSION_PENDING_OWNER_REVIEW",
+  "date": "2026-10-25",
+  "core_installed": "1.2.89",
+  "installer_sha256": "7831edfee8c8d3161aa8ca92f026019b99355ba764e6a98dfe002373cd7f052a",
+  "plugin_candidate": "1.1.1-dev.1",
+  "real_provider_model": "gpt-5.6-terra",
+  "model_name_scope": "actual site/plugin configuration and request model; not independent certification of supplier routing",
+  "checks": [
+    "Native site runs published189; frozen190 package not installed",
+    "Reproduce old FAQ fast return before managed activation",
+    "Actual published189 knowledge event acknowledged by native customer",
+    "Actual HTTP answer uses admitted public knowledge, not conflicting old FAQ",
+    "HTTP citations bind P0,189 and exact active receipt",
+    "Exactly22 public records imported; internal records excluded",
+    "Replay leaves the same active customer knowledge batch",
+    "Unknown query returns insufficient information without a provider retrieval event",
+    "Reviewed synthetic article reaches actual HTTP customer response",
+    "Polling updates actual response and revision",
+    "Failed import preserves last active batch and actual customer answer",
+    "Retry recovers the same pending snapshot into actual customer response",
+    "Withdrawn knowledge no longer enters answer or provider retrieval events",
+    "Unpublished190 knowledge is rejected for the released189 customer",
+    "Rejected candidate does not replace current customer knowledge",
+    "Five actual native provider-success responses, with no mock or extra successful generation",
+    "Conflicting legacy and internal markers are absent from live answers"
+  ],
+  "successful_live_generations": 5,
+  "real_model_billing_acceptance": false,
+  "response_receipts_and_hashes": [
+    {
+      "case_index": 0,
+      "http": 200,
+      "elapsed_ms": 18,
+      "ok": true,
+      "grounded": true,
+      "direct_faq": true,
+      "answer_sha256": "efc77da9bf1b3312f3ec09914d75b0872e9705fa92cd0b4a3bf187e8c0c24ef9",
+      "source_count": 1,
+      "sources": [
+        {
+          "title": "SQLite 安装",
+          "url": "",
+          "source_type": "faq"
+        }
+      ]
+    },
+    {
+      "case_index": 1,
+      "http": 200,
+      "elapsed_ms": 3745,
+      "ok": true,
+      "grounded": true,
+      "direct_faq": false,
+      "answer_sha256": "39d6098241e05520d5db3f6330290c8b6a1d33af1860f8e706c6af74abf505e4",
+      "source_count": 5,
+      "sources": [
+        {
+          "title": "Web Installer",
+          "url": "https://github.com/daixingwei920/daiying-cms/blob/3dcc700174abd1b9a7d2959a09881f247026de1c/DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.json",
+          "source_type": "knowledge_sync",
+          "trust_level": "official",
+          "priority": "P0",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+          "knowledge_id": "install.web_installer",
+          "receipt_sha256": "615a5126d04a3c18cd88e388ebd2c19a56f4f7a47ea591deb61e46ab1d8348f5"
+        },
+        {
+          "title": "Daiying CMS 安装入口和步骤",
+          "url": "https://github.com/daixingwei920/daiying-cms/blob/3dcc700174abd1b9a7d2959a09881f247026de1c/DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.json",
+          "source_type": "knowledge_sync",
+          "trust_level": "official",
+          "priority": "P0",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+          "knowledge_id": "install.cn_steps",
+          "receipt_sha256": "615a5126d04a3c18cd88e388ebd2c19a56f4f7a47ea591deb61e46ab1d8348f5"
+        },
+        {
+          "title": "首次安装失败处理",
+          "url": "https://github.com/daixingwei920/daiying-cms/blob/3dcc700174abd1b9a7d2959a09881f247026de1c/DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.json",
+          "source_type": "knowledge_sync",
+          "trust_level": "official",
+          "priority": "P0",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+          "knowledge_id": "install.failure_guard",
+          "receipt_sha256": "615a5126d04a3c18cd88e388ebd2c19a56f4f7a47ea591deb61e46ab1d8348f5"
+        },
+        {
+          "title": "Runtime Requirements",
+          "url": "https://github.com/daixingwei920/daiying-cms/blob/3dcc700174abd1b9a7d2959a09881f247026de1c/DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.json",
+          "source_type": "knowledge_sync",
+          "trust_level": "official",
+          "priority": "P0",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+          "knowledge_id": "install.runtime_requirements",
+          "receipt_sha256": "615a5126d04a3c18cd88e388ebd2c19a56f4f7a47ea591deb61e46ab1d8348f5"
+        },
+        {
+          "title": "MySQL 安装兼容",
+          "url": "https://github.com/daixingwei920/daiying-cms/blob/3dcc700174abd1b9a7d2959a09881f247026de1c/DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.json",
+          "source_type": "knowledge_sync",
+          "trust_level": "official",
+          "priority": "P0",
+          "knowledge_version": "1.2.89",
+          "knowledge_revision": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+          "knowledge_id": "install.mysql_compatibility",
+          "receipt_sha256": "615a5126d04a3c18cd88e388ebd2c19a56f4f7a47ea591deb61e46ab1d8348f5"
+        }
+      ]
+    },
+    {
+      "case_index": 2,
+      "http": 200,
+      "elapsed_ms": 20,
+      "ok": true,
+      "grounded": false,
+      "direct_faq": false,
+      "answer_sha256": "efd3b954818fc4b10e7dd20b9b4c5145f839913a3feb98a14eb74bc72988d3ea",
+      "source_count": 0,
+      "sources": []
+    },
+    {
+      "case_index": 3,
+      "http": 200,
+      "elapsed_ms": 906,
+      "ok": true,
+      "grounded": true,
+      "direct_faq": false,
+      "answer_sha256": "7d70ba4d167fd5e633ee3fcae68b4113e91c27055fca91f800349fb4773b9160",
+      "source_count": 1,
+      "sources": [
+        {
+          "title": "nebula synthetic guide",
+          "url": "https://fixture.invalid/guide",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.0.0",
+          "knowledge_revision": "d27b6b3fc1c3b66ca2d7684dae081e365caa3bc7",
+          "knowledge_id": "article.clock",
+          "receipt_sha256": "e475ad52202b5d54d317ac75b53e4d8d97242969796724ce8e40589159b273f8"
+        }
+      ]
+    },
+    {
+      "case_index": 4,
+      "http": 200,
+      "elapsed_ms": 1393,
+      "ok": true,
+      "grounded": true,
+      "direct_faq": false,
+      "answer_sha256": "e00b0e23516568efa498af596ceae0119a4e181528ba5a45eccf0b3dbf667b62",
+      "source_count": 1,
+      "sources": [
+        {
+          "title": "nebula synthetic guide",
+          "url": "https://fixture.invalid/guide",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.0.0",
+          "knowledge_revision": "f51337b812d82fae1e2c1a01b87cf8a8a73c7229",
+          "knowledge_id": "article.clock",
+          "receipt_sha256": "fc55d26591edca73d3bdf80fe7cce6762255065acfd5e1a04f3ac73124ed6b8b"
+        }
+      ]
+    },
+    {
+      "case_index": 5,
+      "http": 200,
+      "elapsed_ms": 843,
+      "ok": true,
+      "grounded": true,
+      "direct_faq": false,
+      "answer_sha256": "24f9dd6928f37b21abdbe47b80588cb56e7b96d6cda6523d51770dca259de92f",
+      "source_count": 1,
+      "sources": [
+        {
+          "title": "nebula synthetic guide",
+          "url": "https://fixture.invalid/guide",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.0.0",
+          "knowledge_revision": "f51337b812d82fae1e2c1a01b87cf8a8a73c7229",
+          "knowledge_id": "article.clock",
+          "receipt_sha256": "fc55d26591edca73d3bdf80fe7cce6762255065acfd5e1a04f3ac73124ed6b8b"
+        }
+      ]
+    },
+    {
+      "case_index": 6,
+      "http": 200,
+      "elapsed_ms": 1474,
+      "ok": true,
+      "grounded": true,
+      "direct_faq": false,
+      "answer_sha256": "f98c2e74574fd73c4e5ff5a72515cd57f0bd2e6e4850b885979ffce8d369cab3",
+      "source_count": 1,
+      "sources": [
+        {
+          "title": "nebula synthetic guide",
+          "url": "https://fixture.invalid/guide",
+          "source_type": "knowledge_sync",
+          "trust_level": "trusted",
+          "priority": "P1",
+          "knowledge_version": "1.0.0",
+          "knowledge_revision": "dc0331b8c2f8df519d0ab1a7dfaeda7da70e1fbb",
+          "knowledge_id": "article.clock",
+          "receipt_sha256": "62614623fa6375dfae5a7627f8d0abe78f21733825ff42e522c43db076413728"
+        }
+      ]
+    },
+    {
+      "case_index": 7,
+      "http": 200,
+      "elapsed_ms": 20,
+      "ok": true,
+      "grounded": false,
+      "direct_faq": false,
+      "answer_sha256": "efd3b954818fc4b10e7dd20b9b4c5145f839913a3feb98a14eb74bc72988d3ea",
+      "source_count": 0,
+      "sources": []
+    }
+  ],
+  "answer_source_review": {
+    "status": "REVIEWED_THIS_FIXTURE_ONLY",
+    "review_type": "Codex source-by-source comparison of recorded fixture output to admitted immutable facts; not Owner admission approval",
+    "official_fact_ids": [
+      "install.web_installer",
+      "install.runtime_requirements",
+      "install.cn_steps",
+      "install.mysql_compatibility",
+      "install.failure_guard"
+    ],
+    "claims_checked": [
+      "PHP/extensions",
+      "GitHub installer/public web root",
+      "install URL and database selection",
+      "completion/config/lock",
+      "admin login",
+      "failed-install guard"
+    ],
+    "unsupported_concrete_claims_found": false,
+    "synthetic_markers": {
+      "initial": "BLUE47",
+      "updated": "BLUE48",
+      "failed_import_keeps": "BLUE48",
+      "retry": "BLUE49"
+    },
+    "future_hallucination_guarantee": false
+  },
+  "live_guard_negative_tests": 4,
+  "legacy_inventory": {
+    "production_connection_query_only": true,
+    "text_exported": false,
+    "automatic_migration": false,
+    "faq_table_exists": true,
+    "public_current_site_faq_count": 0,
+    "bounded_review_inventory": [],
+    "inventory_limit": 100,
+    "all_sites_faq_count": 0,
+    "site_identity_source": "same cms_core_settings/site.id or local-site fallback as native Repository",
+    "current_site_knowledge_groups": [
+      {
+        "source_type": "article",
+        "trust_level": "trusted",
+        "enabled": 1,
+        "n": 4
+      },
+      {
+        "source_type": "knowledge_package",
+        "trust_level": "official",
+        "enabled": 1,
+        "n": 19
+      },
+      {
+        "source_type": "page",
+        "trust_level": "trusted",
+        "enabled": 1,
+        "n": 1
+      }
+    ],
+    "ai_customer_service_knowledge_items_total": 24,
+    "ai_customer_service_chunks_total": 94
+  },
+  "legacy_published_source_review_input": {
+    "status": "READ_ONLY_REVIEW_INPUT_NOT_ADMISSION",
+    "query_only": true,
+    "production_writes": 0,
+    "full_content_exported": false,
+    "current_site_chunks_count": 94,
+    "chunks_have_site_column": true,
+    "legacy_tables_unchanged": true,
+    "before": {
+      "ai_customer_service_knowledge_items": "745641e0b1a742dfbe329ef7d8446b29e0ce3775bb6b754e600d9e73de48caaa",
+      "ai_customer_service_chunks": "7700e39537e5119c2ed2c67657aa8844d207e4d39d6c6097f526fc1ada106257",
+      "ai_customer_service_settings": "5a0d0af44b9319a90ac4b95e38a98f46078a45936a6d7d9c20ecd1c478d43012"
+    },
+    "after": {
+      "ai_customer_service_knowledge_items": "745641e0b1a742dfbe329ef7d8446b29e0ce3775bb6b754e600d9e73de48caaa",
+      "ai_customer_service_chunks": "7700e39537e5119c2ed2c67657aa8844d207e4d39d6c6097f526fc1ada106257",
+      "ai_customer_service_settings": "5a0d0af44b9319a90ac4b95e38a98f46078a45936a6d7d9c20ecd1c478d43012"
+    },
+    "items": [
+      {
+        "knowledge_row_id": 20,
+        "source_type": "page",
+        "source_id": "15",
+        "enabled": true,
+        "legacy_trust_label": "trusted",
+        "current_publication_status": "published",
+        "published_title": "服务条款",
+        "published_path": "/terms",
+        "current_content_sha256": "f88f5f0cc43166232010a5da5b40a1375bea079f8005e1bfad3ba86878e755b6",
+        "explicit_review_metadata_present": false,
+        "explicit_grade_metadata_present": false,
+        "admission_approved": false
+      },
+      {
+        "knowledge_row_id": 21,
+        "source_type": "article",
+        "source_id": "82",
+        "enabled": true,
+        "legacy_trust_label": "trusted",
+        "current_publication_status": "published",
+        "published_title": "THE WAY · Holy City 圣城主题｜终身商业授权码",
+        "published_path": "/articles/the-way-holy-city-圣城主题-终身商业授权码",
+        "current_content_sha256": "96a5233f9951bdda70fdb098ebeee02bca63830987e29bbb6f57231d59881455",
+        "explicit_review_metadata_present": false,
+        "explicit_grade_metadata_present": false,
+        "admission_approved": false
+      },
+      {
+        "knowledge_row_id": 22,
+        "source_type": "article",
+        "source_id": "85",
+        "enabled": true,
+        "legacy_trust_label": "trusted",
+        "current_publication_status": "published",
+        "published_title": "戴影 CMS 餐厅外卖插件安装与使用图文教程：菜单识别、加料、支付与接单",
+        "published_path": "/articles/restaurant-takeout-installation-and-use-guide",
+        "current_content_sha256": "92b48ab80713ec408655d6322f37b9931cd7fa0364d99ffac4f18754cc1b3fa9",
+        "explicit_review_metadata_present": false,
+        "explicit_grade_metadata_present": false,
+        "admission_approved": false
+      },
+      {
+        "knowledge_row_id": 23,
+        "source_type": "article",
+        "source_id": "86",
+        "enabled": true,
+        "legacy_trust_label": "trusted",
+        "current_publication_status": "published",
+        "published_title": "戴影 CMS 餐厅外卖插件授权码",
+        "published_path": "/articles/戴影-cms-餐厅外卖插件授权码",
+        "current_content_sha256": "3477e90a4c5e030b9ecf5e7d6d1a521d2696f84dca128947aa45ec8cf5df0662",
+        "explicit_review_metadata_present": false,
+        "explicit_grade_metadata_present": false,
+        "admission_approved": false
+      },
+      {
+        "knowledge_row_id": 24,
+        "source_type": "article",
+        "source_id": "88",
+        "enabled": true,
+        "legacy_trust_label": "trusted",
+        "current_publication_status": "published",
+        "published_title": "来访自动收录插件授权码｜把 CMS 变成可经营的网址导航站",
+        "published_path": "/articles/来访自动收录插件授权码-把-cms-变成可经营的网址导航站",
+        "current_content_sha256": "3ef7a86a75254ad0b2c3489e1531c4e6e18a795617ac95b6c036d283d1073d0d",
+        "explicit_review_metadata_present": false,
+        "explicit_grade_metadata_present": false,
+        "admission_approved": false
+      }
+    ]
+  },
+  "cleanup": {
+    "status": "PASS",
+    "protected_equal": true,
+    "isolated_ai_disabled": true,
+    "isolated_credential_removed": true,
+    "production_key_reference_written": false,
+    "synthetic_authorization_removed": true,
+    "production_writes": 0
+  },
+  "frozen190_unchanged": true,
+  "raw_evidence_sha256": {
+    "live-http-results.json": "553d908a514f3b40c8c800b7c7110b314e7c01f33ed48e1d68dac11cf20bac6b",
+    "live-http.log": "132cf252e916c08ebc5b07f57b8f09c0046effbc37e5faedbbd0367c59483621",
+    "live-configured.json": "64d22044a2d4c9517c6fb8bf0bc314ea868247aa6426dfeb2161cdf47116e2cc",
+    "provider-preflight.json": "0776c2bbf095529871068ddd07f9d466972a047b17afca919c2b977097c751f4",
+    "legacy-faq-inventory.json": "a5c6ab98ddcc5f7e710b934c35e9daa01fc93e604b12e9120101b272b9543a0d",
+    "legacy-content-review.json": "2dbc791895708df76a3f9152b3493875f66bc21ee52578a2c8d92b6d98379caa",
+    "cleanup.json": "4fd5dfae9287a8ce3faf10c4624bc07467efa4d53912b6416da24343cb01ff8a",
+    "protected-before.json": "aceaec3ed1252a4e2dd5b1f1acf9e9c16cf3d8c0b03704b8a4c22392ee5dcc9e",
+    "protected-after.json": "aceaec3ed1252a4e2dd5b1f1acf9e9c16cf3d8c0b03704b8a4c22392ee5dcc9e",
+    "live-guard-tests.log": "8491f22e1477a8ec426f799ee31029e608d61a622ec305e4521234cfc24307b4",
+    "answer-source-review.json": "62e12cb7075444f8c722a5bd22b916538125477965375aa68611c0011fc1be35",
+    "official-answer-admitted-facts.json": "95d5daf336d2d1a574c11c30bb6286a3c3d76a341c93d7dbf25e29219c7de0b0"
+  },
+  "harness_sha256": "9b66de8f0965574efc8ff35da45c0956ee715d70be0a222f4ab3c9fcd549938d",
+  "production_deployed": false,
+  "legacy_records_migrated": 0,
+  "merge_or_release_performed": false,
+  "runtime_core_or_plugin_changes": false,
+  "base_test_source_commit": "ac7ef0d95aed282f09ac093355a7636a9f6b7782"
+}

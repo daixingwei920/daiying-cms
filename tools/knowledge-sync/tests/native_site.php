@@ -1,0 +1,27 @@
+<?php
+declare(strict_types=1);umask(0077);
+[$script,$root,$installer,$private]=$argv;
+if(is_dir($root)||!is_file(dirname($root).'/.daiying-knowledge-isolated'))throw new RuntimeException('New marked isolated site required');
+if(hash_file('sha256',$installer)!=='7831edfee8c8d3161aa8ca92f026019b99355ba764e6a98dfe002373cd7f052a')throw new RuntimeException('Frozen public189 baseline required');
+mkdir($root,0700);$z=new ZipArchive();if($z->open($installer)!==true)throw new RuntimeException('Installer unavailable');$z->extractTo($root);$z->close();
+define('CMS_ROOT',$root);require $root.'/system/core/Bootstrap/autoload.php';session_start();
+$settings=Cms\Core\Config\Settings::load($root);
+$request=new Cms\Core\Http\Request('POST','/install',[],['_csrf'=>Cms\Core\Security\CsrfToken::get(),'site_name'=>'Knowledge Loop — synthetic189 fixture','site_url'=>'http://127.0.0.1:19518','email'=>'knowledge-owner@example.invalid','password'=>'Knowledge-Fixture-Only-2026!','display_name'=>'隔离验收','db_driver'=>'sqlite','sqlite_path'=>'storage/database/cms.sqlite']);
+$result=(new Cms\Core\Install\InstallController($root,$settings,new Cms\Core\Logging\FileLogger($root.'/storage/logs/install.log')))->store($request);
+if($result->status()!==302)throw new RuntimeException('Native fixture installation failed');
+$settings=Cms\Core\Config\Settings::load($root);$pdo=Cms\Core\Database\ConnectionFactory::make($settings);
+$config=require $root.'/config/app.php';$config['updates']['public_key']=trim(file_get_contents($private.'/test-public.txt'));$config['updates']['trusted_keys']=[];
+file_put_contents($root.'/config/app.php','<?php return '.var_export($config,true).';');
+$authorization=Cms\Core\Market\InstallAuthorization::fromArray(json_decode(file_get_contents($private.'/customer-authorization.json'),true,512,JSON_THROW_ON_ERROR));
+(new Cms\Core\Market\MarketPackageInstaller($root))->install($private.'/customer-candidate.zip',$authorization,$pdo);
+(new Cms\Core\Plugin\LocalPluginPackageInstaller($root,$pdo))->enable('official.ai-customer-service',1);
+$settings=Cms\Core\Config\Settings::load($root);
+(new Cms\Core\Ai\SiteAiSettingsRepository($pdo,(string)$settings->get('security.encryption_key','')))->save(['enabled'=>true,'provider'=>'local_model','adapter'=>'openai_compatible','base_url'=>'http://127.0.0.1:19519/v1','model'=>'fixture-no-external-model','timeout_seconds'=>10,'max_tokens'=>512,'temperature'=>0.0,'allow_cloud_fallback'=>false,'local_api_type'=>'openai_compatible'],'');
+require $root.'/content/plugins/official.ai-customer-service/src/Repository/AiCustomerServiceRepository.php';
+$repo=new Official\AiCustomerService\Repository\AiCustomerServiceRepository($pdo);
+$repo->saveSettings(['enabled'=>'1','provider_id'=>'local_model','model'=>'fixture-no-external-model','rate_limit_per_hour'=>'1000','max_messages_per_session'=>'100','save_transcripts'=>'0']);
+$repo->saveFaq('SQLite 安装','旧FAQ错误反例：只能用Oracle，不能用SQLite。');
+$database=$root.'/storage/database/cms.sqlite';
+file_put_contents($database.'.isolated.json',json_encode(['environment'=>'isolated','site_id'=>$repo->siteId()]));
+$pluginManifest=json_decode(file_get_contents($root.'/content/plugins/official.ai-customer-service/plugin.json'),true,512,JSON_THROW_ON_ERROR);
+echo json_encode(['status'=>'PASS','root'=>$root,'database'=>$database,'site_id'=>$repo->siteId(),'version'=>'1.2.89','plugin_version'=>$pluginManifest['version'],'native_market_installer'=>true,'isolated_test_authority_only'=>true,'production_writes'=>0],JSON_UNESCAPED_SLASHES),PHP_EOL;

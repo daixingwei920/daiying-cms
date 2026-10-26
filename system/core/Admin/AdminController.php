@@ -1391,7 +1391,10 @@ final class AdminController
         if (!$this->adminHasCapability('settings.manage')) { return Response::text('权限不足。', 403); }
         $rows = (new \Cms\Core\Seo\CrawlerLog($this->root(), $this->settings))->rows();
         try {
-            $html = (new \Cms\Core\Seo\CrawlerStatistics($this->settings))->render($rows, $request ?? new Request('GET', '/admin/seo/crawlers'));
+            $request ??= new Request('GET', '/admin/seo/crawlers');
+            $statistics = new \Cms\Core\Seo\CrawlerStatistics($this->settings);
+            $html = $statistics->render($rows, $request)
+                . $statistics->renderObservation((new \Cms\Core\Seo\CrawlerObservation($this->root(), $this->settings))->snapshot(), $request);
         } catch (\InvalidArgumentException $exception) {
             return Response::html(View::page('蜘蛛统计筛选无效', '<h1>筛选参数无效</h1><p>' . View::escape($exception->getMessage()) . '</p><a href="' . View::escape(\Cms\Core\Routing\BasePath::prefixCurrent('/admin/seo/crawlers')) . '">重置筛选</a>'), 400)
                 ->withHeaders(['Cache-Control' => 'private, no-store']);

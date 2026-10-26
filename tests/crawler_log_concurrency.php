@@ -30,5 +30,6 @@ try {
     if (count($rows) !== 1 || $rows[0]['hits'] < 1 || $rows[0]['hits'] > 400 || strlen($raw) > 524288) { throw new RuntimeException('Concurrency invariant failed'); }
     echo 'PASS: four real processes, valid bounded aggregate, hits=' . $rows[0]['hits'] . ' of 400 attempted; nonblocking contention intentionally drops samples.' . PHP_EOL;
 } finally {
+    foreach (glob($root . '/storage/logs/seo-crawler-observation-*.json') ?: [] as $observation) { unlink($observation); }
     unlink($root . '/storage/logs/seo-crawlers.json'); unlink($root . '/.issue9-test'); rmdir($root . '/storage/logs'); rmdir($root . '/storage'); rmdir($root);
 }
