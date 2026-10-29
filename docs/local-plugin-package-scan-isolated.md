@@ -1,37 +1,76 @@
-# Local plugin manifest scan compatibility candidate
+# Local plugin manifest scanning: review candidate
 
-Status: isolated maintenance candidate on Core 1.2.90 / base
-`449f92a258f2d02f78cb19f590c308ec268a1d43`. Not committed, signed,
-published or deployed. No Core version change.
+Status: unpublished Core maintenance PR. No version bump, official signing,
+merge, release or production deployment is authorized by this evidence.
+
+## Problem and behavior
 
 The native local installer requires `plugin-id/plugin.json`, but PackageScanner
-previously read capability declarations only from a flat `plugin.json`. This
-could incorrectly flag declared network use as `capability_mismatch`.
+read capability declarations only from a flat `plugin.json`. A correctly declared
+network capability was therefore reported as HIGH `capability_mismatch`, forcing
+an unnecessary `needs_review` decision.
 
-PackageScanner now reads one unambiguous flat or plugin-ID-root manifest. For a
-wrapped package, its manifest identity must match the directory and all entries
-must remain within that root. Multiple manifests, malformed manifests, conflicting
-identity or files outside the declared wrapper fail closed. A root manifest cannot
-be added to spoof the declarations of the installed nested plugin. Existing code,
-network, unsafe-path, protected-path and executable/nested-archive checks remain.
-The public scanZip signature, installer review gate, trust rules and staging
-fingerprint validation are unchanged. There are no plugin-specific IDs or rules.
+The scanner now reads one unambiguous flat or plugin-ID-root manifest. Wrapped
+manifest identity must match its directory and all entries must stay within that
+root. Multiple or corrupt manifests, conflicting identity and out-of-scope files
+fail closed. A root manifest cannot spoof the nested manifest actually installed.
+Dangerous-code, undeclared-network, binary, nested-ZIP, unsafe-path and protected
+Core-path checks remain active. The public scanZip API, administrator review gate,
+trust rules and staging-fingerprint verification are unchanged. No plugin-specific
+ID or exception is added; no migration or data-schema change is required.
 
-Regression: `php tests/plugin_package_manifest_scan.php` checks flat/wrapped
-manifests and relevant negative cases. Related trust/capability, runtime-enable and
-market API enable checks were run separately. Isolated native HTTP acceptance
-also covered authenticated multipart upload, zero-finding preview, installation
-without allow_review, separate enable, payment Provider registration and unsigned
-notification rejection. A genuine high-risk package was refused by default.
+`system/core-manifest.json` is synchronized with the scanner change through the
+existing Core ManifestBuilder. Its membership is unchanged; only the scanner hash
+changes. The initial Phase 0 rejection of the stale manifest is retained in the
+evidence rather than reported as a first-attempt success.
 
-Release boundary: `tests/release_gate_v1_contract.php` invokes
-`sodium_crypto_sign_keypair()`. Per AGENTS.md, signing test-key generation is not
-allowed on the workstation. That test was not run, and no signing keys were
-generated. Functional installation acceptance does not constitute a formal
-Release Gate result or authorize a Core release.
+## Validation and provenance
 
-Knowledge sync: this note documents an unpublished implementation correction to
-the existing package contract. The published V1 product facts and their derived
-USER-FACING knowledge remain unchanged; no new product capability or released
-version is asserted. Knowledge package build/import/index/consumer application
-was not performed. Production knowledge and service settings are unchanged.
+The branch retains server-tested ancestor
+`495829884f135e1f9a4f7d138f341a99cd9e1747`, based on frozen Core 1.2.90 commit
+`449f92a258f2d02f78cb19f590c308ec268a1d43`. Subsequent PR changes only organize
+this document and a structured evidence record. Current main was independently
+checked; its changes since that frozen baseline are documentation only. The
+scanner, Core manifest and regression-test bytes match the recorded server test.
+
+See [structured acceptance evidence](local-plugin-package-scan-evidence.json):
+
+- 17 scanner positive/negative cases and 9 + 1 + 4 related Core checks passed.
+- The unchanged external dev.3 payment-provider ZIP passed the actual authenticated
+  native HTTP upload/scan/install/enable flow: 13 checks, zero findings,
+  `allow_review` omitted, Installed then Enabled. Its restricted API trust and
+  local-unreviewed identity were preserved. Bad CSRF and genuinely risky code were
+  refused. The plugin code/package is not part of this Core PR.
+- External payment fixture regressions passed 72 integration and 11 local HTTP
+  checks; no new real payment was performed for this PR.
+- The authorized update server ran Release Gate V1 (4 checks) and Phase 0, including
+  exact-commit installer/update parity, test signatures and tamper rejection.
+  Seven Gate/build/preflight programs were byte-identical to the baseline.
+- Test signing keys were generated and used only in isolated server test processes.
+  No signing keys, raw logs, private server paths, databases, sessions, payment
+  secrets or plugin runtime artifacts are committed here.
+
+Run the non-signing scanner regression with:
+
+```sh
+php tests/plugin_package_manifest_scan.php
+```
+
+Signing tests must use the authorized update-server isolation workflow under
+AGENTS.md; do not generate signing test keys on the workstation.
+
+## Release boundary
+
+The server's formal preflight correctly remained FAIL-CLOSED because the candidate
+was not exact origin/main. Candidate test success is not formal release approval,
+market review or production acceptance. A future exact merge/release source must
+run its applicable gates again; this PR does not bypass protected-main or version
+checks, reuse an existing release tag, or publish an update.
+
+## Knowledge synchronization
+
+This internal document and its structured evidence record are updated. Published
+V1 product facts, released tutorials and USER-FACING knowledge are unchanged: the
+patch corrects an unpublished implementation of the existing package contract.
+Knowledge package build, import, indexing and consumer application were not run;
+production knowledge and settings remain unchanged.
