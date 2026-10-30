@@ -37,7 +37,8 @@ See [structured acceptance evidence](local-plugin-package-scan-evidence.json):
 
 - 17 scanner positive/negative cases and 9 + 1 + 4 related Core checks passed.
 - The unchanged external dev.3 payment-provider ZIP passed the actual authenticated
-  native HTTP upload/scan/install/enable flow: 13 checks, zero findings,
+  native HTTP upload/scan/install/enable flow from exact PR snapshot
+  `ea55d150a801367024c8c2722ea0afc31fe17a7b`: 22 checks, zero findings,
   `allow_review` omitted, Installed then Enabled. Its restricted API trust and
   local-unreviewed identity were preserved. Bad CSRF and genuinely risky code were
   refused. The plugin code/package is not part of this Core PR.
@@ -49,6 +50,33 @@ See [structured acceptance evidence](local-plugin-package-scan-evidence.json):
 - Test signing keys were generated and used only in isolated server test processes.
   No signing keys, raw logs, private server paths, databases, sessions, payment
   secrets or plugin runtime artifacts are committed here.
+
+## Review follow-up: exact-source installation evidence
+
+The original 13-check native HTTP fixture archived the published baseline and
+overlaid only the scanner. It did not include the V2 Core integrity manifest and
+therefore cannot establish installation acceptance of the exact V2 snapshot.
+That limitation is retained as `native_http_install_legacy_overlay` in the record.
+
+Review reran acceptance from the exact PR archive at `ea55d150`, without a Core
+overlay. All 22 checks passed. Native IntegrityChecker reports `ok` before and
+after installation; an isolated scanner mutation reports `failed`, and restoring
+the original bytes restores `ok`. Critical ambiguous-manifest findings remain
+blocked even with review confirmation. Changing staging files after preview is
+refused. The real dev.3 ZIP still installs without `allow_review` and enables
+separately, retaining its restricted API trust and local-unreviewed identity.
+
+All 356 Core inventory entries match actual source bytes; membership is unchanged
+from the published baseline and only the scanner digest changes. The original
+17 scanner cases and PHP syntax checks passed again. Recorded Gate program,
+runtime ancestor, report and V2 patch hashes were independently checked against
+the retained evidence. The scoped security diff review found no new reportable
+vulnerability in this change; this is not a repository-wide or sandbox audit.
+
+This follow-up changes only these two evidence documents. No runtime correction,
+new signing test, payment, production operation or release was needed. Server
+V1/Phase 0 results remain explicitly bound to the byte-identical runtime of the
+recorded server ancestor, rather than presented as a new Gate run.
 
 Run the non-signing scanner regression with:
 
