@@ -21,12 +21,7 @@ final class PackageScanner
         }
 
         $findings = [];
-        $declaredCapabilities = [];
-        $manifestJson = $zip->getFromName('plugin.json');
-        if (is_string($manifestJson)) {
-            $manifest = json_decode($manifestJson, true);
-            $declaredCapabilities = is_array($manifest['capabilities'] ?? null) ? $manifest['capabilities'] : [];
-        }
+        $declaredCapabilities = $this->declaredCapabilities($zip, $findings);
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $name = (string) $zip->getNameIndex($i);
             $normalized = str_replace('\\', '/', $name);
@@ -69,6 +64,45 @@ final class PackageScanner
         $zip->close();
 
         return $findings;
+    }
+
+    /** @param list<array<string,string>> $findings @return list<mixed> */
+    private function declaredCapabilities(ZipArchive $zip, array &$findings): array
+    {
+        $candidates = [];
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = str_replace('\\', '/', (string) $zip->getNameIndex($i));
+            if (preg_match('#^(?:[^/]+/)?plugin\.json$#D', $name) === 1) {
+                $candidates[] = ['path'=>$name, 'index'=>$i];
+            }
+        }
+        if ($candidates === []) { return []; }
+        if (count($candidates) !== 1) {
+            $findings[] = $this->finding('critical', 'ambiguous_manifest', 'Package must have one unambiguous plugin manifest.', '');
+            return [];
+        }
+        $path = $candidates[0]['path'];
+        $raw = $zip->getFromIndex($candidates[0]['index']);
+        $manifest = is_string($raw) ? json_decode($raw, true) : null;
+        if (!is_array($manifest) || array_is_list($manifest) || !is_array($manifest['capabilities'] ?? [])) {
+            $findings[] = $this->finding('critical', 'invalid_manifest', 'Package plugin manifest is invalid.', $path);
+            return [];
+        }
+        if ($path !== 'plugin.json') {
+            $root = dirname($path);
+            if (($manifest['plugin_id'] ?? null) !== $root) {
+                $findings[] = $this->finding('critical', 'manifest_identity', 'Plugin manifest id must match its root directory.', $path);
+                return [];
+            }
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $name = str_replace('\\', '/', (string) $zip->getNameIndex($i));
+                if (!str_starts_with($name, $root . '/')) {
+                    $findings[] = $this->finding('critical', 'manifest_scope', 'Package contains files outside its plugin manifest root.', $name);
+                    return [];
+                }
+            }
+        }
+        return $manifest['capabilities'] ?? [];
     }
 
     /** @return array{severity: string, code: string, message: string, path: string} */

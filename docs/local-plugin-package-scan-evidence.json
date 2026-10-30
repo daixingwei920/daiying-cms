@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "status": "ISOLATED_CANDIDATE_VERIFIED_NOT_RELEASE_APPROVED",
+  "verified_on": "2026-10-29",
+  "historical_code_base": "449f92a258f2d02f78cb19f590c308ec268a1d43",
+  "server_gate_candidate": "495829884f135e1f9a4f7d138f341a99cd9e1747",
+  "server_gate_candidate_is_pr_ancestor": true,
+  "tested_runtime_sha256": {
+    "system/core/Plugin/PackageScanner.php": "5f43bbd0f9cbd6b394cef332da610d32838c5a5ebc27091504998b03aabf7dda",
+    "system/core-manifest.json": "4d1b4fac8833a51eee1a3eab21cb2384d9deab1bb9bd306f5bd887d6b2fd858c",
+    "tests/plugin_package_manifest_scan.php": "3dfefaf227844bfd1c8301dddae0c1dc0e933cd583d9d3aa5508935cd290ae43"
+  },
+  "source_patch_v2_sha256": "c0822c0d5055e6a43adb3f12f48fa7c5047da2051a2049e486e782cc15b05d02",
+  "server_environment": {
+    "role": "authorized update server isolated directory",
+    "php": "8.5.9",
+    "temporary_directory_mode": "0700",
+    "signing_test_keys": "generated and used in server test processes only",
+    "private_keys_exported": false,
+    "formal_signer_used": false
+  },
+  "server_gate": {
+    "v1_contract": {
+      "command": "php tests/release_gate_v1_contract.php",
+      "exit_code": 0,
+      "assertions": 4,
+      "output": [
+        "[PASS] created partial update regression package",
+        "[PASS] UpdatePackageReader rejects a partial modern Core snapshot",
+        "[PASS] release gate rejects a partial Core update package before publication",
+        "[PASS] release gate failure explains update package parity or full snapshot violation",
+        "Release Gate V1 contract tests passed."
+      ],
+      "sanitized_output_sha256": "260dfbc6635e8ad70122ec171cc7de9a7fcdfa09e7aaac3a2098a49d59543996"
+    },
+    "phase0": {
+      "command": "php tests/release_phase0_gate.php",
+      "exit_code": 0,
+      "output": "Release Phase 0 gate tests PASS",
+      "sanitized_output_sha256": "b076a144b434efe952c16ff22fe3894a1eb6dfe98533e3c2f881d7ba680a01b1",
+      "coverage": [
+        "exact-commit installer and manifest parity",
+        "test signature verification",
+        "full Core update snapshot and metadata parity",
+        "tampered installer rejected"
+      ]
+    },
+    "gate_programs_unchanged_from_base": {
+      "tests/release_gate_v1_contract.php": "36a45d5c27de817c4957a2ae5790ab370bbc234978d577e5ebc14bd671054063",
+      "tests/release_phase0_gate.php": "0d8a07a75166395504af74f1df477ec1e790939951946b772ab382b6160646f9",
+      "scripts/release_parity_gate.php": "b952e0eb8a638ed03c52c8816ead3383041b340b57352664777675e7cab20bcb",
+      "scripts/build_exact_commit_installer.php": "7bb5923d12e8629041ef3fb96d8520f9cb96efda5dfc846cd680425804b65d6a",
+      "scripts/build_exact_commit_update_package.php": "e0ca8b5a2604c46f1e497ca1435d716e3a3f3ab7c1a4a07a135366088f955a2e",
+      "scripts/release/preflight": "449071b1884c9e93adf5fedf52b9e6c7e205a6b34741632c9d7cec64a9b93c99",
+      "scripts/release/common.sh": "c4082abe57548e0acfa54c41562cdeed2ce2fdbd8deebd3ed8f80ec4495af935"
+    },
+    "initial_failure": {
+      "candidate": "85f3b84fec92499421a568709455f4954b3fce95",
+      "reason": "Core integrity manifest was not synchronized",
+      "resolution": "Core ManifestBuilder regenerated the manifest; only Plugin/PackageScanner.php hash changed"
+    },
+    "formal_preflight": {
+      "status": "FAIL_CLOSED",
+      "reason": "test candidate is not current origin/main",
+      "origin_main_observed": "64e87de69082179fd20c451c9ade9d9c3aeff0aa",
+      "release_authorized": false
+    }
+  },
+  "related_regressions": {
+    "scanner_cases": 17,
+    "core_trust_capability": 9,
+    "active_runtime_enable": 1,
+    "market_api_enable": 4,
+    "external_payment_fixture_integration": 72,
+    "external_payment_fixture_http": 11,
+    "new_real_payment_created": false
+  },
+  "evidence_file_sha256": {
+    "server_report": "774d92c7cff77dd964507a642ab7da96122c05fc0dcae855fecebf6dbd033a62",
+    "native_install_report": "741571ad7ff11a5ff0b2d45191449b987076845cd254e89e47ca1fc3eb6a04f0",
+    "native_exact_pr_report": "8dd12384fcb8258893296260e5de7e8a78480fea8dcbc8edee11073bec3cda60"
+  },
+  "reuse_boundary": "Server Gate applies to retained ancestor495829 with byte-identical scanner, Core manifest and regression test. Native HTTP22 applies to exact PR ancestor ea55d150. Later documentation-only commits do not change tested runtime bytes; no formal Release Gate approval for a new merge commit.",
+  "constraints": {
+    "merge_authorized": false,
+    "release_authorized": false,
+    "production_modified": false,
+    "raw_logs_or_runtime_data_committed": false,
+    "plugin_package_or_source_committed": false
+  },
+  "knowledge_sync": {
+    "internal_documentation_updated": true,
+    "published_v1_facts_changed": false,
+    "reason": "Unreleased correction to the existing package contract; no released feature/version change",
+    "build": "NOT_RUN",
+    "import": "NOT_RUN",
+    "index": "NOT_RUN",
+    "consumer_application": "NOT_RUN"
+  },
+  "native_http_install_legacy_overlay": {
+    "plugin_id": "daiying.payment.epay",
+    "plugin_version": "0.1.0-dev.3",
+    "unchanged_plugin_zip_sha256": "ea20c8213724b2053c4eddeff23abc4361f280e3ba33da6e455dcc3b0f0809d9",
+    "scan_status": "passed",
+    "findings": [],
+    "allow_review_submitted": false,
+    "installed": {
+      "plugin_id": "daiying.payment.epay",
+      "status": "Installed",
+      "version": "0.1.0-dev.3",
+      "trust_level": "api",
+      "source": "local_unreviewed",
+      "review_status": "unreviewed"
+    },
+    "enabled": {
+      "plugin_id": "daiying.payment.epay",
+      "status": "Enabled",
+      "version": "0.1.0-dev.3",
+      "trust_level": "api",
+      "source": "local_unreviewed",
+      "review_status": "unreviewed"
+    },
+    "checks_passed": [
+      "anonymous administrator access requires login",
+      "authenticated native upload form is available",
+      "native upload retains CSRF protection",
+      "genuine risky code still requires review",
+      "default install refuses a risky package without review",
+      "unchanged dev.3 ZIP preview passes with zero findings",
+      "native install retains CSRF protection",
+      "native HTTP install succeeds without allow_review or automatic enable",
+      "installation preserves restricted API trust and local-unreviewed source",
+      "native HTTP enable succeeds after default installation",
+      "enabled plugin registers native payment settings schema",
+      "enabled plugin registers callback route and refuses an unsigned notification",
+      "frozen payment package remains byte-identical"
+    ],
+    "assertion_count": 13,
+    "source_kind": "published baseline archive with scanner-only overlay; V2 Core manifest was not included"
+  },
+  "native_http_install": {
+    "plugin_id": "daiying.payment.epay",
+    "plugin_version": "0.1.0-dev.3",
+    "unchanged_plugin_zip_sha256": "ea20c8213724b2053c4eddeff23abc4361f280e3ba33da6e455dcc3b0f0809d9",
+    "source_commit": "ea55d150a801367024c8c2722ea0afc31fe17a7b",
+    "source_kind": "exact git archive of PR snapshot; no Core overlay",
+    "core_manifest_sha256": "4d1b4fac8833a51eee1a3eab21cb2384d9deab1bb9bd306f5bd887d6b2fd858c",
+    "scan_status": "passed",
+    "findings": [],
+    "allow_review_submitted": false,
+    "installed": {
+      "plugin_id": "daiying.payment.epay",
+      "status": "Installed",
+      "version": "0.1.0-dev.3",
+      "trust_level": "api",
+      "source": "local_unreviewed",
+      "review_status": "unreviewed"
+    },
+    "enabled": {
+      "plugin_id": "daiying.payment.epay",
+      "status": "Enabled",
+      "version": "0.1.0-dev.3",
+      "trust_level": "api",
+      "source": "local_unreviewed",
+      "review_status": "unreviewed"
+    },
+    "checks_passed": [
+      "exact PR snapshot passes native Core integrity check before installation",
+      "native integrity checker detects scanner tampering",
+      "original scanner restoration passes integrity without bypass",
+      "anonymous administrator access requires login",
+      "authenticated native upload form is available",
+      "native upload retains CSRF protection",
+      "genuine risky code still requires review",
+      "default install refuses a risky package without review",
+      "ambiguous manifests are blocked in native HTTP preview",
+      "critical scan cannot be overridden by administrator review",
+      "clean staging integrity control passes preview",
+      "native installation rejects changed staging bytes after preview",
+      "unchanged dev.3 ZIP preview passes with zero findings",
+      "native install retains CSRF protection",
+      "native HTTP install succeeds without allow_review or automatic enable",
+      "installation preserves restricted API trust and local-unreviewed source",
+      "native HTTP enable succeeds after default installation",
+      "enabled plugin registers native payment settings schema",
+      "enabled plugin registers callback route and refuses an unsigned notification",
+      "frozen payment package remains byte-identical",
+      "Core integrity remains valid after native installation and enable",
+      "native test uses exact V2 Core manifest bytes"
+    ],
+    "assertion_count": 22,
+    "core_integrity_before_and_after": "ok; missing/changed/unknown all empty",
+    "signing_keys_generated": false,
+    "real_payment_created": false
+  },
+  "review_follow_up": {
+    "reviewed_commit": "ea55d150a801367024c8c2722ea0afc31fe17a7b",
+    "runtime_changes": false,
+    "evidence_gap": "Earlier native HTTP acceptance used a scanner-only overlay, not the exact V2 manifest snapshot.",
+    "resolution": "Native HTTP22 acceptance rerun from the exact PR archive, including V2 manifest, with no Core overlay.",
+    "scanner_regression_rerun": 17,
+    "core_manifest_members": 356,
+    "manifest_membership_unchanged": true,
+    "manifest_changed_entries": [
+      "Plugin/PackageScanner.php"
+    ],
+    "all_manifest_hashes_verified": true,
+    "runtime_ancestor_hashes_verified": true,
+    "gate_program_and_report_hashes_verified": true,
+    "security_diff_scan": {
+      "scan_id": "3968143a-3f8a-4321-9383-d0f74abe7c41",
+      "status": "complete",
+      "new_reportable_findings": 0,
+      "scope": "Five changed files and directly supporting scanner/install/integrity consumers; not repository-wide or production audit."
+    }
+  }
+}
