@@ -24,6 +24,7 @@ This index collects the public-facing documentation currently available in the G
 
 - [戴影影视插件 0.8.0 安装与配置图文教程](media-sources-0.8.0-guide.zh-CN.md) covers independent movie, short-drama, TV and custom-video setup.
 - Content management is available through the admin backend after installation.
+- [Historical SEO/optimizer retirement candidate](historical-optimizer-retirement.md) records the Owner decision, retained data and isolated acceptance; this is not a published upgrade.
 - [Administrator Passkey reauthentication candidate](admin-passkey-reauth.md) describes the isolated sensitive-action flow and its limits.
 - [Site registration settings](site-registration.md) documents global ICP number configuration in the 1.2.85 candidate.
 - [Member collaboration retirement](member-editorial-retirement.md) records the unpublished Issue #9 decision and data retention.

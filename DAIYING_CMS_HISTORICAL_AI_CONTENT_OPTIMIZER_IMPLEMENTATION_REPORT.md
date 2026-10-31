@@ -1,3 +1,5 @@
+> Historical reference: Owner retired these tools in the unpublished 2026-10-30 candidate. See [retirement and data retention](docs/historical-optimizer-retirement.md). This report describes the earlier implementation.
+
 # Daiying CMS Historical AI Content Optimizer Implementation Report
 
 ## Status
