@@ -50,9 +50,57 @@ merge/release commit. Signing test keys stayed in server-only isolated processes
 none were generated or exported on the workstation. Phase 0, a new version and
 formal release preparation were not requested or performed.
 
-The private machine reports and patch digest remain in the task handoff. Old implementation reports describe historical releases and are not
+The private machine reports and patch digest remain in the task handoff.
+Old implementation reports describe historical releases and are not
 instructions to restore the tools in this candidate. Reverting retirement would
 restore execution access and needs an explicit Owner decision.
+
+## PR76 review follow-up
+
+The first native HTTP acceptance checked page availability but did not submit a
+successful AI-writing request; its historical tables were empty. Those results
+alone were insufficient evidence for the full AI-writing/save flow or retention
+of an existing optimization suggestion. No runtime defect was found in review.
+
+`tests/historical_optimizer_http.py` closes these gaps with a fresh exact archive
+of reviewed commit `01cd0cadf32f176ebf0708789ac02eccf914a5af`. All 31 checks passed:
+
+- Article and page AI-writing POSTs traverse the native administrator handler,
+  shared AiService, and an OpenAI-compatible mock bound only to loopback. Both
+  return editable text. Login, CSRF and empty-input refusals dispatch no request.
+- Generation alone creates no article, publication or historical-data change.
+  A later native editor submission saves the returned body as a draft together
+  with manual SEO. The draft is absent from the public Sitemap.
+- An existing published article can still be loaded and edited through the real
+  form handler. Its slug, publication state, manual SEO and canonical are retained;
+  invalid CSRF leaves the saved content unchanged.
+- Seeded historical jobs contain pending SEO and body proposals, with matching
+  logs. All six old actions return 410 without AI dispatch or record mutation.
+  Historical jobs, proposals, logs and migration records remain byte-for-byte
+  equal after the normal editing and AI-writing flows as well.
+- Native keyword assignment saves successfully; crawler and search-engine pages
+  load; the public article still emits manual SEO title/description/canonical;
+  Sitemap includes the published article and excludes the generated draft.
+
+Exactly two simulated model requests were made, both to the local mock; no paid
+or external model was used. This is backend HTTP acceptance, not browser-JavaScript,
+physical-device, real-model or production acceptance. The editor AI script and
+17 other shared controller methods were also compared against base `ee987eb6`
+and are unchanged. No runtime code, migrations, CLI, assets or Gate programs
+changed in this follow-up. Existing server V1 evidence is reused only because all
+five recorded code/manifest/test hashes still match; no additional signing test
+or formal release Gate is claimed for the later test/documentation commit.
+
+Reproduce against a chosen immutable candidate from a clean checkout:
+
+```sh
+python3 tests/historical_optimizer_http.py --commit HEAD --output /tmp/retirement-review.json
+```
+
+The temporary site, synthetic account, sessions, SQLite database and mock provider
+are created privately and removed after the test. Only the optional structured
+acceptance record is retained; no configuration, credentials or database is
+exported. The V1 knowledge/release boundaries below still apply.
 
 ## Knowledge synchronization
 
