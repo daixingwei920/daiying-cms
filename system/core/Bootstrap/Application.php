@@ -133,9 +133,15 @@ final class Application
     public function handle(Request $request): Response
     {
         $request = $this->withBasePathStripped($request);
-        // Retired in Issue #9. Guard all methods and descendants before plugin or
-        // catch-all routes, including requests using previously granted sessions.
         $path = Request::normalizePath($request->path);
+        // Retired tools cannot be revived by old bookmarks or plugin routes.
+        foreach (['/admin/seo/historical-backfill', '/admin/seo/content-quality'] as $retiredPath) {
+            if ($path === $retiredPath || str_starts_with($path, $retiredPath . '/')) {
+                return $this->withConfiguredSecurityHeaders(Response::text('历史文章 SEO 补全和历史内容优化已退役。', 410)
+                    ->withHeaders(['Cache-Control' => 'private, no-store']));
+            }
+        }
+        // Issue #9 retirement also covers previously granted member sessions.
         if ($path === '/admin/member-access' || str_starts_with($path, '/admin/member-access/')
             || $path === '/workspace' || str_starts_with($path, '/workspace/')) {
             return $this->withConfiguredSecurityHeaders(Response::text('会员协作已退役。', 410)
@@ -527,9 +533,6 @@ final class Application
         $router->get('/admin/seo/keywords', [$admin, 'seoKeywordIndex']);
         $router->get('/admin/seo/keywords/detail', [$admin, 'seoKeywordDetail']);
         $router->post('/admin/seo/keywords/save', [$admin, 'seoKeywordSave']);
-        $router->get('/admin/seo/historical-backfill', [$admin, 'seoHistoricalBackfill']);
-        $router->get('/admin/seo/content-quality', [$admin, 'seoContentQuality']);
-        $router->post('/admin/seo/historical-backfill/action', [$admin, 'seoHistoricalBackfillAction']);
         $router->get('/admin/seo/search-engines', [$admin, 'seoSearchEngines']);
         $router->post('/admin/seo/search-engines/import', [$admin, 'seoSearchEngineManualImport']);
         $router->post('/admin/seo/search-engines/submit', [$admin, 'seoSearchEngineSubmit']);

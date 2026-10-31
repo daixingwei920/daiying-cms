@@ -4,6 +4,12 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized historical optimizer retirement (2026-10-30)
+
+- Remove the historical SEO backfill and historical content optimizer tools from Core. Candidate base is merged PR75 `ee987eb6cb4c7800b6df8ed95ec551c1a3e19dbf`; use the clean `maintenance/retire-historical-optimizers` worktree.
+- Remove menus, handlers and dedicated service; old paths and descendants return 410 for every method before routing. Preserve ordinary article editing/AI writing, manual SEO, keyword/search/crawler features, existing content, historical suggestions/logs and all published migrations.
+- Isolated development and regression testing only. No merge, version change, production operation or publication. Signing tests remain server-only. See `docs/historical-optimizer-retirement.md`.
+
 ## Current published Core1.2.90 and Owner-upgraded production (2026-10-26)
 
 - Core1.2.90 is published on GitHub/official stable from immutable tag v1.2.90 at449f92a258f2d02f78cb19f590c308ec268a1d43. Installer62501532a9b73327d35535d6a52c895408393546cdfb984e3c55d5d7965d5b4d; update0ad3dabdf064894733a88ca3c497075dcdf0fa6e6bd285caf11a85e1bfe1c427. No rebuild/re-sign/tag move. Original c09b5ea1.2.90 artifacts remain private historical freezes.
