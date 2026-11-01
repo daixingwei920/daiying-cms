@@ -4,6 +4,14 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Published Core1.2.93 and completed three-site upgrade (2026-11-01)
+
+- Core1.2.93 is published on GitHub/official stable at immutable v1.2.93 /0e601035a1fc6c89d3b36aa767e735a44f1eb24a. Installer8474d05d6da5bbc8e774059db5c2c54e2025d83e1bb1f7b230d99cf392bf9822; updatef00f97703751a01a8999a948bebf75f8bb71da10c504ee7d2a0a771ed05d4a92. Formal exact-main preflight/build/signing/parity643 and PHP8.3/8.5 native upgrade/rollback/retry45 each passed. Do not rebuild, re-sign or move frozen tags/artifacts.
+- PR84 plus native-installer-path correction PR85 cover disconnected Google readiness and owned Core task suspension. The initial7b2a3f4 candidate was stopped before publication; private source/artifacts and failure history remain. No historical migration, public API, signature or integrity guard was weakened.
+- Owner separately approved and completed native1.2.92→1.2.93 updates of official, piank and book.daixingwei.cn, after fresh consistent database/file backups, existing-key verification and dry runs. All three reportNORMAL, each357 Core hashes/425 payload files and six restore points verified; protected configuration/content/payments/plugin state preserved, no cleanup warnings. Production HTTP20, anonymous publication27 and independent signature9 checks passed.
+- Preserve configured Google scheduling; disconnected film/novel scheduling is disabled without erasing error history. Novel orphan AI task stays disabled. No paid AI, real payment/refund or Google sync dispatch; production authenticated visual/editor-save acceptance was not run. Production backups/credentials remain server-private, no local signing-key generation/export or knowledge-consumer import.
+- This branch updates only publication documentation, governed knowledge and provenance tests. Runtime/migrations/config/assets remain byte-identical to frozen v1.2.93. Preparation labels in the frozen changelog/documents are historical; published status and evidence are recorded in docs/CORE_1.2.93_PUBLICATION_REPORT.md. Later releases/production changes need new authorization.
+
 ## Owner-authorized Core1.2.93 publication and three-site upgrade
 
 - Native-entry review stopped the first7b2a3f4 candidate: AdminController disables through LocalPluginPackageInstaller, whose pauseTasks previously omitted Core scheduled tasks. Correct this existing public path (including dependent disable/code uninstall), preserve the stopped Gate/private artifacts, and run the full Gate on the corrected exact main. Owner's release/three-site approval remains active; no publication or deployment of the incomplete candidate.
