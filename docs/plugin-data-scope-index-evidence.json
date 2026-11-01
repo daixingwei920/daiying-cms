@@ -1,0 +1,77 @@
+{
+  "status": "PREMERGE_ISOLATED_PASS_NOT_PUBLISHED",
+  "runtime_source_commit": "b37292adab8c08fa98f499a688f49170fa714075",
+  "version": "1.2.92",
+  "steps": [
+    {
+      "name": "index-php83",
+      "exit_code": 0,
+      "pass_lines": 10
+    },
+    {
+      "name": "index-php85",
+      "exit_code": 0,
+      "pass_lines": 10
+    },
+    {
+      "name": "payment-save-php83",
+      "exit_code": 0,
+      "pass_lines": 8
+    },
+    {
+      "name": "gate-v1",
+      "exit_code": 0,
+      "pass_lines": 4
+    },
+    {
+      "name": "novel-core-index-shelf",
+      "exit_code": 0,
+      "pass_lines": 0
+    },
+    {
+      "name": "novel-v1",
+      "exit_code": 0,
+      "pass_lines": 0
+    },
+    {
+      "name": "mysql-init",
+      "exit_code": 0,
+      "pass_lines": 0
+    },
+    {
+      "name": "mysql-fixture-create",
+      "exit_code": 0,
+      "pass_lines": 0
+    },
+    {
+      "name": "index-mysql57",
+      "exit_code": 0,
+      "pass_lines": 8
+    }
+  ],
+  "shelf": {
+    "status": "PASS",
+    "checks": [
+      "unchanged_shelf_html",
+      "32_books_12800_chapters",
+      "chapter_count_400",
+      "han_count_400000",
+      "book_detail_200",
+      "reader_200",
+      "body_hash_unchanged",
+      "indexed_shelf_under_5s"
+    ],
+    "without_index_ms": 79029.505368,
+    "with_index_ms": 428.482524,
+    "external_calls": 0,
+    "plugin_modified": false
+  },
+  "novel_v1": {
+    "status": "PASS",
+    "checks": 61
+  },
+  "plugin_modified": false,
+  "production_modified": false,
+  "formal_merged_gate": "PENDING",
+  "private_data_or_keys_exported": false
+}

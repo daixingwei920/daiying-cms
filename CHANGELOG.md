@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.92 (unpublished maintenance candidate)
+
+- Fix SQLite payment-provider save transaction ownership on PHP8.3 using the existing PaymentTransaction contract; preserve atomic encrypted settings/default/audit writes and fail closed on lock conflicts.
+- Add a Core-owned plugin-data scope/order index migration. Adopt an existing matching index without rebuilding it; reject conflicting definitions without dropping data or indexes. Preserve all published migrations, payment configurations and plugin query semantics.
+- Merge and isolated exact-source Release Gate preparation only; no production upgrade or publication.
+
 ## 1.2.91 (release preparation)
 
 - Add REST content-type/resource discovery, protected multipart media uploads, safe metadata PATCH, single Active-media reads and real media pagination with accurate lookahead. Reuse native authorization, CSRF, MIME/extension/size/quota protections and audit.

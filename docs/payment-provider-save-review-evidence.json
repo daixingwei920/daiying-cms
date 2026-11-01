@@ -1,0 +1,146 @@
+{
+  "status": "REVIEWED_ISOLATED_PASS_PENDING_OWNER_REVIEW",
+  "pr": "https://github.com/daixingwei920/daiying-cms/pull/80",
+  "date": "2026-11-01",
+  "base_commit": "9a29ee2f981ea6353fc7f91abe9b983e0f1c9680",
+  "runtime_source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
+  "new_regression_source_commit": "dede1d7a0c9ce8a146dc04740f0bc0c8600adbd7",
+  "test_sha256": "87204fae5095c7fa5f5b5c0daa6aac7c49c564ffd4f1318e03ebee66316feba5",
+  "core_controller_sha256": "c5e9c458be0175077769ebb2dc21666862d741f07c0bf2e15489edc534745d67",
+  "runtime_correction": {
+    "prior_claim": "PHP8.5 based solely on Nginx vhost",
+    "prior_claim_withdrawn": true,
+    "https_listener": "Apache/httpd on 443",
+    "apache_php_handler": "proxy:unix:/tmp/php-cgi-83.sock|fcgi://localhost",
+    "active_fpm_binary": "/www/server/php/83/sbin/php-fpm",
+    "active_fpm_version": "PHP 8.3.33 (fpm-fcgi) (built: Aug 20 2026 17:36:53)",
+    "live_php_probe": "NOT_RUN",
+    "historical_request_pid": "NOT_CAPTURED"
+  },
+  "site_copy_cases": [
+    {
+      "case": "base-php83",
+      "php": "8.3.33",
+      "status": 500,
+      "location": "",
+      "elapsed_ms": 1022,
+      "provider_registered": true,
+      "provider_save_errors": [
+        {
+          "message": "Core payment provider settings save failed",
+          "error": "SQLSTATE[HY000]: General error: 5 database is locked"
+        }
+      ],
+      "settings_before_count": 0,
+      "settings_after_count": 0,
+      "production_read_only_mount": true,
+      "network_namespace": "net:[4026532261]",
+      "external_network_routes": 0,
+      "result_complete": true
+    },
+    {
+      "case": "pr80-php83",
+      "php": "8.3.33",
+      "status": 302,
+      "location": "/admin/payments/providers?provider_id=daiying.payment.epay&saved=1",
+      "elapsed_ms": 22,
+      "provider_registered": true,
+      "provider_save_errors": [],
+      "settings_before_count": 0,
+      "settings_after_count": 1,
+      "production_read_only_mount": true,
+      "network_namespace": "net:[4026532261]",
+      "external_network_routes": 0,
+      "result_complete": true
+    },
+    {
+      "case": "base-php85",
+      "php": "8.5.9",
+      "status": 302,
+      "location": "/admin/payments/providers?provider_id=daiying.payment.epay&saved=1",
+      "elapsed_ms": 23,
+      "provider_registered": true,
+      "provider_save_errors": [],
+      "settings_before_count": 0,
+      "settings_after_count": 1,
+      "production_read_only_mount": true,
+      "network_namespace": "net:[4026532261]",
+      "external_network_routes": 0,
+      "result_complete": true
+    },
+    {
+      "case": "pr80-php85",
+      "php": "8.5.9",
+      "status": 302,
+      "location": "/admin/payments/providers?provider_id=daiying.payment.epay&saved=1",
+      "elapsed_ms": 22,
+      "provider_registered": true,
+      "provider_save_errors": [],
+      "settings_before_count": 0,
+      "settings_after_count": 1,
+      "production_read_only_mount": true,
+      "network_namespace": "net:[4026532261]",
+      "external_network_routes": 0,
+      "result_complete": true
+    }
+  ],
+  "isolation": {
+    "consistent_readonly_database_backup": true,
+    "private_config_and_plugins_stayed_on_server": true,
+    "synthetic_admin_and_merchant_key": true,
+    "native_application_and_csrf": true,
+    "test_sapi": "CLI",
+    "production_fpm_save_replay": "NOT_RUN",
+    "network_namespace_external_routes": 0,
+    "production_roots_readonly_mount": true,
+    "test_busy_timeout_seconds": 1,
+    "production_busy_timeout_ms_unchanged": 60000,
+    "real_payment_calls": 0
+  },
+  "new_regressions": [
+    {
+      "test": "php83-payment_provider_save_sqlite",
+      "exit_code": 0,
+      "pass_lines": 8,
+      "complete": true
+    },
+    {
+      "test": "php85-payment_provider_save_sqlite",
+      "exit_code": 0,
+      "pass_lines": 8,
+      "complete": true
+    },
+    {
+      "test": "php83-payment_sqlite_transaction_contract",
+      "exit_code": 0,
+      "pass_lines": 27,
+      "complete": true
+    },
+    {
+      "test": "php83-release_gate_v1_contract",
+      "exit_code": 0,
+      "pass_lines": 4,
+      "complete": true
+    }
+  ],
+  "previous_unchanged_runtime_related_checks": 119,
+  "production_protection": {
+    "config_unchanged": true,
+    "active_core_pointer_unchanged": true,
+    "cms_payment_provider_settings_unchanged": true,
+    "cms_payments_unchanged": true,
+    "cms_payment_refunds_unchanged": true,
+    "cms_payment_entitlements_unchanged": true,
+    "plugin_status_versions_unchanged": true
+  },
+  "boundaries": {
+    "merged": false,
+    "published": false,
+    "production_changed": false,
+    "formal_signed_release_gate": "NOT_RUN_NOT_A_RELEASE",
+    "local_private_signing_keys_generated": false,
+    "private_keys_exported": false,
+    "mysql": "NOT_RUN",
+    "historical_logs_preserved": true
+  }
+}

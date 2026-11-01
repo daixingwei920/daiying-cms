@@ -4,6 +4,19 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized PR80 merge and Core1.2.92 isolated Gate preparation (2026-11-01)
+
+- Owner now authorizes fixing the specified novel-shelf technical debt alongside PR80, merging, and running complete Release Gate on the exact merged commit in the authorized update server isolation. No production change, tag, publication or plugin release; preserve frozen1.2.91 and live configuration/data.
+- The screenshot identifies cms_plugin_data scope/order indexing and evaluation of unchanged novel per-book queries; it does not authorize unrelated payment-action refactoring or content rewrites. Add one idempotent Core migration, validate existing index definitions, and test fresh/existing/conflicting indexes plus realistic shelf/read/publication and rollback behavior.
+- Prepare the next patch candidate1.2.92 so the existing preflight does not reuse published1.2.91. Keep asymmetric private keys only on the authorized server, never workstation generation/export. Formal signer/publication gates stay fail closed; isolate test artifacts and exact source evidence.
+
+## Unpublished payment-provider SQLite save repair (2026-11-01)
+
+- Owner requests repair after the piank.cn provider-save lock diagnosis. Clean branch fix/payment-provider-save-sqlite-lock starts from actual main9a29ee2. Scope is isolated repair/regression only; do not change live settings, replay production saves, merge, publish or alter frozen1.2.91 artifacts.
+- Reuse PaymentTransaction only in paymentProviderSave, preserve atomic configuration/default/secret/audit writes and rollback, and return retryable503 for SQLite BUSY/LOCKED. Preserve admin/CSRF/provider/configuration guards and Core integrity.
+- Review corrected the runtime diagnosis: HTTPS is served by Apache, whose piank vhost points to PHP8.3 FPM; Nginx PHP8.5 configuration alone was not evidence of the live HTTPS runtime. In network-disabled, production-read-only namespaces, actual piank plugin/database copies reproduce baseline PHP8.3 self-lock and pass with PR80; PHP8.5 passes both. Historical request process/concurrency was not captured and no live PHP probe or save was replayed. See docs/payment-provider-save-sqlite.md and its review evidence JSON.
+- Signing-related contract tests run exclusively in the authorized update server's private isolation. No workstation private signing-key generation/export. A contract PASS is not a formal Release Gate or production acceptance.
+
 ## Current published Core1.2.91 and independent Epay0.1.0 (2026-11-01)
 
 - Owner explicitly authorized merging/publishing PR78 and independent Epay. Core1.2.91 is formally published at v1.2.91 / `3c8ecf89f56dda4b930fb2fb0df466a654b7f82c` on GitHub and official distribution; installer `3dad41ee1e541130520d357d5c7f017eb147efdcb581c6ccb61d46299d7e469d`, update `3ef47e9a3d6c45b79e3f1cbd4c70a6f586709291473ec212c2195a8825d1aba7`. Formal Gate,639 signed parity,35 native upgrade/rollback/retry and31 public/10 independent signature checks passed. Do not rebuild, re-sign or move this frozen release/tag.
