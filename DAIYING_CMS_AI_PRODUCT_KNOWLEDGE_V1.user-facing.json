@@ -1,6 +1,6 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
-  "verified_version": "1.2.91",
+  "verified_version": "1.2.92",
   "last_verified_at": "2026-11-01",
   "records": [
     {
@@ -31,8 +31,8 @@
           "line_end": 171
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -69,8 +69,8 @@
           "line_end": 151
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -107,8 +107,8 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -151,8 +151,8 @@
           "line_end": 619
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -189,8 +189,8 @@
           "line_end": 50
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -227,8 +227,8 @@
           "line_end": 45
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -265,8 +265,8 @@
           "line_end": 94
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -303,8 +303,8 @@
           "line_end": 348
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -347,8 +347,8 @@
           "line_end": 7
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -385,8 +385,8 @@
           "line_end": 48
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -435,8 +435,8 @@
           "line_end": 25
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -473,8 +473,8 @@
           "line_end": 628
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -511,8 +511,8 @@
           "line_end": 5
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -549,8 +549,8 @@
           "line_end": 596
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -593,8 +593,8 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -630,8 +630,8 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -662,8 +662,8 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -689,9 +689,9 @@
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "48137fef5270e2a3a378a4fb9d291359b3a98ec7926c37aec17076f91d431454",
-          "line_start": 121,
-          "line_end": 121
+          "sha256": "9cea5745bfd505e48e77007d8a4cb7b5de82ec003c086b5a9a9c0b4761f486eb",
+          "line_start": 127,
+          "line_end": 127
         },
         {
           "path": "system/core/Migration/MysqlHistoricalMigrationDialect.php",
@@ -700,8 +700,8 @@
           "line_end": 12
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -738,8 +738,8 @@
           "line_end": 11
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -765,15 +765,15 @@
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "48137fef5270e2a3a378a4fb9d291359b3a98ec7926c37aec17076f91d431454",
-          "line_start": 124,
-          "line_end": 124
+          "sha256": "9cea5745bfd505e48e77007d8a4cb7b5de82ec003c086b5a9a9c0b4761f486eb",
+          "line_start": 130,
+          "line_end": 130
         },
         {
           "path": "CHANGELOG.md",
-          "sha256": "48137fef5270e2a3a378a4fb9d291359b3a98ec7926c37aec17076f91d431454",
-          "line_start": 125,
-          "line_end": 125
+          "sha256": "9cea5745bfd505e48e77007d8a4cb7b5de82ec003c086b5a9a9c0b4761f486eb",
+          "line_start": 131,
+          "line_end": 131
         },
         {
           "path": "docs/release/1.2.82-upgrade-support.md",
@@ -782,8 +782,8 @@
           "line_end": 4
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -820,8 +820,8 @@
           "line_end": 11
         }
       ],
-      "verified_version": "1.2.91",
-      "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+      "verified_version": "1.2.92",
+      "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -832,10 +832,10 @@
       "enabled_for_customer_service": true
     }
   ],
-  "package_revision": "2026-11-01-payment-provider-sqlite-save-reviewed-unpublished",
+  "package_revision": "2026-11-01-core192-payment-save-plugin-data-index-unpublished",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
-  "source_tag": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
+  "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
+  "source_tag": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "PUBLISHED",
@@ -954,16 +954,16 @@
   "candidate_evidence": {
     "status": "UNPUBLISHED",
     "base_version": "1.2.91",
-    "candidate_version": "1.2.91",
+    "candidate_version": "1.2.92",
     "base_commit": "9a29ee2f981ea6353fc7f91abe9b983e0f1c9680",
-    "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
-    "candidate_revision": "payment-provider-sqlite-save-maintenance",
-    "owner_decision": "Owner requests isolated repair of payment-provider saves. No merge, release, production deployment, configuration changes or real payment.",
-    "runtime_report": "docs/payment-provider-save-sqlite.md",
+    "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
+    "candidate_revision": "payment-save-and-plugin-data-index-maintenance",
+    "owner_decision": "Owner authorizes PR80 merge including the specified novel shelf Core index debt, and complete isolated Release Gate on the exact merged source. No production change or publication.",
+    "runtime_report": "docs/plugin-data-scope-index.md",
     "production_deployed": false,
     "consumer_imported": false,
     "published_release_evidence_preserved": true,
-    "review_evidence": "docs/payment-provider-save-review-evidence.json"
+    "review_evidence": "docs/plugin-data-scope-index-evidence.json"
   },
   "sync_validation": {
     "environment": "isolated",
@@ -1037,9 +1037,9 @@
     }
   },
   "development_candidate": {
-    "source_commit": "49608c5da0d6b5673438a14f0d1063fd71c7c664",
-    "status": "UNPUBLISHED_PAYMENT_PROVIDER_SQLITE_SAVE_REPAIR",
-    "report": "docs/payment-provider-save-sqlite.md",
+    "source_commit": "cfc62b494c3afcb774cd7fc71c79f6b7f15909a7",
+    "status": "UNPUBLISHED_CORE192_PAYMENT_SAVE_AND_PLUGIN_DATA_INDEX",
+    "report": "docs/plugin-data-scope-index.md",
     "production_deployed": false,
     "consumer_imported": false,
     "published_tag_unchanged": true
