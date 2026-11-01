@@ -32,7 +32,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -70,7 +70,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -108,7 +108,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -152,7 +152,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -190,7 +190,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -228,7 +228,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -266,7 +266,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -304,7 +304,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -348,7 +348,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -386,7 +386,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -436,7 +436,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -474,7 +474,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -512,7 +512,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -550,7 +550,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -594,7 +594,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -631,7 +631,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -663,7 +663,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -701,7 +701,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -739,7 +739,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -783,7 +783,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -821,7 +821,7 @@
         }
       ],
       "verified_version": "1.2.93",
-      "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
+      "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -832,10 +832,10 @@
       "enabled_for_customer_service": true
     }
   ],
-  "package_revision": "2026-11-01-core193-unpublished-scheduler-maintenance",
+  "package_revision": "2026-11-01-core193-native-entry-reviewed-candidate",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
-  "source_tag": "70917c56ce80a04d50324df56f752cf1a477c46a",
+  "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
+  "source_tag": "a8336f88c138e01a90dba4be1094ead02485af8f",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "PUBLISHED",
@@ -973,8 +973,8 @@
     "base_version": "1.2.92",
     "candidate_version": "1.2.93",
     "base_commit": "24e1b3cee01cbf5adf31794d1bbe5f7826054468",
-    "source_commit": "70917c56ce80a04d50324df56f752cf1a477c46a",
-    "candidate_revision": "scheduler-ownership-and-google-readiness",
+    "source_commit": "a8336f88c138e01a90dba4be1094ead02485af8f",
+    "candidate_revision": "scheduler-native-disable-and-google-readiness",
     "owner_decision": "Owner authorizes PR84 merge, exact-source full Release Gate, Core1.2.93 publication and native upgrade of three sites, after backups and preserved security/configuration/data.",
     "runtime_report": "docs/scheduler-unconfigured-maintenance.md",
     "production_deployed": false,
