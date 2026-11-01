@@ -249,7 +249,7 @@
   "Plugin/Capability.php": "cfb08447a48d2c498c69d0c680104f71a5d8de2fe1384d3674c07911dcccc1ae",
   "Plugin/FrontendExtensionAsset.php": "f7606e02fc7cbda78ef71ab4b7afedd9ce7cb0ff6edb4fed43362c71ae74a14a",
   "Plugin/FrontendExtensionRenderer.php": "0d778e6514e34ee92a02df32a94e3f0ae472c752971f579b98a09bd651b04cba",
-  "Plugin/LocalPluginPackageInstaller.php": "87adad49b00dce30b7233694c53d8c55e9efacc8ed719646704e21a6ee6cbb18",
+  "Plugin/LocalPluginPackageInstaller.php": "d023da1da6ac272aadbd3e9f41c586ff955cfe50c4f4a54e3575c479e5ce6bf2",
   "Plugin/OfficialExtensionTrustGrant.php": "ba8cca1a80e5b882c27093a53cc1c81b0b8c6382e714f4b9d798d54230cee374",
   "Plugin/OfficialExtensionTrustGrantRepository.php": "a11fc10a4afb5c4e1f0ad5c9faa0f875bd45489329b9eace7cac612b45f3311f",
   "Plugin/OfficialExtensionTrustGrantVerifier.php": "2f7759fbe14b239b04fec41e7ec239a9bb63b3cbf8c349065f1bbc2d181fa2be",
