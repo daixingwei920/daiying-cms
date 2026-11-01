@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Current published Core1.2.91 and independent Epay0.1.0 (2026-11-01)
+
+- Owner explicitly authorized merging/publishing PR78 and independent Epay. Core1.2.91 is formally published at v1.2.91 / `3c8ecf89f56dda4b930fb2fb0df466a654b7f82c` on GitHub and official distribution; installer `3dad41ee1e541130520d357d5c7f017eb147efdcb581c6ccb61d46299d7e469d`, update `3ef47e9a3d6c45b79e3f1cbd4c70a6f586709291473ec212c2195a8825d1aba7`. Formal Gate,639 signed parity,35 native upgrade/rollback/retry and31 public/10 independent signature checks passed. Do not rebuild, re-sign or move this frozen release/tag.
+- Independent daiying.payment.epay0.1.0 is published as LICENSE_REQUIRED,CNY39/single-site/lifetime, minimumCore1.2.91/PHP8.3,no maximum. Its package is excluded from Core/public GitHub attachments. Official-signed private single-site delivery/installation22 and plugin102+15 checks passed; no runtime copy-protection or new live payment claim.
+- Production website remainsCore1.2.90,configuration/pointer/business/runtime fields and customer inventories unchanged; only18 verified plugin updated_at boot timestamps changed during public reads. Preserve the previous Owner-confirmed concurrent-activity protection FAIL as history; the new explicit publication snapshot has full row evidence. No production website upgrade, customer-code consumption, real payment/refund, local signing-key generation/export or production knowledge import was authorized or performed.
+- This documentation commit does not alter released artifacts or tags. See docs/CORE_1.2.91_PUBLICATION_REPORT.md and its evidence JSON. Future releases/website upgrades need new authorization.
+
 ## Owner-authorized integrated1.2.91 pending review (2026-11-01)
 
 - Latest Owner instruction supersedes earlier publication/merge authority: integrate the configured redirect contract with the parked1.2.91 foundation changes, run full isolated test/package gates and independent payment-plugin single-site authorization acceptance on the authorized update server, then prepare pending-review PRs. No merge, production change, public release, account opening or real payment.
