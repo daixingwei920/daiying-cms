@@ -62,8 +62,10 @@ $without = $bench();
 $runner = new MigrationRunner($pdo, [$migration]);
 $check($runner->run() === 1, 'Fresh index is installed and recorded by the native Core migration runner');
 $check($runner->run() === 0, 'A repeated native upgrade does not reapply the migration');
-$afterSchema = $schema(); $migration->up($pdo);
-$check($schema() === $afterSchema, 'A pre-existing matching index is adopted without dropping or rebuilding it');
+$afterSchema = $schema();
+$pdo->prepare('DELETE FROM cms_core_migrations WHERE migration_id=?')->execute([$migration->id()]);
+$check($runner->run() === 1 && $schema() === $afterSchema,
+    'Native upgrade adopts an operator-created matching index without dropping or rebuilding it');
 $check($hash() === $beforeHash && $store->all('novel_index_31') === $before, 'All payloads, duplicates, plugin isolation and newest-first ordering are preserved');
 $check(json_decode($store->all('novel_index_31')[0]['payload_json'], true)['words'] === 1234, 'Newest duplicate remains the winning record');
 $with = $bench();
