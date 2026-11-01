@@ -1,0 +1,151 @@
+{
+  "status": "PASS",
+  "baseline": "24e1b3cee01cbf5adf31794d1bbe5f7826054468",
+  "patch_sha256": "ac764da2ef5ae0737044a237322027fe8976acac5d3969ea53973325978db2d6",
+  "tests": [
+    {
+      "test": "baseline-seo_search_metrics_p4_2",
+      "exit_code": 1,
+      "pass": 22,
+      "fail": 7,
+      "sha256": "71046b2b026efaa30d25e3f9212f625907f7bb3e947fa1b1f0ca012a2473bbc6"
+    },
+    {
+      "test": "baseline-scheduler_plugin_lifecycle_regression",
+      "exit_code": 1,
+      "pass": 5,
+      "fail": 3,
+      "sha256": "2f78aeddd02711d7ed5022c9fad3d4086328011af5477d1d7f76a1591e73ec64"
+    },
+    {
+      "test": "php83-seo_search_metrics_p4_2",
+      "exit_code": 0,
+      "pass": 29,
+      "fail": 0,
+      "sha256": "42fe14046ceafd33d919bbafc65205faab2a2d6ec90893f540b89c74d31b0c4f"
+    },
+    {
+      "test": "php83-scheduler_plugin_lifecycle_regression",
+      "exit_code": 0,
+      "pass": 8,
+      "fail": 0,
+      "sha256": "420a0b3db7f43c14fee708024357295e3fa985e866b595c09d2713452ef7253d"
+    },
+    {
+      "test": "php83-foundation_system_services",
+      "exit_code": 0,
+      "pass": 35,
+      "fail": 0,
+      "sha256": "ae207701a71b5c74b09927397839434e61c2f863982d0e8fad4c3eef7163ab74"
+    },
+    {
+      "test": "php83-seo_search_engine_p3",
+      "exit_code": 0,
+      "pass": 15,
+      "fail": 0,
+      "sha256": "32c0ab089bf1cad8aade07135cfa202f27537429e3d28a83ceafbad99235777e"
+    },
+    {
+      "test": "php83-seo_lifecycle_p4_1",
+      "exit_code": 0,
+      "pass": 36,
+      "fail": 0,
+      "sha256": "a33a137d58507c9f232fd08a040814ab78e566cfc6ab3e56b442dd19448efcab"
+    },
+    {
+      "test": "php83-plugin_sdk_foundation_v1",
+      "exit_code": 0,
+      "pass": 34,
+      "fail": 0,
+      "sha256": "7014985e9bddbc79b1fe57bc527e2a2bdb4dee83f91abb1ed6e68157f2c116a1"
+    },
+    {
+      "test": "php85-seo_search_metrics_p4_2",
+      "exit_code": 0,
+      "pass": 29,
+      "fail": 0,
+      "sha256": "42fe14046ceafd33d919bbafc65205faab2a2d6ec90893f540b89c74d31b0c4f"
+    },
+    {
+      "test": "php85-scheduler_plugin_lifecycle_regression",
+      "exit_code": 0,
+      "pass": 8,
+      "fail": 0,
+      "sha256": "420a0b3db7f43c14fee708024357295e3fa985e866b595c09d2713452ef7253d"
+    },
+    {
+      "test": "php85-foundation_system_services",
+      "exit_code": 0,
+      "pass": 35,
+      "fail": 0,
+      "sha256": "ae207701a71b5c74b09927397839434e61c2f863982d0e8fad4c3eef7163ab74"
+    },
+    {
+      "test": "php85-seo_search_engine_p3",
+      "exit_code": 0,
+      "pass": 15,
+      "fail": 0,
+      "sha256": "32c0ab089bf1cad8aade07135cfa202f27537429e3d28a83ceafbad99235777e"
+    },
+    {
+      "test": "php85-seo_lifecycle_p4_1",
+      "exit_code": 0,
+      "pass": 36,
+      "fail": 0,
+      "sha256": "a33a137d58507c9f232fd08a040814ab78e566cfc6ab3e56b442dd19448efcab"
+    },
+    {
+      "test": "php85-plugin_sdk_foundation_v1",
+      "exit_code": 0,
+      "pass": 34,
+      "fail": 0,
+      "sha256": "7014985e9bddbc79b1fe57bc527e2a2bdb4dee83f91abb1ed6e68157f2c116a1"
+    },
+    {
+      "test": "release-gate-v1-contract",
+      "exit_code": 0,
+      "pass": 4,
+      "fail": 0,
+      "sha256": "260dfbc6635e8ad70122ec171cc7de9a7fcdfa09e7aaac3a2098a49d59543996"
+    },
+    {
+      "test": "followup-php83",
+      "exit_code": 0,
+      "pass": 30,
+      "fail": 0,
+      "sha256": "d6e213046815f897fd7db4355e1d99de0283855cc2c70e0651e9abfce7de617a"
+    },
+    {
+      "test": "followup-php85",
+      "exit_code": 0,
+      "pass": 30,
+      "fail": 0,
+      "sha256": "d6e213046815f897fd7db4355e1d99de0283855cc2c70e0651e9abfce7de617a"
+    },
+    {
+      "test": "followup-release-gate-v1",
+      "exit_code": 0,
+      "pass": 4,
+      "fail": 0,
+      "sha256": "260dfbc6635e8ad70122ec171cc7de9a7fcdfa09e7aaac3a2098a49d59543996"
+    }
+  ],
+  "core_manifest_files": 357,
+  "source_preserved_after_tests": true,
+  "production_read_only": true,
+  "network_disabled_during_tests": true,
+  "local_signing_keys_generated": false,
+  "formal_signed_release_gate": "NOT_RUN_REQUIRES_MERGED_EXACT_SOURCE",
+  "published": false,
+  "followup": "Credential status check remains inside the error boundary; corrupt credentials regression added. Unchanged subsystem tests retained from original report.",
+  "current_regression_passes": 316,
+  "current_release_gate_contract_passes": 4,
+  "tested_files_sha256": {
+    "system/core/Plugin/PluginManager.php": "24236186d47d06af0d9bde465b5aa1df95100e91d044aeeebbf5eb09fcf94192",
+    "system/core/Seo/SearchMetrics/GoogleSearchConsoleConnectionRepository.php": "b511ec7013829df9a8c8bc6e17c0227f35f55814f2527903d10508893d212d30",
+    "system/core/Seo/SearchMetrics/SearchMetricsSyncService.php": "afef213f0f4a43d3f077874af90c591b9e6955cf885e433f764d5096f4d4af96",
+    "system/core-manifest.json": "4dd2f128729fbb026f49318eb7494e12278e6a99d86499758a3c11d36eec878b",
+    "tests/seo_search_metrics_p4_2.php": "e9f419ec1639b00fd6b2aa58a7fc962ec86df4b00e7191964dab161e40d95f3a",
+    "tests/scheduler_plugin_lifecycle_regression.php": "430c58c87eb318de9d853c72f0401fd19b067b6e9f9cfa4f479ebe632f18f5ac"
+  }
+}

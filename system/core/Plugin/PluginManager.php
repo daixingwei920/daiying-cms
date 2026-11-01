@@ -172,6 +172,10 @@ final class PluginManager
             ':status' => $status,
             ':updated_at' => gmdate('c'),
         ]);
+        if ($stmt->rowCount() > 0 && $status !== PluginLifecycle::ENABLED && in_array('cms_core_scheduled_tasks', $this->tableNames(), true)) {
+            $this->pdo->prepare('UPDATE cms_core_scheduled_tasks SET enabled = 0, updated_at = :updated_at WHERE owner = :owner AND enabled = 1')
+                ->execute([':owner' => $pluginId, ':updated_at' => gmdate('c')]);
+        }
     }
 
     public function bootEnabled(): int
