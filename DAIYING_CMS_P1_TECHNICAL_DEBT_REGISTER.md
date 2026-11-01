@@ -151,3 +151,11 @@ P2: AI Provider technical debt: Core 1.2.81 OpenAI-compatible Adapter does not y
 - Global ICP site settings: 1.2.85 candidate adds `site.icp_number`, authenticated settings save/reload/clear, additive theme helpers and a full-page theme footer with the official lookup URL. Existing theme files and `icp_text` settings are preserved. `tests/site_icp_settings.php`: 29 assertions PASS in isolated SQLite. Status: FIXED_CANDIDATE_NOT_PUBLISHED; production and physical-device acceptance not performed.
 
 These are the three Owner-requested maintenance items. The historical P2/P3 cleanup notes above are not expanded into this task. Signed publication and live-site upgrade remain separate gates.
+
+
+## 2026-11-01 novel shelf index maintenance (1.2.92 candidate)
+
+- Source debt: novel operations handoff `TECH_DEBT_2026-11-01.md`, confirmed by Owner screenshot. `PluginDataStore::all()` filters plugin_id/data_type and orders id DESC; the published schema lacked a matching index.
+- Candidate adds `2026_11_01_000001_plugin_data_scope_index`, creating `idx_plugin_data_scope_id(plugin_id,data_type,id DESC)` through Core migrations. Adopt the matching operator-created index without replacing it; wrong column order, unique/partial/prefix/unusable same-name definitions fail closed. MySQL5.7 ASC storage is acceptable because equality prefixes allow a reverse scan. Never edit frozen migration files.
+- The index has no destructive down operation; native updater backup/rollback preserves the original database, including a pre-existing operator index. SQLite and MySQL migration/idempotency/data/performance and native upgrade acceptance must be recorded before closure.
+- Evaluate the existing novel per-book reads in isolation using the unchanged plugin. Do not put novel sources in Core, bypass plugin table ownership or change chapter content. Plugin batching/publication is a separate decision if indexed acceptance still fails. Status: IMPLEMENTED_PENDING_SERVER_ACCEPTANCE; see docs/plugin-data-scope-index.md.

@@ -4,6 +4,12 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized PR80 merge and Core1.2.92 isolated Gate preparation (2026-11-01)
+
+- Owner now authorizes fixing the specified novel-shelf technical debt alongside PR80, merging, and running complete Release Gate on the exact merged commit in the authorized update server isolation. No production change, tag, publication or plugin release; preserve frozen1.2.91 and live configuration/data.
+- The screenshot identifies cms_plugin_data scope/order indexing and evaluation of unchanged novel per-book queries; it does not authorize unrelated payment-action refactoring or content rewrites. Add one idempotent Core migration, validate existing index definitions, and test fresh/existing/conflicting indexes plus realistic shelf/read/publication and rollback behavior.
+- Prepare the next patch candidate1.2.92 so the existing preflight does not reuse published1.2.91. Keep asymmetric private keys only on the authorized server, never workstation generation/export. Formal signer/publication gates stay fail closed; isolate test artifacts and exact source evidence.
+
 ## Unpublished payment-provider SQLite save repair (2026-11-01)
 
 - Owner requests repair after the piank.cn provider-save lock diagnosis. Clean branch fix/payment-provider-save-sqlite-lock starts from actual main9a29ee2. Scope is isolated repair/regression only; do not change live settings, replay production saves, merge, publish or alter frozen1.2.91 artifacts.
