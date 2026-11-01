@@ -76,8 +76,16 @@ class KnowledgeProvenance(unittest.TestCase):
         text = product.derived(self.package)[product.NAME + '.md']
         self.assertEqual(self.package['candidate_evidence']['status'], 'UNPUBLISHED')
         self.assertIn('不代表生产可用', text)
-        self.assertIn('docs/admin-data-workspace.md', text)
+        self.assertIn(self.package['candidate_evidence']['runtime_report'], text)
         self.assertNotIn('候选运行证据见 docs/issue9-delivery.md', text)
+
+    def test_unpublished_foundation_payment_contracts_remain_developer_only(self):
+        exported = {r['id'] for r in product.public_records(self.package)}
+        for rid in ['rest.foundation_media_contract', 'payment.configured_redirect_contract']:
+            record = next(r for r in self.package['records'] if r['id'] == rid)
+            self.assertEqual(record['visibility'], 'ADMIN_DEVELOPER')
+            self.assertFalse(record['enabled_for_customer_service'])
+            self.assertNotIn(rid, exported)
 
     def test_published_release_evidence_is_preserved(self):
         baseline = json.loads(subprocess.check_output(['git', 'show', 'b8edbdce6c9008ddb50facfebb6c2617cde47b9c:' + product.NAME + '.json'], cwd=ROOT, text=True))

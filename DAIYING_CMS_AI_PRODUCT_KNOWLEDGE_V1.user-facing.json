@@ -1,7 +1,7 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
-  "verified_version": "1.2.90",
-  "last_verified_at": "2026-10-31",
+  "verified_version": "1.2.91",
+  "last_verified_at": "2026-11-01",
   "records": [
     {
       "id": "install.web_installer",
@@ -11,7 +11,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; system/core/Install/InstallController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -31,9 +31,9 @@
           "line_end": 171
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -49,7 +49,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/RuntimeRequirements.php; system/core/Support/SystemHealthDoctor.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -69,9 +69,9 @@
           "line_end": 151
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -87,7 +87,7 @@
       "audience": "Administrator",
       "source": "docs/themes.md; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/articles/{slug}",
@@ -107,9 +107,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -125,7 +125,7 @@
       "audience": "Administrator",
       "source": "docs/update-system.md; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -146,14 +146,14 @@
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
-          "line_start": 616,
-          "line_end": 616
+          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "line_start": 619,
+          "line_end": 619
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -169,7 +169,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Recovery/RecoveryController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "/admin/recovery",
       "public_route": "",
@@ -178,9 +178,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
-          "line_start": 581,
-          "line_end": 581
+          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "line_start": 584,
+          "line_end": 584
         },
         {
           "path": "system/core/Recovery/RecoveryController.php",
@@ -189,9 +189,9 @@
           "line_end": 50
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -207,7 +207,7 @@
       "audience": "Administrator",
       "source": "SECURITY.md; docs/installation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -227,9 +227,9 @@
           "line_end": 45
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -245,7 +245,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "/admin/seo/keywords",
       "public_route": "",
@@ -254,9 +254,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
-          "line_start": 533,
-          "line_end": 533
+          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "line_start": 536,
+          "line_end": 536
         },
         {
           "path": "system/core/Seo/Keyword/SeoLifecycleAggregator.php",
@@ -265,9 +265,9 @@
           "line_end": 94
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -283,7 +283,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "/admin/seo/search-engines",
       "public_route": "",
@@ -292,9 +292,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
-          "line_start": 540,
-          "line_end": 540
+          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "line_start": 543,
+          "line_end": 543
         },
         {
           "path": "system/core/Seo/Keyword/SeoLifecycleAggregator.php",
@@ -303,9 +303,9 @@
           "line_end": 348
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -321,7 +321,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Content/ContentFrontController.php; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/sitemap.xml",
@@ -330,9 +330,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
-          "line_start": 438,
-          "line_end": 438
+          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "line_start": 441,
+          "line_end": 441
         },
         {
           "path": "system/core/Content/ContentFrontController.php",
@@ -347,9 +347,9 @@
           "line_end": 7
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -365,7 +365,7 @@
       "audience": "Administrator",
       "source": "docs/commerce.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -385,9 +385,9 @@
           "line_end": 48
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -403,7 +403,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Ai/AiService.php; system/core/Ai/AiProviderPresets.php; system/core/Ai/AiGateway.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -412,9 +412,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
-          "line_start": 508,
-          "line_end": 508
+          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "line_start": 511,
+          "line_end": 511
         },
         {
           "path": "system/core/Ai/AiService.php",
@@ -435,9 +435,9 @@
           "line_end": 25
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -453,7 +453,7 @@
       "audience": "Administrator",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -473,9 +473,9 @@
           "line_end": 628
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -491,7 +491,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -511,9 +511,9 @@
           "line_end": 5
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -529,7 +529,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "/admin/migrations",
       "public_route": "",
@@ -544,14 +544,14 @@
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
-          "line_start": 593,
-          "line_end": 593
+          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "line_start": 596,
+          "line_end": 596
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -567,7 +567,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "user_facing": true,
       "admin_route": "/admin/update;/admin/recovery",
       "public_route": "",
@@ -593,9 +593,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -615,7 +615,7 @@
       "description": "当前已发布稳定版仍为 Core 1.2.86（v1.2.86，d311446607124fff21d76f524a4a11968ad4cd58）。本包复核已整合图像公共能力并修复支付回调的1.3.0-alpha.5开发候选，不代表正式发布或生产部署。",
       "source": "docs/ai-image/integration-1.2.86.md; docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "source_evidence": [
         {
           "path": "docs/ai-image/integration-1.2.86.md",
@@ -630,9 +630,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -653,7 +653,7 @@
       "description": "1.2.83 支持显式文章、页面和分类 slug 保留《》。留空时仍自动生成简洁 slug，已有 slug 与重定向不自动迁移。仍拒绝分隔符、路径穿越、控制字符、查询/片段符和预编码百分号输入；填写原始书名号，不粘贴 URL 编码。",
       "source": "docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "source_evidence": [
         {
           "path": "docs/content-slug-policy.md",
@@ -662,9 +662,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -685,13 +685,13 @@
       "description": "1.2.82 增加四个校验绑定的历史 MySQL 迁移方言适配，不修改已发布迁移文件。1.2.83 延续该能力；这不代表任意 MySQL/MariaDB 环境均已验收。选择数据库后仍应在安装器测试连接和实际完成安装。",
       "source": "CHANGELOG.md; system/core/Migration/MysqlHistoricalMigrationDialect.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "cf769fb25a0fe7e49a1f1a39d21b21bf3a901f376899e2e43576da3a90475a17",
-          "line_start": 115,
-          "line_end": 115
+          "sha256": "48137fef5270e2a3a378a4fb9d291359b3a98ec7926c37aec17076f91d431454",
+          "line_start": 121,
+          "line_end": 121
         },
         {
           "path": "system/core/Migration/MysqlHistoricalMigrationDialect.php",
@@ -700,9 +700,9 @@
           "line_end": 12
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -723,7 +723,7 @@
       "description": "首次安装失败须保留错误并修复原因。若管理员已创建但完成锁失败，入口会阻断，不能伪造完成锁或重复创建管理员。MySQL DDL 不保证全链事务回滚；只有负责人明确确认专用数据可丢弃后，才可人工清理重装。生产站不得删除数据库来修复升级。",
       "source": "docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "source_evidence": [
         {
           "path": "docs/first-install-failure.md",
@@ -738,9 +738,9 @@
           "line_end": 11
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -761,19 +761,19 @@
       "description": "1.2.82 的直接升级验证范围为 1.2.81 → 1.2.82；不能泛化为任意旧版直升最新。实际领取和安装必须服从目标包的签名版本范围与兼容检查。Core 更新不替换已安装插件；旧 Commerce 的 MySQL 参数修复需要独立插件更新。",
       "source": "CHANGELOG.md; docs/release/1.2.82-upgrade-support.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "cf769fb25a0fe7e49a1f1a39d21b21bf3a901f376899e2e43576da3a90475a17",
-          "line_start": 118,
-          "line_end": 118
+          "sha256": "48137fef5270e2a3a378a4fb9d291359b3a98ec7926c37aec17076f91d431454",
+          "line_start": 124,
+          "line_end": 124
         },
         {
           "path": "CHANGELOG.md",
-          "sha256": "cf769fb25a0fe7e49a1f1a39d21b21bf3a901f376899e2e43576da3a90475a17",
-          "line_start": 119,
-          "line_end": 119
+          "sha256": "48137fef5270e2a3a378a4fb9d291359b3a98ec7926c37aec17076f91d431454",
+          "line_start": 125,
+          "line_end": 125
         },
         {
           "path": "docs/release/1.2.82-upgrade-support.md",
@@ -782,9 +782,9 @@
           "line_end": 4
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -805,7 +805,7 @@
       "description": "Owner 于 2026-10-09 决定小说和视频产品退役，不再作为新安装分发、维护或规划产品。保留历史源码、已安装客户资产、订单和许可；退役不等于自动卸载、撤销授权或已完成市场下架。",
       "source": "docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
+      "evidence": "Pinned source/document review of unpublished Core1.2.91. Runtime acceptance is separate in docs/core-1.2.91-isolated-review.md and PR evidence; no publication, production deployment or consumer import is implied.",
       "source_evidence": [
         {
           "path": "docs/retired-products.md",
@@ -820,9 +820,9 @@
           "line_end": 11
         }
       ],
-      "verified_version": "1.2.90",
-      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-      "last_verified_at": "2026-10-31",
+      "verified_version": "1.2.91",
+      "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+      "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -832,10 +832,10 @@
       "enabled_for_customer_service": true
     }
   ],
-  "package_revision": "2026-10-31-admin-data-ui-unpublished-candidate",
+  "package_revision": "2026-11-01-core191-foundation-payment-unpublished",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-  "source_tag": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+  "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+  "source_tag": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "PUBLISHED",
@@ -937,12 +937,12 @@
   "candidate_evidence": {
     "status": "UNPUBLISHED",
     "base_version": "1.2.90",
-    "candidate_version": "1.2.90",
-    "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-    "base_commit": "b8edbdce6c9008ddb50facfebb6c2617cde47b9c",
-    "candidate_revision": "admin-review-update-ui",
-    "owner_decision": "Owner authorizes isolated UI review, strict knowledge source reconciliation, server-isolated Gate and pending-review PR only; no merge, production change or publication.",
-    "runtime_report": "docs/admin-data-workspace.md",
+    "candidate_version": "1.2.91",
+    "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+    "base_commit": "b3f7f74b7491ae28ebdbedf5d27762ab01de9f0d",
+    "candidate_revision": "core191-foundation-configured-payment",
+    "owner_decision": "Isolated integration, authorized-server Release Gate and independent single-site payment-plugin acceptance, then pending-review PR only; no merge, production change or publication.",
+    "runtime_report": "docs/core-1.2.91-isolated-review.md",
     "production_deployed": false,
     "consumer_imported": false,
     "published_release_evidence_preserved": true
@@ -1019,9 +1019,9 @@
     }
   },
   "development_candidate": {
-    "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
-    "status": "UNPUBLISHED_ADMIN_UI_AND_KNOWLEDGE_RECONCILIATION",
-    "report": "docs/admin-data-workspace.md",
+    "source_commit": "d0c46b203f30e752e0895ee8d844b6b87f9463ec",
+    "status": "UNPUBLISHED_CORE191_FOUNDATION_PAYMENT_INTEGRATION",
+    "report": "docs/core-1.2.91-isolated-review.md",
     "production_deployed": false,
     "consumer_imported": false,
     "included_in_frozen_1_2_90": false
@@ -1074,6 +1074,19 @@
     "included_in_new_pr70_core190_candidate": "Core crawler observation only; independent customer plugin excluded",
     "production_deployment_actor": "Owner manual Core upgrade",
     "independent_customer_plugin_production_deployed": false
+  },
+  "previous_admin_ui_candidate_evidence": {
+    "status": "UNPUBLISHED",
+    "base_version": "1.2.90",
+    "candidate_version": "1.2.90",
+    "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+    "base_commit": "b8edbdce6c9008ddb50facfebb6c2617cde47b9c",
+    "candidate_revision": "admin-review-update-ui",
+    "owner_decision": "Owner authorizes isolated UI review, strict knowledge source reconciliation, server-isolated Gate and pending-review PR only; no merge, production change or publication.",
+    "runtime_report": "docs/admin-data-workspace.md",
+    "production_deployed": false,
+    "consumer_imported": false,
+    "published_release_evidence_preserved": true
   },
   "export_scope": "USER-FACING_ONLY"
 }
