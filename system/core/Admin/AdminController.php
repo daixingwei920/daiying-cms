@@ -101,6 +101,7 @@ use Cms\Core\Payment\PaymentProviderRegistry;
 use Cms\Core\Payment\PaymentProviderSettingsRepository;
 use Cms\Core\Payment\PaymentRepository;
 use Cms\Core\Payment\PaymentService;
+use Cms\Core\Payment\PaymentTransaction;
 use PDO;
 use Throwable;
 
@@ -6362,8 +6363,8 @@ final class AdminController
                     throw new PaymentException(implode('；', $provider->diagnostics($public, $previewSecrets)));
                 }
             }
-            $alreadyInTransaction = $pdo->inTransaction();
-            $this->beginImmediate($pdo);
+            $alreadyInTransaction = PaymentTransaction::isActive($pdo);
+            PaymentTransaction::beginImmediate($pdo);
             try {
                 $repo->save(
                     $providerId,
@@ -6378,12 +6379,12 @@ final class AdminController
                 $this->assertPaymentProviderSavePersisted($repo, $providerId, $status, $makeDefault);
                 $this->assertPaymentProviderSaveEligible($pdo, $providerId, $status, $makeDefault);
                 (new AuditLogger($pdo))->record('admin', (int) ($guard['id'] ?? 0), 'payment.provider_settings.saved', ['provider_id' => $providerId, 'default_provider' => $makeDefault]);
-                if (!$alreadyInTransaction && $pdo->inTransaction()) {
-                    $pdo->commit();
+                if (!$alreadyInTransaction && PaymentTransaction::isActive($pdo)) {
+                    PaymentTransaction::commit($pdo);
                 }
             } catch (Throwable $exception) {
-                if (!$alreadyInTransaction && $pdo->inTransaction()) {
-                    $pdo->rollBack();
+                if (!$alreadyInTransaction && PaymentTransaction::isActive($pdo)) {
+                    PaymentTransaction::rollback($pdo);
                 }
                 throw $exception;
             }
@@ -6393,6 +6394,13 @@ final class AdminController
         } catch (PaymentException $exception) {
             return $this->paymentAdminNoStore(Response::html(View::page('支付 Provider 设置失败', '<h1>支付 Provider 设置失败</h1><p class="error">' . View::escape($this->paymentProviderSaveErrorMessage($exception)) . '</p><p>' . $this->paymentProviderSettingsBackLink($returnProviderId) . '</p>'), 400));
         } catch (Throwable $exception) {
+            if ($exception instanceof \PDOException
+                && str_starts_with((string) $this->settings->get('database.dsn', ''), 'sqlite:')
+                && in_array(((int) ($exception->errorInfo[1] ?? 0)) & 0xff, [5, 6], true)) {
+                $this->logger->warning('Core payment provider settings save busy', ['source' => 'Core', 'provider_id' => $returnProviderId]);
+                return $this->paymentAdminNoStore(Response::html(View::page('支付 Provider 设置繁忙', '<h1>支付 Provider 设置繁忙</h1><p class="error">数据库正忙，暂时无法确认支付配置保存结果。请稍后返回设置页核对后重试。</p><p>' . $this->paymentProviderSettingsBackLink($returnProviderId) . '</p>'), 503)
+                    ->withHeaders(['Retry-After' => '3']));
+            }
             $this->logger->error('Core payment provider settings save failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
             return $this->paymentAdminNoStore(Response::html(View::page('支付 Provider 设置失败', '<h1>支付 Provider 设置失败</h1><p class="error">支付 Provider 设置暂不可用。</p><p>' . $this->paymentProviderSettingsBackLink($returnProviderId) . '</p>'), 500));
         }

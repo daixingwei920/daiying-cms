@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Unpublished payment-provider SQLite save repair (2026-11-01)
+
+- Owner requests repair after the piank.cn provider-save lock diagnosis. Clean branch fix/payment-provider-save-sqlite-lock starts from actual main9a29ee2. Scope is isolated repair/regression only; do not change live settings, replay production saves, merge, publish or alter frozen1.2.91 artifacts.
+- Reuse PaymentTransaction only in paymentProviderSave, preserve atomic configuration/default/secret/audit writes and rollback, and return retryable503 for SQLite BUSY/LOCKED. Preserve admin/CSRF/provider/configuration guards and Core integrity.
+- PHP8.3 reproduces the untracked-BEGIN lock; PHP8.5 normal saves pass. Piank uses PHP8.5 and its historical external lock holder is unconfirmed: do not claim the PHP8.3 defect is the sole production cause. See docs/payment-provider-save-sqlite.md.
+- Signing-related contract tests run exclusively in the authorized update server's private isolation. No workstation private signing-key generation/export. A contract PASS is not a formal Release Gate or production acceptance.
+
 ## Current published Core1.2.91 and independent Epay0.1.0 (2026-11-01)
 
 - Owner explicitly authorized merging/publishing PR78 and independent Epay. Core1.2.91 is formally published at v1.2.91 / `3c8ecf89f56dda4b930fb2fb0df466a654b7f82c` on GitHub and official distribution; installer `3dad41ee1e541130520d357d5c7f017eb147efdcb581c6ccb61d46299d7e469d`, update `3ef47e9a3d6c45b79e3f1cbd4c70a6f586709291473ec212c2195a8825d1aba7`. Formal Gate,639 signed parity,35 native upgrade/rollback/retry and31 public/10 independent signature checks passed. Do not rebuild, re-sign or move this frozen release/tag.
