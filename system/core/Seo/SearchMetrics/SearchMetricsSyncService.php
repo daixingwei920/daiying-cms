@@ -31,6 +31,10 @@ final class SearchMetricsSyncService
         $end = $periodEnd ?? gmdate('Y-m-d', time() - 3 * 86400);
         $start = $periodStart ?? gmdate('Y-m-d', strtotime($end . ' -6 days'));
         try {
+            $status = $this->googleConnections->status();
+            if (!$status['ok']) {
+                return ['ok' => false, 'status' => $status['status'], 'message' => $status['message'], 'inserted' => 0, 'updated' => 0, 'skipped' => 0, 'rows' => 0];
+            }
             $result = $this->google->sync(new SearchMetricsSyncRequest((string) ($config['property_url'] ?? ''), $start, $end));
             if (!$result->ok) {
                 $this->googleConnections->recordSync(false, $result->message);
@@ -57,6 +61,7 @@ final class SearchMetricsSyncService
         try {
             $pdo = ConnectionFactory::make($settings);
             $service = new SchedulerService($pdo);
+            $connections = new GoogleSearchConsoleConnectionRepository($pdo, new PluginSecretStore($pdo, (string) $settings->get('security.encryption_key', '')));
             SchedulerTaskRegistry::register(self::TASK_ID, static function () use ($settings): void {
                 $pdo = ConnectionFactory::make($settings);
                 $connections = new GoogleSearchConsoleConnectionRepository($pdo, new PluginSecretStore($pdo, (string) $settings->get('security.encryption_key', '')));
@@ -66,7 +71,7 @@ final class SearchMetricsSyncService
                     throw new SearchMetricsException($result['message']);
                 }
             });
-            $service->register(new ScheduledTask(self::TASK_ID, 'core.seo', 86400));
+            $service->register(new ScheduledTask(self::TASK_ID, 'core.seo', 86400, [], $connections->status()['ok']));
         } catch (\Throwable) {
             // Scheduler setup must not block normal requests; health/UI expose connection state.
         }

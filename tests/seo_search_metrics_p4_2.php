@@ -143,6 +143,39 @@ $check($saveFormStart !== false && $syncFormStart !== false, 'Search Engine UI r
 $check($saveFormEnd !== false && $syncFormStart !== false && $saveFormEnd < $syncFormStart, 'Google sync form is not nested inside the Google save form');
 $check(substr_count($html, 'action="/admin/seo/search-engines/google/sync"') === 1, 'Search Engine UI renders exactly one Google sync form');
 
+// A disabled/unconfigured integration must not generate an authorization error or HTTP request.
+$connections->savePublicConfig('', '', false);
+$connections->recordSync(false, 'Search metrics site URL is required.');
+$historicalConfig = $connections->config();
+$callsBefore = count($httpCalls);
+$check($connections->status()['status'] === 'not_connected', 'Disabled Google integration takes precedence over historical sync failure');
+$disconnected = $sync->syncGoogle();
+$check(!$disconnected['ok'] && $disconnected['status'] === 'not_connected' && $disconnected['rows'] === 0, 'Unconnected Google sync returns an explicit non-sync state');
+$check(count($httpCalls) === $callsBefore && $connections->config() === $historicalConfig, 'Unconnected sync makes no HTTP request and preserves historical connection evidence');
+$settings = Settings::fromArray(['database' => ['dsn' => 'sqlite:' . $db], 'security' => ['encryption_key' => 'unit-secret-key']]);
+$pdo->exec("UPDATE cms_core_scheduled_tasks SET enabled=1,last_result='failed',last_error='Historical scheduler error',fail_count=5,next_run_at='2000-01-01T00:00:00+00:00' WHERE task_id='core.seo.search_metrics.sync'");
+SearchMetricsSyncService::register($settings);
+$task = $scheduler->find(SearchMetricsSyncService::TASK_ID);
+$check((int) $task['enabled'] === 0 && (int) $task['fail_count'] === 5 && $task['last_error'] === 'Historical scheduler error', 'Registration disables unconnected scheduling without erasing failure evidence');
+$check($scheduler->runDue(1)['processed'] === 0, 'Unconnected scheduled sync is not dispatched');
+$connections->savePublicConfig('', '', true);
+$check($connections->status()['status'] === 'not_configured' && $sync->syncGoogle()['status'] === 'not_configured', 'Enabled incomplete configuration is unconfigured rather than an authentication failure');
+SearchMetricsSyncService::register($settings);
+$check((int) $scheduler->find(SearchMetricsSyncService::TASK_ID)['enabled'] === 0, 'Incomplete Google configuration stays outside automatic scheduling');
+$connections->savePublicConfig('google-client-id', 'https://www.daiyingcms.com/', true);
+$pdo->exec("DELETE FROM cms_plugin_secrets WHERE plugin_id='core.seo.search_metrics.google' AND secret_key='refresh_token'");
+$check($sync->syncGoogle()['status'] === 'not_configured' && count($httpCalls) === $callsBefore, 'Missing OAuth token cannot trigger an external request');
+$connections->saveRefreshToken('google-refresh-token');
+$check($connections->status()['status'] === 'auth_error' && $connections->status()['ok'], 'Complete connection retains a real historical error and remains eligible for retry');
+SearchMetricsSyncService::register($settings);
+$check((int) $scheduler->find(SearchMetricsSyncService::TASK_ID)['enabled'] === 1, 'Completing authorization restores automatic scheduling');
+$retried = $sync->syncGoogle('2026-10-01', '2026-10-01');
+$check($retried['ok'] && $connections->status()['status'] === 'connected', 'Mock-authorized sync still recovers and imports metrics normally');
+$callsBefore = count($httpCalls);
+$pdo->exec("UPDATE cms_plugin_secrets SET ciphertext='invalid' WHERE plugin_id='core.seo.search_metrics.google' AND secret_key='refresh_token'");
+$corrupt = $sync->syncGoogle();
+$check(!$corrupt['ok'] && $corrupt['status'] === 'auth_error' && count($httpCalls) === $callsBefore, 'Invalid encrypted credentials fail closed without an uncaught exception or external request');
+
 if ($failures > 0) {
     fwrite(STDERR, $failures . ' SEO P4.2 search metrics checks failed.' . PHP_EOL);
     exit(1);

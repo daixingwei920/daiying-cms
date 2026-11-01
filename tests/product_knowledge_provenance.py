@@ -74,8 +74,9 @@ class KnowledgeProvenance(unittest.TestCase):
 
     def test_publication_and_unpublished_copy_have_correct_warning(self):
         text = product.derived(self.package)[product.NAME + '.md']
-        self.assertEqual(self.package['candidate_evidence']['status'], 'PUBLISHED')
-        self.assertNotIn('当前分支知识源是未发布候选', text)
+        self.assertEqual(self.package['candidate_evidence']['status'], 'UNPUBLISHED')
+        self.assertEqual(self.package['candidate_evidence']['candidate_version'], '1.2.93')
+        self.assertIn('当前分支知识源是未发布候选', text)
         published = copy.deepcopy(self.package)
         published['candidate_evidence']['status'] = 'PUBLISHED'
         self.assertNotIn('当前分支知识源是未发布候选', product.derived(published)[product.NAME + '.md'])
@@ -101,8 +102,11 @@ class KnowledgeProvenance(unittest.TestCase):
         self.assertEqual(self.package['release_evidence']['previous_stable'], published['release_evidence'])
         self.assertEqual(self.package['published_191_candidate_evidence'], published['candidate_evidence'])
         self.assertEqual(self.package['release_evidence']['commit'], subprocess.check_output(['git', 'rev-parse', 'v1.2.92^{commit}'], cwd=ROOT, text=True).strip())
-        self.assertEqual(self.package['source_commit'], self.package['release_evidence']['commit'])
-        self.assertEqual(self.package['source_tag'], 'v1.2.92')
+        self.assertEqual(self.package['source_commit'], self.package['candidate_evidence']['source_commit'])
+        self.assertEqual(self.package['source_tag'], self.package['source_commit'])
+        self.assertNotEqual(self.package['source_commit'], self.package['release_evidence']['commit'])
+        self.assertEqual(self.package['published_192_acceptance_evidence']['source_commit'], self.package['release_evidence']['commit'])
+        self.assertEqual(self.package['published_192_acceptance_evidence']['status'], 'PUBLISHED')
         self.assertEqual(self.package['published_baseline_evidence'], baseline['candidate_evidence'])
 
 

@@ -107,7 +107,7 @@ final class GoogleSearchConsoleConnectionRepository
         if ($enabled && ($clientId === '' || $propertyUrl === '' || !$clientSecret || !$refreshToken)) {
             $status = 'not_configured';
         }
-        if ((string) ($config['last_sync_result'] ?? '') === 'failed') {
+        if ($ok && (string) ($config['last_sync_result'] ?? '') === 'failed') {
             $status = 'auth_error';
         }
 
