@@ -2,7 +2,8 @@
 declare(strict_types=1);
 // Disposable local fixtures only; MySQL requires explicit empty loopback test configuration.
 $source = dirname(__DIR__);
-define('CMS_ROOT', $source);
+$root = sys_get_temp_dir() . '/cms-install-closeout-' . bin2hex(random_bytes(6));
+define('CMS_ROOT', $root);
 require $source . '/system/core/Bootstrap/autoload.php';
 $baseline = getenv('CMS_INSTALL_BASELINE_CONTROLLER');
 if ($baseline) { require $baseline; }
@@ -12,12 +13,23 @@ use Cms\Core\Http\Request;
 use Cms\Core\Logging\FileLogger;
 use Cms\Core\Security\CsrfToken;
 use Cms\Core\Auth\AdminAuthenticator;
-$root = sys_get_temp_dir() . '/cms-install-closeout-' . bin2hex(random_bytes(6));
 mkdir($root, 0700);
 foreach (['config', 'storage', 'storage/logs', 'storage/database', 'content'] as $dir) { mkdir($root . '/' . $dir, 0755, true); }
 copy($source . '/config/app.example.php',$root . '/config/app.example.php');
-symlink($source . '/system', $root . '/system');
-symlink($source . '/content/themes', $root . '/content/themes');
+// The installer updates its registry. A writable source symlink would mutate the checkout.
+$sourceRegistryHash = hash_file('sha256', $source . '/system/official-plugins.php');
+foreach (['system', 'content/themes'] as $directory) {
+    mkdir($root . '/' . $directory, 0700, true);
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($source . '/' . $directory, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::SELF_FIRST,
+    );
+    foreach ($files as $file) {
+        if ($file->isLink()) throw new RuntimeException('Source fixture must not contain symlinks.');
+        $target = $root . '/' . $directory . '/' . $files->getSubPathName();
+        $file->isDir() ? mkdir($target, 0700) : copy($file->getPathname(), $target);
+    }
+}
 $settings = require $source . '/config/app.example.php';
 $settings['database'] = ['dsn'=>'sqlite:' . $root . '/storage/database/cms.sqlite','username'=>'','password'=>'','options'=>[]];
 $settings['app']['secure_cookies'] = false;
@@ -37,6 +49,7 @@ if ($mysqlFile) { $body=array_replace($body,['db_driver'=>'mysql','mysql_host'=>
 function check_closeout(bool $ok, string $name): void { if (!$ok) throw new RuntimeException($name); echo "[PASS] $name\n"; }
 $controller = new InstallController($root, Settings::fromArray($settings), new FileLogger($root . '/storage/logs/test.log'));
 try {
+    check_closeout(!is_link($root . '/system') && !is_link($root . '/content/themes'), 'installer uses independent writable fixture trees');
     $bad=$body; $bad['_csrf']='invalid';
     check_closeout($controller->store(new Request('POST','/install',[],$bad))->status()===400,'CSRF remains enforced');
     rename($root.'/config/app.php',$root.'/config/app.saved.php');
@@ -71,6 +84,7 @@ try {
     file_put_contents($root.'/storage/installed.lock','fixture');
     check_closeout($controller->show()->status()===302 && $controller->store(new Request('POST','/install',[],$body))->status()===302,'completed installation rejects repetition');
     check_closeout((int)$p->query('SELECT COUNT(*) FROM cms_core_migrations')->fetchColumn()===count(glob(CMS_ROOT.'/system/migrations/*.php')),'all current migrations applied');
+    check_closeout(hash_file('sha256', $source . '/system/official-plugins.php') === $sourceRegistryHash, 'installer fixture preserves source registry bytes');
 } finally {
     // Remove only this random test directory; do not follow source symlinks.
     $it=new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root,FilesystemIterator::SKIP_DOTS),RecursiveIteratorIterator::CHILD_FIRST);
