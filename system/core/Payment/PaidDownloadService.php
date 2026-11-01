@@ -807,6 +807,7 @@ final class PaidDownloadService
             $providerId,
             $url,
             fn (string $candidate): bool => $this->isSafeProviderRedirectUrl($candidate),
+            new \Cms\Core\Payment\PaymentProviderSettingsRepository($this->pdo, ''),
         );
     }
 

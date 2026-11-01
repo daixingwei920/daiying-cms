@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Cms\Core\Rest;
 
 use Cms\Core\Auth\AdminAuthenticator;
+use Cms\Core\Auth\AdminSessionService;
+use Cms\Core\Audit\AuditLogger;
+use Cms\Core\Security\CsrfToken;
 use Cms\Core\Comment\CommentRepository;
 use Cms\Core\Config\Settings;
 use Cms\Core\Content\ContentRepository;
@@ -30,6 +33,7 @@ final class ApiV1Controller
             'name' => 'Daiying CMS REST API',
             'versions' => FoundationVersions::all(),
             'resources' => [
+                'content_types' => '/api/v1/content-types',
                 'contents' => '/api/v1/contents',
                 'pages' => '/api/v1/pages',
                 'categories' => '/api/v1/categories',
@@ -38,6 +42,19 @@ final class ApiV1Controller
                 'comments' => '/api/v1/comments',
                 'users' => '/api/v1/users',
                 'settings' => '/api/v1/settings',
+            ],
+            'resource_capabilities' => [
+                'contents' => ['methods' => ['GET', 'POST', 'PATCH', 'DELETE'], 'read_auth' => 'public_published_only', 'write_auth' => 'admin'],
+                'pages' => ['methods' => ['GET', 'POST', 'PATCH', 'DELETE'], 'read_auth' => 'public_published_only', 'write_auth' => 'admin'],
+                'categories' => ['methods' => ['GET', 'POST', 'PATCH', 'DELETE'], 'read_auth' => 'public', 'write_auth' => 'admin'],
+                'tags' => ['methods' => ['GET', 'POST', 'PATCH', 'DELETE'], 'read_auth' => 'public', 'write_auth' => 'admin'],
+                'comments' => ['methods' => ['GET', 'PATCH', 'DELETE'], 'read_auth' => 'admin', 'write_auth' => 'admin'],
+                'users' => ['methods' => ['GET'], 'read_auth' => 'admin'],
+                'settings' => ['methods' => ['GET'], 'read_auth' => 'admin'],
+                'content_types' => ['methods' => ['GET'], 'read_auth' => 'public'],
+                'media' => ['methods' => ['GET', 'POST', 'PATCH'], 'read_auth' => 'public_active_only',
+                    'write_auth' => 'admin_bearer_or_media_admin_session_with_csrf', 'upload_field' => 'file',
+                    'metadata_fields' => ['title', 'description', 'alt_text'], 'max_per_page' => 50],
             ],
             'contracts' => PublicApiRegistry::contracts(),
         ]);
@@ -100,24 +117,113 @@ final class ApiV1Controller
         return $this->terms($request, 'tag');
     }
 
+    public function contentTypes(Request $request): Response
+    {
+        // REST repositories currently support Core article/page types only.
+        $types = array_values(array_filter(ContentTypeRegistry::defaults()->all(), static fn (array $type): bool => $type['rest_exposed']));
+        return $this->ok(['items' => $types]);
+    }
+
     public function media(Request $request): Response
     {
+        if (!in_array($request->method, ['GET', 'POST', 'PATCH'], true)) {
+            return $this->error('method_not_allowed', 'Unsupported media method.', 405);
+        }
         if ($request->method !== 'GET') {
-            return $this->notImplemented('Media write support will be added behind the REST API v1 contract.');
+            $denied = $this->mediaWriteGuard($request);
+            if ($denied !== null) { return $denied; }
         }
-        $page = $this->positiveInt($request->query['page'] ?? 1, 1, 100000);
-        $perPage = $this->positiveInt($request->query['per_page'] ?? 20, 1, 50);
-        $type = (string) ($request->query['type'] ?? '');
-        $library = new MediaLibrary($this->pdo(), $this->rootPath . '/content/uploads');
-        $items = $library->list($type !== '' ? ['type' => $type, 'status' => 'Active'] : ['status' => 'Active'], $perPage);
-        if ($page > 1) {
-            $items = [];
+        $library = new MediaLibrary($this->pdo(), $this->rootPath . '/content/uploads', (array) $this->settings->get('media', []));
+        $id = preg_match('#/api/v1/media/([1-9][0-9]*)$#', $request->path, $match) ? (int) $match[1] : 0;
+        if ($request->path !== '/api/v1/media' && $id <= 0) {
+            return $this->error('not_found', 'Media not found.', 404);
         }
+        try {
+            if ($request->method === 'POST') {
+                $file = $_FILES['file'] ?? null;
+                if (!is_array($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK
+                    || !is_string($file['tmp_name'] ?? null) || !is_string($file['name'] ?? null)
+                    || !is_uploaded_file($file['tmp_name'])) {
+                    return $this->error('invalid_upload', 'A successful multipart file upload is required.', 422);
+                }
+                $user = $this->bearerAuthorized($request) ? null : (new AdminAuthenticator($this->pdo()))->user();
+                $id = $library->uploadLocalFile($file['tmp_name'], $file['name'], (int) ($user['id'] ?? 0));
+                $this->auditMedia($request, $id, 'media.uploaded');
+                return Response::json(['ok' => true, 'data' => ['item' => $this->serializeMedia($library->find($id))]], 201)
+                    ->withHeaders(['Cache-Control' => 'private, no-store']);
+            }
+            if ($request->method === 'PATCH' && $id === 0) {
+                return $this->error('invalid_request', 'A media resource id in the URL is required.', 422);
+            }
+            if ($id > 0) {
+                $item = $library->find($id);
+                if ($item === null || ($item['status'] ?? '') !== 'Active') {
+                    return $this->error('not_found', 'Media not found.', 404);
+                }
+                if ($request->method === 'PATCH') {
+                    $fields = array_intersect_key($item, array_flip(['title', 'description', 'alt_text']));
+                    $changed = false;
+                    foreach ($request->body as $key => $value) {
+                        if ($key === '_csrf') { continue; }
+                        if (!array_key_exists($key, $fields) || !is_string($value) || strlen($value) > 10000) {
+                            return $this->error('invalid_request', 'Only bounded text title, description and alt_text may be updated.', 422);
+                        }
+                        $fields[$key] = $value; $changed = true;
+                    }
+                    if (!$changed) { return $this->error('invalid_request', 'No metadata fields supplied.', 422); }
+                    $library->updateMeta($id, $fields);
+                    $this->auditMedia($request, $id, 'media.metadata_updated');
+                    $item = $library->find($id);
+                }
+                return $this->ok(['item' => $this->serializeMedia($item)]);
+            }
+            $page = $this->positiveInt($request->query['page'] ?? 1, 1, 100000);
+            $perPage = $this->positiveInt($request->query['per_page'] ?? 20, 1, 50);
+            $type = (string) ($request->query['type'] ?? '');
+            if ($type !== '' && !in_array($type, ['image', 'audio', 'video', 'attachment'], true)) {
+                return $this->error('invalid_request', 'Invalid media type.', 422);
+            }
+            $filters = ['status' => 'Active'];
+            if ($type !== '') { $filters['type'] = $type; }
+            $items = $library->list($filters, $perPage + 1, ($page - 1) * $perPage);
+            $hasMore = count($items) > $perPage;
+            return $this->ok(['items' => array_map(fn (array $media): array => $this->serializeMedia($media), array_slice($items, 0, $perPage)),
+                'pagination' => ['page' => $page, 'per_page' => $perPage, 'has_more' => $hasMore]]);
+        } catch (\Throwable) {
+            // Upload validation/storage details must not disclose server paths or configuration.
+            return $this->error('invalid_media', 'Media operation failed validation or storage checks.', 422);
+        }
+    }
 
-        return $this->ok([
-            'items' => array_map(fn (array $media): array => $this->serializeMedia($media), $items),
-            'pagination' => ['page' => $page, 'per_page' => $perPage, 'has_more' => count($items) === $perPage],
-        ]);
+    private function bearerAuthorized(Request $request): bool
+    {
+        $header = (string) ($request->server['HTTP_AUTHORIZATION'] ?? $request->server['Authorization'] ?? '');
+        if (!preg_match('/^Bearer\s+(.+)$/i', $header, $matches)) { return false; }
+        $expected = (string) ($this->settings->get('api.admin_token_sha256', '') ?: $this->settings->get('api.tokens.admin_sha256', ''));
+        return $expected !== '' && trim($matches[1]) !== '' && hash_equals($expected, hash('sha256', trim($matches[1])));
+    }
+
+    private function mediaWriteGuard(Request $request): ?Response
+    {
+        if ($this->bearerAuthorized($request)) { return null; }
+        $user = (new AdminAuthenticator($this->pdo()))->user();
+        if ($user === null || (int) $user['id'] <= 0 || !(new AdminSessionService($this->pdo()))->touchCurrent((int) $user['id'])) {
+            return $this->error('unauthorized', 'Administrator authentication is required.', 401);
+        }
+        $caps = $_SESSION['admin_user']['capabilities'] ?? [];
+        if (!is_array($caps) || array_intersect(['*', 'admin.super', 'media.manage'], $caps) === []) {
+            return $this->error('forbidden', 'Media management permission is required.', 403);
+        }
+        if (!CsrfToken::verify($request->body['_csrf'] ?? $request->server['HTTP_X_CSRF_TOKEN'] ?? null)) {
+            return $this->error('invalid_csrf', 'A valid CSRF token is required for session writes.', 403);
+        }
+        return null;
+    }
+
+    private function auditMedia(Request $request, int $id, string $action): void
+    {
+        $user = $this->bearerAuthorized($request) ? null : (new AdminAuthenticator($this->pdo()))->user();
+        (new AuditLogger($this->pdo()))->record($user === null ? 'api' : 'admin', $user === null ? null : (int) $user['id'], $action, ['media_id' => $id]);
     }
 
     public function comments(Request $request): Response
@@ -357,6 +463,7 @@ final class ApiV1Controller
             'byte_size' => (int) $media['byte_size'],
             'title' => (string) ($media['title'] ?? ''),
             'alt_text' => (string) ($media['alt_text'] ?? ''),
+            'description' => (string) ($media['description'] ?? ''),
             'provider' => (string) ($media['storage_provider'] ?? 'local'),
             'created_at' => (string) ($media['created_at'] ?? ''),
             'updated_at' => (string) ($media['updated_at'] ?? ''),

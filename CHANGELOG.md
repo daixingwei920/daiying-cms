@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.91 (release preparation)
+
+- Add REST content-type/resource discovery, protected multipart media uploads, safe metadata PATCH, single Active-media reads and real media pagination with accurate lookahead. Reuse native authorization, CSRF, MIME/extension/size/quota protections and audit.
+- Include PR75 native manifest scanner correction, PR76 historical optimizer retirement with data retention, and PR77 grouped review/update UI plus strict candidate knowledge provenance. Ordinary editing, AI writing and other SEO stay supported.
+- Preserve public contracts, frozen migrations, signing/integrity protections and the 1.2.80/PHP8.3 floors. The paid Epay0.1.0 plugin is published independently after Core1.2.91; no production website upgrade is implied.
+
 ## 1.2.90 (published 2026-10-26)
 
 - Publish the frozen PR70 candidate449f92a unchanged; the original c09b5ea1.2.90 signed candidate remains a separate private archive. See docs/CORE_1.2.90_PUBLICATION_REPORT.md.

@@ -145,6 +145,7 @@ $check(!str_contains($encodedUsers, 'password_hash') && !str_contains($encodedUs
 
 $mediaWrite = $controller->media(new Request('POST', '/api/v1/media', [], [], ['HTTP_AUTHORIZATION' => 'Bearer rest-secret']));
 $mediaWriteBody = json_decode($mediaWrite->body(), true);
-$check($mediaWrite->status() === 501 && ($mediaWriteBody['error']['code'] ?? '') === 'not_implemented', 'REST media upload remains explicitly not implemented');
+$check($mediaWrite->status() === 422 && ($mediaWriteBody['error']['code'] ?? '') === 'invalid_upload', 'Authenticated REST media upload requires a real multipart file');
+$check($controller->media(new Request('POST', '/api/v1/media'))->status() === 401, 'Anonymous REST media upload requires administrator authentication');
 
 echo "REST API v1 tests PASS\n";

@@ -391,6 +391,7 @@ final class Application
 
         $apiV1 = new ApiV1Controller($settings, $rootPath, $events);
         $router->get('/api/v1', [$apiV1, 'index']);
+        $router->get('/api/v1/content-types', [$apiV1, 'contentTypes']);
         $router->get('/api/v1/contents', [$apiV1, 'contents']);
         $router->get('/api/v1/contents/{id}', [$apiV1, 'contents']);
         $router->post('/api/v1/contents', [$apiV1, 'contents']);
@@ -412,6 +413,8 @@ final class Application
         $router->delete('/api/v1/tags/{id}', [$apiV1, 'tags']);
         $router->get('/api/v1/media', [$apiV1, 'media']);
         $router->post('/api/v1/media', [$apiV1, 'media']);
+        $router->get('/api/v1/media/{id}', [$apiV1, 'media']);
+        $router->patch('/api/v1/media/{id}', [$apiV1, 'media']);
         $router->get('/api/v1/comments', [$apiV1, 'comments']);
         $router->patch('/api/v1/comments/{id}', [$apiV1, 'comments']);
         $router->delete('/api/v1/comments/{id}', [$apiV1, 'comments']);

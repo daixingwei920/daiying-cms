@@ -5081,7 +5081,7 @@ final class AdminController
             $officialPluginNotice .
             $form .
             '<section class="admin-card"><h2>当前可用支付方式</h2><p class="muted">绿色表示可以直接配置并用于发卡、付费内容、付费下载等 Core 支付链路。</p>' . $methodCards . '</section>' .
-            '<section class="admin-card"><h2>常见支付平台要填什么</h2><p class="muted">如果你使用的是第三方聚合收银台，通常选择“通用跳转支付”；如果是官方微信/支付宝直连，需要后续安装对应直连 Provider/插件。</p>' . $integrationGuide . '</section>' .
+            '<section class="admin-card"><h2>常见支付平台要填什么</h2><p class="muted">按接口协议选择支付方式：易支付 V1／MD5 使用对应独立插件；官方直连和信用卡使用各自 Provider，已有方式可并列配置。</p>' . $integrationGuide . '</section>' .
             $repairForm .
             '<h2>高级状态表</h2><p class="muted">这里用于诊断真实保存状态和支付服务发现结果。日常只需要看上面的支付方式卡片和下面的配置表单。</p>' .
             '<table><thead><tr><th>支付方式 / Provider</th><th>显示名称</th><th>必要配置</th><th>启用状态</th><th>默认</th><th>旧字段同步</th><th>诊断</th><th>能力</th><th>公共配置</th><th>密钥掩码</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>' .
@@ -5189,11 +5189,13 @@ final class AdminController
     {
         $items = [
             ['人工转账 / 客服确认', '选择：人工确认付款', '收款说明、客服联系方式、付款后如何备注订单。', '不需要平台后台，不需要回调地址。管理员确认收款后点“捕获支付”。'],
-            ['易支付 / 码支付 / 聚合收银台', '选择：通用跳转支付', '平台收银台地址、本站回跳域名、Checkout 签名密钥、Webhook 密钥。', '平台后台回调地址填：https://你的域名/payment/webhooks/core.hosted-redirect'],
+            ['易支付 V1 / MD5（含兼容码支付）', '需要：通用易支付 V1 插件', '平台 submit.php 网关地址、商户 ID、商户密钥、本站 HTTPS 域名。各渠道须由收款平台实际开通。', '由插件随订单提交异步通知地址；浏览器回跳不确认收款。'],
+            ['自有托管收银台', '选择：通用跳转支付', '仅适用于兼容 CMS Checkout / Webhook 签名契约的收银台。', '回调地址：https://你的域名/payment/webhooks/core.hosted-redirect'],
+            ['银联 / 美国信用卡 / Apple Pay / Google Pay', '按收单机构选择 Provider', '银联可接已签约收单机构；信用卡及钱包可通过支持这些方式的 Stripe 等收单服务配置。', '是否可用取决于商户国家、业务审核、币种与收单平台开通情况；支付按钮不代表已获收款资格。'],
             ['微信支付官方直连', '需要：微信支付直连 Provider/插件', 'AppID、商户号 MCH ID、API v3 密钥、商户证书序列号、商户私钥、支付通知密钥。', '微信商户平台通知地址通常填：https://你的域名/payment/webhooks/微信ProviderID'],
             ['支付宝官方直连', '需要：支付宝直连 Provider/插件', 'App ID、应用私钥、支付宝公钥、网关地址、签名方式、异步通知密钥。', '支付宝开放平台异步通知地址通常填：https://你的域名/payment/webhooks/支付宝ProviderID'],
-            ['Stripe', '需要：Stripe Provider/插件', 'Publishable Key、Secret Key、Webhook Signing Secret、币种和结算国家。', 'Stripe Webhook Endpoint 填：https://你的域名/payment/webhooks/stripe'],
-            ['PayPal', '需要：PayPal Provider/插件', 'Client ID、Client Secret、Webhook ID、Sandbox/Live 环境。', 'PayPal Webhook URL 填：https://你的域名/payment/webhooks/paypal'],
+            ['Stripe', '需要：Stripe Provider/插件', 'Publishable Key、Secret Key、Webhook Signing Secret、币种和结算国家。', 'Stripe Webhook Endpoint 填：https://你的域名/payment/webhooks/official.payment.stripe'],
+            ['PayPal', '需要：PayPal Provider/插件', 'Client ID、Client Secret、Webhook ID、Sandbox/Live 环境。', 'PayPal Webhook URL 填：https://你的域名/payment/webhooks/official.payment.paypal'],
         ];
         $rows = '';
         foreach ($items as [$name, $choice, $fields, $callback]) {
@@ -5222,7 +5224,7 @@ final class AdminController
     {
         return match ($providerId) {
             ManualPaymentProvider::PROVIDER_ID => '适合先跑通发卡闭环、线下转账、客服确认、手工收款。',
-            HostedRedirectPaymentProvider::PROVIDER_ID => '适合接第三方聚合支付、易支付、码支付或你自己的托管收银台。',
+            HostedRedirectPaymentProvider::PROVIDER_ID => '适合兼容 CMS Checkout / Webhook 签名契约的自有托管收银台。易支付 V1／MD5 请安装对应插件。',
             'official.payment.stripe' => 'Stripe 官方 Checkout Provider，支持 Test Mode、Webhook 验签和退款。',
             'official.payment.paypal' => 'PayPal 官方 Checkout Provider，支持 Sandbox/Live、Webhook 验证和退款。',
             'official.payment.wechatpay' => '微信支付 API v3 官方 Provider，支持 Native 网站支付、Notify 验签解密和退款。',
@@ -5943,7 +5945,7 @@ final class AdminController
                 $webhookUrl = '/payment/webhooks/' . $providerId;
             }
             return '<fieldset><legend>第三方支付平台资料</legend>' .
-                '<p class="muted">适用于易支付、码支付、聚合支付、你自己的托管收银台。官方微信/支付宝直连需要专用 Provider/插件。</p>' .
+                '<p class="muted">适用于兼容 CMS 签名契约的托管收银台。易支付 V1／MD5、官方微信/支付宝直连需使用对应 Provider/插件。</p>' .
                 '<label>支付平台收银台地址<input name="hosted_checkout_url" value="' . View::escape($checkout) . '" placeholder="https://pay.example.com/checkout"></label>' .
                 '<p class="muted">填写第三方平台给你的“创建支付 / 收银台 / 网关”HTTPS 地址。不要把密钥放到 URL 问号参数里。</p>' .
                 '<label>本站回跳域名<input name="hosted_return_url_base" value="' . View::escape($return) . '" placeholder="https://你的域名"></label>' .

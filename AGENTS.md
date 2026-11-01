@@ -4,6 +4,19 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized integrated1.2.91 pending review (2026-11-01)
+
+- Latest Owner instruction supersedes earlier publication/merge authority: integrate the configured redirect contract with the parked1.2.91 foundation changes, run full isolated test/package gates and independent payment-plugin single-site authorization acceptance on the authorized update server, then prepare pending-review PRs. No merge, production change, public release, account opening or real payment.
+- Worktree `work/core-1.2.91-integration` starts clean from actual origin/main b3f7f74. Preserve the parked foundation worktree and frozen plugin candidates. Independent plugin remains planned CNY39/single-site/lifetime, excluded from Core packages.
+- All asymmetric signing key generation/use stays on the authorized update server; never create/export private signing keys locally. The formal origin/main preflight remains fail closed while the PR is unmerged. Never counterfeit refs or relax signature/integrity/authorization guards to report PASS.
+
+## Owner-authorized Core1.2.91 and separate Epay release (2026-10-31)
+
+- Owner now authorizes comparison with mainstream CMS APIs, targeted foundation additions, merging this chat's Core changes and formal Core1.2.91 publication. This supersedes earlier no-merge/no-version/no-publication holds for these changes. Clean worktree: work/core-1.2.91, branch maintenance/release-1.2.91; base is actual PR77 merge b3f7f74b7491ae28ebdbedf5d27762ab01de9f0d, including PR75/76/77.
+- Add resource/content-type discovery and protected media upload/read/metadata/pagination by reusing existing services. No broad refactor, schema migration, private-data exposure, integrity bypass or parallel identity system.
+- Publish Core first, then independent daiying.payment.epay0.1.0 (39 RMB, lifetime use, one site, license required, minimum Core1.2.91, no maximum). Keep plugin files out of Core. No production website upgrade, real payment/refund, settings change or customer-code consumption is authorized.
+- Formal signer remains only on the authorized update server. Exact main, clean source, unused version, native install/upgrade/rollback, backup and distribution protection remain required. See docs/rest-foundation-1.2.91.md.
+
 ## Owner-authorized isolated report/update UI (2026-10-31)
 
 - Base: merged PR76 `b8edbdce6c9008ddb50facfebb6c2617cde47b9c`; clean worktree `work/core-admin-review-ui`, branch `ui/admin-review-update-panels`.
