@@ -1,7 +1,7 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
   "verified_version": "1.2.90",
-  "last_verified_at": "2026-10-26",
+  "last_verified_at": "2026-10-31",
   "records": [
     {
       "id": "install.web_installer",
@@ -34,8 +34,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -74,8 +74,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -114,8 +114,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -154,8 +154,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -194,8 +194,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -234,15 +234,15 @@
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 613,
-          "line_end": 613,
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 616,
+          "line_end": 616,
           "anchor": "$router->get('/admin/update', [$admin, 'updateIndex']);"
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -267,9 +267,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 578,
-          "line_end": 578,
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 581,
+          "line_end": 581,
           "anchor": "$router->get('/admin/recovery', [$recovery, 'index']);"
         },
         {
@@ -281,8 +281,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -321,8 +321,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -361,8 +361,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -387,9 +387,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 527,
-          "line_end": 527,
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 533,
+          "line_end": 533,
           "anchor": "$router->get('/admin/seo/keywords', [$admin, 'seoKeywordIndex']);"
         },
         {
@@ -401,8 +401,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -427,9 +427,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 537,
-          "line_end": 537,
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 540,
+          "line_end": 540,
           "anchor": "$router->post('/admin/seo/search-engines/google/sync', [$admin, 'seoSearchEngineGoogleSync']);"
         },
         {
@@ -441,8 +441,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -467,9 +467,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 432,
-          "line_end": 432,
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 438,
+          "line_end": 438,
           "anchor": "$router->get('/sitemap.xml', [$front, 'sitemap']);"
         },
         {
@@ -488,8 +488,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -535,8 +535,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -575,8 +575,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -601,9 +601,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 502,
-          "line_end": 502,
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 508,
+          "line_end": 508,
           "anchor": "$router->get('/admin/settings/ai', [$admin, 'aiSettings']);"
         },
         {
@@ -629,8 +629,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -669,8 +669,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -709,8 +709,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -735,22 +735,22 @@
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
-          "sha256": "08dd765c5d4bdfc7c79787e475066f786d50e315b6579670f635428c499c9667",
-          "line_start": 115,
-          "line_end": 115,
+          "sha256": "183147cebd00f830f66060deb927f18b6ff43832a0ac14c77a16562a10351faf",
+          "line_start": 113,
+          "line_end": 113,
           "anchor": "['/admin/migrations', '旧站迁移', 'transfer'],"
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 590,
-          "line_end": 590,
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 593,
+          "line_end": 593,
           "anchor": "$router->post('/admin/migrations/scan', [$admin, 'externalMigrationScan']);"
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -775,16 +775,16 @@
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
-          "sha256": "08dd765c5d4bdfc7c79787e475066f786d50e315b6579670f635428c499c9667",
-          "line_start": 116,
-          "line_end": 116,
+          "sha256": "183147cebd00f830f66060deb927f18b6ff43832a0ac14c77a16562a10351faf",
+          "line_start": 114,
+          "line_end": 114,
           "anchor": "['/admin/update', '系统更新', 'refresh'],"
         },
         {
           "path": "system/core/Support/View.php",
-          "sha256": "08dd765c5d4bdfc7c79787e475066f786d50e315b6579670f635428c499c9667",
-          "line_start": 117,
-          "line_end": 117,
+          "sha256": "183147cebd00f830f66060deb927f18b6ff43832a0ac14c77a16562a10351faf",
+          "line_start": 115,
+          "line_end": 115,
           "anchor": "['/admin/recovery', '恢复诊断', 'activity'],"
         },
         {
@@ -796,8 +796,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -821,22 +821,22 @@
       "source_evidence": [
         {
           "path": "docs/ai-image/integration-1.2.86.md",
-          "anchor": "当前正式版仍为 Core 1.2.86",
+          "sha256": "a4acc63a504db84bc5c328d028e6d2fe4617b81e5dd27df136be4083b7ad2ca4",
           "line_start": 3,
           "line_end": 3,
-          "sha256": "a4acc63a504db84bc5c328d028e6d2fe4617b81e5dd27df136be4083b7ad2ca4"
+          "anchor": "当前正式版仍为 Core 1.2.86"
         },
         {
           "path": "docs/payment-refund-webhooks.md",
-          "anchor": "Core 1.3.0-alpha.5 开发修复",
           "sha256": "fe05bbdbe8663e35c63ba14ef0fabae6ab45454698bb058c77bfe2f49f414d12",
           "line_start": 3,
-          "line_end": 3
+          "line_end": 3,
+          "anchor": "Core 1.3.0-alpha.5 开发修复"
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -868,8 +868,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -908,8 +908,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -948,8 +948,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -995,8 +995,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1035,8 +1035,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1050,47 +1050,40 @@
       "topic": "AI Provider",
       "capability": "历史文章 AI 优化",
       "audience": "Administrator",
-      "user_facing": true,
+      "user_facing": false,
       "admin_route": "",
       "public_route": "",
       "cli_command": "",
-      "description": "历史文章 SEO 补全和内容优化入口为 /admin/seo/historical-backfill 与 /admin/seo/content-quality。AI 针对 B/C 级历史文章生成待审核草稿，经统一站点 AI 调用；不自动发布或修改 URL。原优化器尚未接入本统一知识包；不能声称资料自动更新已生效。",
-      "source": "system/core/Support/View.php; system/core/Seo/Historical/HistoricalArticleSeoBackfillService.php",
+      "description": "未发布候选已移除历史文章 SEO 补全与历史内容优化的菜单、路由、处理器和专用服务。旧入口及子路径统一返回410；历史文章、URL、SEO、待审核建议、任务、日志及已发布迁移保留。普通文章编辑、AI 写作和其他 SEO 功能保留；此候选事实不表示生产已升级。",
+      "source": "system/core/Bootstrap/Application.php; docs/historical-optimizer-retirement.md",
       "source_type": "official_docs+source_review",
       "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
       "source_evidence": [
         {
-          "path": "system/core/Support/View.php",
-          "sha256": "08dd765c5d4bdfc7c79787e475066f786d50e315b6579670f635428c499c9667",
-          "line_start": 97,
-          "line_end": 97,
-          "anchor": "['/admin/seo/content-quality', '历史内容优化', 'chart'],"
+          "path": "system/core/Bootstrap/Application.php",
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 138,
+          "line_end": 138,
+          "anchor": "foreach (['/admin/seo/historical-backfill', '/admin/seo/content-quality'] as $retiredPath)"
         },
         {
-          "path": "system/core/Seo/Historical/HistoricalArticleSeoBackfillService.php",
-          "sha256": "2bff00498bf8d85452fa45eff2f65d0851ffc73d5b2715b9baa3b42e22714439",
-          "line_start": 543,
-          "line_end": 543,
-          "anchor": "'只生成待审核草稿，不发布、不删除、不改 URL。',"
-        },
-        {
-          "path": "system/core/Seo/Historical/HistoricalArticleSeoBackfillService.php",
-          "sha256": "2bff00498bf8d85452fa45eff2f65d0851ffc73d5b2715b9baa3b42e22714439",
-          "line_start": 827,
-          "line_end": 827,
-          "anchor": "private function productContext(): array"
+          "path": "docs/historical-optimizer-retirement.md",
+          "sha256": "f055387c12bbd082a110a710e6664a4f7ad552ed923ffaee36052ae1d53c7d79",
+          "line_start": 19,
+          "line_end": 19,
+          "anchor": "pending optimization suggestions, jobs, logs and migration records are retained;"
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
-      "implementation_status": "implemented",
+      "implementation_status": "removed_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
       "priority": "P0",
-      "visibility": "USER-FACING",
-      "enabled_for_customer_service": true
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false
     },
     {
       "id": "payment.sqlite_transaction_internal",
@@ -1122,8 +1115,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1156,8 +1149,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1189,8 +1182,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1222,9 +1215,9 @@
         },
         {
           "path": "system/core/Admin/AdminController.php",
-          "sha256": "e831489b1cb0efd233a8fda5e9e5942922544b047ccfd7e3b502e69c94398ead",
-          "line_start": 1061,
-          "line_end": 1061,
+          "sha256": "c3bd8f83c6d342f504baac43839c9e16cadc9397aaacb57b5d2f3c9ba15ff06b",
+          "line_start": 1060,
+          "line_end": 1060,
           "anchor": "public function adminSecurityPasskeyReauthVerify(Request $request): Response"
         },
         {
@@ -1236,8 +1229,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1262,10 +1255,10 @@
       "source_evidence": [
         {
           "path": "docs/ai-image/api.md",
-          "anchor": "## 架构与配置",
           "sha256": "523e48b08b257ab77e1518fccde0c9f2b98f9f7ab782c9bd7bc848407a779e28",
           "line_start": 9,
-          "line_end": 9
+          "line_end": 9,
+          "anchor": "## 架构与配置"
         }
       ],
       "implementation_status": "implemented",
@@ -1275,8 +1268,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "ai.image_sdk",
@@ -1295,10 +1288,10 @@
       "source_evidence": [
         {
           "path": "docs/ai-image/api.md",
-          "anchor": "## 插件 SDK",
           "sha256": "523e48b08b257ab77e1518fccde0c9f2b98f9f7ab782c9bd7bc848407a779e28",
           "line_start": 21,
-          "line_end": 21
+          "line_end": 21,
+          "anchor": "## 插件 SDK"
         }
       ],
       "implementation_status": "implemented",
@@ -1308,8 +1301,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "ai.image_queue_cost",
@@ -1328,10 +1321,10 @@
       "source_evidence": [
         {
           "path": "docs/ai-image/api.md",
-          "anchor": "## 任务队列、恢复、成本",
           "sha256": "523e48b08b257ab77e1518fccde0c9f2b98f9f7ab782c9bd7bc848407a779e28",
           "line_start": 42,
-          "line_end": 42
+          "line_end": 42,
+          "anchor": "## 任务队列、恢复、成本"
         }
       ],
       "implementation_status": "implemented",
@@ -1341,8 +1334,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "ai.image_private_media",
@@ -1361,10 +1354,10 @@
       "source_evidence": [
         {
           "path": "docs/ai-image/api.md",
-          "anchor": "## 媒体与限制",
           "sha256": "523e48b08b257ab77e1518fccde0c9f2b98f9f7ab782c9bd7bc848407a779e28",
           "line_start": 54,
-          "line_end": 54
+          "line_end": 54,
+          "anchor": "## 媒体与限制"
         }
       ],
       "implementation_status": "implemented",
@@ -1374,8 +1367,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "ai.image_validation_scope",
@@ -1394,10 +1387,10 @@
       "source_evidence": [
         {
           "path": "docs/ai-image/tests.md",
-          "anchor": "## 真实服务商调用",
           "sha256": "2f54f8e8b27a06951fcc5f725281bcbce77a2cc6349d3e04abf04a5aa7c9ecbe",
           "line_start": 18,
-          "line_end": 18
+          "line_end": 18,
+          "anchor": "## 真实服务商调用"
         }
       ],
       "implementation_status": "implemented",
@@ -1407,8 +1400,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "plugin.atomic_documents",
@@ -1427,10 +1420,10 @@
       "source_evidence": [
         {
           "path": "docs/ai-image/brand-plugin-contracts.md",
-          "anchor": "## 原子插件文档",
           "sha256": "cc40914dc30deba5915db99f4ea5349df7bb7a648e19d91735920aa4a6d8dbce",
           "line_start": 15,
-          "line_end": 15
+          "line_end": 15,
+          "anchor": "## 原子插件文档"
         }
       ],
       "implementation_status": "implemented",
@@ -1440,8 +1433,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "plugin.branding_admin",
@@ -1460,10 +1453,10 @@
       "source_evidence": [
         {
           "path": "docs/ai-image/brand-plugin-contracts.md",
-          "anchor": "## 管理员应用站点品牌",
           "sha256": "cc40914dc30deba5915db99f4ea5349df7bb7a648e19d91735920aa4a6d8dbce",
           "line_start": 32,
-          "line_end": 32
+          "line_end": 32,
+          "anchor": "## 管理员应用站点品牌"
         }
       ],
       "implementation_status": "implemented",
@@ -1473,8 +1466,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "plugin.public_site_identity",
@@ -1493,10 +1486,10 @@
       "source_evidence": [
         {
           "path": "docs/ai-image/brand-plugin-contracts.md",
-          "anchor": "## 公开站点品牌读取",
+          "sha256": "cc40914dc30deba5915db99f4ea5349df7bb7a648e19d91735920aa4a6d8dbce",
           "line_start": 44,
           "line_end": 44,
-          "sha256": "cc40914dc30deba5915db99f4ea5349df7bb7a648e19d91735920aa4a6d8dbce"
+          "anchor": "## 公开站点品牌读取"
         }
       ],
       "implementation_status": "implemented",
@@ -1506,8 +1499,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "payment.refund_callback_idempotency",
@@ -1526,10 +1519,10 @@
       "source_evidence": [
         {
           "path": "docs/payment-refund-webhooks.md",
-          "anchor": "退款身份使用 provider_id",
           "sha256": "fe05bbdbe8663e35c63ba14ef0fabae6ab45454698bb058c77bfe2f49f414d12",
           "line_start": 7,
-          "line_end": 7
+          "line_end": 7,
+          "anchor": "退款身份使用 provider_id"
         }
       ],
       "implementation_status": "implemented",
@@ -1539,8 +1532,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "payment.checkout_recovery",
@@ -1559,10 +1552,10 @@
       "source_evidence": [
         {
           "path": "docs/plugin-checkout-recovery.md",
-          "anchor": "待付款链接通过",
           "sha256": "6c3479aca97163e72526504a9304acfd4544beeacd3e4b4f554fe3009a14b2de",
           "line_start": 5,
-          "line_end": 5
+          "line_end": 5,
+          "anchor": "待付款链接通过"
         }
       ],
       "implementation_status": "implemented",
@@ -1572,8 +1565,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "theme.navigation_groups",
@@ -1592,10 +1585,10 @@
       "source_evidence": [
         {
           "path": "docs/navigation-groups.md",
-          "anchor": "仍保存为",
           "sha256": "2eba32f7c67b063ad5044dca29abf46c57a57d5462b3466d4ccee27d65300349",
           "line_start": 5,
-          "line_end": 5
+          "line_end": 5,
+          "anchor": "仍保存为"
         }
       ],
       "implementation_status": "implemented",
@@ -1605,8 +1598,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "auth.member_editorial_access",
@@ -1625,10 +1618,10 @@
       "source_evidence": [
         {
           "path": "docs/member-editorial-retirement.md",
-          "anchor": "`/admin/member-access` and `/workspace`",
           "sha256": "45bf926c1aa75902edba63c8f13af24a9173ebe79f4ba51dc241527ad7d24f83",
           "line_start": 5,
-          "line_end": 5
+          "line_end": 5,
+          "anchor": "`/admin/member-access` and `/workspace`"
         }
       ],
       "implementation_status": "retired_in_published_baseline",
@@ -1638,8 +1631,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "ai.request_execution",
@@ -1658,10 +1651,10 @@
       "source_evidence": [
         {
           "path": "docs/ai-image/api.md",
-          "anchor": "会员提交后，可通过",
           "sha256": "523e48b08b257ab77e1518fccde0c9f2b98f9f7ab782c9bd7bc848407a779e28",
           "line_start": 69,
-          "line_end": 69
+          "line_end": 69,
+          "anchor": "会员提交后，可通过"
         }
       ],
       "implementation_status": "implemented",
@@ -1671,8 +1664,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "seo.geo_basics",
@@ -1691,24 +1684,24 @@
       "source_evidence": [
         {
           "path": "docs/seo-geo-contract.md",
-          "anchor": "# Issue #9 batch B",
           "sha256": "5ccb78f67a741b294141bec67f6005191035ee918073e54e2ce1981fba7c3b81",
           "line_start": 1,
-          "line_end": 1
+          "line_end": 1,
+          "anchor": "# Issue #9 batch B"
         },
         {
           "path": "system/core/Seo/SeoPresentation.php",
-          "anchor": "final class SeoPresentation",
           "sha256": "4c14de5e12dcf2a98554f6bfa4a67a55afa9c0457238b8aa6f2aa6d2abfef46d",
           "line_start": 12,
-          "line_end": 12
+          "line_end": 12,
+          "anchor": "final class SeoPresentation"
         },
         {
           "path": "system/core/Seo/CrawlerLog.php",
-          "anchor": "final class CrawlerLog",
           "sha256": "450ae351d9327e7c2efe913948e05bcdfdb57002341c393ff2ff3d9309723e24",
           "line_start": 12,
-          "line_end": 12
+          "line_end": 12,
+          "anchor": "final class CrawlerLog"
         }
       ],
       "implementation_status": "implemented_in_published_baseline",
@@ -1718,8 +1711,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "seo.domestic_crawler_statistics",
@@ -1738,38 +1731,38 @@
       "source_evidence": [
         {
           "path": "system/core/Seo/CrawlerRegistry.php",
-          "anchor": "public static function agents()",
           "sha256": "842b1247fc07319d9868c40e788e6ed71e726b57d38582a91e8120ebe7001286",
           "line_start": 11,
-          "line_end": 11
+          "line_end": 11,
+          "anchor": "public static function agents()"
         },
         {
           "path": "system/core/Seo/CrawlerStatistics.php",
-          "anchor": "public function snapshot(",
           "sha256": "b62ca4a2cbfaa4fcd79a7ae5f4b8b7a015402e52b65d25893e42415fff29a440",
           "line_start": 21,
-          "line_end": 21
+          "line_end": 21,
+          "anchor": "public function snapshot("
         },
         {
           "path": "docs/domestic-crawlers.md",
-          "anchor": "后台SEO分组新增",
           "sha256": "5083bf5ba03bda73d0ca9e8eb77abb49fc8511e509aeda65228a823478a20380",
           "line_start": 7,
-          "line_end": 7
+          "line_end": 7,
+          "anchor": "后台SEO分组新增"
         },
         {
           "path": "docs/pr67-supplemental-acceptance.md",
-          "anchor": "## 400次为何只采集109次",
           "sha256": "aeb98f3ec096d9e1875f75807424c44e3823a8f2620f8edd94ce8f67220408f8",
           "line_start": 44,
-          "line_end": 44
+          "line_end": 44,
+          "anchor": "## 400次为何只采集109次"
         },
         {
           "path": "docs/CORE_1.2.90_PUBLICATION_REPORT.md",
-          "anchor": "## 公开下载、签名和版本",
+          "sha256": "a3082ba361064eb0ab743472a9d7f7ab6c65d84e0f60419f4c5bdd932b4a8eca",
           "line_start": 7,
           "line_end": 7,
-          "sha256": "a3082ba361064eb0ab743472a9d7f7ab6c65d84e0f60419f4c5bdd932b4a8eca"
+          "anchor": "## 公开下载、签名和版本"
         }
       ],
       "implementation_status": "implemented",
@@ -1779,8 +1772,8 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26"
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31"
     },
     {
       "id": "knowledge.customer_consumer_loop",
@@ -1827,15 +1820,15 @@
         },
         {
           "path": "docs/CORE_1.2.90_PUBLICATION_REPORT.md",
-          "anchor": "## 备份、知识同步和边界",
+          "sha256": "a3082ba361064eb0ab743472a9d7f7ab6c65d84e0f60419f4c5bdd932b4a8eca",
           "line_start": 36,
           "line_end": 36,
-          "sha256": "a3082ba361064eb0ab743472a9d7f7ab6c65d84e0f60419f4c5bdd932b4a8eca"
+          "anchor": "## 备份、知识同步和边界"
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented_unpublished_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1867,23 +1860,77 @@
         },
         {
           "path": "docs/CORE_1.2.90_PR70_PREPARATION_REPORT.md",
-          "anchor": "## 本轮正式包实跑",
+          "sha256": "eb08020bbb3dd24031552ff697dd95e22ef5255d6bedc42d4ea2525fc4dd6617",
           "line_start": 14,
           "line_end": 14,
-          "sha256": "eb08020bbb3dd24031552ff697dd95e22ef5255d6bedc42d4ea2525fc4dd6617"
+          "anchor": "## 本轮正式包实跑"
         },
         {
           "path": "docs/CORE_1.2.90_PUBLICATION_REPORT.md",
-          "anchor": "## 公开下载、签名和版本",
+          "sha256": "a3082ba361064eb0ab743472a9d7f7ab6c65d84e0f60419f4c5bdd932b4a8eca",
           "line_start": 7,
           "line_end": 7,
-          "sha256": "a3082ba361064eb0ab743472a9d7f7ab6c65d84e0f60419f4c5bdd932b4a8eca"
+          "anchor": "## 公开下载、签名和版本"
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false
+    },
+    {
+      "id": "admin.review_update_workspace",
+      "topic": "Administration",
+      "capability": "Review and Update Data Workspace Candidate",
+      "description": "未发布候选将审核与系统更新数据改为摘要卡片、分类导航和详情面板；问题逐条展开，完整 JSON 默认折叠并区域内滚动。切换分类与缩放保留未提交输入，窄屏菜单折叠。仅调整展示，保留管理员鉴权、CSRF、更新二次确认、签名与完整性校验；不表示已发布或已在生产安装。",
+      "audience": "Administrator",
+      "source": "system/core/Admin/AdminDataView.php; system/core/Admin/AdminController.php",
+      "source_type": "official_docs+source_review",
+      "evidence": "Source/document review only; isolated HTTP/browser/Gate acceptance is reported separately. No production availability or consumer import is implied.",
+      "user_facing": false,
+      "admin_route": "/admin/update",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "system/core/Admin/AdminDataView.php",
+          "sha256": "910ee8547e6d84d5ec40d109500594f026ebb1d29fb9e2ec543d1f19fffd8323",
+          "line_start": 15,
+          "line_end": 15,
+          "anchor": "public static function workspace("
+        },
+        {
+          "path": "system/core/Admin/AdminDataView.php",
+          "sha256": "910ee8547e6d84d5ec40d109500594f026ebb1d29fb9e2ec543d1f19fffd8323",
+          "line_start": 45,
+          "line_end": 45,
+          "anchor": "public static function raw("
+        },
+        {
+          "path": "system/core/Admin/AdminController.php",
+          "sha256": "c3bd8f83c6d342f504baac43839c9e16cadc9397aaacb57b5d2f3c9ba15ff06b",
+          "line_start": 9240,
+          "line_end": 9240,
+          "anchor": "private function reviewReportHtml("
+        },
+        {
+          "path": "system/core/Admin/AdminController.php",
+          "sha256": "c3bd8f83c6d342f504baac43839c9e16cadc9397aaacb57b5d2f3c9ba15ff06b",
+          "line_start": 8044,
+          "line_end": 8044,
+          "anchor": "$plan = $service->dryRun((string) $request->input('package_path', ''));"
+        }
+      ],
+      "verified_version": "1.2.90",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
+      "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
       "priority": "P0",
@@ -1891,10 +1938,10 @@
       "enabled_for_customer_service": false
     }
   ],
-  "package_revision": "2026-10-26-core190-published-owner-update-observed",
+  "package_revision": "2026-10-31-admin-data-ui-unpublished-candidate",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-  "source_tag": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
+  "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+  "source_tag": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "PUBLISHED",
@@ -2010,31 +2057,19 @@
       "note": "含旧 testing/rc 发布前措辞，仅引用来源版本约束，不作为当前发布状态。"
     }
   ],
-  "release_status": "PUBLISHED",
+  "release_status": "UNPUBLISHED",
   "candidate_evidence": {
-    "status": "PUBLISHED",
-    "base_version": "1.2.89",
+    "status": "UNPUBLISHED",
+    "base_version": "1.2.90",
     "candidate_version": "1.2.90",
-    "source_commit": "449f92a258f2d02f78cb19f590c308ec268a1d43",
-    "candidate_revision": "PR70-449f92a",
-    "owner_decision": "Owner accepted PR70 and authorizes its merge into1.2.90, separate formal signing and Release Gate. Original frozen1.2.90 remains intact; no publication or production.",
-    "runtime_report": "docs/CORE_1.2.90_PR70_PREPARATION_REPORT.md",
-    "installer_sha256": "62501532a9b73327d35535d6a52c895408393546cdfb984e3c55d5d7965d5b4d",
-    "update_sha256": "0ad3dabdf064894733a88ca3c497075dcdf0fa6e6bd285caf11a85e1bfe1c427",
-    "production_deployed": true,
+    "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+    "base_commit": "b8edbdce6c9008ddb50facfebb6c2617cde47b9c",
+    "candidate_revision": "admin-review-update-ui",
+    "owner_decision": "Owner authorizes isolated UI review, strict knowledge source reconciliation, server-isolated Gate and pending-review PR only; no merge, production change or publication.",
+    "runtime_report": "docs/admin-data-workspace.md",
+    "production_deployed": false,
     "consumer_imported": false,
-    "original_frozen_candidate_preserved": {
-      "status": "SIGNED_NOT_PUBLISHED_FROZEN",
-      "base_version": "1.2.89",
-      "candidate_version": "1.2.90",
-      "source_commit": "c09b5ea10f31cf0203a5cf4b73df1d628c8cf546",
-      "owner_decision": "Original signed1.2.90 candidate preserved unchanged. Owner accepts PR70 and authorizes separate new1.2.90 exact-main signing/Gate preparation; no publication or production.",
-      "runtime_report": "https://github.com/daixingwei920/daiying-cms/pull/69",
-      "production_deployed": false,
-      "consumer_imported": false
-    },
-    "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.90",
-    "production_deployment_actor": "Owner manual upgrade; no Codex deployment"
+    "published_release_evidence_preserved": true
   },
   "sync_validation": {
     "environment": "isolated",
@@ -2108,14 +2143,12 @@
     }
   },
   "development_candidate": {
-    "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-    "status": "CORE190_PUBLISHED_INDEPENDENT_CUSTOMER_PLUGIN_UNPUBLISHED",
-    "included_in_frozen_1_2_90": false,
-    "report": "docs/CORE_1.2.90_PUBLICATION_REPORT.md",
-    "production_deployed": true,
-    "included_in_new_pr70_core190_candidate": "Core crawler observation only; independent customer plugin excluded",
-    "production_deployment_actor": "Owner manual Core upgrade",
-    "independent_customer_plugin_production_deployed": false
+    "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+    "status": "UNPUBLISHED_ADMIN_UI_AND_KNOWLEDGE_RECONCILIATION",
+    "report": "docs/admin-data-workspace.md",
+    "production_deployed": false,
+    "consumer_imported": false,
+    "included_in_frozen_1_2_90": false
   },
   "publication_validation": {
     "report": "docs/CORE_1.2.90_PUBLICATION_REPORT.md",
@@ -2130,5 +2163,40 @@
     "active_core_source_hashes": 356,
     "other_protected_data_unchanged": true,
     "original_strict_guard_delta_retained": true
+  },
+  "published_baseline_evidence": {
+    "status": "PUBLISHED",
+    "base_version": "1.2.89",
+    "candidate_version": "1.2.90",
+    "source_commit": "449f92a258f2d02f78cb19f590c308ec268a1d43",
+    "candidate_revision": "PR70-449f92a",
+    "owner_decision": "Owner accepted PR70 and authorizes its merge into1.2.90, separate formal signing and Release Gate. Original frozen1.2.90 remains intact; no publication or production.",
+    "runtime_report": "docs/CORE_1.2.90_PR70_PREPARATION_REPORT.md",
+    "installer_sha256": "62501532a9b73327d35535d6a52c895408393546cdfb984e3c55d5d7965d5b4d",
+    "update_sha256": "0ad3dabdf064894733a88ca3c497075dcdf0fa6e6bd285caf11a85e1bfe1c427",
+    "production_deployed": true,
+    "consumer_imported": false,
+    "original_frozen_candidate_preserved": {
+      "status": "SIGNED_NOT_PUBLISHED_FROZEN",
+      "base_version": "1.2.89",
+      "candidate_version": "1.2.90",
+      "source_commit": "c09b5ea10f31cf0203a5cf4b73df1d628c8cf546",
+      "owner_decision": "Original signed1.2.90 candidate preserved unchanged. Owner accepts PR70 and authorizes separate new1.2.90 exact-main signing/Gate preparation; no publication or production.",
+      "runtime_report": "https://github.com/daixingwei920/daiying-cms/pull/69",
+      "production_deployed": false,
+      "consumer_imported": false
+    },
+    "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.90",
+    "production_deployment_actor": "Owner manual upgrade; no Codex deployment"
+  },
+  "published_baseline_development_evidence": {
+    "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
+    "status": "CORE190_PUBLISHED_INDEPENDENT_CUSTOMER_PLUGIN_UNPUBLISHED",
+    "included_in_frozen_1_2_90": false,
+    "report": "docs/CORE_1.2.90_PUBLICATION_REPORT.md",
+    "production_deployed": true,
+    "included_in_new_pr70_core190_candidate": "Core crawler observation only; independent customer plugin excluded",
+    "production_deployment_actor": "Owner manual Core upgrade",
+    "independent_customer_plugin_production_deployed": false
   }
 }

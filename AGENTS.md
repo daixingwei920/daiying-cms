@@ -4,6 +4,12 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized isolated report/update UI (2026-10-31)
+
+- Base: merged PR76 `b8edbdce6c9008ddb50facfebb6c2617cde47b9c`; clean worktree `work/core-admin-review-ui`, branch `ui/admin-review-update-panels`.
+- Owner asks for compact, readable review/update data pages. Use summary cards, category navigation, expandable findings and collapsed raw JSON. Preserve input while switching/resizing, original data, guards, update execution, signature/integrity checks and public contracts.
+- Owner additionally authorizes review/fixes, strict candidate knowledge reconciliation, server-isolated Release Gate and a pending-review PR. No merge, version bump, production changes or publication. Signing keys stay on the authorized update server; local rendering/HTTP acceptance does not prove signed update acceptance. See `docs/admin-data-workspace.md`.
+
 ## Owner-authorized historical optimizer retirement (2026-10-30)
 
 - Remove the historical SEO backfill and historical content optimizer tools from Core. Candidate base is merged PR75 `ee987eb6cb4c7800b6df8ed95ec551c1a3e19dbf`; use the clean `maintenance/retire-historical-optimizers` worktree.

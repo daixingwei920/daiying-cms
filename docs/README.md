@@ -12,6 +12,7 @@ This index collects the public-facing documentation currently available in the G
 
 - [Unified V1 facts](../DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.md)
 - [Architecture and consumer boundaries](../DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_ARCHITECTURE.md)
+- [UI candidate knowledge reconciliation 2026-10-31](knowledge/2026-10-31-admin-ui-reconciliation.md) records strict provenance, retired-feature export removal and unpublished status.
 - [Knowledge synchronization report 2026-10-14](knowledge/2026-10-14-sync-report.md)
 - [知识库到客服闭环及蜘蛛丢样观测隔离验收](knowledge-customer-loop-acceptance.md)
 - [客服真实模型补测与旧资料承接建议](knowledge-customer-loop-live-acceptance.md)
@@ -21,6 +22,8 @@ This index collects the public-facing documentation currently available in the G
 - [Issue #9 SEO/GEO configuration and output contract](seo-geo-contract.md) documents the unpublished optional settings, rendering, privacy and rollback behavior.
 
 ## User Guide
+
+- [审核与系统更新数据界面（隔离候选）](admin-data-workspace.md) records grouped views, retained validation, local acceptance and unpublished status.
 
 - [戴影影视插件 0.8.0 安装与配置图文教程](media-sources-0.8.0-guide.zh-CN.md) covers independent movie, short-drama, TV and custom-video setup.
 - Content management is available through the admin backend after installation.

@@ -106,7 +106,8 @@ def derived(package):
         f"自动同步状态为 {package['integration_status']['automatic_sync']}；原 Core 优化器共享知识接入为 NOT_IMPLEMENTED。隔离验收不代表已部署或生产验收通过。", "",
     ]
     if package.get("candidate_evidence", {}).get("status") == "UNPUBLISHED":
-        lines.extend(["**当前分支知识源是未发布候选；不代表生产可用。** 正式发布事实保留在 release_evidence；候选运行证据见 docs/issue9-delivery.md。禁止自动导入生产客服或索引。", ""])
+        candidate_report = package["candidate_evidence"]["runtime_report"]
+        lines.extend([f"**当前分支知识源是未发布候选；不代表生产可用。** 正式发布事实保留在 release_evidence；候选运行证据见 {candidate_report}。禁止自动导入生产客服或索引。", ""])
     for record in package["records"]:
         lines.extend([
             f"## {record['capability']}", "",

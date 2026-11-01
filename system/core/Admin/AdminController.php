@@ -7831,25 +7831,34 @@ final class AdminController
             $preparedPath = '';
         }
         $preparedNotice = $preparedPath !== ''
-            ? '<p class="success">更新包已下载并准备完成，下面的本地路径已自动填入。</p>'
+            ? '<p class="success">更新包路径已填入，请先验证安装包。</p>'
             : '';
-        $body = '<h1>系统更新</h1><p class="muted">更新包会先验证签名、SHA-256、环境版本，并生成准备计划。执行更新会进入维护模式并创建恢复点。</p>' .
-            '<section class="admin-card"><h2>官方更新中心</h2><p class="muted">用于连接 updates.daiyingcms.com 检查 Daiying CMS Core 是否有新版本。发现更新后可一键下载并准备到服务器本地，不会自动执行安装。</p>' .
-            '<form method="post" action="/admin/update/check">' . CsrfToken::field() .
+        $checkForm = '<p class="muted">连接官方更新服务检查版本，下载准备不会自动执行安装。</p><form method="post" action="/admin/update/check">' . CsrfToken::field() .
             '<label>更新服务器地址<input name="server_url" value="' . View::escape($serverUrl) . '" placeholder="https://updates.daiyingcms.com"></label>' .
             '<label>产品 ID<input name="product_id" value="daiying.cms" readonly></label>' .
             '<label>当前版本<input name="current_version" value="' . View::escape($currentVersion) . '" readonly></label>' .
             '<label>发布通道<select name="channel"><option value="stable">正式版 stable</option><option value="rc">候选版 rc</option><option value="beta">测试版 beta</option><option value="dev">开发版 dev</option></select></label>' .
-            '<input type="hidden" name="site_id" value="' . View::escape($siteId) . '">' .
-            '<button type="submit">检查官方更新</button></form></section>' .
-            '<form method="post" action="/admin/update/verify">' . CsrfToken::field() .
-            $preparedNotice .
+            '<input type="hidden" name="site_id" value="' . View::escape($siteId) . '"><button type="submit">检查官方更新</button></form>';
+        $verifyForm = '<form method="post" action="/admin/update/verify">' . CsrfToken::field() . $preparedNotice .
+            '<label>服务器上的更新包路径<input name="package_path" value="' . View::escape($preparedPath) . '" placeholder="/path/to/update.zip"></label><button type="submit">验证/演练更新包</button></form>';
+        $executeForm = '<p class="muted">执行更新会进入维护模式并创建恢复点，请先核对验证结果。</p><form method="post" action="/admin/update/execute">' . CsrfToken::field() .
             '<label>服务器上的更新包路径<input name="package_path" value="' . View::escape($preparedPath) . '" placeholder="/path/to/update.zip"></label>' .
-            '<button type="submit">验证/演练更新包</button></form>' .
-            '<form method="post" action="/admin/update/execute">' . CsrfToken::field() .
-            '<label>服务器上的更新包路径<input name="package_path" value="' . View::escape($preparedPath) . '" placeholder="/path/to/update.zip"></label>' .
-            '<label>二次确认<input name="confirmation" placeholder="UPDATE CORE"></label>' .
-            '<button type="submit">执行系统更新</button></form><h2>更新记录</h2>' . $items;
+            '<label>二次确认<input name="confirmation" placeholder="UPDATE CORE"></label><button type="submit">执行系统更新</button></form>';
+        $sections = [
+            ['id' => 'check', 'title' => '官方更新中心', 'note' => '检查可用版本与兼容性。', 'html' => $checkForm],
+            ['id' => 'verify', 'title' => '验证更新包', 'note' => '保留签名、SHA-256、环境与完整性校验。', 'html' => $verifyForm],
+            ['id' => 'execute', 'title' => '执行更新', 'note' => '需要手动填写二次确认。', 'html' => $executeForm],
+            ['id' => 'history', 'title' => '更新记录', 'html' => $items],
+        ];
+        // Keep a prepared package visible on return, including when JavaScript is disabled.
+        if ($preparedPath !== '') {
+            [$sections[0], $sections[1]] = [$sections[1], $sections[0]];
+        }
+        $body = AdminDataView::workspace('updates', '系统更新', '检查版本、验证安装包、确认执行，分步完成系统维护。', [
+            ['label' => '当前版本', 'value' => $currentVersion, 'note' => '当前运行的 Core 版本'],
+            ['label' => '准备状态', 'value' => $preparedPath !== '' ? '已填入包路径' : '尚未选择安装包', 'note' => '仅表示表单状态，不代表验证通过'],
+            ['label' => '历史记录', 'value' => (string) count($history), 'note' => '服务器保留的更新记录'],
+        ], $sections);
 
         return Response::html(View::page('系统更新', $body));
     }
@@ -7885,18 +7894,18 @@ final class AdminController
             $compatible = (array) ($payload['compatibility'] ?? []);
             $messages = (array) ($compatible['messages'] ?? []);
             $status = ($payload['update_available'] ?? false) ? '发现可用更新' : '当前没有可用更新';
-            $details = '<dl class="admin-definition-list">' .
-                '<dt>检查结果</dt><dd>' . View::escape($status) . '</dd>' .
-                '<dt>产品 ID</dt><dd><code>' . View::escape((string) ($payload['product_id'] ?? $productId)) . '</code></dd>' .
-                '<dt>当前版本</dt><dd>' . View::escape($currentVersion) . '</dd>' .
-                '<dt>目标版本</dt><dd>' . View::escape((string) ($payload['latest_version'] ?? $payload['version'] ?? '-')) . '</dd>' .
-                '<dt>发布通道</dt><dd>' . View::escape((string) ($payload['channel'] ?? $channel)) . '</dd>' .
-                '<dt>直接升级</dt><dd>' . View::escape(($payload['direct_upgrade_supported'] ?? true) ? '可直接升级到最新版' : '当前版本过旧，需要中间基线') . '</dd>' .
-                '<dt>预计迁移</dt><dd>' . (int) ($payload['migration_count'] ?? count((array) ($payload['required_migrations'] ?? []))) . ' 个</dd>' .
-                '<dt>包 SHA-256</dt><dd><code>' . View::escape((string) ($payload['package_sha256'] ?? '-')) . '</code></dd>' .
-                '<dt>包地址</dt><dd><code>' . View::escape((string) ($payload['package_url'] ?? '-')) . '</code></dd>' .
-                '<dt>兼容状态</dt><dd>' . View::escape(($compatible['compatible'] ?? true) ? '兼容' : '不兼容') . '</dd>' .
-                '</dl>';
+            $details = AdminDataView::facts([
+                '检查结果' => $status,
+                '产品 ID' => (string) ($payload['product_id'] ?? $productId),
+                '当前版本' => $currentVersion,
+                '目标版本' => (string) ($payload['latest_version'] ?? $payload['version'] ?? '-'),
+                '发布通道' => (string) ($payload['channel'] ?? $channel),
+                '直接升级' => ($payload['direct_upgrade_supported'] ?? true) ? '可直接升级到最新版' : '当前版本过旧，需要中间基线',
+                '预计迁移' => (int) ($payload['migration_count'] ?? count((array) ($payload['required_migrations'] ?? []))) . ' 个',
+                '兼容状态' => ($compatible['compatible'] ?? true) ? '兼容' : '不兼容',
+                '包 SHA-256' => (string) ($payload['package_sha256'] ?? '-'),
+                '包地址' => (string) ($payload['package_url'] ?? '-'),
+            ]);
             if ($messages !== []) {
                 $details .= '<h2>兼容提示</h2><ul>';
                 foreach ($messages as $message) {
@@ -7920,7 +7929,13 @@ final class AdminController
                 'target_version' => (string) ($payload['version'] ?? ''),
             ]);
 
-            return Response::html(View::page('系统更新', '<h1>官方更新检查</h1>' . $details));
+            return Response::html(View::page('系统更新', AdminDataView::workspace('check', '官方更新检查', '核对目标版本、迁移范围和兼容提示后，再下载更新包。', [
+                ['label' => '检查结果', 'value' => $status],
+                ['label' => '当前版本', 'value' => $currentVersion],
+                ['label' => '目标版本', 'value' => (string) ($payload['latest_version'] ?? $payload['version'] ?? '未提供')],
+            ], [
+                ['id' => 'overview', 'title' => '版本与兼容性', 'html' => $details],
+            ])));
         } catch (Throwable $exception) {
             $this->auditCoreUpdateAction($guard, 'core.update_check_failed', $serverUrl, [
                 'product_id' => $productId,
@@ -7980,23 +7995,21 @@ final class AdminController
                 'prepared_package_name' => basename($packagePath),
             ]);
 
-            $body = '<h1>更新包已准备</h1>' .
-                '<p class="success">更新包已经下载到当前 CMS 服务器，并完成 SHA-256 校验。</p>' .
-                '<dl class="admin-definition-list">' .
-                '<dt>目标版本</dt><dd>' . View::escape((string) ($payload['version'] ?? '-')) . '</dd>' .
-                '<dt>发布通道</dt><dd>' . View::escape((string) ($payload['channel'] ?? $channel)) . '</dd>' .
-                '<dt>本地路径</dt><dd><code>' . View::escape($packagePath) . '</code></dd>' .
-                '<dt>SHA-256</dt><dd><code>' . View::escape((string) $download['sha256']) . '</code></dd>' .
-                '<dt>大小</dt><dd>' . View::escape((string) $download['size_bytes']) . ' bytes</dd>' .
-                '</dl>' .
-                '<form method="post" action="/admin/update/verify">' . CsrfToken::field() .
-                '<input type="hidden" name="package_path" value="' . View::escape($packagePath) . '">' .
-                '<button type="submit">立即验证/演练更新包</button></form>' .
-                '<form method="post" action="/admin/update/execute">' . CsrfToken::field() .
-                '<input type="hidden" name="package_path" value="' . View::escape($packagePath) . '">' .
-                '<label>二次确认<input name="confirmation" placeholder="UPDATE CORE"></label>' .
-                '<button type="submit">执行系统更新</button></form>' .
-                '<p><a class="button admin-button-secondary" href="/admin/update?prepared_package=' . rawurlencode($packagePath) . '">返回系统更新</a></p>';
+            $body = AdminDataView::workspace('prepared', '更新包已准备', '更新包已下载并完成 SHA-256 校验；请继续验证签名与演练计划。', [
+                ['label' => '准备结果', 'value' => '下载完成', 'note' => '尚未执行安装'],
+                ['label' => '目标版本', 'value' => (string) ($payload['version'] ?? '-')],
+            ], [
+                ['id' => 'verify', 'title' => '验证与演练', 'html' => '<form method="post" action="/admin/update/verify">' . CsrfToken::field() .
+                    '<input type="hidden" name="package_path" value="' . View::escape($packagePath) . '"><p>验证签名、环境与完整更新计划。</p><button type="submit">立即验证/演练更新包</button></form>'],
+                ['id' => 'package', 'title' => '安装包信息', 'html' => AdminDataView::facts([
+                    '目标版本' => (string) ($payload['version'] ?? '-'),
+                    '发布通道' => (string) ($payload['channel'] ?? $channel),
+                    '本地路径' => $packagePath, 'SHA-256' => (string) $download['sha256'],
+                    '大小' => (string) $download['size_bytes'] . ' bytes',
+                ])],
+                ['id' => 'execute', 'title' => '执行更新', 'note' => '请先核对演练结果；执行会进入维护模式并创建恢复点。', 'html' => '<form method="post" action="/admin/update/execute">' . CsrfToken::field() .
+                    '<input type="hidden" name="package_path" value="' . View::escape($packagePath) . '"><label>二次确认<input name="confirmation" placeholder="UPDATE CORE"></label><button type="submit">执行系统更新</button></form>'],
+            ], '<a class="button admin-button-secondary" href="' . View::escape($this->adminPath('/admin/update?prepared_package=' . rawurlencode($packagePath))) . '">返回系统更新</a>');
 
             return Response::html(View::page('系统更新', $body));
         } catch (Throwable $exception) {
@@ -8036,8 +8049,7 @@ final class AdminController
                 'file_count' => (int) ($plan['file_count'] ?? 0),
                 'migration_count' => (int) ($plan['migration_count'] ?? 0),
             ]);
-            $body = '<h1>更新包验证通过</h1>' . $this->updatePlanSummaryHtml($plan) .
-                '<details open><summary>完整验证计划 JSON</summary><pre>' . View::escape(json_encode($plan, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)) . '</pre></details>';
+            $body = $this->updateVerificationHtml($plan);
             return Response::html(View::page('系统更新', $body));
         } catch (Throwable $exception) {
             $this->auditCoreUpdateAction($guard, 'core.update_verify_failed', (string) $request->input('package_path', ''), [
@@ -8072,7 +8084,7 @@ final class AdminController
                 'operation_id' => (string) ($result['operation_id'] ?? ''),
                 'release_id' => (string) ($result['release_id'] ?? ''),
             ]);
-            $body = '<h1>系统更新完成</h1><pre>' . View::escape(json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) . '</pre>';
+            $body = $this->updateResultHtml($result);
             return Response::html(View::page('系统更新', $body));
         } catch (Throwable $exception) {
             $this->auditCoreUpdateAction($guard, 'core.update_execute_failed', (string) $request->input('package_path', ''), [
@@ -8310,24 +8322,7 @@ final class AdminController
             $report = $this->reviewSubmissionClient()->report($submissionId);
             $this->updateDeveloperSubmissionReport($submissionId, $report);
             $row = $this->developerSubmissionRow($submissionId);
-            $status = (string) ($report['status'] ?? ($row['status'] ?? ''));
-            $static = is_array($report['static_report'] ?? null) ? $report['static_report'] : [];
-            $ai = is_array($report['ai_report'] ?? null) ? $report['ai_report'] : [];
-            $issues = $this->reviewIssuesHtml($static, $ai);
-            $previous = (string) ($row['previous_submission_id'] ?? '');
-            $body = '<h1>审核结果</h1><p><a class="button admin-button-secondary" href="/admin/market/submissions">返回我的提交</a></p><table><tbody>' .
-                '<tr><th>提交编号</th><td><code>' . View::escape($submissionId) . '</code></td></tr>' .
-                '<tr><th>产品</th><td>' . View::escape((string) ($row['product_id'] ?? $report['product_id'] ?? '')) . '</td></tr>' .
-                '<tr><th>类型</th><td>' . View::escape($this->marketTypeLabel((string) ($row['package_type'] ?? $report['package_type'] ?? ''))) . '</td></tr>' .
-                '<tr><th>版本</th><td>' . View::escape((string) ($row['version'] ?? $report['version'] ?? '')) . '</td></tr>' .
-                '<tr><th>最终状态</th><td>' . View::escape($this->reviewStatusLabel($status)) . '</td></tr>' .
-                '<tr><th>静态扫描</th><td>' . View::escape((string) ($static['status'] ?? 'unknown')) . '</td></tr>' .
-                '<tr><th>AI 审核</th><td>' . View::escape((string) ($ai['status'] ?? 'pending')) . '</td></tr>' .
-                '<tr><th>风险等级</th><td>' . View::escape((string) ($ai['risk_level'] ?? $static['risk_level'] ?? 'unknown')) . '</td></tr>' .
-                '<tr><th>上次提交</th><td>' . View::escape($previous === '' ? '-' : $previous) . '</td></tr>' .
-                '</tbody></table><h2>问题与建议</h2>' . $issues .
-                '<h2>重新提交</h2><p><a class="button" href="/admin/market/developer-submit?previous_submission_id=' . rawurlencode($submissionId) . '">修改后重新提交</a></p>' .
-                '<h2>原始审核数据</h2><pre>' . View::escape(json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}') . '</pre>';
+            $body = $this->reviewReportHtml($submissionId, $row ?? [], $report);
 
             return Response::html(View::page('审核结果', $body));
         } catch (Throwable $exception) {
@@ -8367,7 +8362,7 @@ final class AdminController
                 '<tr><th>价格</th><td>' . View::escape((string) ($versionData['pricing_text'] ?? $versionData['price_label'] ?? 'Free')) . '</td></tr>' .
                 '<tr><th>授权</th><td>' . ((bool) ($versionData['license_required'] ?? false) ? '需要授权' : '免费') . '</td></tr>' .
                 '</tbody></table>' . $this->marketPurchasePanel($versionData) .
-                '<h2>原始数据</h2><pre>' . View::escape(json_encode($detail, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}') . '</pre>';
+                AdminDataView::raw('原始数据', $detail);
 
             return Response::html(View::page($detailTitle, $body));
         } catch (Throwable $exception) {
@@ -9241,6 +9236,32 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
         ]);
     }
 
+    /** @param array<string,mixed> $row @param array<string,mixed> $report */
+    private function reviewReportHtml(string $submissionId, array $row, array $report): string
+    {
+        $status = (string) ($report['status'] ?? $row['status'] ?? '');
+        $static = is_array($report['static_report'] ?? null) ? $report['static_report'] : [];
+        $ai = is_array($report['ai_report'] ?? null) ? $report['ai_report'] : [];
+        $product = (string) ($row['product_id'] ?? $report['product_id'] ?? '');
+        $version = (string) ($row['version'] ?? $report['version'] ?? '');
+        return AdminDataView::workspace('review', '审核结果', '先查看审核结论，再按分类核对问题、提交信息与完整报告。', [
+            ['label' => '最终状态', 'value' => $this->reviewStatusLabel($status), 'note' => '以审核服务返回的最终状态为准'],
+            ['label' => '静态扫描', 'value' => (string) ($static['status'] ?? 'unknown'), 'note' => '安装包与能力声明检查'],
+            ['label' => 'AI 审核', 'value' => isset($ai['status']) ? $this->reviewStatusLabel((string) $ai['status']) : '等待结果', 'note' => 'AI 结果不代替最终审核结论'],
+            ['label' => '风险等级', 'value' => (string) ($ai['risk_level'] ?? $static['risk_level'] ?? 'unknown'), 'note' => $product . ' · ' . $version],
+        ], [
+            ['id' => 'issues', 'title' => '问题与建议', 'note' => '展开单个问题，查看完整说明、文件位置和修改建议。', 'html' => $this->reviewIssuesHtml($static, $ai)],
+            ['id' => 'submission', 'title' => '提交信息', 'html' => AdminDataView::facts([
+                '提交编号' => $submissionId, '产品' => $product, '版本' => $version,
+                '类型' => $this->marketTypeLabel((string) ($row['package_type'] ?? $report['package_type'] ?? '')),
+                '上次提交' => (string) ($row['previous_submission_id'] ?? '-'),
+                '最终状态' => $this->reviewStatusLabel($status),
+            ])],
+            ['id' => 'raw', 'title' => '原始审核数据', 'note' => '保留完整报告，按需展开；用于排查与核对。', 'html' => AdminDataView::raw('展开完整审核 JSON', $report)],
+        ], '<a class="button admin-button-secondary" href="' . View::escape($this->adminPath('/admin/market/submissions')) . '">返回我的提交</a>' .
+            '<a class="button" href="' . View::escape($this->adminPath('/admin/market/developer-submit?previous_submission_id=' . rawurlencode($submissionId))) . '">修改后重新提交</a>');
+    }
+
     /** @param array<string,mixed> $static @param array<string,mixed> $ai */
     private function reviewIssuesHtml(array $static, array $ai): string
     {
@@ -9273,12 +9294,17 @@ if(dyPasswordless){dyPasswordless.addEventListener("click",async function(){var 
                 if ($message === '' && isset($issue['rule'])) {
                     $message = '规则：' . (string) $issue['rule'];
                 }
-                $rows .= '<tr><td>' . View::escape($source) . '</td><td>' . View::escape((string) ($issue['severity'] ?? 'INFO')) . '</td><td>' . View::escape((string) ($issue['file'] ?? '-')) . '</td><td>' . View::escape((string) ($issue['line'] ?? '-')) . '</td><td>' . View::escape($message) . '</td><td>' . View::escape((string) ($issue['recommendation'] ?? $issue['suggestion'] ?? '')) . '</td></tr>';
+                $severity = (string) ($issue['severity'] ?? 'INFO');
+                $tone = strtolower($severity);
+                if (!in_array($tone, ['critical', 'high', 'medium', 'low', 'info', 'fail', 'ai_provider_error'], true)) {
+                    $tone = 'info';
+                }
+                $rows .= '<details class="data-issue"><summary><span class="data-severity data-severity-' . $tone . '">' . View::escape($severity) . '</span><span class="data-issue-title"><strong>' . View::escape($message === '' ? '未提供问题说明' : $message) . '</strong><small>' . View::escape($source . ' · ' . (string) ($issue['file'] ?? '-') . ' : ' . (string) ($issue['line'] ?? '-')) . '</small></span></summary><div class="data-issue-body"><h3>完整说明</h3><p>' . View::escape($message) . '</p><h3>修改建议</h3><p>' . View::escape((string) ($issue['recommendation'] ?? $issue['suggestion'] ?? '未提供修改建议。')) . '</p></div></details>';
             }
         }
-        $rows = $rows !== '' ? $rows : '<tr><td colspan="6" class="muted">静态扫描和 AI 审核暂未返回需要处理的问题。</td></tr>';
+        $rows = $rows !== '' ? $rows : '<p class="muted">静态扫描和 AI 审核暂未返回需要处理的问题。</p>';
 
-        return '<table><thead><tr><th>来源</th><th>严重程度</th><th>文件</th><th>行号</th><th>说明</th><th>修改建议</th></tr></thead><tbody>' . $rows . '</tbody></table>';
+        return $rows;
     }
 
     private function reviewStatusLabel(string $status): string
@@ -10439,18 +10465,48 @@ JS;
         $compatibility = is_array($plan['compatibility'] ?? null) ? $plan['compatibility'] : [];
         $signature = is_array($plan['signature'] ?? null) ? $plan['signature'] : [];
 
-        return '<table><tbody>' .
-            '<tr><th>更新包</th><td><code>' . View::escape((string) ($plan['release_id'] ?? $plan['package_id'] ?? '')) . '</code></td></tr>' .
-            '<tr><th>版本</th><td>' . View::escape((string) ($plan['from_version'] ?? '')) . ' -> ' . View::escape((string) ($plan['to_version'] ?? $plan['target_version'] ?? '')) . '</td></tr>' .
-            '<tr><th>直接升级</th><td>' . View::escape(($plan['direct_upgrade_supported'] ?? true) ? '可直接升级到最新版' : '当前版本过旧，需要中间基线') . '</td></tr>' .
-            '<tr><th>文件 / 迁移</th><td>' . (int) ($plan['file_count'] ?? 0) . ' 个文件，' . (int) ($plan['migration_count'] ?? 0) . ' 个迁移</td></tr>' .
-            '<tr><th>迁移边界</th><td>hard min: ' . View::escape((string) ($plan['hard_min_version'] ?? '')) . '；migration floor: ' . View::escape((string) ($plan['migration_floor'] ?? '')) . '</td></tr>' .
-            '<tr><th>兼容性</th><td>' . View::escape((string) ($compatibility['current_integrity'] ?? '')) . ' / ' . View::escape((string) ($compatibility['database'] ?? '')) . ' / PHP ' . View::escape((string) ($compatibility['php'] ?? '')) . '</td></tr>' .
-            '<tr><th>签名</th><td>' . View::escape((string) ($signature['algorithm'] ?? '')) . ' <code>' . View::escape((string) ($signature['key_id'] ?? '')) . '</code></td></tr>' .
-            '<tr><th>包含能力</th><td>' . $features . '</td></tr>' .
-            '<tr><th>验收门</th><td>' . $gates . '</td></tr>' .
-            '<tr><th>说明</th><td>' . View::escape((string) ($plan['notes'] ?? '')) . '</td></tr>' .
-            '</tbody></table>';
+        return AdminDataView::facts([
+            '更新包' => (string) ($plan['release_id'] ?? $plan['package_id'] ?? ''),
+            '版本' => (string) ($plan['from_version'] ?? '') . ' → ' . (string) ($plan['to_version'] ?? $plan['target_version'] ?? ''),
+            '直接升级' => ($plan['direct_upgrade_supported'] ?? true) ? '可直接升级到最新版' : '当前版本过旧，需要中间基线',
+            '文件 / 迁移' => (int) ($plan['file_count'] ?? 0) . ' 个文件，' . (int) ($plan['migration_count'] ?? 0) . ' 个迁移',
+            '迁移边界' => 'hard min: ' . (string) ($plan['hard_min_version'] ?? '') . '；migration floor: ' . (string) ($plan['migration_floor'] ?? ''),
+            '兼容性' => (string) ($compatibility['current_integrity'] ?? '') . ' / ' . (string) ($compatibility['database'] ?? '') . ' / PHP ' . (string) ($compatibility['php'] ?? ''),
+            '签名' => (string) ($signature['algorithm'] ?? '') . ' · ' . (string) ($signature['key_id'] ?? ''),
+            '说明' => (string) ($plan['notes'] ?? ''),
+        ]) . '<div class="data-feature-group"><h3>包含能力</h3>' . $features . '</div><div class="data-feature-group"><h3>验收门</h3>' . $gates . '</div>';
+    }
+
+    /** @param array<string,mixed> $plan */
+    private function updateVerificationHtml(array $plan): string
+    {
+        return AdminDataView::workspace('verify', '更新包验证通过', '本页为验证与演练结果，更新尚未执行。', [
+            ['label' => '验证结果', 'value' => '演练通过', 'note' => '未执行更新'],
+            ['label' => '目标版本', 'value' => (string) ($plan['to_version'] ?? $plan['target_version'] ?? '未提供')],
+            ['label' => '更新文件', 'value' => (string) ($plan['file_count'] ?? 0)],
+            ['label' => '数据库迁移', 'value' => (string) ($plan['migration_count'] ?? 0)],
+        ], [
+            ['id' => 'plan', 'title' => '验证摘要', 'html' => $this->updatePlanSummaryHtml($plan)],
+            ['id' => 'raw', 'title' => '完整验证计划', 'html' => AdminDataView::raw('完整验证计划 JSON', $plan)],
+        ], '<a class="button admin-button-secondary" href="' . View::escape($this->adminPath('/admin/update')) . '">返回系统更新</a>');
+    }
+
+    /** @param array<string,mixed> $result */
+    private function updateResultHtml(array $result): string
+    {
+        $health = is_array($result['health'] ?? null) ? $result['health'] : [];
+        return AdminDataView::workspace('updated', '系统更新完成', '查看本次操作结果与健康检查，完整记录按需展开。', [
+            ['label' => '执行状态', 'value' => (string) ($result['status'] ?? '未提供')],
+            ['label' => '健康检查', 'value' => (string) ($health['status'] ?? '未提供')],
+        ], [
+            ['id' => 'result', 'title' => '执行结果', 'html' => AdminDataView::facts([
+                '操作编号' => (string) ($result['operation_id'] ?? ''),
+                '发布编号' => (string) ($result['release_id'] ?? ''),
+                '执行状态' => (string) ($result['status'] ?? ''),
+                '健康检查' => (string) ($health['status'] ?? '未提供'),
+            ])],
+            ['id' => 'raw', 'title' => '完整更新数据', 'html' => AdminDataView::raw('展开完整更新 JSON', $result)],
+        ], '<a class="button admin-button-secondary" href="' . View::escape($this->adminPath('/admin/update')) . '">返回系统更新</a>');
     }
 
     /** @param mixed $items @param array<string,string> $labels */
