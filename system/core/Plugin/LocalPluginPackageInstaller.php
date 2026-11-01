@@ -1281,6 +1281,10 @@ final class LocalPluginPackageInstaller
     private function pauseTasks(string $pluginId): void
     {
         $now = gmdate('c');
+        if ($this->tableExists('cms_core_scheduled_tasks') && $this->pluginRow($pluginId) !== null) {
+            $this->pdo->prepare('UPDATE cms_core_scheduled_tasks SET enabled = 0, updated_at = :updated_at WHERE owner = :owner AND enabled = 1')
+                ->execute([':owner' => $pluginId, ':updated_at' => $now]);
+        }
         $this->pdo->prepare("UPDATE cms_plugin_tasks SET status = 'Paused', updated_at = :updated_at WHERE plugin_id = :plugin_id AND status = 'Queued'")
             ->execute([':plugin_id' => $pluginId, ':updated_at' => $now]);
         $this->pdo->prepare("UPDATE cms_plugin_tasks SET status = 'CancelRequested', cancel_requested_at = :cancel_requested_at, cancel_reason = :cancel_reason, updated_at = :updated_at WHERE plugin_id = :plugin_id AND status = 'Running'")
