@@ -27,6 +27,7 @@ use Cms\Core\Payment\PaymentTransaction;
 
 final class ConfiguredSaveFixture implements PaymentProviderInterface, PaymentProviderConfigurationInterface, PaymentProviderSettingsSchemaInterface
 {
+    public ?Closure $onConfigurationCheck = null;
     public function providerId(): string { return 'fixture.configured-payment'; }
     public function displayName(): string { return 'TEST ONLY configured provider'; }
     public function capabilities(): array { return ['payment.create']; }
@@ -47,6 +48,7 @@ final class ConfiguredSaveFixture implements PaymentProviderInterface, PaymentPr
     public function isConfigured(array $publicConfig, array $maskedSecrets): bool { return $this->diagnostics($publicConfig, $maskedSecrets) === []; }
     public function diagnostics(array $publicConfig, array $maskedSecrets): array
     {
+        ($this->onConfigurationCheck ?? static function (): void {})();
         return ($publicConfig['merchant_id']??'')==='fixture' && !empty($maskedSecrets['merchant_key']) ? [] : ['Missing fixture merchant or key'];
     }
 }
@@ -157,6 +159,42 @@ try {
         throw new RuntimeException('Blank secret on retry must preserve the original encrypted key');
     }
     echo "[PASS] Retry after lock release succeeds and preserves the existing secret\n";
+    $rowsBefore = $pdo->query('SELECT * FROM cms_payment_provider_settings ORDER BY id')->fetchAll();
+    $auditBefore = $pdo->query('SELECT * FROM cms_audit_logs ORDER BY id')->fetchAll();
+    $reader = ConnectionFactory::make($settings);
+    $configurationChecks = 0;
+    $provider->onConfigurationCheck = static function () use ($reader, &$configurationChecks): void {
+        // The second check runs inside the save transaction, after its settings writes.
+        // A separate shared reader still permits those writes but blocks COMMIT in DELETE mode.
+        if (++$configurationChecks === 2) {
+            $reader->beginTransaction();
+            $reader->query('SELECT * FROM cms_payment_provider_settings')->fetchAll();
+        }
+    };
+    try {
+        $response = $save(new Request('POST', '/admin/payments/providers/save', [], array_replace($saveBody, [
+            'display_name' => 'must roll back at commit', 'fixture_secret' => 'rejected-reader-rotation',
+        ])));
+        if ($response->status() !== 503 || ($response->headers()['Retry-After'] ?? '') !== '3' || !$reader->inTransaction()) {
+            throw new RuntimeException('Reader-blocked COMMIT must return retryable503, got ' . $response->status());
+        }
+        if ($pdo->query('SELECT * FROM cms_payment_provider_settings ORDER BY id')->fetchAll() !== $rowsBefore
+            || $pdo->query('SELECT * FROM cms_audit_logs ORDER BY id')->fetchAll() !== $auditBefore) {
+            throw new RuntimeException('Reader-blocked COMMIT must roll back settings, default, secret and audit');
+        }
+    } finally {
+        $provider->onConfigurationCheck = null;
+        if ($reader->inTransaction()) {
+            $reader->rollBack();
+        }
+    }
+    $response = $save(new Request('POST', '/admin/payments/providers/save', [], $saveBody));
+    $repo = new PaymentProviderSettingsRepository($pdo, 'isolated-provider-save-test-only');
+    if ($response->status() !== 302 || !str_contains($response->headers()['Location'] ?? '', 'saved=1')
+        || $repo->secrets($provider->providerId())['merchant_key'] !== 'synthetic-secret-only') {
+        throw new RuntimeException('Reader release must allow retry without a lingering lock or changed secret');
+    }
+    echo "[PASS] Reader-blocked COMMIT rolls back atomically and retry preserves the secret\n";
     $rowsBefore = $pdo->query('SELECT * FROM cms_payment_provider_settings ORDER BY id')->fetchAll();
     $pdo->exec("CREATE TRIGGER reject_save_audit BEFORE INSERT ON cms_audit_logs WHEN NEW.action='payment.provider_settings.saved' BEGIN SELECT RAISE(ABORT,'fixture audit failure'); END");
     $response = $save(new Request('POST', '/admin/payments/providers/save', [], array_replace($saveBody, ['display_name'=>'must roll back', 'fixture_secret'=>'rejected-rotation'])));
