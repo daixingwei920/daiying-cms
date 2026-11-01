@@ -2,6 +2,8 @@
 
 This index collects the public-facing documentation currently available in the GitHub repository.
 
+- [Core1.2.91 foundation API comparison](rest-foundation-1.2.91.md) records scoped additions and security/compatibility boundaries.
+
 ## Getting Started
 
 - [Installation](installation.md)

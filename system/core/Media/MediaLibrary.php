@@ -177,7 +177,7 @@ final class MediaLibrary
     }
 
     /** @return list<array<string, mixed>> */
-    public function list(array $filters = [], int $limit = 50): array
+    public function list(array $filters = [], int $limit = 50, int $offset = 0): array
     {
         $where = [];
         $params = [];
@@ -193,12 +193,13 @@ final class MediaLibrary
             $where[] = 'status = :status';
             $params[':status'] = (string) $filters['status'];
         }
-        $sql = 'SELECT * FROM cms_media' . ($where !== [] ? ' WHERE ' . implode(' AND ', $where) : '') . ' ORDER BY id DESC LIMIT :limit';
+        $sql = 'SELECT * FROM cms_media' . ($where !== [] ? ' WHERE ' . implode(' AND ', $where) : '') . ' ORDER BY id DESC LIMIT :limit OFFSET :offset';
         $stmt = $this->pdo->prepare($sql);
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
         }
         $stmt->bindValue(':limit', max(1, min($limit, 200)), PDO::PARAM_INT);
+        $stmt->bindValue(':offset', max(0, $offset), PDO::PARAM_INT);
         $stmt->execute();
 
         return array_map(fn (array $row): array => $this->hydrate($row), $stmt->fetchAll());
