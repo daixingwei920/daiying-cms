@@ -297,7 +297,7 @@ final class View
 
     private static function assetVersion(): string
     {
-        return '20261024-crawler-statistics';
+        return '20261031-admin-data-workspace';
     }
 
     private static function adminNavGroupScript(): string

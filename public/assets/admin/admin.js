@@ -1,4 +1,58 @@
 (function () {
+  // Enhance anchors only after loading: without JS every section remains readable.
+  document.querySelectorAll('[data-admin-data-view]').forEach(function (view) {
+    var nav = view.querySelector('[data-report-nav]');
+    var tabs = Array.from(view.querySelectorAll('[data-report-tab]'));
+    var panels = Array.from(view.querySelectorAll('[data-report-panel]'));
+    var menu = view.querySelector('[data-report-menu]');
+    var narrow = window.matchMedia('(max-width: 760px)');
+    if (!nav || !menu || !tabs.length || tabs.length !== panels.length) return;
+    nav.setAttribute('role', 'tablist');
+    nav.setAttribute('aria-orientation', 'vertical');
+    function select(index, focus) {
+      tabs.forEach(function (tab, i) {
+        tab.setAttribute('aria-selected', i === index ? 'true' : 'false');
+        tab.tabIndex = i === index ? 0 : -1;
+        panels[i].hidden = i !== index;
+      });
+      if (focus) tabs[index].focus();
+      if (narrow.matches && !focus) menu.open = false;
+    }
+    tabs.forEach(function (tab, index) {
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', panels[index].id);
+      panels[index].setAttribute('role', 'tabpanel');
+      panels[index].setAttribute('aria-labelledby', tab.id);
+      panels[index].tabIndex = 0;
+      tab.addEventListener('click', function (event) {
+        event.preventDefault();
+        select(index, false);
+        // A collapsed mobile menu must not retain focus in its hidden contents.
+        if (narrow.matches) panels[index].focus({preventScroll: true});
+      });
+      tab.addEventListener('keydown', function (event) {
+        var next = index;
+        if (event.key === 'ArrowDown' || event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+        else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') next = (index + tabs.length - 1) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        select(next, true);
+      });
+    });
+    var initial = panels.findIndex(function (panel) { return '#' + panel.id === window.location.hash; });
+    select(initial < 0 ? 0 : initial, false);
+    function resizeMenu() {
+      // Do not strand keyboard focus inside a menu hidden by a breakpoint change.
+      if (narrow.matches && menu.contains(document.activeElement)) {
+        menu.querySelector('summary').focus({preventScroll: true});
+      }
+      menu.open = !narrow.matches;
+    }
+    resizeMenu();
+    narrow.addEventListener('change', resizeMenu);
+  });
   var key = 'daiying.admin.sidebarCollapsed';
   var body = document.body;
   var button = document.querySelector('[data-admin-sidebar-toggle]');
