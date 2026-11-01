@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized Core1.2.92 fix, merge and publication (2026-11-01)
+
+- Owner now authorizes completing fixes, merging and formally publishing Core1.2.92 after the full exact-source server Gate and signed native upgrade/rollback acceptance. This supersedes the earlier publication hold for Core1.2.92 only; no website/piank upgrade, independent plugin release or live payment is authorized.
+- Fix the installer-safety fixture's writable symlinks by using independent copies and asserting source bytes are preserved. Keep all production signing/integrity/authorization guards unchanged. All asymmetric private-key generation/use remains on the authorized update server; never generate/export private signing keys on the workstation.
+- Preserve the original9425171/ba69e50 gate/protection failures and the22 updated_at-only historical deltas, without attributing their origin to Owner or converting raw equality to PASS. The new publication authorization permits a separate current pre-publication backup/snapshot; strictly preserve configurations, payment/license/inventory data and business/runtime plugin fields, and record volatile boot timestamps separately. Fail closed on any unexpected substantive delta.
+- Publish only frozen official-signed installer/update artifacts bound to the final exact main commit/tag. Back up the distribution database before publication, preserve existing packages/prices/licenses and verify anonymous downloads, signatures, metadata and tag parity. No production deployment or knowledge import.
+
 ## Owner-authorized PR80 merge and Core1.2.92 isolated Gate preparation (2026-11-01)
 
 - Owner now authorizes fixing the specified novel-shelf technical debt alongside PR80, merging, and running complete Release Gate on the exact merged commit in the authorized update server isolation. No production change, tag, publication or plugin release; preserve frozen1.2.91 and live configuration/data.
