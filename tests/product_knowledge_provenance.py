@@ -74,9 +74,9 @@ class KnowledgeProvenance(unittest.TestCase):
 
     def test_publication_and_unpublished_copy_have_correct_warning(self):
         text = product.derived(self.package)[product.NAME + '.md']
-        self.assertEqual(self.package['candidate_evidence']['status'], 'UNPUBLISHED')
+        self.assertEqual(self.package['candidate_evidence']['status'], 'PUBLISHED')
         self.assertEqual(self.package['candidate_evidence']['candidate_version'], '1.2.93')
-        self.assertIn('当前分支知识源是未发布候选', text)
+        self.assertNotIn('当前分支知识源是未发布候选', text)
         published = copy.deepcopy(self.package)
         published['candidate_evidence']['status'] = 'PUBLISHED'
         self.assertNotIn('当前分支知识源是未发布候选', product.derived(published)[product.NAME + '.md'])
@@ -89,7 +89,7 @@ class KnowledgeProvenance(unittest.TestCase):
 
     def test_foundation_payment_contracts_remain_developer_only(self):
         exported = {r['id'] for r in product.public_records(self.package)}
-        for rid in ['rest.foundation_media_contract', 'payment.configured_redirect_contract', 'payment.provider_settings_sqlite_save', 'storage.plugin_data_scope_index']:
+        for rid in ['rest.foundation_media_contract', 'payment.configured_redirect_contract', 'payment.provider_settings_sqlite_save', 'storage.plugin_data_scope_index', 'maintenance.scheduler_connection_readiness']:
             record = next(r for r in self.package['records'] if r['id'] == rid)
             self.assertEqual(record['visibility'], 'ADMIN_DEVELOPER')
             self.assertFalse(record['enabled_for_customer_service'])
@@ -97,15 +97,17 @@ class KnowledgeProvenance(unittest.TestCase):
 
     def test_published_release_evidence_is_preserved(self):
         baseline = json.loads(subprocess.check_output(['git', 'show', 'b8edbdce6c9008ddb50facfebb6c2617cde47b9c:' + product.NAME + '.json'], cwd=ROOT, text=True))
-        self.assertEqual(self.package['release_evidence']['previous_stable']['previous_stable'], baseline['release_evidence'])
+        self.assertEqual(self.package['release_evidence']['previous_stable']['previous_stable']['previous_stable'], baseline['release_evidence'])
         published = json.loads(subprocess.check_output(['git', 'show', '9a29ee2f981ea6353fc7f91abe9b983e0f1c9680:' + product.NAME + '.json'], cwd=ROOT, text=True))
-        self.assertEqual(self.package['release_evidence']['previous_stable'], published['release_evidence'])
+        self.assertEqual(self.package['release_evidence']['previous_stable']['previous_stable'], published['release_evidence'])
         self.assertEqual(self.package['published_191_candidate_evidence'], published['candidate_evidence'])
-        self.assertEqual(self.package['release_evidence']['commit'], subprocess.check_output(['git', 'rev-parse', 'v1.2.92^{commit}'], cwd=ROOT, text=True).strip())
+        published192 = json.loads(subprocess.check_output(['git', 'show', '24e1b3cee01cbf5adf31794d1bbe5f7826054468:' + product.NAME + '.json'], cwd=ROOT, text=True))
+        self.assertEqual(self.package['release_evidence']['previous_stable'], published192['release_evidence'])
+        self.assertEqual(self.package['release_evidence']['commit'], subprocess.check_output(['git', 'rev-parse', 'v1.2.93^{commit}'], cwd=ROOT, text=True).strip())
         self.assertEqual(self.package['source_commit'], self.package['candidate_evidence']['source_commit'])
-        self.assertEqual(self.package['source_tag'], self.package['source_commit'])
-        self.assertNotEqual(self.package['source_commit'], self.package['release_evidence']['commit'])
-        self.assertEqual(self.package['published_192_acceptance_evidence']['source_commit'], self.package['release_evidence']['commit'])
+        self.assertEqual(self.package['source_tag'], 'v1.2.93')
+        self.assertEqual(self.package['source_commit'], self.package['release_evidence']['commit'])
+        self.assertEqual(self.package['published_192_acceptance_evidence'], published192['candidate_evidence'])
         self.assertEqual(self.package['published_192_acceptance_evidence']['status'], 'PUBLISHED')
         self.assertEqual(self.package['published_baseline_evidence'], baseline['candidate_evidence'])
 

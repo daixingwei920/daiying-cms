@@ -1,0 +1,33 @@
+{
+  "status": "PUBLISHED_AND_THREE_SITES_UPGRADED_VERIFIED",
+  "version": "1.2.93",
+  "commit": "0e601035a1fc6c89d3b36aa767e735a44f1eb24a",
+  "tag": "v1.2.93",
+  "github_release": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.93",
+  "update_service": "https://updates.daiyingcms.com",
+  "installer_sha256": "8474d05d6da5bbc8e774059db5c2c54e2025d83e1bb1f7b230d99cf392bf9822",
+  "update_sha256": "f00f97703751a01a8999a948bebf75f8bb71da10c504ee7d2a0a771ed05d4a92",
+  "signed_parity_checks": 643,
+  "native_signed_checks": {
+    "83": 45,
+    "85": 45
+  },
+  "public_checks": 27,
+  "pinned_signature_checks": 9,
+  "production_http_checks": 20,
+  "backups_and_six_native_restore_points_each_verified": true,
+  "cleanup_warnings": 0,
+  "existing_configuration_content_payments_and_licenses_preserved": true,
+  "new_migrations": 0,
+  "local_signing_key_generation_or_export": false,
+  "real_payment_refund_ai_or_google_sync_requested": false,
+  "production_authenticated_visual_or_save_tests": "NOT_RUN",
+  "knowledge_consumer_import_or_index": "NOT_RUN",
+  "production_site_versions": {
+    "official": "1.2.93",
+    "piank": "1.2.93",
+    "novel": "1.2.93"
+  },
+  "configured_google_preserved_and_unconfigured_not_scheduled": true,
+  "disabled_orphan_ai_task_and_history_preserved": true
+}
