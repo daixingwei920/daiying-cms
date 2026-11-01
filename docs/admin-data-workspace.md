@@ -15,15 +15,17 @@ Owner 于 2026-10-31 要求将审核、更新数据的长列表改为清晰的�
 ## 验证
 
 - `php tests/admin_data_workspace.php`：16 项通过，包含长文本、全部问题保留、HTML 转义、空/失败报告、状态区分、原始数据折叠、子目录链接、签名元数据展示。
-- `python3 tests/admin_data_workspace_http.py --output /path/to/native-http.json`：一次性 SQLite、原生管理员登录与真实 HTTP handler；审核/更新服务仅为 loopback mock。验证原生报告渲染、完整性检查、鉴权/CSRF 拦截、兼容性阻止准备操作、兼容更新下载准备和哈希/字节保留、无签名非法包拒绝、缺失包拒绝、执行二次确认、失败不切换 Core 指针。支持 --commit 从不可变 git archive 运行并记录运行时哈希。外部调用为 0。
+- `python3 tests/admin_data_workspace_http.py --commit <准确提交> --output /path/to/native-http.json`：23 项通过；一次性 SQLite、原生管理员登录与真实 HTTP handler；审核/更新服务仅为 loopback mock。验证原生报告渲染、完整性检查、鉴权/CSRF 拦截、兼容性阻止准备操作、兼容更新下载准备和哈希/字节保留、无签名非法包拒绝、缺失包拒绝、执行二次确认、失败不切换 Core 指针。支持 --commit 从不可变 git archive 运行并记录运行时哈希。外部调用为 0。
 - 相关回归：`admin_layout_scroll_contract.php`、`market_review_submission_payment_provider.php`、`updater_runtime_boundary.php`；PHP/JS 语法与 `git diff --check`。
 - 浏览器：1280px 默认桌面和 390×844 窄屏；单分类显示，长 JSON 高度 440px 且可滚动，无页面横向溢出；切换/缩放保留输入，键盘切换保留焦点，窄屏菜单折叠。属于模拟视口，未做真实 iPhone 验收。
-- 成功验证/执行结果预览使用合成数据调用同一展示方法，**不代表真实签名安装或更新成功**。本次未运行服务器 Release Gate / 签名包正向安装，不在本机生成或导出签名密钥。
+- 成功验证/执行结果预览使用合成数据调用同一展示方法，**不代表真实签名安装或更新成功**。服务器 Release Gate 的准确提交、结果与签名测试边界单独附在待审 PR 和外部脱敏证据中，不在本机生成或导出签名密钥。
 
 ## 知识库同步状态
 
-更新本候选说明与 docs 索引；统一 V1 事实源仍固定已发布 1.2.90，本候选没有晋级为已发布事实。未构建、导入、索引或部署到消费者。
+UI 源码固定于 `746ebaab6eb08a9242bfd707a9ff269ca5a85cc1`。统一 V1 沿用已支持的不可变候选提交引用，严格比较工作区源码、Git blob、SHA-256、行号及锚点；没有添加跳过检查的选项。知识包标记 UNPUBLISHED，Core 版本仍为 1.2.90，已发布 release_evidence 保持不变，原发布候选与生产升级证据另存为 published_baseline_evidence / published_baseline_development_evidence。
 
-`python3 scripts/product_knowledge.py` 当前失败：`source drift: system/core/Bootstrap/Application.php`。在原有干净历史优化器工作区重复检查得到同一错误；本候选没有修改该文件。这是既有来源漂移，保持失败状态，留待下一次获授权的事实/版本同步处理，不通过重写已发布事实掩盖。
+原失败 `source drift: system/core/Bootstrap/Application.php` 已定位为旧来源提交与后续路由/导航/已退役服务的差异，并非修改 integrity guard。已更新候选来源引用、哈希与锚点，退役的历史优化器记录改为 removed_candidate 且不进入客服导出；新增 UI 候选记录仅 ADMIN_DEVELOPER。检查通过：48 条事实、21 条公开导出、57 个固定源码/文档文件。9 项回归确认来源漂移、错误哈希/引用、不安全路径与内部误导出仍失败。
 
-外部交接证据位于当前任务 `outputs/admin-data-ui/`，不进入 Core 包。正式发布前仍需准确提交的服务器 Release Gate 和发布授权。
+详细知识同步记录见 `docs/knowledge/2026-10-31-admin-ui-reconciliation.md`。未导入知识库、重建索引或部署消费者。完整源码清单仍使用原 ManifestBuilder；本分支不修改签名/Gate/完整性保护程序。
+
+外部交接证据位于当前任务 `outputs/admin-data-ui/`，不进入 Core 包。正式 preflight 必须原样执行；未合并 PR 的提交与 origin/main 不同应保持 FAIL-CLOSED，不能将独立隔离测试通过标记成发布放行。正式发布前仍需合并后准确提交的服务器 Release Gate 和发布授权。

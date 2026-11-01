@@ -12,6 +12,7 @@ This index collects the public-facing documentation currently available in the G
 
 - [Unified V1 facts](../DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1.md)
 - [Architecture and consumer boundaries](../DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_ARCHITECTURE.md)
+- [UI candidate knowledge reconciliation 2026-10-31](knowledge/2026-10-31-admin-ui-reconciliation.md) records strict provenance, retired-feature export removal and unpublished status.
 - [Knowledge synchronization report 2026-10-14](knowledge/2026-10-14-sync-report.md)
 - [知识库到客服闭环及蜘蛛丢样观测隔离验收](knowledge-customer-loop-acceptance.md)
 - [客服真实模型补测与旧资料承接建议](knowledge-customer-loop-live-acceptance.md)

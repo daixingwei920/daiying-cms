@@ -211,3 +211,7 @@ The original 332-record `daixiaoying-ai-customer-service-qa-v1.jsonl` has not be
 ## Issue #9 candidate knowledge boundary
 
 The V1 package on this branch will pin the immutable Issue #9 implementation commit, with candidate_evidence.status=UNPUBLISHED and release_evidence retained as the historical 1.2.88 release. source_tag may hold that exact Git commit as an immutable ref; no release tag is created. Collaboration retirement and SEO/GEO are ADMIN_DEVELOPER facts, not production availability claims. Runtime evidence stays in the Issue #9 delivery report; source-review records retain NOT_RUN_THIS_TASK. No knowledge import, index rebuild, consumer deployment or automatic synchronization is implied.
+
+## Admin data UI candidate reconciliation (2026-10-31)
+
+The same immutable-candidate-ref mechanism now pins UI source `746ebaab6eb08a9242bfd707a9ff269ca5a85cc1`. Published 1.2.90 release evidence stays unchanged. The candidate is UNPUBLISHED; the retired optimizer is removed_candidate and excluded from the customer projection, and the new UI fact is ADMIN_DEVELOPER only. Strict worktree/blob/hash/ref/anchor validation stays enabled. See [reconciliation evidence](docs/knowledge/2026-10-31-admin-ui-reconciliation.md). No consumer import/index/deployment is implied.

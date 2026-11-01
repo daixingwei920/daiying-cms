@@ -1,7 +1,7 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
   "verified_version": "1.2.90",
-  "last_verified_at": "2026-10-26",
+  "last_verified_at": "2026-10-31",
   "records": [
     {
       "id": "install.web_installer",
@@ -32,8 +32,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -70,8 +70,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -108,8 +108,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -146,14 +146,14 @@
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 613,
-          "line_end": 613
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 616,
+          "line_end": 616
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -178,9 +178,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 578,
-          "line_end": 578
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 581,
+          "line_end": 581
         },
         {
           "path": "system/core/Recovery/RecoveryController.php",
@@ -190,8 +190,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -228,8 +228,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -254,9 +254,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 527,
-          "line_end": 527
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 533,
+          "line_end": 533
         },
         {
           "path": "system/core/Seo/Keyword/SeoLifecycleAggregator.php",
@@ -266,8 +266,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -292,9 +292,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 537,
-          "line_end": 537
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 540,
+          "line_end": 540
         },
         {
           "path": "system/core/Seo/Keyword/SeoLifecycleAggregator.php",
@@ -304,8 +304,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -330,9 +330,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 432,
-          "line_end": 432
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 438,
+          "line_end": 438
         },
         {
           "path": "system/core/Content/ContentFrontController.php",
@@ -348,8 +348,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -386,8 +386,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -412,9 +412,9 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 502,
-          "line_end": 502
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 508,
+          "line_end": 508
         },
         {
           "path": "system/core/Ai/AiService.php",
@@ -436,8 +436,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -474,8 +474,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -512,8 +512,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -538,20 +538,20 @@
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
-          "sha256": "08dd765c5d4bdfc7c79787e475066f786d50e315b6579670f635428c499c9667",
-          "line_start": 115,
-          "line_end": 115
+          "sha256": "183147cebd00f830f66060deb927f18b6ff43832a0ac14c77a16562a10351faf",
+          "line_start": 113,
+          "line_end": 113
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "892bc4a0b1092037543963b2109f34832f4a43c13a35be228a1ec16b004b537e",
-          "line_start": 590,
-          "line_end": 590
+          "sha256": "a5b0fd398f30e31ff3398331201af86865782449770cd12aeb73fae8e4c49d27",
+          "line_start": 593,
+          "line_end": 593
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -576,15 +576,15 @@
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
-          "sha256": "08dd765c5d4bdfc7c79787e475066f786d50e315b6579670f635428c499c9667",
-          "line_start": 116,
-          "line_end": 116
+          "sha256": "183147cebd00f830f66060deb927f18b6ff43832a0ac14c77a16562a10351faf",
+          "line_start": 114,
+          "line_end": 114
         },
         {
           "path": "system/core/Support/View.php",
-          "sha256": "08dd765c5d4bdfc7c79787e475066f786d50e315b6579670f635428c499c9667",
-          "line_start": 117,
-          "line_end": 117
+          "sha256": "183147cebd00f830f66060deb927f18b6ff43832a0ac14c77a16562a10351faf",
+          "line_start": 115,
+          "line_end": 115
         },
         {
           "path": "docs/first-install-failure.md",
@@ -594,8 +594,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -619,9 +619,9 @@
       "source_evidence": [
         {
           "path": "docs/ai-image/integration-1.2.86.md",
+          "sha256": "a4acc63a504db84bc5c328d028e6d2fe4617b81e5dd27df136be4083b7ad2ca4",
           "line_start": 3,
-          "line_end": 3,
-          "sha256": "a4acc63a504db84bc5c328d028e6d2fe4617b81e5dd27df136be4083b7ad2ca4"
+          "line_end": 3
         },
         {
           "path": "docs/payment-refund-webhooks.md",
@@ -631,8 +631,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -663,8 +663,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -701,8 +701,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -739,8 +739,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -783,8 +783,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -821,52 +821,8 @@
         }
       ],
       "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
-      "confidence": "high",
-      "implementation_status": "implemented",
-      "test_status": "NOT_RUN_THIS_TASK",
-      "review_status": "SOURCE_REVIEWED",
-      "priority": "P0",
-      "visibility": "USER-FACING",
-      "enabled_for_customer_service": true
-    },
-    {
-      "id": "ai.historical_optimizer",
-      "topic": "AI Provider",
-      "capability": "历史文章 AI 优化",
-      "audience": "Administrator",
-      "user_facing": true,
-      "admin_route": "",
-      "public_route": "",
-      "cli_command": "",
-      "description": "历史文章 SEO 补全和内容优化入口为 /admin/seo/historical-backfill 与 /admin/seo/content-quality。AI 针对 B/C 级历史文章生成待审核草稿，经统一站点 AI 调用；不自动发布或修改 URL。原优化器尚未接入本统一知识包；不能声称资料自动更新已生效。",
-      "source": "system/core/Support/View.php; system/core/Seo/Historical/HistoricalArticleSeoBackfillService.php",
-      "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review at the unpublished domestic-crawler candidate based on published Core 1.2.89. Runtime checks are separately recorded in docs/domestic-crawlers.md; no publication, production deployment or consumer import is implied.",
-      "source_evidence": [
-        {
-          "path": "system/core/Support/View.php",
-          "sha256": "08dd765c5d4bdfc7c79787e475066f786d50e315b6579670f635428c499c9667",
-          "line_start": 97,
-          "line_end": 97
-        },
-        {
-          "path": "system/core/Seo/Historical/HistoricalArticleSeoBackfillService.php",
-          "sha256": "2bff00498bf8d85452fa45eff2f65d0851ffc73d5b2715b9baa3b42e22714439",
-          "line_start": 543,
-          "line_end": 543
-        },
-        {
-          "path": "system/core/Seo/Historical/HistoricalArticleSeoBackfillService.php",
-          "sha256": "2bff00498bf8d85452fa45eff2f65d0851ffc73d5b2715b9baa3b42e22714439",
-          "line_start": 827,
-          "line_end": 827
-        }
-      ],
-      "verified_version": "1.2.90",
-      "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-      "last_verified_at": "2026-10-26",
+      "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+      "last_verified_at": "2026-10-31",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -876,10 +832,10 @@
       "enabled_for_customer_service": true
     }
   ],
-  "package_revision": "2026-10-26-core190-published-owner-update-observed",
+  "package_revision": "2026-10-31-admin-data-ui-unpublished-candidate",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-  "source_tag": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
+  "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+  "source_tag": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "PUBLISHED",
@@ -977,31 +933,19 @@
     "customer_service_latest_package_import": "ISOLATED_RELEVANCE_BUSINESS_7_OF_7_PASS_PRODUCTION_NOT_RUN",
     "core_optimizer_shared_knowledge": "NOT_IMPLEMENTED"
   },
-  "release_status": "PUBLISHED",
+  "release_status": "UNPUBLISHED",
   "candidate_evidence": {
-    "status": "PUBLISHED",
-    "base_version": "1.2.89",
+    "status": "UNPUBLISHED",
+    "base_version": "1.2.90",
     "candidate_version": "1.2.90",
-    "source_commit": "449f92a258f2d02f78cb19f590c308ec268a1d43",
-    "candidate_revision": "PR70-449f92a",
-    "owner_decision": "Owner accepted PR70 and authorizes its merge into1.2.90, separate formal signing and Release Gate. Original frozen1.2.90 remains intact; no publication or production.",
-    "runtime_report": "docs/CORE_1.2.90_PR70_PREPARATION_REPORT.md",
-    "installer_sha256": "62501532a9b73327d35535d6a52c895408393546cdfb984e3c55d5d7965d5b4d",
-    "update_sha256": "0ad3dabdf064894733a88ca3c497075dcdf0fa6e6bd285caf11a85e1bfe1c427",
-    "production_deployed": true,
+    "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+    "base_commit": "b8edbdce6c9008ddb50facfebb6c2617cde47b9c",
+    "candidate_revision": "admin-review-update-ui",
+    "owner_decision": "Owner authorizes isolated UI review, strict knowledge source reconciliation, server-isolated Gate and pending-review PR only; no merge, production change or publication.",
+    "runtime_report": "docs/admin-data-workspace.md",
+    "production_deployed": false,
     "consumer_imported": false,
-    "original_frozen_candidate_preserved": {
-      "status": "SIGNED_NOT_PUBLISHED_FROZEN",
-      "base_version": "1.2.89",
-      "candidate_version": "1.2.90",
-      "source_commit": "c09b5ea10f31cf0203a5cf4b73df1d628c8cf546",
-      "owner_decision": "Original signed1.2.90 candidate preserved unchanged. Owner accepts PR70 and authorizes separate new1.2.90 exact-main signing/Gate preparation; no publication or production.",
-      "runtime_report": "https://github.com/daixingwei920/daiying-cms/pull/69",
-      "production_deployed": false,
-      "consumer_imported": false
-    },
-    "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.90",
-    "production_deployment_actor": "Owner manual upgrade; no Codex deployment"
+    "published_release_evidence_preserved": true
   },
   "sync_validation": {
     "environment": "isolated",
@@ -1075,14 +1019,12 @@
     }
   },
   "development_candidate": {
-    "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
-    "status": "CORE190_PUBLISHED_INDEPENDENT_CUSTOMER_PLUGIN_UNPUBLISHED",
-    "included_in_frozen_1_2_90": false,
-    "report": "docs/CORE_1.2.90_PUBLICATION_REPORT.md",
-    "production_deployed": true,
-    "included_in_new_pr70_core190_candidate": "Core crawler observation only; independent customer plugin excluded",
-    "production_deployment_actor": "Owner manual Core upgrade",
-    "independent_customer_plugin_production_deployed": false
+    "source_commit": "746ebaab6eb08a9242bfd707a9ff269ca5a85cc1",
+    "status": "UNPUBLISHED_ADMIN_UI_AND_KNOWLEDGE_RECONCILIATION",
+    "report": "docs/admin-data-workspace.md",
+    "production_deployed": false,
+    "consumer_imported": false,
+    "included_in_frozen_1_2_90": false
   },
   "publication_validation": {
     "report": "docs/CORE_1.2.90_PUBLICATION_REPORT.md",
@@ -1097,6 +1039,41 @@
     "active_core_source_hashes": 356,
     "other_protected_data_unchanged": true,
     "original_strict_guard_delta_retained": true
+  },
+  "published_baseline_evidence": {
+    "status": "PUBLISHED",
+    "base_version": "1.2.89",
+    "candidate_version": "1.2.90",
+    "source_commit": "449f92a258f2d02f78cb19f590c308ec268a1d43",
+    "candidate_revision": "PR70-449f92a",
+    "owner_decision": "Owner accepted PR70 and authorizes its merge into1.2.90, separate formal signing and Release Gate. Original frozen1.2.90 remains intact; no publication or production.",
+    "runtime_report": "docs/CORE_1.2.90_PR70_PREPARATION_REPORT.md",
+    "installer_sha256": "62501532a9b73327d35535d6a52c895408393546cdfb984e3c55d5d7965d5b4d",
+    "update_sha256": "0ad3dabdf064894733a88ca3c497075dcdf0fa6e6bd285caf11a85e1bfe1c427",
+    "production_deployed": true,
+    "consumer_imported": false,
+    "original_frozen_candidate_preserved": {
+      "status": "SIGNED_NOT_PUBLISHED_FROZEN",
+      "base_version": "1.2.89",
+      "candidate_version": "1.2.90",
+      "source_commit": "c09b5ea10f31cf0203a5cf4b73df1d628c8cf546",
+      "owner_decision": "Original signed1.2.90 candidate preserved unchanged. Owner accepts PR70 and authorizes separate new1.2.90 exact-main signing/Gate preparation; no publication or production.",
+      "runtime_report": "https://github.com/daixingwei920/daiying-cms/pull/69",
+      "production_deployed": false,
+      "consumer_imported": false
+    },
+    "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.90",
+    "production_deployment_actor": "Owner manual upgrade; no Codex deployment"
+  },
+  "published_baseline_development_evidence": {
+    "source_commit": "2b4fe067be2312ee7e0574c347c8a7e65d5ac11f",
+    "status": "CORE190_PUBLISHED_INDEPENDENT_CUSTOMER_PLUGIN_UNPUBLISHED",
+    "included_in_frozen_1_2_90": false,
+    "report": "docs/CORE_1.2.90_PUBLICATION_REPORT.md",
+    "production_deployed": true,
+    "included_in_new_pr70_core190_candidate": "Core crawler observation only; independent customer plugin excluded",
+    "production_deployment_actor": "Owner manual Core upgrade",
+    "independent_customer_plugin_production_deployed": false
   },
   "export_scope": "USER-FACING_ONLY"
 }
