@@ -8,7 +8,7 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 
 - Owner requests repair after the piank.cn provider-save lock diagnosis. Clean branch fix/payment-provider-save-sqlite-lock starts from actual main9a29ee2. Scope is isolated repair/regression only; do not change live settings, replay production saves, merge, publish or alter frozen1.2.91 artifacts.
 - Reuse PaymentTransaction only in paymentProviderSave, preserve atomic configuration/default/secret/audit writes and rollback, and return retryable503 for SQLite BUSY/LOCKED. Preserve admin/CSRF/provider/configuration guards and Core integrity.
-- PHP8.3 reproduces the untracked-BEGIN lock; PHP8.5 normal saves pass. Piank uses PHP8.5 and its historical external lock holder is unconfirmed: do not claim the PHP8.3 defect is the sole production cause. See docs/payment-provider-save-sqlite.md.
+- Review corrected the runtime diagnosis: HTTPS is served by Apache, whose piank vhost points to PHP8.3 FPM; Nginx PHP8.5 configuration alone was not evidence of the live HTTPS runtime. In network-disabled, production-read-only namespaces, actual piank plugin/database copies reproduce baseline PHP8.3 self-lock and pass with PR80; PHP8.5 passes both. Historical request process/concurrency was not captured and no live PHP probe or save was replayed. See docs/payment-provider-save-sqlite.md and its review evidence JSON.
 - Signing-related contract tests run exclusively in the authorized update server's private isolation. No workstation private signing-key generation/export. A contract PASS is not a formal Release Gate or production acceptance.
 
 ## Current published Core1.2.91 and independent Epay0.1.0 (2026-11-01)
