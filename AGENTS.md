@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized Core1.2.93 publication and three-site upgrade
+
+- Owner accepts the proposed merge of PR84, full formal Release Gate, publication as1.2.93 and native upgrades of official, piank and book.daixingwei.cn. This supersedes the pending-publication hold below for this patch only. Back up before production mutations; preserve existing site, AI, payment, content, license and inventory data. Do not trigger paid AI, real payments or refunds.
+- Prepare on clean fix/unconfigured-search-metrics from main24e1b3c, retaining the reviewed runtime0e94dc6. Release only a clean exact merged origin/main snapshot; run full preflight/build, server-only existing official signing, signed parity and isolated native upgrade/rollback acceptance. Never generate/export asymmetric signing keys on the workstation or change frozen1.2.92/tag/artifacts.
+- Current production sites run1.2.92. Official inactive1.2.81 is privately archived; the novel orphan AI task is disabled with history retained. Native1.2.93 acceptance must also confirm unconfigured Google remains undispatched and owned-task lifecycle behavior, without importing production data or configuring Google authorization.
+- Refresh governed V1 candidate source provenance using a real immutable preparation commit, preserve published1.2.92 evidence, and reconcile published facts after verified publication. Do not weaken provenance, signing, integrity or authorization guards.
+
 ## Current published Core1.2.92 (2026-11-01)
 
 ### Post-upgrade operational repair and pending Core maintenance

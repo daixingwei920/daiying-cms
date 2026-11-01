@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.93 (release preparation)
+
+- Skip Google search metrics sync before constructing a request when the integration is disconnected or unconfigured. Enable its scheduled task only after configuration and credentials are complete; preserve real authorization failures and safe retries.
+- Disable a plugin's owned scheduled tasks when its lifecycle leaves Enabled, preserving payload, failure evidence and run history. Keep other task owners, normal registration, authorization and integrity checks unchanged.
+- No new migration or payment/AI dispatch. Owner authorizes PR84 merge, exact-source server Release Gate, formal publication and native updates of the official, film and novel sites, with backups and retained settings/data.
+
 ## 1.2.92 (unpublished maintenance candidate)
 
 - Fix SQLite payment-provider save transaction ownership on PHP8.3 using the existing PaymentTransaction contract; preserve atomic encrypted settings/default/audit writes and fail closed on lock conflicts.
