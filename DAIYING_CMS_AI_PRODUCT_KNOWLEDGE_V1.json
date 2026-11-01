@@ -11,7 +11,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; system/core/Install/InstallController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -34,7 +34,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -51,7 +51,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/RuntimeRequirements.php; system/core/Support/SystemHealthDoctor.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -74,7 +74,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -91,7 +91,7 @@
       "audience": "Administrator",
       "source": "docs/themes.md; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/articles/{slug}",
@@ -114,7 +114,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -131,7 +131,7 @@
       "audience": "Internal",
       "source": "docs/content-foundation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -154,7 +154,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -171,7 +171,7 @@
       "audience": "Internal",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -194,7 +194,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -211,7 +211,7 @@
       "audience": "Administrator",
       "source": "docs/update-system.md; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -241,7 +241,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -258,7 +258,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Recovery/RecoveryController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "/admin/recovery",
       "public_route": "",
@@ -281,7 +281,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -298,7 +298,7 @@
       "audience": "Internal",
       "source": "system/core/SiteVault/SiteVaultService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -321,7 +321,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -338,7 +338,7 @@
       "audience": "Administrator",
       "source": "SECURITY.md; docs/installation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -361,7 +361,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -378,7 +378,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "/admin/seo/keywords",
       "public_route": "",
@@ -401,7 +401,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -418,7 +418,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "/admin/seo/search-engines",
       "public_route": "",
@@ -441,7 +441,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -458,7 +458,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Content/ContentFrontController.php; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/sitemap.xml",
@@ -488,7 +488,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -505,7 +505,7 @@
       "audience": "Developer",
       "source": "docs/plugins.md; docs/themes.md; docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -535,7 +535,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -552,7 +552,7 @@
       "audience": "Administrator",
       "source": "docs/commerce.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -575,7 +575,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -592,7 +592,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Ai/AiService.php; system/core/Ai/AiProviderPresets.php; system/core/Ai/AiGateway.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -629,7 +629,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -646,7 +646,7 @@
       "audience": "Administrator",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -669,7 +669,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -686,7 +686,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -709,7 +709,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -726,7 +726,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "/admin/migrations",
       "public_route": "",
@@ -749,7 +749,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -766,7 +766,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": true,
       "admin_route": "/admin/update;/admin/recovery",
       "public_route": "",
@@ -796,7 +796,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -817,7 +817,7 @@
       "description": "当前已发布稳定版仍为 Core 1.2.86（v1.2.86，d311446607124fff21d76f524a4a11968ad4cd58）。本包复核已整合图像公共能力并修复支付回调的1.3.0-alpha.5开发候选，不代表正式发布或生产部署。",
       "source": "docs/ai-image/integration-1.2.86.md; docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "source_evidence": [
         {
           "path": "docs/ai-image/integration-1.2.86.md",
@@ -835,7 +835,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -857,7 +857,7 @@
       "description": "1.2.83 支持显式文章、页面和分类 slug 保留《》。留空时仍自动生成简洁 slug，已有 slug 与重定向不自动迁移。仍拒绝分隔符、路径穿越、控制字符、查询/片段符和预编码百分号输入；填写原始书名号，不粘贴 URL 编码。",
       "source": "docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "source_evidence": [
         {
           "path": "docs/content-slug-policy.md",
@@ -868,7 +868,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -890,7 +890,7 @@
       "description": "1.2.82 增加四个校验绑定的历史 MySQL 迁移方言适配，不修改已发布迁移文件。1.2.83 延续该能力；这不代表任意 MySQL/MariaDB 环境均已验收。选择数据库后仍应在安装器测试连接和实际完成安装。",
       "source": "CHANGELOG.md; system/core/Migration/MysqlHistoricalMigrationDialect.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
@@ -908,7 +908,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -930,7 +930,7 @@
       "description": "首次安装失败须保留错误并修复原因。若管理员已创建但完成锁失败，入口会阻断，不能伪造完成锁或重复创建管理员。MySQL DDL 不保证全链事务回滚；只有负责人明确确认专用数据可丢弃后，才可人工清理重装。生产站不得删除数据库来修复升级。",
       "source": "docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "source_evidence": [
         {
           "path": "docs/first-install-failure.md",
@@ -948,7 +948,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -970,7 +970,7 @@
       "description": "1.2.82 的直接升级验证范围为 1.2.81 → 1.2.82；不能泛化为任意旧版直升最新。实际领取和安装必须服从目标包的签名版本范围与兼容检查。Core 更新不替换已安装插件；旧 Commerce 的 MySQL 参数修复需要独立插件更新。",
       "source": "CHANGELOG.md; docs/release/1.2.82-upgrade-support.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
@@ -995,7 +995,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -1017,7 +1017,7 @@
       "description": "Owner 于 2026-10-09 决定小说和视频产品退役，不再作为新安装分发、维护或规划产品。保留历史源码、已安装客户资产、订单和许可；退役不等于自动卸载、撤销授权或已完成市场下架。",
       "source": "docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "source_evidence": [
         {
           "path": "docs/retired-products.md",
@@ -1035,7 +1035,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -1057,7 +1057,7 @@
       "description": "Core1.2.91已移除历史文章 SEO 补全与历史内容优化的菜单、路由、处理器和专用服务。旧入口及子路径统一返回410；历史文章、URL、SEO、待审核建议、任务、日志及已发布迁移保留。普通文章编辑、AI 写作和其他 SEO 功能保留；此候选事实不表示生产已升级。",
       "source": "system/core/Bootstrap/Application.php; docs/historical-optimizer-retirement.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
@@ -1075,7 +1075,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "removed",
@@ -1097,7 +1097,7 @@
       "description": "1.2.83 按 PDO 连接共享 SQLite immediate transaction 状态，保留事务所有权、支付回调/退款原子性与写锁。属于内部维护修复；不证明真实支付通道、退款或商户交易已验收。",
       "source": "CHANGELOG.md; system/core/Payment/PaymentTransaction.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
@@ -1115,7 +1115,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -1133,7 +1133,7 @@
       "audience": "Developer",
       "source": "docs/site-registration.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "/admin/settings",
       "public_route": "",
@@ -1149,7 +1149,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1166,7 +1166,7 @@
       "audience": "Developer",
       "source": "docs/ai.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -1182,7 +1182,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1199,7 +1199,7 @@
       "audience": "Administrator",
       "source": "docs/admin-passkey-reauth.md; system/core/Admin/AdminController.php; system/core/Auth/AdminPasskeyService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "/admin/security",
       "public_route": "",
@@ -1215,9 +1215,9 @@
         },
         {
           "path": "system/core/Admin/AdminController.php",
-          "sha256": "bc4d73a0e5448feadc5c2ca1da411d1ef446377be2f83fa4e8c78523f556b3bf",
-          "line_start": 1060,
-          "line_end": 1060,
+          "sha256": "c5e9c458be0175077769ebb2dc21666862d741f07c0bf2e15489edc534745d67",
+          "line_start": 1061,
+          "line_end": 1061,
           "anchor": "public function adminSecurityPasskeyReauthVerify(Request $request): Response"
         },
         {
@@ -1229,7 +1229,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1246,7 +1246,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -1268,7 +1268,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1279,7 +1279,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1301,7 +1301,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1312,7 +1312,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1334,7 +1334,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1345,7 +1345,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1367,7 +1367,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1378,7 +1378,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/tests.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1400,7 +1400,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1411,7 +1411,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1433,7 +1433,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1444,7 +1444,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1466,7 +1466,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1477,7 +1477,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1499,7 +1499,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1510,7 +1510,7 @@
       "audience": "Developer",
       "source": "docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1532,7 +1532,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1543,7 +1543,7 @@
       "audience": "Developer",
       "source": "docs/plugin-checkout-recovery.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1565,7 +1565,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1576,7 +1576,7 @@
       "audience": "Developer",
       "source": "docs/navigation-groups.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "/admin/navigation",
       "public_route": "",
@@ -1598,7 +1598,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1609,7 +1609,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/member-editorial-retirement.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1631,7 +1631,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1642,7 +1642,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1664,7 +1664,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1675,7 +1675,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/seo-geo-contract.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "/admin/settings",
       "public_route": "/llms.txt",
@@ -1711,7 +1711,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1722,7 +1722,7 @@
       "audience": "Developer",
       "source": "system/core/Seo/CrawlerRegistry.php; system/core/Seo/CrawlerStatistics.php; docs/domestic-crawlers.md; docs/CORE_1.2.90_PUBLICATION_REPORT.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "/admin/seo/crawlers",
       "public_route": "",
@@ -1772,7 +1772,7 @@
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01"
     },
     {
@@ -1783,7 +1783,7 @@
       "audience": "Developer",
       "source": "docs/knowledge-customer-loop-acceptance.md; docs/knowledge-customer-loop-live-acceptance.md; docs/knowledge-article-admission-acceptance.md; docs/knowledge-relevance-fix-acceptance.md; docs/CORE_1.2.90_PUBLICATION_REPORT.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1827,7 +1827,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented_unpublished_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1844,7 +1844,7 @@
       "audience": "Developer",
       "source": "system/core/Seo/CrawlerObservation.php; docs/CORE_1.2.90_PR70_PREPARATION_REPORT.md; docs/CORE_1.2.90_PUBLICATION_REPORT.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "/admin/seo/crawlers",
       "public_route": "",
@@ -1874,7 +1874,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1891,7 +1891,7 @@
       "audience": "Administrator",
       "source": "system/core/Admin/AdminDataView.php; system/core/Admin/AdminController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -1914,21 +1914,21 @@
         },
         {
           "path": "system/core/Admin/AdminController.php",
-          "sha256": "bc4d73a0e5448feadc5c2ca1da411d1ef446377be2f83fa4e8c78523f556b3bf",
-          "line_start": 9242,
-          "line_end": 9242,
+          "sha256": "c5e9c458be0175077769ebb2dc21666862d741f07c0bf2e15489edc534745d67",
+          "line_start": 9250,
+          "line_end": 9250,
           "anchor": "private function reviewReportHtml("
         },
         {
           "path": "system/core/Admin/AdminController.php",
-          "sha256": "bc4d73a0e5448feadc5c2ca1da411d1ef446377be2f83fa4e8c78523f556b3bf",
-          "line_start": 8046,
-          "line_end": 8046,
+          "sha256": "c5e9c458be0175077769ebb2dc21666862d741f07c0bf2e15489edc534745d67",
+          "line_start": 8054,
+          "line_end": 8054,
           "anchor": "$plan = $service->dryRun((string) $request->input('package_path', ''));"
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1945,7 +1945,7 @@
       "audience": "Developer",
       "source": "docs/rest-foundation-1.2.91.md; system/core/Rest/ApiV1Controller.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1968,7 +1968,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1985,7 +1985,7 @@
       "audience": "Developer",
       "source": "docs/payment-configured-redirect.md; system/core/Payment/PaymentProviderRedirectPolicyResolver.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned source/document review of published Core1.2.91 at v1.2.91. Runtime, signing and publication checks are separately recorded in docs/CORE_1.2.91_PUBLICATION_REPORT.md; no production website upgrade or consumer import is implied.",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -2008,7 +2008,7 @@
         }
       ],
       "verified_version": "1.2.91",
-      "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
       "last_verified_at": "2026-11-01",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -2016,12 +2016,59 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false
+    },
+    {
+      "id": "payment.provider_settings_sqlite_save",
+      "topic": "Developer API",
+      "capability": "Payment-provider settings SQLite transaction maintenance candidate",
+      "description": "未发布维护候选：支付配置保存复用Core事务管理，兼容PHP8.3的SQLite事务识别；配置、默认方式、加密密钥和审计原子提交/回滚。SQLite BUSY/LOCKED返回503及Retry-After并提示核对后重试，不绕过写锁或安全校验。历史piank.cn的外部占锁进程未确认，不宣称已线上修复。",
+      "audience": "Developer",
+      "source": "docs/payment-provider-save-sqlite.md; system/core/Admin/AdminController.php; system/core/Payment/PaymentTransaction.php",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned source/document review of an unpublished maintenance commit; runtime scope is separately recorded in docs/payment-provider-save-sqlite.md. Published release evidence is preserved; no production deployment or customer knowledge import is implied.",
+      "user_facing": false,
+      "admin_route": "/admin/payments/providers",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/payment-provider-save-sqlite.md",
+          "anchor": "# 支付配置保存的 SQLite 事务修复（未发布）",
+          "sha256": "fe0a840d9fe828b44a0d4a3da5e1d54369392464b0417525aa51bcd6c94a35a6",
+          "line_start": 1,
+          "line_end": 1
+        },
+        {
+          "path": "system/core/Admin/AdminController.php",
+          "anchor": "public function paymentProviderSave(Request $request): Response",
+          "sha256": "c5e9c458be0175077769ebb2dc21666862d741f07c0bf2e15489edc534745d67",
+          "line_start": 6316,
+          "line_end": 6316
+        },
+        {
+          "path": "system/core/Payment/PaymentTransaction.php",
+          "anchor": "public static function beginImmediate(PDO $pdo): void",
+          "sha256": "168ffae87199fe3bf51b30ec4bf21fb94ed7c7341c88c413f4ea6fce0782f3df",
+          "line_start": 19,
+          "line_end": 19
+        }
+      ],
+      "verified_version": "1.2.91",
+      "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
+      "last_verified_at": "2026-11-01",
+      "implementation_status": "implemented_candidate",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false
     }
   ],
-  "package_revision": "2026-11-01-core191-epay010-published",
+  "package_revision": "2026-11-01-payment-provider-sqlite-save-unpublished",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
-  "source_tag": "v1.2.91",
+  "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
+  "source_tag": "f4604f322856572ebafed7e36479a3c9cf69283b",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "PUBLISHED",
@@ -2154,16 +2201,16 @@
       "note": "含旧 testing/rc 发布前措辞，仅引用来源版本约束，不作为当前发布状态。"
     }
   ],
-  "release_status": "UNPUBLISHED",
+  "release_status": "UNPUBLISHED_MAINTENANCE_CANDIDATE",
   "candidate_evidence": {
-    "status": "PUBLISHED",
-    "base_version": "1.2.90",
+    "status": "UNPUBLISHED",
+    "base_version": "1.2.91",
     "candidate_version": "1.2.91",
-    "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
-    "base_commit": "b3f7f74b7491ae28ebdbedf5d27762ab01de9f0d",
-    "candidate_revision": "PR78-merged-formally-published",
-    "owner_decision": "Owner explicitly authorizes merge and publication. PR78 merged and exact-main formal Gate/signing completed; Core1.2.91 and independent Epay0.1.0 published. No website upgrade or real payment/refund.",
-    "runtime_report": "docs/CORE_1.2.91_PUBLICATION_REPORT.md",
+    "base_commit": "9a29ee2f981ea6353fc7f91abe9b983e0f1c9680",
+    "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
+    "candidate_revision": "payment-provider-sqlite-save-maintenance",
+    "owner_decision": "Owner requests isolated repair of payment-provider saves. No merge, release, production deployment, configuration changes or real payment.",
+    "runtime_report": "docs/payment-provider-save-sqlite.md",
     "production_deployed": false,
     "consumer_imported": false,
     "published_release_evidence_preserved": true
@@ -2240,12 +2287,12 @@
     }
   },
   "development_candidate": {
-    "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
-    "status": "CORE191_AND_INDEPENDENT_EPAY010_PUBLISHED_WEBSITE_NOT_UPGRADED",
-    "report": "docs/CORE_1.2.91_PUBLICATION_REPORT.md",
+    "source_commit": "f4604f322856572ebafed7e36479a3c9cf69283b",
+    "status": "UNPUBLISHED_PAYMENT_PROVIDER_SQLITE_SAVE_REPAIR",
+    "report": "docs/payment-provider-save-sqlite.md",
     "production_deployed": false,
     "consumer_imported": false,
-    "included_in_frozen_1_2_90": false
+    "published_tag_unchanged": true
   },
   "publication_validation": {
     "report": "docs/CORE_1.2.91_PUBLICATION_REPORT.md",
@@ -2337,5 +2384,18 @@
     "active_core_source_hashes": 356,
     "other_protected_data_unchanged": true,
     "original_strict_guard_delta_retained": true
+  },
+  "published_191_candidate_evidence": {
+    "status": "PUBLISHED",
+    "base_version": "1.2.90",
+    "candidate_version": "1.2.91",
+    "source_commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+    "base_commit": "b3f7f74b7491ae28ebdbedf5d27762ab01de9f0d",
+    "candidate_revision": "PR78-merged-formally-published",
+    "owner_decision": "Owner explicitly authorizes merge and publication. PR78 merged and exact-main formal Gate/signing completed; Core1.2.91 and independent Epay0.1.0 published. No website upgrade or real payment/refund.",
+    "runtime_report": "docs/CORE_1.2.91_PUBLICATION_REPORT.md",
+    "production_deployed": false,
+    "consumer_imported": false,
+    "published_release_evidence_preserved": true
   }
 }
