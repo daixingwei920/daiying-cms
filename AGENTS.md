@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Current published Core1.2.92 (2026-11-01)
+
+- Core1.2.92 is published on GitHub and official stable at immutable tag v1.2.92 /9ef20865d798b96696206b0ad2b01f17463f6235. Installer13e334e4f03c792359697add4d544e7896c03c9ffa85e6cea893c21339a813d7; update5c47cd424b989932191813741ac8fe61e90fe72c5ddf55ffa4d5545466d39fdb. Full exact-source server Gate/signed parity643, official native upgrade/rollback/retry43, public27 and independent signature9 checks passed. Do not rebuild/re-sign/move this frozen release.
+- PR80/81/82 cover payment-save SQLite ownership, the Core-owned plugin-data scope index migration and installer-test isolation. Published migrations remain unchanged; matching pre-existing indexes are retained and wrong definitions fail closed. See docs/CORE_1.2.92_PUBLICATION_REPORT.md and evidence JSON.
+- Official website and piank remainCore1.2.91; no website upgrade, live payment/refund or knowledge import. Only a backed-up release-display cache was expired. Prior raw full-row production protection failures and updated_at-only boot deltas remain historical evidence, with no invented Owner attribution. New explicit publication backup/protection verifies business/configuration/license/inventory invariants and records diagnostic timestamps separately.
+- Independent Epay0.1.0 remains unchanged at39 RMB/single-site/lifetime. No customer license/code generation or consumption. Production signing stayed server-side; no local private signing-key generation/export. This post-publication documentation/knowledge change never alters published artifacts.
+
 ## Owner-authorized Core1.2.92 fix, merge and publication (2026-11-01)
 
 - Owner now authorizes completing fixes, merging and formally publishing Core1.2.92 after the full exact-source server Gate and signed native upgrade/rollback acceptance. This supersedes the earlier publication hold for Core1.2.92 only; no website/piank upgrade, independent plugin release or live payment is authorized.
