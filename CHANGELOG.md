@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.94 (release preparation)
+
+- Compact seven administration pages: group payment filters/provider fields, display ad cards and related panels in columns, and expand long SEO evidence, mapping URLs and restore commands on demand. Keep wide records within their own scroll regions and retain entered values across collapse/resizing.
+- Preserve original fields, save routes, CSRF/confirmation, data, public APIs, signed-update integrity and all published migrations. Minimum upgrade source remains Core1.2.80; minimum PHP8.3.
+- Owner authorizes exact-source server Release Gate, signing and publication. Production website upgrades and real payment/external synchronization are outside this release task.
+
 ## 1.2.93 (release preparation)
 
 - Skip Google search metrics sync before constructing a request when the integration is disconnected or unconfigured. Enable its scheduled task only after configuration and credentials are complete; preserve real authorization failures and safe retries.

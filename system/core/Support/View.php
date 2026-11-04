@@ -297,7 +297,7 @@ final class View
 
     private static function assetVersion(): string
     {
-        return '20261031-admin-data-workspace';
+        return '20261104-admin-compact-workspaces';
     }
 
     private static function adminNavGroupScript(): string

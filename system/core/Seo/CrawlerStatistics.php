@@ -80,7 +80,7 @@ final class CrawlerStatistics
         $s = $this->snapshot($rows, $request); $f = $s['filters']; $e = static fn ($v): string => View::escape((string) $v);
         $base = BasePath::fromSettings($this->settings);
         $url = static fn (string $path): string => $e(BasePath::prefix($path, $base));
-        $html = '<div class="admin-page-header"><div><h1>蜘蛛记录与统计</h1><p class="muted">国内平台与其他平台的 UA 声明标记；不是请求所在地，也不是收录或 AI 引用统计。</p></div><a class="button admin-button-secondary" href="' . $url('/admin/settings') . '">SEO / GEO 设置</a></div>';
+        $html = '<div class="admin-compact compact-crawlers"><div class="admin-page-header"><div><h1>蜘蛛记录与统计</h1><p class="muted">国内平台与其他平台的 UA 声明标记；不是请求所在地，也不是收录或 AI 引用统计。</p></div><a class="button admin-button-secondary" href="' . $url('/admin/settings') . '">SEO / GEO 设置</a></div>';
         $html .= '<p class="admin-badge ' . ($this->settings->get('seo.crawler_log_enabled', false) ? 'admin-badge-success">采集已开启' : 'admin-badge-warning">采集已关闭，以下仅显示保留记录') . '</p>';
         $html .= '<p>UA 自称，来源未验证。不保存 IP、原始 UA、查询串或具体文章地址。记录按 UTC 日期和公开路由类别聚合；并发可能丢样，存储上限等情况也可能漏记；丢样数量未知，不能推算完整访问总量、采集率或独立访客数。</p>';
         $html .= '<form method="get" action="' . $url('/admin/seo/crawlers') . '" class="admin-filter-bar" aria-label="蜘蛛统计筛选">';
@@ -97,18 +97,18 @@ final class CrawlerStatistics
         foreach (['筛选范围内已采集请求数' => $s['total'], '其中今日已采集请求数' => $s['todayHits'], '国内平台标记已采集请求数' => $s['domestic'], '4xx / 5xx 已采集请求数' => $s['errors']] as $label => $number) { $html .= '<section class="card admin-dashboard-card"><span>' . $label . '</span><strong>' . number_format($number) . '</strong></section>'; }
         $html .= '</div>';
         if ($s['total'] === 0) { $html .= '<div class="admin-empty-state">当前筛选下暂无记录。请确认已开启采集，并等待带有已支持蜘蛛标记的请求访问公开页面；空记录不能证明蜘蛛没有访问，也不能证明已经收录。</div>'; }
-        $html .= '<h2>已采集请求按日趋势（UTC）</h2><div class="crawler-table-wrap"><table class="crawler-stat-table"><thead><tr><th>UTC 日期</th><th>已采集请求数</th><th>相对采集量</th></tr></thead><tbody>';
+        $html .= '<div class="compact-crawler-columns"><section class="editor-card"><h2>已采集请求按日趋势（UTC）</h2><div class="crawler-table-wrap compact-scroll" tabindex="0" role="region" aria-label="按日趋势"><table class="crawler-stat-table"><thead><tr><th>UTC 日期</th><th>已采集请求数</th><th>相对采集量</th></tr></thead><tbody>';
         $peak = max(1, ...array_values($s['daily']));
         foreach ($s['daily'] as $day => $hits) { $width = (int) round($hits / $peak * 100); $html .= '<tr><td>' . $e($day) . '</td><td>' . number_format($hits) . '</td><td><span class="crawler-trend-track" aria-hidden="true"><span style="width:' . $width . '%"></span></span></td></tr>'; }
-        $html .= '</tbody></table></div><h2>蜘蛛声明排名（' . count($s['ranking']) . ' 种）</h2><div class="crawler-table-wrap"><table class="crawler-stat-table"><thead><tr><th>蜘蛛 / UA 标记</th><th>平台分类</th><th>类型标记</th><th>已采集请求数</th><th>4xx / 5xx</th><th>来源</th></tr></thead><tbody>';
+        $html .= '</tbody></table></div></section><section class="editor-card"><h2>蜘蛛声明排名（' . count($s['ranking']) . ' 种）</h2><div class="crawler-table-wrap compact-scroll" tabindex="0" role="region" aria-label="蜘蛛声明排名"><table class="crawler-stat-table"><thead><tr><th>蜘蛛 / UA 标记</th><th>平台分类</th><th>类型标记</th><th>已采集请求数</th><th>4xx / 5xx</th><th>来源</th></tr></thead><tbody>';
         foreach ($s['ranking'] as $r) { $html .= '<tr><td>' . $e($r['label']) . '<br><code>' . $e($r['agent']) . '</code></td><td>' . ($r['domestic'] ? '国内平台标记' : '其他平台标记') . '</td><td>' . $e($r['kind']) . '</td><td>' . number_format($r['hits']) . '</td><td>' . number_format($r['errors']) . '</td><td>未验证</td></tr>'; }
         if ($s['ranking'] === []) { $html .= '<tr><td colspan="6">暂无匹配的蜘蛛声明。</td></tr>'; }
-        $html .= '</tbody></table></div><h2>聚合明细</h2><p>共 ' . $s['rowCount'] . ' 条聚合，第 ' . $s['page'] . ' / ' . $s['pages'] . ' 页，每页最多50条。</p><div class="crawler-table-wrap"><table class="crawler-stat-table"><thead><tr><th>UTC 日期</th><th>蜘蛛声明</th><th>公开路由类别</th><th>HTTP 状态</th><th>已采集次数</th><th>来源</th></tr></thead><tbody>';
+        $html .= '</tbody></table></div></section></div><section class="editor-card"><h2>聚合明细</h2><p>共 ' . $s['rowCount'] . ' 条聚合，第 ' . $s['page'] . ' / ' . $s['pages'] . ' 页，每页最多50条。</p><div class="crawler-table-wrap compact-scroll" tabindex="0" role="region" aria-label="聚合明细"><table class="crawler-stat-table"><thead><tr><th>UTC 日期</th><th>蜘蛛声明</th><th>公开路由类别</th><th>HTTP 状态</th><th>已采集次数</th><th>来源</th></tr></thead><tbody>';
         foreach ($s['rows'] as $row) { $html .= '<tr>'; foreach (['day', 'agent', 'route', 'status', 'hits'] as $key) { $html .= '<td>' . $e($row[$key]) . '</td>'; } $html .= '<td>未验证</td></tr>'; }
         if ($s['rows'] === []) { $html .= '<tr><td colspan="6">暂无匹配记录。</td></tr>'; }
         $html .= '</tbody></table></div><nav class="admin-pagination" aria-label="聚合明细分页">';
         foreach ([$s['page'] - 1 => '上一页', $s['page'] + 1 => '下一页'] as $page => $label) { if ($page >= 1 && $page <= $s['pages']) { $html .= '<a href="' . $url('/admin/seo/crawlers?' . http_build_query(array_replace($f, ['page' => (string) $page]))) . '">' . $label . '</a>'; } }
-        return $html . '</nav><p class="muted">国内平台标记包括百度、搜狗、360、神马、字节 Bytespider、头条、Petal。分类来自公开 UA 规则，不验证运营方或用途，不表示 AI 搜索/训练策略已覆盖这些蜘蛛。</p>';
+        return $html . '</nav><p class="muted">国内平台标记包括百度、搜狗、360、神马、字节 Bytespider、头条、Petal。分类来自公开 UA 规则，不验证运营方或用途，不表示 AI 搜索/训练策略已覆盖这些蜘蛛。</p></section></div>';
     }
 
     /** Site-wide best-effort counters: only the time window applies, never UA/status filters. */
@@ -125,7 +125,7 @@ final class CrawlerStatistics
         }
         $stored = $counts['stored']; unset($counts['stored']);
         $unavailable = max(0, (int) ($observation['unavailable_shards'] ?? 0));
-        $html = '<h2>全站采集丢样观测（UTC）</h2><p>仅跟随上方时间窗口，不受平台、蜘蛛或 HTTP 状态筛选影响；不能与上方筛选结果相减或直接比较。只观测采集开启时、已识别 UA 对受支持公开路由的 GET / HEAD 尝试。</p>';
+        $html = '<details class="admin-card"><summary>全站采集丢样观测（UTC）</summary><p>仅跟随上方时间窗口，不受平台、蜘蛛或 HTTP 状态筛选影响；不能与上方筛选结果相减或直接比较。只观测采集开启时、已识别 UA 对受支持公开路由的 GET / HEAD 尝试。</p>';
         $html .= '<p>观测本身也可能因争锁、写入失败或计数上限而漏记，以下均为观测下界。不能计算真实访问量、完整丢样数或丢样率；来源仍未验证。旧记录不会补算。</p><div class="admin-dashboard-grid">';
         foreach (['观测到的写入成功' => $stored, '观测到的未记入次数' => array_sum($counts), '当前不可读取的观测分片' => $unavailable] as $label => $number) {
             $html .= '<section class="card admin-dashboard-card"><span>' . $label . '</span><strong>' . number_format($number) . '</strong></section>';
@@ -134,6 +134,6 @@ final class CrawlerStatistics
         foreach (['lock_busy' => '日志锁忙（非阻塞跳过）', 'row_limit' => '聚合条数上限', 'byte_limit' => '日志字节上限', 'invalid_ledger' => '日志结构无效', 'io_error' => '日志读写失败', 'unsafe_path' => '不安全的符号链接路径', 'hit_cap' => '聚合计数上限'] as $reason => $label) {
             $html .= '<tr><td>' . $label . '</td><td>' . number_format($counts[$reason]) . '</td></tr>';
         }
-        return $html . '</tbody></table></div>';
+        return $html . '</tbody></table></div></details>';
     }
 }

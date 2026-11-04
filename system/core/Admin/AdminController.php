@@ -4077,17 +4077,17 @@ final class AdminController
             $notice = '<p class="error">导入失败，请检查格式后重试。</p>';
         }
 
-        $body = '<h1>导入导出</h1><p class="muted">官方导出包包含 manifest、内容、用户、media、url-map、extensions、payments 和 checksums。</p>' .
+        $body = '<div class="admin-compact compact-transfer"><h1>导入导出</h1><p class="muted">官方导出包包含 manifest、内容、用户、media、url-map、extensions、payments 和 checksums。</p>' .
             '<form method="post" action="/admin/transfer/export">' . CsrfToken::field() . '<button type="submit">创建官方导出包</button></form>' .
             $notice .
-            '<section class="editor-card"><h2>导入内容</h2><p class="muted">支持 WordPress XML 与 Z-Blog JSON。导入内容会先保存为草稿 Article，并记录原始 URL Mapping。</p>' .
+            '<div class="compact-columns"><section class="editor-card"><h2>导入内容</h2><p class="muted">支持 WordPress XML 与 Z-Blog JSON。导入内容会先保存为草稿 Article，并记录原始 URL Mapping。</p>' .
             '<form method="post" action="/admin/transfer/import">' . CsrfToken::field() .
-            '<label>导入数据<textarea name="import_payload" rows="8" placeholder="粘贴 WordPress XML 或 Z-Blog JSON"></textarea></label>' .
+            '<label>导入数据<textarea name="import_payload" rows="5" placeholder="粘贴 WordPress XML 或 Z-Blog JSON"></textarea></label>' .
             '<button type="submit">导入为草稿</button></form></section>' .
             '<section class="editor-card"><h2>URL Mapping</h2><p class="muted">导入旧站内容后，旧 URL 会在这里映射到新内容地址；删除映射只影响跳转，不会删除文章、页面、媒体、支付或发卡数据。</p>' .
-            $urlMappings . '</section>' .
+            $urlMappings . '</section></div>' .
             '<h2>导出包</h2>' . $items .
-            '<p class="muted">恢复前先执行预检；内容数据恢复只写入内容、媒体元数据和 URL Mapping，不恢复支付账本、发卡商品、库存或订单。</p>';
+            '<p class="muted">恢复前先执行预检；内容数据恢复只写入内容、媒体元数据和 URL Mapping，不恢复支付账本、发卡商品、库存或订单。</p></div>';
 
         return Response::html(View::page('导入导出', $body));
     }
@@ -4095,14 +4095,15 @@ final class AdminController
     private function transferUrlMappingTable(UrlMappingRepository $repo): string
     {
         $rows = '';
+        $urlCell = static fn (string $value): string => '<details class="compact-url"><summary><span class="compact-url-preview">' . View::escape($value) . '</span></summary><code>' . View::escape($value) . '</code></details>';
         foreach ($repo->recent(20) as $mapping) {
             $id = (int) ($mapping['id'] ?? 0);
             $delete = $id > 0
                 ? '<form method="post" action="/admin/transfer/url-mappings/' . $id . '/delete" style="display:inline" onsubmit="return confirm(\'确定要删除这条 URL Mapping 吗？此操作不可撤销，但不会删除内容。\');">' .
                     CsrfToken::field() . '<button class="admin-danger" type="submit">删除</button></form>'
                 : '<span class="muted">不可操作</span>';
-            $rows .= '<tr><td>' . View::escape((string) ($mapping['source_url'] ?? '')) . '</td><td>' .
-                View::escape((string) ($mapping['target_url'] ?? '')) . '</td><td>' .
+            $rows .= '<tr><td>' . $urlCell((string) ($mapping['source_url'] ?? '')) . '</td><td>' .
+                $urlCell((string) ($mapping['target_url'] ?? '')) . '</td><td>' .
                 View::escape((string) ($mapping['status_code'] ?? '')) . '</td><td>' .
                 View::escape((string) ($mapping['source_platform'] ?? '')) . '</td><td>' .
                 View::escape((string) ($mapping['created_at'] ?? '')) . '</td><td>' . $delete . '</td></tr>';
@@ -4112,7 +4113,7 @@ final class AdminController
         }
 
         return '<p class="muted">共 ' . $repo->count() . ' 条，显示最近 20 条。</p>' .
-            '<table><thead><tr><th>旧 URL</th><th>新 URL</th><th>状态码</th><th>来源</th><th>创建时间</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>';
+            '<table class="compact-mappings"><thead><tr><th>旧 URL</th><th>新 URL</th><th>状态码</th><th>来源</th><th>创建时间</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>';
     }
 
     private function transferExportRow(string $file): string
@@ -4149,7 +4150,7 @@ final class AdminController
         $delete = '<form method="post" action="/admin/transfer/delete/' . rawurlencode($name) . '" style="display:inline" onsubmit="return confirm(\'确定要删除这个导出包吗？此操作不可撤销。\');">' .
             CsrfToken::field() . '<button class="admin-danger" type="submit">删除</button></form>';
 
-        return '<tr><td>' . View::escape($name) . '</td><td>' . View::escape($createdAt) . '</td><td>' . View::escape($mediaLabel) . '</td><td>' . View::escape($paymentLabel) . '</td><td>' . $commands . '</td><td>' . $download . ' ' . $preflight . ' ' . $restoreContent . ' ' . $delete . '</td></tr>';
+        return '<tr><td>' . View::escape($name) . '</td><td>' . View::escape($createdAt) . '</td><td>' . View::escape($mediaLabel) . '</td><td>' . View::escape($paymentLabel) . '</td><td><details><summary>查看恢复命令</summary><div class="compact-commands">' . $commands . '</div></details></td><td><div class="admin-action-row">' . $download . ' ' . $preflight . ' ' . $restoreContent . ' ' . $delete . '</div></td></tr>';
     }
 
     private function transferCliCommand(string $command, string $file): string
@@ -4876,22 +4877,22 @@ final class AdminController
 
         $providers = PaymentProviderRegistry::ids();
         $providerText = $providers === [] ? '当前无可用支付 Provider' : implode(', ', $providers);
-        $body = '<h1>支付管理</h1><p class="muted">CMS Core 维护可信支付状态。支付 Provider 只负责返回已验证结果，资金不经过平台账户。</p>' .
+        $body = '<div class="admin-compact"><h1>支付管理</h1><p class="muted">CMS Core 维护可信支付状态。支付 Provider 只负责返回已验证结果，资金不经过平台账户。</p>' .
             '<p class="muted">已注册 Provider：' . View::escape($providerText) . ' <a class="button" href="/admin/payments/providers">Provider 设置</a></p>' .
-            '<form method="post" action="/admin/payments/authorizations/expire">' . CsrfToken::field() . '<button type="submit">标记过期授权</button></form>' .
-            '<form method="post" action="/admin/payments/entitlements/expire">' . CsrfToken::field() . '<button type="submit">标记过期权益</button></form>' .
-            '<form method="get" action="/admin/payments"><label>搜索<input name="q" value="' . View::escape((string) $request->input('q', '')) . '" placeholder="Subject、远端单号、参考号或幂等键"></label>' .
+            '<div class="admin-action-row compact-maintenance"><form method="post" action="/admin/payments/authorizations/expire">' . CsrfToken::field() . '<button type="submit">标记过期授权</button></form>' .
+            '<form method="post" action="/admin/payments/entitlements/expire">' . CsrfToken::field() . '<button type="submit">标记过期权益</button></form></div>' .
+            '<form method="get" action="/admin/payments" class="compact-filters"><label class="compact-wide">搜索<input name="q" value="' . View::escape((string) $request->input('q', '')) . '" placeholder="Subject、远端单号、参考号或幂等键"></label>' .
             '<label>状态<select name="status"><option value="">全部</option>' . $this->paymentStatusOptions((string) $request->input('status', '')) . '</select></label>' .
             '<label>Provider<input name="provider_id" value="' . View::escape((string) $request->input('provider_id', '')) . '"></label>' .
             '<label>Subject Type<input name="subject_type" value="' . View::escape((string) $request->input('subject_type', '')) . '"></label>' .
             '<label>币种<input name="currency" value="' . View::escape((string) $request->input('currency', '')) . '" placeholder="USD"></label>' .
             '<label>创建起始<input name="created_from" value="' . View::escape((string) $request->input('created_from', '')) . '" placeholder="YYYY-MM-DD"></label>' .
-            '<label>创建截止<input name="created_to" value="' . View::escape((string) $request->input('created_to', '')) . '" placeholder="YYYY-MM-DD"></label><button type="submit">筛选</button></form>' .
+            '<label>创建截止<input name="created_to" value="' . View::escape((string) $request->input('created_to', '')) . '" placeholder="YYYY-MM-DD"></label><div class="admin-action-row"><button type="submit">筛选</button><a href="/admin/payments">重置</a></div></form>' .
             $this->paymentSummaryHtml($summary) .
             $this->paymentDiagnosticsHtml($diagnostics ?? []) .
             '<p><a class="button" href="/admin/payments/export.csv?' . View::escape(http_build_query($filters)) . '">导出当前筛选 CSV</a></p>' .
             '<table><thead><tr><th>ID</th><th>Subject</th><th>Provider</th><th>状态</th><th>金额</th><th>创建时间</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>' .
-            '<p class="muted">第 ' . (int) $result['page'] . ' / ' . (int) $result['pages'] . ' 页，共 ' . (int) $result['total'] . ' 条。</p>';
+            '<p class="muted">第 ' . (int) $result['page'] . ' / ' . (int) $result['pages'] . ' 页，共 ' . (int) $result['total'] . ' 条。</p></div>';
 
         return Response::html(View::page('支付管理', $body));
     }
@@ -5077,16 +5078,16 @@ final class AdminController
             CsrfToken::field() .
             '<button class="button" type="submit">修复 Provider 存储</button></form>';
 
-        $body = '<div class="admin-page-header"><div><h1>支付方式设置</h1><p class="muted">先选择要使用的支付方式，再在下方填写对应资料。普通管理员不用猜 Provider ID 或 JSON。</p></div><p><a class="button admin-button-secondary" href="/admin/payments">返回支付管理</a></p></div>' .
+        $body = '<div class="admin-compact"><div class="admin-page-header"><div><h1>支付方式设置</h1><p class="muted">先选择要使用的支付方式，再在下方填写对应资料。普通管理员不用猜 Provider ID 或 JSON。</p></div><p><a class="button admin-button-secondary" href="/admin/payments">返回支付管理</a></p></div>' .
             $notice .
             $officialPluginNotice .
-            $form .
-            '<section class="admin-card"><h2>当前可用支付方式</h2><p class="muted">绿色表示可以直接配置并用于发卡、付费内容、付费下载等 Core 支付链路。</p>' . $methodCards . '</section>' .
-            '<section class="admin-card"><h2>常见支付平台要填什么</h2><p class="muted">按接口协议选择支付方式：易支付 V1／MD5 使用对应独立插件；官方直连和信用卡使用各自 Provider，已有方式可并列配置。</p>' . $integrationGuide . '</section>' .
-            $repairForm .
+            '<div class="compact-provider-layout">' . $form .
+            '<section class="admin-card"><h2>当前可用支付方式</h2><p class="muted">绿色表示可以直接配置并用于发卡、付费内容、付费下载等 Core 支付链路。</p>' . $methodCards . '</section></div>' .
+            '<details class="admin-card"><summary>常见支付平台要填什么</summary><p class="muted">按接口协议选择支付方式：易支付 V1／MD5 使用对应独立插件；官方直连和信用卡使用各自 Provider，已有方式可并列配置。</p>' . $integrationGuide . '</details>' .
+            '<details class="admin-card"><summary>高级状态与维护</summary>' . $repairForm .
             '<h2>高级状态表</h2><p class="muted">这里用于诊断真实保存状态和支付服务发现结果。日常只需要看上面的支付方式卡片和下面的配置表单。</p>' .
             '<table><thead><tr><th>支付方式 / Provider</th><th>显示名称</th><th>必要配置</th><th>启用状态</th><th>默认</th><th>旧字段同步</th><th>诊断</th><th>能力</th><th>公共配置</th><th>密钥掩码</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>' .
-            $chainCheck;
+            $chainCheck . '</details></div>';
 
         return $this->paymentAdminNoStore(Response::html(View::page('支付方式设置', $body)));
     }
@@ -5911,12 +5912,12 @@ final class AdminController
 
         return '<section class="admin-card" id="provider-form"><h2>配置支付方式：' . View::escape($this->paymentProviderFriendlyName($providerId)) . '</h2>' .
             '<p class="muted">配置 Provider：' . View::escape($providerId) . '。技术 ID 会自动带入，日常只需要填写下面的中文字段。</p>' .
-            '<form method="post" action="/admin/payments/providers/save">' . CsrfToken::field() .
+            '<form method="post" action="/admin/payments/providers/save" class="compact-provider-form">' . CsrfToken::field() .
             '<input type="hidden" name="provider_settings_form" value="1">' .
             '<input type="hidden" name="provider_id" value="' . View::escape($providerId) . '">' .
-            '<label>支付方式名称<input name="display_name" value="' . View::escape($displayName) . '" placeholder="' . View::escape($this->paymentProviderFriendlyName($providerId)) . '"></label>' .
+            '<div class="compact-fields"><label>支付方式名称<input name="display_name" value="' . View::escape($displayName) . '" placeholder="' . View::escape($this->paymentProviderFriendlyName($providerId)) . '"></label>' .
             '<label>状态<select name="status">' . $statusOptions . '</select></label>' .
-            '<label><input type="checkbox" name="default_provider" value="1"' . $checked . '> 设为默认支付方式 <span class="muted">（设为默认 Provider）</span></label>' .
+            '<label><input type="checkbox" name="default_provider" value="1"' . $checked . '> 设为默认支付方式 <span class="muted">（设为默认 Provider）</span></label></div>' .
             $fields .
             '<details><summary>高级公共 JSON（可选）</summary><p class="muted">普通配置无需填写；这里只放非密钥字段，会与上方字段合并。密钥、Token、密码不要写在这里。</p><textarea name="public_config_json" rows="3">' . View::escape($advanced) . '</textarea></details>' .
             '<button type="submit">保存支付方式</button></form></section>';
@@ -10736,18 +10737,21 @@ JS;
 
         $opportunityRows = '';
         foreach ($opportunities as $opportunity) {
+            $details = AdminDataView::facts([
+                'Primary URL' => (string) ($opportunity['primary_url'] ?? ''),
+                '搜索引擎' => (string) ($opportunity['engine'] ?? 'Not Available'),
+                '证据' => (string) ($opportunity['evidence'] ?? ''),
+                '最新指标周期' => (string) ($opportunity['last_metric_period'] ?? 'Not Available'),
+                '最近百度提交' => (string) ($opportunity['last_baidu_submission'] ?? 'Not Available'),
+                'Index Evidence' => (string) ($opportunity['index_evidence'] ?? 'unknown'),
+            ]);
             $opportunityRows .= '<tr><td><a href="/admin/seo/keywords/detail?keyword=' . rawurlencode((string) ($opportunity['keyword'] ?? '')) . '">' . View::escape((string) ($opportunity['keyword'] ?? '')) . '</a></td>' .
-                '<td><code>' . View::escape((string) ($opportunity['primary_url'] ?? '')) . '</code></td>' .
-                '<td>' . View::escape((string) ($opportunity['engine'] ?? 'Not Available')) . '</td>' .
                 '<td>' . View::escape((string) ($opportunity['type'] ?? 'Review')) . '</td>' .
                 '<td><strong>' . View::escape((string) ($opportunity['score'] ?? 0)) . '</strong></td>' .
-                '<td>' . View::escape((string) ($opportunity['evidence'] ?? '')) . '</td>' .
                 '<td>' . View::escape((string) ($opportunity['suggested_action'] ?? 'Review manually')) . '</td>' .
-                '<td>' . View::escape((string) ($opportunity['last_metric_period'] ?? 'Not Available')) . '</td>' .
-                '<td>' . View::escape((string) ($opportunity['last_baidu_submission'] ?? 'Not Available')) . '</td>' .
-                '<td>' . View::escape((string) ($opportunity['index_evidence'] ?? 'unknown')) . '</td></tr>';
+                '<td><details><summary>查看证据与指标</summary>' . $details . '</details></td></tr>';
         }
-        $opportunityRows = $opportunityRows !== '' ? $opportunityRows : '<tr><td colspan="10" class="muted">No SEO opportunities detected from available observed data.</td></tr>';
+        $opportunityRows = $opportunityRows !== '' ? $opportunityRows : '<tr><td colspan="5" class="muted">No SEO opportunities detected from available observed data.</td></tr>';
 
         $rowHtml = '';
         foreach ($rows as $row) {
@@ -10773,19 +10777,19 @@ JS;
         }
         $rowHtml = $rowHtml !== '' ? $rowHtml : '<tr><td colspan="11" class="muted">暂无匹配关键词。</td></tr>';
 
-        return '<div class="admin-page-header"><div><h1>关键词中心</h1><p class="muted">基于 Content / Category / Tag 的 target keywords 聚合展示，不自动修改任何页面。</p></div></div>' .
+        return '<div class="admin-compact compact-keywords"><div class="admin-page-header"><div><h1>关键词中心</h1><p class="muted">基于 Content / Category / Tag 的 target keywords 聚合展示，不自动修改任何页面。</p></div></div>' .
             '<div class="admin-dashboard-grid">' . $cardHtml . '</div>' .
-            '<section class="editor-card"><h2>今日 SEO 机会</h2><table><thead><tr><th>关键词</th><th>Primary URL</th><th>搜索引擎</th><th>机会类型</th><th>分数</th><th>证据</th><th>建议操作</th><th>最新指标周期</th><th>最近百度提交</th><th>Index Evidence</th></tr></thead><tbody>' . $opportunityRows . '</tbody></table><p class="muted">分数由确定性规则计算并可解释。Submitted 不等于 Indexed。</p></section>' .
-            '<section class="editor-card"><h2>筛选</h2><form method="get" action="/admin/seo/keywords"><div class="admin-grid four">' .
+            '<section class="editor-card"><h2>今日 SEO 机会</h2><table><thead><tr><th>关键词</th><th>机会类型</th><th>分数</th><th>建议操作</th><th>证据 / 指标</th></tr></thead><tbody>' . $opportunityRows . '</tbody></table><p class="muted">分数由确定性规则计算并可解释。Submitted 不等于 Indexed。</p></section>' .
+            '<div class="compact-columns"><section class="editor-card"><h2>筛选</h2><form method="get" action="/admin/seo/keywords"><div class="compact-fields">' .
             '<label>关键词搜索<input name="q" value="' . View::escape((string) ($filters['q'] ?? '')) . '" placeholder="PHP CMS"></label>' .
             '<label>内容类型' . $this->selectHtml('type', ['all' => '全部', 'article' => 'Article', 'page' => 'Page', 'category' => 'Category', 'tag' => 'Tag'], (string) ($filters['type'] ?? 'all')) . '</label>' .
             '<label>冲突' . $this->selectHtml('conflict', ['all' => '全部', 'yes' => '潜在关键词内耗', 'no' => '正常'], (string) ($filters['conflict'] ?? 'all')) . '</label>' .
             '<label>状态' . $this->selectHtml('status', ['all' => '全部', 'draft' => 'draft', 'active' => 'active', 'paused' => 'paused'], (string) ($filters['status'] ?? 'all')) . '</label>' .
             '</div><p><button type="submit">应用筛选</button> <a class="button admin-button-secondary" href="/admin/seo/keywords">清空</a></p></form></section>' .
             '<section class="editor-card"><h2>新增 / 预留关键词</h2><form method="post" action="/admin/seo/keywords/save">' . CsrfToken::field() .
-            '<div class="admin-grid four"><label>关键词<input name="keyword" required></label><label>Primary URL<input name="primary_url" placeholder="/category/php-cms"></label><label>状态' . $this->selectHtml('status', ['draft' => 'draft', 'active' => 'active', 'paused' => 'paused'], 'draft') . '</label><label>来源' . $this->selectHtml('source', ['manual' => 'manual', 'content' => 'content', 'baidu' => 'baidu', 'google' => 'google', 'ai_suggestion' => 'ai_suggestion'], 'manual') . '</label></div>' .
-            '<label>备注<textarea name="notes" rows="2"></textarea></label><p><button type="submit">保存关键词</button></p></form></section>' .
-            '<section class="editor-card"><h2>关键词列表</h2><table><thead><tr><th>关键词</th><th>主落地页</th><th>绑定页面数量</th><th>内容类型</th><th>来源</th><th>状态</th><th>是否冲突</th><th>Sitemap</th><th>索引证据</th><th>优化机会</th><th>最后更新时间</th></tr></thead><tbody>' . $rowHtml . '</tbody></table><p class="muted">缺失的搜索表现数据会显示 Not Available，不显示 0。</p></section>';
+            '<div class="compact-fields"><label>关键词<input name="keyword" required></label><label>Primary URL<input name="primary_url" placeholder="/category/php-cms"></label><label>状态' . $this->selectHtml('status', ['draft' => 'draft', 'active' => 'active', 'paused' => 'paused'], 'draft') . '</label><label>来源' . $this->selectHtml('source', ['manual' => 'manual', 'content' => 'content', 'baidu' => 'baidu', 'google' => 'google', 'ai_suggestion' => 'ai_suggestion'], 'manual') . '</label></div>' .
+            '<label>备注<textarea name="notes" rows="2"></textarea></label><p><button type="submit">保存关键词</button></p></form></section></div>' .
+            '<section class="editor-card"><h2>关键词列表</h2><div class="compact-table-scroll" tabindex="0" role="region" aria-label="关键词列表"><table class="compact-wide-table"><thead><tr><th>关键词</th><th>主落地页</th><th>绑定页面数量</th><th>内容类型</th><th>来源</th><th>状态</th><th>是否冲突</th><th>Sitemap</th><th>索引证据</th><th>优化机会</th><th>最后更新时间</th></tr></thead><tbody>' . $rowHtml . '</tbody></table></div><p class="muted">缺失的搜索表现数据会显示 Not Available，不显示 0。</p></section></div>';
     }
 
     /** @param array<string,mixed> $detail */
@@ -10927,9 +10931,9 @@ JS;
             ? '<form method="post" action="/admin/seo/search-engines/google/sync">' . CsrfToken::field() . '<button type="submit">立即同步</button><p class="muted">执行后会刷新本页，并显示获取、新增、更新、跳过数量。</p></form>'
             : '<p><span class="admin-badge admin-badge-warning">Google 同步需要先完成 OAuth 连接。</span></p>';
 
-        return '<div class="admin-page-header"><div><h1>搜索引擎连接</h1><p class="muted">搜索表现数据与 CMS 目标关键词分层保存。</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/seo/keywords">关键词中心</a></div></div>' .
+        return '<div class="admin-compact compact-search"><div class="admin-page-header"><div><h1>搜索引擎连接</h1><p class="muted">搜索表现数据与 CMS 目标关键词分层保存。</p></div><div class="admin-action-row"><a class="button admin-button-secondary" href="/admin/seo/keywords">关键词中心</a></div></div>' .
             $notice .
-            '<section class="editor-card"><h2>Baidu</h2><table><tbody>' .
+            '<div class="compact-columns"><section class="editor-card"><h2>Baidu</h2><table><tbody>' .
             '<tr><th>状态</th><td>' . View::escape($statusLabel) . '</td></tr>' .
             '<tr><th>插件已安装</th><td>' . View::escape(!empty($baidu['plugin_installed']) ? 'YES' : 'NO') . '</td></tr>' .
             '<tr><th>插件已启用</th><td>' . View::escape(!empty($baidu['plugin_enabled']) ? 'YES' : 'NO') . '</td></tr>' .
@@ -10950,17 +10954,17 @@ JS;
             '<tr><th>上次同步结果</th><td>' . View::escape((string) ($google['last_sync_result'] ?? '')) . '</td></tr>' .
             '<tr><th>OAuth 回调地址</th><td><code>' . View::escape($this->googleOauthRedirectUri()) . '</code></td></tr>' .
             '</tbody></table><form method="post" action="/admin/seo/search-engines/google/save">' . CsrfToken::field() .
-            '<div class="admin-grid four"><label><input type="checkbox" name="enabled" value="1"' . ($googleEnabled ? ' checked' : '') . '> 启用</label>' .
+            '<div class="compact-fields"><label><input type="checkbox" name="enabled" value="1"' . ($googleEnabled ? ' checked' : '') . '> 启用</label>' .
             '<label>Search Console 站点资源<input name="property_url" value="' . View::escape($googleProperty) . '" placeholder="https://www.example.com/"></label>' .
             '<label>Client ID<input name="client_id" value="' . View::escape($googleClientId) . '" autocomplete="off"></label>' .
             '<label>Client Secret<input type="password" name="client_secret" placeholder="留空则保留" autocomplete="new-password"></label></div>' .
             '<label>Refresh Token<textarea name="refresh_token" rows="2" placeholder="通常通过 OAuth 连接自动保存；留空则保留。"></textarea></label>' .
             '<p><button type="submit">保存 Google 配置</button> <a class="button admin-button-secondary" href="/admin/seo/search-engines/google/oauth/start">连接 Google OAuth</a></p>' .
             '<p class="muted">Google 搜索表现数据来自官方 Search Analytics API；缺失数据继续显示 Not Available，不显示 0。</p></form>' .
-            '<div class="admin-card-subsection"><h3>同步 Google 搜索表现数据</h3>' . $googleSyncPanel . '</div></section>' .
-            '<section class="editor-card"><h2>手动导入 CSV</h2><form method="post" action="/admin/seo/search-engines/import">' . CsrfToken::field() .
-            '<label>CSV<textarea name="csv_text" rows="8" placeholder="keyword,url_path,search_engine,impressions,clicks,ctr,average_position,period_start,period_end&#10;PHP CMS,/category/php-cms,baidu,100,10,10,3.2,2026-10-01,2026-10-02"></textarea></label><p><button type="submit">导入 CSV</button></p></form></section>' .
-            '<section class="editor-card"><h2>Baidu URL Submission</h2><form method="post" action="/admin/seo/search-engines/submit">' . CsrfToken::field() . '<label>URL<input name="url" placeholder="/category/php-cms"></label><p><button type="submit">通过百度推送插件提交到百度</button></p><p class="muted">Submitted / Submission Accepted 不等于 Indexed。</p></form><table><thead><tr><th>URL</th><th>状态</th><th>HTTP</th><th>Success</th><th>Remain</th><th>Error</th><th>提交时间</th></tr></thead><tbody>' . $submissionRows . '</tbody></table></section>';
+            '<div class="admin-card-subsection"><h3>同步 Google 搜索表现数据</h3>' . $googleSyncPanel . '</div></section></div>' .
+            '<details class="editor-card"><summary>手动导入 CSV</summary><form method="post" action="/admin/seo/search-engines/import">' . CsrfToken::field() .
+            '<label>CSV<textarea name="csv_text" rows="5" placeholder="keyword,url_path,search_engine,impressions,clicks,ctr,average_position,period_start,period_end&#10;PHP CMS,/category/php-cms,baidu,100,10,10,3.2,2026-10-01,2026-10-02"></textarea></label><p><button type="submit">导入 CSV</button></p></form></details>' .
+            '<section class="editor-card"><h2>Baidu URL Submission</h2><form method="post" action="/admin/seo/search-engines/submit">' . CsrfToken::field() . '<label>URL<input name="url" placeholder="/category/php-cms"></label><p><button type="submit">通过百度推送插件提交到百度</button></p><p class="muted">Submitted / Submission Accepted 不等于 Indexed。</p></form><div class="compact-table-scroll" tabindex="0" role="region" aria-label="百度提交记录"><table class="compact-submissions"><thead><tr><th>URL</th><th>状态</th><th>HTTP</th><th>Success</th><th>Remain</th><th>Error</th><th>提交时间</th></tr></thead><tbody>' . $submissionRows . '</tbody></table></div></section></div>';
     }
 
     private function option(string $value, string $selected, string $label): string
@@ -11259,27 +11263,27 @@ JS;
         }
         $stats = $repo->stats();
         $rows = '';
+        // Keep the blank slot in the same form so every submitted field retains its contract.
+        $slots[] = ['slot_key' => '', 'label' => '', 'placement' => '', 'html' => '', 'enabled' => 0];
         foreach ($slots as $i => $slot) {
             $key = (string) ($slot['slot_key'] ?? '');
             $slotStats = $stats[$key] ?? ['impressions' => 0, 'clicks' => 0];
-            $rows .= '<tr><td><input name="slots[' . $i . '][slot_key]" value="' . View::escape($key) . '" placeholder="home_top"></td>' .
-                '<td><input name="slots[' . $i . '][label]" value="' . View::escape((string) ($slot['label'] ?? '广告位')) . '"></td>' .
-                '<td><input name="slots[' . $i . '][placement]" value="' . View::escape((string) ($slot['placement'] ?? '')) . '"></td>' .
-                '<td><label class="inline"><input type="checkbox" name="slots[' . $i . '][enabled]" value="1"' . ((int) ($slot['enabled'] ?? 0) === 1 ? ' checked' : '') . '> 启用</label></td>' .
-                '<td>' . (int) $slotStats['impressions'] . '</td><td>' . (int) $slotStats['clicks'] . '</td></tr>' .
-                '<tr><td colspan="6"><textarea name="slots[' . $i . '][html]" rows="4" placeholder="广告 HTML，脚本和危险属性会在前台输出时过滤">' . View::escape((string) ($slot['html'] ?? '')) . '</textarea>' .
-                '<p class="muted">预览：' . AdRenderer::sanitizeHtml((string) ($slot['html'] ?? '')) . '</p></td></tr>';
+            $rows .= '<section class="editor-card compact-ad-slot"><header class="admin-page-header"><h3>' . View::escape($key === '' ? '新增广告位' : (string) ($slot['label'] ?? $key)) . '</h3>' .
+                '<span class="muted">曝光 ' . (int) $slotStats['impressions'] . ' · 点击 ' . (int) $slotStats['clicks'] . '</span></header><div class="compact-fields">' .
+                '<label>插槽键<input name="slots[' . $i . '][slot_key]" value="' . View::escape($key) . '" placeholder="custom_slot"></label>' .
+                '<label>名称<input name="slots[' . $i . '][label]" value="' . View::escape((string) ($slot['label'] ?? '')) . '" placeholder="自定义广告位"></label>' .
+                '<label>位置说明<input name="slots[' . $i . '][placement]" value="' . View::escape((string) ($slot['placement'] ?? '')) . '" placeholder="主题插槽"></label>' .
+                '<label class="inline"><input type="checkbox" name="slots[' . $i . '][enabled]" value="1"' . ((int) ($slot['enabled'] ?? 0) === 1 ? ' checked' : '') . '> 启用</label></div>' .
+                '<details><summary>广告代码与预览</summary><label>广告 HTML<textarea name="slots[' . $i . '][html]" rows="4" placeholder="脚本和危险属性会在前台输出时过滤">' . View::escape((string) ($slot['html'] ?? '')) . '</textarea></label>' .
+                '<div class="compact-ad-preview">预览：' . AdRenderer::sanitizeHtml((string) ($slot['html'] ?? '')) . '</div></details></section>';
         }
-        $next = count($slots);
-        $rows .= '<tr><td><input name="slots[' . $next . '][slot_key]" placeholder="custom_slot"></td><td><input name="slots[' . $next . '][label]" placeholder="自定义广告位"></td><td><input name="slots[' . $next . '][placement]" placeholder="主题插槽"></td><td><label class="inline"><input type="checkbox" name="slots[' . $next . '][enabled]" value="1"> 启用</label></td><td>0</td><td>0</td></tr>' .
-            '<tr><td colspan="6"><textarea name="slots[' . $next . '][html]" rows="4" placeholder="新增广告 HTML"></textarea></td></tr>';
 
-        return '<h1>广告统计</h1><p class="muted">Core 统一管理广告位、验证文件和基础曝光/点击统计；主题只消费同一份广告数据。</p>' .
+        return '<div class="admin-compact"><h1>广告统计</h1><p class="muted">Core 统一管理广告位、验证文件和基础曝光/点击统计；主题只消费同一份广告数据。</p>' .
             '<form method="post" action="/admin/ads">' . CsrfToken::field() .
-            '<h2>广告验证文件</h2><label>ads.txt<textarea name="ads_txt" rows="5" placeholder="google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0">' . View::escape($repo->adsTxt()) . '</textarea></label>' .
-            '<p><a class="button" href="/ads.txt" target="_blank" rel="noopener">打开 /ads.txt</a></p>' .
-            '<h2>广告位</h2><table><thead><tr><th>插槽键</th><th>名称</th><th>位置说明</th><th>状态</th><th>曝光</th><th>点击</th></tr></thead><tbody>' . $rows . '</tbody></table>' .
-            '<button type="submit">保存广告设置</button></form>';
+            '<details class="editor-card"><summary>广告验证文件 · ads.txt</summary><label>ads.txt<textarea name="ads_txt" rows="3" placeholder="google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0">' . View::escape($repo->adsTxt()) . '</textarea></label>' .
+            '<p><a class="button" href="/ads.txt" target="_blank" rel="noopener">打开 /ads.txt</a></p></details>' .
+            '<h2>广告位</h2><div class="compact-columns">' . $rows . '</div>' .
+            '<div class="compact-save"><button type="submit">保存广告设置</button></div></form></div>';
     }
 
     /** @return list<array<string,mixed>> */

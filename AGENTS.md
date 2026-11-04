@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Isolated compact admin layouts (2026-11-04)
+
+- Owner subsequently says “发布”, authorizing merge, next patch Core1.2.94 preparation, server-only signing, complete Release Gate and publication of this layout change. This supersedes this task's no-merge/no-signing/no-publication hold below; no production website upgrade, payment action, settings change or independent plugin release is authorized. Preserve frozen1.2.93; back up distribution data before publication.
+- Owner requests compact layouts for ads, keywords, crawlers, search connections, payments, payment providers and transfer. Branch `ui/admin-compact-workspaces` starts from clean main `fca2464`; keep the published 1.2.93 version unchanged.
+- Presentation changes only: grouped fields/cards, side-by-side panels, expandable evidence/commands and contained long tables. Preserve submitted field names, routes, CSRF, confirmation, data and public contracts.
+- No merge, signing, publication or production mutation is authorized. Signing-contract tests generate asymmetric keys and must not run on the workstation. See `docs/knowledge/2026-11-04-admin-compact-layout.md` for acceptance and knowledge status.
+
 ## Published Core1.2.93 and completed three-site upgrade (2026-11-01)
 
 - Core1.2.93 is published on GitHub/official stable at immutable v1.2.93 /0e601035a1fc6c89d3b36aa767e735a44f1eb24a. Installer8474d05d6da5bbc8e774059db5c2c54e2025d83e1bb1f7b230d99cf392bf9822; updatef00f97703751a01a8999a948bebf75f8bb71da10c504ee7d2a0a771ed05d4a92. Formal exact-main preflight/build/signing/parity643 and PHP8.3/8.5 native upgrade/rollback/retry45 each passed. Do not rebuild, re-sign or move frozen tags/artifacts.
