@@ -26,6 +26,7 @@ This index collects the public-facing documentation currently available in the G
 ## User Guide
 
 - [审核与系统更新数据界面（隔离候选）](admin-data-workspace.md) records grouped views, retained validation, local acceptance and unpublished status.
+- [七个后台页面紧凑布局（未发布候选）](knowledge/2026-11-04-admin-compact-layout.md) records presentation changes, isolated acceptance and knowledge synchronization status.
 
 - [戴影影视插件 0.8.0 安装与配置图文教程](media-sources-0.8.0-guide.zh-CN.md) covers independent movie, short-drama, TV and custom-video setup.
 - Content management is available through the admin backend after installation.
