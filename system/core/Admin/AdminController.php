@@ -8045,6 +8045,7 @@ final class AdminController
             return Response::text('无权执行此操作。', 403);
         }
 
+        $packagePath = (string) $request->input('package_path', '');
         try {
             $root = $this->root();
             $service = new UpdateService(
@@ -8052,7 +8053,7 @@ final class AdminController
                 $this->currentCoreVersion(),
                 new SignatureVerifier((string) $this->settings->get('updates.public_key', '')),
             );
-            $plan = $service->dryRun((string) $request->input('package_path', ''));
+            $plan = $service->dryRun($packagePath);
             $this->auditCoreUpdateAction($guard, 'core.update_verified', (string) $request->input('package_path', ''), [
                 'status' => 'dry_run_passed',
                 'release_id' => (string) ($plan['release_id'] ?? ''),
@@ -8060,14 +8061,14 @@ final class AdminController
                 'file_count' => (int) ($plan['file_count'] ?? 0),
                 'migration_count' => (int) ($plan['migration_count'] ?? 0),
             ]);
-            $body = $this->updateVerificationHtml($plan);
+            $body = $this->updateVerificationHtml($plan, $packagePath);
             return Response::html(View::page('系统更新', $body));
         } catch (Throwable $exception) {
             $this->auditCoreUpdateAction($guard, 'core.update_verify_failed', (string) $request->input('package_path', ''), [
                 'error' => $this->safeAdminErrorSummary($exception),
             ]);
             $this->logger->error('Update verification failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
-            return Response::html(View::page('系统更新', '<h1>更新包验证失败</h1><p class="error">' . View::escape($exception->getMessage()) . '</p>'), 400);
+            return Response::html(View::page('系统更新', '<h1>更新包验证失败</h1><p class="error">' . View::escape($exception->getMessage()) . '</p><p><a class="button" href="' . View::escape($this->updateReturnUrl($packagePath)) . '">返回系统更新</a></p>'), 400);
         }
     }
 
@@ -8082,6 +8083,7 @@ final class AdminController
             return Response::text('无权执行此操作。', 403);
         }
 
+        $packagePath = (string) $request->input('package_path', '');
         try {
             $root = $this->root();
             $service = new UpdateService(
@@ -8089,7 +8091,7 @@ final class AdminController
                 $this->currentCoreVersion(),
                 new SignatureVerifier((string) $this->settings->get('updates.public_key', '')),
             );
-            $result = $service->execute((string) $request->input('package_path', ''), (int) ($guard['id'] ?? 0), (string) $request->input('confirmation', ''));
+            $result = $service->execute($packagePath, (int) ($guard['id'] ?? 0), (string) $request->input('confirmation', ''));
             $this->auditCoreUpdateAction($guard, 'core.update_execute_completed', (string) $request->input('package_path', ''), [
                 'status' => (string) ($result['status'] ?? ''),
                 'operation_id' => (string) ($result['operation_id'] ?? ''),
@@ -8102,7 +8104,7 @@ final class AdminController
                 'error' => $this->safeAdminErrorSummary($exception),
             ]);
             $this->logger->error('Update execution failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
-            return Response::html(View::page('系统更新', '<h1>系统更新失败</h1><p class="error">' . View::escape($exception->getMessage()) . '</p>'), 400);
+            return Response::html(View::page('系统更新', '<h1>系统更新失败</h1><p class="error">' . View::escape($exception->getMessage()) . '</p><p><a class="button" href="' . View::escape($this->updateReturnUrl($packagePath)) . '">返回系统更新</a></p>'), 400);
         }
     }
 
@@ -10488,18 +10490,30 @@ JS;
         ]) . '<div class="data-feature-group"><h3>包含能力</h3>' . $features . '</div><div class="data-feature-group"><h3>验收门</h3>' . $gates . '</div>';
     }
 
-    /** @param array<string,mixed> $plan */
-    private function updateVerificationHtml(array $plan): string
+    private function updateReturnUrl(string $packagePath): string
     {
+        return $this->adminPath('/admin/update' . ($packagePath !== '' ? '?prepared_package=' . rawurlencode($packagePath) : ''));
+    }
+
+    /** @param array<string,mixed> $plan */
+    private function updateVerificationHtml(array $plan, string $packagePath = ''): string
+    {
+        $continue = $packagePath !== ''
+            ? '<div class="admin-card-subsection"><h3>继续执行更新</h3><p class="muted">验证与演练已通过，更新尚未执行。执行时会重新校验更新包，并进入维护模式、创建恢复点。</p>' .
+                '<form method="post" action="' . View::escape($this->adminPath('/admin/update/execute')) . '">' . CsrfToken::field() .
+                '<input type="hidden" name="package_path" value="' . View::escape($packagePath) . '">' .
+                '<label>二次确认<input name="confirmation" placeholder="UPDATE CORE" autocomplete="off"></label>' .
+                '<p><button type="submit">继续执行更新</button></p></form></div>'
+            : '';
         return AdminDataView::workspace('verify', '更新包验证通过', '本页为验证与演练结果，更新尚未执行。', [
             ['label' => '验证结果', 'value' => '演练通过', 'note' => '未执行更新'],
             ['label' => '目标版本', 'value' => (string) ($plan['to_version'] ?? $plan['target_version'] ?? '未提供')],
             ['label' => '更新文件', 'value' => (string) ($plan['file_count'] ?? 0)],
             ['label' => '数据库迁移', 'value' => (string) ($plan['migration_count'] ?? 0)],
         ], [
-            ['id' => 'plan', 'title' => '验证摘要', 'html' => $this->updatePlanSummaryHtml($plan)],
+            ['id' => 'plan', 'title' => '验证摘要', 'html' => $continue . $this->updatePlanSummaryHtml($plan)],
             ['id' => 'raw', 'title' => '完整验证计划', 'html' => AdminDataView::raw('完整验证计划 JSON', $plan)],
-        ], '<a class="button admin-button-secondary" href="' . View::escape($this->adminPath('/admin/update')) . '">返回系统更新</a>');
+        ], '<a class="button admin-button-secondary" href="' . View::escape($this->updateReturnUrl($packagePath)) . '">返回系统更新</a>');
     }
 
     /** @param array<string,mixed> $result */

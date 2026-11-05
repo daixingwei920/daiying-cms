@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.95 (release preparation)
+
+- Add a direct, CSRF-protected update execution form after successful verification, with the prepared path carried forward and manual `UPDATE CORE` confirmation retained.
+- Preserve the prepared package path when returning from verification, including verification or execution errors. Execution still revalidates package trust, integrity, compatibility and recovery requirements.
+- Cover the complete native HTTP check/download/verify/return/reverify/execute chain, tampering after verification, confirmation/CSRF rejection and retained data. No migration or production-site upgrade is included; Core1.2.80/PHP8.3 floors remain.
+
 ## 1.2.94 (release preparation)
 
 - Compact seven administration pages: group payment filters/provider fields, display ad cards and related panels in columns, and expand long SEO evidence, mapping URLs and restore commands on demand. Keep wide records within their own scroll regions and retain entered values across collapse/resizing.
