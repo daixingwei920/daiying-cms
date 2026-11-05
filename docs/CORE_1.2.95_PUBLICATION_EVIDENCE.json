@@ -1,0 +1,50 @@
+{
+  "status": "PUBLISHED",
+  "version": "1.2.95",
+  "commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
+  "tag": "v1.2.95",
+  "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.95",
+  "official_publication_at": "2026-11-05T04:51:35+00:00",
+  "installer_sha256": "b5407bedca21cd42cf4ca43b51c30cd5f29d2849a178fb8d4c4b69978d7b67ba",
+  "update_sha256": "b81681059fb2bf44718d5fc2f4aa96002554b537d46f8d2974a989826953df2c",
+  "signed_parity_checks": 643,
+  "native_upgrade_rollback_retry": {
+    "php8.3.33": 64,
+    "php8.5.9": 64,
+    "from_version": "1.2.94",
+    "target_version": "1.2.95",
+    "real_old_installer": true
+  },
+  "complete_signed_http_flow": {
+    "php8.3.33": 32,
+    "php8.5.9": 32,
+    "scope": "Candidate handlers from exact merged source; explicit disposable current-version metadata 1.2.94; actual signed 1.2.95 update. Separate old-installer tests cover native upgrade."
+  },
+  "independent_signature_checks": 7,
+  "anonymous_publication_checks": 15,
+  "runtime_checks_reused_from_unchanged_precommit": {
+    "php83_php85_each": {
+      "presentation": 11,
+      "existing_presentation": 16,
+      "existing_http": 23,
+      "runtime_boundary": 3
+    },
+    "release_gate_v1": 4
+  },
+  "install_safety_per_php": 14,
+  "knowledge_provenance": 10,
+  "distribution_protection": {
+    "status": "PASS",
+    "distribution_backup_integrity": "ok",
+    "existing_licenses_codes_activations_unchanged": true,
+    "existing_release_rows_unchanged": true,
+    "unrelated_products_unchanged": true,
+    "commercial_fields_unchanged": true,
+    "distribution_code_config_unchanged": true,
+    "production_site_upgrade": false
+  },
+  "production_site_upgrade": false,
+  "production_site_freeze": false,
+  "private_keys_generated_on_workstation": false,
+  "private_keys_exported": false
+}
