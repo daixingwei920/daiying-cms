@@ -1,0 +1,47 @@
+{
+  "status": "PUBLISHED",
+  "version": "1.2.94",
+  "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+  "tag": "v1.2.94",
+  "github_release": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.94",
+  "installer_sha256": "51b9f29cdb0b4c4d50d1127fefbb00349bdd4ae130226e5f92462e03254ac4e1",
+  "update_sha256": "e096a8df58e6e891476a9635dfa36e7894fdfa0cadd48d7872fa75f9bdb71e5e",
+  "signed_parity_checks": 643,
+  "native_signed_checks": {
+    "PHP8.3.33": 64,
+    "PHP8.5.9": 64
+  },
+  "independent_signature_checks": 7,
+  "anonymous_publication_checks": 15,
+  "distribution_preservation": {
+    "status": "PASS",
+    "distribution_backup_integrity": "ok",
+    "existing_licenses_codes_activations_unchanged": true,
+    "existing_release_rows_unchanged": true,
+    "unrelated_products_unchanged": true,
+    "commercial_fields_unchanged": true,
+    "distribution_code_config_unchanged": true,
+    "production_site_upgrade": false
+  },
+  "publication_verification": {
+    "public_api_visible": true,
+    "latest_version": "1.2.94",
+    "package_exists": true,
+    "sha256_valid": true,
+    "manifest_valid": true,
+    "manifest_product_id": "daiying.cms",
+    "manifest_package_type": "core",
+    "cms_compatibility_valid": true
+  },
+  "production_core_upgrade_performed": false,
+  "minimum_upgrade_source": "1.2.80",
+  "minimum_php": "8.3.0",
+  "maximum_core": "",
+  "local_private_key_generation_or_export": false,
+  "consumer_imported": false,
+  "legacy_root_probe": {
+    "http_status": 404,
+    "note": "Additional legacy-root probe; distribution source/config unchanged by publication. Current Core update flow uses modern product endpoint."
+  },
+  "original_failures_preserved": true
+}
