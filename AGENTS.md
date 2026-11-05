@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Published Core1.2.94 (2026-11-04)
+
+- Core1.2.94 is published at immutable v1.2.94 / be832ac2d1ade3c6b53734881eb4f599c1474256 on GitHub and the official stable service. Official signing/parity643, PHP8.3/8.5 native upgrade/rollback/retry64 each, independent signature7 and anonymous publication15 checks passed.
+- Installer51b9f29cdb0b4c4d50d1127fefbb00349bdd4ae130226e5f92462e03254ac4e1; updatee096a8df58e6e891476a9635dfa36e7894fdfa0cadd48d7872fa75f9bdb71e5e. Preserve frozen artifacts/tags, Core1.2.80/PHP8.3 floors, existing licenses/inventory and public contracts.
+- Publication does not upgrade or freeze websites. Live novel writes were incorrectly treated as a release blocker by a reused three-site-upgrade snapshot; Owner corrects the scope. Preserve original failures and use exact-source isolated gates plus distribution backup/protection, without changing Core security contracts.
+- No production Core upgrade, real payment/refund, paid model or Google sync dispatch was performed. The separately authorized custom novel-worker loader repair is operational code outside this Core payload. See docs/CORE_1.2.94_PUBLICATION_REPORT.md.
+
 ## Isolated compact admin layouts (2026-11-04)
 
 - Owner subsequently says “发布”, authorizing merge, next patch Core1.2.94 preparation, server-only signing, complete Release Gate and publication of this layout change. This supersedes this task's no-merge/no-signing/no-publication hold below; no production website upgrade, payment action, settings change or independent plugin release is authorized. Preserve frozen1.2.93; back up distribution data before publication.
