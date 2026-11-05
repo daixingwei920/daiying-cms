@@ -74,7 +74,7 @@ class KnowledgeProvenance(unittest.TestCase):
 
     def test_publication_and_unpublished_copy_have_correct_warning(self):
         text = product.derived(self.package)[product.NAME + '.md']
-        self.assertEqual(self.package['candidate_evidence']['candidate_version'], '1.2.94')
+        self.assertEqual(self.package['candidate_evidence']['candidate_version'], '1.2.95')
         self.assertEqual('当前分支知识源是未发布候选' in text,
                          self.package['candidate_evidence']['status'] == 'UNPUBLISHED')
         published = copy.deepcopy(self.package)
@@ -89,7 +89,7 @@ class KnowledgeProvenance(unittest.TestCase):
 
     def test_foundation_payment_contracts_remain_developer_only(self):
         exported = {r['id'] for r in product.public_records(self.package)}
-        for rid in ['rest.foundation_media_contract', 'payment.configured_redirect_contract', 'payment.provider_settings_sqlite_save', 'storage.plugin_data_scope_index', 'maintenance.scheduler_connection_readiness', 'admin.compact_workspaces']:
+        for rid in ['rest.foundation_media_contract', 'payment.configured_redirect_contract', 'payment.provider_settings_sqlite_save', 'storage.plugin_data_scope_index', 'maintenance.scheduler_connection_readiness', 'admin.compact_workspaces', 'admin.update_flow_continuation']:
             record = next(r for r in self.package['records'] if r['id'] == rid)
             self.assertEqual(record['visibility'], 'ADMIN_DEVELOPER')
             self.assertFalse(record['enabled_for_customer_service'])
@@ -97,9 +97,13 @@ class KnowledgeProvenance(unittest.TestCase):
 
     def test_published_release_evidence_is_preserved(self):
         published193 = json.loads(subprocess.check_output(['git', 'show', 'fca2464fbd879956532839a345a8362c282b3695:' + product.NAME + '.json'], cwd=ROOT, text=True))
-        evidence193 = self.package['release_evidence']
-        if evidence193['version'] == '1.2.94':
-            evidence193 = evidence193['previous_stable']
+        published194 = json.loads(subprocess.check_output(['git', 'show', '75ad39cb12008e1aa8195f5dfec5620c128e3393:' + product.NAME + '.json'], cwd=ROOT, text=True))
+        evidence194 = self.package['release_evidence']
+        if evidence194['version'] == '1.2.95':
+            evidence194 = evidence194['previous_stable']
+        self.assertEqual(evidence194, published194['release_evidence'])
+        self.assertEqual(self.package['published_194_acceptance_evidence'], published194['candidate_evidence'])
+        evidence193 = evidence194['previous_stable']
         self.assertEqual(evidence193, published193['release_evidence'])
         self.assertEqual(self.package['published_193_acceptance_evidence'], published193['candidate_evidence'])
         baseline = json.loads(subprocess.check_output(['git', 'show', 'b8edbdce6c9008ddb50facfebb6c2617cde47b9c:' + product.NAME + '.json'], cwd=ROOT, text=True))
@@ -112,7 +116,7 @@ class KnowledgeProvenance(unittest.TestCase):
         self.assertEqual(evidence193['commit'], subprocess.check_output(['git', 'rev-parse', 'v1.2.93^{commit}'], cwd=ROOT, text=True).strip())
         self.assertEqual(self.package['source_commit'], self.package['candidate_evidence']['source_commit'])
         if self.package['candidate_evidence']['status'] == 'PUBLISHED':
-            self.assertEqual(self.package['source_tag'], 'v1.2.94')
+            self.assertEqual(self.package['source_tag'], 'v1.2.95')
             self.assertEqual(self.package['source_commit'], self.package['release_evidence']['commit'])
         else:
             self.assertEqual(self.package['source_tag'], self.package['source_commit'])

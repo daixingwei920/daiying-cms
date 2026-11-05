@@ -1,6 +1,6 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
-  "verified_version": "1.2.94",
+  "verified_version": "1.2.95",
   "last_verified_at": "2026-11-04",
   "records": [
     {
@@ -11,7 +11,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; system/core/Install/InstallController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -31,8 +31,8 @@
           "line_end": 171
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -49,7 +49,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/RuntimeRequirements.php; system/core/Support/SystemHealthDoctor.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -69,8 +69,8 @@
           "line_end": 151
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -87,7 +87,7 @@
       "audience": "Administrator",
       "source": "docs/themes.md; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/articles/{slug}",
@@ -107,8 +107,8 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -125,7 +125,7 @@
       "audience": "Administrator",
       "source": "docs/update-system.md; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -151,8 +151,8 @@
           "line_end": 619
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -169,7 +169,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Recovery/RecoveryController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "/admin/recovery",
       "public_route": "",
@@ -189,8 +189,8 @@
           "line_end": 50
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -207,7 +207,7 @@
       "audience": "Administrator",
       "source": "SECURITY.md; docs/installation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -227,8 +227,8 @@
           "line_end": 45
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -245,7 +245,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "/admin/seo/keywords",
       "public_route": "",
@@ -265,8 +265,8 @@
           "line_end": 94
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -283,7 +283,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "/admin/seo/search-engines",
       "public_route": "",
@@ -303,8 +303,8 @@
           "line_end": 348
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -321,7 +321,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Content/ContentFrontController.php; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/sitemap.xml",
@@ -347,8 +347,8 @@
           "line_end": 7
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -365,7 +365,7 @@
       "audience": "Administrator",
       "source": "docs/commerce.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -385,8 +385,8 @@
           "line_end": 48
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -403,7 +403,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Ai/AiService.php; system/core/Ai/AiProviderPresets.php; system/core/Ai/AiGateway.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -435,8 +435,8 @@
           "line_end": 25
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -453,7 +453,7 @@
       "audience": "Administrator",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -473,8 +473,8 @@
           "line_end": 628
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -491,7 +491,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -511,8 +511,8 @@
           "line_end": 5
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -529,7 +529,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "/admin/migrations",
       "public_route": "",
@@ -549,8 +549,8 @@
           "line_end": 596
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -567,7 +567,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "user_facing": true,
       "admin_route": "/admin/update;/admin/recovery",
       "public_route": "",
@@ -593,8 +593,8 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -615,7 +615,7 @@
       "description": "当前已发布稳定版仍为 Core 1.2.86（v1.2.86，d311446607124fff21d76f524a4a11968ad4cd58）。本包复核已整合图像公共能力并修复支付回调的1.3.0-alpha.5开发候选，不代表正式发布或生产部署。",
       "source": "docs/ai-image/integration-1.2.86.md; docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "source_evidence": [
         {
           "path": "docs/ai-image/integration-1.2.86.md",
@@ -630,8 +630,8 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -653,7 +653,7 @@
       "description": "1.2.83 支持显式文章、页面和分类 slug 保留《》。留空时仍自动生成简洁 slug，已有 slug 与重定向不自动迁移。仍拒绝分隔符、路径穿越、控制字符、查询/片段符和预编码百分号输入；填写原始书名号，不粘贴 URL 编码。",
       "source": "docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "source_evidence": [
         {
           "path": "docs/content-slug-policy.md",
@@ -662,8 +662,8 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -685,13 +685,13 @@
       "description": "1.2.82 增加四个校验绑定的历史 MySQL 迁移方言适配，不修改已发布迁移文件。1.2.83 延续该能力；这不代表任意 MySQL/MariaDB 环境均已验收。选择数据库后仍应在安装器测试连接和实际完成安装。",
       "source": "CHANGELOG.md; system/core/Migration/MysqlHistoricalMigrationDialect.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "635d798b4602a86fc0a85fc4ce0320635547396aff12c47dff9d535cc126c2ed",
-          "line_start": 139,
-          "line_end": 139
+          "sha256": "1d670ed7ae0fce3fc357fa0da41c06d1b2f2f20d20c21cfc6ea20ba59c752440",
+          "line_start": 145,
+          "line_end": 145
         },
         {
           "path": "system/core/Migration/MysqlHistoricalMigrationDialect.php",
@@ -700,8 +700,8 @@
           "line_end": 12
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -723,7 +723,7 @@
       "description": "首次安装失败须保留错误并修复原因。若管理员已创建但完成锁失败，入口会阻断，不能伪造完成锁或重复创建管理员。MySQL DDL 不保证全链事务回滚；只有负责人明确确认专用数据可丢弃后，才可人工清理重装。生产站不得删除数据库来修复升级。",
       "source": "docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "source_evidence": [
         {
           "path": "docs/first-install-failure.md",
@@ -738,8 +738,8 @@
           "line_end": 11
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -761,19 +761,19 @@
       "description": "1.2.82 的直接升级验证范围为 1.2.81 → 1.2.82；不能泛化为任意旧版直升最新。实际领取和安装必须服从目标包的签名版本范围与兼容检查。Core 更新不替换已安装插件；旧 Commerce 的 MySQL 参数修复需要独立插件更新。",
       "source": "CHANGELOG.md; docs/release/1.2.82-upgrade-support.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "635d798b4602a86fc0a85fc4ce0320635547396aff12c47dff9d535cc126c2ed",
-          "line_start": 142,
-          "line_end": 142
+          "sha256": "1d670ed7ae0fce3fc357fa0da41c06d1b2f2f20d20c21cfc6ea20ba59c752440",
+          "line_start": 148,
+          "line_end": 148
         },
         {
           "path": "CHANGELOG.md",
-          "sha256": "635d798b4602a86fc0a85fc4ce0320635547396aff12c47dff9d535cc126c2ed",
-          "line_start": 143,
-          "line_end": 143
+          "sha256": "1d670ed7ae0fce3fc357fa0da41c06d1b2f2f20d20c21cfc6ea20ba59c752440",
+          "line_start": 149,
+          "line_end": 149
         },
         {
           "path": "docs/release/1.2.82-upgrade-support.md",
@@ -782,8 +782,8 @@
           "line_end": 4
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -805,7 +805,7 @@
       "description": "Owner 于 2026-10-09 决定小说和视频产品退役，不再作为新安装分发、维护或规划产品。保留历史源码、已安装客户资产、订单和许可；退役不等于自动卸载、撤销授权或已完成市场下架。",
       "source": "docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.94 source/document review. Publication and isolated runtime acceptance are separately recorded in docs/CORE_1.2.94_PUBLICATION_REPORT.md. No website upgrade, real payment, paid AI, Google synchronization or customer knowledge import is implied.",
+      "evidence": "Pinned unpublished Core1.2.95 source/document review. Isolated runtime evidence is recorded in docs/knowledge/2026-11-04-admin-update-flow.md. Publication, production deployment and customer knowledge import are not implied by this source review.",
       "source_evidence": [
         {
           "path": "docs/retired-products.md",
@@ -820,8 +820,8 @@
           "line_end": 11
         }
       ],
-      "verified_version": "1.2.94",
-      "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+      "verified_version": "1.2.95",
+      "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
       "last_verified_at": "2026-11-04",
       "confidence": "high",
       "implementation_status": "implemented",
@@ -832,10 +832,10 @@
       "enabled_for_customer_service": true
     }
   ],
-  "package_revision": "2026-11-04-core194-published-compact-admin-layouts",
+  "package_revision": "2026-11-04-core195-update-flow-unpublished",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
-  "source_tag": "v1.2.94",
+  "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
+  "source_tag": "4ab927df4d663c96e80a1ef579187834bfc92320",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "PUBLISHED",
@@ -998,14 +998,14 @@
   },
   "release_status": "PUBLISHED",
   "candidate_evidence": {
-    "status": "PUBLISHED",
-    "base_version": "1.2.93",
-    "candidate_version": "1.2.94",
-    "base_commit": "fca2464fbd879956532839a345a8362c282b3695",
-    "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
-    "candidate_revision": "PR87-merged-formally-published",
-    "owner_decision": "Owner explicitly authorizes publication; no production website upgrade. Published after exact-source server gates and native signed acceptance. Novel live writes are outside Core publication scope.",
-    "runtime_report": "docs/CORE_1.2.94_PUBLICATION_REPORT.md",
+    "status": "UNPUBLISHED",
+    "base_version": "1.2.94",
+    "candidate_version": "1.2.95",
+    "base_commit": "75ad39cb12008e1aa8195f5dfec5620c128e3393",
+    "source_commit": "4ab927df4d663c96e80a1ef579187834bfc92320",
+    "candidate_revision": "verified-update-continuation",
+    "owner_decision": "Owner explicitly requests publication: merge, exact-source server Release Gate, official signing and Core1.2.95 publication. No production website upgrade or real payment/external synchronization.",
+    "runtime_report": "docs/knowledge/2026-11-04-admin-update-flow.md",
     "production_deployed": false,
     "consumer_imported": false,
     "published_release_evidence_preserved": true
@@ -1258,6 +1258,19 @@
     "owner_decision": "Owner approved merge, formal exact-source Gate, Core1.2.93 publication and native upgrade of official/film/novel sites. Completed with backups, retained security/configuration/data and no paid AI/payment/Google-sync dispatch.",
     "runtime_report": "docs/CORE_1.2.93_PUBLICATION_REPORT.md",
     "production_deployed": true,
+    "consumer_imported": false,
+    "published_release_evidence_preserved": true
+  },
+  "published_194_acceptance_evidence": {
+    "status": "PUBLISHED",
+    "base_version": "1.2.93",
+    "candidate_version": "1.2.94",
+    "base_commit": "fca2464fbd879956532839a345a8362c282b3695",
+    "source_commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+    "candidate_revision": "PR87-merged-formally-published",
+    "owner_decision": "Owner explicitly authorizes publication; no production website upgrade. Published after exact-source server gates and native signed acceptance. Novel live writes are outside Core publication scope.",
+    "runtime_report": "docs/CORE_1.2.94_PUBLICATION_REPORT.md",
+    "production_deployed": false,
     "consumer_imported": false,
     "published_release_evidence_preserved": true
   },

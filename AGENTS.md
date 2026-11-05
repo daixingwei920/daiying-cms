@@ -4,6 +4,12 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized update-flow repair and publication (2026-11-04)
+
+- Owner explicitly requests fixing verification-to-execution navigation, retaining the prepared package path on return, complete tests and then publication. Clean `fix/admin-update-flow` starts at main75ad39c; next patch is Core1.2.95.
+- Preserve POST/CSRF, manual `UPDATE CORE`, signature/integrity/environment validation and native recovery. Add direct continuation only after successful verification and preserve the path through existing prepared-state URLs; do not change updater trust, schema or public APIs.
+- Merge, exact-source server-only signing/Release Gate and publication are authorized. No production website upgrade, business freeze, paid dispatch or unrelated change; publication does not require a live novel-site database to stop.
+
 ## Published Core1.2.94 (2026-11-04)
 
 - Core1.2.94 is published at immutable v1.2.94 / be832ac2d1ade3c6b53734881eb4f599c1474256 on GitHub and the official stable service. Official signing/parity643, PHP8.3/8.5 native upgrade/rollback/retry64 each, independent signature7 and anonymous publication15 checks passed.
