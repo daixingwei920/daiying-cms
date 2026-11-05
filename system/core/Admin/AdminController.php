@@ -1890,6 +1890,8 @@ final class AdminController
         }
         $canDeleteContent = $this->adminHasCapability('content.delete');
 
+        $statusCounts = [];
+        $typeOptions = [];
         $rows = '';
         foreach ($items as $item) {
             $meta = json_decode((string) ($item['meta_json'] ?? '{}'), true) ?: [];
@@ -1902,17 +1904,32 @@ final class AdminController
                     CsrfToken::field() . '<button class="admin-danger" type="submit">删除</button></form>'
                 : '';
             $status = (string) $item['status'];
+            $statusCounts[$status] = ($statusCounts[$status] ?? 0) + 1;
+            $typeOptions[(string) $item['content_type']] = AdminUiText::contentType((string) $item['content_type']);
             $tone = $status === 'published' ? 'success' : ($status === 'scheduled' ? 'warning' : 'muted');
-            $rows .= '<tr><td>' . (int) $item['id'] . '</td><td><span class="admin-tag">' . View::escape(AdminUiText::contentType((string) $item['content_type'])) .
-                '</span></td><td><strong>' . View::escape((string) $item['title']) . '</strong><br><code>' . View::escape((string) $item['slug']) . '</code></td><td>' .
-                '<span class="admin-badge admin-badge-' . $tone . '">' . View::escape($this->contentStatusLabel($status)) . '</span></td><td><div class="admin-action-row"><a class="button" href="/admin/content/edit/' . (int) $item['id'] . '">编辑</a>' . $view . ' <a class="button admin-button-secondary" href="' . View::escape($preview) . '">预览</a> ' . $delete . '</div></td></tr>';
+            $rows .= '<tr data-content-row data-status="' . View::escape($status) . '" data-type="' . View::escape((string) $item['content_type']) . '" data-published="' . View::escape((string) ($item['published_at'] ?? '')) . '"><td data-content-id>' . (int) $item['id'] . '</td><td><span class="admin-tag" data-content-type>' . View::escape(AdminUiText::contentType((string) $item['content_type'])) .
+                '</span></td><td class="content-title-cell"><strong data-content-title>' . View::escape((string) $item['title']) . '</strong><br><code data-content-slug>' . View::escape((string) $item['slug']) . '</code></td><td>' .
+                '<span data-content-state class="admin-badge admin-badge-' . $tone . '">' . View::escape($this->contentStatusLabel($status)) . '</span></td><td data-content-updated>' . View::escape((string) ($item['updated_at'] ?? '')) . '</td><td><div class="admin-action-row"><button type="button" class="admin-button-secondary" data-content-detail aria-haspopup="dialog" aria-controls="content-detail" hidden>详情</button><a class="button" data-content-edit href="/admin/content/edit/' . (int) $item['id'] . '">编辑</a>' . $view . ' <a class="button admin-button-secondary" data-content-preview href="' . View::escape($preview) . '">预览</a> ' . $delete . '</div></td></tr>';
         }
-        $rows = $rows !== '' ? $rows : '<tr><td colspan="5" class="muted">暂无内容</td></tr>';
+        $rows = $rows !== '' ? $rows : '<tr><td colspan="6" class="muted">暂无内容</td></tr>';
         $pager = $this->adminContentPager($page, $totalPages, $perPage, $total);
 
-        $body = '<div class="admin-page-header"><div><h1>内容管理</h1><p class="muted">文章、页面和区块内容统一在这里管理。</p></div><div class="admin-action-row"><a class="button" href="/admin/content/new">新建内容</a> <a class="button admin-button-secondary" href="/admin/categories">分类管理</a> <a class="button admin-button-secondary" href="/admin/navigation">设置前台导航</a></div></div>' .
-            $notice . '<div class="admin-list-toolbar"><span class="muted">共 ' . (int) $total . ' 条内容，第 ' . (int) $page . ' / ' . (int) $totalPages . ' 页，每页 ' . (int) $perPage . ' 条。</span></div>' .
-            '<table><thead><tr><th>ID</th><th>类型</th><th>标题</th><th>状态</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>' . $pager;
+        $statusButtons = '<button type="button" data-content-status="" aria-pressed="true">本页全部 <span>' . count($items) . '</span></button>';
+        foreach ($statusCounts as $status => $count) {
+            $statusButtons .= '<button type="button" data-content-status="' . View::escape($status) . '" aria-pressed="false">' . View::escape($this->contentStatusLabel($status)) . ' <span>' . $count . '</span></button>';
+        }
+        $types = '<option value="">全部类型</option>';
+        foreach ($typeOptions as $type => $label) {
+            $types .= '<option value="' . View::escape($type) . '">' . View::escape($label) . '</option>';
+        }
+        $body = '<section class="admin-content-workspace" data-content-workspace><div class="admin-page-header"><div><span class="data-eyebrow">CONTENT WORKSPACE</span><h1>内容管理</h1><p class="muted">文章、页面和区块内容统一在这里管理。</p></div><div class="admin-action-row"><a class="button" href="/admin/content/new">新建内容</a> <a class="button admin-button-secondary" href="/admin/categories">分类管理</a> <a class="button admin-button-secondary" href="/admin/navigation">设置前台导航</a></div></div>' .
+            $notice . '<div class="content-filters" data-content-filters hidden><div class="content-status-tabs" role="group" aria-label="筛选本页状态">' . $statusButtons . '</div>' .
+            '<div class="content-filter-controls"><label>搜索本页<input type="search" data-content-search placeholder="本页标题或 Slug" autocomplete="off"></label><label>内容类型<select data-content-type-filter>' . $types . '</select></label><button type="button" class="admin-button-secondary" data-content-reset>重置</button></div><p class="muted">筛选仅作用于当前页，翻页可查看其他内容。</p></div>' .
+            '<div class="admin-list-toolbar"><span class="muted">共 ' . (int) $total . ' 条内容，第 ' . (int) $page . ' / ' . (int) $totalPages . ' 页，每页 ' . (int) $perPage . ' 条。</span><span class="muted" data-content-result role="status" aria-live="polite"></span></div>' .
+            '<div class="content-table-scroll" tabindex="0" role="region" aria-label="内容列表，可横向滚动"><table class="content-table"><thead><tr><th>ID</th><th>类型</th><th>标题</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table></div><p class="admin-empty" data-content-empty hidden>本页没有符合条件的内容，请调整筛选或查看其他页。</p>' . $pager .
+            '<dialog class="content-detail-drawer" id="content-detail" aria-labelledby="content-detail-title"><header><div><span class="data-eyebrow">CONTENT DETAILS</span><h2 id="content-detail-title">内容详情</h2></div><button type="button" class="admin-button-secondary" data-content-close aria-label="关闭内容详情">关闭 ×</button></header>' .
+            '<h3 data-detail-title></h3><dl class="data-facts"><div><dt>ID</dt><dd data-detail-id></dd></div><div><dt>类型</dt><dd data-detail-type></dd></div><div><dt>状态</dt><dd data-detail-state></dd></div><div><dt>更新时间</dt><dd data-detail-updated></dd></div><div><dt>发布时间</dt><dd data-detail-published></dd></div><div><dt>Slug</dt><dd data-detail-slug></dd></div></dl>' .
+            '<footer class="admin-action-row"><a class="button" data-detail-edit>编辑内容</a><a class="button admin-button-secondary" data-detail-preview>预览</a></footer></dialog></section>';
 
         return Response::html(View::page('内容管理', $body));
     }
