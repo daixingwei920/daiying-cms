@@ -54,6 +54,7 @@ This index collects the public-facing documentation currently available in the G
 - [Global AI](ai.md)
 - [Mail Infrastructure](mail-infrastructure.md)
 - [Payment Provider Development](payment-providers.md)
+- [自动发卡 MySQL 原生预处理修复（隔离、未发布）](card-delivery-mysql-native-prepare.md)
 - [Foundation Services](foundation-services.md)
 - [Content Foundation](content-foundation.md)
 - [Core API Stability](../CORE_API_STABILITY.md)
