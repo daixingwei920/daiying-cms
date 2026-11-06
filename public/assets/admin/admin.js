@@ -63,6 +63,7 @@
     var empty = view.querySelector('[data-content-empty]');
     var drawer = view.querySelector('.content-detail-drawer');
     var status = '';
+    var docked = window.matchMedia('(min-width: 1440px)');
     if (!search || !type || !result || !empty) return;
     var index = rows.map(function (row) {
       return {row: row, text: (row.querySelector('[data-content-title]').textContent + ' ' + row.querySelector('[data-content-slug]').textContent).toLocaleLowerCase()};
@@ -78,6 +79,7 @@
       statuses.forEach(function (button) { button.setAttribute('aria-pressed', button.dataset.contentStatus === status ? 'true' : 'false'); });
       result.textContent = '本页显示 ' + visible + ' / ' + rows.length + ' 条';
       empty.hidden = visible !== 0 || rows.length === 0;
+      if (drawer && drawer.open && view.querySelector('.is-detail-selected[hidden]')) drawer.close();
     }
     view.querySelector('[data-content-filters]').hidden = false;
     search.addEventListener('input', filter);
@@ -92,18 +94,40 @@
       button.hidden = false;
       button.addEventListener('click', function () {
         var row = button.closest('[data-content-row]');
+        var scrollRoot = view.closest('.admin-main');
+        var scrollTop = scrollRoot ? scrollRoot.scrollTop : 0;
         trigger = button;
         rows.forEach(function (item) { item.classList.toggle('is-detail-selected', item === row); });
         ['title', 'id', 'type', 'state', 'updated', 'slug'].forEach(function (name) { drawer.querySelector('[data-detail-' + name + ']').textContent = value(row, '[data-content-' + name + ']'); });
-        drawer.querySelector('[data-detail-published]').textContent = row.dataset.published || '尚未发布';
+        var published = row.dataset.published || '';
+        drawer.querySelector('[data-detail-published]').textContent = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(published) ? published.slice(0, 16).replace('T', ' ') : (published || '尚未发布');
+        drawer.querySelector('[data-detail-published]').title = published;
+        [['title', '标题'], ['slug', 'Slug'], ['state', '状态']].forEach(function (field) {
+          var filled = !!value(row, '[data-content-' + field[0] + ']');
+          var check = drawer.querySelector('[data-detail-check="' + field[0] + '"]');
+          check.textContent = (filled ? '✓ ' : '— ') + field[1] + (filled ? '已填写' : '未填写');
+          check.classList.toggle('is-missing', !filled);
+        });
         ['edit', 'preview'].forEach(function (name) { drawer.querySelector('[data-detail-' + name + ']').href = row.querySelector('[data-content-' + name + ']').href; });
-        drawer.showModal();
+        if (!drawer.open) {
+          drawer.dataset.docked = docked.matches ? 'true' : 'false';
+          view.classList.toggle('has-content-detail', docked.matches);
+          if (docked.matches) drawer.show(); else drawer.showModal();
+        }
+        drawer.querySelector('[data-content-close]').focus({preventScroll: true});
+        if (scrollRoot) scrollRoot.scrollTop = scrollTop;
       });
     });
     view.querySelector('[data-content-close]').addEventListener('click', function () { drawer.close(); });
+    view.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && drawer.open) { event.preventDefault(); drawer.close(); }
+    });
+    docked.addEventListener('change', function () { if (drawer.open) drawer.close(); });
     drawer.addEventListener('close', function () {
+      view.classList.remove('has-content-detail');
       rows.forEach(function (item) { item.classList.remove('is-detail-selected'); });
-      if (trigger && trigger.isConnected) trigger.focus({preventScroll: true});
+      if (trigger && trigger.isConnected && !trigger.closest('[hidden]')) trigger.focus({preventScroll: true});
+      else search.focus({preventScroll: true});
     });
   });
   var key = 'daiying.admin.sidebarCollapsed';

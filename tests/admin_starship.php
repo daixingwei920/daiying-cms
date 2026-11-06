@@ -56,6 +56,10 @@ $check($xp->query('//*[@data-content-detail][@hidden][@type="button"]')->length=
 $check(str_contains($html,View::escape($attack))&&!str_contains($html,$attack),'Untrusted titles remain escaped');
 $check($xp->query('//tr[@data-content-row][1]//*[@data-content-title]')->item(0)->textContent===$attack,'Full title data survives safely for the drawer');
 $check($xp->query('//tr[@data-content-row]//*[@data-content-updated]')->length===50,'Drawer and list reuse existing returned timestamps');
+$check($xp->query('//div[@class="content-layout"]/div[@class="content-list-column"]')->length===1 && $xp->query('//div[@class="content-layout"]/dialog')->length===1,'Desktop list and details are sibling panels, not nested in the table');
+$check($xp->query('//time[@data-content-updated][@datetime="2026-11-05T09:30:00+00:00"]')->length===50,'Readable dates retain the complete original timestamp');
+$check($xp->query('//details[@class="content-row-menu"]//form[@method="post"]//input[@name="_csrf"]')->length===50,'More-actions disclosure retains protected delete forms');
+
 $p2=$controller->contentIndex(new Request('GET','/admin/content',['page'=>2]))->body();
 $check($xpath($p2)->query('//tr[@data-content-row]')->length===3,'Next page still renders only remaining records');
 $max=$controller->contentIndex(new Request('GET','/admin/content',['per_page'=>10000]))->body();
@@ -81,7 +85,7 @@ if(($argv[1]??'')==='--preview'){
         return str_replace('</body>','<script>document.addEventListener("submit",e=>e.preventDefault());document.addEventListener("click",e=>{const a=e.target.closest("a");if(a&&!a.getAttribute("href")?.startsWith("#")&&a.getAttribute("href")!=="index.html")e.preventDefault()});</script></body>',$body);
     };
     // A separate safe display fixture keeps the default preview readable; escaping is tested above.
-    $pdo->prepare('UPDATE cms_contents SET title=? WHERE id=53')->execute(['内容管理快速开始']);
+    $pdo->prepare("UPDATE cms_contents SET title=?,status='published',published_at='2026-11-05T09:00:00+00:00' WHERE id=53")->execute(['新手入门：搭建你的第一个网站']);
     $previewHtml=$controller->contentIndex(new Request('GET','/admin/content'))->body();
     file_put_contents($out.'/content.html',$standalone($previewHtml));
     copy(TEST_SOURCE_ROOT.'/public/assets/admin/admin.css',$out.'/admin.css');copy(TEST_SOURCE_ROOT.'/public/assets/admin/admin.js',$out.'/admin.js');
