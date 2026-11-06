@@ -71,7 +71,7 @@ $_SESSION['admin_user']['capabilities']=['*','admin.super'];
 $check($before===hash('sha256',json_encode($pdo->query('SELECT * FROM cms_contents ORDER BY id')->fetchAll())),'Content listing and details preparation do not mutate records');
 View::setBasePath('/cms');$_SERVER['REQUEST_URI']='/cms/admin/content';
 $nested=View::page('子目录检查','<p>隔离</p>');
-$check(str_contains($nested,'/cms/assets/admin/admin.css?v=20261105-admin-starship')&&str_contains($nested,'href="/cms/admin/content"'),'Shared theme assets and navigation preserve subdirectory paths');
+$check(str_contains($nested,'/cms/assets/admin/admin.css?v=20261106-admin-starship-light')&&str_contains($nested,'href="/cms/admin/content"'),'Shared theme assets and navigation preserve subdirectory paths');
 View::setBasePath('');$_SERVER['REQUEST_URI']='/admin/login';
 $login=View::page('登录','<p>登录</p>');
 $check(!str_contains($login,'admin-starship')&&!str_contains($login,'/assets/admin/admin.css'),'Login and front pages remain outside the authenticated redesign');

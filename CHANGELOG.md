@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.96 (release preparation)
+
+- Apply the approved blue/white admin palette with static chamfered framing, clear navigation and bounded tables. Keep authenticated styling separate from login/front pages; no new framework, external fonts or continuous animation.
+- Add current-page content filters and on-demand details: dock beside the list on wide screens and use an accessible modal on narrow screens. Preserve native pagination, editing, preview, delete POST/CSRF/confirmation and capabilities.
+- Preserve public APIs, all published migrations and the Core1.2.80/PHP8.3 floors. Official release publication is authorized; production website upgrades remain separate.
+
 ## 1.2.95 (release preparation)
 
 - Add a direct, CSRF-protected update execution form after successful verification, with the prepared path carried forward and manual `UPDATE CORE` confirmation retained.

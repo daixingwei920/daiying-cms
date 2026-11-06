@@ -297,7 +297,7 @@ final class View
 
     private static function assetVersion(): string
     {
-        return '20261105-admin-starship';
+        return '20261106-admin-starship-light';
     }
 
     private static function adminNavGroupScript(): string
