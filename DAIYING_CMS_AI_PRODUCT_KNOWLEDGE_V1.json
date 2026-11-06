@@ -2308,13 +2308,6 @@
           "line_start": 298,
           "line_end": 298,
           "sha256": "c680980e0a542440076ce483027426dc0308df3ec9010503ae4215230f288d96"
-        },
-        {
-          "path": "public/assets/admin/admin.css",
-          "anchor": "/* Approved original palette;",
-          "line_start": 2178,
-          "line_end": 2178,
-          "sha256": "ec7c509ba0b159708f2c853f2828e1bb41d82a252b1609662511379f2e8367c4"
         }
       ],
       "verified_version": "1.2.96",
