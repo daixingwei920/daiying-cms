@@ -74,7 +74,7 @@ class KnowledgeProvenance(unittest.TestCase):
 
     def test_publication_and_unpublished_copy_have_correct_warning(self):
         text = product.derived(self.package)[product.NAME + '.md']
-        self.assertEqual(self.package['candidate_evidence']['candidate_version'], '1.2.95')
+        self.assertEqual(self.package['candidate_evidence']['candidate_version'], '1.2.96')
         self.assertEqual('当前分支知识源是未发布候选' in text,
                          self.package['candidate_evidence']['status'] == 'UNPUBLISHED')
         published = copy.deepcopy(self.package)

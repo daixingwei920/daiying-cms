@@ -4,6 +4,18 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized original-palette admin publication (2026-11-06 UTC)
+
+- Owner selects the blue/white original-palette Starship layout and accepts completing source integration, regression/full Release Gate, signing verification and publication. This supersedes the isolated task's no-merge/no-version/no-signing/no-publication hold for Core1.2.96 only.
+- Integrate the reviewed original palette into the existing shared admin asset, preserving current paginated data, page-local filter labels, routes, CSRF, confirmations and permissions. Keep the published1.2.95 tag/artifacts immutable.
+- Merge only the reviewed clean candidate; formal builds/signing/Gate use exact clean merged origin/main on the authorized server. Back up distribution state and protect existing products, licenses, codes and inventory before publication. No production website upgrade, plugin-specific features, paid AI, real payment/refund or external sync is authorized.
+
+## Owner-authorized isolated Starship admin design (2026-11-05)
+
+- Owner approves implementing the Starship concept after reviewing the content-management mockup. Clean `ui/admin-starship` starts at main8964902 / published Core1.2.95; keep version and frozen artifacts unchanged.
+- Apply the lightweight shared admin design and content-management presentation. Reuse current paginated data, existing routes, CSRF, delete confirmation and permissions. Page-local filters must be explicitly labeled; do not invent site-wide counts, authors, categories, bulk actions or new queries.
+- Develop and validate in isolation, including real browser layout/keyboard checks and asset-size comparison. No new framework, font download, perpetual animation, external API or production change. No merge, signing, release or site upgrade is authorized for this task. Key-generating contracts run only on the authorized server.
+
 ## Owner-authorized update-flow repair and publication (2026-11-04)
 
 - Owner explicitly requests fixing verification-to-execution navigation, retaining the prepared package path on return, complete tests and then publication. Clean `fix/admin-update-flow` starts at main75ad39c; next patch is Core1.2.95.

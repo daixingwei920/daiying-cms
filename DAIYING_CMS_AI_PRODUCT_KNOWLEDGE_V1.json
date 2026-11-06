@@ -1,7 +1,7 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
-  "verified_version": "1.2.95",
-  "last_verified_at": "2026-11-04",
+  "verified_version": "1.2.96",
+  "last_verified_at": "2026-11-06",
   "records": [
     {
       "id": "install.web_installer",
@@ -11,7 +11,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; system/core/Install/InstallController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -33,9 +33,9 @@
           "anchor": "return is_file($this->rootPath . '/storage/installed.lock');"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -51,7 +51,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/RuntimeRequirements.php; system/core/Support/SystemHealthDoctor.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -73,9 +73,9 @@
           "anchor": "foreach (['pdo', 'openssl', 'curl', 'fileinfo', 'zip', 'mbstring'] as $extension) {"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -91,7 +91,7 @@
       "audience": "Administrator",
       "source": "docs/themes.md; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/articles/{slug}",
@@ -113,9 +113,9 @@
           "anchor": "Core 1.2.83 支持在文章、页面和分类的显式 slug 中保留 `《》`。留空时仍按标题自动生成字母、数字和连字符组成的简洁 slug。已有文章和重定向不自动迁移；文章 #75 的现有新网址及 301 无须撤销。"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -131,7 +131,7 @@
       "audience": "Internal",
       "source": "docs/content-foundation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -153,9 +153,9 @@
           "anchor": "## Trash"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -171,7 +171,7 @@
       "audience": "Internal",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -193,9 +193,9 @@
           "anchor": "public function retryFailedFile(int $jobId, string $path, string $sourceHint = ''): array"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -211,7 +211,7 @@
       "audience": "Administrator",
       "source": "docs/update-system.md; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -240,9 +240,9 @@
           "anchor": "$router->get('/admin/update', [$admin, 'updateIndex']);"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -258,7 +258,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Recovery/RecoveryController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "/admin/recovery",
       "public_route": "",
@@ -280,9 +280,9 @@
           "anchor": "'<button name=\"action\" value=\"restore_core_database\" type=\"submit\">恢复Core+数据库</button></form></li>';"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -298,7 +298,7 @@
       "audience": "Internal",
       "source": "system/core/SiteVault/SiteVaultService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -320,9 +320,9 @@
           "anchor": "public function restore(string $packagePath, ?int $actorId = null): array"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -338,7 +338,7 @@
       "audience": "Administrator",
       "source": "SECURITY.md; docs/installation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -360,9 +360,9 @@
           "anchor": "php scripts/validate_production_readiness.php --strict"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -378,7 +378,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "/admin/seo/keywords",
       "public_route": "",
@@ -400,9 +400,9 @@
           "anchor": "'observed_search_data' => $primaryMetrics !== [] ? 'yes' : 'not_available',"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -418,7 +418,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "/admin/seo/search-engines",
       "public_route": "",
@@ -440,9 +440,9 @@
           "anchor": "return ['status' => 'submitted', 'evidence' => 'Accepted by submission channel; Submitted is not Indexed', 'last_checked' => (string) ($submission['created_at'] ?? '')];"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -458,7 +458,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Content/ContentFrontController.php; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/sitemap.xml",
@@ -487,9 +487,9 @@
           "anchor": "前端只解码一次路径段。链接、canonical、站点地图及新导入的 URL Mapping 对 slug 进行百分号编码，禁止双重解码绕过校验。官方导出/导入保留书名号；不改历史数据库迁移。"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -505,7 +505,7 @@
       "audience": "Developer",
       "source": "docs/plugins.md; docs/themes.md; docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -534,9 +534,9 @@
           "anchor": "Decision date: 2026-10-09. Owner decision: **DAIYING_NOVEL = RETIRED**, **DAIYING_VIDEO = RETIRED**."
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -552,7 +552,7 @@
       "audience": "Administrator",
       "source": "docs/commerce.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -574,9 +574,9 @@
           "anchor": "The first workflow does not fetch or scrape external product URLs. If a source URL is entered, it is treated only as administrator-provided context for the prompt and as a future extension point."
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -592,7 +592,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Ai/AiService.php; system/core/Ai/AiProviderPresets.php; system/core/Ai/AiGateway.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -628,9 +628,9 @@
           "anchor": "public function request(AiRequest $request): AiResponse"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -646,7 +646,7 @@
       "audience": "Administrator",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -668,9 +668,9 @@
           "anchor": "$this->repo->record($jobId, $system, $siteId, 'comment', $sourceId, 'PendingFeature', null, null, null, null, $metadata, 'pending_feature', 'Core 暂无评论模块，暂不写入前台评论。');"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -686,7 +686,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -708,9 +708,9 @@
           "anchor": "1. 保留错误提示和服务器日志，先修复数据库连接、扩展、目录权限或其他实际失败原因。安装失败不是安装成功。"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -726,7 +726,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "/admin/migrations",
       "public_route": "",
@@ -735,7 +735,7 @@
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
-          "sha256": "0ba948dfd233735c6d69a849e3440ac02dd55906d2731d8aaabd8f101dbb44b3",
+          "sha256": "c680980e0a542440076ce483027426dc0308df3ec9010503ae4215230f288d96",
           "line_start": 113,
           "line_end": 113,
           "anchor": "['/admin/migrations', '旧站迁移', 'transfer'],"
@@ -748,9 +748,9 @@
           "anchor": "$router->post('/admin/migrations/scan', [$admin, 'externalMigrationScan']);"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -766,7 +766,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": true,
       "admin_route": "/admin/update;/admin/recovery",
       "public_route": "",
@@ -775,14 +775,14 @@
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
-          "sha256": "0ba948dfd233735c6d69a849e3440ac02dd55906d2731d8aaabd8f101dbb44b3",
+          "sha256": "c680980e0a542440076ce483027426dc0308df3ec9010503ae4215230f288d96",
           "line_start": 114,
           "line_end": 114,
           "anchor": "['/admin/update', '系统更新', 'refresh'],"
         },
         {
           "path": "system/core/Support/View.php",
-          "sha256": "0ba948dfd233735c6d69a849e3440ac02dd55906d2731d8aaabd8f101dbb44b3",
+          "sha256": "c680980e0a542440076ce483027426dc0308df3ec9010503ae4215230f288d96",
           "line_start": 115,
           "line_end": 115,
           "anchor": "['/admin/recovery', '恢复诊断', 'activity'],"
@@ -795,9 +795,9 @@
           "anchor": "适用于首次安装、尚未正式运行的网站。已正式运行的网站必须使用官方备份、升级及回滚流程，不能删除数据库来解决升级问题。"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -817,7 +817,7 @@
       "description": "当前已发布稳定版仍为 Core 1.2.86（v1.2.86，d311446607124fff21d76f524a4a11968ad4cd58）。本包复核已整合图像公共能力并修复支付回调的1.3.0-alpha.5开发候选，不代表正式发布或生产部署。",
       "source": "docs/ai-image/integration-1.2.86.md; docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "source_evidence": [
         {
           "path": "docs/ai-image/integration-1.2.86.md",
@@ -834,9 +834,9 @@
           "anchor": "Core 1.3.0-alpha.5 开发修复"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -857,7 +857,7 @@
       "description": "1.2.83 支持显式文章、页面和分类 slug 保留《》。留空时仍自动生成简洁 slug，已有 slug 与重定向不自动迁移。仍拒绝分隔符、路径穿越、控制字符、查询/片段符和预编码百分号输入；填写原始书名号，不粘贴 URL 编码。",
       "source": "docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "source_evidence": [
         {
           "path": "docs/content-slug-policy.md",
@@ -867,9 +867,9 @@
           "anchor": "Core 1.2.83 支持在文章、页面和分类的显式 slug 中保留 `《》`。留空时仍按标题自动生成字母、数字和连字符组成的简洁 slug。已有文章和重定向不自动迁移；文章 #75 的现有新网址及 301 无须撤销。"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -890,13 +890,13 @@
       "description": "1.2.82 增加四个校验绑定的历史 MySQL 迁移方言适配，不修改已发布迁移文件。1.2.83 延续该能力；这不代表任意 MySQL/MariaDB 环境均已验收。选择数据库后仍应在安装器测试连接和实际完成安装。",
       "source": "CHANGELOG.md; system/core/Migration/MysqlHistoricalMigrationDialect.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "1d670ed7ae0fce3fc357fa0da41c06d1b2f2f20d20c21cfc6ea20ba59c752440",
-          "line_start": 145,
-          "line_end": 145,
+          "sha256": "21423c97bc784e518c097454635d04a22c8e3750982b4a37fea253ed8c7ba590",
+          "line_start": 151,
+          "line_end": 151,
           "anchor": "- Support MySQL fresh installation through four checksum-bound historical dialect adapters, without modifying frozen migrations."
         },
         {
@@ -907,9 +907,9 @@
           "anchor": "final class MysqlHistoricalMigrationDialect"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -930,7 +930,7 @@
       "description": "首次安装失败须保留错误并修复原因。若管理员已创建但完成锁失败，入口会阻断，不能伪造完成锁或重复创建管理员。MySQL DDL 不保证全链事务回滚；只有负责人明确确认专用数据可丢弃后，才可人工清理重装。生产站不得删除数据库来修复升级。",
       "source": "docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "source_evidence": [
         {
           "path": "docs/first-install-failure.md",
@@ -947,9 +947,9 @@
           "anchor": "MySQL 的 DDL 不具备 SQLite 式的全链事务回滚保证。部分表、失败索引或安装中断不能默认当作可直接重试；需要负责人核查或按上述条件人工重新安装。产品不提供自动数据库清理或自动恢复状态机。"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -970,20 +970,20 @@
       "description": "1.2.82 的直接升级验证范围为 1.2.81 → 1.2.82；不能泛化为任意旧版直升最新。实际领取和安装必须服从目标包的签名版本范围与兼容检查。Core 更新不替换已安装插件；旧 Commerce 的 MySQL 参数修复需要独立插件更新。",
       "source": "CHANGELOG.md; docs/release/1.2.82-upgrade-support.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "1d670ed7ae0fce3fc357fa0da41c06d1b2f2f20d20c21cfc6ea20ba59c752440",
-          "line_start": 148,
-          "line_end": 148,
+          "sha256": "21423c97bc784e518c097454635d04a22c8e3750982b4a37fea253ed8c7ba590",
+          "line_start": 154,
+          "line_end": 154,
           "anchor": "- Direct upgrade validation covers 1.2.81 to 1.2.82. Other source versions are not verified for this release."
         },
         {
           "path": "CHANGELOG.md",
-          "sha256": "1d670ed7ae0fce3fc357fa0da41c06d1b2f2f20d20c21cfc6ea20ba59c752440",
-          "line_start": 149,
-          "line_end": 149,
+          "sha256": "21423c97bc784e518c097454635d04a22c8e3750982b4a37fea253ed8c7ba590",
+          "line_start": 155,
+          "line_end": 155,
           "anchor": "- Existing Commerce installations require a separate plugin update for its MySQL parameter fix; Core updates do not replace installed plugins."
         },
         {
@@ -994,9 +994,9 @@
           "anchor": "签名 update.json 与外部 metadata 的 source_versions 均为 min=max=1.2.81；min_upgrade_from、hard_min_version、migration_floor 均为1.2.81。构建及 parity 拒绝覆盖这一正式契约。此调整不改变旧发布包或49份历史迁移。"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1017,7 +1017,7 @@
       "description": "Owner 于 2026-10-09 决定小说和视频产品退役，不再作为新安装分发、维护或规划产品。保留历史源码、已安装客户资产、订单和许可；退役不等于自动卸载、撤销授权或已完成市场下架。",
       "source": "docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "source_evidence": [
         {
           "path": "docs/retired-products.md",
@@ -1034,9 +1034,9 @@
           "anchor": "Legacy official plugin registry trust, capability/table namespaces and frozen migrations remain unchanged to protect already-installed customer sites. Retirement does not disable or uninstall existing copies, remove stored content, revoke licenses or alter paid orders. Historical releases and source history are retained."
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1057,7 +1057,7 @@
       "description": "Core1.2.91已移除历史文章 SEO 补全与历史内容优化的菜单、路由、处理器和专用服务。旧入口及子路径统一返回410；历史文章、URL、SEO、待审核建议、任务、日志及已发布迁移保留。普通文章编辑、AI 写作和其他 SEO 功能保留；此候选事实不表示生产已升级。",
       "source": "system/core/Bootstrap/Application.php; docs/historical-optimizer-retirement.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
@@ -1074,9 +1074,9 @@
           "anchor": "pending optimization suggestions, jobs, logs and migration records are retained;"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "confidence": "high",
       "implementation_status": "removed",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1097,13 +1097,13 @@
       "description": "1.2.83 按 PDO 连接共享 SQLite immediate transaction 状态，保留事务所有权、支付回调/退款原子性与写锁。属于内部维护修复；不证明真实支付通道、退款或商户交易已验收。",
       "source": "CHANGELOG.md; system/core/Payment/PaymentTransaction.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "1d670ed7ae0fce3fc357fa0da41c06d1b2f2f20d20c21cfc6ea20ba59c752440",
-          "line_start": 132,
-          "line_end": 132,
+          "sha256": "21423c97bc784e518c097454635d04a22c8e3750982b4a37fea253ed8c7ba590",
+          "line_start": 138,
+          "line_end": 138,
           "anchor": "- Share SQLite immediate transaction state by PDO connection across payment services and repositories on PHP 8.3."
         },
         {
@@ -1114,9 +1114,9 @@
           "anchor": "use WeakMap;"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1133,7 +1133,7 @@
       "audience": "Developer",
       "source": "docs/site-registration.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "/admin/settings",
       "public_route": "",
@@ -1148,9 +1148,9 @@
           "anchor": "在后台「平台 → 站点设置」（`/admin/settings`）的站点 URL 下方填写「ICP 备案号」，点击「保存站点设置」。填写真实备案文本，例如 `京ICP备12345678号-1`；没有备案号时留空。本设置只负责展示，不能代办备案或证明备案有效。"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1166,7 +1166,7 @@
       "audience": "Developer",
       "source": "docs/ai.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -1181,9 +1181,9 @@
           "anchor": "The shared Chat Completions adapter maps the configured token budget to"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1199,7 +1199,7 @@
       "audience": "Administrator",
       "source": "docs/admin-passkey-reauth.md; system/core/Admin/AdminController.php; system/core/Auth/AdminPasskeyService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "/admin/security",
       "public_route": "",
@@ -1215,7 +1215,7 @@
         },
         {
           "path": "system/core/Admin/AdminController.php",
-          "sha256": "e0aaf3ced1837dcd31afeb5bce5ade7d2fcc0ab11b151556346386468be05991",
+          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46",
           "line_start": 1061,
           "line_end": 1061,
           "anchor": "public function adminSecurityPasskeyReauthVerify(Request $request): Response"
@@ -1228,9 +1228,9 @@
           "anchor": "(string) ($session['purpose'] ?? '') !== $purpose"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1246,7 +1246,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -1267,9 +1267,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "ai.image_sdk",
@@ -1279,7 +1279,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1300,9 +1300,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "ai.image_queue_cost",
@@ -1312,7 +1312,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1333,9 +1333,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "ai.image_private_media",
@@ -1345,7 +1345,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1366,9 +1366,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "ai.image_validation_scope",
@@ -1378,7 +1378,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/tests.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1399,9 +1399,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "plugin.atomic_documents",
@@ -1411,7 +1411,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1432,9 +1432,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "plugin.branding_admin",
@@ -1444,7 +1444,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1465,9 +1465,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "plugin.public_site_identity",
@@ -1477,7 +1477,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1498,9 +1498,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "payment.refund_callback_idempotency",
@@ -1510,7 +1510,7 @@
       "audience": "Developer",
       "source": "docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1531,9 +1531,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "payment.checkout_recovery",
@@ -1543,7 +1543,7 @@
       "audience": "Developer",
       "source": "docs/plugin-checkout-recovery.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1564,9 +1564,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "theme.navigation_groups",
@@ -1576,7 +1576,7 @@
       "audience": "Developer",
       "source": "docs/navigation-groups.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "/admin/navigation",
       "public_route": "",
@@ -1597,9 +1597,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "auth.member_editorial_access",
@@ -1609,7 +1609,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/member-editorial-retirement.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1630,9 +1630,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "ai.request_execution",
@@ -1642,7 +1642,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1663,9 +1663,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "seo.geo_basics",
@@ -1675,7 +1675,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/seo-geo-contract.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "/admin/settings",
       "public_route": "/llms.txt",
@@ -1710,9 +1710,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "seo.domestic_crawler_statistics",
@@ -1722,7 +1722,7 @@
       "audience": "Developer",
       "source": "system/core/Seo/CrawlerRegistry.php; system/core/Seo/CrawlerStatistics.php; docs/domestic-crawlers.md; docs/CORE_1.2.90_PUBLICATION_REPORT.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "/admin/seo/crawlers",
       "public_route": "",
@@ -1771,9 +1771,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04"
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06"
     },
     {
       "id": "knowledge.customer_consumer_loop",
@@ -1783,7 +1783,7 @@
       "audience": "Developer",
       "source": "docs/knowledge-customer-loop-acceptance.md; docs/knowledge-customer-loop-live-acceptance.md; docs/knowledge-article-admission-acceptance.md; docs/knowledge-relevance-fix-acceptance.md; docs/CORE_1.2.90_PUBLICATION_REPORT.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1826,9 +1826,9 @@
           "anchor": "## 备份、知识同步和边界"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented_unpublished_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1844,7 +1844,7 @@
       "audience": "Developer",
       "source": "system/core/Seo/CrawlerObservation.php; docs/CORE_1.2.90_PR70_PREPARATION_REPORT.md; docs/CORE_1.2.90_PUBLICATION_REPORT.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "/admin/seo/crawlers",
       "public_route": "",
@@ -1873,9 +1873,9 @@
           "anchor": "## 公开下载、签名和版本"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1891,7 +1891,7 @@
       "audience": "Administrator",
       "source": "system/core/Admin/AdminDataView.php; system/core/Admin/AdminController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -1914,22 +1914,22 @@
         },
         {
           "path": "system/core/Admin/AdminController.php",
-          "sha256": "e0aaf3ced1837dcd31afeb5bce5ade7d2fcc0ab11b151556346386468be05991",
-          "line_start": 9253,
-          "line_end": 9253,
+          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46",
+          "line_start": 9275,
+          "line_end": 9275,
           "anchor": "private function reviewReportHtml("
         },
         {
           "path": "system/core/Admin/AdminController.php",
-          "sha256": "e0aaf3ced1837dcd31afeb5bce5ade7d2fcc0ab11b151556346386468be05991",
-          "line_start": 8056,
-          "line_end": 8056,
+          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46",
+          "line_start": 8078,
+          "line_end": 8078,
           "anchor": "$plan = $service->dryRun($packagePath);"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1945,7 +1945,7 @@
       "audience": "Developer",
       "source": "docs/rest-foundation-1.2.91.md; system/core/Rest/ApiV1Controller.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1967,9 +1967,9 @@
           "anchor": "private function mediaWriteGuard("
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1985,7 +1985,7 @@
       "audience": "Developer",
       "source": "docs/payment-configured-redirect.md; system/core/Payment/PaymentProviderRedirectPolicyResolver.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -2007,9 +2007,9 @@
           "anchor": "if ($provider instanceof PaymentProviderConfiguredRedirectPolicyInterface)"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -2025,7 +2025,7 @@
       "audience": "Developer",
       "source": "docs/payment-provider-save-sqlite.md; system/core/Admin/AdminController.php; system/core/Payment/PaymentTransaction.php; docs/payment-provider-save-review-evidence.json",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "/admin/payments/providers",
       "public_route": "",
@@ -2042,9 +2042,9 @@
         {
           "path": "system/core/Admin/AdminController.php",
           "anchor": "public function paymentProviderSave(Request $request): Response",
-          "sha256": "e0aaf3ced1837dcd31afeb5bce5ade7d2fcc0ab11b151556346386468be05991",
-          "line_start": 6317,
-          "line_end": 6317
+          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46",
+          "line_start": 6339,
+          "line_end": 6339
         },
         {
           "path": "system/core/Payment/PaymentTransaction.php",
@@ -2061,9 +2061,9 @@
           "sha256": "e37bfb188be36a404da873c258564b501adcab278999247626d4c4823924079b"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -2079,7 +2079,7 @@
       "audience": "Developer",
       "source": "docs/plugin-data-scope-index.md; system/migrations/2026_11_01_000001_plugin_data_scope_index.php; system/core/Plugin/PluginDataStore.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -2108,9 +2108,9 @@
           "line_end": 66
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -2126,7 +2126,7 @@
       "audience": "Developer",
       "source": "docs/scheduler-unconfigured-maintenance.md; system/core/Plugin/PluginManager.php; system/core/Seo/SearchMetrics/SearchMetricsSyncService.php; system/core/Seo/SearchMetrics/GoogleSearchConsoleConnectionRepository.php; system/core/Plugin/LocalPluginPackageInstaller.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -2169,9 +2169,9 @@
           "sha256": "d023da1da6ac272aadbd3e9f41c586ff955cfe50c4f4a54e3575c479e5ce6bf2"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -2187,7 +2187,7 @@
       "audience": "Administrator",
       "source": "docs/knowledge/2026-11-04-admin-compact-layout.md; system/core/Admin/AdminController.php; system/core/Seo/CrawlerStatistics.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -2204,9 +2204,9 @@
         {
           "path": "system/core/Admin/AdminController.php",
           "anchor": "private function adForm(AdRepository $repo): string",
-          "line_start": 11272,
-          "line_end": 11272,
-          "sha256": "e0aaf3ced1837dcd31afeb5bce5ade7d2fcc0ab11b151556346386468be05991"
+          "line_start": 11294,
+          "line_end": 11294,
+          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46"
         },
         {
           "path": "system/core/Seo/CrawlerStatistics.php",
@@ -2216,9 +2216,9 @@
           "sha256": "d864891f9995d6ad6d9b18905babb1d775be7b8ad4f5789531be3cd266c9fda2"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -2234,7 +2234,7 @@
       "audience": "Administrator",
       "source": "docs/knowledge/2026-11-04-admin-update-flow.md; system/core/Admin/AdminController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.95 source/document review. Runtime acceptance is separately recorded in docs/CORE_1.2.95_PUBLICATION_REPORT.md. Production site upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -2251,21 +2251,68 @@
         {
           "path": "system/core/Admin/AdminController.php",
           "anchor": "private function updateVerificationHtml(",
-          "line_start": 10499,
-          "line_end": 10499,
-          "sha256": "e0aaf3ced1837dcd31afeb5bce5ade7d2fcc0ab11b151556346386468be05991"
+          "line_start": 10521,
+          "line_end": 10521,
+          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46"
         },
         {
           "path": "system/core/Admin/AdminController.php",
           "anchor": "private function updateReturnUrl(",
-          "line_start": 10493,
-          "line_end": 10493,
-          "sha256": "e0aaf3ced1837dcd31afeb5bce5ade7d2fcc0ab11b151556346386468be05991"
+          "line_start": 10515,
+          "line_end": 10515,
+          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46"
         }
       ],
-      "verified_version": "1.2.95",
-      "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "last_verified_at": "2026-11-04",
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false
+    },
+    {
+      "id": "admin.starship_original_palette",
+      "topic": "Administration",
+      "capability": "Blue-white admin framing and page-local content details",
+      "description": "Core1.2.96发布候选沿用蓝白原配色，统一静态切角和面板层次；内容列表新增明确限定当前页的筛选，宽屏并排详情、窄屏模态详情。保留分页、字段、编辑/预览/查看、删除POST/CSRF/确认与权限；无新查询或外部字体/动画。完整正式Gate与发布验收另记，未表示官网升级。",
+      "audience": "Administrator",
+      "source": "docs/knowledge/2026-11-05-admin-starship.md; system/core/Admin/AdminController.php; system/core/Support/View.php; public/assets/admin/admin.css",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned unpublished Core1.2.96 source/document review. Isolated runtime and browser evidence is recorded separately in docs/knowledge/2026-11-05-admin-starship.md. Publication, production upgrade and consumer import are not implied by source review.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/knowledge/2026-11-05-admin-starship.md",
+          "anchor": "# 蓝白配色星舰后台",
+          "line_start": 1,
+          "line_end": 1,
+          "sha256": "ef9c0bc96d958bd09ff2acc6f5b592fc61cf036f9bb230b74672b8f86e6eb1bf"
+        },
+        {
+          "path": "system/core/Admin/AdminController.php",
+          "anchor": "public function contentIndex(",
+          "line_start": 1865,
+          "line_end": 1865,
+          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46"
+        },
+        {
+          "path": "system/core/Support/View.php",
+          "anchor": "private static function assetVersion(",
+          "line_start": 298,
+          "line_end": 298,
+          "sha256": "c680980e0a542440076ce483027426dc0308df3ec9010503ae4215230f288d96"
+        }
+      ],
+      "verified_version": "1.2.96",
+      "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+      "last_verified_at": "2026-11-06",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -2274,10 +2321,10 @@
       "enabled_for_customer_service": false
     }
   ],
-  "package_revision": "2026-11-04-core195-formally-published",
+  "package_revision": "2026-11-06-core196-original-palette-unpublished",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-  "source_tag": "v1.2.95",
+  "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+  "source_tag": "071620d3d7e7ec55b4623a991d4e3d489a131472",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "PUBLISHED",
@@ -2486,14 +2533,14 @@
   ],
   "release_status": "PUBLISHED",
   "candidate_evidence": {
-    "status": "PUBLISHED",
-    "base_version": "1.2.94",
-    "candidate_version": "1.2.95",
-    "base_commit": "75ad39cb12008e1aa8195f5dfec5620c128e3393",
-    "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-    "candidate_revision": "PR89-merged-formally-published",
-    "owner_decision": "Owner requests fixing the update flow, complete tests then publication. Published after exact-source server gates and native signed acceptance. No production website upgrade or freeze.",
-    "runtime_report": "docs/CORE_1.2.95_PUBLICATION_REPORT.md",
+    "status": "UNPUBLISHED",
+    "base_version": "1.2.95",
+    "candidate_version": "1.2.96",
+    "base_commit": "8964902b11a07d6623037e14c01974c08ebe23e8",
+    "source_commit": "071620d3d7e7ec55b4623a991d4e3d489a131472",
+    "candidate_revision": "approved-blue-white-starship",
+    "owner_decision": "Owner approves integrating the selected original palette, regression/full Release Gate, signing verification and publication. No production website upgrade, real payment or external synchronization.",
+    "runtime_report": "docs/knowledge/2026-11-05-admin-starship.md",
     "production_deployed": false,
     "consumer_imported": false,
     "published_release_evidence_preserved": true
@@ -2758,6 +2805,19 @@
     "candidate_revision": "PR87-merged-formally-published",
     "owner_decision": "Owner explicitly authorizes publication; no production website upgrade. Published after exact-source server gates and native signed acceptance. Novel live writes are outside Core publication scope.",
     "runtime_report": "docs/CORE_1.2.94_PUBLICATION_REPORT.md",
+    "production_deployed": false,
+    "consumer_imported": false,
+    "published_release_evidence_preserved": true
+  },
+  "published_195_acceptance_evidence": {
+    "status": "PUBLISHED",
+    "base_version": "1.2.94",
+    "candidate_version": "1.2.95",
+    "base_commit": "75ad39cb12008e1aa8195f5dfec5620c128e3393",
+    "source_commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
+    "candidate_revision": "PR89-merged-formally-published",
+    "owner_decision": "Owner requests fixing the update flow, complete tests then publication. Published after exact-source server gates and native signed acceptance. No production website upgrade or freeze.",
+    "runtime_report": "docs/CORE_1.2.95_PUBLICATION_REPORT.md",
     "production_deployed": false,
     "consumer_imported": false,
     "published_release_evidence_preserved": true

@@ -41,7 +41,7 @@ final class View
     public static function page(string $title, string $body): string
     {
         $isAdmin = self::isAdminRequest();
-        $layoutClass = $isAdmin ? ' class="admin-shell"' : '';
+        $layoutClass = $isAdmin ? ' class="admin-shell admin-starship"' : '';
         $adminNav = $isAdmin ? self::adminSidebar() : self::frontHeader();
         $adminTopbar = $isAdmin ? self::adminTopbar($title) : '';
         $mainClass = $isAdmin ? ' class="admin-main" id="admin-main" tabindex="-1"' : '';
@@ -297,7 +297,7 @@ final class View
 
     private static function assetVersion(): string
     {
-        return '20261104-admin-compact-workspaces';
+        return '20261106-admin-starship-light';
     }
 
     private static function adminNavGroupScript(): string
