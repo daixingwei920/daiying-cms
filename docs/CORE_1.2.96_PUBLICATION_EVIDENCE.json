@@ -1,0 +1,69 @@
+{
+  "status": "PUBLISHED",
+  "version": "1.2.96",
+  "commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
+  "tag": "v1.2.96",
+  "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.96",
+  "official_publication_at": "2026-11-06T02:05:24+00:00",
+  "installer_sha256": "e723e32264563195785ad91af7e50b5b4fb93e1fbc48d6ebdbb944e9da01aea1",
+  "update_sha256": "3a0660bc2be044e2405e9c1066ca46ee2e6447bd1203984511a4bdfc8f72df2d",
+  "signed_parity_checks": 643,
+  "native_upgrade_rollback_retry": {
+    "php8.3.33": 64,
+    "php8.5.9": 64,
+    "from_version": "1.2.95",
+    "target_version": "1.2.96",
+    "real_old_installer": true
+  },
+  "complete_signed_http_flow": {
+    "php8.3.33": 32,
+    "php8.5.9": 32,
+    "scope": "Exact merged handlers, explicit disposable1.2.95 current-version metadata and actual official-signed1.2.96 package; real old-installer native upgrade is separate."
+  },
+  "independent_signature_checks": 7,
+  "anonymous_publication_checks": 15,
+  "isolated_precommit_per_php": {
+    "native_admin": 25,
+    "compact": 40,
+    "data_workspace": 16,
+    "update_flow": 11,
+    "runtime_boundary": 3,
+    "native_http": 23,
+    "scroll_contract": true
+  },
+  "release_gate_v1_contract": 4,
+  "install_safety_per_php": 14,
+  "knowledge_provenance": 10,
+  "browser_layout_checks": 70,
+  "browser_interactions": 5,
+  "browser_scope": "35 Core fixture pages at1470/390px; not physical devices, production, paid operations or independent plugin UI acceptance.",
+  "distribution_protection": {
+    "status": "PASS",
+    "distribution_backup_integrity": "ok",
+    "existing_licenses_codes_activations_unchanged": true,
+    "existing_release_rows_unchanged": true,
+    "unrelated_products_unchanged": true,
+    "commercial_fields_unchanged": true,
+    "distribution_code_config_unchanged": true,
+    "production_site_upgrade": false
+  },
+  "distribution_source_review": {
+    "status": "EXACT_CURRENT_SOURCE_REVIEWED",
+    "old_sha256": "6971aed3e47189bba12f0e359bc43ce7344f348de8a9f238e421eea243257150",
+    "approved_sha256": "b0424348057fc02c419885068fbe100f63c183a6262fe71b107ba823b9014149",
+    "approved_commit": "a9e8d8e22c508d32bda5699238118ddf1b076104",
+    "previous_owner_approved_deployment_evidence": "work/distribution-selection/ACCEPTANCE.zh-CN.md",
+    "acceptance_sha256": "04a1c6fb67214a179f32076cec6d139b4199efa4b01855c7a6c565f6eab2a261",
+    "diff_scope": "Only Core discovery selection changed; ReleaseSigner, PackageValidator and publication code unchanged. Bound package ID/hash download verification retained.",
+    "production_source_modified_this_task": false
+  },
+  "preserved_stop": {
+    "report": "report.stopped-source-guard.json",
+    "sha256": "ed6c683e38da3b462d687223d1147848018fd19df91cdc4e8c37304eec846482",
+    "reason": "Expected distribution source fingerprint predates previously approved selection fix."
+  },
+  "production_site_upgrade": false,
+  "production_site_freeze": false,
+  "private_keys_generated_on_workstation": false,
+  "private_keys_exported": false
+}

@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Published Core1.2.96 (2026-11-06 UTC)
+
+- Core1.2.96 is published on GitHub and official stable at immutable v1.2.96 / 56ec3de16b7dabec478f277d74b97f7df65ab138. PR91 integrates the approved blue-white Starship layout, page-local content filters and responsive details while retaining native action/security contracts. All published migrations and Core1.2.80/PHP8.3 floors remain.
+- Exact-main preflight/build, official signing/parity643, PHP8.3/8.5 real1.2.95→1.2.96 upgrade/rollback/retry64 each, signed update HTTP32 each, independent signature7 and anonymous publication15 passed. Candidate Chrome35 pages ×1470/390px gives70 no-overflow checks and5 keyboard/filter interactions; not physical-device or independent plugin UI acceptance.
+- Installere723e32264563195785ad91af7e50b5b4fb93e1fbc48d6ebdbb944e9da01aea1; update3a0660bc2be044e2405e9c1066ca46ee2e6447bd1203984511a4bdfc8f72df2d. Keep frozen tag/artifacts unchanged. Prior signing source-guard stop is preserved; live distribution exactly matches approved selection-fix sourcea9e8d8e, with reviewed fingerprints and unchanged signing/publication code.
+- Distribution backup/protection passed; existing licenses/codes/inventory, old releases, other products and source/config unchanged. No website upgrade/freeze, real payment/refund, paid AI, external sync, local private-key generation/export or production knowledge import. V1 is pinned to published1.2.96; see docs/CORE_1.2.96_PUBLICATION_REPORT.md.
+
 ## Owner-authorized original-palette admin publication (2026-11-06 UTC)
 
 - Owner selects the blue/white original-palette Starship layout and accepts completing source integration, regression/full Release Gate, signing verification and publication. This supersedes the isolated task's no-merge/no-version/no-signing/no-publication hold for Core1.2.96 only.

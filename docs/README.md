@@ -26,7 +26,8 @@ This index collects the public-facing documentation currently available in the G
 ## User Guide
 
 - [审核与系统更新数据界面（隔离候选）](admin-data-workspace.md) records grouped views, retained validation, local acceptance and unpublished status.
-- [星舰后台与内容管理（隔离开发候选）](knowledge/2026-11-05-admin-starship.md) records the shared theme, bounded content interactions, performance evidence and unpublished scope.
+- [Core1.2.96正式发布与验收](CORE_1.2.96_PUBLICATION_REPORT.md) records the blue-white admin layout, signed native gates, publication verification and unchanged production-site boundary.
+- [星舰后台设计与候选记录](knowledge/2026-11-05-admin-starship.md) preserves the frozen preparation snapshot; current published status is in the1.2.96 report.
 - [七个后台页面紧凑布局（未发布候选）](knowledge/2026-11-04-admin-compact-layout.md) records presentation changes, isolated acceptance and knowledge synchronization status.
 
 - [戴影影视插件 0.8.0 安装与配置图文教程](media-sources-0.8.0-guide.zh-CN.md) covers independent movie, short-drama, TV and custom-video setup.
