@@ -336,8 +336,8 @@ final class CardDeliveryRepository
         if ($orderId <= 0 || $paymentId <= 0) {
             throw new CardDeliveryException('Card order payment context is invalid.');
         }
-        $this->pdo->prepare('UPDATE cms_card_orders SET payment_id = :payment_id, updated_at = :updated_at WHERE id = :id AND (payment_id IS NULL OR payment_id = :payment_id)')
-            ->execute([':id' => $orderId, ':payment_id' => $paymentId, ':updated_at' => gmdate('c')]);
+        $this->pdo->prepare('UPDATE cms_card_orders SET payment_id = :payment_id, updated_at = :updated_at WHERE id = :id AND (payment_id IS NULL OR payment_id = :expected_payment_id)')
+            ->execute([':id' => $orderId, ':payment_id' => $paymentId, ':expected_payment_id' => $paymentId, ':updated_at' => gmdate('c')]);
     }
 
     public function markOrderPaid(int $orderId, int $paymentId): void
