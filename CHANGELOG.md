@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.97 (release preparation)
+
+- Fix automatic card-delivery payment binding with MySQL native prepared statements by using a distinct placeholder in the retry guard. Preserve the empty-binding/same-payment condition and prevent a different payment from overwriting the order.
+- No schema migration or API change. Preserve Core 1.2.80 and PHP 8.3 minimums. This Core release enables the Web Clip 1.1.0 MySQL card-delivery dependency; plugin publication remains a separate package release.
+- Formal publication requires the exact-source Release Gate, official server-side signing, signed-package upgrade/rollback acceptance and distribution backup. Website upgrades remain separate.
+
 ## 1.2.96 (release preparation)
 
 - Apply the approved blue/white admin palette with static chamfered framing, clear navigation and bounded tables. Keep authenticated styling separate from login/front pages; no new framework, external fonts or continuous animation.
