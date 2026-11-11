@@ -4,6 +4,13 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Published Core1.2.98 (2026-11-11 UTC)
+
+- PR97 is published on GitHub/official stable at immutable v1.2.98 / 235e25b4aaebac8a9d9e8410ff694cb1ef6bffa6. Contains the approved command-bridge UI and32/14/15/16px typography plus experimental seo.sitemaps registration, existing seo.extend, no new migration/permission. Keep frozen tag/artifacts unchanged.
+- Exact clean-main preflight/build, official server signing/parity643, PHP8.3/8.5 real1.2.97→1.2.98 upgrade/rollback/retry71 each, signed update HTTP32 each, fresh signed installer HTTP9 each, disposable MySQL8 Sitemap73 each, independent signatures7 and anonymous publication15 passed. Selected UI asset bytes match signed upgrade HTTP responses.
+- Installeradb99b609397e8d68bcefeb9d88c912a89e328e9f5b808c05124418bbde18029; updatee343a6594ae8c29105fa4ce862ec0f8e0acf521184acfc2fb8f1cfb5ae424324. Distribution backup/protection passes. No production website upgrade, plugin publication, novel fallback replacement, paid AI, real payment or production knowledge import. Private keys remain server-only.
+- V1 is pinned to published1.2.98 and preserves prior evidence; see docs/CORE_1.2.98_PUBLICATION_REPORT.md. Preparation snapshots and preserved fixture STOP logs are historical, not current publication state.
+
 ## Owner-authorized joint Core1.2.98 release (2026-11-11)
 
 - Owner explicitly requests coordination with the admin-layout chat, integration and publication of one new Core release. This supersedes the isolated UI/API no-merge/no-version/no-signing/no-publication holds below for the selected UI and generic sitemap API only. The layout chat is the sole release executor; the API chat keeps main/distribution unchanged.

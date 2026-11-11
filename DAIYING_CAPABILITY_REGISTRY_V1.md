@@ -30,7 +30,7 @@
 | `content.type` | Register content type | reviewed | Medium | No | `$context->registerContentType(...)` |
 | `content.field` | Register custom content field | reviewed | Medium | No | `$context->registerCustomField(...)` |
 | `search.register` | Register searchable resource | reviewed | Low | No | `$context->registerSearchResource(...)` |
-| `seo.extend` | Extend SEO metadata/JSON-LD; sitemap discovery in the unreleased candidate | `api` allowed | Low | No | `$context->registerSeoMeta(...)` |
+| `seo.extend` | Extend SEO metadata/JSON-LD; experimental sitemap discovery from Core1.2.98 | `api` allowed | Low | No | `$context->registerSeoMeta(...)` |
 | `blocks.register` | Register content block and renderer | `api` allowed | Medium | No | `$context->registerBlockRenderer(...)` |
 
 `$context->license()` is context-scoped to the current plugin and does not require a separate `license.read` capability. Plugins cannot pass an arbitrary plugin ID to read another plugin's license. Paid behavior should be gated with `hasFeature()` or `requireFeature()`, not raw tier checks.

@@ -26,7 +26,7 @@ Use the SDK services instead of private Core internals:
 
 Do not use raw PDO, direct `$_SESSION` mutation, private Core table layouts, guessed event strings, or unlisted Core methods from an `api` plugin. Trusted/bundled plugins may receive additional privileges only when Core grants them explicitly.
 
-- [Unreleased sitemap discovery registration](../plugin-sitemap-registry.md): owned public XML maps through `seo.extend`, with old-Core feature detection.
+- [Core1.2.98 experimental sitemap discovery registration](../plugin-sitemap-registry.md): owned public XML maps through `seo.extend`, with old-Core feature detection.
 
 ## Legacy Document
 
