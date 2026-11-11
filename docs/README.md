@@ -23,7 +23,11 @@ This index collects the public-facing documentation currently available in the G
 
 - [Issue #9 SEO/GEO configuration and output contract](seo-geo-contract.md) documents the unpublished optional settings, rendering, privacy and rollback behavior.
 
+- [Plugin sitemap registration candidate](plugin-sitemap-registry.md) records the generic SDK, compatibility and isolated validation; formal joint release pending.
+
 ## User Guide
+
+- [蓝白指挥舱后台：隔离实现与性能记录](knowledge/2026-11-11-admin-command-bridge.md) records the approved concept implementation, native/browser checks and unpublished status.
 
 - [餐厅外卖插件与主题：首选语言及独立安装](restaurant-storefront-1.0.1.md)
 

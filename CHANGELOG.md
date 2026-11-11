@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.98 (release preparation)
+
+- Apply the reviewed blue-white command-bridge admin layout across Core panels, with compact32px headings,14px body,15px navigation and16px content titles. Static shared CSS and existing paginated data preserve bounded loading/runtime cost; no framework, font download or animation loop.
+- Add experimental PluginContext::registerSitemap() using existing seo.extend and owned public GET XML routes. Healthy enabled plugin maps appear in the Core sitemap index and robots; Core-only output, private-path guards, noindex and subdirectory URLs remain protected. Core does not fetch child maps.
+- Preserve Core1.2.80/PHP8.3 minimums and all published migrations. Joint publication requires exact-source Gate, official server signing and signed native acceptance; website upgrades and independent plugins remain separate.
+
 ## 1.2.97 (release preparation)
 
 - Fix automatic card-delivery payment binding with MySQL native prepared statements by using a distinct placeholder in the retry guard. Preserve the empty-binding/same-payment condition and prevent a different payment from overwriting the order.

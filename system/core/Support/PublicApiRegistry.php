@@ -135,6 +135,14 @@ final class PublicApiRegistry
                 'capabilities' => ['seo.extend'],
             ],
             [
+                'id' => 'seo.sitemaps',
+                'version' => '0.1.0-alpha',
+                'class' => 'Cms\\Core\\Plugin\\PluginContext',
+                'stability' => 'experimental',
+                'summary' => 'Announce owned public XML GET routes in the Core sitemap index and robots.txt without fetching plugin maps.',
+                'capabilities' => ['seo.extend'],
+            ],
+            [
                 'id' => 'storage.provider',
                 'version' => FoundationVersions::STORAGE_API,
                 'class' => 'Cms\\Core\\Media\\MediaStorageProviderV1Interface',

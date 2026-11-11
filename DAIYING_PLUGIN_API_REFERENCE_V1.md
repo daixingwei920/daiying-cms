@@ -51,8 +51,26 @@ registerCustomField(string $contentType, CustomFieldDefinition $field): void
 registerSearchResource(string $id, string $label): void
 registerSeoJsonLd(string $id, callable $provider): void
 registerSeoMeta(string $id, callable $provider): void
+registerSitemap(string $path): void // Unreleased sitemap discovery candidate; seo.extend
 registerMailEvent(string $eventId, string $label, array $variables = []): void
 ```
+
+## Sitemap discovery registration (unreleased candidate)
+
+See [contract and local validation](docs/plugin-sitemap-registry.md). Requires existing `seo.extend`; ordinary API plugins are supported without PDO or new permissions. Register the public route first:
+
+```php
+$context->frontRoute('GET', '/catalog-sitemap.xml', static fn () => $pages->sitemap());
+if (method_exists($context, 'registerSitemap') && $context->hasCapability('seo.extend')) {
+    $context->registerSitemap('/catalog-sitemap.xml');
+}
+```
+
+The path must be an application-relative `.xml` path with no scheme, host, query, fragment, percent encoding, traversal, template, private prefix or controls. It must match the same plugin's previously registered GET route with no admin, route-capability or CSRF requirement. Repeat announcements deduplicate. There are at most 32 maps per plugin and 512 in total; exceeding a limit throws `PluginException`.
+
+With healthy enabled registrations and global indexing allowed, `/sitemap.xml` returns a `sitemapindex` containing `/sitemap.xml?core=1` (the original dynamic Core `urlset`) and the plugin maps. Without maps it preserves the existing `urlset`. `robots.txt` appends canonical declarations and retains its previous rules. Noindex hides plugin announcements and returns an empty Core map. This is discovery, not authorization or a promise of search-engine indexing. Plugins remain responsible for child urlset XML correctness (no nested index), published-only content, privacy, sitemap protocol limits and site-configuration readiness. Core never fetches child maps or runs their handlers to generate the index.
+
+Registration is request-local, omitted for disabled/failed-boot plugins, and filtered against current lifecycle/capability state. No database migration or persisted registry. Older Cores require the feature detection shown above and existing manual discovery configuration; do not install server rewrites from a plugin. The candidate is **not published** and does not replace a working production fallback until a separately approved Core/plugin upgrade.
 
 ## Advertising and Payment Facades (Unreleased GC03/04 Candidate)
 

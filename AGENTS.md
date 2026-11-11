@@ -4,6 +4,28 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized joint Core1.2.98 release (2026-11-11)
+
+- Owner explicitly requests coordination with the admin-layout chat, integration and publication of one new Core release. This supersedes the isolated UI/API no-merge/no-version/no-signing/no-publication holds below for the selected UI and generic sitemap API only. The layout chat is the sole release executor; the API chat keeps main/distribution unchanged.
+- Clean release/core-1.2.98-ui-sitemap starts from actual main05d0f951bfce396deb2e19b0796a06bbe8484811. Preserve the approved32/14/15/16px typography and frozen asset bytes, existing routes/security/data and all historical migrations. seo.sitemaps remains experimental; reuse seo.extend, no new permission or schema.
+- Run PHP8.3/8.5, disposable MySQL, relevant SDK/native HTTP regressions, full exact-main Release Gate, server-only official signing and isolated signed installation/upgrade/rollback. Keys stay on the authorized update server; no integrity or provenance bypass.
+- Back up and protect distribution state before publication. No production website upgrade, independent plugin release, novel Apache fallback replacement, real payment/refund, paid AI or production knowledge import. Keep v1.2.97 and earlier artifacts immutable.
+
+## Owner-requested sitemap registration candidate (2026-11-11)
+
+- Owner requests a generic plugin sitemap registration API. Clean `feat/plugin-sitemap-registry` at `work/core-sitemap-registry-clean` starts from current official main `05d0f951bfce396deb2e19b0796a06bbe8484811` (source version 1.2.97). This task is local implementation/validation only; no version bump, merge, signing, publication or production upgrade.
+- Reuse `seo.extend` and owned public GET routes; Core aggregates discovery without business-plugin IDs, child-map fetching, new permission grants or migrations. Preserve native robots policies, Core map contents and older plugins. The independent novel adapter is outside Core source/payload.
+- The novel site's already approved Apache discovery fallback remains unchanged. Replacing that fallback requires a separately authorized, backed-up native Core/plugin deployment.
+- Signing/key-generation tests are not run on the workstation; do not weaken their guards to obtain a local PASS. See `docs/plugin-sitemap-registry.md` for local evidence and pending formal gates.
+
+## Owner-authorized isolated command-bridge admin design (2026-11-11)
+
+- Owner approves implementing the reviewed blue-white command-bridge mockup with close visual fidelity and bounded loading/runtime cost. Clean `ui/admin-command-bridge` starts at origin/main `05d0f951bfce396deb2e19b0796a06bbe8484811` (configured Core1.2.97).
+- Reuse shared assets, native paginated content, notifications and responsive dialog. Static CSS frames only; no additional requests, queries, fonts, framework, canvas, polling or animation loop. Preserve routes, submitted fields, capabilities, CSRF, confirmation and integrity checks.
+- Owner subsequently requests smaller type and a complete Core screenshot review: headings32px, body14px, navigation15px, content titles16px. Preserve the shared visual style; all35 Core fixtures and52 screenshots are isolated review material, not independent-plugin or production acceptance.
+- Owner confirms the current typography candidate on2026-11-11: “这个字号可以，就按这版”. Keep headings32px/body14px/sidebar15px/content titles16px and use the selected52-shot gallery as the visual baseline. This is not new publication or production-upgrade authorization.
+- Develop/test in isolation. No merge, version bump, signing, publication or production website change is authorized by this design instruction. Keep all published artifacts immutable. See `docs/knowledge/2026-11-11-admin-command-bridge.md` for current evidence and limits.
+
 ## Published Core1.2.96 (2026-11-06 UTC)
 
 - Core1.2.96 is published on GitHub and official stable at immutable v1.2.96 / 56ec3de16b7dabec478f277d74b97f7df65ab138. PR91 integrates the approved blue-white Starship layout, page-local content filters and responsive details while retaining native action/security contracts. All published migrations and Core1.2.80/PHP8.3 floors remain.
