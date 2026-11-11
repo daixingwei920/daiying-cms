@@ -66,7 +66,7 @@ try {
         throw new RuntimeException('Restaurant plugin is disabled, untrusted, or dependencies failed to boot.');
     }
     $repo = new Official\Restaurant\RestaurantRepository($pdo);
-    $tickets = new Official\Restaurant\RestaurantTicketService($repo, new Official\Restaurant\RestaurantPrintService($repo));
+    $tickets = new Official\Restaurant\RestaurantTicketService($repo, new Official\Restaurant\RestaurantPrintService($repo, null, new Official\Restaurant\RestaurantPosRepository($pdo), hash('sha256', rtrim((string)$settings->get('site.url', ''), '/'))));
     $commerce = new Daiying\Commerce\CommerceRepository($pdo, (string) $settings->get('security.encryption_key', ''));
     $checkout = new Official\Restaurant\RestaurantCheckoutService($repo, $tickets, $commerce, $pdo, (string) $settings->get('security.encryption_key', ''));
     $cursorPath = $directory . '/cursor.json';

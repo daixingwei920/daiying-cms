@@ -16,6 +16,7 @@ use Official\Restaurant\RestaurantMenuImportService;
 
 require_once dirname(__DIR__) . '/official.commerce/src/CommerceRepository.php';
 require_once __DIR__ . '/src/RestaurantRepository.php';
+foreach (['RestaurantPosRepository','RestaurantPosGateway','RestaurantPosService','RestaurantPosController'] as $class) { require_once __DIR__ . '/src/'.$class.'.php'; }
 require_once __DIR__ . '/src/RestaurantTicketService.php';
 require_once __DIR__ . '/src/RestaurantPrintService.php';
 require_once __DIR__ . '/src/RestaurantCheckoutService.php';
@@ -26,7 +27,8 @@ return static function (PluginContext $context): void {
     $root = dirname(__DIR__, 3);
     $settings = Settings::load($root);
     $repo = new RestaurantRepository($context->pdo());
-    $printer = new RestaurantPrintService($repo);
+    $posRepo = new \Official\Restaurant\RestaurantPosRepository($context->pdo());
+    $printer = new RestaurantPrintService($repo, null, $posRepo, hash('sha256', rtrim((string)$settings->get('site.url', ''), '/')));
     $tickets = new RestaurantTicketService($repo, $printer);
     $commerce = new CommerceRepository($context->pdo(), (string) $settings->get('security.encryption_key', ''));
     $paymentSecret = (string) $settings->get('security.encryption_key', '');
@@ -48,7 +50,16 @@ return static function (PluginContext $context): void {
     } catch (\Cms\Core\Plugin\PluginException) {
     }
     $allowLoopbackBridge = preg_match('~^http://(127\.0\.0\.1|localhost|\[::1\])(?::\d+)?/?$~', (string) $settings->get('site.url', '')) === 1;
-    $controller = new RestaurantController($repo, $tickets, $printer, $checkout, $payments, new RestaurantMenuImportService($ai), $context->assetUrl('assets/menu-addons.js'), $allowLoopbackBridge);
+    $controller = new RestaurantController($repo, $tickets, $printer, $checkout, $payments, new RestaurantMenuImportService($ai), $context->assetUrl('assets/menu-addons.js'), $allowLoopbackBridge, $context->assetUrl('assets/admin.css'), $context->assetUrl('assets/admin.js'), $posRepo);
+
+    $posService = new \Official\Restaurant\RestaurantPosService($posRepo, $repo, $context->secrets(), (string)$settings->get('site.url', ''), [$checkout, 'orderReceiptForCart']);
+    $posService->registerSchedule($context);
+    $posController = new \Official\Restaurant\RestaurantPosController($posService, $repo, $context->assetUrl('assets/admin.css'));
+    $context->adminRoute('GET', '/admin/restaurant/pos', [$posController, 'index'], 'restaurant.manage', false);
+    $context->adminRoute('POST', '/admin/restaurant/pos/action', [$posController, 'action'], 'restaurant.manage', true);
+    foreach (['square', 'clover'] as $brand) {
+        $context->adminRoute('GET', '/admin/restaurant/pos/'.$brand.'/callback', static fn(\Cms\Core\Http\Request $request) => $posController->callback($request, $brand), 'restaurant.manage', false);
+    }
 
     $context->adminRoute('GET', '/admin/restaurant', [$controller, 'dashboard'], 'restaurant.orders', false);
     $context->adminRoute('GET', '/admin/restaurant/menu', [$controller, 'menu'], 'restaurant.manage', false);

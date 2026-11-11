@@ -6,7 +6,7 @@ namespace Official\Restaurant;
 
 final class RestaurantPrintService
 {
-    public function __construct(private readonly RestaurantRepository $repo, private readonly mixed $mail = null)
+    public function __construct(private readonly RestaurantRepository $repo, private readonly mixed $mail = null, private readonly ?RestaurantPosRepository $pos = null, private readonly string $siteHash = '')
     {
     }
 
@@ -17,6 +17,7 @@ final class RestaurantPrintService
      */
     public function enqueueStationJobs(array $ticket, array $items): array
     {
+        if ($this->pos?->isPrimaryPrinterForOrder((int)($ticket['commerce_order_id'] ?? 0), $this->siteHash)) { return []; }
         $jobs = [];
         foreach ($this->groupByStation($items) as $stationCode => $stationItems) {
             $payload = $this->renderTicket($ticket, $stationCode, $stationItems);

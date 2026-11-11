@@ -1,13 +1,13 @@
 {
   "plugin_id": "official.restaurant",
   "name": "餐厅外卖",
-  "description": "面向餐厅自取、预约与指定区域送餐的菜单、厨房票据和订单看板插件；实体打印需单独验收。",
-  "version": "1.0.1",
+  "description": "面向餐厅自取、预约与指定区域送餐的菜单、厨房票据和订单看板插件；后台分组设置；Square/Clover仅开放测试环境，正式POS连接尚未开放，实体打印需单独验收。",
+  "version": "1.0.2",
   "author": "Daiying CMS",
   "type": "plugin",
   "package_type": "plugin",
   "entry": "plugin.php",
-  "core": { "min": "1.2.83", "max": "2.0.0" },
+  "core": { "min": "1.2.83" },
   "php": ">=8.3.0",
   "trust_level": "trusted_php",
   "official": true,
@@ -16,10 +16,15 @@
     "commerce.orders",
     "restaurant.manage",
     "restaurant.orders",
-    "restaurant.print"
+    "restaurant.print",
+    "scheduler.register"
   ],
   "capability_namespaces": ["commerce", "restaurant"],
   "admin_routes": [
+    { "label": "连接收银系统", "path": "/admin/restaurant/pos", "method": "GET" },
+    { "label": "保存收银连接", "path": "/admin/restaurant/pos/action", "method": "POST" },
+    { "label": "Square授权返回", "path": "/admin/restaurant/pos/square/callback", "method": "GET" },
+    { "label": "Clover授权返回", "path": "/admin/restaurant/pos/clover/callback", "method": "GET" },
     { "label": "餐厅外卖", "path": "/admin/restaurant", "method": "GET" },
     { "label": "菜单管理", "path": "/admin/restaurant/menu", "method": "GET" },
     { "label": "识别菜单", "path": "/admin/restaurant/menu/import", "method": "GET" },
@@ -55,11 +60,11 @@
   ],
   "dependencies": [],
   "required_plugins": ["official.commerce"],
-  "migrations": ["migrations/001_restaurant_core.php", "migrations/002_restaurant_checkout.php", "migrations/003_agent_claims.php", "migrations/004_print_bridge.php"],
+  "migrations": ["migrations/001_restaurant_core.php", "migrations/002_restaurant_checkout.php", "migrations/003_agent_claims.php", "migrations/004_print_bridge.php", "migrations/005_pos_connections.php"],
   "table_prefixes": ["restaurant_"],
   "data_policy": {
     "uninstall": "retain_orders_tickets_and_print_history",
     "purge": "separate_confirmation_only"
   },
-  "data_schema_version": "0.1.0-alpha.15"
+  "data_schema_version": "0.1.0-alpha.16"
 }

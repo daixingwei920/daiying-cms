@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Official\Restaurant;
 
+require_once __DIR__ . '/RestaurantAdminSettings.php';
+
 use Cms\Core\Http\Request;
 use Cms\Core\Http\Response;
 use Cms\Core\Payment\PaymentService;
@@ -22,11 +24,18 @@ final class RestaurantController
         private readonly ?RestaurantMenuImportService $menuImport = null,
         private readonly string $addonEditorAssetUrl = '',
         private readonly bool $allowLoopbackBridge = false,
+        private readonly string $adminStyleUrl = '',
+        private readonly string $adminScriptUrl = '',
+        private readonly ?RestaurantPosRepository $pos = null,
     ) {
     }
 
     public function dashboard(Request $request): Response
     {
+        $posNotice = '';
+        foreach ($this->pos?->connections() ?? [] as $connection) {
+            if ($connection['last_error'] !== '' || (int)$connection['auto_send'] && (int)$connection['worker_seen_at'] < time() - 180) { $posNotice = '<p role="alert">收银系统有订单需要人工核对。<a href="/admin/restaurant/pos">查看传单情况</a>，请勿重复出单。</p>'; break; }
+        }
         $stats = $this->repo->stats();
         $rows = '';
         foreach ($this->repo->tickets(30) as $ticket) {
@@ -40,14 +49,14 @@ final class RestaurantController
                 '<input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '">' .
                 '<select name="status"><option value="accepted">接单</option><option value="preparing">制作中</option><option value="ready">已出餐</option><option value="completed">完成</option><option value="cancelled">取消</option></select> ' .
                 '<button type="submit">更新</button></form>';
-            $rows .= '<tr><td>' . ($orderId > 0 ? '订单 #' . $orderId . '<br>' : '测试票<br>') . View::escape((string) $ticket['ticket_number']) . '</td><td>' . View::escape((string) $ticket['service_mode']) . '</td><td>' . View::escape((string) $ticket['customer_name']) . '<br>' . View::escape((string) ($ticket['customer_phone'] ?? '')) . '</td><td>' . View::escape($paymentLabel) . '</td><td>' . View::escape($this->repo->formatDueLocal((string) ($ticket['due_at'] ?? ''))) . '</td><td>' . View::escape((string) ($ticketPayload['delivery_address'] ?? '')) . '</td><td>' . View::escape((string) $ticket['status']) . '</td><td>' . View::escape((string) $ticket['created_at']) . '</td><td>' . $actions . '</td></tr>';
+            $rows .= '<tr><td>' . ($orderId > 0 ? '订单 #' . $orderId . '<br>' : '测试票<br>') . View::escape((string) $ticket['ticket_number']) . '</td><td>' . $this->label((string) $ticket['service_mode']) . '</td><td>' . View::escape((string) $ticket['customer_name']) . '<br>' . View::escape((string) ($ticket['customer_phone'] ?? '')) . '</td><td>' . View::escape($paymentLabel) . '</td><td>' . View::escape($this->repo->formatDueLocal((string) ($ticket['due_at'] ?? ''))) . '</td><td>' . View::escape((string) ($ticketPayload['delivery_address'] ?? '')) . '</td><td>' . $this->label((string) $ticket['status']) . '</td><td>' . View::escape((string) $ticket['created_at']) . '</td><td>' . $actions . '</td></tr>';
         }
         if ($rows === '') {
             $rows = '<tr><td colspan="9" class="muted">还没有餐厅订单。</td></tr>';
         }
 
-        $body = '<h1>餐厅外卖</h1>' . $this->nav() . $this->notice($request) .
-            '<p class="muted">复用 Commerce 的商品、支付和订单能力，餐厅插件负责菜单、厨房岗位、分单打印和出餐看板。</p>' .
+        $body = '<h1>餐厅外卖</h1>' . $this->nav() . $posNotice . $this->notice($request) .
+            '<p class="ra-lead">在这里接单、查看取餐时间，并安排厨房制作。交餐前请核实付款，交餐后标记完成。</p>' .
             '<div class="admin-stats-grid">' .
             $this->stat('岗位', $stats['stations']) .
             $this->stat('打印机', $stats['printers']) .
@@ -56,35 +65,35 @@ final class RestaurantController
             $this->stat('待打印任务', $stats['queued_print_jobs']) .
             '</div>' .
             '<form method="post" action="/admin/restaurant/tickets/create-test" style="display:inline">' . CsrfToken::field() . '<button type="submit">生成测试分单</button></form> ' .
-            '<form method="post" action="/admin/restaurant/orders/sync-paid" style="display:inline">' . CsrfToken::field() . '<button type="submit">同步已支付订单生成厨房票</button></form>' .
+            '<form method="post" action="/admin/restaurant/orders/sync-paid" style="display:inline">' . CsrfToken::field() . '<button type="submit">检查已付款订单</button></form>' .
             '<h2>订单看板</h2><p>取餐核对订单号或票号、下单姓名/手机号，并确认付款已核实且未完成；不要只看截图。交餐后标记完成，取消厨房票不等于退款。预约时间按门店时区显示，未来预约票不能当作即时出餐。</p><table><thead><tr><th>订单号 / 票号</th><th>方式</th><th>顾客 / 手机号</th><th>付款核实</th><th>预约时间</th><th>配送地址</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody>' . $rows . '</tbody></table>';
 
-        return Response::html(View::page('餐厅外卖', $body));
+        return Response::html($this->adminPage('餐厅外卖', $body));
     }
 
     public function stations(Request $request): Response
     {
         $rows = '';
         foreach ($this->repo->stations() as $station) {
-            $rows .= '<tr><td>' . (int) $station['id'] . '</td><td>' . View::escape((string) $station['name']) . '</td><td><code>' . View::escape((string) $station['code']) . '</code></td><td>' . View::escape((string) $station['status']) . '</td><td>' . (int) $station['sort_order'] . '</td></tr>';
+            $rows .= '<tr><td>' . (int) $station['id'] . '</td><td>' . View::escape((string) $station['name']) . '</td><td><code>' . View::escape((string) $station['code']) . '</code></td><td>' . $this->label((string) $station['status']) . '</td><td>' . (int) $station['sort_order'] . '</td></tr>';
         }
         $rows = $rows !== '' ? $rows : '<tr><td colspan="5" class="muted">还没有岗位。建议先建：前台、油锅、寿司、炒锅、饮品。</td></tr>';
         $body = '<h1>厨房岗位</h1>' . $this->nav() . $this->notice($request) .
             '<form method="post" action="/admin/restaurant/stations/save">' . CsrfToken::field() .
             '<label>岗位名称<input name="name" placeholder="油锅 / 寿司 / 炒锅 / 饮品 / 前台"></label>' .
-            '<label>岗位代码<input name="code" placeholder="fry / sushi / wok / drinks / front"></label>' .
+            '<details><summary>内部编号（已有打印分工需要时填写）</summary><label>分工编号<input name="code" placeholder="留空自动生成"></label></details>' .
             '<label>状态<select name="status"><option value="active">启用</option><option value="disabled">停用</option></select></label>' .
             '<label>排序<input name="sort_order" type="number" value="0"></label>' .
             '<button type="submit">保存岗位</button></form>' .
             '<table><thead><tr><th>ID</th><th>岗位</th><th>代码</th><th>状态</th><th>排序</th></tr></thead><tbody>' . $rows . '</tbody></table>';
-        return Response::html(View::page('厨房岗位', $body));
+        return Response::html($this->adminPage('厨房岗位', $body));
     }
 
     public function saveStation(Request $request): Response
     {
         $this->repo->saveStation([
             'name' => $request->input('name', ''),
-            'code' => $request->input('code', ''),
+            'code' => trim((string) $request->input('code', '')) ?: 'station_' . bin2hex(random_bytes(5)),
             'status' => $request->input('status', 'active'),
             'sort_order' => $request->input('sort_order', 0),
         ]);
@@ -100,29 +109,29 @@ final class RestaurantController
         $rows = '';
         foreach ($this->repo->printers() as $printer) {
             $seen = (string) ($printer['bridge_last_seen_at'] ?? '');
-            $online = $seen === '' ? '未连接' : (strtotime($seen . ' UTC') >= time() - 180 ? '打印桥在线（不代表已出纸）' : '打印桥离线 / 请人工接单');
-            $rows .= '<tr><td><a href="/admin/restaurant/printers?edit=' . (int) $printer['id'] . '">' . (int) $printer['id'] . '</a></td><td>' . View::escape((string) $printer['name']) . '</td><td>' . View::escape((string) ($printer['config']['connection_mode'] ?? 'manual')) . ' / ' . View::escape((string) ($printer['config']['adapter'] ?? $printer['provider'])) . '</td><td>' . View::escape(implode(', ', $printer['station_codes'] ?? [])) . '</td><td>' . View::escape((string) $printer['status']) . '<br>' . View::escape($online) . '</td><td>' . View::escape((string) ($printer['last_test_status'] ?? '未测')) . ' ' . View::escape((string) ($printer['last_test_message'] ?? '')) . '<form method="post" action="/admin/restaurant/printers/test">' . CsrfToken::field() . '<input type="hidden" name="printer_id" value="' . (int) $printer['id'] . '"><label><input type="checkbox" name="confirmed" value="1" required>已获现场授权，生成明确标识的测试票</label><button type="submit">测试票入队</button></form></td></tr>';
+            $online = $seen === '' ? '未连接' : (strtotime($seen . ' UTC') >= time() - 180 ? '打印助手在线（不代表已出纸）' : '打印助手离线 / 请人工接单');
+            $rows .= '<tr><td><a href="/admin/restaurant/printers?edit=' . (int) $printer['id'] . '">' . (int) $printer['id'] . '</a></td><td>' . View::escape((string) $printer['name']) . '</td><td>' . $this->label((string) ($printer['config']['connection_mode'] ?? 'manual')) . ' / ' . $this->label((string) ($printer['config']['adapter'] ?? $printer['provider'])) . '</td><td>' . View::escape(implode(', ', $printer['station_codes'] ?? [])) . '</td><td>' . $this->label((string) $printer['status']) . '<br>' . View::escape($online) . '</td><td>' . View::escape((string) ($printer['last_test_status'] ?? '未测')) . ' ' . View::escape((string) ($printer['last_test_message'] ?? '')) . '<form method="post" action="/admin/restaurant/printers/test">' . CsrfToken::field() . '<input type="hidden" name="printer_id" value="' . (int) $printer['id'] . '"><label><input type="checkbox" name="confirmed" value="1" required>已获现场授权，生成明确标识的测试票</label><button type="submit">测试票入队</button></form></td></tr>';
         }
         $rows = $rows !== '' ? $rows : '<tr><td colspan="6" class="muted">还没有设备；未绑定时订单保留在人工厨房看板。</td></tr>';
         $body = '<h1>打印机</h1>' . $this->nav() . $this->notice($request) .
-            '<p>模式 A：授权的现有 Windows 打印队列；模式 B：独立、经验证的 Ethernet 设备。厂商 POS 接口须另获授权和完成适配，当前不可用。不修改 POS 数据库、不抢占端口、不开放打印机到公网。</p>' .
-            '<p>一台设备可绑定多个岗位。网络地址和 Windows 队列名称只在本地打印桥配置，网站不能指挥打印桥连接任意主机。凭据仅授予绑定设备任务权限。</p>' .
+            '<p>选择店内已经在用的打印机，或独立的厨房打印机。暂未支持通过收银品牌直接连接；没有打印机也可以使用订单看板接单。</p>' .
+            '<p>一台打印机可以负责厨房、寿司台或饮料区。需要先在店内电脑安装打印助手，再在下面关联设备。</p>' .
             '<form method="post" action="/admin/restaurant/printers/save">' . CsrfToken::field() .
             '<input type="hidden" name="id" value="' . (int) ($editing['id'] ?? 0) . '">' .
             '<label>显示名称<input name="name" required value="' . View::escape((string) ($editing['name'] ?? '')) . '" placeholder="厨房 / 寿司台 / 饮料区"></label>' .
-            '<label>处理方式<select name="provider"><option value="manual"' . $select('manual', (string) ($editing['provider'] ?? 'manual')) . '>人工看板</option><option value="agent"' . $select('agent', (string) ($editing['provider'] ?? '')) . '>本地 Print Bridge</option><option value="email">旧邮件配置（未适配）</option><option value="cloud">旧云打印配置（未适配）</option></select></label>' .
-            '<label>连接模式<select name="connection_mode"><option value="existing"' . $select('existing', (string) ($config['connection_mode'] ?? 'existing')) . '>模式 A：复用现有设备</option><option value="independent"' . $select('independent', (string) ($config['connection_mode'] ?? '')) . '>模式 B：独立厨房打印机</option></select></label>' .
-            '<label>可替换适配器<select name="adapter"><option value="windows_queue"' . $select('windows_queue', (string) ($config['adapter'] ?? 'windows_queue')) . '>Windows 授权打印队列（A/B）</option><option value="mac_queue"' . $select('mac_queue', (string) ($config['adapter'] ?? '')) . '>Mac 授权打印队列（A/B，测试候选）</option><option value="escpos_tcp"' . $select('escpos_tcp', (string) ($config['adapter'] ?? '')) . '>经验证 ESC/POS TCP 9100（仅 B）</option><option disabled>厂商授权 POS 接口（待适配）</option></select></label>' .
+            '<label>处理方式<select name="provider"><option value="manual"' . $select('manual', (string) ($editing['provider'] ?? 'manual')) . '>人工看板</option><option value="agent"' . $select('agent', (string) ($editing['provider'] ?? '')) . '>店内打印助手</option><option value="email">旧邮件配置（未适配）</option><option value="cloud">旧云打印配置（未适配）</option></select></label>' .
+            '<label>连接模式<select name="connection_mode"><option value="existing"' . $select('existing', (string) ($config['connection_mode'] ?? 'existing')) . '>使用店内现有设备</option><option value="independent"' . $select('independent', (string) ($config['connection_mode'] ?? '')) . '>使用独立厨房打印机</option></select></label>' .
+            '<label>打印机连在哪<select name="adapter"><option value="windows_queue"' . $select('windows_queue', (string) ($config['adapter'] ?? 'windows_queue')) . '>Windows 电脑上的打印机</option><option value="mac_queue"' . $select('mac_queue', (string) ($config['adapter'] ?? '')) . '>Mac 电脑上的打印机</option><option value="escpos_tcp"' . $select('escpos_tcp', (string) ($config['adapter'] ?? '')) . '>独立网线打印机（须先确认兼容）</option><option disabled>收银系统直接连接（尚未开放）</option></select></label>' .
             '<fieldset><legend>绑定岗位</legend>' . $stationOptions . '</fieldset>' .
             '<label>邮箱（邮件小票）<input name="email" placeholder="kitchen@example.com"></label>' .
-            '<label>本地打印桥 ID<input name="agent_id" value="' . View::escape((string) ($config['agent_id'] ?? '')) . '" placeholder="forest-kitchen-pc"></label>' .
-            '<label>设备绑定凭据<input name="agent_token" type="password" autocomplete="new-password" placeholder="至少 32 字符；编辑时留空保留已有凭据"></label>' .
+            '<label>打印助手编号<input name="agent_id" value="' . View::escape((string) ($config['agent_id'] ?? '')) . '" placeholder="forest-kitchen-pc"></label>' .
+            '<label>打印助手配对密码<input name="agent_token" type="password" autocomplete="new-password" placeholder="至少 32 字符；编辑时留空保留已有凭据"></label>' .
             '<label>云打印厂商<input name="cloud_vendor" placeholder="feie / yly / xprinter"></label>' .
             '<label>云打印设备 ID<input name="cloud_device_id"></label>' .
             '<label>状态<select name="status"><option value="enabled"' . $select('enabled', (string) ($editing['status'] ?? 'enabled')) . '>启用</option><option value="disabled"' . $select('disabled', (string) ($editing['status'] ?? '')) . '>停用并撤销访问</option></select></label>' .
             '<button type="submit">保存打印机</button></form>' .
-            '<table><thead><tr><th>ID</th><th>名称</th><th>模式 / 适配器</th><th>岗位</th><th>启用 / 连接状态</th><th>测试结果 / 测试票</th></tr></thead><tbody>' . $rows . '</tbody></table>';
-        return Response::html(View::page('打印机', $body));
+            '<table><thead><tr><th>ID</th><th>名称</th><th>设备连接方式</th><th>岗位</th><th>启用 / 连接状态</th><th>测试结果 / 测试票</th></tr></thead><tbody>' . $rows . '</tbody></table>';
+        return Response::html($this->adminPage('打印机', $body));
     }
 
     public function savePrinter(Request $request): Response
@@ -148,7 +157,7 @@ final class RestaurantController
             'actor' => $this->printActor(),
         ]);
         } catch (\InvalidArgumentException $exception) {
-            return Response::html(View::page('设备配置无效', '<h1>未保存设备</h1><p>' . View::escape($exception->getMessage()) . '</p>'), 400);
+            return Response::html($this->adminPage('设备配置无效', '<h1>未保存设备</h1><p>' . View::escape($exception->getMessage()) . '</p>'), 400);
         }
         return Response::redirect('/admin/restaurant/printers?saved=1');
     }
@@ -156,13 +165,13 @@ final class RestaurantController
     public function testPrinter(Request $request): Response
     {
         if ($request->input('confirmed', '') !== '1') {
-            return Response::html(View::page('须确认测试', '<h1>须先确认现场授权</h1>'), 400);
+            return Response::html($this->adminPage('须确认测试', '<h1>须先确认现场授权</h1>'), 400);
         }
         try {
             $jobId = $this->tickets->createPrinterTestTicket((int) $request->input('printer_id', 0), $this->printActor());
             return Response::redirect('/admin/restaurant/print-jobs?test_job=' . $jobId);
         } catch (\InvalidArgumentException $exception) {
-            return Response::html(View::page('测试票未创建', '<p>' . View::escape($exception->getMessage()) . '</p>'), 400);
+            return Response::html($this->adminPage('测试票未创建', '<p>' . View::escape($exception->getMessage()) . '</p>'), 400);
         }
     }
 
@@ -195,7 +204,7 @@ final class RestaurantController
             $itemMetadata = json_decode((string) ($item['modifiers_json'] ?? '{}'), true);
             $itemSection = is_array($itemMetadata) ? (string) ($itemMetadata['menu_section'] ?? 'all_day') : 'all_day';
             $sectionLabel = ['all_day' => '全天', 'lunch' => '午餐', 'dinner' => '晚餐', 'kids' => '儿童餐'][$itemSection] ?? '全天';
-            $rows .= '<tr><td><a href="/admin/restaurant/menu?edit=' . (int) $item['id'] . '">' . (int) $item['id'] . '</a></td><td>' . View::escape((string) $item['category']) . '</td><td>' . View::escape((string) $item['name']) . '</td><td>' . $sectionLabel . '</td><td>' . View::escape($this->repo->minorToMoney((int) $item['price_minor']) . ' ' . (string) $item['currency']) . '</td><td><code>' . View::escape((string) $item['station_code']) . '</code></td><td>' . View::escape((string) $item['status']) . '</td></tr>';
+            $rows .= '<tr><td><a href="/admin/restaurant/menu?edit=' . (int) $item['id'] . '">' . (int) $item['id'] . '</a></td><td>' . View::escape((string) $item['category']) . '</td><td><a href="/admin/restaurant/menu?edit=' . (int) $item['id'] . '">' . View::escape((string) $item['name']) . '</a></td><td>' . $sectionLabel . '</td><td>' . View::escape($this->repo->minorToMoney((int) $item['price_minor']) . ' ' . (string) $item['currency']) . '</td><td><code>' . View::escape((string) $item['station_code']) . '</code></td><td>' . $this->label((string) ($item['status'] === 'active' ? 'available' : $item['status'])) . '</td></tr>';
         }
         $rows = $rows !== '' ? $rows : '<tr><td colspan="7" class="muted">还没有菜品。</td></tr>';
         $body = '<h1>菜单管理</h1>' . $this->nav() . $this->notice($request) .
@@ -203,7 +212,7 @@ final class RestaurantController
             '<form method="post" action="/admin/restaurant/menu/save">' . CsrfToken::field() . '<input type="hidden" name="id" value="' . (int) ($editing['id'] ?? 0) . '">' .
             '<label>菜品名称<input name="name" value="' . $field('name') . '" required></label>' .
             $languageFields .
-            '<label>分类<input name="category" value="' . $field('category') . '"></label>' .
+            '<label>分类<input name="category" value="' . $field('category') . '" list="restaurant-categories"></label><datalist id="restaurant-categories">' . implode('', array_map(static fn (array $category): string => '<option value="' . View::escape((string) $category['key']) . '"></option>', $this->repo->menuCategories())) . '</datalist>' .
             '<label>用餐分组<select name="menu_section">' . $sectionOptions . '</select></label>' .
             '<label>该分组售价<input name="price" inputmode="decimal" value="' . View::escape($this->repo->minorToMoney((int) ($editing['price_minor'] ?? 0))) . '" required></label>' .
             '<label>币种<input name="currency" value="' . $field('currency', 'CNY') . '" maxlength="3"></label>' .
@@ -212,13 +221,13 @@ final class RestaurantController
             '<label>状态<select name="status">' . $statusOptions . '</select></label>' .
             $this->addonEditor(is_array($editingMetadata) ? $editingMetadata : []) .
             '<p>“不要鸡肉、不要米饭”等由顾客在每道菜的备注中填写，不再配置成免费多选项。加料价格由后台设置，顾客不能输入价格；使用菜品币种、按每份计费。</p>' .
-            '<details><summary>高级展示与规格设置（通常无需修改）</summary><label>展示数据 JSON（name/description/category 可含 zh-CN、en-US、es-US；featured、featured_order、tags、image_url、modifiers）<textarea name="metadata_json" rows="12">' . View::escape((string) ($editing['modifiers_json'] ?? '{}')) . '</textarea></label></details>' .
+            '<input type="hidden" name="menu_form_present" value="1"><fieldset><legend>菜品展示</legend><label>菜品图片地址<input name="image_url" value="' . View::escape((string) ($editingMetadata['image_url'] ?? '')) . '" placeholder="从媒体库复制图片地址"></label><label><input type="checkbox" name="featured" value="1"' . (!empty($editingMetadata['featured']) ? ' checked' : '') . '>推荐到首页招牌菜</label><label>推荐排序<input name="featured_order" type="number" value="' . (int) ($editingMetadata['featured_order'] ?? 0) . '"></label><p class="ra-help">已有的规格和其他展示设置会保留。三语介绍在上方分别填写。</p></fieldset>' .
             '<button type="submit">保存菜品</button></form>' .
             '<table><thead><tr><th>ID</th><th>分类</th><th>菜品</th><th>用餐分组</th><th>售价</th><th>岗位</th><th>状态</th></tr></thead><tbody>' . $rows . '</tbody></table>';
         if ($this->addonEditorAssetUrl !== '') {
             $body .= '<script src="' . View::escape($this->addonEditorAssetUrl) . '" defer></script>';
         }
-        return Response::html(View::page('菜单管理', $body));
+        return Response::html($this->adminPage('菜单管理', $body));
     }
 
     private function addonEditor(array $metadata): string
@@ -244,11 +253,21 @@ final class RestaurantController
 
     public function saveMenuItem(Request $request): Response
     {
-        $metadata = json_decode((string) $request->input('metadata_json', '{}'), true);
+        $original = $request->input('menu_form_present', '') === '1' ? ($this->repo->menuItem((int) $request->input('id', 0))['modifiers_json'] ?? '{}') : $request->input('metadata_json', '{}');
+        $metadata = json_decode((string) $original, true);
         if (!is_array($metadata)) {
-            return Response::html(View::page('菜单数据无效', '<h1>展示数据必须是 JSON 对象</h1>'), 400);
+            return Response::html($this->adminPage('菜单数据无效', '<h1>菜品资料无法读取，请重新打开编辑页面。</h1>'), 400);
         }
         try {
+            if ($request->input('menu_form_present', '') === '1') {
+                $image = trim((string) $request->input('image_url', ''));
+                if ($image !== '' && (!preg_match('~^(https?://|/(?!/))[^\s<>]+$~i', $image) || str_contains($image, '\\'))) {
+                    throw new \InvalidArgumentException('菜品图片请使用媒体库或网站图片地址。');
+                }
+                $metadata['image_url'] = $image;
+                $metadata['featured'] = $request->input('featured', '') === '1';
+                $metadata['featured_order'] = (int) $request->input('featured_order', 0);
+            }
             if ($request->input('language_fields_present', '') === '1') {
                 foreach (['name', 'description'] as $key) {
                     $input = $request->input('localized_' . $key, []);
@@ -297,7 +316,7 @@ final class RestaurantController
             'metadata' => $metadata,
             ]);
         } catch (\InvalidArgumentException $exception) {
-            return Response::html(View::page('菜单数据无效', '<h1>菜品未保存</h1><p>' . View::escape($exception->getMessage()) . '</p><a href="/admin/restaurant/menu">返回菜单</a>'), 400);
+            return Response::html($this->adminPage('菜单数据无效', '<h1>菜品未保存</h1><p>' . View::escape($exception->getMessage()) . '</p><a href="/admin/restaurant/menu">返回菜单</a>'), 400);
         }
         return Response::redirect('/admin/restaurant/menu?saved=1');
     }
@@ -305,10 +324,9 @@ final class RestaurantController
     public function menuImport(Request $request): Response
     {
         $capabilities = $this->menuImport?->capabilities() ?? [];
-        $status = '文字 PDF：' . (!empty($capabilities['pdf_text']) ? '可用' : '需 pdftotext') . '；照片：' . (!empty($capabilities['image_ocr']) ? '可用' : '需 Tesseract') . '；扫描 PDF：' . (!empty($capabilities['scanned_pdf']) ? '可用' : '需 pdftoppm 与 Tesseract') . '；站点 AI：' . (!empty($capabilities['ai']) ? '已配置' : '未配置');
+        $status = '文字菜单文件：' . (!empty($capabilities['pdf_text']) ? '可以识别' : '暂不可识别，可改为粘贴文字') . '；菜单照片：' . (!empty($capabilities['image_ocr']) ? '可以识别' : '暂不可识别，可改为粘贴文字') . '；扫描菜单文件：' . (!empty($capabilities['scanned_pdf']) ? '可以识别' : '暂不可识别') . '；站点 AI：' . (!empty($capabilities['ai']) ? '已配置' : '未配置');
         $body = '<h1>识别菜单 → 核对草稿 → 导入</h1>' . $this->nav() . '<p>' . $status . '</p>' .
-            '<p>本服务器 upload_max_filesize：' . View::escape((string) ini_get('upload_max_filesize')) . '；post_max_size：' . View::escape((string) ini_get('post_max_size')) . '；max_input_vars：' . View::escape((string) ini_get('max_input_vars')) . '。实际上传上限取服务器与插件限制中的较小值；批量审核建议 max_input_vars ≥ 2000。</p>' .
-            '<p>照片识别取决于服务器语言包：英文 eng、中文 chi_sim、西语 spa。缺少相应语言包时，不保证能识别该语言。</p>' .
+            '<p class="ra-help">可以上传菜单照片或文件，也可以直接粘贴文字。识别失败时可手动填写；复杂排版请分批上传。</p>' .
             '<p>保留手动新增/编辑。上传仅生成草稿，必须核对菜名、分类、午/晚/儿童价与说明，不会自动上架或覆盖已有菜品。复杂多栏识别可能不完整；最多 200 行、PDF 前 6 页。</p>' .
             '<form method="post" enctype="multipart/form-data" action="/admin/restaurant/menu/recognize">' . CsrfToken::field() .
             '<label>菜单 PDF/照片/TXT/CSV（≤10 MB）<input type="file" name="menu_file" accept=".pdf,.jpg,.jpeg,.png,.webp,.txt,.csv"></label>' .
@@ -320,7 +338,7 @@ final class RestaurantController
         if (is_array($draft) && (int) ($draft['created_at'] ?? 0) >= time() - 3600) {
             $body .= $this->menuDraftForm($draft);
         }
-        return Response::html(View::page('菜单识别与导入', $body));
+        return Response::html($this->adminPage('菜单识别与导入', $body));
     }
 
     public function recognizeMenu(Request $request): Response
@@ -346,7 +364,7 @@ final class RestaurantController
             return Response::redirect('/admin/restaurant/menu/import#review');
         } catch (\Throwable $exception) {
             $message = !$exception instanceof \Cms\Core\Ai\AiException && ($exception instanceof \InvalidArgumentException || $exception instanceof \RuntimeException) ? $exception->getMessage() : '识别失败；未导入任何菜品。请检查站点 AI 或识别组件。';
-            return Response::html(View::page('菜单识别失败', '<h1>未导入任何菜品</h1><p>' . View::escape($message) . '</p><a href="/admin/restaurant/menu/import">返回识别页</a>'), 400);
+            return Response::html($this->adminPage('菜单识别失败', '<h1>未导入任何菜品</h1><p>' . View::escape($message) . '</p><a href="/admin/restaurant/menu/import">返回识别页</a>'), 400);
         }
     }
 
@@ -355,16 +373,16 @@ final class RestaurantController
         $this->menuSession();
         $draft = $_SESSION['restaurant_menu_draft'] ?? null;
         if (!is_array($draft) || !hash_equals((string) ($draft['id'] ?? ''), (string) $request->input('draft_id', '')) || (int) ($draft['created_at'] ?? 0) < time() - 3600) {
-            return Response::html(View::page('草稿失效', '<h1>草稿已过期或已导入，请重新识别。</h1>'), 400);
+            return Response::html($this->adminPage('草稿失效', '<h1>草稿已过期或已导入，请重新识别。</h1>'), 400);
         }
         $submitted = $request->input('rows', []);
         if (!is_array($submitted) || count($submitted) !== count($draft['rows']) || $request->input('review_complete', '') !== $draft['id'] || $request->input('confirmed', '') !== '1') {
-            return Response::html(View::page('需要核对', '<h1>请先核对并勾选确认；提交若被服务器截断，请分批识别或提高 max_input_vars。</h1>'), 400);
+            return Response::html($this->adminPage('需要核对', '<h1>请先核对并勾选确认；提交若被服务器截断，请分批识别或提高 max_input_vars。</h1>'), 400);
         }
         $rows = [];
         foreach ($submitted as $index => $row) {
             if (!is_array($row) || !isset($draft['rows'][$index])) {
-                return Response::html(View::page('草稿无效', '<h1>草稿行无效。</h1>'), 400);
+                return Response::html($this->adminPage('草稿无效', '<h1>草稿行无效。</h1>'), 400);
             }
             $edited = [];
             foreach (['name', 'category', 'menu_section', 'price', 'currency', 'description'] as $field) {
@@ -380,9 +398,9 @@ final class RestaurantController
         try {
             $result = $this->repo->importReviewedMenu($rows, (string) $draft['source_hash'], $request->input('activate', '') === '1');
             unset($_SESSION['restaurant_menu_draft']);
-            return Response::html(View::page('菜单已导入', '<h1>菜单已导入</h1><p>新增 ' . $result['created'] . ' 道；跳过同名/同分类/同分组已有菜品 ' . $result['skipped'] . ' 道，未覆盖人工录入。可售状态由刚才的明确选择决定。</p><a href="/admin/restaurant/menu">查看/编辑菜单</a>'));
+            return Response::html($this->adminPage('菜单已导入', '<h1>菜单已导入</h1><p>新增 ' . $result['created'] . ' 道；跳过同名/同分类/同分组已有菜品 ' . $result['skipped'] . ' 道，未覆盖人工录入。可售状态由刚才的明确选择决定。</p><a href="/admin/restaurant/menu">查看/编辑菜单</a>'));
         } catch (\InvalidArgumentException $exception) {
-            return Response::html(View::page('核对未完成', '<h1>未导入任何菜品</h1><p>' . View::escape($exception->getMessage()) . '</p>' . $this->menuDraftForm($draft)), 400);
+            return Response::html($this->adminPage('核对未完成', '<h1>未导入任何菜品</h1><p>' . View::escape($exception->getMessage()) . '</p>' . $this->menuDraftForm($draft)), 400);
         }
     }
 
@@ -425,7 +443,7 @@ final class RestaurantController
             $forms .= '<form method="post" action="/admin/restaurant/categories/save" class="admin-card">' . CsrfToken::field() .
                 '<h2>' . $key . ' · ' . (int) $category['count'] . ' 道菜</h2>' .
                 '<input type="hidden" name="source_category" value="' . $key . '">' .
-                '<label>分类标识<input name="category" value="' . $key . '" maxlength="191" required></label>' .
+                '<label>分类名称<input name="category" value="' . $key . '" maxlength="191" required></label>' .
                 '<label>中文名称<input name="label_zh" value="' . View::escape($labels['zh-CN']) . '" maxlength="191" required></label>' .
                 '<label>English<input name="label_en" value="' . View::escape($labels['en-US']) . '" maxlength="191" required></label>' .
                 '<label>Español<input name="label_es" value="' . View::escape($labels['es-US']) . '" maxlength="191" required></label>' .
@@ -434,7 +452,7 @@ final class RestaurantController
         $forms = $forms !== '' ? $forms : '<p>还没有分类。先在菜单中新增菜品并填写分类。</p>';
         $body = '<h1>分类管理</h1>' . $this->nav() . $this->notice($request) .
             '<p>修改分类标识和三语名称后，该分类下所有菜品会一起更新；菜品归类可在菜单管理中单独调整。</p>' . $forms;
-        return Response::html(View::page('分类管理', $body));
+        return Response::html($this->adminPage('分类管理', $body));
     }
 
     public function saveCategory(Request $request): Response
@@ -450,46 +468,33 @@ final class RestaurantController
                 ],
             );
         } catch (\InvalidArgumentException $exception) {
-            return Response::html(View::page('分类保存失败', '<h1>分类保存失败</h1><p class="error">' . View::escape($exception->getMessage()) . '</p><p><a href="/admin/restaurant/categories">返回分类管理</a></p>'), 400);
+            return Response::html($this->adminPage('分类保存失败', '<h1>分类保存失败</h1><p class="error">' . View::escape($exception->getMessage()) . '</p><p><a href="/admin/restaurant/categories">返回分类管理</a></p>'), 400);
         }
         return Response::redirect('/admin/restaurant/categories?saved=1&updated=' . $updated);
     }
 
-    public function storefrontSettings(): Response
+    public function storefrontSettings(?Request $request = null): Response
     {
         $row = $this->repo->storefrontSettings();
-        $field = static fn (string $key): string => View::escape((string) ($row[$key] ?? ''));
-        $tax = $this->repo->taxSettings();
-        $languageOptions = '';
-        $defaultLocale = $this->repo->defaultLocale();
-        foreach (['en-US' => 'English（英文）', 'zh-CN' => '中文', 'es-US' => 'Español（西班牙语）'] as $locale => $label) {
-            $languageOptions .= '<option value="' . $locale . '"' . ($locale === $defaultLocale ? ' selected' : '') . '>' . $label . '</option>';
-        }
-        $body = '<h1>店面与营业设置</h1>' . $this->nav() . '<form method="post" action="/admin/restaurant/storefront/save">' . CsrfToken::field() .
-            '<label>餐馆名称<input name="name" value="' . $field('name') . '" required></label>' .
-            '<input type="hidden" name="default_locale_present" value="1"><label>首选语言<select name="default_locale">' . $languageOptions . '</select></label><p>未自行选择语言的顾客使用首选语言，默认英文；顾客已保存的中英西语言选择优先。</p>' .
-            '<label>电话<input name="phone" value="' . $field('phone') . '"></label>' .
-            '<label>地址<input name="address" value="' . $field('address') . '"></label>' .
-            '<label>时区<input name="timezone" value="' . View::escape((string) ($row['timezone'] ?? 'America/New_York')) . '"></label>' .
-            '<fieldset><legend>税费</legend><input type="hidden" name="tax_fields_present" value="1">' .
-            '<label>税率（%）<input name="tax_rate" inputmode="decimal" value="' . View::escape($tax['rate_percent']) . '" placeholder="由门店核定；留空表示未配置"></label>' .
-            '<label>配送费是否计税<select name="delivery_taxable"><option value="">待确认</option><option value="no"' . ($tax['configured'] && !$tax['delivery_taxable'] ? ' selected' : '') . '>不计税</option><option value="yes"' . ($tax['configured'] && $tax['delivery_taxable'] ? ' selected' : '') . '>计税</option></select></label>' .
-            '<p>税率由门店按经营地核定，系统不自动判断税务规则。当前使用未含税售价；税基包含菜品及收费加料，配送费按所选规则处理。未配置税率不可新建支付订单；合法零税率也须明确填写 0。现有已提交订单不追溯改价。</p></fieldset>' .
-            '<p>在下方 JSON 中按实际商户资料设置 merchant_region（两位国家代码）和 transaction_region（cn_domestic、cross_border 或 international）。未配置时禁止结账；税费须另按实际经营地核定。</p>' .
-            '<p>预约：设置 preorder_available=true、hours、preorder_lead_minutes、preorder_max_days。送餐：设置 delivery_available=true、delivery_fee_minor（最小货币单位）及 delivery_postal_codes 数组；未明确设置运费和配送邮编时不开放送餐。请仅配置实际可服务的区域。</p>' .
-            '<p>营业时间格式：{"hours":{"mon":[{"open":"11:00","close":"21:00"}]}}。配置后按门店时区计算状态；paused/closed 可手动覆盖。</p>' .
-            '<label>店面设置 JSON（多语言名称/地址/简介、门头、图库、营业状态和自取配送可用性）<textarea name="settings_json" rows="20">' . View::escape((string) ($row['settings_json'] ?? '{"status":"closed","pickup_available":false,"delivery_available":false}')) . '</textarea></label>' .
-            '<button type="submit">保存店面</button></form>';
-        return Response::html(View::page('店面设置', $body));
+        $notice = ($request?->query['saved'] ?? '') === '1' ? '<p class="success" role="status">保存成功，你的店面设置已经更新。</p>' : '';
+        $body = '<h1>店面与营业设置</h1>' . $this->nav() . $notice . RestaurantAdminSettings::render($row, $this->repo->taxSettings(), $this->repo->defaultLocale());
+        return Response::html($this->adminPage('店面设置', $body));
     }
 
     public function saveStorefrontSettings(Request $request): Response
     {
-        $settings = json_decode((string) $request->input('settings_json', '{}'), true);
-        if (!is_array($settings)) {
-            return Response::html(View::page('店面数据无效', '<h1>店面设置必须是 JSON 对象</h1>'), 400);
-        }
         try {
+            if ($request->input('settings_form_present', '') === '1') {
+                $row = $this->repo->storefrontSettings();
+                $settings = json_decode((string) ($row['settings_json'] ?? '{}'), true);
+                $settings = RestaurantAdminSettings::merge($request, is_array($settings) ? $settings : []);
+            } else {
+                // Preserve the existing public save contract for older admin clients.
+                $settings = json_decode((string) $request->input('settings_json', '{}'), true);
+                if (!is_array($settings)) {
+                    throw new \InvalidArgumentException('店面资料格式不正确，请重新打开设置后再保存。');
+                }
+            }
             if ((string) $request->input('default_locale_present', '') === '1') {
                 $settings['default_locale'] = (string) $request->input('default_locale', 'en-US');
             }
@@ -504,9 +509,11 @@ final class RestaurantController
                 'settings' => $settings,
             ]);
         } catch (\InvalidArgumentException $exception) {
-            return Response::html(View::page('店面设置无效', '<h1>店面未保存</h1><p>' . View::escape($exception->getMessage()) . '</p>'), 400);
+            return Response::html($this->adminPage('店面设置无效', '<h1>店面未保存</h1><p>' . View::escape($exception->getMessage()) . '</p>'), 400);
         }
-        return Response::redirect('/admin/restaurant/storefront?saved=1');
+        $section = $request->input('settings_section', '');
+        $anchor = is_string($section) && in_array($section, ['basic','hours','fulfillment','tax','appearance','content','pos'], true) ? '#ra-' . $section : '';
+        return Response::redirect('/admin/restaurant/storefront?saved=1' . $anchor);
     }
 
     public function printJobs(): Response
@@ -514,19 +521,19 @@ final class RestaurantController
         $rows = '';
         foreach ($this->repo->printJobs(100) as $job) {
             $orderLabel = $job['commerce_order_id'] === null ? 'TEST / 人工票，非支付订单' : '订单 ' . (int) $job['commerce_order_id'];
-            $rows .= '<tr><td>' . (int) $job['id'] . '<br><small>' . View::escape((string) $job['uuid']) . '</small><br>' . View::escape($orderLabel) . '</td><td>' . View::escape((string) $job['station_code']) . '</td><td>' . View::escape((string) ($job['printer_name'] ?? '未绑定')) . '<br><small>' . View::escape((string) $job['provider']) . '</small></td><td>' . View::escape((string) $job['status']) . '<br><strong>' . View::escape((string) ($job['last_error'] ?? '')) . '</strong></td><td>' . (int) $job['attempts'] . '</td></tr>';
-            $rows .= '<tr><td colspan="5"><details><summary>厨房票及人工处理 / Ticket &amp; manual actions #' . (int) $job['id'] . '</summary><pre>' . View::escape((string) $job['payload_text']) . '</pre><div class="restaurant-print-actions"><form method="post" action="/admin/restaurant/print-jobs/retry">' . CsrfToken::field() . '<input type="hidden" name="job_id" value="' . (int) $job['id'] . '"><input type="hidden" name="request_key" value="' . bin2hex(random_bytes(16)) . '"><label>核实原因<input name="reason" required minlength="3" maxlength="500"></label><label><input type="checkbox" name="confirmed" value="1" required>已现场核实；了解重印可能产生重复纸票</label><button type="submit">新建人工重印任务</button></form><form method="post" action="/admin/restaurant/print-jobs/confirm">' . CsrfToken::field() . '<input type="hidden" name="job_id" value="' . (int) $job['id'] . '"><label>现场确认说明<input name="reason" required minlength="3" maxlength="500"></label><label><input type="checkbox" name="confirmed" value="1" required>已实际出纸或已人工处理</label><button type="submit">现场确认完成</button></form></div></details></td></tr>';
+            $rows .= '<tr><td>' . (int) $job['id'] . '<br><small>' . View::escape((string) $job['uuid']) . '</small><br>' . View::escape($orderLabel) . '</td><td>' . View::escape((string) $job['station_code']) . '</td><td>' . View::escape((string) ($job['printer_name'] ?? '未绑定')) . '<br><small>' . $this->label((string) $job['provider']) . '</small></td><td>' . $this->label((string) $job['status']) . '<br><strong>' . View::escape((string) ($job['last_error'] ?? '')) . '</strong></td><td>' . (int) $job['attempts'] . '</td></tr>';
+            $rows .= '<tr><td colspan="5"><details><summary>查看小票或处理出单问题 #' . (int) $job['id'] . '</summary><pre>' . View::escape((string) $job['payload_text']) . '</pre><div class="restaurant-print-actions"><form method="post" action="/admin/restaurant/print-jobs/retry">' . CsrfToken::field() . '<input type="hidden" name="job_id" value="' . (int) $job['id'] . '"><input type="hidden" name="request_key" value="' . bin2hex(random_bytes(16)) . '"><label>核实原因<input name="reason" required minlength="3" maxlength="500"></label><label><input type="checkbox" name="confirmed" value="1" required>已现场核实；了解重印可能产生重复纸票</label><button type="submit">新建人工重印任务</button></form><form method="post" action="/admin/restaurant/print-jobs/confirm">' . CsrfToken::field() . '<input type="hidden" name="job_id" value="' . (int) $job['id'] . '"><label>现场确认说明<input name="reason" required minlength="3" maxlength="500"></label><label><input type="checkbox" name="confirmed" value="1" required>已实际出纸或已人工处理</label><button type="submit">现场确认完成</button></form></div></details></td></tr>';
         }
         $rows = $rows !== '' ? $rows : '<tr><td colspan="5" class="muted">还没有打印任务。</td></tr>';
         $body = '<h1>打印任务</h1>' . $this->nav() .
             '<p role="alert"><strong>待核实、失败、未绑定任务须人工接单。</strong> 数据已发送/已进入 Windows 队列不等于实际出纸。结果不确定不自动重打；取消与退款不能撤回已印出的纸票，请现场通知厨房。</p>' .
             '<style>.restaurant-print-jobs{width:100%;table-layout:fixed}.restaurant-print-jobs td{vertical-align:top;overflow-wrap:anywhere}.restaurant-print-jobs summary{cursor:pointer;font-weight:600}.restaurant-print-jobs pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%}.restaurant-print-actions{display:flex;gap:16px;flex-wrap:wrap}.restaurant-print-jobs .restaurant-print-actions form{display:grid;gap:8px;white-space:normal;flex:1 1 280px;min-width:0}.restaurant-print-jobs .restaurant-print-actions label{display:block;white-space:normal}.restaurant-print-jobs .restaurant-print-actions input:not([type=checkbox]){display:block;max-width:100%;width:100%}@media(max-width:640px){.restaurant-print-jobs{font-size:12px}.restaurant-print-jobs td{padding:6px}}</style>' .
-            '<table class="restaurant-print-jobs"><thead><tr><th>ID / 订单</th><th>岗位</th><th>打印机 / 类型</th><th>状态 / 告警</th><th>次数</th></tr></thead><tbody>' . $rows . '</tbody></table>';
-        $body .= '<h2>打印操作审计</h2><table><thead><tr><th>时间</th><th>任务</th><th>操作</th><th>人员 / 打印桥</th><th>说明</th></tr></thead><tbody>';
+            '<table class="restaurant-print-jobs"><thead><tr><th>ID / 订单</th><th>岗位</th><th>打印机 / 类型</th><th>状态 / 告警</th><th>尝试次数</th></tr></thead><tbody>' . $rows . '</tbody></table>';
+        $body .= '<h2>打印操作审计</h2><table><thead><tr><th>时间</th><th>任务</th><th>操作</th><th>操作人员 / 打印助手</th><th>说明</th></tr></thead><tbody>';
         foreach ($this->repo->printAudits() as $audit) {
             $body .= '<tr><td>' . View::escape((string) $audit['created_at']) . '</td><td>' . (int) ($audit['job_id'] ?? 0) . '</td><td>' . View::escape((string) $audit['action']) . '</td><td>' . View::escape((string) $audit['actor']) . '</td><td>' . View::escape((string) $audit['message']) . '</td></tr>';
         }
-        return Response::html(View::page('打印任务', $body . '</tbody></table>'));
+        return Response::html($this->adminPage('打印任务', $body . '</tbody></table>'));
     }
 
     public function retryPrintJob(Request $request): Response
@@ -537,7 +544,7 @@ final class RestaurantController
             }
             $this->printer->retry((int) $request->input('job_id', 0), (string) $request->input('reason', ''), $this->printActor(), (string) $request->input('request_key', ''));
         } catch (\InvalidArgumentException $exception) {
-            return Response::html(View::page('未重印', '<p>' . View::escape($exception->getMessage()) . '</p>'), 400);
+            return Response::html($this->adminPage('未重印', '<p>' . View::escape($exception->getMessage()) . '</p>'), 400);
         }
         return Response::redirect('/admin/restaurant/print-jobs?retried=1');
     }
@@ -550,7 +557,7 @@ final class RestaurantController
             }
             $this->repo->confirmManualPrint((int) $request->input('job_id', 0), (string) $request->input('reason', ''), $this->printActor());
         } catch (\InvalidArgumentException $exception) {
-            return Response::html(View::page('未确认打印', '<p>' . View::escape($exception->getMessage()) . '</p>'), 400);
+            return Response::html($this->adminPage('未确认打印', '<p>' . View::escape($exception->getMessage()) . '</p>'), 400);
         }
         return Response::redirect('/admin/restaurant/print-jobs?confirmed=1');
     }
@@ -567,13 +574,13 @@ final class RestaurantController
         $status = (string) $request->input('status', 'new');
         $ticket = $this->repo->ticket($ticketId);
         if (($ticket['status'] ?? '') === 'completed' && $status !== 'completed' && (int) ($ticket['commerce_order_id'] ?? 0) > 0) {
-            return Response::html(View::page('订单已完成', '<h1>订单已完成</h1><p>已交餐订单不能重新接单，请人工核实。</p>'), 409);
+            return Response::html($this->adminPage('订单已完成', '<h1>订单已完成</h1><p>已交餐订单不能重新接单，请人工核实。</p>'), 409);
         }
         if ($status === 'completed' && (int) ($ticket['commerce_order_id'] ?? 0) > 0) {
             $cart = $this->repo->cartByCommerceOrder((int) $ticket['commerce_order_id']);
             $receipt = $cart === null ? null : $this->checkout?->orderReceiptForCart((string) $cart['token']);
             if (($receipt['payment_status'] ?? '') !== 'paid' || ($ticket['status'] ?? '') === 'cancelled') {
-                return Response::html(View::page('不能确认交餐', '<h1>不能确认交餐</h1><p>请先核实真实付款及订单状态；已取消或退款订单须人工处理。</p>'), 409);
+                return Response::html($this->adminPage('不能确认交餐', '<h1>不能确认交餐</h1><p>请先核实真实付款及订单状态；已取消或退款订单须人工处理。</p>'), 409);
             }
         }
         $this->repo->updateTicketStatus($ticketId, $status);
@@ -888,9 +895,19 @@ final class RestaurantController
         return $summary;
     }
 
+    private function adminPage(string $title, string $body): string
+    {
+        $assets = $this->adminStyleUrl !== '' ? '<link rel="stylesheet" href="' . View::escape($this->adminStyleUrl) . '">' : '';
+        $assets .= $this->adminScriptUrl !== '' ? '<script src="' . View::escape($this->adminScriptUrl) . '" defer></script>' : '';
+        return View::page($title, $assets . '<div class="restaurant-admin">' . $body . '</div>');
+    }
+
     private function nav(): string
     {
-        return '<p><a href="/admin/restaurant">订单看板</a> · <a href="/admin/restaurant/storefront">店面设置</a> · <a href="/admin/restaurant/menu">菜单</a> · <a href="/admin/restaurant/menu/import">识别菜单</a> · <a href="/admin/restaurant/categories">分类</a> · <a href="/admin/restaurant/stations">厨房岗位</a> · <a href="/admin/restaurant/printers">打印机</a> · <a href="/admin/restaurant/print-jobs">打印任务</a> · <a href="/restaurant">前台菜单</a></p>';
+        $links = ['/admin/restaurant'=>'订单看板','/admin/restaurant/menu'=>'菜品与价格','/admin/restaurant/menu/import'=>'导入菜单','/admin/restaurant/categories'=>'菜品分类','/admin/restaurant/storefront'=>'店面与营业','/admin/restaurant/stations'=>'厨房分工','/admin/restaurant/printers'=>'打印机','/admin/restaurant/print-jobs'=>'出单记录','/admin/restaurant/pos'=>'收银系统'];
+        $nav = '<nav class="ra-main-nav" aria-label="餐厅管理">';
+        foreach ($links as $path=>$label) { $nav .= '<a href="'.$path.'">'.$label.'</a>'; }
+        return $nav . '<a class="ra-preview-link" href="/" target="_blank" rel="noopener">查看网站 ↗</a></nav>';
     }
 
     private function notice(Request $request): string
@@ -902,9 +919,14 @@ final class RestaurantController
             return '<p class="success">测试分单已生成。</p>';
         }
         if (isset($request->query['sync'])) {
-            return '<p class="notice">已同步 Commerce 已支付餐厅订单：' . View::escape((string) $request->query['sync']) . '</p>';
+            return '<p class="notice">已核对付款并更新餐厅订单：' . '请查看下方订单和出单记录。' . '</p>';
         }
         return '';
+    }
+
+    private function label(string $value): string
+    {
+        return View::escape(['pickup'=>'到店自取','delivery'=>'配送到家','dine_in'=>'堂食','new'=>'待接单','accepted'=>'已接单','preparing'=>'制作中','ready'=>'待取餐','completed'=>'已完成','cancelled'=>'已取消','active'=>'启用','disabled'=>'停用','sold_out'=>'已售罄','enabled'=>'启用','available'=>'可售','queued'=>'等待出单','pending_manual'=>'等待人工处理','printed'=>'已确认出单','failed'=>'需要处理','uncertain'=>'请现场核实','claimed'=>'已领取','printing'=>'正在出单','manual'=>'人工看板','agent'=>'店内打印助手','existing'=>'现有设备','independent'=>'独立厨房设备','windows_queue'=>'Windows电脑','mac_queue'=>'Mac电脑','escpos_tcp'=>'独立网线打印机'][$value] ?? $value);
     }
 
     private function stat(string $label, int $value): string
@@ -917,9 +939,9 @@ final class RestaurantController
         $options = '';
         foreach ($this->repo->activeStations() as $station) {
             $code = (string) $station['code'];
-            $options .= '<option value="' . View::escape($code) . '" ' . ($selected === $code ? 'selected' : '') . '>' . View::escape((string) $station['name']) . ' (' . View::escape($code) . ')</option>';
+            $options .= '<option value="' . View::escape($code) . '" ' . ($selected === $code ? 'selected' : '') . '>' . View::escape((string) $station['name']) . '</option>';
         }
-        return $options !== '' ? $options : '<option value="front">前台 (front)</option><option value="fry">油锅 (fry)</option><option value="sushi">寿司 (sushi)</option><option value="wok">炒锅 (wok)</option>';
+        return $options !== '' ? $options : '<option value="front">前台</option><option value="fry">油锅</option><option value="sushi">寿司</option><option value="wok">炒锅</option>';
     }
 
     /** @param list<string> $selected */
