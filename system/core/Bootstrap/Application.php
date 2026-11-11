@@ -424,7 +424,7 @@ final class Application
         $assets = new ExtensionAssetController($rootPath);
         $router->get('/extension-assets/{type}/{id}', [$assets, 'show']);
 
-        $front = new ContentFrontController($rootPath, $settings, $logger);
+        $front = new ContentFrontController($rootPath, $settings, $logger, $pluginRuntime);
         $router->get('/articles', [$front, 'articles']);
         $router->get('/articles/{slug}', [$front, 'article']);
         $router->get('/post/{slug}', [$front, 'legacyRedirect']);

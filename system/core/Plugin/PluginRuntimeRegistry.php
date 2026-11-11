@@ -11,6 +11,8 @@ final class PluginRuntimeRegistry
     /** @var array<string,PluginRouteDefinition> */
     private array $routes = [];
     private array $homepages = [];
+    /** @var array<string,string> Map path => owning plugin ID. */
+    private array $sitemaps = [];
     /** @var list<PluginMenuItem> */
     private array $menus = [];
     /** @var list<FrontendExtensionAsset> */
@@ -87,6 +89,41 @@ final class PluginRuntimeRegistry
         return array_values($this->routes);
     }
 
+    /** Register an existing public GET route; no fetching or handler execution. */
+    public function sitemap(string $pluginId, string $path): void
+    {
+        if (strlen($path) > 512 || preg_match('#^/(?:[A-Za-z0-9_-][A-Za-z0-9_.-]*/)*[A-Za-z0-9_-][A-Za-z0-9_.-]*[.]xml$#D', $path) !== 1) {
+            throw new PluginException('Sitemap must be an application-relative XML route without query or fragment.');
+        }
+        if (preg_match('#^/(?:admin|api|install|recovery|diagnostics|health|preview|workspace|login|logout|register)(?:/|[.]|$)#i', $path) === 1) {
+            throw new PluginException('Sitemap cannot announce a private or reserved path.');
+        }
+        $route = $this->routes['GET ' . $path] ?? null;
+        if ($route === null || $route->pluginId !== $pluginId || $route->admin || $route->csrf || $route->capability !== null) {
+            throw new PluginException('Sitemap requires an owned public GET route registered first.');
+        }
+        if (!isset($this->sitemaps[$path]) && (
+            count($this->sitemaps) >= 512
+            || count(array_filter($this->sitemaps, static fn (string $owner): bool => $owner === $pluginId)) >= 32
+        )) {
+            throw new PluginException('Sitemap registration limit exceeded.');
+        }
+        $this->sitemaps[$path] = $pluginId;
+    }
+
+    /** @return array<string,string> Map path => owning plugin ID, in canonical path order. */
+    public function sitemaps(): array
+    {
+        $maps = $this->sitemaps;
+        ksort($maps, SORT_STRING);
+        return $maps;
+    }
+
+    public function removeSitemaps(string $pluginId): void
+    {
+        $this->sitemaps = array_filter($this->sitemaps, static fn (string $owner): bool => $owner !== $pluginId);
+    }
+
     /** @return list<PluginMenuItem> */
     public function menus(): array
     {
@@ -123,6 +160,9 @@ final class PluginRuntimeRegistry
 
     private function assertRouteAllowed(string $path): void
     {
+        if (in_array($path, ['/sitemap.xml', '/robots.txt'], true)) {
+            throw new PluginException('Plugin route attempts to override a Core discovery endpoint.');
+        }
         foreach ($this->reservedPrefixes as $reserved) {
             if ($path === $reserved || str_starts_with($path, $reserved . '/')) {
                 throw new PluginException('Plugin route attempts to override a reserved Core route.');

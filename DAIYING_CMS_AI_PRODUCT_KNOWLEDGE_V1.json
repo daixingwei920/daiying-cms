@@ -1,7 +1,7 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
-  "verified_version": "1.2.96",
-  "last_verified_at": "2026-11-06",
+  "verified_version": "1.2.98",
+  "last_verified_at": "2026-11-11",
   "records": [
     {
       "id": "install.web_installer",
@@ -11,7 +11,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; system/core/Install/InstallController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -33,9 +33,9 @@
           "anchor": "return is_file($this->rootPath . '/storage/installed.lock');"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -51,7 +51,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/RuntimeRequirements.php; system/core/Support/SystemHealthDoctor.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -73,9 +73,9 @@
           "anchor": "foreach (['pdo', 'openssl', 'curl', 'fileinfo', 'zip', 'mbstring'] as $extension) {"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -91,7 +91,7 @@
       "audience": "Administrator",
       "source": "docs/themes.md; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/articles/{slug}",
@@ -113,9 +113,9 @@
           "anchor": "Core 1.2.83 支持在文章、页面和分类的显式 slug 中保留 `《》`。留空时仍按标题自动生成字母、数字和连字符组成的简洁 slug。已有文章和重定向不自动迁移；文章 #75 的现有新网址及 301 无须撤销。"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -131,7 +131,7 @@
       "audience": "Internal",
       "source": "docs/content-foundation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -153,9 +153,9 @@
           "anchor": "## Trash"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -171,7 +171,7 @@
       "audience": "Internal",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -193,9 +193,9 @@
           "anchor": "public function retryFailedFile(int $jobId, string $path, string $sourceHint = ''): array"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -211,7 +211,7 @@
       "audience": "Administrator",
       "source": "docs/update-system.md; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -234,15 +234,15 @@
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "sha256": "527fe04ea75a8b720c45078db484ba258619cf6aa8ba2f9a7a4c50c44e8dd177",
           "line_start": 619,
           "line_end": 619,
           "anchor": "$router->get('/admin/update', [$admin, 'updateIndex']);"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -258,7 +258,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Recovery/RecoveryController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "/admin/recovery",
       "public_route": "",
@@ -267,7 +267,7 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "sha256": "527fe04ea75a8b720c45078db484ba258619cf6aa8ba2f9a7a4c50c44e8dd177",
           "line_start": 584,
           "line_end": 584,
           "anchor": "$router->get('/admin/recovery', [$recovery, 'index']);"
@@ -280,9 +280,9 @@
           "anchor": "'<button name=\"action\" value=\"restore_core_database\" type=\"submit\">恢复Core+数据库</button></form></li>';"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -298,7 +298,7 @@
       "audience": "Internal",
       "source": "system/core/SiteVault/SiteVaultService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -320,9 +320,9 @@
           "anchor": "public function restore(string $packagePath, ?int $actorId = null): array"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -338,7 +338,7 @@
       "audience": "Administrator",
       "source": "SECURITY.md; docs/installation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -360,9 +360,9 @@
           "anchor": "php scripts/validate_production_readiness.php --strict"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -378,7 +378,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "/admin/seo/keywords",
       "public_route": "",
@@ -387,7 +387,7 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "sha256": "527fe04ea75a8b720c45078db484ba258619cf6aa8ba2f9a7a4c50c44e8dd177",
           "line_start": 536,
           "line_end": 536,
           "anchor": "$router->get('/admin/seo/keywords', [$admin, 'seoKeywordIndex']);"
@@ -400,9 +400,9 @@
           "anchor": "'observed_search_data' => $primaryMetrics !== [] ? 'yes' : 'not_available',"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -418,7 +418,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "/admin/seo/search-engines",
       "public_route": "",
@@ -427,7 +427,7 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "sha256": "527fe04ea75a8b720c45078db484ba258619cf6aa8ba2f9a7a4c50c44e8dd177",
           "line_start": 543,
           "line_end": 543,
           "anchor": "$router->post('/admin/seo/search-engines/google/sync', [$admin, 'seoSearchEngineGoogleSync']);"
@@ -440,9 +440,9 @@
           "anchor": "return ['status' => 'submitted', 'evidence' => 'Accepted by submission channel; Submitted is not Indexed', 'last_checked' => (string) ($submission['created_at'] ?? '')];"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -458,7 +458,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Content/ContentFrontController.php; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/sitemap.xml",
@@ -467,17 +467,17 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "sha256": "527fe04ea75a8b720c45078db484ba258619cf6aa8ba2f9a7a4c50c44e8dd177",
           "line_start": 441,
           "line_end": 441,
           "anchor": "$router->get('/sitemap.xml', [$front, 'sitemap']);"
         },
         {
           "path": "system/core/Content/ContentFrontController.php",
-          "sha256": "600346066e6e1932425dc5a9ae7f55b568341700828425147ff6ce48ae2a2531",
-          "line_start": 303,
-          "line_end": 303,
-          "anchor": "public function sitemap(): Response"
+          "sha256": "c0bd8c26957bca91e2e41d8a40cdb90c2b86dd111a4569f3f7a28658d04d9dfd",
+          "line_start": 306,
+          "line_end": 306,
+          "anchor": "public function sitemap(?Request $request = null): Response"
         },
         {
           "path": "docs/content-slug-policy.md",
@@ -487,9 +487,9 @@
           "anchor": "前端只解码一次路径段。链接、canonical、站点地图及新导入的 URL Mapping 对 slug 进行百分号编码，禁止双重解码绕过校验。官方导出/导入保留书名号；不改历史数据库迁移。"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -505,7 +505,7 @@
       "audience": "Developer",
       "source": "docs/plugins.md; docs/themes.md; docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -534,9 +534,9 @@
           "anchor": "Decision date: 2026-10-09. Owner decision: **DAIYING_NOVEL = RETIRED**, **DAIYING_VIDEO = RETIRED**."
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -552,7 +552,7 @@
       "audience": "Administrator",
       "source": "docs/commerce.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -574,9 +574,9 @@
           "anchor": "The first workflow does not fetch or scrape external product URLs. If a source URL is entered, it is treated only as administrator-provided context for the prompt and as a future extension point."
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -592,7 +592,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Ai/AiService.php; system/core/Ai/AiProviderPresets.php; system/core/Ai/AiGateway.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -601,7 +601,7 @@
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "sha256": "527fe04ea75a8b720c45078db484ba258619cf6aa8ba2f9a7a4c50c44e8dd177",
           "line_start": 511,
           "line_end": 511,
           "anchor": "$router->get('/admin/settings/ai', [$admin, 'aiSettings']);"
@@ -628,9 +628,9 @@
           "anchor": "public function request(AiRequest $request): AiResponse"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -646,7 +646,7 @@
       "audience": "Administrator",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -668,9 +668,9 @@
           "anchor": "$this->repo->record($jobId, $system, $siteId, 'comment', $sourceId, 'PendingFeature', null, null, null, null, $metadata, 'pending_feature', 'Core 暂无评论模块，暂不写入前台评论。');"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -686,7 +686,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -708,9 +708,9 @@
           "anchor": "1. 保留错误提示和服务器日志，先修复数据库连接、扩展、目录权限或其他实际失败原因。安装失败不是安装成功。"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -726,7 +726,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "/admin/migrations",
       "public_route": "",
@@ -735,22 +735,22 @@
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
-          "sha256": "c680980e0a542440076ce483027426dc0308df3ec9010503ae4215230f288d96",
-          "line_start": 113,
-          "line_end": 113,
+          "sha256": "81f8294621e0abbe7351c0b9d584ad6cddea414eeb2403ce01c24fd9b8de60fd",
+          "line_start": 115,
+          "line_end": 115,
           "anchor": "['/admin/migrations', '旧站迁移', 'transfer'],"
         },
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "sha256": "527fe04ea75a8b720c45078db484ba258619cf6aa8ba2f9a7a4c50c44e8dd177",
           "line_start": 596,
           "line_end": 596,
           "anchor": "$router->post('/admin/migrations/scan', [$admin, 'externalMigrationScan']);"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -766,7 +766,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": true,
       "admin_route": "/admin/update;/admin/recovery",
       "public_route": "",
@@ -775,16 +775,16 @@
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
-          "sha256": "c680980e0a542440076ce483027426dc0308df3ec9010503ae4215230f288d96",
-          "line_start": 114,
-          "line_end": 114,
+          "sha256": "81f8294621e0abbe7351c0b9d584ad6cddea414eeb2403ce01c24fd9b8de60fd",
+          "line_start": 116,
+          "line_end": 116,
           "anchor": "['/admin/update', '系统更新', 'refresh'],"
         },
         {
           "path": "system/core/Support/View.php",
-          "sha256": "c680980e0a542440076ce483027426dc0308df3ec9010503ae4215230f288d96",
-          "line_start": 115,
-          "line_end": 115,
+          "sha256": "81f8294621e0abbe7351c0b9d584ad6cddea414eeb2403ce01c24fd9b8de60fd",
+          "line_start": 117,
+          "line_end": 117,
           "anchor": "['/admin/recovery', '恢复诊断', 'activity'],"
         },
         {
@@ -795,9 +795,9 @@
           "anchor": "适用于首次安装、尚未正式运行的网站。已正式运行的网站必须使用官方备份、升级及回滚流程，不能删除数据库来解决升级问题。"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -817,7 +817,7 @@
       "description": "当前已发布稳定版仍为 Core 1.2.86（v1.2.86，d311446607124fff21d76f524a4a11968ad4cd58）。本包复核已整合图像公共能力并修复支付回调的1.3.0-alpha.5开发候选，不代表正式发布或生产部署。",
       "source": "docs/ai-image/integration-1.2.86.md; docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "source_evidence": [
         {
           "path": "docs/ai-image/integration-1.2.86.md",
@@ -834,9 +834,9 @@
           "anchor": "Core 1.3.0-alpha.5 开发修复"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -857,7 +857,7 @@
       "description": "1.2.83 支持显式文章、页面和分类 slug 保留《》。留空时仍自动生成简洁 slug，已有 slug 与重定向不自动迁移。仍拒绝分隔符、路径穿越、控制字符、查询/片段符和预编码百分号输入；填写原始书名号，不粘贴 URL 编码。",
       "source": "docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "source_evidence": [
         {
           "path": "docs/content-slug-policy.md",
@@ -867,9 +867,9 @@
           "anchor": "Core 1.2.83 支持在文章、页面和分类的显式 slug 中保留 `《》`。留空时仍按标题自动生成字母、数字和连字符组成的简洁 slug。已有文章和重定向不自动迁移；文章 #75 的现有新网址及 301 无须撤销。"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -890,13 +890,13 @@
       "description": "1.2.82 增加四个校验绑定的历史 MySQL 迁移方言适配，不修改已发布迁移文件。1.2.83 延续该能力；这不代表任意 MySQL/MariaDB 环境均已验收。选择数据库后仍应在安装器测试连接和实际完成安装。",
       "source": "CHANGELOG.md; system/core/Migration/MysqlHistoricalMigrationDialect.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "21423c97bc784e518c097454635d04a22c8e3750982b4a37fea253ed8c7ba590",
-          "line_start": 151,
-          "line_end": 151,
+          "sha256": "9aec39c1b517c1b6daec4726fb67d83dcf900f9442dd82f39fd64969f91fe7a9",
+          "line_start": 163,
+          "line_end": 163,
           "anchor": "- Support MySQL fresh installation through four checksum-bound historical dialect adapters, without modifying frozen migrations."
         },
         {
@@ -907,9 +907,9 @@
           "anchor": "final class MysqlHistoricalMigrationDialect"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -930,7 +930,7 @@
       "description": "首次安装失败须保留错误并修复原因。若管理员已创建但完成锁失败，入口会阻断，不能伪造完成锁或重复创建管理员。MySQL DDL 不保证全链事务回滚；只有负责人明确确认专用数据可丢弃后，才可人工清理重装。生产站不得删除数据库来修复升级。",
       "source": "docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "source_evidence": [
         {
           "path": "docs/first-install-failure.md",
@@ -947,9 +947,9 @@
           "anchor": "MySQL 的 DDL 不具备 SQLite 式的全链事务回滚保证。部分表、失败索引或安装中断不能默认当作可直接重试；需要负责人核查或按上述条件人工重新安装。产品不提供自动数据库清理或自动恢复状态机。"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -970,20 +970,20 @@
       "description": "1.2.82 的直接升级验证范围为 1.2.81 → 1.2.82；不能泛化为任意旧版直升最新。实际领取和安装必须服从目标包的签名版本范围与兼容检查。Core 更新不替换已安装插件；旧 Commerce 的 MySQL 参数修复需要独立插件更新。",
       "source": "CHANGELOG.md; docs/release/1.2.82-upgrade-support.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "21423c97bc784e518c097454635d04a22c8e3750982b4a37fea253ed8c7ba590",
-          "line_start": 154,
-          "line_end": 154,
+          "sha256": "9aec39c1b517c1b6daec4726fb67d83dcf900f9442dd82f39fd64969f91fe7a9",
+          "line_start": 166,
+          "line_end": 166,
           "anchor": "- Direct upgrade validation covers 1.2.81 to 1.2.82. Other source versions are not verified for this release."
         },
         {
           "path": "CHANGELOG.md",
-          "sha256": "21423c97bc784e518c097454635d04a22c8e3750982b4a37fea253ed8c7ba590",
-          "line_start": 155,
-          "line_end": 155,
+          "sha256": "9aec39c1b517c1b6daec4726fb67d83dcf900f9442dd82f39fd64969f91fe7a9",
+          "line_start": 167,
+          "line_end": 167,
           "anchor": "- Existing Commerce installations require a separate plugin update for its MySQL parameter fix; Core updates do not replace installed plugins."
         },
         {
@@ -994,9 +994,9 @@
           "anchor": "签名 update.json 与外部 metadata 的 source_versions 均为 min=max=1.2.81；min_upgrade_from、hard_min_version、migration_floor 均为1.2.81。构建及 parity 拒绝覆盖这一正式契约。此调整不改变旧发布包或49份历史迁移。"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1017,7 +1017,7 @@
       "description": "Owner 于 2026-10-09 决定小说和视频产品退役，不再作为新安装分发、维护或规划产品。保留历史源码、已安装客户资产、订单和许可；退役不等于自动卸载、撤销授权或已完成市场下架。",
       "source": "docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "source_evidence": [
         {
           "path": "docs/retired-products.md",
@@ -1034,9 +1034,9 @@
           "anchor": "Legacy official plugin registry trust, capability/table namespaces and frozen migrations remain unchanged to protect already-installed customer sites. Retirement does not disable or uninstall existing copies, remove stored content, revoke licenses or alter paid orders. Historical releases and source history are retained."
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1057,11 +1057,11 @@
       "description": "Core1.2.91已移除历史文章 SEO 补全与历史内容优化的菜单、路由、处理器和专用服务。旧入口及子路径统一返回410；历史文章、URL、SEO、待审核建议、任务、日志及已发布迁移保留。普通文章编辑、AI 写作和其他 SEO 功能保留；此候选事实不表示生产已升级。",
       "source": "system/core/Bootstrap/Application.php; docs/historical-optimizer-retirement.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "source_evidence": [
         {
           "path": "system/core/Bootstrap/Application.php",
-          "sha256": "dfec28cb860bed30f41c1bde1e763b16045913a4ab96dae2fabe88f1cea633bb",
+          "sha256": "527fe04ea75a8b720c45078db484ba258619cf6aa8ba2f9a7a4c50c44e8dd177",
           "line_start": 138,
           "line_end": 138,
           "anchor": "foreach (['/admin/seo/historical-backfill', '/admin/seo/content-quality'] as $retiredPath)"
@@ -1074,9 +1074,9 @@
           "anchor": "pending optimization suggestions, jobs, logs and migration records are retained;"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "confidence": "high",
       "implementation_status": "removed",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1097,13 +1097,13 @@
       "description": "1.2.83 按 PDO 连接共享 SQLite immediate transaction 状态，保留事务所有权、支付回调/退款原子性与写锁。属于内部维护修复；不证明真实支付通道、退款或商户交易已验收。",
       "source": "CHANGELOG.md; system/core/Payment/PaymentTransaction.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "21423c97bc784e518c097454635d04a22c8e3750982b4a37fea253ed8c7ba590",
-          "line_start": 138,
-          "line_end": 138,
+          "sha256": "9aec39c1b517c1b6daec4726fb67d83dcf900f9442dd82f39fd64969f91fe7a9",
+          "line_start": 150,
+          "line_end": 150,
           "anchor": "- Share SQLite immediate transaction state by PDO connection across payment services and repositories on PHP 8.3."
         },
         {
@@ -1114,9 +1114,9 @@
           "anchor": "use WeakMap;"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -1133,7 +1133,7 @@
       "audience": "Developer",
       "source": "docs/site-registration.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "/admin/settings",
       "public_route": "",
@@ -1148,9 +1148,9 @@
           "anchor": "在后台「平台 → 站点设置」（`/admin/settings`）的站点 URL 下方填写「ICP 备案号」，点击「保存站点设置」。填写真实备案文本，例如 `京ICP备12345678号-1`；没有备案号时留空。本设置只负责展示，不能代办备案或证明备案有效。"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1166,7 +1166,7 @@
       "audience": "Developer",
       "source": "docs/ai.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -1181,9 +1181,9 @@
           "anchor": "The shared Chat Completions adapter maps the configured token budget to"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1199,7 +1199,7 @@
       "audience": "Administrator",
       "source": "docs/admin-passkey-reauth.md; system/core/Admin/AdminController.php; system/core/Auth/AdminPasskeyService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "/admin/security",
       "public_route": "",
@@ -1215,7 +1215,7 @@
         },
         {
           "path": "system/core/Admin/AdminController.php",
-          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46",
+          "sha256": "a6146488b8ab510ed2b4c7a9befe96c4b0907cde0fda576f2a0eb6baf031cc2c",
           "line_start": 1061,
           "line_end": 1061,
           "anchor": "public function adminSecurityPasskeyReauthVerify(Request $request): Response"
@@ -1228,9 +1228,9 @@
           "anchor": "(string) ($session['purpose'] ?? '') !== $purpose"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1246,7 +1246,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -1267,9 +1267,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "ai.image_sdk",
@@ -1279,7 +1279,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1300,9 +1300,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "ai.image_queue_cost",
@@ -1312,7 +1312,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1333,9 +1333,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "ai.image_private_media",
@@ -1345,7 +1345,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1366,9 +1366,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "ai.image_validation_scope",
@@ -1378,7 +1378,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/tests.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1399,9 +1399,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "plugin.atomic_documents",
@@ -1411,7 +1411,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1432,9 +1432,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "plugin.branding_admin",
@@ -1444,7 +1444,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1465,9 +1465,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "plugin.public_site_identity",
@@ -1477,7 +1477,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/brand-plugin-contracts.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1498,9 +1498,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "payment.refund_callback_idempotency",
@@ -1510,7 +1510,7 @@
       "audience": "Developer",
       "source": "docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1531,9 +1531,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "payment.checkout_recovery",
@@ -1543,7 +1543,7 @@
       "audience": "Developer",
       "source": "docs/plugin-checkout-recovery.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1564,9 +1564,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "theme.navigation_groups",
@@ -1576,7 +1576,7 @@
       "audience": "Developer",
       "source": "docs/navigation-groups.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "/admin/navigation",
       "public_route": "",
@@ -1597,9 +1597,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "auth.member_editorial_access",
@@ -1609,7 +1609,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/member-editorial-retirement.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1630,9 +1630,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "ai.request_execution",
@@ -1642,7 +1642,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/ai-image/api.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1663,9 +1663,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "seo.geo_basics",
@@ -1675,7 +1675,7 @@
       "audience": "Administrator and Developer",
       "source": "docs/seo-geo-contract.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "/admin/settings",
       "public_route": "/llms.txt",
@@ -1710,9 +1710,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "seo.domestic_crawler_statistics",
@@ -1722,7 +1722,7 @@
       "audience": "Developer",
       "source": "system/core/Seo/CrawlerRegistry.php; system/core/Seo/CrawlerStatistics.php; docs/domestic-crawlers.md; docs/CORE_1.2.90_PUBLICATION_REPORT.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "/admin/seo/crawlers",
       "public_route": "",
@@ -1771,9 +1771,9 @@
       "priority": "P0",
       "visibility": "ADMIN_DEVELOPER",
       "enabled_for_customer_service": false,
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06"
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11"
     },
     {
       "id": "knowledge.customer_consumer_loop",
@@ -1783,7 +1783,7 @@
       "audience": "Developer",
       "source": "docs/knowledge-customer-loop-acceptance.md; docs/knowledge-customer-loop-live-acceptance.md; docs/knowledge-article-admission-acceptance.md; docs/knowledge-relevance-fix-acceptance.md; docs/CORE_1.2.90_PUBLICATION_REPORT.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1826,9 +1826,9 @@
           "anchor": "## 备份、知识同步和边界"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented_unpublished_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1844,7 +1844,7 @@
       "audience": "Developer",
       "source": "system/core/Seo/CrawlerObservation.php; docs/CORE_1.2.90_PR70_PREPARATION_REPORT.md; docs/CORE_1.2.90_PUBLICATION_REPORT.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "/admin/seo/crawlers",
       "public_route": "",
@@ -1873,9 +1873,9 @@
           "anchor": "## 公开下载、签名和版本"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1891,7 +1891,7 @@
       "audience": "Administrator",
       "source": "system/core/Admin/AdminDataView.php; system/core/Admin/AdminController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -1914,22 +1914,22 @@
         },
         {
           "path": "system/core/Admin/AdminController.php",
-          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46",
-          "line_start": 9275,
-          "line_end": 9275,
+          "sha256": "a6146488b8ab510ed2b4c7a9befe96c4b0907cde0fda576f2a0eb6baf031cc2c",
+          "line_start": 9274,
+          "line_end": 9274,
           "anchor": "private function reviewReportHtml("
         },
         {
           "path": "system/core/Admin/AdminController.php",
-          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46",
-          "line_start": 8078,
-          "line_end": 8078,
+          "sha256": "a6146488b8ab510ed2b4c7a9befe96c4b0907cde0fda576f2a0eb6baf031cc2c",
+          "line_start": 8077,
+          "line_end": 8077,
           "anchor": "$plan = $service->dryRun($packagePath);"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented_candidate",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1945,7 +1945,7 @@
       "audience": "Developer",
       "source": "docs/rest-foundation-1.2.91.md; system/core/Rest/ApiV1Controller.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -1957,7 +1957,7 @@
           "sha256": "1fd5974c7a85a6c085a4f3c12022450ddee0361a18080ccda52794096dd8abf1",
           "line_start": 1,
           "line_end": 1,
-          "anchor": "#"
+          "anchor": "# Core 1.2.91 基础接口对照与补齐"
         },
         {
           "path": "system/core/Rest/ApiV1Controller.php",
@@ -1967,9 +1967,9 @@
           "anchor": "private function mediaWriteGuard("
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -1985,7 +1985,7 @@
       "audience": "Developer",
       "source": "docs/payment-configured-redirect.md; system/core/Payment/PaymentProviderRedirectPolicyResolver.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -2007,9 +2007,9 @@
           "anchor": "if ($provider instanceof PaymentProviderConfiguredRedirectPolicyInterface)"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -2025,7 +2025,7 @@
       "audience": "Developer",
       "source": "docs/payment-provider-save-sqlite.md; system/core/Admin/AdminController.php; system/core/Payment/PaymentTransaction.php; docs/payment-provider-save-review-evidence.json",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "/admin/payments/providers",
       "public_route": "",
@@ -2042,9 +2042,9 @@
         {
           "path": "system/core/Admin/AdminController.php",
           "anchor": "public function paymentProviderSave(Request $request): Response",
-          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46",
-          "line_start": 6339,
-          "line_end": 6339
+          "sha256": "a6146488b8ab510ed2b4c7a9befe96c4b0907cde0fda576f2a0eb6baf031cc2c",
+          "line_start": 6338,
+          "line_end": 6338
         },
         {
           "path": "system/core/Payment/PaymentTransaction.php",
@@ -2061,9 +2061,9 @@
           "sha256": "e37bfb188be36a404da873c258564b501adcab278999247626d4c4823924079b"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -2079,7 +2079,7 @@
       "audience": "Developer",
       "source": "docs/plugin-data-scope-index.md; system/migrations/2026_11_01_000001_plugin_data_scope_index.php; system/core/Plugin/PluginDataStore.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -2108,9 +2108,9 @@
           "line_end": 66
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -2126,7 +2126,7 @@
       "audience": "Developer",
       "source": "docs/scheduler-unconfigured-maintenance.md; system/core/Plugin/PluginManager.php; system/core/Seo/SearchMetrics/SearchMetricsSyncService.php; system/core/Seo/SearchMetrics/GoogleSearchConsoleConnectionRepository.php; system/core/Plugin/LocalPluginPackageInstaller.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -2145,7 +2145,7 @@
           "anchor": "public function setStatus(string $pluginId, string $status): void",
           "line_start": 159,
           "line_end": 159,
-          "sha256": "24236186d47d06af0d9bde465b5aa1df95100e91d044aeeebbf5eb09fcf94192"
+          "sha256": "1296ed999ee8485135da59e617d9e1857579a385bd92db96b41955500bdc3d9e"
         },
         {
           "path": "system/core/Seo/SearchMetrics/SearchMetricsSyncService.php",
@@ -2169,9 +2169,9 @@
           "sha256": "d023da1da6ac272aadbd3e9f41c586ff955cfe50c4f4a54e3575c479e5ce6bf2"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -2187,7 +2187,7 @@
       "audience": "Administrator",
       "source": "docs/knowledge/2026-11-04-admin-compact-layout.md; system/core/Admin/AdminController.php; system/core/Seo/CrawlerStatistics.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -2204,9 +2204,9 @@
         {
           "path": "system/core/Admin/AdminController.php",
           "anchor": "private function adForm(AdRepository $repo): string",
-          "line_start": 11294,
-          "line_end": 11294,
-          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46"
+          "line_start": 11293,
+          "line_end": 11293,
+          "sha256": "a6146488b8ab510ed2b4c7a9befe96c4b0907cde0fda576f2a0eb6baf031cc2c"
         },
         {
           "path": "system/core/Seo/CrawlerStatistics.php",
@@ -2216,9 +2216,9 @@
           "sha256": "d864891f9995d6ad6d9b18905babb1d775be7b8ad4f5789531be3cd266c9fda2"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -2234,7 +2234,7 @@
       "audience": "Administrator",
       "source": "docs/knowledge/2026-11-04-admin-update-flow.md; system/core/Admin/AdminController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -2251,21 +2251,21 @@
         {
           "path": "system/core/Admin/AdminController.php",
           "anchor": "private function updateVerificationHtml(",
-          "line_start": 10521,
-          "line_end": 10521,
-          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46"
+          "line_start": 10520,
+          "line_end": 10520,
+          "sha256": "a6146488b8ab510ed2b4c7a9befe96c4b0907cde0fda576f2a0eb6baf031cc2c"
         },
         {
           "path": "system/core/Admin/AdminController.php",
           "anchor": "private function updateReturnUrl(",
-          "line_start": 10515,
-          "line_end": 10515,
-          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46"
+          "line_start": 10514,
+          "line_end": 10514,
+          "sha256": "a6146488b8ab510ed2b4c7a9befe96c4b0907cde0fda576f2a0eb6baf031cc2c"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -2281,7 +2281,7 @@
       "audience": "Administrator",
       "source": "docs/knowledge/2026-11-05-admin-starship.md; system/core/Admin/AdminController.php; system/core/Support/View.php; public/assets/admin/admin.css",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core1.2.96 source/document review. Actual runtime acceptance is separately recorded in docs/CORE_1.2.96_PUBLICATION_REPORT.md. Production website upgrade and consumer import are not implied.",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
       "user_facing": false,
       "admin_route": "",
       "public_route": "",
@@ -2300,19 +2300,120 @@
           "anchor": "public function contentIndex(",
           "line_start": 1865,
           "line_end": 1865,
-          "sha256": "4b5f1f6e22a233e886fb5a13a90345a50c2eb4514103d5c6c012231ce86e3d46"
+          "sha256": "a6146488b8ab510ed2b4c7a9befe96c4b0907cde0fda576f2a0eb6baf031cc2c"
         },
         {
           "path": "system/core/Support/View.php",
           "anchor": "private static function assetVersion(",
-          "line_start": 298,
-          "line_end": 298,
-          "sha256": "c680980e0a542440076ce483027426dc0308df3ec9010503ae4215230f288d96"
+          "line_start": 300,
+          "line_end": 300,
+          "sha256": "81f8294621e0abbe7351c0b9d584ad6cddea414eeb2403ce01c24fd9b8de60fd"
         }
       ],
-      "verified_version": "1.2.96",
-      "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-      "last_verified_at": "2026-11-06",
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false
+    },
+    {
+      "id": "admin.command_bridge",
+      "topic": "Administration",
+      "capability": "Reviewed command-bridge UI and compact typography",
+      "description": "Core1.2.98未发布候选采用蓝白指挥舱布局及32/14/15/16px字号，复用现有分页、当前页筛选和响应式详情；共享静态CSS，无额外框架、字体下载、轮询或查询。保留原操作、权限、CSRF及更新确认。正式发布与生产升级状态独立记录。",
+      "audience": "Administrator",
+      "source": "docs/knowledge/2026-11-11-admin-command-bridge.md; system/core/Admin/AdminController.php; system/core/Support/View.php",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/knowledge/2026-11-11-admin-command-bridge.md",
+          "anchor": "# 蓝白指挥舱后台：隔离候选",
+          "line_start": 1,
+          "line_end": 1,
+          "sha256": "7793503c43d22c967471e89b561cc5e51e1744602f5ff7744688df701e94fe03"
+        },
+        {
+          "path": "system/core/Admin/AdminController.php",
+          "anchor": "public function contentIndex(",
+          "line_start": 1865,
+          "line_end": 1865,
+          "sha256": "a6146488b8ab510ed2b4c7a9befe96c4b0907cde0fda576f2a0eb6baf031cc2c"
+        },
+        {
+          "path": "system/core/Support/View.php",
+          "anchor": "private static function assetVersion(",
+          "line_start": 300,
+          "line_end": 300,
+          "sha256": "81f8294621e0abbe7351c0b9d584ad6cddea414eeb2403ce01c24fd9b8de60fd"
+        }
+      ],
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
+      "implementation_status": "implemented",
+      "test_status": "NOT_RUN_THIS_TASK",
+      "review_status": "SOURCE_REVIEWED",
+      "priority": "P0",
+      "visibility": "ADMIN_DEVELOPER",
+      "enabled_for_customer_service": false
+    },
+    {
+      "id": "seo.plugin_sitemap_registration",
+      "topic": "Plugin SDK",
+      "capability": "Experimental owned public sitemap registration",
+      "description": "Core1.2.98未发布候选新增实验性PluginContext::registerSitemap，复用seo.extend及插件拥有的公开GET XML路由。Core根Sitemap与robots只公布健康启用插件，保护noindex、撤权、禁用及子目录URL；不请求子地图，不新增权限或迁移。独立插件须自行适配，官网与小说站部署不由Core发布自动完成。",
+      "audience": "Developer",
+      "source": "docs/plugin-sitemap-registry.md; system/core/Plugin/PluginContext.php; system/core/Content/ContentFrontController.php; system/core/Support/PublicApiRegistry.php",
+      "source_type": "official_docs+source_review",
+      "evidence": "Pinned unpublished Core1.2.98 source/document review. Runtime/signing/publication are independently recorded in docs/CORE_1.2.98_PREPARATION_REPORT.md; no production upgrade or consumer import implied.",
+      "user_facing": false,
+      "admin_route": "",
+      "public_route": "",
+      "cli_command": "",
+      "confidence": "high",
+      "source_evidence": [
+        {
+          "path": "docs/plugin-sitemap-registry.md",
+          "anchor": "# Plugin sitemap registration — isolated candidate",
+          "line_start": 1,
+          "line_end": 1,
+          "sha256": "ca86ba217d9386ab1402140d550ef5689e208d9a72f8796fa5149597ca909109"
+        },
+        {
+          "path": "system/core/Plugin/PluginContext.php",
+          "anchor": "public function registerSitemap(",
+          "line_start": 200,
+          "line_end": 200,
+          "sha256": "e824d6ef1e8b816ddcf36f9fdd95112bcbd93687da8eea11d3e95254b9315379"
+        },
+        {
+          "path": "system/core/Content/ContentFrontController.php",
+          "anchor": "public function sitemap(",
+          "line_start": 306,
+          "line_end": 306,
+          "sha256": "c0bd8c26957bca91e2e41d8a40cdb90c2b86dd111a4569f3f7a28658d04d9dfd"
+        },
+        {
+          "path": "system/core/Support/PublicApiRegistry.php",
+          "anchor": "'seo.sitemaps'",
+          "line_start": 138,
+          "line_end": 138,
+          "sha256": "548af817e52f2440a0a99c0e28235c1e8a4721ab5433725b454aeead1840b520"
+        }
+      ],
+      "verified_version": "1.2.98",
+      "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+      "last_verified_at": "2026-11-11",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -2321,157 +2422,170 @@
       "enabled_for_customer_service": false
     }
   ],
-  "package_revision": "2026-11-06-core196-formally-published",
+  "package_revision": "2026-11-11-core198-command-bridge-sitemap-unpublished",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-  "source_tag": "v1.2.96",
+  "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+  "source_tag": "eeb84344042e9b0b536990db045fdc8fc45235ca",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "PUBLISHED",
-    "version": "1.2.96",
-    "commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-    "tag": "v1.2.96",
-    "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.96",
-    "installer_sha256": "e723e32264563195785ad91af7e50b5b4fb93e1fbc48d6ebdbb944e9da01aea1",
-    "update_sha256": "3a0660bc2be044e2405e9c1066ca46ee2e6447bd1203984511a4bdfc8f72df2d",
+    "version": "1.2.97",
+    "commit": "7d9b68abf8b6b083530902ff72ff9ebd9f5d860d",
+    "tag": "v1.2.97",
+    "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.97",
+    "installer_sha256": "32f64e630fb0208a7066bda8ab46985bcc6f8832007767ea3834477151a74247",
+    "update_sha256": "789080539f5866c3a10f8424713788b382cd892b4d34c84f957c1f12dca2bc09",
+    "verified_scope": "Published GitHub metadata/digests and official distribution Published stable record observed2026-11-11; historical runtime counts not asserted",
     "production_deployed": false,
     "consumer_imported": false,
-    "runtime_report": "docs/CORE_1.2.96_PUBLICATION_REPORT.md",
+    "runtime_report": "docs/CORE_1.2.98_PREPARATION_REPORT.md",
     "previous_stable": {
       "status": "PUBLISHED",
-      "version": "1.2.95",
-      "commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
-      "tag": "v1.2.95",
-      "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.95",
-      "installer_sha256": "b5407bedca21cd42cf4ca43b51c30cd5f29d2849a178fb8d4c4b69978d7b67ba",
-      "update_sha256": "b81681059fb2bf44718d5fc2f4aa96002554b537d46f8d2974a989826953df2c",
+      "version": "1.2.96",
+      "commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
+      "tag": "v1.2.96",
+      "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.96",
+      "installer_sha256": "e723e32264563195785ad91af7e50b5b4fb93e1fbc48d6ebdbb944e9da01aea1",
+      "update_sha256": "3a0660bc2be044e2405e9c1066ca46ee2e6447bd1203984511a4bdfc8f72df2d",
       "production_deployed": false,
       "consumer_imported": false,
-      "runtime_report": "docs/CORE_1.2.95_PUBLICATION_REPORT.md",
+      "runtime_report": "docs/CORE_1.2.96_PUBLICATION_REPORT.md",
       "previous_stable": {
         "status": "PUBLISHED",
-        "version": "1.2.94",
-        "commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
-        "tag": "v1.2.94",
-        "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.94",
-        "installer_sha256": "51b9f29cdb0b4c4d50d1127fefbb00349bdd4ae130226e5f92462e03254ac4e1",
-        "update_sha256": "e096a8df58e6e891476a9635dfa36e7894fdfa0cadd48d7872fa75f9bdb71e5e",
+        "version": "1.2.95",
+        "commit": "8f97bda5b15beceb23b06f4f3c1cc38bbc387aa9",
+        "tag": "v1.2.95",
+        "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.95",
+        "installer_sha256": "b5407bedca21cd42cf4ca43b51c30cd5f29d2849a178fb8d4c4b69978d7b67ba",
+        "update_sha256": "b81681059fb2bf44718d5fc2f4aa96002554b537d46f8d2974a989826953df2c",
         "production_deployed": false,
         "consumer_imported": false,
-        "runtime_report": "docs/CORE_1.2.94_PUBLICATION_REPORT.md",
+        "runtime_report": "docs/CORE_1.2.95_PUBLICATION_REPORT.md",
         "previous_stable": {
           "status": "PUBLISHED",
-          "version": "1.2.93",
-          "commit": "0e601035a1fc6c89d3b36aa767e735a44f1eb24a",
-          "tag": "v1.2.93",
-          "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.93",
-          "installer_sha256": "8474d05d6da5bbc8e774059db5c2c54e2025d83e1bb1f7b230d99cf392bf9822",
-          "update_sha256": "f00f97703751a01a8999a948bebf75f8bb71da10c504ee7d2a0a771ed05d4a92",
-          "production_deployed": true,
-          "production_site_versions": {
-            "official": "1.2.93",
-            "piank": "1.2.93",
-            "novel": "1.2.93"
-          },
+          "version": "1.2.94",
+          "commit": "be832ac2d1ade3c6b53734881eb4f599c1474256",
+          "tag": "v1.2.94",
+          "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.94",
+          "installer_sha256": "51b9f29cdb0b4c4d50d1127fefbb00349bdd4ae130226e5f92462e03254ac4e1",
+          "update_sha256": "e096a8df58e6e891476a9635dfa36e7894fdfa0cadd48d7872fa75f9bdb71e5e",
+          "production_deployed": false,
           "consumer_imported": false,
-          "runtime_report": "docs/CORE_1.2.93_PUBLICATION_REPORT.md",
+          "runtime_report": "docs/CORE_1.2.94_PUBLICATION_REPORT.md",
           "previous_stable": {
             "status": "PUBLISHED",
-            "version": "1.2.92",
-            "commit": "9ef20865d798b96696206b0ad2b01f17463f6235",
-            "tag": "v1.2.92",
-            "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.92",
-            "update_service": "https://updates.daiyingcms.com",
-            "installer_sha256": "13e334e4f03c792359697add4d544e7896c03c9ffa85e6cea893c21339a813d7",
-            "update_sha256": "5c47cd424b989932191813741ac8fe61e90fe72c5ddf55ffa4d5545466d39fdb",
-            "checked_at": "2026-11-01",
-            "public_checks": 27,
-            "signature_checks": 9,
-            "production_site_upgraded": false,
-            "production_site_version": "1.2.91",
-            "agent_upgraded_production_site": false,
-            "publication_report": "docs/CORE_1.2.92_PUBLICATION_REPORT.md",
+            "version": "1.2.93",
+            "commit": "0e601035a1fc6c89d3b36aa767e735a44f1eb24a",
+            "tag": "v1.2.93",
+            "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.93",
+            "installer_sha256": "8474d05d6da5bbc8e774059db5c2c54e2025d83e1bb1f7b230d99cf392bf9822",
+            "update_sha256": "f00f97703751a01a8999a948bebf75f8bb71da10c504ee7d2a0a771ed05d4a92",
+            "production_deployed": true,
+            "production_site_versions": {
+              "official": "1.2.93",
+              "piank": "1.2.93",
+              "novel": "1.2.93"
+            },
+            "consumer_imported": false,
+            "runtime_report": "docs/CORE_1.2.93_PUBLICATION_REPORT.md",
             "previous_stable": {
               "status": "PUBLISHED",
-              "version": "1.2.91",
-              "commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
-              "tag": "v1.2.91",
-              "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.91",
+              "version": "1.2.92",
+              "commit": "9ef20865d798b96696206b0ad2b01f17463f6235",
+              "tag": "v1.2.92",
+              "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.92",
               "update_service": "https://updates.daiyingcms.com",
-              "installer_sha256": "3dad41ee1e541130520d357d5c7f017eb147efdcb581c6ccb61d46299d7e469d",
-              "update_sha256": "3ef47e9a3d6c45b79e3f1cbd4c70a6f586709291473ec212c2195a8825d1aba7",
+              "installer_sha256": "13e334e4f03c792359697add4d544e7896c03c9ffa85e6cea893c21339a813d7",
+              "update_sha256": "5c47cd424b989932191813741ac8fe61e90fe72c5ddf55ffa4d5545466d39fdb",
               "checked_at": "2026-11-01",
-              "public_checks": 31,
-              "signature_checks": 10,
+              "public_checks": 27,
+              "signature_checks": 9,
               "production_site_upgraded": false,
-              "production_site_version": "1.2.90",
+              "production_site_version": "1.2.91",
               "agent_upgraded_production_site": false,
-              "publication_report": "docs/CORE_1.2.91_PUBLICATION_REPORT.md",
+              "publication_report": "docs/CORE_1.2.92_PUBLICATION_REPORT.md",
               "previous_stable": {
                 "status": "PUBLISHED",
-                "version": "1.2.90",
-                "commit": "449f92a258f2d02f78cb19f590c308ec268a1d43",
-                "tag": "v1.2.90",
-                "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.90",
+                "version": "1.2.91",
+                "commit": "3c8ecf89f56dda4b930fb2fb0df466a654b7f82c",
+                "tag": "v1.2.91",
+                "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.91",
                 "update_service": "https://updates.daiyingcms.com",
-                "installer_sha256": "62501532a9b73327d35535d6a52c895408393546cdfb984e3c55d5d7965d5b4d",
-                "update_sha256": "0ad3dabdf064894733a88ca3c497075dcdf0fa6e6bd285caf11a85e1bfe1c427",
-                "checked_at": "2026-10-26",
-                "public_checks": 29,
-                "signature_checks": 19,
-                "production_site_upgraded": true,
+                "installer_sha256": "3dad41ee1e541130520d357d5c7f017eb147efdcb581c6ccb61d46299d7e469d",
+                "update_sha256": "3ef47e9a3d6c45b79e3f1cbd4c70a6f586709291473ec212c2195a8825d1aba7",
+                "checked_at": "2026-11-01",
+                "public_checks": 31,
+                "signature_checks": 10,
+                "production_site_upgraded": false,
                 "production_site_version": "1.2.90",
-                "production_upgrade_actor": "Owner confirmed manual upgrade",
                 "agent_upgraded_production_site": false,
-                "production_operation_status": "Completed",
-                "publication_report": "docs/CORE_1.2.90_PUBLICATION_REPORT.md",
+                "publication_report": "docs/CORE_1.2.91_PUBLICATION_REPORT.md",
                 "previous_stable": {
                   "status": "PUBLISHED",
-                  "version": "1.2.89",
-                  "commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
-                  "tag": "v1.2.89",
-                  "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.89",
+                  "version": "1.2.90",
+                  "commit": "449f92a258f2d02f78cb19f590c308ec268a1d43",
+                  "tag": "v1.2.90",
+                  "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.90",
                   "update_service": "https://updates.daiyingcms.com",
-                  "installer_sha256": "7831edfee8c8d3161aa8ca92f026019b99355ba764e6a98dfe002373cd7f052a",
-                  "update_sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
-                  "checked_at": "2026-10-24T04:30:07.543998+00:00",
-                  "production_site_upgraded": false,
-                  "production_site_version": "1.2.88",
+                  "installer_sha256": "62501532a9b73327d35535d6a52c895408393546cdfb984e3c55d5d7965d5b4d",
+                  "update_sha256": "0ad3dabdf064894733a88ca3c497075dcdf0fa6e6bd285caf11a85e1bfe1c427",
+                  "checked_at": "2026-10-26",
+                  "public_checks": 29,
+                  "signature_checks": 19,
+                  "production_site_upgraded": true,
+                  "production_site_version": "1.2.90",
+                  "production_upgrade_actor": "Owner confirmed manual upgrade",
+                  "agent_upgraded_production_site": false,
+                  "production_operation_status": "Completed",
+                  "publication_report": "docs/CORE_1.2.90_PUBLICATION_REPORT.md",
                   "previous_stable": {
                     "status": "PUBLISHED",
-                    "version": "1.2.88",
-                    "commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
-                    "tag": "v1.2.88",
-                    "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.88",
+                    "version": "1.2.89",
+                    "commit": "3dcc700174abd1b9a7d2959a09881f247026de1c",
+                    "tag": "v1.2.89",
+                    "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.89",
                     "update_service": "https://updates.daiyingcms.com",
-                    "installer_sha256": "77012a3cb53b55fb204c9b8f57d0f13ae5541a63e9b6063cc70c1299c94642a6",
-                    "update_sha256": "78c4dd318d9827199002f3dac96c7c55371b0d8173f9871719c7a0af616c387e",
-                    "checked_at": "2026-10-20T13:35:27.327572+00:00",
+                    "installer_sha256": "7831edfee8c8d3161aa8ca92f026019b99355ba764e6a98dfe002373cd7f052a",
+                    "update_sha256": "23ee08234d1726e100208ec4dddd68a031f8c1f6d1dfdcb019af9614e9cc9cc1",
+                    "checked_at": "2026-10-24T04:30:07.543998+00:00",
                     "production_site_upgraded": false,
-                    "production_site_version": "1.2.87",
+                    "production_site_version": "1.2.88",
                     "previous_stable": {
                       "status": "PUBLISHED",
-                      "version": "1.2.87",
-                      "commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
-                      "tag": "v1.2.87",
-                      "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.87",
+                      "version": "1.2.88",
+                      "commit": "d64732de86ab70c09af0655c66d99da3f57f9220",
+                      "tag": "v1.2.88",
+                      "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.88",
                       "update_service": "https://updates.daiyingcms.com",
-                      "installer_sha256": "48f1257824abe9d88b61cd169c4405e64a857d68ea74090e42044f12b74e8e37",
-                      "update_sha256": "a5352d9d507bb56a58b57d94b0e5061fa830beed8d8666a1b7a211cd5d225405",
-                      "checked_at": "2026-10-19T05:30:05.466909+00:00",
+                      "installer_sha256": "77012a3cb53b55fb204c9b8f57d0f13ae5541a63e9b6063cc70c1299c94642a6",
+                      "update_sha256": "78c4dd318d9827199002f3dac96c7c55371b0d8173f9871719c7a0af616c387e",
+                      "checked_at": "2026-10-20T13:35:27.327572+00:00",
                       "production_site_upgraded": false,
-                      "production_site_version": "1.2.86",
+                      "production_site_version": "1.2.87",
                       "previous_stable": {
                         "status": "PUBLISHED",
-                        "version": "1.2.86",
-                        "commit": "d311446607124fff21d76f524a4a11968ad4cd58",
-                        "tag": "v1.2.86",
-                        "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.86",
+                        "version": "1.2.87",
+                        "commit": "a5031178b4b30d1bf50c289953ac9a76a0c3832b",
+                        "tag": "v1.2.87",
+                        "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.87",
                         "update_service": "https://updates.daiyingcms.com",
-                        "installer_sha256": "954e18b12221bbe12f178b81258ca6eee23b3bbc1dc2607efd176ef1e56587fe",
-                        "update_sha256": "28e6f9f837b3ca5fa76e91fee0d5a00bdbd7c6482360acb518085599bdb0d127",
-                        "checked_at": "2026-10-18T17:51:49.285151+00:00",
-                        "production_site_upgraded": false
+                        "installer_sha256": "48f1257824abe9d88b61cd169c4405e64a857d68ea74090e42044f12b74e8e37",
+                        "update_sha256": "a5352d9d507bb56a58b57d94b0e5061fa830beed8d8666a1b7a211cd5d225405",
+                        "checked_at": "2026-10-19T05:30:05.466909+00:00",
+                        "production_site_upgraded": false,
+                        "production_site_version": "1.2.86",
+                        "previous_stable": {
+                          "status": "PUBLISHED",
+                          "version": "1.2.86",
+                          "commit": "d311446607124fff21d76f524a4a11968ad4cd58",
+                          "tag": "v1.2.86",
+                          "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.86",
+                          "update_service": "https://updates.daiyingcms.com",
+                          "installer_sha256": "954e18b12221bbe12f178b81258ca6eee23b3bbc1dc2607efd176ef1e56587fe",
+                          "update_sha256": "28e6f9f837b3ca5fa76e91fee0d5a00bdbd7c6482360acb518085599bdb0d127",
+                          "checked_at": "2026-10-18T17:51:49.285151+00:00",
+                          "production_site_upgraded": false
+                        }
                       }
                     }
                   }
@@ -2545,14 +2659,14 @@
   ],
   "release_status": "PUBLISHED",
   "candidate_evidence": {
-    "status": "PUBLISHED",
-    "base_version": "1.2.95",
-    "candidate_version": "1.2.96",
-    "base_commit": "8964902b11a07d6623037e14c01974c08ebe23e8",
-    "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
-    "candidate_revision": "PR91-merged-formally-published",
-    "owner_decision": "Owner approves selected original palette integration and publication after complete Gate/signing verification. Published after exact-source signed native acceptance. No production website upgrade or freeze.",
-    "runtime_report": "docs/CORE_1.2.96_PUBLICATION_REPORT.md",
+    "status": "UNPUBLISHED",
+    "base_version": "1.2.97",
+    "candidate_version": "1.2.98",
+    "base_commit": "05d0f951bfce396deb2e19b0796a06bbe8484811",
+    "source_commit": "eeb84344042e9b0b536990db045fdc8fc45235ca",
+    "candidate_revision": "joint-command-bridge-plugin-sitemap",
+    "owner_decision": "Owner authorizes coordinated integration, full testing, official server signing and one joint Core release; typography accepted. No production website upgrade, plugin publication, real payments or paid AI.",
+    "runtime_report": "docs/CORE_1.2.98_PREPARATION_REPORT.md",
     "production_deployed": false,
     "consumer_imported": false,
     "published_release_evidence_preserved": true
@@ -2830,6 +2944,19 @@
     "candidate_revision": "PR89-merged-formally-published",
     "owner_decision": "Owner requests fixing the update flow, complete tests then publication. Published after exact-source server gates and native signed acceptance. No production website upgrade or freeze.",
     "runtime_report": "docs/CORE_1.2.95_PUBLICATION_REPORT.md",
+    "production_deployed": false,
+    "consumer_imported": false,
+    "published_release_evidence_preserved": true
+  },
+  "published_196_acceptance_evidence": {
+    "status": "PUBLISHED",
+    "base_version": "1.2.95",
+    "candidate_version": "1.2.96",
+    "base_commit": "8964902b11a07d6623037e14c01974c08ebe23e8",
+    "source_commit": "56ec3de16b7dabec478f277d74b97f7df65ab138",
+    "candidate_revision": "PR91-merged-formally-published",
+    "owner_decision": "Owner approves selected original palette integration and publication after complete Gate/signing verification. Published after exact-source signed native acceptance. No production website upgrade or freeze.",
+    "runtime_report": "docs/CORE_1.2.96_PUBLICATION_REPORT.md",
     "production_deployed": false,
     "consumer_imported": false,
     "published_release_evidence_preserved": true

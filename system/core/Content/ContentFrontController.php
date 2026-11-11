@@ -18,6 +18,8 @@ use Cms\Core\Navigation\NavigationBuilder;
 use Cms\Core\Payment\PaidContentService;
 use Cms\Core\Payment\PaidDownloadService;
 use Cms\Core\Payment\PaymentProviderSelector;
+use Cms\Core\Plugin\PluginLifecycle;
+use Cms\Core\Plugin\PluginRuntimeRegistry;
 use Cms\Core\Recovery\RunMode;
 use Cms\Core\Routing\BasePath;
 use Cms\Core\Security\CsrfToken;
@@ -32,6 +34,7 @@ final class ContentFrontController
         private readonly string $rootPath,
         private readonly Settings $settings,
         private readonly FileLogger $logger,
+        private readonly ?PluginRuntimeRegistry $pluginRuntime = null,
     ) {
     }
 
@@ -300,8 +303,16 @@ final class ContentFrontController
         ]));
     }
 
-    public function sitemap(): Response
+    public function sitemap(?Request $request = null): Response
     {
+        $maps = $this->pluginSitemapUrls();
+        if ($maps !== [] && ($request?->query['core'] ?? null) !== '1') {
+            $entries = array_map(static fn (string $loc): array => ['loc' => $loc], [
+                $this->absoluteUrl($this->url('/sitemap.xml')) . '?core=1',
+                ...$maps,
+            ]);
+            return new Response($this->buildSitemapXml($entries, true), 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+        }
         $entries = [];
         if ($this->siteAllowsRobotsIndex()) {
             $entries[] = ['loc' => $this->absoluteUrl($this->url('/'))];
@@ -362,7 +373,44 @@ final class ContentFrontController
         }
         $body .= 'Sitemap: ' . $this->absoluteUrl($this->url('/sitemap.xml')) . "\n";
 
+        foreach ($this->pluginSitemapUrls() as $url) {
+            $body .= 'Sitemap: ' . $url . "\n";
+        }
+
         return Response::text($body);
+    }
+
+    /** @return list<string> Enabled, successfully booted plugin maps only. */
+    private function pluginSitemapUrls(): array
+    {
+        $maps = $this->pluginRuntime?->sitemaps() ?? [];
+        if (!$this->siteAllowsRobotsIndex() || $maps === []) {
+            return [];
+        }
+        try {
+            $pdo = ConnectionFactory::make($this->settings);
+            $pluginIds = array_values(array_unique($maps));
+            $placeholders = implode(',', array_fill(0, count($pluginIds), '?'));
+            $stmt = $pdo->prepare('SELECT plugin_id, capabilities_json FROM cms_plugins WHERE status = ? AND plugin_id IN (' . $placeholders . ')');
+            $stmt->execute([PluginLifecycle::ENABLED, ...$pluginIds]);
+            $owners = [];
+            foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row) {
+                $capabilities = json_decode((string) $row['capabilities_json'], true);
+                if (is_array($capabilities) && in_array('seo.extend', $capabilities, true)) {
+                    $owners[(string) $row['plugin_id']] = true;
+                }
+            }
+            $urls = [];
+            foreach ($maps as $path => $owner) {
+                if (isset($owners[$owner])) {
+                    $urls[] = $this->absoluteUrl($this->url($path));
+                }
+            }
+            return array_values(array_unique($urls));
+        } catch (Throwable) {
+            // Do not advertise plugin maps when lifecycle state cannot be verified.
+            return [];
+        }
     }
 
     public function llms(): Response
@@ -1085,11 +1133,12 @@ final class ContentFrontController
     }
 
     /** @param list<array{loc:string,lastmod?:string}> $entries */
-    private function buildSitemapXml(array $entries): string
+    private function buildSitemapXml(array $entries, bool $index = false): string
     {
         $document = new \DOMDocument('1.0', 'UTF-8');
         $document->formatOutput = true;
-        $urlset = $document->createElementNS('http://www.sitemaps.org/schemas/sitemap/0.9', 'urlset');
+        $rootName = $index ? 'sitemapindex' : 'urlset';
+        $urlset = $document->createElementNS('http://www.sitemaps.org/schemas/sitemap/0.9', $rootName);
         $document->appendChild($urlset);
 
         foreach ($entries as $entry) {
@@ -1097,7 +1146,7 @@ final class ContentFrontController
             if ($loc === '') {
                 continue;
             }
-            $url = $document->createElement('url');
+            $url = $document->createElement($index ? 'sitemap' : 'url');
             $locElement = $document->createElement('loc');
             $locElement->appendChild($document->createTextNode($loc));
             $url->appendChild($locElement);
@@ -1114,7 +1163,7 @@ final class ContentFrontController
 
         $xml = $document->saveXML();
         if (!is_string($xml)) {
-            return '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"/>' . "\n";
+            return '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<' . $rootName . ' xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"/>' . "\n";
         }
 
         return $xml;
@@ -1134,7 +1183,12 @@ final class ContentFrontController
             $url = '/' . ltrim($url, '/');
         }
 
-        return rtrim($this->siteBaseUrl(), '/') . '/' . ltrim($url, '/');
+        $base = rtrim($this->siteBaseUrl(), '/');
+        $basePath = rtrim((string) parse_url($base, PHP_URL_PATH), '/');
+        if ($basePath !== '' && ($url === $basePath || str_starts_with($url, $basePath . '/') || str_starts_with($url, $basePath . '?'))) {
+            return $base . substr($url, strlen($basePath));
+        }
+        return $base . '/' . ltrim($url, '/');
     }
 
     private function sitemapLastmod(mixed $value): ?string

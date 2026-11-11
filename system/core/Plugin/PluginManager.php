@@ -206,6 +206,7 @@ final class PluginManager
                 $count++;
             } catch (\Throwable $exception) {
                 $this->runtime?->removeHomepageProviders($pluginId);
+                $this->runtime?->removeSitemaps($pluginId);
                 $this->logger->error('Plugin boot failed; quarantining plugin', [
                     'source' => 'Plugin',
                     'plugin_id' => $pluginId,

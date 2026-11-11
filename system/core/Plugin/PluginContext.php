@@ -196,6 +196,15 @@ final class PluginContext
         $this->runtime()->route($this->manifest->id, $method, $path, $handler, $capability, false, $csrf);
     }
 
+    /** Announce an owned public GET XML route in the Core sitemap index and robots.txt. */
+    public function registerSitemap(string $path): void
+    {
+        if (!$this->hasCapability('seo.extend')) {
+            throw new PluginException('Plugin does not declare seo.extend capability.');
+        }
+        $this->runtime()->sitemap($this->manifest->id, $path);
+    }
+
     /** @param callable $handler */
     public function adminRoute(string $method, string $path, callable $handler, ?string $capability = null, bool $csrf = true): void
     {

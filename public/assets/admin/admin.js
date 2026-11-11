@@ -90,39 +90,52 @@
     if (!drawer || typeof drawer.showModal !== 'function') return;
     var trigger = null;
     function value(row, selector) { var node = row.querySelector(selector); return node ? node.textContent.trim() : ''; }
-    view.querySelectorAll('[data-content-detail]').forEach(function (button) {
-      button.hidden = false;
-      button.addEventListener('click', function () {
+    var detailButtons = Array.from(view.querySelectorAll('[data-content-detail]'));
+    function showDetail(button, focus) {
         var row = button.closest('[data-content-row]');
-        var scrollRoot = view.closest('.admin-main');
+        // Initial docking precedes first layout; only a user action needs scroll preservation.
+        var scrollRoot = focus ? view.closest('.admin-main') : null;
         var scrollTop = scrollRoot ? scrollRoot.scrollTop : 0;
         trigger = button;
+        drawer.dataset.status = row.dataset.status;
         rows.forEach(function (item) { item.classList.toggle('is-detail-selected', item === row); });
         ['title', 'id', 'type', 'state', 'updated', 'slug'].forEach(function (name) { drawer.querySelector('[data-detail-' + name + ']').textContent = value(row, '[data-content-' + name + ']'); });
         var published = row.dataset.published || '';
         drawer.querySelector('[data-detail-published]').textContent = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(published) ? published.slice(0, 16).replace('T', ' ') : (published || '尚未发布');
         drawer.querySelector('[data-detail-published]').title = published;
-        [['title', '标题'], ['slug', 'Slug'], ['state', '状态']].forEach(function (field) {
+        [['title', '标题'], ['slug', 'Slug']].forEach(function (field) {
           var filled = !!value(row, '[data-content-' + field[0] + ']');
           var check = drawer.querySelector('[data-detail-check="' + field[0] + '"]');
           check.textContent = (filled ? '✓ ' : '— ') + field[1] + (filled ? '已填写' : '未填写');
           check.classList.toggle('is-missing', !filled);
         });
         ['edit', 'preview'].forEach(function (name) { drawer.querySelector('[data-detail-' + name + ']').href = row.querySelector('[data-content-' + name + ']').href; });
+        var previousFocus = document.activeElement;
         if (!drawer.open) {
           drawer.dataset.docked = docked.matches ? 'true' : 'false';
           view.classList.toggle('has-content-detail', docked.matches);
           if (docked.matches) drawer.show(); else drawer.showModal();
         }
-        drawer.querySelector('[data-content-close]').focus({preventScroll: true});
+        if (focus) drawer.querySelector('[data-content-close]').focus({preventScroll: true});
+        else if (previousFocus && previousFocus !== document.body) previousFocus.focus({preventScroll: true});
+        else if (document.activeElement && drawer.contains(document.activeElement)) document.activeElement.blur();
         if (scrollRoot) scrollRoot.scrollTop = scrollTop;
-      });
+    }
+    detailButtons.forEach(function (button) {
+      var title = button.closest('[data-content-row]').querySelector('[data-content-title]');
+      button.textContent = title.textContent;
+      button.setAttribute('aria-label', '查看详情：' + title.textContent);
+      button.hidden = false;
+      title.hidden = true;
+      button.addEventListener('click', function () { showDetail(button, true); });
     });
     view.querySelector('[data-content-close]').addEventListener('click', function () { drawer.close(); });
     view.addEventListener('keydown', function (event) {
       if (event.key === 'Escape' && drawer.open) { event.preventDefault(); drawer.close(); }
     });
     docked.addEventListener('change', function () { if (drawer.open) drawer.close(); });
+    // Initial wide-screen inspector reuses the first row without stealing keyboard focus.
+    if (docked.matches && detailButtons.length) showDetail(detailButtons[0], false);
     drawer.addEventListener('close', function () {
       view.classList.remove('has-content-detail');
       rows.forEach(function (item) { item.classList.remove('is-detail-selected'); });

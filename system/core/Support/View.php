@@ -46,7 +46,9 @@ final class View
         $adminTopbar = $isAdmin ? self::adminTopbar($title) : '';
         $mainClass = $isAdmin ? ' class="admin-main" id="admin-main" tabindex="-1"' : '';
         $adminOpen = $isAdmin ? '<a class="admin-skip-link" href="#admin-main">跳到主要内容</a>' . $adminNav . '<div class="admin-workspace">' . $adminTopbar : $adminNav;
-        $adminClose = $isAdmin ? '</div>' : '';
+        $adminClose = $isAdmin
+            ? '<footer class="admin-status-rail" aria-label="工作台通知"><a href="' . self::escape(self::url('/admin/notifications')) . '">' . self::icon('bell') . '通知中心 <span>未读 ' . self::$adminUnreadNotifications . ' 条</span></a><a href="#admin-main">返回主要内容 ↑</a></footer></div>'
+            : '';
         $headAssets = $isAdmin
             ? '<link rel="stylesheet" href="' . self::escape(self::url('/assets/admin/admin.css?v=' . self::assetVersion())) . '">'
             : '<style>' . self::baseCss() . '</style>';
@@ -297,7 +299,7 @@ final class View
 
     private static function assetVersion(): string
     {
-        return '20261106-admin-starship-light';
+        return '20261111-admin-command-bridge';
     }
 
     private static function adminNavGroupScript(): string
