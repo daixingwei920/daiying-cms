@@ -169,7 +169,8 @@ $reject(fn () => $tickets->createTicketWithPrintJobs(['customer_name' => 'ATOMIC
 $assert(count($repo->tickets()) === $beforeAtomic, 'Kitchen ticket, items and queue are atomic; no orphan ticket after database fault.');
 $pdo->exec('DROP TRIGGER local_print_failure');
 $assert(count($repo->printAudits()) > 0 && str_contains($controller->printJobs()->body(), '操作审计') && str_contains($controller->printJobs()->body(), '人工接单'), 'Visible fallback and actor-aware operation audit are available.');
-$assert(str_contains($controller->printers($request())->body(), '模式 A') && str_contains($controller->printers($request())->body(), '模式 B'), 'Native admin page exposes both modes and disabled future POS integration.');
+$printerForm = $controller->printers($request())->body();
+$assert(str_contains($printerForm, 'value="existing"') && str_contains($printerForm, 'value="independent"') && str_contains($printerForm, '<option disabled>收银系统直接连接（尚未开放）'), 'Native admin keeps both connection modes and disables unavailable POS integration without requiring technical labels.');
 $assert($controller->retryPrintJob(new Request('POST', '/', [], ['job_id' => $testA]))->status() === 400, 'HTTP manual reprint requires explicit owner acknowledgement.');
 $page = $checkout->syncPaidOrders(1);
 $assert($page['checked'] === 1 && $page['next_cursor'] > 0 && $checkout->syncPaidOrders(1, $page['next_cursor'])['next_cursor'] > $page['next_cursor'], 'Bounded reconciliation cursor prevents early unpaid orders starving later paid orders.');

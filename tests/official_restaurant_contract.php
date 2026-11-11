@@ -38,7 +38,7 @@ $assert(($manifest['name'] ?? '') === '餐厅外卖', 'Restaurant plugin display
 $assert(($manifest['table_prefixes'] ?? []) === ['restaurant_'], 'Restaurant plugin declares only the restaurant_ table namespace.');
 $assert(in_array('official.commerce', $manifest['required_plugins'] ?? [], true), 'Restaurant plugin depends on Commerce instead of reimplementing checkout.');
 $assert(in_array('restaurant.print', $manifest['capabilities'] ?? [], true), 'Restaurant plugin declares print capability.');
-$assert(($manifest['data_schema_version'] ?? '') === '0.1.0-alpha.15', 'Unchanged migrations retain their established schema version.');
+$assert(($manifest['data_schema_version'] ?? '') === '0.1.0-alpha.16' && in_array('migrations/005_pos_connections.php', $manifest['migrations'], true), 'POS migration is explicitly declared with its new schema version.');
 $assert(in_array('migrations/002_restaurant_checkout.php', $manifest['migrations'] ?? [], true), 'Restaurant checkout migration is declared.');
 
 foreach (glob(CMS_ROOT . '/content/plugins/official.restaurant/{plugin.php,src/*.php,migrations/*.php}', GLOB_BRACE) ?: [] as $file) {

@@ -125,3 +125,9 @@ Several historical implementation reports still live at the repository root. The
 - [Core1.2.90正式发布与公开验收](CORE_1.2.90_PUBLICATION_REPORT.md)：GitHub/官方更新、29项匿名检查/19项验签、官网缓存刷新及Owner手动升级分别记录。
 
 - [Core1.2.94正式发布](CORE_1.2.94_PUBLICATION_REPORT.md) records exact-source gates, independent verification, distribution preservation and publication/upgrade separation.
+
+- [餐厅收银系统接入研究](restaurant-pos-integration-research-2026-11-11.md)：后台改版为本地候选；品牌准入与真实连接验收分别记录。
+
+- [餐厅后台改版交付记录](restaurant-admin-redesign-report.md)：可交互本地预览、真实测试结果与未部署边界。
+
+- [餐厅 Square / Clover 本地实现与验收](restaurant-pos-implementation-report-2026-11-11.md)
