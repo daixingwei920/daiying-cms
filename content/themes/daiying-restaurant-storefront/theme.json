@@ -1,0 +1,38 @@
+{
+  "theme_id": "daiying-restaurant-storefront",
+  "name": "戴影餐厅外卖主题",
+  "version": "1.0.1",
+  "author": "Daiying CMS",
+  "description": "餐厅自取、预约与送餐点餐主题，展示真实门店、菜单、营业状态与图库。",
+  "core": {
+    "min": "1.2.83",
+    "max": "2.0.0"
+  },
+  "content_types": ["restaurant_menu", "restaurant_page"],
+  "recommended_plugins": ["official.restaurant"],
+  "required_plugins": [],
+  "package_type": "theme",
+  "settings_schema": {
+    "restaurant_name": {"type": "text", "label": "餐馆名称", "group": "品牌", "default": "示例餐馆 / Sample Restaurant"},
+    "logo_url": {"type": "image", "label": "Logo 图片", "group": "品牌", "default": ""},
+    "primary_color": {"type": "color", "label": "主色", "group": "品牌", "default": "#146c43"},
+    "secondary_color": {"type": "color", "label": "辅助色", "group": "品牌", "default": "#c2410c"},
+    "accent_color": {"type": "color", "label": "强调色", "group": "品牌", "default": "#f2b705"},
+    "storefront_image_url": {"type": "image", "label": "门店门头图", "group": "门店", "default": ""},
+    "seo_address": {"type": "text", "label": "真实门店地址（搜索引擎）", "group": "本地搜索", "default": ""},
+    "seo_phone": {"type": "text", "label": "真实电话（搜索引擎）", "group": "本地搜索", "default": ""},
+    "seo_hours": {"type": "text", "label": "营业时间（如 Mo-Su 11:00-21:00）", "group": "本地搜索", "default": ""},
+    "canonical_url": {"type": "text", "label": "网站规范网址 https://", "group": "本地搜索", "default": ""},
+    "desktop_focal_point": {"type": "text", "label": "桌面图像焦点", "group": "门店", "default": "50% 50%"},
+    "mobile_focal_point": {"type": "text", "label": "手机图像焦点", "group": "门店", "default": "50% 45%"},
+    "hero_style": {"type": "select", "label": "首屏样式", "group": "布局", "default": "storefront", "options": {"storefront": "门店照片", "compact": "紧凑"}},
+    "menu_card_style": {"type": "select", "label": "菜单卡片样式", "group": "布局", "default": "photo", "options": {"photo": "图片卡片", "text": "文字卡片"}},
+    "corner_radius": {"type": "range", "label": "圆角", "group": "布局", "default": 8, "min": 0, "max": 16, "step": 1},
+    "image_ratio": {"type": "select", "label": "菜品图片比例", "group": "布局", "default": "4 / 3", "options": {"1 / 1": "1:1", "4 / 3": "4:3", "16 / 10": "16:10"}},
+    "show_house_favorites": {"type": "toggle", "label": "显示招牌推荐", "group": "首页分区", "default": true},
+    "show_menu": {"type": "toggle", "label": "显示完整菜单", "group": "首页分区", "default": true},
+    "show_gallery": {"type": "toggle", "label": "显示门店图库", "group": "首页分区", "default": true},
+    "show_about": {"type": "toggle", "label": "显示关于我们", "group": "首页分区", "default": true},
+    "show_location": {"type": "toggle", "label": "显示地址时间", "group": "首页分区", "default": true}
+  }
+}

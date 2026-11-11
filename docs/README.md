@@ -25,6 +25,8 @@ This index collects the public-facing documentation currently available in the G
 
 ## User Guide
 
+- [餐厅外卖插件与主题：首选语言及独立安装](restaurant-storefront-1.0.1.md)
+
 - [审核与系统更新数据界面（隔离候选）](admin-data-workspace.md) records grouped views, retained validation, local acceptance and unpublished status.
 - [Core1.2.96正式发布与验收](CORE_1.2.96_PUBLICATION_REPORT.md) records the blue-white admin layout, signed native gates, publication verification and unchanged production-site boundary.
 - [星舰后台设计与候选记录](knowledge/2026-11-05-admin-starship.md) preserves the frozen preparation snapshot; current published status is in the1.2.96 report.
