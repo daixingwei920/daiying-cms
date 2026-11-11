@@ -51,11 +51,15 @@ registerCustomField(string $contentType, CustomFieldDefinition $field): void
 registerSearchResource(string $id, string $label): void
 registerSeoJsonLd(string $id, callable $provider): void
 registerSeoMeta(string $id, callable $provider): void
-registerSitemap(string $path): void // Unreleased sitemap discovery candidate; seo.extend
+registerSitemap(string $path): void // Core1.2.98 experimental; seo.extend
 registerMailEvent(string $eventId, string $label, array $variables = []): void
 ```
 
-## Sitemap discovery registration (unreleased candidate)
+<a id="sitemap-discovery-registration-unreleased-candidate"></a>
+
+## Sitemap discovery registration (Core1.2.98, experimental)
+
+Published in Core1.2.98. See [formal acceptance and release boundaries](docs/CORE_1.2.98_PUBLICATION_REPORT.md); historical candidate notes remain a frozen development record.
 
 See [contract and local validation](docs/plugin-sitemap-registry.md). Requires existing `seo.extend`; ordinary API plugins are supported without PDO or new permissions. Register the public route first:
 

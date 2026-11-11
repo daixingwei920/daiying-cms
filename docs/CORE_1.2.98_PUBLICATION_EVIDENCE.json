@@ -1,0 +1,86 @@
+{
+  "status": "PUBLISHED",
+  "version": "1.2.98",
+  "commit": "235e25b4aaebac8a9d9e8410ff694cb1ef6bffa6",
+  "tag": "v1.2.98",
+  "pr": "https://github.com/daixingwei920/daiying-cms/pull/97",
+  "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.98",
+  "official_published_at": "2026-11-11T06:49:01+00:00",
+  "installer_sha256": "adb99b609397e8d68bcefeb9d88c912a89e328e9f5b808c05124418bbde18029",
+  "update_sha256": "e343a6594ae8c29105fa4ce862ec0f8e0acf521184acfc2fb8f1cfb5ae424324",
+  "signed_parity_checks": 643,
+  "update_files": 425,
+  "existing_migrations": 56,
+  "native_upgrade_rollback_retry": {
+    "83": {
+      "status": "PASS",
+      "checks": 71,
+      "from_version": "1.2.97",
+      "target_version": "1.2.98",
+      "formal_signed": true
+    },
+    "85": {
+      "status": "PASS",
+      "checks": 71,
+      "from_version": "1.2.97",
+      "target_version": "1.2.98",
+      "formal_signed": true
+    }
+  },
+  "fresh_http_install_checks": {
+    "83": 9,
+    "85": 9
+  },
+  "signed_update_http_checks": {
+    "83": 32,
+    "85": 32
+  },
+  "mysql_sitemap": [
+    {
+      "php": "83",
+      "database": "private MySQL8.0 native prepares",
+      "exit_code": 0,
+      "checks": 73
+    },
+    {
+      "php": "85",
+      "database": "private MySQL8.0 native prepares",
+      "exit_code": 0,
+      "checks": 73
+    }
+  ],
+  "independent_signature_checks": 7,
+  "anonymous_publication_checks": 15,
+  "selected_UI_asset_sha256": {
+    "admin.css": "5712604ac88ba46fee56245037ee6bfcea4a9da3339da6bc13aebf08043ce3be",
+    "admin.js": "790f7365956dc6f375f206cdf0c140bbdae41edb3f83f8b51860e289d1a412e0"
+  },
+  "selected_typography_px": {
+    "heading": 32,
+    "body": 14,
+    "navigation": 15,
+    "content_title": 16
+  },
+  "browser_evidence_reused": "Owner-selected35 Core fixtures/52 screenshots and70 desktop/mobile layout checks; assets byte-identical and served identically after signed upgrade; not independent plugin or production UI acceptance",
+  "knowledge_provenance": 10,
+  "protected_distribution": {
+    "status": "PASS",
+    "distribution_backup_integrity": "ok",
+    "existing_licenses_codes_activations_unchanged": true,
+    "existing_release_rows_unchanged": true,
+    "unrelated_products_unchanged": true,
+    "commercial_fields_unchanged": true,
+    "distribution_code_config_unchanged": true,
+    "production_site_upgrade": false
+  },
+  "preserved_native_fixture_stop": {
+    "reason": "Synthetic seo.extend plugin fixture installation required native explicit administrator review confirmation; fixture now uses supported install confirmation, no Core change",
+    "report": "/root/daiying-release198-gate-20261111-965cfcc283d7/report.stopped-fixture-review.json",
+    "sha256": "0b53cddfdc9ddbd62064dbfc2a0ac705ae5910d5f91bb7808683e630c9967782"
+  },
+  "preserved_precommit_stops": "Unsupported MySQL5.7 migration guard and test-launcher dependencies/client failure retained; supported private MySQL8 passes without changing migrations",
+  "production_site_upgrade": false,
+  "independent_plugin_publication": false,
+  "private_keys_generated_on_workstation": false,
+  "private_keys_exported": false
+}
