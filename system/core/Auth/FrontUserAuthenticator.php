@@ -54,7 +54,7 @@ final class FrontUserAuthenticator
         return $id;
     }
 
-    public function attempt(string $email, string $password, string $ip): bool
+    public function attempt(string $email, string $password, string $ip, bool $remember = false): bool
     {
         $email = strtolower(trim($email));
         if ($this->isRateLimited($email, $ip)) {
@@ -72,11 +72,17 @@ final class FrontUserAuthenticator
             return false;
         }
 
+        $rememberService = new FrontUserRememberService($this->pdo);
+        if ($remember) {
+            $rememberService->issue((int) $user['id']);
+        } else {
+            $rememberService->clear();
+        }
         $this->loginUser([
             'id' => (int) $user['id'],
             'email' => (string) $user['email'],
             'display_name' => (string) $user['display_name'],
-        ]);
+        ], false);
         $stmt = $this->pdo->prepare('UPDATE cms_front_users SET last_login_at = :last_login_at, updated_at = :updated_at WHERE id = :id');
         $stmt->execute([':id' => (int) $user['id'], ':last_login_at' => gmdate('c'), ':updated_at' => gmdate('c')]);
 
@@ -84,8 +90,11 @@ final class FrontUserAuthenticator
     }
 
     /** @param array{id:int,email:string,display_name:string} $user */
-    public function loginUser(array $user): void
+    public function loginUser(array $user, bool $clearRemember = true): void
     {
+        if ($clearRemember) {
+            (new FrontUserRememberService($this->pdo))->clear();
+        }
         SessionManager::regenerate();
         $_SESSION['front_user'] = [
             'id' => (int) $user['id'],
@@ -96,6 +105,7 @@ final class FrontUserAuthenticator
 
     public function logout(): void
     {
+        (new FrontUserRememberService($this->pdo))->clear();
         unset($_SESSION['front_user']);
         SessionManager::regenerate();
     }
@@ -105,8 +115,10 @@ final class FrontUserAuthenticator
     {
         $user = $_SESSION['front_user'] ?? null;
         if (!is_array($user) || (int) ($user['id'] ?? 0) <= 0) {
-            return null;
+            return (new FrontUserRememberService($this->pdo))->restore();
         }
+
+        (new FrontUserRememberService($this->pdo))->renewIfNeeded();
 
         return [
             'id' => (int) $user['id'],
