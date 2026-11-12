@@ -131,3 +131,5 @@ Several historical implementation reports still live at the repository root. The
 - [餐厅后台改版交付记录](restaurant-admin-redesign-report.md)：可交互本地预览、真实测试结果与未部署边界。
 
 - [餐厅 Square / Clover 本地实现与验收](restaurant-pos-implementation-report-2026-11-11.md)
+
+- [餐厅外卖1.0.2正式发布](RESTAURANT_1.0.2_PUBLICATION_REPORT.md)
