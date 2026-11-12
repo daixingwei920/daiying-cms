@@ -140,7 +140,7 @@ final class ContentFrontController
     public function loginForm(Request $request): Response
     {
         $redirect = $this->safeRedirect((string) ($request->query['redirect'] ?? '/'));
-        return Response::html(View::page('会员登录', $this->authFormHtml('login', $redirect)));
+        return Response::html(View::page('会员登录', $this->authFormHtml('login', $redirect, '', (string) ($request->query['remember'] ?? '') === '1')));
     }
 
     public function login(Request $request): Response
@@ -149,18 +149,19 @@ final class ContentFrontController
             return Response::html(View::page('会员登录', $this->authFormHtml('login', '/')), 405)->withHeaders(['Allow' => 'POST']);
         }
         $redirect = $this->safeRedirect((string) $request->input('redirect', '/'));
+        $remember = (string) ($request->body['remember'] ?? '') === '1';
         if (!CsrfToken::verify($request->input('_csrf'))) {
-            return Response::html(View::page('会员登录', $this->authFormHtml('login', $redirect, '请求校验失败，请刷新页面重试。')), 403);
+            return Response::html(View::page('会员登录', $this->authFormHtml('login', $redirect, '请求校验失败，请刷新页面重试。', $remember)), 403);
         }
         try {
             $auth = new FrontUserAuthenticator(ConnectionFactory::make($this->settings));
-            if (!$auth->attempt((string) $request->input('email', ''), (string) $request->input('password', ''), $this->clientIp($request))) {
-                return Response::html(View::page('会员登录', $this->authFormHtml('login', $redirect, '邮箱或密码不正确。')), 401);
+            if (!$auth->attempt((string) $request->input('email', ''), (string) $request->input('password', ''), $this->clientIp($request), $remember)) {
+                return Response::html(View::page('会员登录', $this->authFormHtml('login', $redirect, '邮箱或密码不正确。', $remember)), 401);
             }
             return Response::redirect($redirect);
         } catch (Throwable $exception) {
             $this->logger->error('Front login failed', ['source' => 'Core', 'error' => $exception->getMessage()]);
-            return Response::html(View::page('会员登录', $this->authFormHtml('login', $redirect, '登录服务暂不可用。')), 500);
+            return Response::html(View::page('会员登录', $this->authFormHtml('login', $redirect, '登录服务暂不可用。', $remember)), 500);
         }
     }
 
@@ -1093,7 +1094,7 @@ final class ContentFrontController
         return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
     }
 
-    private function authFormHtml(string $mode, string $redirect, string $error = ''): string
+    private function authFormHtml(string $mode, string $redirect, string $error = '', bool $rememberChecked = false): string
     {
         $isRegister = $mode === 'register';
         $title = $isRegister ? '会员注册' : '会员登录';
@@ -1101,6 +1102,7 @@ final class ContentFrontController
         $switchUrl = $this->url(($isRegister ? '/login' : '/register') . '?redirect=' . rawurlencode($redirect));
         $switchText = $isRegister ? '已有账号，去登录' : '没有账号，去注册';
         $displayName = $isRegister ? '<label>昵称<input name="display_name" autocomplete="name" required></label>' : '';
+        $remember = $isRegister ? '' : '<label><input type="checkbox" name="remember" value="1"' . ($rememberChecked ? ' checked' : '') . '> 在此设备保持登录</label>';
         $errorHtml = $error !== '' ? '<p class="error">' . View::escape($error) . '</p>' : '';
 
         return '<h1>' . $title . '</h1>' . $errorHtml .
@@ -1109,6 +1111,7 @@ final class ContentFrontController
             $displayName .
             '<label>邮箱<input name="email" type="email" autocomplete="email" required></label>' .
             '<label>密码<input name="password" type="password" autocomplete="' . ($isRegister ? 'new-password' : 'current-password') . '" required></label>' .
+            $remember .
             '<button type="submit">' . ($isRegister ? '注册并登录' : '登录') . '</button> <a class="button" href="' . View::escape($switchUrl) . '">' . $switchText . '</a>' .
             '</form>';
     }

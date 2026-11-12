@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.99 (release preparation)
+
+- Add optional persistent front-member login for Home Screen use. A login link may preselect “在此设备保持登录” with `remember=1`; users can uncheck it. A random token is stored hashed in a new Core table and sent as an HttpOnly, SameSite=Lax cookie, with Secure enabled by HTTPS site configuration.
+- Restore active members after browser-session loss, renew the finite cookie during continued use, and revoke it on logout or member identity switch. Administrator sessions remain session-only. Clearing site data or a year of inactivity still requires login.
+- Add a new migration for token hashes. Preserve existing member identities and Core 1.2.80/PHP 8.3 minimums. Formal publication requires exact-source Release Gate, official server signing, signed native upgrade/rollback acceptance and production backup.
+
 ## 1.2.98 (release preparation)
 
 - Apply the reviewed blue-white command-bridge admin layout across Core panels, with compact32px headings,14px body,15px navigation and16px content titles. Static shared CSS and existing paginated data preserve bounded loading/runtime cost; no framework, font download or animation loop.
