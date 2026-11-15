@@ -6,7 +6,7 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 
 ## Isolated Core 1.2.99 candidate (2026-11-15)
 
-- Clean branch `feat/v2-capability-provenance` starts at official main `1b226514a769f196bd3d19a8d546ed6e1b6fd147` and adds only generic AI tool ownership checks. Candidate version is 1.2.99; published 1.2.98 remains the official baseline.
+- Clean branch `feat/v2-capability-provenance` starts at official main `1b226514a769f196bd3d19a8d546ed6e1b6fd147` and adds generic AI tool ownership checks plus source-stamped operator wake signals for plugins declaring `ai.tool`. Candidate version is 1.2.99; published 1.2.98 remains the official baseline.
 - This branch is preparation for Daiying AI operator V2. It is not signed, merged, published, or deployed. Exact-source Release Gate and official server signing remain required before any Core publication. Business plugin code stays outside Core.
 
 ## Published Core1.2.98 (2026-11-11 UTC)

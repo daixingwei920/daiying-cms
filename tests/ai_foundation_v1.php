@@ -199,12 +199,19 @@ $job = $pdo->query('SELECT * FROM cms_ai_jobs WHERE id = ' . (int) $jobRowId)->f
 $check(is_array($job) && (int) $job['queue_job_id'] > 0 && $job['owner_plugin'] === 'official.content', 'AI jobs reuse the Core queue and store AI progress metadata');
 
 $allowedManifest = new PluginManifest('vendor.ai', 'AI Plugin', '1.0.0', 'Unit', '1.0.0', '8.3.0', 'plugin.php', 'api', ['ai.provider', 'ai.tool', 'ai.agent', 'ai.prompt'], [], [], 'plugin', false, [], [], '');
-$allowedContext = new PluginContext($allowedManifest, new EventDispatcher(), new BlockRegistry(), new PluginDataStore($pdo, 'vendor.ai'), null);
+$aiEvents = new EventDispatcher();
+$operatorSignals = [];
+$aiEvents->listen(\Cms\Core\Ai\AiOperatorWakeEvent::class, static function (object $event) use (&$operatorSignals): void {
+    $operatorSignals[] = [$event->ownerPlugin, $event->eventId];
+});
+$allowedContext = new PluginContext($allowedManifest, $aiEvents, new BlockRegistry(), new PluginDataStore($pdo, 'vendor.ai'), null);
 $allowedContext->registerAiProvider(new AiFoundationPluginProvider());
 $allowedContext->registerAiTool(new AiToolDefinition('vendor.demo.search', 'Search', AiToolRisk::READ, [], 'vendor.ai'), static fn (array $payload): array => ['ok' => true]);
 $allowedContext->registerAiAgent(new AiAgentDefinition('vendor.demo.agent', 'Demo Agent', '', [], ['vendor.demo.search'], 'vendor.ai'));
 $allowedContext->registerAiPrompt(new AiPromptTemplate('vendor.demo/prompt', '1.0', 'Hello {{name}}', ['name'], 'vendor.ai'));
 $check(AiProviderRegistry::get('vendor.demo') !== null && AiToolRegistry::get('vendor.demo.search') !== null, 'PluginContext exposes stable AI Provider and Tool registration APIs');
+$allowedContext->signalAiOperator('stock.updated:1');
+$check($operatorSignals === [['vendor.ai', 'stock.updated:1']], 'AI operator wake signal carries registering plugin provenance');
 try {
     $allowedContext->registerAiTool(new AiToolDefinition('vendor.fake.search', 'Spoofed', AiToolRisk::READ, [], 'other.plugin'), static fn (array $payload): array => []);
     $check(false, 'AI tool owner spoof must fail');
@@ -218,6 +225,12 @@ try {
     $check($exception->reason() === 'tool_owner_conflict', 'AI tool id takeover is rejected');
 }
 $blockedContext = new PluginContext(new PluginManifest('vendor.blocked', 'Blocked', '1.0.0', 'Unit', '1.0.0', '8.3.0', 'plugin.php', 'api', [], [], [], 'plugin', false, [], [], ''), new EventDispatcher(), new BlockRegistry(), new PluginDataStore($pdo, 'vendor.blocked'), null);
+try {
+    $blockedContext->signalAiOperator('stock.updated:1');
+    $check(false, 'Plugin without ai.tool must not signal operator');
+} catch (PluginException) {
+    $check(true, 'AI operator wake requires declared ai.tool capability');
+}
 try {
     $blockedContext->registerAiProvider(new AiFoundationPluginProvider());
     $check(false, 'AI provider registration requires declared capability');

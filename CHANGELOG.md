@@ -3,6 +3,7 @@
 ## 1.2.99 (isolated release preparation)
 
 - Require plugin AI tool definitions to name their registering plugin as owner, and reject another owner's attempt to replace an existing tool ID. This is a generic provenance guard for the existing AI tool API; it adds no migration or new capability.
+- Let a plugin with `ai.tool` send a source-stamped AI operator wake signal through `PluginContext::signalAiOperator()`. This allows one event listener to cover all participating plugins without unrestricted event dispatch.
 - Preserve the published 1.2.98 tag and the Core 1.2.80/PHP 8.3 floors. Publication, signing and production upgrades remain separate gates.
 
 ## 1.2.98 (release preparation)

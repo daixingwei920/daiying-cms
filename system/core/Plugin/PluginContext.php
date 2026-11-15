@@ -13,6 +13,7 @@ use Cms\Core\Ai\AiProviderInterface;
 use Cms\Core\Ai\AiProviderRegistry;
 use Cms\Core\Ai\AiToolDefinition;
 use Cms\Core\Ai\AiToolRegistry;
+use Cms\Core\Ai\AiOperatorWakeEvent;
 use Cms\Core\Auth\FrontUserService;
 use Cms\Core\Cache\CacheInterface;
 use Cms\Core\Content\PluginContentService;
@@ -381,6 +382,18 @@ final class PluginContext
         }
 
         AiToolRegistry::register($definition, $handler);
+    }
+
+    public function signalAiOperator(string $eventId): void
+    {
+        if (!$this->hasCapability('ai.tool')) {
+            throw new PluginException('Plugin does not declare ai.tool capability.');
+        }
+        if (!preg_match('/^[A-Za-z0-9_.:-]{8,96}$/D', $eventId)) {
+            throw new PluginException('AI operator event id is invalid.');
+        }
+
+        $this->events->dispatch(new AiOperatorWakeEvent($this->manifest->id, $eventId));
     }
 
     public function registerAiAgent(AiAgentDefinition $agent): void
