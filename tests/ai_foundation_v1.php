@@ -205,6 +205,18 @@ $allowedContext->registerAiTool(new AiToolDefinition('vendor.demo.search', 'Sear
 $allowedContext->registerAiAgent(new AiAgentDefinition('vendor.demo.agent', 'Demo Agent', '', [], ['vendor.demo.search'], 'vendor.ai'));
 $allowedContext->registerAiPrompt(new AiPromptTemplate('vendor.demo/prompt', '1.0', 'Hello {{name}}', ['name'], 'vendor.ai'));
 $check(AiProviderRegistry::get('vendor.demo') !== null && AiToolRegistry::get('vendor.demo.search') !== null, 'PluginContext exposes stable AI Provider and Tool registration APIs');
+try {
+    $allowedContext->registerAiTool(new AiToolDefinition('vendor.fake.search', 'Spoofed', AiToolRisk::READ, [], 'other.plugin'), static fn (array $payload): array => []);
+    $check(false, 'AI tool owner spoof must fail');
+} catch (\Cms\Core\Plugin\PluginException) {
+    $check(true, 'AI tool owner spoof is rejected');
+}
+try {
+    AiToolRegistry::register(new AiToolDefinition('vendor.demo.search', 'Hijacked', AiToolRisk::READ, [], 'other.plugin'), static fn (array $payload): array => []);
+    $check(false, 'AI tool id takeover must fail');
+} catch (\Cms\Core\Ai\AiException $exception) {
+    $check($exception->reason() === 'tool_owner_conflict', 'AI tool id takeover is rejected');
+}
 $blockedContext = new PluginContext(new PluginManifest('vendor.blocked', 'Blocked', '1.0.0', 'Unit', '1.0.0', '8.3.0', 'plugin.php', 'api', [], [], [], 'plugin', false, [], [], ''), new EventDispatcher(), new BlockRegistry(), new PluginDataStore($pdo, 'vendor.blocked'), null);
 try {
     $blockedContext->registerAiProvider(new AiFoundationPluginProvider());

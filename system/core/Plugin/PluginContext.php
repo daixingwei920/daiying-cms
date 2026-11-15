@@ -376,6 +376,9 @@ final class PluginContext
         if (!$this->hasCapability('ai.tool')) {
             throw new PluginException('Plugin does not declare ai.tool capability.');
         }
+        if ($definition->ownerPlugin !== $this->manifest->id) {
+            throw new PluginException('AI tool owner must match the registering plugin.');
+        }
 
         AiToolRegistry::register($definition, $handler);
     }
