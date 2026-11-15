@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.99 (isolated release preparation)
+
+- Require plugin AI tool definitions to name their registering plugin as owner, and reject another owner's attempt to replace an existing tool ID. This is a generic provenance guard for the existing AI tool API; it adds no migration or new capability.
+- Preserve the published 1.2.98 tag and the Core 1.2.80/PHP 8.3 floors. Publication, signing and production upgrades remain separate gates.
+
 ## 1.2.98 (release preparation)
 
 - Apply the reviewed blue-white command-bridge admin layout across Core panels, with compact32px headings,14px body,15px navigation and16px content titles. Static shared CSS and existing paginated data preserve bounded loading/runtime cost; no framework, font download or animation loop.
