@@ -4,10 +4,11 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
-## Isolated Core 1.2.99 candidate (2026-11-15)
+## Published Core1.2.99 (2026-11-16 UTC)
 
-- Clean branch `feat/v2-capability-provenance` starts at official main `1b226514a769f196bd3d19a8d546ed6e1b6fd147` and adds generic AI tool ownership checks plus source-stamped operator wake signals for plugins declaring `ai.tool`. Candidate version is 1.2.99; published 1.2.98 remains the official baseline.
-- This branch is preparation for Daiying AI operator V2. It is not signed, merged, published, or deployed. Exact-source Release Gate and official server signing remain required before any Core publication. Business plugin code stays outside Core.
+- PR103 is published on GitHub and official stable at immutable `v1.2.99` / `c794aec96976563ccc29bf1c3fd677fe62fe7eaf`. Generic AI tool ownership checks and source-stamped operator wake signals require existing `ai.tool`; no new migration or capability. Business plugins remain independent.
+- Exact-main preflight/build, official server signing and 644 signed parity checks passed; PHP8.3/8.5 native signed 1.2.98→1.2.99 upgrade/rollback/retry 71 each, signed update HTTP32 each, fresh signed installer HTTP9 each, fixed-public-key verification7 and anonymous publication17 passed. Installer SHA256 `e74eea75642d9761f35c8209e0441dcee36b61fa45a0230693d8c201bb54d842`; update SHA256 `a5aead41b1f9a9234bd8056d748cfba8752efeaad2251b615b2343441088a85e`.
+- Distribution backup and existing license/history/product protection passed. No production website upgrade, plugin publication, paid AI, payment or knowledge consumer import. Private signing keys stayed on the authorized update server. See `docs/CORE_1.2.99_PUBLICATION_REPORT.md`.
 
 ## Published Core1.2.98 (2026-11-11 UTC)
 

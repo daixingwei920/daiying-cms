@@ -40,7 +40,7 @@ registerMailProvider(MailProviderInterface $provider): void
 registerAiProvider(AiProviderInterface $provider): void
 registerPaymentProvider(PaymentProviderInterface $provider): void
 registerAiTool(AiToolDefinition $definition, callable $handler): void
-signalAiOperator(string $eventId): void // Unpublished Core1.2.99 candidate; requires ai.tool
+signalAiOperator(string $eventId): void // Core1.2.99; requires ai.tool
 registerAiAgent(AiAgentDefinition $agent): void
 registerAiPrompt(AiPromptTemplate $prompt): void
 registerRemoteMediaProvider(RemoteMediaProviderInterface $provider): void
@@ -56,9 +56,9 @@ registerSitemap(string $path): void // Core1.2.98 experimental; seo.extend
 registerMailEvent(string $eventId, string $label, array $variables = []): void
 ```
 
-## AI operator wake signal (unpublished Core1.2.99 candidate)
+## AI operator wake signal (Core1.2.99)
 
-`registerAiTool()` requires `AiToolDefinition::ownerPlugin` to equal the registering plugin's manifest ID. A second plugin cannot replace an existing tool ID. A plugin declaring `ai.tool` may call `signalAiOperator($eventId)` after a relevant change; Core dispatches `AiOperatorWakeEvent` with the plugin ID taken from the manifest, not caller input. The event ID must be 8–96 ASCII letters, digits, underscores, periods, colons or hyphens. The signal is a synchronous hint; it does not grant an AI tool, approve an action or guarantee a patrol. Event listeners should catch their own failures so an optional wake does not fail the originating business operation. This API is unavailable on published Core1.2.98; plugins that also support it must feature-detect it.
+`registerAiTool()` requires `AiToolDefinition::ownerPlugin` to equal the registering plugin's manifest ID. A second plugin cannot replace an existing tool ID. A plugin declaring `ai.tool` may call `signalAiOperator($eventId)` after a relevant change; Core dispatches `AiOperatorWakeEvent` with the plugin ID taken from the manifest, not caller input. The event ID must be 8–96 ASCII letters, digits, underscores, periods, colons or hyphens. The signal is a synchronous hint; it does not grant an AI tool, approve an action or guarantee a patrol. Event listeners should catch their own failures so an optional wake does not fail the originating business operation. Older Cores require feature detection. See the [formal release record](docs/CORE_1.2.99_PUBLICATION_REPORT.md).
 
 <a id="sitemap-discovery-registration-unreleased-candidate"></a>
 
