@@ -27,6 +27,7 @@ This index collects the public-facing documentation currently available in the G
 
 ## User Guide
 
+- [Core1.2.100正式发布与验收](CORE_1.2.100_PUBLICATION_REPORT.md)：已增加通用调度 CLI 和站点级进程锁；网站需自行配置 cron，生产站点未升级。
 - [Core1.2.98正式发布与验收](CORE_1.2.98_PUBLICATION_REPORT.md)：选定指挥舱/字号与实验性插件Sitemap API已发布；以下候选记录为冻结开发快照。
 - [Core1.2.99正式发布与验收](CORE_1.2.99_PUBLICATION_REPORT.md)：插件 AI 工具归属和来源标记唤醒已发布；未升级生产站点或发布独立插件。
 - [AI 代运营 V2 Core1.2.99 候选知识核对](knowledge/2026-11-15-ai-operator-v2-candidate.md)：发布前隔离核对的历史记录；当前发布结果见上方正式发布报告。

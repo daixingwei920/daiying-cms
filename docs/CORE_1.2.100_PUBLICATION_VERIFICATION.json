@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "version": "1.2.100",
+  "commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
+  "checks": [
+    "GitHub latest is stable 1.2.100",
+    "GitHub release targets exact merged source",
+    "Seven public release attachments",
+    "GitHub attachment names match frozen stage",
+    "GitHub digest daiying-cms-1.2.100-stable.manifest.json",
+    "GitHub digest daiying-cms-1.2.100-stable.zip",
+    "GitHub digest daiying-cms-1.2.100-stable.zip.sha256",
+    "GitHub digest daiying-cms-1.2.100-stable.zip.signature.json",
+    "GitHub digest daiying-cms-core-update-1.2.100.zip",
+    "GitHub digest daiying-cms-core-update-1.2.100.zip.sha256",
+    "GitHub digest daiying-cms-core-update-1.2.100.zip.signature.json",
+    "Official latest selects 1.2.100",
+    "Official service offers 1.2.99 upgrade",
+    "Official metadata binds signed update hash",
+    "Anonymous GitHub download bytes daiying-cms-1.2.100-stable.zip",
+    "Anonymous GitHub download bytes daiying-cms-core-update-1.2.100.zip",
+    "Anonymous official update bytes match frozen signed package"
+  ],
+  "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.100",
+  "official_package_url": "https://updates.daiyingcms.com/api/v1/packages/daiying.cms%3A1.2.100%3Astable?source_version=1.2.99&site_id=&php_version=8.3.33&expected_product=daiying.cms&expected_channel=stable&expected_sha256=6c45490b6615a25550f0d8b0b6dea94d9d9f46a26a2b2b35c8dda9871f6442e4",
+  "installer_sha256": "000eda96213415ae3c9f803ccbd8f9e6bc2e76c03f224ba16f5572ab5e0934f0",
+  "update_sha256": "6c45490b6615a25550f0d8b0b6dea94d9d9f46a26a2b2b35c8dda9871f6442e4",
+  "production_site_upgrade": false
+}

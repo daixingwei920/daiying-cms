@@ -1,0 +1,51 @@
+{
+  "status": "PUBLISHED_VERIFIED",
+  "version": "1.2.100",
+  "commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
+  "tag": "v1.2.100",
+  "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.100",
+  "official_package_url": "https://updates.daiyingcms.com/api/v1/packages/daiying.cms%3A1.2.100%3Astable?source_version=1.2.99&site_id=&php_version=8.3.33&expected_product=daiying.cms&expected_channel=stable&expected_sha256=6c45490b6615a25550f0d8b0b6dea94d9d9f46a26a2b2b35c8dda9871f6442e4",
+  "official_published_at": "2026-11-16T13:21:32+00:00",
+  "installer_sha256": "000eda96213415ae3c9f803ccbd8f9e6bc2e76c03f224ba16f5572ab5e0934f0",
+  "update_sha256": "6c45490b6615a25550f0d8b0b6dea94d9d9f46a26a2b2b35c8dda9871f6442e4",
+  "signed_parity_checks": 644,
+  "update_files": 426,
+  "native_upgrade_rollback_retry": {
+    "83": {
+      "checks": 71,
+      "status": "PASS"
+    },
+    "85": {
+      "checks": 71,
+      "status": "PASS"
+    }
+  },
+  "signed_update_http_checks": {
+    "83": 32,
+    "85": 32
+  },
+  "fresh_signed_install_http_checks": {
+    "83": 9,
+    "85": 9
+  },
+  "independent_signature_checks": 7,
+  "anonymous_publication_checks": 17,
+  "protected_distribution": {
+    "status": "PASS",
+    "distribution_backup_integrity": "ok",
+    "existing_licenses_codes_activations_unchanged": true,
+    "existing_release_rows_unchanged": true,
+    "unrelated_products_unchanged": true,
+    "commercial_fields_unchanged": true,
+    "distribution_code_config_unchanged": true,
+    "production_site_upgrade": false
+  },
+  "premerge_recovery": {
+    "initial_stop": "Knowledge source drift after version change: config/app.example.php",
+    "resolution": "Repinned 59 facts to reviewed Core 1.2.100 candidate source; strict check and 10 provenance tests passed before merge."
+  },
+  "production_site_upgrade": false,
+  "independent_plugin_publication": false,
+  "private_keys_exported": false,
+  "knowledge_consumer_imported": false
+}
