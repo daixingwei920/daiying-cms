@@ -4,6 +4,11 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Isolated Core 1.2.99 candidate (2026-11-15)
+
+- Clean branch `feat/v2-capability-provenance` starts at official main `1b226514a769f196bd3d19a8d546ed6e1b6fd147` and adds generic AI tool ownership checks plus source-stamped operator wake signals for plugins declaring `ai.tool`. Candidate version is 1.2.99; published 1.2.98 remains the official baseline.
+- This branch is preparation for Daiying AI operator V2. It is not signed, merged, published, or deployed. Exact-source Release Gate and official server signing remain required before any Core publication. Business plugin code stays outside Core.
+
 ## Published Core1.2.98 (2026-11-11 UTC)
 
 - PR97 is published on GitHub/official stable at immutable v1.2.98 / 235e25b4aaebac8a9d9e8410ff694cb1ef6bffa6. Contains the approved command-bridge UI and32/14/15/16px typography plus experimental seo.sitemaps registration, existing seo.extend, no new migration/permission. Keep frozen tag/artifacts unchanged.

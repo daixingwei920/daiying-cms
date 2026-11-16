@@ -14,6 +14,10 @@ final class AiToolRegistry
     /** @param callable(array<string,mixed>):array<string,mixed> $handler */
     public static function register(AiToolDefinition $definition, callable $handler): void
     {
+        $existing = self::$definitions[$definition->id] ?? null;
+        if ($existing !== null && $existing->ownerPlugin !== $definition->ownerPlugin) {
+            throw new AiException('AI tool id is already owned by another plugin.', 'tool_owner_conflict');
+        }
         self::$definitions[$definition->id] = $definition;
         self::$handlers[$definition->id] = $handler;
     }

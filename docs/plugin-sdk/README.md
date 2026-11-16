@@ -27,6 +27,7 @@ Use the SDK services instead of private Core internals:
 Do not use raw PDO, direct `$_SESSION` mutation, private Core table layouts, guessed event strings, or unlisted Core methods from an `api` plugin. Trusted/bundled plugins may receive additional privileges only when Core grants them explicitly.
 
 - [Core1.2.98 experimental sitemap discovery registration](../plugin-sitemap-registry.md): owned public XML maps through `seo.extend`, with old-Core feature detection.
+- Core1.2.99 candidate adds an `ai.tool`-gated, source-stamped operator wake hint and enforces AI tool ownership. See the [API reference](../../DAIYING_PLUGIN_API_REFERENCE_V1.md#ai-operator-wake-signal-unpublished-core1299-candidate) and [event registry](../../DAIYING_EVENT_REGISTRY_V1.md); published Core1.2.98 does not provide this signal.
 
 ## Legacy Document
 

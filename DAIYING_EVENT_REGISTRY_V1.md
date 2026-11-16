@@ -18,6 +18,8 @@ Event dispatch is synchronous. Listener exception isolation is deferred; current
 | `Cms\Core\Auth\FrontUserLoggedInEvent` | `FrontUserService::loginById()` after Core session is established | `userId:int`, `email:?string`, `provider:string`, `externalSubject:?string`, `loggedInAt:string` | Sync | Escapes from dispatcher | 1.2.70 |
 | `Daiying\Commerce\Events\OrderPaidEvent` | official.commerce `pending_payment -> paid` transition after payment trust is confirmed and order is updated | `orderId:int`, `orderNumber:string`, `frontUserId:?int`, `buyerEmail:?string`, `amountMinor:int`, `currency:string`, `providerId:string`, `paymentId:?int`, `transactionId:?string`, `paidAt:string`, `idempotencyKey:string` | Sync | Escapes from dispatcher | 1.2.70 |
 
+Unpublished Core1.2.99 candidate: `Cms\Core\Ai\AiOperatorWakeEvent` is dispatched synchronously by `PluginContext::signalAiOperator()` for a plugin declaring `ai.tool`. It carries `ownerPlugin:string` from the plugin manifest and `eventId:string` supplied by the plugin. Listener exceptions escape from the dispatcher; listeners should isolate optional wake failures.
+
 Not in V1 registry:
 
 - Refund events.
