@@ -4,6 +4,11 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Isolated scheduler runner candidate (2026-11-16)
+
+- `fix/core-scheduler-cli` is a clean branch from published Core 1.2.99 main. It adds a CLI entrypoint for existing registered scheduled tasks to unblock isolated AI operator V2 queue execution. This is an unpublished candidate: no version bump, merge, signing, distribution update or production site change is authorized here.
+- Preserve the immutable 1.2.99 tag and use the normal exact-source Release Gate and server-only signing process if a later Core release is approved. A site still needs to configure its own minute cron invocation after that release.
+
 ## Published Core1.2.99 (2026-11-16 UTC)
 
 - PR103 is published on GitHub and official stable at immutable `v1.2.99` / `c794aec96976563ccc29bf1c3fd677fe62fe7eaf`. Generic AI tool ownership checks and source-stamped operator wake signals require existing `ai.tool`; no new migration or capability. Business plugins remain independent.
