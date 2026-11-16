@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.100 (release preparation)
+
+- Add `run-scheduled-tasks` to dispatch existing registered Core and plugin tasks from minute cron. Boot enabled plugin handlers and retain the existing scheduler's due-task and owner checks.
+- Hold a site-level nonblocking process lock for the entire CLI run so a slow AI operator cycle cannot overlap the next invocation. Document running cron as the site's OS user, one runner per site.
+- No migration or public API change. Preserve published 1.2.99 artifacts and the Core 1.2.80/PHP 8.3 floors; production website upgrades remain separate.
+
 ## 1.2.99 (isolated release preparation)
 
 - Require plugin AI tool definitions to name their registering plugin as owner, and reject another owner's attempt to replace an existing tool ID. This is a generic provenance guard for the existing AI tool API; it adds no migration or new capability.
