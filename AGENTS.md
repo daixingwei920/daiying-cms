@@ -4,6 +4,12 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Published Core 1.2.100 (2026-11-16 UTC)
+
+- PR 105 is published on GitHub and official stable at immutable `v1.2.100` / `ff8ddf1a903835bb2bbede1b78cf70960e4e1d17`. It adds `run-scheduled-tasks` for existing registered Core/plugin tasks with a site-level nonblocking process lock; no migration or public plugin API change.
+- Exact-main preflight/build, official server signing and signed parity 644 passed. PHP 8.3/8.5 native signed 1.2.99→1.2.100 upgrade/rollback/retry 71 each, signed update HTTP 32 each, fresh install HTTP 9 each, fixed-public-key checks 7 and anonymous publication checks 17 passed. Installer SHA256 `000eda96213415ae3c9f803ccbd8f9e6bc2e76c03f224ba16f5572ab5e0934f0`; update SHA256 `6c45490b6615a25550f0d8b0b6dea94d9d9f46a26a2b2b35c8dda9871f6442e4`.
+- Distribution backup and existing license/history/product protection passed. No production website upgrade, plugin publication, paid AI, payment or knowledge consumer import. Private signing keys stayed on the authorized update server. Sites must separately configure minute cron after upgrade. See `docs/CORE_1.2.100_PUBLICATION_REPORT.md`.
+
 ## Owner-authorized Core 1.2.100 scheduler release (2026-11-16)
 
 - Owner approved PR 105 merge, full Release Gate, official server signing and Core publication. `fix/core-scheduler-cli` is the clean candidate branch from published Core 1.2.99 main; target 1.2.100 adds a CLI entrypoint for existing registered scheduled tasks and a nonblocking site-level process lock.
