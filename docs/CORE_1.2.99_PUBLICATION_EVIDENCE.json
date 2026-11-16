@@ -1,0 +1,52 @@
+{
+  "status": "PUBLISHED_VERIFIED",
+  "version": "1.2.99",
+  "commit": "c794aec96976563ccc29bf1c3fd677fe62fe7eaf",
+  "tag": "v1.2.99",
+  "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.99",
+  "official_package_url": "https://updates.daiyingcms.com/api/v1/packages/daiying.cms%3A1.2.99%3Astable?source_version=1.2.98&site_id=&php_version=8.3.33&expected_product=daiying.cms&expected_channel=stable&expected_sha256=a5aead41b1f9a9234bd8056d748cfba8752efeaad2251b615b2343441088a85e",
+  "official_published_at": "2026-11-16T02:48:16+00:00",
+  "installer_sha256": "e74eea75642d9761f35c8209e0441dcee36b61fa45a0230693d8c201bb54d842",
+  "update_sha256": "a5aead41b1f9a9234bd8056d748cfba8752efeaad2251b615b2343441088a85e",
+  "signed_parity_checks": 644,
+  "update_files": 426,
+  "native_upgrade_rollback_retry": {
+    "83": {
+      "checks": 71,
+      "status": "PASS"
+    },
+    "85": {
+      "checks": 71,
+      "status": "PASS"
+    }
+  },
+  "signed_update_http_checks": {
+    "83": 32,
+    "85": 32
+  },
+  "fresh_signed_install_http_checks": {
+    "83": 9,
+    "85": 9
+  },
+  "independent_signature_checks": 7,
+  "anonymous_publication_checks": 17,
+  "protected_distribution": {
+    "status": "PASS",
+    "distribution_backup_integrity": "ok",
+    "existing_licenses_codes_activations_unchanged": true,
+    "existing_release_rows_unchanged": true,
+    "unrelated_products_unchanged": true,
+    "commercial_fields_unchanged": true,
+    "distribution_code_config_unchanged": true,
+    "production_site_upgrade": false
+  },
+  "preserved_fixture_preparation_stop": {
+    "reason": "Test-fixture preparation asserted target version text in setup.php, where the prior fixture only names its baseline version; no native upgrade started.",
+    "report": "/root/daiying-release199-gate-20261115-c1657816a48b/report.stopped-template-assertion.json",
+    "sha256": "79c201212337638fd247a9de1a36da8ef5e3201774c6d0939dea3adb6ac3bbf6"
+  },
+  "production_site_upgrade": false,
+  "independent_plugin_publication": false,
+  "private_keys_exported": false,
+  "knowledge_consumer_imported": false
+}

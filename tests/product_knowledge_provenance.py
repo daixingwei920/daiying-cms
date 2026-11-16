@@ -103,6 +103,9 @@ class KnowledgeProvenance(unittest.TestCase):
         published196 = json.loads(subprocess.check_output(['git', 'show', '05d0f951bfce396deb2e19b0796a06bbe8484811:' + product.NAME + '.json'], cwd=ROOT, text=True))
         self.assertEqual(self.package['published_196_acceptance_evidence'], published196['candidate_evidence'])
         evidence194 = self.package['release_evidence']
+        if evidence194['version'] == '1.2.99':
+            self.assertEqual(evidence194['commit'], subprocess.check_output(['git', 'rev-parse', 'v1.2.99^{commit}'], cwd=ROOT, text=True).strip())
+            evidence194 = evidence194['previous_stable']
         if evidence194['version'] == '1.2.98':
             self.assertEqual(evidence194['commit'], subprocess.check_output(['git', 'rev-parse', 'v1.2.98^{commit}'], cwd=ROOT, text=True).strip())
             evidence194 = evidence194['previous_stable']
@@ -130,7 +133,7 @@ class KnowledgeProvenance(unittest.TestCase):
         self.assertEqual(evidence193['commit'], subprocess.check_output(['git', 'rev-parse', 'v1.2.93^{commit}'], cwd=ROOT, text=True).strip())
         self.assertEqual(self.package['source_commit'], self.package['candidate_evidence']['source_commit'])
         if self.package['candidate_evidence']['status'] == 'PUBLISHED':
-            self.assertEqual(self.package['source_tag'], 'v1.2.98')
+            self.assertEqual(self.package['source_tag'], 'v1.2.99')
             self.assertEqual(self.package['source_commit'], self.package['release_evidence']['commit'])
         else:
             self.assertEqual(self.package['source_tag'], self.package['source_commit'])
