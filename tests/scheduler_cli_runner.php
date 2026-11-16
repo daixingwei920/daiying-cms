@@ -61,6 +61,14 @@ try {
     $check(is_array($registered) && $registered['owner'] === 'fixture.scheduler' && (int) $registered['enabled'] === 1, 'Plugin task registered in Core scheduler');
 
     $pdo->exec("UPDATE cms_core_scheduled_tasks SET next_run_at='2000-01-01T00:00:00+00:00' WHERE task_id='fixture.scheduler.run'");
+    $lock = fopen($root . '/storage/locks/scheduled-tasks.lock', 'c');
+    $check($lock !== false && flock($lock, LOCK_EX | LOCK_NB), 'Test process holds the site scheduler lock');
+    [$code, $output] = $run('run-scheduled-tasks 2');
+    $busy = json_decode($output, true);
+    $check($code === 0 && ($busy['status'] ?? '') === 'already_running' && !is_file($marker), 'Concurrent CLI skips the due task while another runner holds the lock');
+    flock($lock, LOCK_UN);
+    fclose($lock);
+
     [$code, $output] = $run('run-scheduled-tasks 2');
     $result = json_decode($output, true);
     $check($code === 0 && is_array($result) && ($result['processed'] ?? -1) === 1 && ($result['succeeded'] ?? -1) === 1, 'CLI runs the due plugin task once');
