@@ -4,6 +4,11 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized Core 1.2.100 scheduler release (2026-11-16)
+
+- Owner approved PR 105 merge, full Release Gate, official server signing and Core publication. `fix/core-scheduler-cli` is the clean candidate branch from published Core 1.2.99 main; target 1.2.100 adds a CLI entrypoint for existing registered scheduled tasks and a nonblocking site-level process lock.
+- Preserve the immutable 1.2.99 tag. Build/sign only from exact clean merged main on the authorized update server, protect distribution state with a fresh backup, and stop if any gate fails. No production website upgrade or plugin publication is included. A site must separately configure minute cron after installing the new Core.
+
 ## Published Core1.2.99 (2026-11-16 UTC)
 
 - PR103 is published on GitHub and official stable at immutable `v1.2.99` / `c794aec96976563ccc29bf1c3fd677fe62fe7eaf`. Generic AI tool ownership checks and source-stamped operator wake signals require existing `ai.tool`; no new migration or capability. Business plugins remain independent.

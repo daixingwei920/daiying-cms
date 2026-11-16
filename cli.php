@@ -883,6 +883,35 @@ if ($command === 'run-extension-jobs') {
     exit(0);
 }
 
+if ($command === 'run-scheduled-tasks') {
+    $limit = cms_cli_positive_limit($argv[2] ?? null, 20);
+    $lockDir = CMS_ROOT . '/storage/locks';
+    if (!is_dir($lockDir) && !mkdir($lockDir, 0755, true) && !is_dir($lockDir)) {
+        throw new \RuntimeException('Cannot create scheduler lock directory.');
+    }
+    $lock = fopen($lockDir . '/scheduled-tasks.lock', 'c');
+    if ($lock === false) {
+        throw new \RuntimeException('Cannot open scheduler lock.');
+    }
+    if (!flock($lock, LOCK_EX | LOCK_NB)) {
+        fclose($lock);
+        echo json_encode(['status' => 'already_running', 'processed' => 0, 'succeeded' => 0, 'failed' => 0, 'missing' => 0]), PHP_EOL;
+        exit(0);
+    }
+    try {
+        $settings = Settings::load(CMS_ROOT);
+        $pdo = ConnectionFactory::make($settings);
+        $manager = new \Cms\Core\Plugin\PluginManager(CMS_ROOT.'/content/plugins', $pdo, new \Cms\Core\Logging\FileLogger(CMS_ROOT.'/storage/logs/plugins.log'), new \Cms\Core\Events\EventDispatcher(), new \Cms\Core\Plugin\BlockRegistry(), new \Cms\Core\Plugin\PluginRuntimeRegistry(), new \Cms\Core\Plugin\OfficialPluginRegistry(CMS_ROOT,$pdo), new \Cms\Core\Plugin\PluginSecretStore($pdo,(string)$settings->get('security.encryption_key','')), settings: $settings);
+        $manager->bootEnabled();
+        \Cms\Core\Seo\SearchMetrics\SearchMetricsSyncService::register($settings);
+        echo json_encode((new \Cms\Core\Scheduler\SchedulerService($pdo))->runDue($limit),JSON_PRETTY_PRINT), PHP_EOL;
+    } finally {
+        flock($lock, LOCK_UN);
+        fclose($lock);
+    }
+    exit(0);
+}
+
 if ($command === 'run-ai-image-jobs') {
     $settings = Settings::load(CMS_ROOT);
     $pdo = ConnectionFactory::make($settings);
@@ -896,6 +925,7 @@ if ($command === 'run-ai-image-jobs') {
 
 echo "Available commands:" . PHP_EOL;
 echo "  run-extension-jobs <job-type> [limit]  Process only a registered extension job type" . PHP_EOL;
+echo "  run-scheduled-tasks [limit]  Run due registered Core and plugin scheduled tasks" . PHP_EOL;
 echo "  run-ai-image-jobs [limit]  Recover and process Core image tasks; never replay ambiguous provider calls" . PHP_EOL;
 echo "  migrate    Run core database migrations" . PHP_EOL;
 echo "  market:platform:init --yes --email=<owner> --name=<name>  Initialize this server as the official Market Platform and create the first Platform Owner" . PHP_EOL;
