@@ -61,7 +61,8 @@ Plugins can register scheduled tasks through
 `scheduler.register` or the legacy-compatible `cron.register` capability.
 Run due Core and plugin tasks from the site root with
 `php cli.php run-scheduled-tasks [limit]`; schedule this command once per minute
-in the server's cron service. The command boots enabled plugins to register
+in the server's cron service as the site's OS user, with only one runner per site.
+The command boots enabled plugins to register
 their handlers, then runs due tasks through `SchedulerService::runDue()`.
 
 ## Cache
