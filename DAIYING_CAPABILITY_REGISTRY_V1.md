@@ -19,7 +19,7 @@
 | `payment.provider` | Register payment provider | trusted/reviewed | High | No | `$context->registerPaymentProvider(...)` |
 | `mail.event` | Register mail template event | reviewed | Medium | No | `$context->registerMailEvent(...)` |
 | `ai.provider` | Register AI provider | trusted/reviewed | High | No | `$context->registerAiProvider(...)` |
-| `ai.tool` | Register AI tool | reviewed | High | No | `$context->registerAiTool(...)` |
+| `ai.tool` | Register an owned AI tool; send a source-stamped operator wake hint in the unpublished 1.2.99 candidate | reviewed | High | No | `$context->registerAiTool(...)`; `$context->signalAiOperator(...)` (candidate) |
 | `ai.agent` | Register AI agent | reviewed | High | No | `$context->registerAiAgent(...)` |
 | `ai.prompt` | Register AI prompt | `api` allowed | Medium | No | `$context->registerAiPrompt(...)` |
 | `ai.use` | Use site AI service | reviewed | Medium | No | `$context->ai()` |
