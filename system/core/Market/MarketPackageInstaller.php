@@ -119,7 +119,7 @@ final class MarketPackageInstaller
                 $verifiedMigrations = $runner->run($target, $pluginManifest, $trustedOfficial);
             }
 
-            $repo->recordSource($manifest->extensionId, $manifest->type, $manifest->source, $marketReference, $manifest->version, [
+            $sourceMetadata = [
                 'package_sha256' => $zipHash,
                 'review_status' => $manifest->reviewStatus,
                 'status' => $result['status'],
@@ -132,14 +132,20 @@ final class MarketPackageInstaller
                     'version' => $dependency->constraint,
                     'optional' => $dependency->optional,
                 ], $manifest->dependencies),
-            ]);
+            ];
 
-            if (is_dir($backup)) {
-                $this->removeDirectory($backup);
+            // Keep the old files until both completion records have committed.
+            $pdo->beginTransaction();
+            try {
+                $repo->recordSource($manifest->extensionId, $manifest->type, $manifest->source, $marketReference, $manifest->version, $sourceMetadata);
+                $repo->recordLog($marketReference, $manifest->extensionId, $manifest->type, 'Installed', $result);
+                $pdo->commit();
+            } catch (\Throwable $exception) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                throw $exception;
             }
-            $repo->recordLog($marketReference, $manifest->extensionId, $manifest->type, 'Installed', $result);
-
-            return $result;
         } catch (\Throwable $exception) {
             if (is_dir($staging)) {
                 $this->removeDirectory($staging);
@@ -159,6 +165,17 @@ final class MarketPackageInstaller
             $repo->recordLog($marketReference, $manifest->extensionId, $manifest->type, 'Failed', $plan + ['error' => $exception->getMessage()]);
             throw $exception;
         }
+
+        if (is_dir($backup)) {
+            try {
+                $this->removeDirectory($backup);
+            } catch (\Throwable) {
+                // A cleanup error must not undo an installation already recorded as successful.
+                error_log('Unable to remove the completed market installation backup for ' . $manifest->extensionId);
+            }
+        }
+
+        return $result;
     }
 
     private function isTrustedOfficialPackage(MarketPackageManifest $manifest, PDO $pdo, ?OfficialExtensionTrustGrant $grant): bool
