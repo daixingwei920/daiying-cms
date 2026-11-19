@@ -4,6 +4,11 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Core 1.2.101 market rollback release preparation (2026-11-19)
+
+- Owner authorizes review and merge of the market installer rollback repair, version preparation, exact-main Release Gate, official server signing and isolated signed upgrade/rollback validation. This authorization stops before publication or deployment.
+- Preserve the published `v1.2.100` tag and artifacts. The repair retains the previous extension files until the market source and success log commit together. Core 1.2.80 and PHP 8.3 remain the minimums, with no migration or public API change.
+
 ## Published Core 1.2.100 (2026-11-16 UTC)
 
 - PR 105 is published on GitHub and official stable at immutable `v1.2.100` / `ff8ddf1a903835bb2bbede1b78cf70960e4e1d17`. It adds `run-scheduled-tasks` for existing registered Core/plugin tasks with a site-level nonblocking process lock; no migration or public plugin API change.

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.101 (release preparation)
+
+- Keep the previous extension files until the market source record and success log commit together. If either database write fails, restore the previous files and plugin registration and discard the attempted source record.
+- Preserve the existing package verification, public APIs, schema and Core 1.2.80/PHP 8.3 minimums.
+
 ## 1.2.100 (release preparation)
 
 - Add `run-scheduled-tasks` to dispatch existing registered Core and plugin tasks from minute cron. Boot enabled plugin handlers and retain the existing scheduler's due-task and owner checks.
