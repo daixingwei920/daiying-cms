@@ -17,6 +17,7 @@ Current stable release: **Core 1.2.100**, published **2026-11-16**. Minimum PHP:
 - Official Website: <https://www.daiyingcms.com>
 - Chinese documentation: <https://www.daiyingcms.com/docs>
 - Gitee source mirror: <https://gitee.com/daiyingcms/daiying-cms>
+- Core 1.2.100 installer mirror: [Gitee release and attachments](https://gitee.com/daiyingcms/daiying-cms/releases/tag/v1.2.100)
 - Documentation: [docs/README.md](docs/README.md)
 - Download: <https://github.com/daixingwei920/daiying-cms/releases/latest>
 - Releases: <https://github.com/daixingwei920/daiying-cms/releases>
@@ -58,7 +59,7 @@ Current stable release artifacts:
 - [SHA-256 sidecar](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.sha256) · [Signature metadata](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.signature.json)
 - Installer SHA-256: `000eda96213415ae3c9f803ccbd8f9e6bc2e76c03f224ba16f5572ab5e0934f0`.
 
-The Gitee mirror contains `main` and published stable-release tags. Release attachments remain on GitHub; source archives from either repository are for source review and development. Existing sites should back up and use the native `/admin/update` flow instead of installing an update ZIP as a new site.
+The Gitee mirror contains `main` and published stable-release tags. The original 1.2.100 installer, checksum and signature sidecars are also available unchanged from the [Gitee release](https://gitee.com/daiyingcms/daiying-cms/releases/tag/v1.2.100); public downloads were compared byte-for-byte with the GitHub originals. Other versions and attachments follow the official GitHub Release. Source archives from either repository are for source review and development. Existing sites should back up and use the native `/admin/update` flow instead of installing an update ZIP as a new site.
 
 ### 3. Install
 
