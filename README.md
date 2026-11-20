@@ -1,176 +1,179 @@
 # 戴影CMS（Daiying CMS）
 
-[简体中文](README.zh-CN.md)
+[English](README.en.md) · [中文安装教程](docs/installation.zh-CN.md) · [正式版下载](https://github.com/daixingwei920/daiying-cms/releases/latest)
 
-**Official website: <https://www.daiyingcms.com/>**
+**用自己的服务器，搭建和管理内容网站。**
 
-Daiying CMS (戴影CMS) is a self-hosted PHP content management system for personal publishers, developers, and teams building content websites. Publish articles and pages, manage media, customize the design with themes, and extend the site with plugins.
+戴影CMS（Daiying CMS）是一款部署在自有服务器上的 PHP 内容管理系统，面向个人站长、开发者和需要自主维护网站的团队。你可以发布文章和页面、管理图片与文件，选择主题调整外观，通过插件扩展网站功能。
 
-“戴影CMS”, “戴影 CMS”, and “Daiying CMS” refer to this project. Core also provides signed online updates, global AI settings, Passkey-capable admin login, and recovery tooling. Commerce foundations and in-development external distribution workflows have their own status and configuration requirements below.
+“戴影CMS”“戴影 CMS”和“Daiying CMS”均指本项目。交易基础能力及开发中的外部渠道分发能力，按下文各自的状态与配置要求使用。
 
-Published baseline: **1.2.90 stable**. Download the current official package from GitHub Releases; this documentation update does not rebuild the frozen release archives.
+**当前正式版：Core 1.2.100**，发布于 **2026-11-16**。最低 PHP **8.3.0**，该正式版已测试 PHP 8.3 / 8.5。版本与安装包以 [GitHub Releases](https://github.com/daixingwei920/daiying-cms/releases/latest) 为准；`main` 可能包含尚未发布的维护代码。
 
-![Daiying CMS admin dashboard](.github/assets/screenshots/admin-dashboard.png)
+![Daiying CMS 后台总览](.github/assets/screenshots/admin-dashboard.png)
 
-## Project Links
+## 项目入口
 
-- Official Website: <https://www.daiyingcms.com>
-- Documentation: [docs/README.md](docs/README.md)
-- Download: <https://github.com/daixingwei920/daiying-cms/releases/latest>
-- Releases: <https://github.com/daixingwei920/daiying-cms/releases>
-- Plugins: [docs/plugins.md](docs/plugins.md)
-- Plugin SDK V1: [docs/plugin-sdk/README.md](docs/plugin-sdk/README.md)
-- Themes: [docs/themes.md](docs/themes.md)
-- Global AI: [docs/ai.md](docs/ai.md)
+- [官方网站](https://www.daiyingcms.com/)：项目介绍、中文教程与官方动态。
+- [中文安装教程](docs/installation.zh-CN.md)：从环境准备、下载安装到后台登录和检查。
+- [文档导航](docs/README.md) · [官网中文文档中心](https://www.daiyingcms.com/docs)。
+- [GitHub 主仓库](https://github.com/daixingwei920/daiying-cms) · [Gitee 国内源码镜像](https://gitee.com/daiyingcms/daiying-cms)。
+- [正式版与下载附件](https://github.com/daixingwei920/daiying-cms/releases/latest) · [全部版本记录](https://github.com/daixingwei920/daiying-cms/releases)。
+- [问题反馈](https://github.com/daixingwei920/daiying-cms/issues)。
+- 插件文档：[docs/plugins.md](docs/plugins.md)
+- 主题文档：[docs/themes.md](docs/themes.md)
+- 全局 AI：[docs/ai.md](docs/ai.md)
 
-## Product Model
+## 你可以用它做什么
 
-Daiying CMS is organized as a Core platform with optional product layers:
+- **发布内容**：管理文章、页面、分类、标签与内容区块，搭建个人站或团队内容网站。
+- **整理媒体**：统一管理图片、附件及音视频资源，并在内容中引用。
+- **调整外观**：安装主题，按主题提供的设置调整页面展示。
+- **扩展功能**：通过插件和官方应用市场按需安装扩展，开发者可使用主题规范与 Plugin SDK。
+- **辅助写作**：配置站点 AI Provider 后使用相应写作能力；需要自行配置服务与凭据。
+- **维护网站**：通过官方更新流程校验包哈希和签名，结合恢复点进行升级与故障恢复。
 
-1. **Daiying CMS Core**: installer, admin backend, routing, content, media, themes, plugin lifecycle, recovery, and signed updates.
-2. **Content / Media**: articles, pages, structured blocks, taxonomy, uploads, media rendering, and external media/storage integrations.
-3. **Commerce**: products, pricing, orders, payments, paid access, card-code delivery, commercial license storage, and optional AI-assisted product-description drafting.
-4. **Distribution**: **In Development**. A distribution layer being developed for sending Daiying CMS content and commerce data to supported external channels.
-5. **Plugins / Themes**: packaged extension points and marketplace ecosystem for official and third-party capabilities.
-6. **Update System**: signed Core update flow with restore points, integrity checks, health checks, and rollback paths.
+Commerce 为基础能力 / Beta，外部渠道 Distribution 仍在开发中，详见下文；不同插件、主题和外部服务有各自的配置及授权要求。
 
-## Quick Start
+## 快速开始
 
-### 1. Check Requirements
+### 1. 环境要求
 
-- PHP 8.3.0 or newer.
-- PHP extensions: `pdo`, `json`, `openssl`, `fileinfo`, `zip`.
-- SQLite for the simplest install path, or MySQL/MariaDB with `utf8mb4`.
-- A web server that serves `public/index.php` as the document-root entry point.
-- Writable runtime directories under `storage/` and `content/uploads/`.
+- PHP 8.3.0 或更高版本。
+- PHP 扩展：`pdo`、`json`、`openssl`、`fileinfo`、`zip`。
+- 数据库选 SQLite 时启用 `pdo_sqlite`；选 MySQL/MariaDB 时启用 `pdo_mysql`，数据库使用 `utf8mb4`。
+- Web 服务器的**文档根目录指向解压目录中的 `public/`**，入口为 `public/index.php`。
+- 安装时 `config/`、`storage/` 及上传目录 `content/uploads/` 需要站点 PHP 运行用户具备相应写权限。
 
-### 2. Download
+### 2. 下载
 
-Download the latest stable package from [GitHub Releases](https://github.com/daixingwei920/daiying-cms/releases/latest).
+新站请选择**完整安装包**；已有站点先备份，再通过后台 `/admin/update` 按提示升级，参见[更新文档](docs/update-system.md)。
 
-Release artifacts for this source:
+| Core 1.2.100 正式发布附件 | 入口 |
+| --- | --- |
+| 完整安装包 | [daiying-cms-1.2.100-stable.zip](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip) |
+| SHA-256 校验文件 | [下载 .sha256](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.sha256) |
+| 签名信息 | [下载 .signature.json](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.signature.json) |
+| 版本说明 | [v1.2.100 Release](https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.100) |
 
-- Tag: `v1.2.90`
-- Package: `daiying-cms-1.2.90-stable.zip`
-- SHA-256: see the `.sha256` sidecar attached to the release.
+安装包 SHA-256：
 
-### 3. Install
+```text
+000eda96213415ae3c9f803ccbd8f9e6bc2e76c03f224ba16f5572ab5e0934f0
+```
 
-1. Upload and extract the ZIP on the server.
-2. Point the web server document root to `public`.
-3. Ensure `storage/` and `content/uploads/` are writable by the PHP process.
-4. Open `/install`.
-5. Choose SQLite or MySQL/MariaDB and test the database connection.
-6. Create the site identity and first administrator account.
-7. Log in at `/admin/login`.
+Gitee 提供 `main` 和正式版标签的单向源码镜像，方便国内阅读文档、浏览和克隆代码；正式安装包附件仍从上述官方 Release 获取。仓库的“克隆/下载”和自动生成的源码 ZIP 用于阅读与开发，不代替正式完整安装包。
 
-See [Installation](docs/installation.md) for the full checklist.
+### 3. 安装
 
-## Major Capabilities
+1. 下载完整安装包和校验文件，按[中文教程](docs/installation.zh-CN.md#下载与校验)核对 SHA-256。
+2. 上传并解压安装包，将站点文档根目录设为解压目录中的 `public/`，为域名配置 HTTPS 和对应的 PHP 8.3+ 运行环境。
+3. 为站点 PHP 用户设置必要的配置、运行和上传目录写权限。
+4. 访问 `https://你的域名/install`，先完成安装器环境检查。
+5. 选择 SQLite 或 MySQL/MariaDB，填写配置并点击数据库连接测试。
+6. 填写站点名称、公开站点 URL 和管理员信息，提交安装。
+7. 访问 `/admin/login` 登录后台，再访问 `/health` 核对安装状态和运行版本。
+
+详细步骤、常见问题及 1.2.100 定时任务配置见：[中文安装教程](docs/installation.zh-CN.md)；[English installation guide](docs/installation.md)。
+
+## 重点能力
 
 ### Distribution
 
-**Status: In Development**
+**状态：开发中**
 
-Distribution is a layer being developed for sending Daiying CMS content and commerce data to supported external channels.
+Distribution 是 Daiying CMS 当前正在建设的差异化方向，但它不是插件商城、商业授权、授权码交付、Core 更新、Capability Pack、Site Vault 或 Shadow Upgrade。
 
-The intended workflow is:
+Distribution 的目标是让站长或卖家只在 Daiying CMS 内完成一次内容或商品资料填写，然后由系统根据已接入的外部渠道进行处理、适配和分发。
+
+概念流程：
 
 ```text
-Content / product data
--> media assets
+内容 / 商品资料
+-> 图片 / 视频 / 音频等媒体资源
 -> Distribution
--> choose or match external channels
--> AI or rule-based channel adaptation
+-> 选择或匹配外部渠道
+-> AI 或规则进行渠道适配
 -> Provider / Connector
--> delivery
--> success, failure, channel error, or AI error status
+-> 分发
+-> 返回成功、失败、渠道异常或 AI 异常状态
 ```
 
-Distribution is separate from the plugin marketplace, commercial plugin licensing, authorization-code delivery, Core updates, Capability Packs, Site Vault, and Shadow Upgrade.
-
-The current repository contains an alpha Commerce Distribution implementation under `content/plugins/official.commerce`. It is not a stable Core module, and the final Provider/Connector specification should continue to follow the merged implementation as it matures.
+当前仓库已经在 `content/plugins/official.commerce` 中包含 alpha 阶段的 Commerce Distribution 实现。它仍不是稳定的 Core 模块，最终 Provider / Connector 规范应继续以合并后的真实实现为准。
 
 ### Commerce
 
-**Status: Foundation / Beta**
+**状态：基础能力 / Beta**
 
-Daiying CMS includes payment provider settings, payment attempts, paid content/download access, and automatic card-code delivery. The bundled Commerce plugin provides product and order foundations, and its product editor can draft a product description from administrator-provided product fields through the Core site AI service. The first AI product-description workflow does not crawl external product URLs; a URL can be kept as administrator-provided context for later workflows.
+Core 已包含支付 Provider 设置、支付记录、付费内容/下载授权和自动发卡。当前仓库内置的 Commerce 插件提供商品和订单基础能力，商品编辑页可以通过 Core 站点 AI，根据管理员已填写的商品字段生成商品介绍草稿。第一版不会抓取外部商品链接；商品链接只作为管理员提供的上下文保留给后续流程。
 
-See [Commerce](docs/commerce.md).
+见：[Commerce 文档](docs/commerce.md)。
 
-### Plugin Architecture
+### 插件生态
 
-Plugins are installed from local ZIP packages or official market packages when the Market API is configured. The plugin lifecycle includes manifest validation, safe extraction, static scanning, dependency checks, atomic install, data-retention policy, migrations, reinstall recovery, and capability boundaries.
+插件可通过本地 ZIP 或官方市场安装。生命周期覆盖 manifest 校验、安全解压、静态扫描、依赖检查、原子安装、数据保留策略、迁移、重装恢复和能力边界。
 
-Bundled plugins currently visible in this repository include:
+当前仓库可确认的插件包括：
 
 - `official.commerce`
 - `official.friend-links`
 - `local.storage.baidu`
 - `faq_block`
 
-See [Plugins](docs/plugins.md).
+见：[插件文档](docs/plugins.md)。
 
-### Themes
+### 主题生态
 
-Daiying CMS themes are separate packages under `content/themes`, each with a `theme.json` manifest, templates, assets, compatibility constraints, supported content types, and optional settings schema.
+主题独立放在 `content/themes`，通过 `theme.json` 声明主题 ID、版本、兼容 Core、支持内容类型、模板、资源和设置项。
 
-Bundled themes currently visible in this repository include:
+当前仓库可确认的主题包括：
 
 - `default`
 - `daiying_media`
 - `safe`
 
-See [Themes](docs/themes.md).
+见：[主题文档](docs/themes.md)。
 
-`daiying_novel`, `official.novel-collector`, `daiying-video` and `official.video-collector` are **RETIRED** as of 2026-10-09. They are not maintained, required by Core release acceptance, or included in new installer packages. Historical source, migrations, orders and customer licenses are retained. See [retirement policy](docs/retired-products.md).
+历史 `daiying_novel`、`official.novel-collector`、`daiying-video` 和 `official.video-collector` 已于 2026-10-09 退役，不作为当前维护或新装提供的产品宣传。历史源码与已安装用户数据保留，见[退役说明](docs/retired-products.md)。
 
-### Media And External Storage
+### 全局 AI Provider 设置
 
-Core media support includes MIME validation, randomized storage keys, deduplication, references, safe downloads, and HTML5 audio/video rendering. The repository also contains a Baidu storage plugin for OAuth-based Baidu Netdisk media access.
+Core 提供可选的站点级 AI Provider 配置和统一 AI Service API，供 CMS 功能和插件复用。DeepSeek、OpenAI、Grok / xAI、腾讯混元和自定义兼容服务共用 OpenAI-compatible Adapter；Gemini 使用原生 Gemini Adapter。内容编辑器可以使用这个服务进行“AI 帮我写”草稿生成，官方插件也可以默认继承站点 AI 设置，不要求管理员重复填写 API Key。AI 层只负责配置、Provider 调用和安全错误处理；文章摘要、SEO、商品描述、渠道适配等具体用途应由插件或业务模块决定。
 
-### Global AI Provider Settings
+### 后台安全
 
-Core provides optional site-level AI Provider configuration and a reusable AI service API for CMS features and plugins. DeepSeek, OpenAI, Grok / xAI, Tencent Hunyuan, and custom compatible endpoints share one OpenAI-compatible adapter; Gemini uses a native Gemini adapter. The content editor can use this service for "AI write with me" drafting, and bundled plugins can inherit the same site AI settings instead of asking administrators to repeat API Keys. The AI layer handles configuration, Provider calls, and safe error handling only; business uses such as summaries, SEO, product text, or distribution adaptation belong to plugins or feature modules.
+管理员可以保留密码登录，同时为已注册 Passkey 的账号使用无密码后台登录。Passkey 凭据限定在管理员账号和当前站点来源内，登录页继续使用 Core 现有认证与 CSRF 边界。
 
-### Admin Security
+见：[全局 AI](docs/ai.md)。
 
-Administrators can keep password login while also using registered Passkeys for passwordless admin login. Passkey credentials stay scoped to the administrator account and the site origin; the login page uses the existing Core authentication and CSRF boundaries.
+## 文档
 
-See [Global AI](docs/ai.md).
-
-## Documentation
-
-- [Documentation Index](docs/README.md)
-- [Installation](docs/installation.md)
-- [Developers](docs/developers.md)
-- [Plugins](docs/plugins.md)
-- [Plugin SDK V1](docs/plugin-sdk/README.md)
-- [Legacy Plugin API v1](PLUGIN_API_V1.md)
-- [Themes](docs/themes.md)
-- [Theme Development Specification V1](DAIYING_THEME_DEVELOPMENT_SPEC_V1.md)
-- [Theme API v1](THEME_API_V1.md)
-- [Daiying Theme Framework](theme-framework/README.md)
+- [文档导航](docs/README.md)
+- [中文安装部署](docs/installation.zh-CN.md)
+- [开发者入口](docs/developers.md)
+- [插件](docs/plugins.md)
+- [插件 API v1](PLUGIN_API_V1.md)
+- [主题](docs/themes.md)
+- [主题 API v1](THEME_API_V1.md)
 - [Storage Provider API v1](STORAGE_PROVIDER_API_V1.md)
 - [REST API v1](REST_API_V1.md)
-- [Global AI](docs/ai.md)
+- [全局 AI](docs/ai.md)
 - [Commerce](docs/commerce.md)
 - [Distribution](docs/distribution.md)
 - [Update System](docs/update-system.md)
 - [Foundation Freeze Checklist](CORE_FOUNDATION_FREEZE_CHECKLIST.md)
-- [Security Policy](SECURITY.md)
-- [Contributing](CONTRIBUTING.md)
+- [安全策略](SECURITY.md)
+- [贡献指南](CONTRIBUTING.md)
 
-## Release And Update Notes
+## 更新
 
-Installed sites use the official update server configured as:
+已安装站点使用的官方更新服务器：
 
 ```text
 https://updates.daiyingcms.com
 ```
 
-Core update packages are signed and verified by the update flow. Production sites should run the readiness checker before public launch:
+生产环境上线前建议运行：
 
 ```sh
 php scripts/validate_production_readiness.php
@@ -178,27 +181,23 @@ php scripts/validate_production_readiness.php --json
 php scripts/validate_production_readiness.php --strict
 ```
 
-Release history is summarized in [CHANGELOG.md](CHANGELOG.md).
+版本历史见：[CHANGELOG.md](CHANGELOG.md)。
 
-## Screenshots
+## 截图
 
-The screenshots below come from the current live Daiying CMS admin UI. Sensitive fields, private file lists, and order details were avoided, cropped, or redacted.
+以下为已保存的后台功能截图示例，界面样式以当前安装版本为准。截图采集时已避开、裁剪或遮罩敏感字段、私人文件列表和订单明细。
 
-| Area | Screenshot |
+| 区域 | 截图 |
 | --- | --- |
-| Content editor | ![Content editor](.github/assets/screenshots/content-editor.png) |
-| Media library | ![Media library](.github/assets/screenshots/media-library.png) |
-| Plugin marketplace | ![Plugin marketplace](.github/assets/screenshots/marketplace.png) |
-| Card delivery commerce | ![Card delivery commerce](.github/assets/screenshots/commerce.png) |
-| Theme marketplace | ![Theme marketplace](.github/assets/screenshots/theme-marketplace.png) |
-| Online update | ![Online update](.github/assets/screenshots/online-update.png) |
+| 内容编辑器 | ![内容编辑器](.github/assets/screenshots/content-editor.png) |
+| 媒体库 | ![媒体库](.github/assets/screenshots/media-library.png) |
+| 插件市场 | ![插件市场](.github/assets/screenshots/marketplace.png) |
+| 发卡商业能力 | ![发卡商业能力](.github/assets/screenshots/commerce.png) |
+| 主题市场 | ![主题市场](.github/assets/screenshots/theme-marketplace.png) |
+| 在线更新 | ![在线更新](.github/assets/screenshots/online-update.png) |
 
-Additional screenshot capture notes are documented in [DAIYING_CMS_SCREENSHOT_REPORT.md](DAIYING_CMS_SCREENSHOT_REPORT.md).
+截图采集记录见：[DAIYING_CMS_SCREENSHOT_REPORT.md](DAIYING_CMS_SCREENSHOT_REPORT.md)。
 
-## Security
+## 授权
 
-Do not publish configuration secrets, database dumps, OAuth secrets, payment keys, update signing private keys, sessions, or logs. See [SECURITY.md](SECURITY.md) for reporting and handling guidance.
-
-## License
-
-No project license file is currently present in this repository. Do not assume reuse rights until the project owner adds an explicit `LICENSE`.
+当前仓库没有 `LICENSE` 文件。项目所有者明确授权方式前，请不要假设第三方可自由复用、分发或商用。

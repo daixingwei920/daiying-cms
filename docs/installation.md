@@ -1,5 +1,7 @@
 # Installation
 
+[简体中文安装教程](installation.zh-CN.md)
+
 This page summarizes the installer behavior confirmed from the current Daiying CMS repository.
 
 ## Requirements
@@ -22,7 +24,7 @@ This page summarizes the installer behavior confirmed from the current Daiying C
 
 ## Install Flow
 
-1. Download the latest stable ZIP from GitHub Releases.
+1. Download the complete installer ZIP and its checksum from [GitHub Releases](https://github.com/daixingwei920/daiying-cms/releases/latest). Repository source archives are not the official installer.
 2. Upload and extract it on the server.
 3. Point the web server document root to `public`.
 4. Open `/install`.
