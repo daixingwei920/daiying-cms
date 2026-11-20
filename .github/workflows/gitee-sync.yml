@@ -1,0 +1,39 @@
+name: Sync main and stable tags to Gitee
+
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published, released]
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gitee-main-stable-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: >-
+      github.repository == 'daixingwei920/daiying-cms' &&
+      (github.event_name != 'release' ||
+       (github.event.release.draft == false && github.event.release.prerelease == false))
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out the current main sync implementation
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Verify sync policy against disposable Git repositories
+        run: python3 -m unittest discover -s .github/tests -p 'test_sync_gitee.py' -v
+      - name: Push allowed refs and verify SHA
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITEE_SYNC_TOKEN: ${{ secrets.GITEE_SYNC_TOKEN }}
+        run: python3 .github/scripts/sync_gitee.py
