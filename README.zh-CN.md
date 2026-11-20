@@ -1,37 +1,39 @@
 # 戴影CMS（Daiying CMS）
 
-[English](README.md)
+[English](README.en.md) · [中文安装教程](docs/installation.zh-CN.md) · [正式版下载](https://github.com/daixingwei920/daiying-cms/releases/latest)
 
-**官方网站：<https://www.daiyingcms.com/>**
+**用自己的服务器，搭建和管理内容网站。**
 
 戴影CMS（Daiying CMS）是一款部署在自有服务器上的 PHP 内容管理系统，面向个人站长、开发者和需要自主维护网站的团队。你可以发布文章和页面、管理图片与文件，选择主题调整外观，通过插件扩展网站功能。
 
 “戴影CMS”“戴影 CMS”和“Daiying CMS”均指本项目。交易基础能力及开发中的外部渠道分发能力，按下文各自的状态与配置要求使用。
 
-已发布基线：**1.2.90 stable**。正式安装包以 GitHub Releases 为准；本次文档修改不重新构建或替换已冻结的发布包。
+**当前正式版：Core 1.2.100**，发布于 **2026-11-16**。最低 PHP **8.3.0**，该正式版已测试 PHP 8.3 / 8.5。版本与安装包以 [GitHub Releases](https://github.com/daixingwei920/daiying-cms/releases/latest) 为准；`main` 可能包含尚未发布的维护代码。
 
 ![Daiying CMS 后台总览](.github/assets/screenshots/admin-dashboard.png)
 
 ## 项目入口
 
-- 官网：<https://www.daiyingcms.com>
-- 文档导航：[docs/README.md](docs/README.md)
-- 下载：<https://github.com/daixingwei920/daiying-cms/releases/latest>
-- Releases：<https://github.com/daixingwei920/daiying-cms/releases>
+- [官方网站](https://www.daiyingcms.com/)：项目介绍、中文教程与官方动态。
+- [中文安装教程](docs/installation.zh-CN.md)：从环境准备、下载安装到后台登录和检查。
+- [文档导航](docs/README.md) · [官网中文文档中心](https://www.daiyingcms.com/docs)。
+- [GitHub 主仓库](https://github.com/daixingwei920/daiying-cms) · [Gitee 国内源码镜像](https://gitee.com/daiyingcms/daiying-cms)。
+- [正式版与下载附件](https://github.com/daixingwei920/daiying-cms/releases/latest) · [全部版本记录](https://github.com/daixingwei920/daiying-cms/releases)。
+- [问题反馈](https://github.com/daixingwei920/daiying-cms/issues)。
 - 插件文档：[docs/plugins.md](docs/plugins.md)
 - 主题文档：[docs/themes.md](docs/themes.md)
 - 全局 AI：[docs/ai.md](docs/ai.md)
 
-## 产品层级
+## 你可以用它做什么
 
-Daiying CMS 不是单一功能脚本，而是按产品层级组织：
+- **发布内容**：管理文章、页面、分类、标签与内容区块，搭建个人站或团队内容网站。
+- **整理媒体**：统一管理图片、附件及音视频资源，并在内容中引用。
+- **调整外观**：安装主题，按主题提供的设置调整页面展示。
+- **扩展功能**：通过插件和官方应用市场按需安装扩展，开发者可使用主题规范与 Plugin SDK。
+- **辅助写作**：配置站点 AI Provider 后使用相应写作能力；需要自行配置服务与凭据。
+- **维护网站**：通过官方更新流程校验包哈希和签名，结合恢复点进行升级与故障恢复。
 
-1. **Daiying CMS Core**：安装器、后台、路由、内容、媒体、主题、插件生命周期、恢复诊断、签名更新。
-2. **Content / Media**：文章、页面、结构化区块、分类、媒体库、上传、外部媒体与存储接入。
-3. **Commerce**：商品、价格、订单、支付、付费访问、自动发卡、商业产品和授权存储，以及可选的 AI 商品介绍草稿。
-4. **Distribution**：**开发中**。正在开发的外部渠道分发层，用于将 Daiying CMS 的内容数据和 Commerce 数据分发到已支持的外部渠道。
-5. **Plugins / Themes**：官方和第三方插件、主题扩展生态。
-6. **Update System**：签名 Core 更新、恢复点、完整性检查、健康检查和回滚路径。
+Commerce 为基础能力 / Beta，外部渠道 Distribution 仍在开发中，详见下文；不同插件、主题和外部服务有各自的配置及授权要求。
 
 ## 快速开始
 
@@ -39,31 +41,40 @@ Daiying CMS 不是单一功能脚本，而是按产品层级组织：
 
 - PHP 8.3.0 或更高版本。
 - PHP 扩展：`pdo`、`json`、`openssl`、`fileinfo`、`zip`。
-- SQLite，或 MySQL/MariaDB `utf8mb4`。
-- Web 服务器应将站点入口指向 `public/index.php`。
-- `storage/` 和 `content/uploads/` 需要 PHP 进程可写。
+- 数据库选 SQLite 时启用 `pdo_sqlite`；选 MySQL/MariaDB 时启用 `pdo_mysql`，数据库使用 `utf8mb4`。
+- Web 服务器的**文档根目录指向解压目录中的 `public/`**，入口为 `public/index.php`。
+- 安装时 `config/`、`storage/` 及上传目录 `content/uploads/` 需要站点 PHP 运行用户具备相应写权限。
 
 ### 2. 下载
 
-从 [GitHub Releases](https://github.com/daixingwei920/daiying-cms/releases/latest) 下载最新稳定安装包。
+新站请选择**完整安装包**；已有站点先备份，再通过后台 `/admin/update` 按提示升级，参见[更新文档](docs/update-system.md)。
 
-当前检查到的发行信息：
+| Core 1.2.100 正式发布附件 | 入口 |
+| --- | --- |
+| 完整安装包 | [daiying-cms-1.2.100-stable.zip](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip) |
+| SHA-256 校验文件 | [下载 .sha256](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.sha256) |
+| 签名信息 | [下载 .signature.json](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.signature.json) |
+| 版本说明 | [v1.2.100 Release](https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.100) |
 
-- Tag：`v1.2.90`
-- 安装包：`daiying-cms-1.2.90-stable.zip`
-- SHA-256：见 Release 附带的 `.sha256` 校验文件。
+安装包 SHA-256：
+
+```text
+000eda96213415ae3c9f803ccbd8f9e6bc2e76c03f224ba16f5572ab5e0934f0
+```
+
+Gitee 提供 `main` 和正式版标签的单向源码镜像，方便国内阅读文档、浏览和克隆代码；正式安装包附件仍从上述官方 Release 获取。仓库的“克隆/下载”和自动生成的源码 ZIP 用于阅读与开发，不代替正式完整安装包。
 
 ### 3. 安装
 
-1. 上传并解压安装包。
-2. 将 Web 服务器站点目录指向 `public`。
-3. 确保 `storage/` 和 `content/uploads/` 可写。
-4. 打开 `/install`。
-5. 选择 SQLite 或 MySQL/MariaDB，并测试数据库连接。
-6. 填写站点身份和第一个管理员账号。
-7. 通过 `/admin/login` 登录后台。
+1. 下载完整安装包和校验文件，按[中文教程](docs/installation.zh-CN.md#下载与校验)核对 SHA-256。
+2. 上传并解压安装包，将站点文档根目录设为解压目录中的 `public/`，为域名配置 HTTPS 和对应的 PHP 8.3+ 运行环境。
+3. 为站点 PHP 用户设置必要的配置、运行和上传目录写权限。
+4. 访问 `https://你的域名/install`，先完成安装器环境检查。
+5. 选择 SQLite 或 MySQL/MariaDB，填写配置并点击数据库连接测试。
+6. 填写站点名称、公开站点 URL 和管理员信息，提交安装。
+7. 访问 `/admin/login` 登录后台，再访问 `/health` 核对安装状态和运行版本。
 
-详细检查项见：[安装文档](docs/installation.md)。
+详细步骤、常见问题及 1.2.100 定时任务配置见：[中文安装教程](docs/installation.zh-CN.md)；[English installation guide](docs/installation.md)。
 
 ## 重点能力
 
@@ -106,8 +117,6 @@ Core 已包含支付 Provider 设置、支付记录、付费内容/下载授权�
 
 - `official.commerce`
 - `official.friend-links`
-- `official.novel-collector`
-- `official.video-collector`
 - `local.storage.baidu`
 - `faq_block`
 
@@ -121,11 +130,11 @@ Core 已包含支付 Provider 设置、支付记录、付费内容/下载授权�
 
 - `default`
 - `daiying_media`
-- `daiying_novel`
-- `daiying-video`
 - `safe`
 
 见：[主题文档](docs/themes.md)。
+
+历史 `daiying_novel`、`official.novel-collector`、`daiying-video` 和 `official.video-collector` 已于 2026-10-09 退役，不作为当前维护或新装提供的产品宣传。历史源码与已安装用户数据保留，见[退役说明](docs/retired-products.md)。
 
 ### 全局 AI Provider 设置
 
@@ -140,7 +149,7 @@ Core 提供可选的站点级 AI Provider 配置和统一 AI Service API，供 C
 ## 文档
 
 - [文档导航](docs/README.md)
-- [安装部署](docs/installation.md)
+- [中文安装部署](docs/installation.zh-CN.md)
 - [开发者入口](docs/developers.md)
 - [插件](docs/plugins.md)
 - [插件 API v1](PLUGIN_API_V1.md)
@@ -176,7 +185,7 @@ php scripts/validate_production_readiness.php --strict
 
 ## 截图
 
-以下截图均来自当前真实 Daiying CMS 后台。截图采集时已避开、裁剪或遮罩敏感字段、私人文件列表和订单明细。
+以下为已保存的后台功能截图示例，界面样式以当前安装版本为准。截图采集时已避开、裁剪或遮罩敏感字段、私人文件列表和订单明细。
 
 | 区域 | 截图 |
 | --- | --- |

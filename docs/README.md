@@ -6,6 +6,7 @@ This index collects the public-facing documentation currently available in the G
 
 ## Getting Started
 
+- [中文安装教程：下载、环境、后台登录与定时任务](installation.zh-CN.md)
 - [Installation](installation.md)
 - [Update System](update-system.md)
 - [Security Policy](../SECURITY.md)
