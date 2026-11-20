@@ -1,6 +1,6 @@
 # 戴影CMS（Daiying CMS）
 
-[English](README.en.md) · [中文安装教程](docs/installation.zh-CN.md) · [正式版下载](https://github.com/daixingwei920/daiying-cms/releases/latest)
+[English](README.en.md) · [中文安装教程](docs/installation.zh-CN.md) · [1.2.100 国内下载](https://gitee.com/daiyingcms/daiying-cms/releases/tag/v1.2.100)
 
 **用自己的服务器，搭建和管理内容网站。**
 
@@ -18,7 +18,7 @@
 - [中文安装教程](docs/installation.zh-CN.md)：从环境准备、下载安装到后台登录和检查。
 - [文档导航](docs/README.md) · [官网中文文档中心](https://www.daiyingcms.com/docs)。
 - [GitHub 主仓库](https://github.com/daixingwei920/daiying-cms) · [Gitee 国内源码镜像](https://gitee.com/daiyingcms/daiying-cms)。
-- [正式版与下载附件](https://github.com/daixingwei920/daiying-cms/releases/latest) · [全部版本记录](https://github.com/daixingwei920/daiying-cms/releases)。
+- [1.2.100 国内发行版与附件](https://gitee.com/daiyingcms/daiying-cms/releases/tag/v1.2.100) · [GitHub 正式版](https://github.com/daixingwei920/daiying-cms/releases/latest) · [全部版本记录](https://github.com/daixingwei920/daiying-cms/releases)。
 - [问题反馈](https://github.com/daixingwei920/daiying-cms/issues)。
 - 插件文档：[docs/plugins.md](docs/plugins.md)
 - 主题文档：[docs/themes.md](docs/themes.md)
@@ -51,10 +51,10 @@ Commerce 为基础能力 / Beta，外部渠道 Distribution 仍在开发中，�
 
 | Core 1.2.100 正式发布附件 | 入口 |
 | --- | --- |
-| 完整安装包 | [daiying-cms-1.2.100-stable.zip](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip) |
-| SHA-256 校验文件 | [下载 .sha256](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.sha256) |
-| 签名信息 | [下载 .signature.json](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.signature.json) |
-| 版本说明 | [v1.2.100 Release](https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.100) |
+| 完整安装包 | [Gitee 下载 ZIP](https://gitee.com/daiyingcms/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip) · [GitHub 原文件](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip) |
+| SHA-256 校验文件 | [Gitee 下载 .sha256](https://gitee.com/daiyingcms/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.sha256) · [GitHub 原文件](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.sha256) |
+| 签名信息 | [Gitee 下载 .signature.json](https://gitee.com/daiyingcms/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.signature.json) · [GitHub 原文件](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.signature.json) |
+| 版本说明 | [Gitee 国内发行版](https://gitee.com/daiyingcms/daiying-cms/releases/tag/v1.2.100) · [GitHub 原始 Release](https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.100) |
 
 安装包 SHA-256：
 
@@ -62,7 +62,7 @@ Commerce 为基础能力 / Beta，外部渠道 Distribution 仍在开发中，�
 000eda96213415ae3c9f803ccbd8f9e6bc2e76c03f224ba16f5572ab5e0934f0
 ```
 
-Gitee 提供 `main` 和正式版标签的单向源码镜像，方便国内阅读文档、浏览和克隆代码；正式安装包附件仍从上述官方 Release 获取。仓库的“克隆/下载”和自动生成的源码 ZIP 用于阅读与开发，不代替正式完整安装包。
+Gitee 提供 `main` 和正式版标签的单向源码镜像，并为 **1.2.100** 提供上述完整安装包、校验文件和签名附件的原文件镜像；三个文件已通过公开下载回验，与 GitHub 原件逐字节一致。其他版本和附件以 GitHub 正式 Release 为准。仓库的“克隆/下载”和自动生成的源码 ZIP 用于阅读与开发，不代替正式完整安装包。
 
 ### 3. 安装
 
