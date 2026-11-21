@@ -28,6 +28,10 @@ Themes must not implement business workflows such as payment, inventory, orders,
 
 Themes must not read private Core tables, call private repositories/controllers, mutate application state, or require manual edits to `system/`, `config/`, `storage/`, or `public/index.php`.
 
+## Site Branding
+
+Themes must render the installing site's name from Core's `site_name` view data or another documented public theme setting. Never hard-code the theme author, product, or demo site's name as the visitor-facing site brand in templates, page titles, SEO, or footer text. Escape the value on output and use a neutral label if the setting is empty. The fixed theme identity in `theme.json` and marketplace metadata is separate from the installing site's branding.
+
 ## Theme Structure
 
 Themes are installed under:
