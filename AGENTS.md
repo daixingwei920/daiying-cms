@@ -4,6 +4,12 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Published Core 1.2.102 (2026-11-21 UTC)
+
+- PR111 is published on GitHub and official stable at immutable `v1.2.102` / `7004f868211df4e5643213a43c08b2b9dc0bb542`: crawler source evidence, sidebar trim and minimal bundled restaurant/Commerce compatibility. Existing installed business plugins are excluded from the Core update ZIP. No new migration or public API; Core1.2.80/PHP8.3 floors remain.
+- Complete supported matrix263, exact clean-main preflight/build, official signing/parity647, PHP8.3/8.5 native100→102 upgrade/rollback/retry71 each, signed update HTTP32 each, fresh install HTTP9 each, bundled compatibility12 each, upgraded crawler continuation4 each, independent signatures7 and public publication16 all passed. Installer SHA256 `ccde6fc241328a5dfdda227b67513a083e03cc43823d10fa9f4611bb388d88cb`; update `24b8b43281f94a93ff2dbb7dcdbd01d044e41d4d61cf63e593f4ab4c4db1c573`.
+- Fresh distribution backup/protection passed. No production website upgrade, independent plugin publication, paid AI, real payment, proxy/Cron configuration change or knowledge consumer import. Official private keys remain server-only. Preserve frozen101/102 artifacts, prior failures and all tags. See `docs/CORE_1.2.102_PUBLICATION_REPORT.md`.
+
 ## Owner-authorized joint Core1.2.102 release (2026-11-21)
 
 - Owner additionally authorizes fixing bundled restaurant/Commerce compatibility after the full matrix reproduced the existing main failure. Backport only the two required Commerce helpers, preserve pending-only claim mutation and Core-ledger payment evidence, validate SQLite/native MySQL retries, and rerun complete supported tests before joint release. Do not upgrade or publish the independent market plugin or weaken the restaurant guard.

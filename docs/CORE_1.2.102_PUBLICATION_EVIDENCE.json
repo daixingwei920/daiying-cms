@@ -1,0 +1,89 @@
+{
+  "status": "PUBLISHED_AND_VERIFIED",
+  "version": "1.2.102",
+  "source_commit": "7004f868211df4e5643213a43c08b2b9dc0bb542",
+  "publication": {
+    "status": "PUBLISHED",
+    "version": "1.2.102",
+    "at": "2026-11-21T06:10:57+00:00",
+    "commit": "7004f868211df4e5643213a43c08b2b9dc0bb542",
+    "package_id": "daiying.cms:1.2.102:stable",
+    "sha256": "24b8b43281f94a93ff2dbb7dcdbd01d044e41d4d61cf63e593f4ab4c4db1c573",
+    "official_signature_verified": true,
+    "production_site_upgrade": false,
+    "verification": {
+      "public_api_visible": true,
+      "latest_version": "1.2.102",
+      "package_exists": true,
+      "sha256_valid": true,
+      "manifest_valid": true,
+      "manifest_product_id": "daiying.cms",
+      "manifest_package_type": "core",
+      "cms_compatibility_valid": true
+    }
+  },
+  "protected_state": {
+    "status": "PASS",
+    "distribution_backup_integrity": "ok",
+    "existing_licenses_codes_activations_unchanged": true,
+    "existing_release_rows_unchanged": true,
+    "unrelated_products_unchanged": true,
+    "commercial_fields_unchanged": true,
+    "distribution_code_config_unchanged": true,
+    "production_site_upgrade": false
+  },
+  "full_matrix_steps": 263,
+  "formal_gate_status": "FULL_EXACT_MERGED_GATE_AND_OFFICIAL_SIGNED_NATIVE_ACCEPTANCE_PASS",
+  "signed_parity_checks": 647,
+  "signed_artifacts": {
+    "installer_sha256": "ccde6fc241328a5dfdda227b67513a083e03cc43823d10fa9f4611bb388d88cb",
+    "update_sha256": "24b8b43281f94a93ff2dbb7dcdbd01d044e41d4d61cf63e593f4ab4c4db1c573",
+    "file_count": 429,
+    "native_official_signature": "PASS"
+  },
+  "native_acceptance": {
+    "83": {
+      "checks": 71,
+      "status": "PASS"
+    },
+    "85": {
+      "checks": 71,
+      "status": "PASS"
+    }
+  },
+  "signed_update_http_checks": {
+    "83": 32,
+    "85": 32
+  },
+  "signed_fresh_install_http_checks": {
+    "83": 9,
+    "85": 9
+  },
+  "signed_bundle_compatibility_checks": {
+    "83": 12,
+    "85": 12
+  },
+  "signed_crawler_continuation_checks": {
+    "83": 4,
+    "85": 4
+  },
+  "independent_signature_checks": {
+    "status": "PASS",
+    "checks": [
+      "Artifact SHA256 daiying-cms-1.2.102-stable.zip",
+      "Pinned official Ed25519 signature daiying-cms-1.2.102-stable.zip",
+      "Exact source/version/name binding daiying-cms-1.2.102-stable.zip",
+      "Artifact SHA256 daiying-cms-core-update-1.2.102.zip",
+      "Pinned official Ed25519 signature daiying-cms-core-update-1.2.102.zip",
+      "Exact source/version/name binding daiying-cms-core-update-1.2.102.zip",
+      "Native internal signature and complete Core snapshot"
+    ],
+    "private_keys_generated": false,
+    "private_keys_exported": false
+  },
+  "public_download_checks": 16,
+  "production_site_upgrade": false,
+  "independent_plugin_publication": false,
+  "consumer_import": false,
+  "private_keys_exported": false
+}
