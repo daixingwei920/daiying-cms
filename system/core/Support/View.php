@@ -299,7 +299,7 @@ final class View
 
     private static function assetVersion(): string
     {
-        return '20261111-admin-command-bridge';
+        return '20261120-admin-sidebar-trim';
     }
 
     private static function adminNavGroupScript(): string

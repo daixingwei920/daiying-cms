@@ -1,0 +1,19 @@
+# Core1.2.102 sidebar repair preparation
+
+Owner authorizes publication after tests. Start from clean current main aeaf942fafb14cd16268c75f2b259ec55b3769a9. Preserve the existing signed1.2.101 preparation and all published versions;1.2.102 is a distinct release, not a replacement of its signed artifacts.
+
+## Change and visual evidence
+
+The absolutely positioned `.admin-sidebar::after` bottom trim paints above the scrolling navigation. At1470×748, it crosses the active crawler label, reproducing the supplied screenshot. Remove only that decorative strip; preserve the active-link frame,15px navigation and other approved typography. Advance the shared admin asset cache token and native View hash. Existing27 native admin checks pass locally. Actual Chrome before/after screenshots and top/bottom scrolling confirm the repaired label and absence of whole-page overflow; fixture evidence is not production UI acceptance.
+
+Approved fixed CSS SHA256:844244696ffcc416aa8213f3a3cfe89ae7931469d7a49284e313d841aa19383c. JavaScript is unchanged. No new framework, request, font, query or runtime loop.
+
+## Inherited main and release boundary
+
+Main already contains the reviewed market-installer metadata transaction rollback repair from PR107/3f21a0e8f28c314e3e7198e464bccbfac293174a. Its runtime remains byte-identical. Retain its isolated SQLite/MySQL and signed native acceptance separately; the1.2.101 artifact stays frozen/unpublished. The new1.2.102 signed package must pass current exact-main gates and installation/upgrade/rollback tests independently.
+
+Run relevant regressions on PHP8.3/8.5 and the key-generating Release Gate V1 contract only on the authorized update server. Formal preflight/build requires exact clean merged origin/main. Official keys stay server-side. Back up/protect distributor business state before authorized publication. No production website upgrade, independent plugin publication, real payment, paid AI or knowledge consumer import is included.
+
+## Knowledge synchronization
+
+Before final merge, pin governed V1 to an immutable1.2.102 preparation commit, preserve published1.2.100 and older evidence, and distinguish source review, runtime tests and publication. The sidebar fact remains developer-only. Formal package and publication results are recorded after actual verification; no live consumer import or index rebuild is performed.

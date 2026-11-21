@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.102 (release preparation)
+
+- Remove the absolute sidebar-bottom decorative light strip that crosses menu labels while the navigation scrolls. Preserve the selected-link blue chamfered frame and accepted typography; advance the shared asset cache token.
+- Retain the reviewed market installer rollback maintenance already merged on main; preserve the frozen1.2.101 signed preparation. No new migration, capability or public API change; Core1.2.80/PHP8.3 minimums remain.
+- Official publication requires exact-source signing/Gate and native signed installation/upgrade/rollback acceptance. This release does not upgrade production websites or publish independent plugins.
+
 ## 1.2.101 (release preparation)
 
 - Keep the previous extension files until the market source record and success log commit together. If either database write fails, restore the previous files and plugin registration and discard the attempted source record.

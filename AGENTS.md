@@ -4,6 +4,17 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized Core1.2.102 sidebar repair publication (2026-11-20)
+
+- Owner requests publication after successful tests. Use the clean fix/admin-sidebar-trim candidate based on actual main aeaf942, preserving its approved upstream changes. A signed1.2.101 preparation already exists and stays immutable/unpublished; prepare a distinct unused1.2.102 for this sidebar repair rather than overwrite or re-sign that candidate.
+- Freeze reviewed source, run PHP8.3/8.5 relevant regressions and server-only key-generating contract, then merge and run exact clean-main preflight/build, official signing, signed parity and native install/upgrade/rollback/retry/HTTP acceptance. Existing1.2.101 market rollback runtime is unchanged; retain its acceptance evidence.
+- Back up distribution and protect existing licenses, history and products before GitHub/official stable publication. No production website upgrade, independent plugin release, paid AI, real payment, consumer import, integrity bypass or local signing-key generation/export.
+
+## Isolated sidebar trim repair (2026-11-20)
+
+- Owner reports a sidebar decoration crossing the active crawler menu label. Clean fix/admin-sidebar-trim starts at actual origin/main aeaf942; remove only the absolutely positioned sidebar-bottom pseudo-element, retaining active-link frames and approved typography. Advance the shared admin asset cache token and rebuild the native Core manifest for View.php.
+- Validate the reproduced scroll/viewport collision and fixed rendering with the actual stylesheet, plus the existing admin UI regression. No version bump, merge, signing, publication or production edit is included. Preserve the separate1.2.101 market rollback preparation and all frozen artifacts.
+
 ## Core 1.2.101 market rollback release preparation (2026-11-19)
 
 - Owner authorizes review and merge of the market installer rollback repair, version preparation, exact-main Release Gate, official server signing and isolated signed upgrade/rollback validation. This authorization stops before publication or deployment.
