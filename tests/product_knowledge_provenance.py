@@ -89,7 +89,7 @@ class KnowledgeProvenance(unittest.TestCase):
 
     def test_foundation_payment_contracts_remain_developer_only(self):
         exported = {r['id'] for r in product.public_records(self.package)}
-        for rid in ['rest.foundation_media_contract', 'payment.configured_redirect_contract', 'payment.provider_settings_sqlite_save', 'storage.plugin_data_scope_index', 'maintenance.scheduler_connection_readiness', 'admin.compact_workspaces', 'admin.update_flow_continuation', 'admin.starship_original_palette', 'admin.command_bridge', 'seo.plugin_sitemap_registration']:
+        for rid in ['rest.foundation_media_contract', 'payment.configured_redirect_contract', 'payment.provider_settings_sqlite_save', 'storage.plugin_data_scope_index', 'maintenance.scheduler_connection_readiness', 'admin.compact_workspaces', 'admin.update_flow_continuation', 'admin.starship_original_palette', 'admin.command_bridge', 'seo.plugin_sitemap_registration', 'seo.crawler_source_verification']:
             record = next(r for r in self.package['records'] if r['id'] == rid)
             self.assertEqual(record['visibility'], 'ADMIN_DEVELOPER')
             self.assertFalse(record['enabled_for_customer_service'])
