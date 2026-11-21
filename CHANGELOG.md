@@ -2,6 +2,7 @@
 
 ## 1.2.102 (release preparation)
 
+- Restore the bundled Commerce helpers required by the bundled restaurant: pending-only completion-claim updates (including native MySQL idempotent retries) and payment evidence from Core's trusted ledger. This repairs the existing new-install bundle mismatch without changing plugin schemas, independently publishing the market plugin or updating installed plugins through the Core update ZIP.
 - Add truthful crawler source evidence from official IP ranges or forward-confirmed reverse DNS. Use a bounded CLI queue/cache without request-time external lookups; preserve historical/mixed counts, ignore visitor forwarding headers, and disclose unsupported/unavailable sources. Owner authorizes joint publication with the sidebar repair only after complete testing and formal release gates.
 - Remove the absolute sidebar-bottom decorative light strip that crosses menu labels while the navigation scrolls. Preserve the selected-link blue chamfered frame and accepted typography; advance the shared asset cache token.
 - Retain the reviewed market installer rollback maintenance already merged on main; preserve the frozen1.2.101 signed preparation. No new migration, capability or public API change; Core1.2.80/PHP8.3 minimums remain.
