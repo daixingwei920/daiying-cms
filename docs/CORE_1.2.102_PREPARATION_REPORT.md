@@ -1,6 +1,6 @@
 # Core1.2.102 sidebar repair preparation
 
-Owner authorizes publication after tests. Start from clean current main aeaf942fafb14cd16268c75f2b259ec55b3769a9. Preserve the existing signed1.2.101 preparation and all published versions;1.2.102 is a distinct release, not a replacement of its signed artifacts.
+Owner initially authorized the sidebar publication after tests, then explicitly paused it to add real crawler source verification. Publication remains paused. Start from clean current main aeaf942fafb14cd16268c75f2b259ec55b3769a9; clean-start feature worktree branches from sidebar preparation80a1d62. Preserve the existing signed1.2.101 preparation and all published versions;1.2.102 is a distinct candidate, not a replacement of signed artifacts.
 
 ## Change and visual evidence
 
@@ -17,3 +17,9 @@ Run relevant regressions on PHP8.3/8.5 and the key-generating Release Gate V1 co
 ## Knowledge synchronization
 
 Before final merge, pin governed V1 to an immutable1.2.102 preparation commit, preserve published1.2.100 and older evidence, and distinguish source review, runtime tests and publication. The sidebar fact remains developer-only. Formal package and publication results are recorded after actual verification; no live consumer import or index rebuild is performed.
+
+## Added crawler source verification
+
+See [the scoped contract](crawler-source-verification.md). New requests use fresh official IP ranges or forward-confirmed reverse DNS. HTTP only consults bounded local state, ignoring visitor forwarding headers; a bounded CLI worker performs networking. Encrypted one-hour pending addresses are removed on completion/maintenance. Old traffic stays unverified; mixed source counts cannot become a blanket green badge. No database migration, public API, framework or new production configuration.
+
+Server-isolated initial and supplemental evidence root: `/root/daiying-crawler-verify-pkxxa6n6`. PHP8.3/8.5 each passed source87, statistics93, observation23, SEO/GEO65, real-process concurrency/sampling, existing CLI scheduler/lifecycle, frozen migrations, starship27 and native HTTP/CLI16 checks. The server-only Release Gate V1 contract passed. These are subsystem/precommit checks, not formal signed-artifact Release Gate or production acceptance. Final label wrapping, disabled-collection cleanup and performance/live network results are recorded in the accompanying acceptance report.

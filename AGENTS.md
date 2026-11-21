@@ -526,3 +526,8 @@ See `docs/retired-products.md`.
 - Unified branch: `codex/core184-unified`; preserve GC 01/02 while merging the approved generic homepage/dispute contracts, payment fixes, and bounded advertising/payment facades.
 - Historical scope note: this integration was isolated at the time; publication and production actions require separate Owner authorization.
 - The existing private signing-key boundary above remains in force. Reuse only existing valid public test authorization envelopes through the native verifier; missing signing tests stay NOT VERIFIED.
+## Owner-authorized crawler source verification (2026-11-20)
+
+- Owner pauses the pending sidebar publication and requests real crawler verification: new requests only, official IP ranges or forward-confirmed reverse DNS, with smooth page access. Implement and test in the clean-start `feat/crawler-source-verification` worktree, preserving the sidebar preparation commit and frozen1.2.101 signed artifacts.
+- No publication, production deployment/upgrade, proxy configuration changes, private traffic inspection or historical source backfill. No real payment or paid AI. Background networking uses fixed official public endpoints; HTTP collection must not perform DNS/HTTPS/process creation or add scheduler database work.
+- Reuse existing CLI scheduler and encryption key, bounded nonblocking storage and honest mixed/unknown labels. Server-only key-generating contract checks remain applicable before Core commit. See `docs/crawler-source-verification.md`.

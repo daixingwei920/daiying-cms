@@ -2,6 +2,7 @@
 
 ## 1.2.102 (release preparation)
 
+- Add truthful crawler source evidence from official IP ranges or forward-confirmed reverse DNS. Use a bounded CLI queue/cache without request-time external lookups; preserve historical/mixed counts, ignore visitor forwarding headers, and disclose unsupported/unavailable sources. Publication is paused by Owner pending this additional work.
 - Remove the absolute sidebar-bottom decorative light strip that crosses menu labels while the navigation scrolls. Preserve the selected-link blue chamfered frame and accepted typography; advance the shared asset cache token.
 - Retain the reviewed market installer rollback maintenance already merged on main; preserve the frozen1.2.101 signed preparation. No new migration, capability or public API change; Core1.2.80/PHP8.3 minimums remain.
 - Official publication requires exact-source signing/Gate and native signed installation/upgrade/rollback acceptance. This release does not upgrade production websites or publish independent plugins.

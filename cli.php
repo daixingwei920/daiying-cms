@@ -179,6 +179,11 @@ if ($command === 'seo:crawlers:prune') {
     exit(0);
 }
 
+if ($command === 'seo:crawlers:verify') {
+    echo json_encode((new \Cms\Core\Seo\CrawlerSourceVerification(CMS_ROOT, Settings::load(CMS_ROOT)))->run(4), JSON_THROW_ON_ERROR), PHP_EOL;
+    exit(0);
+}
+
 if ($command === 'migrate') {
     $settings = Settings::load(CMS_ROOT);
     $pdo = ConnectionFactory::make($settings);
@@ -904,6 +909,7 @@ if ($command === 'run-scheduled-tasks') {
         $manager = new \Cms\Core\Plugin\PluginManager(CMS_ROOT.'/content/plugins', $pdo, new \Cms\Core\Logging\FileLogger(CMS_ROOT.'/storage/logs/plugins.log'), new \Cms\Core\Events\EventDispatcher(), new \Cms\Core\Plugin\BlockRegistry(), new \Cms\Core\Plugin\PluginRuntimeRegistry(), new \Cms\Core\Plugin\OfficialPluginRegistry(CMS_ROOT,$pdo), new \Cms\Core\Plugin\PluginSecretStore($pdo,(string)$settings->get('security.encryption_key','')), settings: $settings);
         $manager->bootEnabled();
         \Cms\Core\Seo\SearchMetrics\SearchMetricsSyncService::register($settings);
+        \Cms\Core\Seo\CrawlerSourceVerification::register(CMS_ROOT, $settings);
         echo json_encode((new \Cms\Core\Scheduler\SchedulerService($pdo))->runDue($limit),JSON_PRETTY_PRINT), PHP_EOL;
     } finally {
         flock($lock, LOCK_UN);
@@ -926,6 +932,7 @@ if ($command === 'run-ai-image-jobs') {
 echo "Available commands:" . PHP_EOL;
 echo "  run-extension-jobs <job-type> [limit]  Process only a registered extension job type" . PHP_EOL;
 echo "  run-scheduled-tasks [limit]  Run due registered Core and plugin scheduled tasks" . PHP_EOL;
+echo "  seo:crawlers:verify        Process up to four pending crawler source checks" . PHP_EOL;
 echo "  run-ai-image-jobs [limit]  Recover and process Core image tasks; never replay ambiguous provider calls" . PHP_EOL;
 echo "  migrate    Run core database migrations" . PHP_EOL;
 echo "  market:platform:init --yes --email=<owner> --name=<name>  Initialize this server as the official Market Platform and create the first Platform Owner" . PHP_EOL;
