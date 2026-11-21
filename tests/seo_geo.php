@@ -94,7 +94,7 @@ $check($repo->find($reservedId)['slug'] !== 'llms.txt', 'llms.txt content slug c
 $settings = Settings::fromArray($config); $log = new CrawlerLog($root, $settings);
 $app->handle(new Request('GET', '/articles/public', ['token' => 'QUERY-SECRET'], [], ['HTTP_USER_AGENT' => 'spoof GPTBot/1.0 RAW-UA-SECRET', 'REMOTE_ADDR' => '198.51.100.200', 'HTTP_AUTHORIZATION' => 'Bearer SECRET']));
 $rows = $log->rows();
-$check(count($rows) === 1 && $rows[0]['route'] === '/articles/{slug}' && $rows[0]['verification'] === 'source_unverified', 'Spoofed bot is an unverified aggregate on coarse public route');
+$check(count($rows) === 1 && $rows[0]['route'] === '/articles/{slug}' && $rows[0]['verification'] === 'source_unavailable', 'A spoofed UA with a reserved source address remains unauthenticated on a coarse public route');
 $raw = file_get_contents($root . '/storage/logs/seo-crawlers.json');
 foreach (['QUERY-SECRET', 'RAW-UA-SECRET', '198.51.100.200', 'Bearer', '/articles/public'] as $private) { $check(!str_contains($raw, $private), 'Crawler ledger excludes ' . $private); }
 $log->record(new Request('GET', '/preview/secret', [], [], ['HTTP_USER_AGENT' => 'GPTBot']), Response::html('secret'));
@@ -145,7 +145,7 @@ $check($admin->seoCrawlers()->status() === 302, 'Anonymous statistics denied');
 $frontAuth->loginUser(['id' => $member, 'email' => 'member@test.invalid', 'display_name' => 'Member']);
 $check($admin->seoCrawlers()->status() === 302, 'Normal member statistics denied');
 $adminAuth->attempt('owner@test.invalid', 'synthetic-password', '127.0.0.1');
-$check($admin->seoCrawlers()->status() === 200 && str_contains($admin->seoCrawlers()->body(), '来源未验证'), 'Founder can view truthful crawler statistics');
+$check($admin->seoCrawlers()->status() === 200 && str_contains($admin->seoCrawlers()->body(), '暂无法核验'), 'Founder can view truthful crawler statistics');
 $filtered = $app->handle(new Request('GET', '/admin/seo/crawlers', ['platform' => 'domestic', 'agent' => '360Spider', 'status' => '4']));
 $check($filtered->status() === 200 && str_contains($filtered->body(), '360搜索') && str_contains($filtered->body(), 'value="domestic" selected'), 'Native admin route receives domestic crawler query filters');
 $invalidFilter = $app->handle(new Request('GET', '/admin/seo/crawlers', ['agent' => ['nested' => 'bad']]));

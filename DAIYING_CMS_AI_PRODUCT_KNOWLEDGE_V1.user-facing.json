@@ -1,7 +1,7 @@
 {
   "knowledge_version": "DAIYING_CMS_AI_PRODUCT_KNOWLEDGE_V1",
-  "verified_version": "1.2.100",
-  "last_verified_at": "2026-11-16",
+  "verified_version": "1.2.102",
+  "last_verified_at": "2026-11-21",
   "records": [
     {
       "id": "install.web_installer",
@@ -11,7 +11,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; system/core/Install/InstallController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -20,9 +20,9 @@
       "source_evidence": [
         {
           "path": "docs/installation.md",
-          "sha256": "a1752f192adb0bb2a01be1a08532821b44b957c786d259c8a2933fbb065901ff",
-          "line_start": 23,
-          "line_end": 23
+          "sha256": "0f8b77f97485c00fb8cde567c94e66bbc23420db303c897777019fa1fe2b342a",
+          "line_start": 25,
+          "line_end": 25
         },
         {
           "path": "system/core/Install/InstallController.php",
@@ -31,9 +31,9 @@
           "line_end": 171
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -49,7 +49,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/RuntimeRequirements.php; system/core/Support/SystemHealthDoctor.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -69,9 +69,9 @@
           "line_end": 151
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -87,7 +87,7 @@
       "audience": "Administrator",
       "source": "docs/themes.md; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/articles/{slug}",
@@ -107,9 +107,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -125,7 +125,7 @@
       "audience": "Administrator",
       "source": "docs/update-system.md; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "/admin/update",
       "public_route": "",
@@ -151,9 +151,9 @@
           "line_end": 619
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -169,7 +169,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Recovery/RecoveryController.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "/admin/recovery",
       "public_route": "",
@@ -189,9 +189,9 @@
           "line_end": 50
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -207,7 +207,7 @@
       "audience": "Administrator",
       "source": "SECURITY.md; docs/installation.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -222,14 +222,14 @@
         },
         {
           "path": "docs/installation.md",
-          "sha256": "a1752f192adb0bb2a01be1a08532821b44b957c786d259c8a2933fbb065901ff",
-          "line_start": 45,
-          "line_end": 45
+          "sha256": "0f8b77f97485c00fb8cde567c94e66bbc23420db303c897777019fa1fe2b342a",
+          "line_start": 47,
+          "line_end": 47
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -245,7 +245,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "/admin/seo/keywords",
       "public_route": "",
@@ -265,9 +265,9 @@
           "line_end": 94
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -283,7 +283,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Seo/Keyword/SeoLifecycleAggregator.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "/admin/seo/search-engines",
       "public_route": "",
@@ -303,9 +303,9 @@
           "line_end": 348
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -321,7 +321,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Content/ContentFrontController.php; docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/sitemap.xml",
@@ -347,9 +347,9 @@
           "line_end": 7
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -365,7 +365,7 @@
       "audience": "Administrator",
       "source": "docs/commerce.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -385,9 +385,9 @@
           "line_end": 48
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -403,7 +403,7 @@
       "audience": "Administrator",
       "source": "system/core/Bootstrap/Application.php; system/core/Ai/AiService.php; system/core/Ai/AiProviderPresets.php; system/core/Ai/AiGateway.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "/admin/settings/ai",
       "public_route": "",
@@ -435,9 +435,9 @@
           "line_end": 25
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -453,7 +453,7 @@
       "audience": "Administrator",
       "source": "system/core/ExternalMigration/ExternalMigrationService.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "",
@@ -473,9 +473,9 @@
           "line_end": 628
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -491,7 +491,7 @@
       "audience": "Administrator",
       "source": "docs/installation.md; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "",
       "public_route": "/install",
@@ -500,9 +500,9 @@
       "source_evidence": [
         {
           "path": "docs/installation.md",
-          "sha256": "a1752f192adb0bb2a01be1a08532821b44b957c786d259c8a2933fbb065901ff",
-          "line_start": 23,
-          "line_end": 23
+          "sha256": "0f8b77f97485c00fb8cde567c94e66bbc23420db303c897777019fa1fe2b342a",
+          "line_start": 25,
+          "line_end": 25
         },
         {
           "path": "docs/first-install-failure.md",
@@ -511,9 +511,9 @@
           "line_end": 5
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -529,7 +529,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; system/core/Bootstrap/Application.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "/admin/migrations",
       "public_route": "",
@@ -538,7 +538,7 @@
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
-          "sha256": "81f8294621e0abbe7351c0b9d584ad6cddea414eeb2403ce01c24fd9b8de60fd",
+          "sha256": "54a0f4ef76927be686487c711c55e79d3f93e7d308d166d80742f8397067a30d",
           "line_start": 115,
           "line_end": 115
         },
@@ -549,9 +549,9 @@
           "line_end": 596
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -567,7 +567,7 @@
       "audience": "Administrator",
       "source": "system/core/Support/View.php; docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "user_facing": true,
       "admin_route": "/admin/update;/admin/recovery",
       "public_route": "",
@@ -576,13 +576,13 @@
       "source_evidence": [
         {
           "path": "system/core/Support/View.php",
-          "sha256": "81f8294621e0abbe7351c0b9d584ad6cddea414eeb2403ce01c24fd9b8de60fd",
+          "sha256": "54a0f4ef76927be686487c711c55e79d3f93e7d308d166d80742f8397067a30d",
           "line_start": 116,
           "line_end": 116
         },
         {
           "path": "system/core/Support/View.php",
-          "sha256": "81f8294621e0abbe7351c0b9d584ad6cddea414eeb2403ce01c24fd9b8de60fd",
+          "sha256": "54a0f4ef76927be686487c711c55e79d3f93e7d308d166d80742f8397067a30d",
           "line_start": 117,
           "line_end": 117
         },
@@ -593,9 +593,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
       "review_status": "SOURCE_REVIEWED",
@@ -615,7 +615,7 @@
       "description": "当前已发布稳定版仍为 Core 1.2.86（v1.2.86，d311446607124fff21d76f524a4a11968ad4cd58）。本包复核已整合图像公共能力并修复支付回调的1.3.0-alpha.5开发候选，不代表正式发布或生产部署。",
       "source": "docs/ai-image/integration-1.2.86.md; docs/payment-refund-webhooks.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "source_evidence": [
         {
           "path": "docs/ai-image/integration-1.2.86.md",
@@ -630,9 +630,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -653,7 +653,7 @@
       "description": "1.2.83 支持显式文章、页面和分类 slug 保留《》。留空时仍自动生成简洁 slug，已有 slug 与重定向不自动迁移。仍拒绝分隔符、路径穿越、控制字符、查询/片段符和预编码百分号输入；填写原始书名号，不粘贴 URL 编码。",
       "source": "docs/content-slug-policy.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "source_evidence": [
         {
           "path": "docs/content-slug-policy.md",
@@ -662,9 +662,9 @@
           "line_end": 3
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -685,13 +685,13 @@
       "description": "1.2.82 增加四个校验绑定的历史 MySQL 迁移方言适配，不修改已发布迁移文件。1.2.83 延续该能力；这不代表任意 MySQL/MariaDB 环境均已验收。选择数据库后仍应在安装器测试连接和实际完成安装。",
       "source": "CHANGELOG.md; system/core/Migration/MysqlHistoricalMigrationDialect.php",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "8c0e64ace80f4e6ae4cb0ff60f8c4ee095386391dc23dcebc0bf3e034e33ddee",
-          "line_start": 175,
-          "line_end": 175
+          "sha256": "502c4c5a78e87f27aec605c3113e2385e240918094dbc879d705e8e63e7d8351",
+          "line_start": 188,
+          "line_end": 188
         },
         {
           "path": "system/core/Migration/MysqlHistoricalMigrationDialect.php",
@@ -700,9 +700,9 @@
           "line_end": 12
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -723,7 +723,7 @@
       "description": "首次安装失败须保留错误并修复原因。若管理员已创建但完成锁失败，入口会阻断，不能伪造完成锁或重复创建管理员。MySQL DDL 不保证全链事务回滚；只有负责人明确确认专用数据可丢弃后，才可人工清理重装。生产站不得删除数据库来修复升级。",
       "source": "docs/first-install-failure.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "source_evidence": [
         {
           "path": "docs/first-install-failure.md",
@@ -738,9 +738,9 @@
           "line_end": 11
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -761,19 +761,19 @@
       "description": "1.2.82 的直接升级验证范围为 1.2.81 → 1.2.82；不能泛化为任意旧版直升最新。实际领取和安装必须服从目标包的签名版本范围与兼容检查。Core 更新不替换已安装插件；旧 Commerce 的 MySQL 参数修复需要独立插件更新。",
       "source": "CHANGELOG.md; docs/release/1.2.82-upgrade-support.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "source_evidence": [
         {
           "path": "CHANGELOG.md",
-          "sha256": "8c0e64ace80f4e6ae4cb0ff60f8c4ee095386391dc23dcebc0bf3e034e33ddee",
-          "line_start": 178,
-          "line_end": 178
+          "sha256": "502c4c5a78e87f27aec605c3113e2385e240918094dbc879d705e8e63e7d8351",
+          "line_start": 191,
+          "line_end": 191
         },
         {
           "path": "CHANGELOG.md",
-          "sha256": "8c0e64ace80f4e6ae4cb0ff60f8c4ee095386391dc23dcebc0bf3e034e33ddee",
-          "line_start": 179,
-          "line_end": 179
+          "sha256": "502c4c5a78e87f27aec605c3113e2385e240918094dbc879d705e8e63e7d8351",
+          "line_start": 192,
+          "line_end": 192
         },
         {
           "path": "docs/release/1.2.82-upgrade-support.md",
@@ -782,9 +782,9 @@
           "line_end": 4
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -805,7 +805,7 @@
       "description": "Owner 于 2026-10-09 决定小说和视频产品退役，不再作为新安装分发、维护或规划产品。保留历史源码、已安装客户资产、订单和许可；退役不等于自动卸载、撤销授权或已完成市场下架。",
       "source": "docs/retired-products.md",
       "source_type": "official_docs+source_review",
-      "evidence": "Pinned published Core 1.2.100 source/document review. Runtime release checks are recorded separately; no production site upgrade or consumer import implied.",
+      "evidence": "Pinned unpublished Core1.2.102 source/document review. Owner authorizes joint publication after complete tests and formal gates; no production upgrade or consumer import. Isolated development results are recorded separately in docs/crawler-source-verification-acceptance.md.",
       "source_evidence": [
         {
           "path": "docs/retired-products.md",
@@ -820,9 +820,9 @@
           "line_end": 11
         }
       ],
-      "verified_version": "1.2.100",
-      "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-      "last_verified_at": "2026-11-16",
+      "verified_version": "1.2.102",
+      "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+      "last_verified_at": "2026-11-21",
       "confidence": "high",
       "implementation_status": "implemented",
       "test_status": "NOT_RUN_THIS_TASK",
@@ -832,10 +832,10 @@
       "enabled_for_customer_service": true
     }
   ],
-  "package_revision": "2026-11-16-core100-formally-published",
+  "package_revision": "2026-11-21-core102-joint-release-with-bundled-compatibility",
   "source_repository": "https://github.com/daixingwei920/daiying-cms",
-  "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-  "source_tag": "v1.2.100",
+  "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+  "source_tag": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
   "verification_scope": "SOURCE_AND_DOCUMENT_REVIEW_ONLY",
   "release_evidence": {
     "status": "PUBLISHED",
@@ -1069,19 +1069,20 @@
     "customer_service_latest_package_import": "ISOLATED_RELEVANCE_BUSINESS_7_OF_7_PASS_PRODUCTION_NOT_RUN",
     "core_optimizer_shared_knowledge": "NOT_IMPLEMENTED"
   },
-  "release_status": "PUBLISHED",
+  "release_status": "UNPUBLISHED",
   "candidate_evidence": {
-    "status": "PUBLISHED",
-    "base_version": "1.2.99",
-    "candidate_version": "1.2.100",
-    "base_commit": "8c04279c25049b82e5719e10f93117b54e61a172",
-    "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
-    "candidate_revision": "PR105-merged-formally-published",
-    "owner_decision": "Owner approved PR 105 merge, full Release Gate, official server signing and Core publication; production website upgrades remain separate.",
-    "runtime_report": "docs/CORE_1.2.100_PUBLICATION_REPORT.md",
+    "status": "UNPUBLISHED",
+    "base_version": "1.2.100",
+    "candidate_version": "1.2.102",
+    "base_commit": "aeaf942fafb14cd16268c75f2b259ec55b3769a9",
+    "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+    "candidate_revision": "crawler-source-verification-and-sidebar-trim",
+    "owner_decision": "Owner authorizes merging and publishing crawler source verification and sidebar repair together after complete Core tests and formal signing/release gates. Preserve frozen1.2.101 artifacts. Back up distribution state. No production site upgrade, plugin publication, real payment, paid AI, proxy/Cron changes or consumer import. Owner additionally authorizes the minimal bundled restaurant/Commerce compatibility repair after the baseline full-test failure; complete tests before release.",
+    "runtime_report": "docs/crawler-source-verification-acceptance.md",
     "production_deployed": false,
     "consumer_imported": false,
-    "published_release_evidence_preserved": true
+    "published_release_evidence_preserved": true,
+    "phase": "COMPAT_REPAIR_FOCUSED_PASS_FULL_GATES_PENDING"
   },
   "sync_validation": {
     "environment": "isolated",
@@ -1155,26 +1156,19 @@
     }
   },
   "development_candidate": {
-    "source_commit": "9ef20865d798b96696206b0ad2b01f17463f6235",
-    "status": "PUBLISHED",
-    "report": "docs/CORE_1.2.92_PUBLICATION_REPORT.md",
+    "source_commit": "7c3155d9dc6012afa519988f8c39f18d57e5c16d",
+    "status": "UNPUBLISHED",
+    "report": "docs/CORE_1.2.102_PREPARATION_REPORT.md",
     "production_deployed": false,
     "consumer_imported": false,
     "published_tag_unchanged": true
   },
   "publication_validation": {
-    "report": "docs/CORE_1.2.92_PUBLICATION_REPORT.md",
-    "evidence": "docs/CORE_1.2.92_PUBLICATION_EVIDENCE.json",
-    "public_download_checks": 27,
-    "public_signature_checks": 9,
-    "formal_signed_parity_checks": 643,
-    "native_official_upgrade_rollback_retry_checks": 43,
-    "website_download_version": "1.2.92",
-    "production_health": "1.2.91 NORMAL",
+    "status": "NOT_YET_PUBLISHED_PENDING_FULL_GATES",
+    "report": "docs/crawler-source-verification-acceptance.md",
+    "previous_published_version": "1.2.100",
     "production_deployed": false,
-    "production_knowledge_import": false,
-    "diagnostic_boot_timestamps_separately_recorded": true,
-    "historical_raw_protection_failures_preserved": true
+    "production_knowledge_import": false
   },
   "published_baseline_evidence": {
     "status": "PUBLISHED",
@@ -1385,6 +1379,44 @@
     "production_deployed": false,
     "consumer_imported": false,
     "published_release_evidence_preserved": true
+  },
+  "published_100_acceptance_evidence": {
+    "status": "PUBLISHED",
+    "base_version": "1.2.99",
+    "candidate_version": "1.2.100",
+    "base_commit": "8c04279c25049b82e5719e10f93117b54e61a172",
+    "source_commit": "ff8ddf1a903835bb2bbede1b78cf70960e4e1d17",
+    "candidate_revision": "PR105-merged-formally-published",
+    "owner_decision": "Owner approved PR 105 merge, full Release Gate, official server signing and Core publication; production website upgrades remain separate.",
+    "runtime_report": "docs/CORE_1.2.100_PUBLICATION_REPORT.md",
+    "production_deployed": false,
+    "consumer_imported": false,
+    "published_release_evidence_preserved": true
+  },
+  "published_100_snapshot_metadata": {
+    "release_status": "PUBLISHED",
+    "development_candidate": {
+      "source_commit": "9ef20865d798b96696206b0ad2b01f17463f6235",
+      "status": "PUBLISHED",
+      "report": "docs/CORE_1.2.92_PUBLICATION_REPORT.md",
+      "production_deployed": false,
+      "consumer_imported": false,
+      "published_tag_unchanged": true
+    },
+    "publication_validation": {
+      "report": "docs/CORE_1.2.92_PUBLICATION_REPORT.md",
+      "evidence": "docs/CORE_1.2.92_PUBLICATION_EVIDENCE.json",
+      "public_download_checks": 27,
+      "public_signature_checks": 9,
+      "formal_signed_parity_checks": 643,
+      "native_official_upgrade_rollback_retry_checks": 43,
+      "website_download_version": "1.2.92",
+      "production_health": "1.2.91 NORMAL",
+      "production_deployed": false,
+      "production_knowledge_import": false,
+      "diagnostic_boot_timestamps_separately_recorded": true,
+      "historical_raw_protection_failures_preserved": true
+    }
   },
   "export_scope": "USER-FACING_ONLY"
 }

@@ -26,7 +26,7 @@ Owner于2026-10-24要求“补齐国内蜘蛛识别和统计界面”。基于�
 
 识别最多读取UA前512字节，忽略UA内http(s)文档链接，使用token边界，大小写不敏感；不接受普通浏览器名、附着前后缀或无依据的新机器人名字。别名合并到同一canonical agent，沿用旧JSON字段及聚合键；既有Baiduspider/GPTBot等记录仍可读取，无需迁移。
 
-“国内平台”只是公开UA标记的分组，不是请求IP所在地，也不验证运营方身份。所有显示始终为“来源未验证”。旧AI搜索/训练robots策略的覆盖范围不扩大到这些新增标记；不新增robots策略、在线DNS/IP认证或防火墙规则，不声称可识别没有公开可靠UA的国内AI产品。
+“国内平台”只是公开UA标记的分组，不是请求IP所在地。已发布基线始终显示来源未验证；未发布1.2.102候选增加[后台真实来源核验](crawler-source-verification.md)，只对有新证据的请求标记成功，历史数据不追认。当前未纳入核验规则的UA继续明确标记不支持。旧AI搜索/训练robots策略的覆盖范围不扩大到这些新增标记；不新增robots策略或防火墙规则，不声称可识别没有公开可靠UA的国内AI产品。
 
 UA依据：搜狗[官方说明](https://zhanzhang.sogou.com/index.php/help/spider)、360[官方蜘蛛说明](https://www.so.com/help/spider_ip.html)与[变体说明](https://www.so.com/help/help_3_2.html)、神马[官方指南](https://zhanzhang.sm.cn/open/optimizaGuide)。兼容标记另参照上游项目的一手UA登记：[Matomo词表](https://github.com/matomo-org/device-detector/blob/b6616b08266969f65e519c4ef2c18cd3b00b3d7b/regexes/bots.yml)及[crawler-user-agents](https://github.com/monperrus/crawler-user-agents/blob/master/crawler-user-agents.json)。上游登记不等于运营方身份或用途认证；部分旧运营方文档已不能直接访问，未据此赋予“官方已验证”标签。
 

@@ -8,12 +8,12 @@ use Cms\Core\Config\Settings;
 use Cms\Core\Http\Request;
 use Cms\Core\Http\Response;
 
-/** Bounded local aggregate ledger. UA identification is never source authentication. */
+/** Bounded local aggregate ledger; source evidence is separate from UA identification. */
 final class CrawlerLog
 {
     private const MAX_BYTES = 524288;
     private const MAX_ROWS = 2000;
-    public function __construct(private readonly string $root, private readonly Settings $settings) {}
+    public function __construct(private readonly string $root, private readonly Settings $settings, private readonly ?CrawlerSourceVerification $verification = null) {}
 
     public function record(Request $request, Response $response): void
     {
@@ -23,15 +23,23 @@ final class CrawlerLog
         $agent = CrawlerRegistry::identify((string) ($request->server['HTTP_USER_AGENT'] ?? ''));
         if ($agent === null) { return; }
         $add = (bool) $this->settings->get('seo.crawler_log_enabled', false);
+        $source = [];
+        if ($add) {
+            try { $source = ($this->verification ?? new CrawlerSourceVerification($this->root, $this->settings))->classify($agent, (string) ($request->server['REMOTE_ADDR'] ?? '')); }
+            catch (\Throwable) { $source = ['verification' => 'source_unavailable']; }
+        }
         $outcome = 'io_error';
         $this->update($add ? ['day' => gmdate('Y-m-d'), 'agent' => $agent, 'route' => $route,
-            'status' => $response->status(), 'verification' => 'source_unverified', 'hits' => 1] : null, $outcome);
+            'status' => $response->status(), 'hits' => 1] + $source : null, $outcome);
         if ($add) { (new CrawlerObservation($this->root, $this->settings))->record($outcome); }
     }
 
     /** @return list<array<string,mixed>> */
     public function rows(): array { return $this->update(null); }
-    public function prune(): void { $this->update(null); (new CrawlerObservation($this->root, $this->settings))->prune(); }
+    public function prune(): void { $this->update(null); (new CrawlerObservation($this->root, $this->settings))->prune(); (new CrawlerSourceVerification($this->root, $this->settings))->prune(); }
+
+    /** Only pending batches created by new requests can receive worker results. */
+    public function applySourceResults(array $results): void { $outcome = null; $this->update(null, $outcome, $results); }
 
     private function route(string $path): ?string
     {
@@ -43,7 +51,7 @@ final class CrawlerLog
     }
 
     /** @param array<string,mixed>|null $add @return list<array<string,mixed>> */
-    private function update(?array $add, ?string &$outcome = null): array
+    private function update(?array $add, ?string &$outcome = null, array $results = []): array
     {
         $outcome = 'io_error';
         $path = $this->root . '/storage/logs/seo-crawlers.json';
@@ -66,12 +74,25 @@ final class CrawlerLog
             $today = gmdate('Y-m-d');
             $rows = array_values(array_filter($data, static fn ($r): bool => is_array($r)
                 && is_string($r['day'] ?? null) && $r['day'] >= $floor && $r['day'] <= $today));
+            foreach ($rows as &$row) {
+                if (($row['verification'] ?? '') !== 'source_pending') { continue; }
+                $key = $row['source_key'] ?? null;
+                $result = is_string($key) && preg_match('/^[a-f0-9]{32}$/D', $key) ? ($results[$key] ?? null) : null;
+                if (is_array($result) && in_array(CrawlerSourceVerification::status(array_replace($row, $result)), ['source_verified_ip', 'source_verified_dns', 'source_not_verified', 'source_unavailable'], true)) {
+                    $row = array_replace($row, $result); unset($row['source_key'], $row['verification_queued_at']);
+                } elseif (!is_int($row['verification_queued_at'] ?? null) || $row['verification_queued_at'] < time() - CrawlerSourceVerification::QUEUE_TTL) {
+                    $row['verification'] = 'source_unavailable'; unset($row['source_key'], $row['verification_queued_at']);
+                }
+            }
+            unset($row);
             if ($add !== null) {
                 $outcome = 'stored';
                 $found = false;
                 foreach ($rows as &$row) {
                     if (($row['day'] ?? '') === $add['day'] && ($row['agent'] ?? '') === $add['agent']
-                        && ($row['route'] ?? '') === $add['route'] && ($row['status'] ?? 0) === $add['status']) {
+                        && ($row['route'] ?? '') === $add['route'] && ($row['status'] ?? 0) === $add['status']
+                        && ($row['verification'] ?? 'source_unverified') === $add['verification']
+                        && ($row['source_key'] ?? '') === ($add['source_key'] ?? '')) {
                         if ((int) ($row['hits'] ?? 0) >= 10000000) { $outcome = 'hit_cap'; }
                         $row['hits'] = min(10000000, (int) ($row['hits'] ?? 0) + 1); $found = true; break;
                     }
@@ -79,6 +100,18 @@ final class CrawlerLog
                 unset($row);
                 if (!$found && count($rows) < self::MAX_ROWS) { $rows[] = $add; }
                 elseif (!$found) { $outcome = 'row_limit'; }
+            }
+            // Completed batches can coalesce, while legacy and unknown sources remain separate.
+            if ($results !== []) {
+                $merged = [];
+                foreach ($rows as $row) {
+                    $key = json_encode([$row['day'], $row['agent'] ?? null, $row['route'] ?? null, $row['status'] ?? null,
+                        $row['verification'] ?? 'source_unverified', $row['source_key'] ?? '']);
+                    if (isset($merged[$key]) && is_int($row['hits'] ?? null) && is_int($merged[$key]['hits'] ?? null)) {
+                        $merged[$key]['hits'] = min(10000000, $merged[$key]['hits'] + $row['hits']);
+                    } else { $merged[$key] = $row; }
+                }
+                $rows = array_values($merged);
             }
             $encoded = json_encode($rows, JSON_UNESCAPED_SLASHES);
             if (!is_string($encoded) || strlen($encoded) > self::MAX_BYTES) { $outcome = 'byte_limit'; return []; }

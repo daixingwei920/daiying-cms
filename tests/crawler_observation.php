@@ -35,7 +35,7 @@ try{
     foreach([['not json','invalid_ledger'],[str_repeat('x',524289),'byte_limit']]as[$data,$reason]){file_put_contents($path,$data);requests($log,1);check($totals()[$reason]===1,'Primary failure observed: '.$reason);}
     $rows=[];for($i=0;$i<2000;$i++)$rows[]=['day'=>$today,'agent'=>'GPTBot','route'=>'/','status'=>$i,'hits'=>1];
     file_put_contents($path,json_encode($rows));requests($log,1);check($totals()['row_limit']===1&&count($log->rows())===2000,'Row capacity is distinguished from contention');
-    file_put_contents($path,json_encode([['day'=>$today,'agent'=>'Baiduspider','route'=>'/articles/{slug}','status'=>200,'hits'=>10000000]]));requests($log,1);
+    file_put_contents($path,json_encode([['day'=>$today,'agent'=>'Baiduspider','route'=>'/articles/{slug}','status'=>200,'hits'=>10000000,'verification'=>'source_unavailable']]));requests($log,1);
     check($totals()['hit_cap']===1&&$log->rows()[0]['hits']===10000000,'Saturated aggregate does not claim another stored request');
     unlink($path);mkdir($path);requests($log,1);rmdir($path);check($totals()['io_error']===1,'Non-file primary ledger fails closed with I/O observation');
     $target=$root.'/untouched';file_put_contents($target,'UNCHANGED');symlink($target,$path);requests($log,1);unlink($path);

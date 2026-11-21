@@ -444,6 +444,23 @@ final class CommerceRepository
         return $this->order($orderId) ?? [];
     }
 
+    /** Compatibility with the bundled restaurant; terminal orders must never accept a new claim. */
+    public function updatePendingOrderClaim(int $orderId, string $claim): void
+    {
+        if ($claim === '' || strlen($claim) > 128) {
+            throw new InvalidArgumentException('订单校验信息无效。');
+        }
+        $stmt = $this->pdo->prepare("UPDATE commerce_orders SET completion_claim = :claim, updated_at = :updated_at WHERE id = :id AND status = 'pending_payment'");
+        $stmt->execute([':id' => $orderId, ':claim' => $claim, ':updated_at' => gmdate('Y-m-d H:i:s')]);
+        if ($stmt->rowCount() !== 1) {
+            // Native MySQL reports zero changed rows for an identical same-second retry.
+            $order = $this->order($orderId);
+            if ($order === null || $order['status'] !== 'pending_payment' || !hash_equals((string) $order['completion_claim'], $claim)) {
+                throw new RuntimeException('只有待支付订单可以更新校验信息。');
+            }
+        }
+    }
+
     public function attachPayment(int $orderId, int $paymentId): void
     {
         $this->pdo->prepare('UPDATE commerce_orders SET payment_id = :payment_id, updated_at = :updated_at WHERE id = :id')
@@ -601,6 +618,12 @@ final class CommerceRepository
         $stmt->execute([':id' => $id]);
         $row = $stmt->fetch();
         return is_array($row) ? $this->hydrateJsonFields($row, ['snapshot_json']) : null;
+    }
+
+    /** Read Core's trusted ledger, never infer payment from the Commerce lifecycle alone. */
+    public function orderPaymentState(int $orderId, string $currency): array
+    {
+        return (new PaymentRepository($this->pdo))->trustedStatus('commerce_order', 'order:' . $orderId, $currency);
     }
 
     /** @return list<array<string,mixed>> */

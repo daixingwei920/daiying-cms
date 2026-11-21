@@ -4,6 +4,24 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized joint Core1.2.102 release (2026-11-21)
+
+- Owner additionally authorizes fixing bundled restaurant/Commerce compatibility after the full matrix reproduced the existing main failure. Backport only the two required Commerce helpers, preserve pending-only claim mutation and Core-ledger payment evidence, validate SQLite/native MySQL retries, and rerun complete supported tests before joint release. Do not upgrade or publish the independent market plugin or weaken the restaurant guard.
+- Owner explicitly requests publishing crawler source verification and the sidebar repair together after complete testing. This supersedes the prior publication pause for this combined candidate. Use clean `feat/crawler-source-verification`, preserving the frozen1.2.101 signed candidate and all published tags/artifacts.
+- Run the complete supported Core regression matrix, server-only key-generating contracts, exact clean merged-main preflight/build, official signing, signed parity and native signed fresh-install/upgrade/rollback/retry/HTTP acceptance before publication. Preserve Core1.2.80/PHP8.3 floors and published migrations. Never bypass integrity or release guards.
+- Merge and GitHub/official stable publication are authorized after passing gates, with a fresh distribution backup and protection checks. No production website upgrade, independent plugin publication, paid AI, real payment, proxy/Cron configuration change or consumer import. Official private keys remain on the update server.
+
+## Owner-authorized Core1.2.102 sidebar repair publication (2026-11-20)
+
+- Owner requests publication after successful tests. Use the clean fix/admin-sidebar-trim candidate based on actual main aeaf942, preserving its approved upstream changes. A signed1.2.101 preparation already exists and stays immutable/unpublished; prepare a distinct unused1.2.102 for this sidebar repair rather than overwrite or re-sign that candidate.
+- Freeze reviewed source, run PHP8.3/8.5 relevant regressions and server-only key-generating contract, then merge and run exact clean-main preflight/build, official signing, signed parity and native install/upgrade/rollback/retry/HTTP acceptance. Existing1.2.101 market rollback runtime is unchanged; retain its acceptance evidence.
+- Back up distribution and protect existing licenses, history and products before GitHub/official stable publication. No production website upgrade, independent plugin release, paid AI, real payment, consumer import, integrity bypass or local signing-key generation/export.
+
+## Isolated sidebar trim repair (2026-11-20)
+
+- Owner reports a sidebar decoration crossing the active crawler menu label. Clean fix/admin-sidebar-trim starts at actual origin/main aeaf942; remove only the absolutely positioned sidebar-bottom pseudo-element, retaining active-link frames and approved typography. Advance the shared admin asset cache token and rebuild the native Core manifest for View.php.
+- Validate the reproduced scroll/viewport collision and fixed rendering with the actual stylesheet, plus the existing admin UI regression. No version bump, merge, signing, publication or production edit is included. Preserve the separate1.2.101 market rollback preparation and all frozen artifacts.
+
 ## Core 1.2.101 market rollback release preparation (2026-11-19)
 
 - Owner authorizes review and merge of the market installer rollback repair, version preparation, exact-main Release Gate, official server signing and isolated signed upgrade/rollback validation. This authorization stops before publication or deployment.
@@ -515,3 +533,8 @@ See `docs/retired-products.md`.
 - Unified branch: `codex/core184-unified`; preserve GC 01/02 while merging the approved generic homepage/dispute contracts, payment fixes, and bounded advertising/payment facades.
 - Historical scope note: this integration was isolated at the time; publication and production actions require separate Owner authorization.
 - The existing private signing-key boundary above remains in force. Reuse only existing valid public test authorization envelopes through the native verifier; missing signing tests stay NOT VERIFIED.
+## Owner-authorized crawler source verification (2026-11-20)
+
+- Owner pauses the pending sidebar publication and requests real crawler verification: new requests only, official IP ranges or forward-confirmed reverse DNS, with smooth page access. Implement and test in the clean-start `feat/crawler-source-verification` worktree, preserving the sidebar preparation commit and frozen1.2.101 signed artifacts.
+- No publication, production deployment/upgrade, proxy configuration changes, private traffic inspection or historical source backfill. No real payment or paid AI. Background networking uses fixed official public endpoints; HTTP collection must not perform DNS/HTTPS/process creation or add scheduler database work.
+- Reuse existing CLI scheduler and encryption key, bounded nonblocking storage and honest mixed/unknown labels. Server-only key-generating contract checks remain applicable before Core commit. See `docs/crawler-source-verification.md`.
