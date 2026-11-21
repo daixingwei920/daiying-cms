@@ -1,0 +1,1865 @@
+{
+  "status": "FULL_SUPPORTED_MATRIX_PASS",
+  "source_commit": "7004f868211df4e5643213a43c08b2b9dc0bb542",
+  "candidate_tree_matches_merged_main": true,
+  "step_count": 263,
+  "steps": [
+    {
+      "name": "83-active_release_bootstrap",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 1,
+      "skip": false
+    },
+    {
+      "name": "83-active_release_integrity_target",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 9,
+      "skip": false
+    },
+    {
+      "name": "83-admin_compact_workspaces",
+      "exit_code": 0,
+      "seconds": 0.37,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-admin_data_workspace",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 16,
+      "skip": false
+    },
+    {
+      "name": "83-admin_layout_scroll_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-admin_market_trust_grant_authorization",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 7,
+      "skip": false
+    },
+    {
+      "name": "83-admin_passkey_reauthentication",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 11,
+      "skip": false
+    },
+    {
+      "name": "83-admin_starship",
+      "exit_code": 0,
+      "seconds": 0.42,
+      "checks": 27,
+      "skip": false
+    },
+    {
+      "name": "83-admin_update_flow",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 11,
+      "skip": false
+    },
+    {
+      "name": "83-ai_foundation_v1",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 22,
+      "skip": false
+    },
+    {
+      "name": "83-ai_images",
+      "exit_code": 0,
+      "seconds": 0.36,
+      "checks": 31,
+      "skip": false
+    },
+    {
+      "name": "83-ai_images_concurrency",
+      "exit_code": 0,
+      "seconds": 0.67,
+      "checks": 2,
+      "skip": false
+    },
+    {
+      "name": "83-ai_images_direct",
+      "exit_code": 0,
+      "seconds": 0.36,
+      "checks": 19,
+      "skip": false
+    },
+    {
+      "name": "83-baidu_plugin_availability_ui",
+      "exit_code": 0,
+      "seconds": 0.26,
+      "checks": 14,
+      "skip": false
+    },
+    {
+      "name": "83-baidu_storage_provider_contract",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-base_path_deployment",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 23,
+      "skip": false
+    },
+    {
+      "name": "83-bundled_commerce_compatibility",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 12,
+      "skip": false
+    },
+    {
+      "name": "83-card_delivery_native_prepare_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 11,
+      "skip": false
+    },
+    {
+      "name": "83-commerce_v1_contract",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-content_adjacent_view_model",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 9,
+      "skip": false
+    },
+    {
+      "name": "83-content_book_title_slug",
+      "exit_code": 0,
+      "seconds": 0.62,
+      "checks": 54,
+      "skip": false
+    },
+    {
+      "name": "83-content_category_slug_preservation",
+      "exit_code": 0,
+      "seconds": 0.31,
+      "checks": 8,
+      "skip": false
+    },
+    {
+      "name": "83-content_editor_utf8_save",
+      "exit_code": 0,
+      "seconds": 0.57,
+      "checks": 59,
+      "skip": false
+    },
+    {
+      "name": "83-content_foundation_safety",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 18,
+      "skip": false
+    },
+    {
+      "name": "83-content_keywords_render_regression",
+      "exit_code": 0,
+      "seconds": 0.37,
+      "checks": 4,
+      "skip": false
+    },
+    {
+      "name": "83-content_paragraph_multiline_rendering",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 9,
+      "skip": false
+    },
+    {
+      "name": "83-content_patch_release_regression",
+      "exit_code": 0,
+      "seconds": 0.36,
+      "checks": 35,
+      "skip": false
+    },
+    {
+      "name": "83-content_public_paid_view",
+      "exit_code": 0,
+      "seconds": 0.72,
+      "checks": 29,
+      "skip": false
+    },
+    {
+      "name": "83-core_ai_gpt5_parameters",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 41,
+      "skip": false
+    },
+    {
+      "name": "83-core_ai_local_openclaw",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 26,
+      "skip": false
+    },
+    {
+      "name": "83-core_ai_settings",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 36,
+      "skip": false
+    },
+    {
+      "name": "83-core_boundary_legacy_shell_dirs",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-core_mail_infrastructure",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 16,
+      "skip": false
+    },
+    {
+      "name": "83-core_notifications",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 27,
+      "skip": false
+    },
+    {
+      "name": "83-core_sitemap",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 42,
+      "skip": false
+    },
+    {
+      "name": "83-crawler_log_concurrency",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 1,
+      "skip": false
+    },
+    {
+      "name": "83-crawler_log_sampling",
+      "exit_code": 0,
+      "seconds": 0.21,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-crawler_observation",
+      "exit_code": 0,
+      "seconds": 0.12,
+      "checks": 24,
+      "skip": false
+    },
+    {
+      "name": "83-crawler_source_verification",
+      "exit_code": 0,
+      "seconds": 0.36,
+      "checks": 87,
+      "skip": false
+    },
+    {
+      "name": "83-crawler_statistics",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 93,
+      "skip": false
+    },
+    {
+      "name": "83-direct_upgrade_182_contract",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 8,
+      "skip": false
+    },
+    {
+      "name": "83-foundation_boundary_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 10,
+      "skip": false
+    },
+    {
+      "name": "83-foundation_public_api_storage_v1",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 27,
+      "skip": false
+    },
+    {
+      "name": "83-foundation_system_services",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 35,
+      "skip": false
+    },
+    {
+      "name": "83-frontend_extension_api",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 20,
+      "skip": false
+    },
+    {
+      "name": "83-frozen_migration_checksums",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 3,
+      "skip": false
+    },
+    {
+      "name": "83-gemini_provider_client",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 7,
+      "skip": false
+    },
+    {
+      "name": "83-historical_article_seo_backfill",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 22,
+      "skip": false
+    },
+    {
+      "name": "83-homepage_source_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 19,
+      "skip": false
+    },
+    {
+      "name": "83-install_safety_closeout_contract",
+      "exit_code": 0,
+      "seconds": 0.57,
+      "checks": 14,
+      "skip": false
+    },
+    {
+      "name": "83-market_api_plugin_enable",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 4,
+      "skip": false
+    },
+    {
+      "name": "83-market_install_lock_lifecycle",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 3,
+      "skip": false
+    },
+    {
+      "name": "83-market_plugin_migrations",
+      "exit_code": 0,
+      "seconds": 5.18,
+      "checks": 66,
+      "skip": false
+    },
+    {
+      "name": "83-market_review_submission_payment_provider",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 5,
+      "skip": false
+    },
+    {
+      "name": "83-market_search_pagination",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 22,
+      "skip": false
+    },
+    {
+      "name": "83-market_theme_hyphen_extension_id",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 12,
+      "skip": false
+    },
+    {
+      "name": "83-member_editorial_access",
+      "exit_code": 0,
+      "seconds": 0.67,
+      "checks": 287,
+      "skip": false
+    },
+    {
+      "name": "83-member_editorial_migration",
+      "exit_code": 0,
+      "seconds": 0.32,
+      "checks": 10,
+      "skip": false
+    },
+    {
+      "name": "83-navigation_groups",
+      "exit_code": 0,
+      "seconds": 0.47,
+      "checks": 40,
+      "skip": false
+    },
+    {
+      "name": "83-official_affiliate_hub_cj_adapter",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 15,
+      "skip": false
+    },
+    {
+      "name": "83-official_affiliate_hub_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 39,
+      "skip": false
+    },
+    {
+      "name": "83-official_baidu_url_submission",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 18,
+      "skip": false
+    },
+    {
+      "name": "83-official_mail_contract",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 72,
+      "skip": false
+    },
+    {
+      "name": "83-official_restaurant_contract",
+      "exit_code": 0,
+      "seconds": 1.12,
+      "checks": 101,
+      "skip": false
+    },
+    {
+      "name": "83-official_restaurant_order_receipt",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 31,
+      "skip": false
+    },
+    {
+      "name": "83-official_restaurant_print_bridge",
+      "exit_code": 0,
+      "seconds": 2.67,
+      "checks": 53,
+      "skip": false
+    },
+    {
+      "name": "83-official_restaurant_tax",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 41,
+      "skip": false
+    },
+    {
+      "name": "83-payment_checkout_recovery",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 11,
+      "skip": false
+    },
+    {
+      "name": "83-payment_configured_redirect_policy",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 12,
+      "skip": false
+    },
+    {
+      "name": "83-payment_dispute_contract",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 6,
+      "skip": false
+    },
+    {
+      "name": "83-payment_provider_config_currency_filter",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 6,
+      "skip": false
+    },
+    {
+      "name": "83-payment_provider_save_sqlite",
+      "exit_code": 0,
+      "seconds": 2.62,
+      "checks": 8,
+      "skip": false
+    },
+    {
+      "name": "83-payment_refund_webhook_idempotency",
+      "exit_code": 0,
+      "seconds": 0.21,
+      "checks": 22,
+      "skip": false
+    },
+    {
+      "name": "83-payment_sqlite_transaction_contract",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 27,
+      "skip": false
+    },
+    {
+      "name": "83-payment_status_native_prepare_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 18,
+      "skip": false
+    },
+    {
+      "name": "83-phase1_passkey_ai_writing",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 17,
+      "skip": false
+    },
+    {
+      "name": "83-plugin_advertising_payment_contract",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 51,
+      "skip": false
+    },
+    {
+      "name": "83-plugin_branding_documents",
+      "exit_code": 0,
+      "seconds": 0.31,
+      "checks": 14,
+      "skip": false
+    },
+    {
+      "name": "83-plugin_data_scope_index",
+      "exit_code": 0,
+      "seconds": 0.92,
+      "checks": 10,
+      "skip": false
+    },
+    {
+      "name": "83-plugin_decoupling_foundation",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 32,
+      "skip": false
+    },
+    {
+      "name": "83-plugin_enable_runtime_version",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 1,
+      "skip": false
+    },
+    {
+      "name": "83-plugin_license_service_v1",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 18,
+      "skip": false
+    },
+    {
+      "name": "83-plugin_package_manifest_scan",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 18,
+      "skip": false
+    },
+    {
+      "name": "83-plugin_payment_permission_admin_guard",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 9,
+      "skip": false
+    },
+    {
+      "name": "83-plugin_payment_permission_decision_contract",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 31,
+      "skip": false
+    },
+    {
+      "name": "83-plugin_sdk_foundation_v1",
+      "exit_code": 0,
+      "seconds": 0.21,
+      "checks": 34,
+      "skip": false
+    },
+    {
+      "name": "83-plugin_sitemap_registry",
+      "exit_code": 0,
+      "seconds": 0.42,
+      "checks": 73,
+      "skip": false
+    },
+    {
+      "name": "83-plugin_trust_capability_validation",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 9,
+      "skip": false
+    },
+    {
+      "name": "83-provider_capability_gate_hardening",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 9,
+      "skip": false
+    },
+    {
+      "name": "83-release_gate_v1_contract",
+      "exit_code": 0,
+      "seconds": 16.5,
+      "checks": 4,
+      "skip": false
+    },
+    {
+      "name": "83-release_phase0_gate",
+      "exit_code": 0,
+      "seconds": 67.51,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-rest_api_v1",
+      "exit_code": 0,
+      "seconds": 0.26,
+      "checks": 28,
+      "skip": false
+    },
+    {
+      "name": "83-restaurant_admin_settings",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 31,
+      "skip": false
+    },
+    {
+      "name": "83-restaurant_pos",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 84,
+      "skip": false
+    },
+    {
+      "name": "83-restaurant_preferred_language",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 28,
+      "skip": false
+    },
+    {
+      "name": "83-restaurant_theme_contract",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 37,
+      "skip": false
+    },
+    {
+      "name": "83-retired_products_distribution",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-scheduler_cli_runner",
+      "exit_code": 0,
+      "seconds": 0.26,
+      "checks": 8,
+      "skip": false
+    },
+    {
+      "name": "83-scheduler_plugin_lifecycle_regression",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 15,
+      "skip": false
+    },
+    {
+      "name": "83-seo_geo",
+      "exit_code": 0,
+      "seconds": 0.87,
+      "checks": 65,
+      "skip": false
+    },
+    {
+      "name": "83-seo_keyword_center_p2",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 40,
+      "skip": false
+    },
+    {
+      "name": "83-seo_lifecycle_p4_1",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 36,
+      "skip": false
+    },
+    {
+      "name": "83-seo_search_engine_p3",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 15,
+      "skip": false
+    },
+    {
+      "name": "83-seo_search_metrics_p4_2",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 30,
+      "skip": false
+    },
+    {
+      "name": "83-site_icp_settings",
+      "exit_code": 0,
+      "seconds": 0.47,
+      "checks": 29,
+      "skip": false
+    },
+    {
+      "name": "83-stripe_checkout_url_validator",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 17,
+      "skip": false
+    },
+    {
+      "name": "83-system_health_foundation",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 3,
+      "skip": false
+    },
+    {
+      "name": "83-theme_api_v1",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 15,
+      "skip": false
+    },
+    {
+      "name": "83-theme_asset_serving_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 28,
+      "skip": false
+    },
+    {
+      "name": "83-theme_runtime_settings_context",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 2,
+      "skip": false
+    },
+    {
+      "name": "83-updater_runtime_boundary",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 3,
+      "skip": false
+    },
+    {
+      "name": "83-updater_runtime_bridge_preflight",
+      "exit_code": 0,
+      "seconds": 0.31,
+      "checks": 13,
+      "skip": false
+    },
+    {
+      "name": "83-knowledge-strict",
+      "exit_code": 0,
+      "seconds": 0.31,
+      "checks": 1,
+      "skip": false
+    },
+    {
+      "name": "83-knowledge-provenance",
+      "exit_code": 0,
+      "seconds": 0.67,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-admin_data_workspace_http",
+      "exit_code": 0,
+      "seconds": 2.07,
+      "checks": 23,
+      "skip": false
+    },
+    {
+      "name": "83-crawler_source_http",
+      "exit_code": 0,
+      "seconds": 1.77,
+      "checks": 16,
+      "skip": false
+    },
+    {
+      "name": "83-rest_media_v1_http",
+      "exit_code": 0,
+      "seconds": 2.67,
+      "checks": 32,
+      "skip": false
+    },
+    {
+      "name": "83-historical_optimizer_http",
+      "exit_code": 0,
+      "seconds": 2.92,
+      "checks": 31,
+      "skip": false
+    },
+    {
+      "name": "83-content-put-meta-http",
+      "exit_code": 0,
+      "seconds": 2.57,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-source-roundtrip",
+      "exit_code": 0,
+      "seconds": 1.27,
+      "checks": 1,
+      "skip": false
+    },
+    {
+      "name": "85-active_release_bootstrap",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 1,
+      "skip": false
+    },
+    {
+      "name": "85-active_release_integrity_target",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 9,
+      "skip": false
+    },
+    {
+      "name": "85-admin_compact_workspaces",
+      "exit_code": 0,
+      "seconds": 0.37,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-admin_data_workspace",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 16,
+      "skip": false
+    },
+    {
+      "name": "85-admin_layout_scroll_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-admin_market_trust_grant_authorization",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 7,
+      "skip": false
+    },
+    {
+      "name": "85-admin_passkey_reauthentication",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 11,
+      "skip": false
+    },
+    {
+      "name": "85-admin_starship",
+      "exit_code": 0,
+      "seconds": 0.47,
+      "checks": 27,
+      "skip": false
+    },
+    {
+      "name": "85-admin_update_flow",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 11,
+      "skip": false
+    },
+    {
+      "name": "85-ai_foundation_v1",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 22,
+      "skip": false
+    },
+    {
+      "name": "85-ai_images",
+      "exit_code": 0,
+      "seconds": 0.42,
+      "checks": 31,
+      "skip": false
+    },
+    {
+      "name": "85-ai_images_concurrency",
+      "exit_code": 0,
+      "seconds": 0.72,
+      "checks": 2,
+      "skip": false
+    },
+    {
+      "name": "85-ai_images_direct",
+      "exit_code": 0,
+      "seconds": 0.36,
+      "checks": 19,
+      "skip": false
+    },
+    {
+      "name": "85-baidu_plugin_availability_ui",
+      "exit_code": 0,
+      "seconds": 0.26,
+      "checks": 14,
+      "skip": false
+    },
+    {
+      "name": "85-baidu_storage_provider_contract",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-base_path_deployment",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 23,
+      "skip": false
+    },
+    {
+      "name": "85-bundled_commerce_compatibility",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 12,
+      "skip": false
+    },
+    {
+      "name": "85-card_delivery_native_prepare_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 11,
+      "skip": false
+    },
+    {
+      "name": "85-commerce_v1_contract",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-content_adjacent_view_model",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 9,
+      "skip": false
+    },
+    {
+      "name": "85-content_book_title_slug",
+      "exit_code": 0,
+      "seconds": 0.67,
+      "checks": 54,
+      "skip": false
+    },
+    {
+      "name": "85-content_category_slug_preservation",
+      "exit_code": 0,
+      "seconds": 0.31,
+      "checks": 8,
+      "skip": false
+    },
+    {
+      "name": "85-content_editor_utf8_save",
+      "exit_code": 0,
+      "seconds": 1.02,
+      "checks": 59,
+      "skip": false
+    },
+    {
+      "name": "85-content_foundation_safety",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 18,
+      "skip": false
+    },
+    {
+      "name": "85-content_keywords_render_regression",
+      "exit_code": 0,
+      "seconds": 0.42,
+      "checks": 4,
+      "skip": false
+    },
+    {
+      "name": "85-content_paragraph_multiline_rendering",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 9,
+      "skip": false
+    },
+    {
+      "name": "85-content_patch_release_regression",
+      "exit_code": 0,
+      "seconds": 0.42,
+      "checks": 35,
+      "skip": false
+    },
+    {
+      "name": "85-content_public_paid_view",
+      "exit_code": 0,
+      "seconds": 0.77,
+      "checks": 29,
+      "skip": false
+    },
+    {
+      "name": "85-core_ai_gpt5_parameters",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 41,
+      "skip": false
+    },
+    {
+      "name": "85-core_ai_local_openclaw",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 26,
+      "skip": false
+    },
+    {
+      "name": "85-core_ai_settings",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 36,
+      "skip": false
+    },
+    {
+      "name": "85-core_boundary_legacy_shell_dirs",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-core_mail_infrastructure",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 16,
+      "skip": false
+    },
+    {
+      "name": "85-core_notifications",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 27,
+      "skip": false
+    },
+    {
+      "name": "85-core_sitemap",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 42,
+      "skip": false
+    },
+    {
+      "name": "85-crawler_log_concurrency",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 1,
+      "skip": false
+    },
+    {
+      "name": "85-crawler_log_sampling",
+      "exit_code": 0,
+      "seconds": 0.22,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-crawler_observation",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 24,
+      "skip": false
+    },
+    {
+      "name": "85-crawler_source_verification",
+      "exit_code": 0,
+      "seconds": 0.42,
+      "checks": 87,
+      "skip": false
+    },
+    {
+      "name": "85-crawler_statistics",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 93,
+      "skip": false
+    },
+    {
+      "name": "85-direct_upgrade_182_contract",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 8,
+      "skip": false
+    },
+    {
+      "name": "85-foundation_boundary_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 10,
+      "skip": false
+    },
+    {
+      "name": "85-foundation_public_api_storage_v1",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 27,
+      "skip": false
+    },
+    {
+      "name": "85-foundation_system_services",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 35,
+      "skip": false
+    },
+    {
+      "name": "85-frontend_extension_api",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 20,
+      "skip": false
+    },
+    {
+      "name": "85-frozen_migration_checksums",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 3,
+      "skip": false
+    },
+    {
+      "name": "85-gemini_provider_client",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 7,
+      "skip": false
+    },
+    {
+      "name": "85-historical_article_seo_backfill",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 22,
+      "skip": false
+    },
+    {
+      "name": "85-homepage_source_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 19,
+      "skip": false
+    },
+    {
+      "name": "85-install_safety_closeout_contract",
+      "exit_code": 0,
+      "seconds": 1.07,
+      "checks": 14,
+      "skip": false
+    },
+    {
+      "name": "85-market_api_plugin_enable",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 4,
+      "skip": false
+    },
+    {
+      "name": "85-market_install_lock_lifecycle",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 3,
+      "skip": false
+    },
+    {
+      "name": "85-market_plugin_migrations",
+      "exit_code": 0,
+      "seconds": 5.23,
+      "checks": 66,
+      "skip": false
+    },
+    {
+      "name": "85-market_review_submission_payment_provider",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 5,
+      "skip": false
+    },
+    {
+      "name": "85-market_search_pagination",
+      "exit_code": 0,
+      "seconds": 0.32,
+      "checks": 22,
+      "skip": false
+    },
+    {
+      "name": "85-market_theme_hyphen_extension_id",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 12,
+      "skip": false
+    },
+    {
+      "name": "85-member_editorial_access",
+      "exit_code": 0,
+      "seconds": 1.77,
+      "checks": 287,
+      "skip": false
+    },
+    {
+      "name": "85-member_editorial_migration",
+      "exit_code": 0,
+      "seconds": 0.31,
+      "checks": 10,
+      "skip": false
+    },
+    {
+      "name": "85-navigation_groups",
+      "exit_code": 0,
+      "seconds": 0.87,
+      "checks": 40,
+      "skip": false
+    },
+    {
+      "name": "85-official_affiliate_hub_cj_adapter",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 15,
+      "skip": false
+    },
+    {
+      "name": "85-official_affiliate_hub_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 39,
+      "skip": false
+    },
+    {
+      "name": "85-official_baidu_url_submission",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 18,
+      "skip": false
+    },
+    {
+      "name": "85-official_mail_contract",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 72,
+      "skip": false
+    },
+    {
+      "name": "85-official_restaurant_contract",
+      "exit_code": 0,
+      "seconds": 2.97,
+      "checks": 101,
+      "skip": false
+    },
+    {
+      "name": "85-official_restaurant_order_receipt",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 31,
+      "skip": false
+    },
+    {
+      "name": "85-official_restaurant_print_bridge",
+      "exit_code": 0,
+      "seconds": 10.44,
+      "checks": 53,
+      "skip": false
+    },
+    {
+      "name": "85-official_restaurant_tax",
+      "exit_code": 0,
+      "seconds": 0.07,
+      "checks": 41,
+      "skip": false
+    },
+    {
+      "name": "85-payment_checkout_recovery",
+      "exit_code": 0,
+      "seconds": 0.12,
+      "checks": 11,
+      "skip": false
+    },
+    {
+      "name": "85-payment_configured_redirect_policy",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 12,
+      "skip": false
+    },
+    {
+      "name": "85-payment_dispute_contract",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 6,
+      "skip": false
+    },
+    {
+      "name": "85-payment_provider_config_currency_filter",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 6,
+      "skip": false
+    },
+    {
+      "name": "85-payment_provider_save_sqlite",
+      "exit_code": 0,
+      "seconds": 3.02,
+      "checks": 8,
+      "skip": false
+    },
+    {
+      "name": "85-payment_refund_webhook_idempotency",
+      "exit_code": 0,
+      "seconds": 0.21,
+      "checks": 22,
+      "skip": false
+    },
+    {
+      "name": "85-payment_sqlite_transaction_contract",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 27,
+      "skip": false
+    },
+    {
+      "name": "85-payment_status_native_prepare_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 18,
+      "skip": false
+    },
+    {
+      "name": "85-phase1_passkey_ai_writing",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 17,
+      "skip": false
+    },
+    {
+      "name": "85-plugin_advertising_payment_contract",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 51,
+      "skip": false
+    },
+    {
+      "name": "85-plugin_branding_documents",
+      "exit_code": 0,
+      "seconds": 0.31,
+      "checks": 14,
+      "skip": false
+    },
+    {
+      "name": "85-plugin_data_scope_index",
+      "exit_code": 0,
+      "seconds": 0.82,
+      "checks": 10,
+      "skip": false
+    },
+    {
+      "name": "85-plugin_decoupling_foundation",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 32,
+      "skip": false
+    },
+    {
+      "name": "85-plugin_enable_runtime_version",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 1,
+      "skip": false
+    },
+    {
+      "name": "85-plugin_license_service_v1",
+      "exit_code": 0,
+      "seconds": 0.26,
+      "checks": 18,
+      "skip": false
+    },
+    {
+      "name": "85-plugin_package_manifest_scan",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 18,
+      "skip": false
+    },
+    {
+      "name": "85-plugin_payment_permission_admin_guard",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 9,
+      "skip": false
+    },
+    {
+      "name": "85-plugin_payment_permission_decision_contract",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 31,
+      "skip": false
+    },
+    {
+      "name": "85-plugin_sdk_foundation_v1",
+      "exit_code": 0,
+      "seconds": 0.57,
+      "checks": 34,
+      "skip": false
+    },
+    {
+      "name": "85-plugin_sitemap_registry",
+      "exit_code": 0,
+      "seconds": 0.42,
+      "checks": 73,
+      "skip": false
+    },
+    {
+      "name": "85-plugin_trust_capability_validation",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 9,
+      "skip": false
+    },
+    {
+      "name": "85-provider_capability_gate_hardening",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 9,
+      "skip": false
+    },
+    {
+      "name": "85-release_gate_v1_contract",
+      "exit_code": 0,
+      "seconds": 16.8,
+      "checks": 4,
+      "skip": false
+    },
+    {
+      "name": "85-release_phase0_gate",
+      "exit_code": 0,
+      "seconds": 68.6,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-rest_api_v1",
+      "exit_code": 0,
+      "seconds": 0.62,
+      "checks": 28,
+      "skip": false
+    },
+    {
+      "name": "85-restaurant_admin_settings",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 31,
+      "skip": false
+    },
+    {
+      "name": "85-restaurant_pos",
+      "exit_code": 0,
+      "seconds": 0.21,
+      "checks": 84,
+      "skip": false
+    },
+    {
+      "name": "85-restaurant_preferred_language",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 28,
+      "skip": false
+    },
+    {
+      "name": "85-restaurant_theme_contract",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 37,
+      "skip": false
+    },
+    {
+      "name": "85-retired_products_distribution",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-scheduler_cli_runner",
+      "exit_code": 0,
+      "seconds": 0.26,
+      "checks": 8,
+      "skip": false
+    },
+    {
+      "name": "85-scheduler_plugin_lifecycle_regression",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 15,
+      "skip": false
+    },
+    {
+      "name": "85-seo_geo",
+      "exit_code": 0,
+      "seconds": 1.42,
+      "checks": 65,
+      "skip": false
+    },
+    {
+      "name": "85-seo_keyword_center_p2",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 40,
+      "skip": false
+    },
+    {
+      "name": "85-seo_lifecycle_p4_1",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 36,
+      "skip": false
+    },
+    {
+      "name": "85-seo_search_engine_p3",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 15,
+      "skip": false
+    },
+    {
+      "name": "85-seo_search_metrics_p4_2",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 30,
+      "skip": false
+    },
+    {
+      "name": "85-site_icp_settings",
+      "exit_code": 0,
+      "seconds": 0.87,
+      "checks": 29,
+      "skip": false
+    },
+    {
+      "name": "85-stripe_checkout_url_validator",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 17,
+      "skip": false
+    },
+    {
+      "name": "85-system_health_foundation",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 3,
+      "skip": false
+    },
+    {
+      "name": "85-theme_api_v1",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 15,
+      "skip": false
+    },
+    {
+      "name": "85-theme_asset_serving_contract",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 28,
+      "skip": false
+    },
+    {
+      "name": "85-theme_runtime_settings_context",
+      "exit_code": 0,
+      "seconds": 0.03,
+      "checks": 2,
+      "skip": false
+    },
+    {
+      "name": "85-updater_runtime_boundary",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 3,
+      "skip": false
+    },
+    {
+      "name": "85-updater_runtime_bridge_preflight",
+      "exit_code": 0,
+      "seconds": 0.36,
+      "checks": 13,
+      "skip": false
+    },
+    {
+      "name": "85-knowledge-strict",
+      "exit_code": 0,
+      "seconds": 0.31,
+      "checks": 1,
+      "skip": false
+    },
+    {
+      "name": "85-knowledge-provenance",
+      "exit_code": 0,
+      "seconds": 0.67,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-admin_data_workspace_http",
+      "exit_code": 0,
+      "seconds": 2.42,
+      "checks": 23,
+      "skip": false
+    },
+    {
+      "name": "85-crawler_source_http",
+      "exit_code": 0,
+      "seconds": 2.12,
+      "checks": 16,
+      "skip": false
+    },
+    {
+      "name": "85-rest_media_v1_http",
+      "exit_code": 0,
+      "seconds": 2.57,
+      "checks": 32,
+      "skip": false
+    },
+    {
+      "name": "85-historical_optimizer_http",
+      "exit_code": 0,
+      "seconds": 2.07,
+      "checks": 31,
+      "skip": false
+    },
+    {
+      "name": "85-content-put-meta-http",
+      "exit_code": 0,
+      "seconds": 2.07,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-source-roundtrip",
+      "exit_code": 0,
+      "seconds": 1.62,
+      "checks": 1,
+      "skip": false
+    },
+    {
+      "name": "gitee-sync-unit",
+      "exit_code": 0,
+      "seconds": 0.31,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "mysql8-initialize",
+      "exit_code": 0,
+      "seconds": 3.18,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-mysql-mysql_full_install_contract",
+      "exit_code": 0,
+      "seconds": 3.87,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-mysql-mysql_migration_recovery_contract",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-mysql_payment_callback_concurrency-schema",
+      "exit_code": 0,
+      "seconds": 2.62,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "83-mysql-mysql_payment_callback_concurrency",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 3,
+      "skip": false
+    },
+    {
+      "name": "83-mysql-plugin_payment_permission_mysql_contract",
+      "exit_code": 0,
+      "seconds": 0.52,
+      "checks": 13,
+      "skip": false
+    },
+    {
+      "name": "83-mysql-bundled_commerce_compatibility",
+      "exit_code": 0,
+      "seconds": 3.17,
+      "checks": 12,
+      "skip": false
+    },
+    {
+      "name": "83-mysql-seo_geo",
+      "exit_code": 0,
+      "seconds": 3.17,
+      "checks": 65,
+      "skip": false
+    },
+    {
+      "name": "83-mysql-plugin_sitemap_registry",
+      "exit_code": 0,
+      "seconds": 3.57,
+      "checks": 73,
+      "skip": false
+    },
+    {
+      "name": "83-mysql-market_install_lock_lifecycle",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 3,
+      "skip": false
+    },
+    {
+      "name": "85-mysql-mysql_full_install_contract",
+      "exit_code": 0,
+      "seconds": 4.47,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-mysql-mysql_migration_recovery_contract",
+      "exit_code": 0,
+      "seconds": 0.16,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-mysql_payment_callback_concurrency-schema",
+      "exit_code": 0,
+      "seconds": 2.87,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-mysql-mysql_payment_callback_concurrency",
+      "exit_code": 0,
+      "seconds": 0.11,
+      "checks": 3,
+      "skip": false
+    },
+    {
+      "name": "85-mysql-plugin_payment_permission_mysql_contract",
+      "exit_code": 0,
+      "seconds": 0.52,
+      "checks": 13,
+      "skip": false
+    },
+    {
+      "name": "85-mysql-bundled_commerce_compatibility",
+      "exit_code": 0,
+      "seconds": 3.52,
+      "checks": 12,
+      "skip": false
+    },
+    {
+      "name": "85-mysql-seo_geo",
+      "exit_code": 0,
+      "seconds": 3.87,
+      "checks": 65,
+      "skip": false
+    },
+    {
+      "name": "85-mysql-plugin_sitemap_registry",
+      "exit_code": 0,
+      "seconds": 2.87,
+      "checks": 73,
+      "skip": false
+    },
+    {
+      "name": "85-mysql-market_install_lock_lifecycle",
+      "exit_code": 0,
+      "seconds": 0.06,
+      "checks": 3,
+      "skip": false
+    },
+    {
+      "name": "83-real-curl-timeout",
+      "exit_code": 0,
+      "seconds": 120.03,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "85-real-curl-timeout",
+      "exit_code": 0,
+      "seconds": 120.07,
+      "checks": 0,
+      "skip": false
+    },
+    {
+      "name": "workstation-node-restaurant-language",
+      "exit_code": 0,
+      "skip": false,
+      "checks": 34,
+      "seconds": 0
+    }
+  ],
+  "not_automated": {
+    "retired/": "retired product tests outside supported Core",
+    "ai_images_live.php": "paid live opt-in excluded",
+    "commerce_ai_deepseek_live.php": "paid live opt-in excluded",
+    "official_affiliate_hub_cj_live.php": "real supplier/account opt-in excluded",
+    "cross_version_fixture_upgrade.php": "historical RSA1.2.52 below supported1.2.80 floor; modern signed acceptance separate",
+    "fresh_install_package_contract.php": "deferred to final officially signed package"
+  },
+  "preserved_failures": [
+    "Original main and pre-repair matrix restaurant failure retained; bundled compatibility repaired with Owner authorization.",
+    "Disposable MySQL fixture initially included private site config; corrected test packaging exclusion without changing installer guard.",
+    "Native wrapper indentation initially omitted setup files; corrected external wrapper, retained failure and unchanged signed artifacts."
+  ],
+  "production_modified": false,
+  "live_paid_services": false,
+  "deferred_fresh_install_completed": "PASS: final officially signed installer fresh HTTP9 and bundled compatibility12 per PHP8.3/8.5; see publication evidence"
+}

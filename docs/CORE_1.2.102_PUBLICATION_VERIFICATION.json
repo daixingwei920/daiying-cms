@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Anonymous GitHub latest is stable1.2.102",
+    "GitHub target is exact frozen source",
+    "Seven release attachments",
+    "GitHub digest daiying-cms-1.2.102-stable.manifest.json",
+    "GitHub digest daiying-cms-1.2.102-stable.zip",
+    "GitHub digest daiying-cms-1.2.102-stable.zip.sha256",
+    "GitHub digest daiying-cms-1.2.102-stable.zip.signature.json",
+    "GitHub digest daiying-cms-core-update-1.2.102.zip",
+    "GitHub digest daiying-cms-core-update-1.2.102.zip.sha256",
+    "GitHub digest daiying-cms-core-update-1.2.102.zip.signature.json",
+    "Official stable offers1.2.102 from1.2.100",
+    "Anonymous GitHub downloaded bytes daiying-cms-1.2.102-stable.zip",
+    "Anonymous GitHub downloaded bytes daiying-cms-core-update-1.2.102.zip",
+    "Official downloaded update equals frozen signed bytes",
+    "Upgrade selection boundary 1.2.80",
+    "Upgrade selection boundary 1.2.102"
+  ],
+  "github_url": "https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.102",
+  "official_package_url": "https://updates.daiyingcms.com/api/v1/packages/daiying.cms%3A1.2.102%3Astable?source_version=1.2.100&site_id=&php_version=8.3.33&expected_product=daiying.cms&expected_channel=stable&expected_sha256=24b8b43281f94a93ff2dbb7dcdbd01d044e41d4d61cf63e593f4ab4c4db1c573",
+  "production_site_upgrade": false
+}

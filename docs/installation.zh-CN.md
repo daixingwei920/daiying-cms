@@ -2,7 +2,7 @@
 
 [返回中文项目介绍](../README.zh-CN.md) · [English](installation.md) · [官网中文文档](https://www.daiyingcms.com/docs)
 
-本教程面向首次部署的站长，依据 Core **1.2.100** 正式发布包与安装器流程整理。正式版发布于 **2026-11-16**；GitHub `main` 可能包含尚未发布的维护代码，请以[正式 Release](https://github.com/daixingwei920/daiying-cms/releases/latest)选择安装包。已有站点请先备份，再按[原生更新流程](update-system.md)升级。
+本教程面向首次部署的站长，依据 Core **1.2.102** 正式发布包与安装器流程整理。正式版发布于 **2026-11-21**；GitHub `main` 可能包含尚未发布的维护代码，请以[正式 Release](https://github.com/daixingwei920/daiying-cms/releases/latest)选择安装包。已有站点请先备份，再按[原生更新流程](update-system.md)升级。
 
 ## 环境准备
 
@@ -18,25 +18,27 @@
 
 ## 下载与校验
 
-国内用户可从 [Gitee v1.2.100 发行版](https://gitee.com/daiyingcms/daiying-cms/releases/tag/v1.2.100)直接下载，或从[官方 GitHub v1.2.100 Release](https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.100)获取相同原文件：
+从 [官方 GitHub v1.2.102 Release](https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.102) 下载：
 
-- [Gitee 完整安装包：daiying-cms-1.2.100-stable.zip](https://gitee.com/daiyingcms/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip)（[GitHub 原文件](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip)）
-- [Gitee SHA-256 文件](https://gitee.com/daiyingcms/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.sha256)（[GitHub 原文件](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.sha256)）
-- [Gitee 签名信息](https://gitee.com/daiyingcms/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.signature.json)（[GitHub 原文件](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.signature.json)）
+- [完整安装包：daiying-cms-1.2.102-stable.zip](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.102/daiying-cms-1.2.102-stable.zip)
+- [SHA-256 文件](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.102/daiying-cms-1.2.102-stable.zip.sha256)
+- [签名信息](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.102/daiying-cms-1.2.102-stable.zip.signature.json)
+
+Gitee 已核验的附件镜像仍为 [旧版1.2.100](https://gitee.com/daiyingcms/daiying-cms/releases/tag/v1.2.100)；本教程使用 GitHub1.2.102 原文件。
 
 Linux 在下载目录执行：
 
 ```sh
-sha256sum -c daiying-cms-1.2.100-stable.zip.sha256
+sha256sum -c daiying-cms-1.2.102-stable.zip.sha256
 ```
 
-macOS 使用 `shasum -a 256 daiying-cms-1.2.100-stable.zip`；Windows PowerShell 使用 `Get-FileHash .\daiying-cms-1.2.100-stable.zip -Algorithm SHA256`。结果应为：
+macOS 使用 `shasum -a 256 daiying-cms-1.2.102-stable.zip`；Windows PowerShell 使用 `Get-FileHash .\daiying-cms-1.2.102-stable.zip -Algorithm SHA256`。结果应为：
 
 ```text
-000eda96213415ae3c9f803ccbd8f9e6bc2e76c03f224ba16f5572ab5e0934f0
+ccde6fc241328a5dfdda227b67513a083e03cc43823d10fa9f4611bb388d88cb
 ```
 
-校验不一致时停止使用该下载文件，重新从上述发行版附件区获取。Gitee 的这三个附件与 GitHub 原件逐字节一致；GitHub/Gitee 的自动源码 ZIP、Git 克隆目录及 Core 更新 ZIP 都不作为首次安装包使用。
+校验不一致时停止使用该下载文件，重新从上述发行版附件区获取。GitHub/Gitee 的自动源码 ZIP、Git 克隆目录及 Core 更新 ZIP 都不作为首次安装包使用。
 
 ## 上传与站点目录
 

@@ -8,7 +8,7 @@ Daiying CMS (戴影CMS) is a self-hosted PHP content management system for perso
 
 “戴影CMS”, “戴影 CMS”, and “Daiying CMS” refer to this project. Core also provides signed online updates, global AI settings, Passkey-capable admin login, and recovery tooling. Commerce foundations and in-development external distribution workflows have their own status and configuration requirements below.
 
-Current stable release: **Core 1.2.100**, published **2026-11-16**. Minimum PHP: **8.3.0**; PHP 8.3 / 8.5 were tested for this release. Download the official package from GitHub Releases. `main` may contain unpublished maintenance work and is not a release package.
+Current stable release: **Core 1.2.102**, published **2026-11-21**. Minimum PHP: **8.3.0**; PHP 8.3 / 8.5 were tested for this release. Download the official package from GitHub Releases. `main` may contain unpublished maintenance work and is not a release package.
 
 ![Daiying CMS admin dashboard](.github/assets/screenshots/admin-dashboard.png)
 
@@ -54,10 +54,10 @@ Download the latest stable package from [GitHub Releases](https://github.com/dai
 
 Current stable release artifacts:
 
-- Tag: [`v1.2.100`](https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.100)
-- Installer: [daiying-cms-1.2.100-stable.zip](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip)
-- [SHA-256 sidecar](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.sha256) · [Signature metadata](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.100/daiying-cms-1.2.100-stable.zip.signature.json)
-- Installer SHA-256: `000eda96213415ae3c9f803ccbd8f9e6bc2e76c03f224ba16f5572ab5e0934f0`.
+- Tag: [`v1.2.102`](https://github.com/daixingwei920/daiying-cms/releases/tag/v1.2.102)
+- Installer: [daiying-cms-1.2.102-stable.zip](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.102/daiying-cms-1.2.102-stable.zip)
+- [SHA-256 sidecar](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.102/daiying-cms-1.2.102-stable.zip.sha256) · [Signature metadata](https://github.com/daixingwei920/daiying-cms/releases/download/v1.2.102/daiying-cms-1.2.102-stable.zip.signature.json)
+- Installer SHA-256: `ccde6fc241328a5dfdda227b67513a083e03cc43823d10fa9f4611bb388d88cb`.
 
 The Gitee mirror contains `main` and published stable-release tags. The original 1.2.100 installer, checksum and signature sidecars are also available unchanged from the [Gitee release](https://gitee.com/daiyingcms/daiying-cms/releases/tag/v1.2.100); public downloads were compared byte-for-byte with the GitHub originals. Other versions and attachments follow the official GitHub Release. Source archives from either repository are for source review and development. Existing sites should back up and use the native `/admin/update` flow instead of installing an update ZIP as a new site.
 
