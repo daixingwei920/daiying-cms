@@ -1,6 +1,6 @@
 # Core1.2.102 sidebar repair preparation
 
-Owner initially authorized the sidebar publication after tests, then explicitly paused it to add real crawler source verification. Publication remains paused. Start from clean current main aeaf942fafb14cd16268c75f2b259ec55b3769a9; clean-start feature worktree branches from sidebar preparation80a1d62. Preserve the existing signed1.2.101 preparation and all published versions;1.2.102 is a distinct candidate, not a replacement of signed artifacts.
+Owner initially authorized the sidebar publication after tests, then explicitly paused it to add real crawler source verification. On2026-11-21 Owner authorizes publishing both changes together after complete testing, superseding that pause. Start from clean current main aeaf942fafb14cd16268c75f2b259ec55b3769a9; clean-start feature worktree branches from sidebar preparation80a1d62. Preserve the existing signed1.2.101 preparation and all published versions;1.2.102 is a distinct candidate, not a replacement of signed artifacts.
 
 ## Change and visual evidence
 

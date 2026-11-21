@@ -4,6 +4,12 @@ This file is long-term project context for Codex agents working on Daiying CMS C
 
 Update this file whenever the official Core baseline, clean worktree, release process, or maintenance boundary changes.
 
+## Owner-authorized joint Core1.2.102 release (2026-11-21)
+
+- Owner explicitly requests publishing crawler source verification and the sidebar repair together after complete testing. This supersedes the prior publication pause for this combined candidate. Use clean `feat/crawler-source-verification`, preserving the frozen1.2.101 signed candidate and all published tags/artifacts.
+- Run the complete supported Core regression matrix, server-only key-generating contracts, exact clean merged-main preflight/build, official signing, signed parity and native signed fresh-install/upgrade/rollback/retry/HTTP acceptance before publication. Preserve Core1.2.80/PHP8.3 floors and published migrations. Never bypass integrity or release guards.
+- Merge and GitHub/official stable publication are authorized after passing gates, with a fresh distribution backup and protection checks. No production website upgrade, independent plugin publication, paid AI, real payment, proxy/Cron configuration change or consumer import. Official private keys remain on the update server.
+
 ## Owner-authorized Core1.2.102 sidebar repair publication (2026-11-20)
 
 - Owner requests publication after successful tests. Use the clean fix/admin-sidebar-trim candidate based on actual main aeaf942, preserving its approved upstream changes. A signed1.2.101 preparation already exists and stays immutable/unpublished; prepare a distinct unused1.2.102 for this sidebar repair rather than overwrite or re-sign that candidate.
