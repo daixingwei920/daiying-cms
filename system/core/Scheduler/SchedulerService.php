@@ -56,7 +56,20 @@ final class SchedulerService
     /** @return list<array<string,mixed>> */
     public function due(int $limit = 20): array
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM cms_core_scheduled_tasks WHERE enabled = 1 AND next_run_at <= :now AND (lock_until IS NULL OR lock_until <= :now) ORDER BY next_run_at ASC, id ASC LIMIT :limit");
+        return $this->selectDue($limit);
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function selectDue(int $limit, ?string $taskId = null): array
+    {
+        $sql = "SELECT * FROM cms_core_scheduled_tasks WHERE enabled = 1 AND next_run_at <= :now AND (lock_until IS NULL OR lock_until <= :now)";
+        if ($taskId !== null) {
+            $sql .= " AND task_id = :task_id";
+        }
+        $stmt = $this->pdo->prepare($sql . " ORDER BY next_run_at ASC, id ASC LIMIT :limit");
+        if ($taskId !== null) {
+            $stmt->bindValue(':task_id', $taskId);
+        }
         $stmt->bindValue(':now', gmdate('c'));
         $stmt->bindValue(':limit', max(1, min(100, $limit)), PDO::PARAM_INT);
         $stmt->execute();
@@ -70,11 +83,27 @@ final class SchedulerService
      */
     public function runDue(int $limit = 20, array $alignedTaskIds = []): array
     {
+        return $this->runSelected($this->due($limit), $alignedTaskIds);
+    }
+
+    /** @return array{processed:int,succeeded:int,failed:int,missing:int} */
+    public function runDueTask(string $taskId, bool $alignToInterval = false): array
+    {
+        return $this->runSelected($this->selectDue(1, $taskId), $alignToInterval ? [$taskId] : []);
+    }
+
+    /**
+     * @param list<array<string,mixed>> $tasks
+     * @param list<string> $alignedTaskIds
+     * @return array{processed:int,succeeded:int,failed:int,missing:int}
+     */
+    private function runSelected(array $tasks, array $alignedTaskIds): array
+    {
         $processed = 0;
         $succeeded = 0;
         $failed = 0;
         $missing = 0;
-        foreach ($this->due($limit) as $task) {
+        foreach ($tasks as $task) {
             $processed++;
             $taskId = (string) $task['task_id'];
             if (!$this->lock($taskId)) {
