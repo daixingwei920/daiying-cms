@@ -64,8 +64,11 @@ final class SchedulerService
         return $stmt->fetchAll();
     }
 
-    /** @return array{processed:int,succeeded:int,failed:int,missing:int} */
-    public function runDue(int $limit = 20): array
+    /**
+     * @param list<string> $alignedTaskIds Tasks whose next run should use the next UTC interval boundary.
+     * @return array{processed:int,succeeded:int,failed:int,missing:int}
+     */
+    public function runDue(int $limit = 20, array $alignedTaskIds = []): array
     {
         $processed = 0;
         $succeeded = 0;
@@ -77,19 +80,20 @@ final class SchedulerService
             if (!$this->lock($taskId)) {
                 continue;
             }
+            $align = in_array($taskId, $alignedTaskIds, true);
             $handler = SchedulerTaskRegistry::get($taskId);
             if ($handler === null) {
-                $this->finish($task, false, 'No scheduled task handler registered.');
+                $this->finish($task, false, 'No scheduled task handler registered.', $align);
                 $missing++;
                 continue;
             }
             try {
                 $payload = json_decode((string) $task['payload_json'], true, 512, JSON_THROW_ON_ERROR);
                 $handler(is_array($payload) ? $payload : []);
-                $this->finish($task, true, 'ok');
+                $this->finish($task, true, 'ok', $align);
                 $succeeded++;
             } catch (\Throwable $exception) {
-                $this->finish($task, false, (string) SecretRedactor::redact($exception->getMessage()));
+                $this->finish($task, false, (string) SecretRedactor::redact($exception->getMessage()), $align);
                 $failed++;
             }
         }
@@ -99,31 +103,37 @@ final class SchedulerService
 
     private function lock(string $taskId): bool
     {
-        $stmt = $this->pdo->prepare("UPDATE cms_core_scheduled_tasks SET lock_until = :lock_until, updated_at = :updated_at WHERE task_id = :task_id AND enabled = 1 AND (lock_until IS NULL OR lock_until <= :now)");
+        // Another worker may have completed the task since this worker's due scan.
+        $now = time();
+        $stmt = $this->pdo->prepare("UPDATE cms_core_scheduled_tasks SET lock_until = :lock_until, updated_at = :updated_at WHERE task_id = :task_id AND enabled = 1 AND next_run_at <= :due_at AND (lock_until IS NULL OR lock_until <= :now)");
         $stmt->execute([
             ':task_id' => $taskId,
-            ':now' => gmdate('c'),
-            ':lock_until' => gmdate('c', time() + 300),
-            ':updated_at' => gmdate('c'),
+            ':due_at' => gmdate('c', $now),
+            ':now' => gmdate('c', $now),
+            ':lock_until' => gmdate('c', $now + 300),
+            ':updated_at' => gmdate('c', $now),
         ]);
 
         return $stmt->rowCount() > 0;
     }
 
     /** @param array<string,mixed> $task */
-    private function finish(array $task, bool $success, string $result): void
+    private function finish(array $task, bool $success, string $result, bool $align): void
     {
         $interval = max(60, (int) ($task['interval_seconds'] ?? 60));
-        $next = gmdate('c', time() + $interval);
+        $finished = time();
+        $next = $align
+            ? (intdiv($finished, $interval) + 1) * $interval
+            : $finished + $interval;
         $this->pdo->prepare('UPDATE cms_core_scheduled_tasks SET lock_until = NULL, next_run_at = :next_run_at, last_run_at = :last_run_at, last_result = :last_result, last_error = :last_error, fail_count = :fail_count, updated_at = :updated_at WHERE task_id = :task_id')
             ->execute([
                 ':task_id' => (string) $task['task_id'],
-                ':next_run_at' => $next,
-                ':last_run_at' => gmdate('c'),
+                ':next_run_at' => gmdate('c', $next),
+                ':last_run_at' => gmdate('c', $finished),
                 ':last_result' => $success ? substr($result, 0, 500) : 'failed',
                 ':last_error' => $success ? null : substr($result, 0, 1000),
                 ':fail_count' => $success ? 0 : ((int) ($task['fail_count'] ?? 0) + 1),
-                ':updated_at' => gmdate('c'),
+                ':updated_at' => gmdate('c', $finished),
             ]);
     }
 
