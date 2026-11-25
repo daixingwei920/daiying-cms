@@ -10,6 +10,11 @@ Update this file whenever the official Core baseline, clean worktree, release pr
 - Complete supported matrix263, exact clean-main preflight/build, official signing/parity647, PHP8.3/8.5 native100→102 upgrade/rollback/retry71 each, signed update HTTP32 each, fresh install HTTP9 each, bundled compatibility12 each, upgraded crawler continuation4 each, independent signatures7 and public publication16 all passed. Installer SHA256 `ccde6fc241328a5dfdda227b67513a083e03cc43823d10fa9f4611bb388d88cb`; update `24b8b43281f94a93ff2dbb7dcdbd01d044e41d4d61cf63e593f4ab4c4db1c573`.
 - Fresh distribution backup/protection passed. No production website upgrade, independent plugin publication, paid AI, real payment, proxy/Cron configuration change or knowledge consumer import. Official private keys remain server-only. Preserve frozen101/102 artifacts, prior failures and all tags. See `docs/CORE_1.2.102_PUBLICATION_REPORT.md`.
 
+## Published Core 1.2.104 (2026-11-25)
+
+- Core 1.2.104 is published on GitHub and the official stable channel. The immutable release tag points to `c99d3e9746d2381594f9f3b4276d1e460274d8b7`. The single-task scheduler reuses due-state and lease checks. There are no migrations.
+- Full supported regression, signed parity, native upgrade/rollback and public download checks passed. Website upgrades and worker cutover were outside this release. See `docs/CORE_1.2.104_PUBLICATION_REPORT.md`.
+
 ## Published Core 1.2.103 (2026-11-25)
 
 - Core 1.2.103 is available on GitHub and the official stable channel with immutable tag v1.2.103 at `5d9999e73cfe628b16f83a19b1a4c01be93fa33a`. Its scheduler changes opt selected tasks into UTC interval boundaries and recheck due time when claiming a task. No new migration.
