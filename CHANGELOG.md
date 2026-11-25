@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.104
+
+- Add a scoped scheduler entry point for one registered task, allowing separate workers to dispatch publication and writing independently. Reuse existing due-time and lease checks, and preserve the default scheduler and database schema.
+
 ## 1.2.103
 
 - Allow the scheduler runner to opt selected tasks into UTC interval boundaries so minute cron does not miss a task when the previous run finishes a few seconds late. The default cadence stays completion-based.
