@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.103
+
+- Allow the scheduler runner to opt selected tasks into UTC interval boundaries so minute cron does not miss a task when the previous run finishes a few seconds late. The default cadence stays completion-based.
+- Recheck whether a task is due when acquiring its lease so a stale scan cannot dispatch a completed task again. No database migration is required.
+
 ## 1.2.102 (release preparation)
 
 - Restore the bundled Commerce helpers required by the bundled restaurant: pending-only completion-claim updates (including native MySQL idempotent retries) and payment evidence from Core's trusted ledger. This repairs the existing new-install bundle mismatch without changing plugin schemas, independently publishing the market plugin or updating installed plugins through the Core update ZIP.
